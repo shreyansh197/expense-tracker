@@ -76,10 +76,11 @@ export function DatePicker({ value, onChange, month, year }: DatePickerProps) {
       {open && (
         <div
           className={cn(
-            "absolute z-50 mt-1.5 w-72 rounded-xl border border-gray-200 bg-white p-3 shadow-xl",
+            "absolute z-50 w-72 rounded-xl border border-gray-200 bg-white p-3 shadow-xl",
             "dark:border-gray-700 dark:bg-gray-900",
-            // Position: centered on mobile, left-aligned on desktop
-            "left-1/2 -translate-x-1/2 sm:left-0 sm:translate-x-0"
+            // Open upward on mobile (form is at bottom), downward on desktop
+            "bottom-full mb-1.5 left-1/2 -translate-x-1/2",
+            "sm:bottom-auto sm:top-full sm:mt-1.5 sm:mb-0 sm:left-0 sm:translate-x-0"
           )}
         >
           {/* Month/Year header */}
