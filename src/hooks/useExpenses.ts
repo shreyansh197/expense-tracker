@@ -5,6 +5,12 @@ import { supabase } from "@/lib/supabase";
 import { getSyncCode } from "@/lib/deviceId";
 import type { Expense, ExpenseInput, CategoryId, SyncStatus } from "@/types";
 
+// Global event to trigger re-fetch across all useExpenses instances
+const expenseListeners = new Set<() => void>();
+function notifyExpenseChange() {
+  expenseListeners.forEach((fn) => fn());
+}
+
 export function useExpenses(month: number, year: number) {
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [loading, setLoading] = useState(true);
@@ -47,9 +53,12 @@ export function useExpenses(month: number, year: number) {
     setLoading(false);
   }, [month, year]);
 
-  // Initial fetch + realtime subscription
+  // Initial fetch + realtime subscription + global change listener
   useEffect(() => {
     fetchExpenses();
+
+    // Listen for changes from other useExpenses instances (e.g. modal)
+    expenseListeners.add(fetchExpenses);
 
     const channel = supabase
       .channel(`expenses-${month}-${year}`)
@@ -61,13 +70,13 @@ export function useExpenses(month: number, year: number) {
           table: "expenses",
         },
         () => {
-          // Re-fetch on any change (simple and reliable)
           fetchExpenses();
         }
       )
       .subscribe();
 
     return () => {
+      expenseListeners.delete(fetchExpenses);
       supabase.removeChannel(channel);
     };
   }, [month, year, fetchExpenses]);
@@ -83,7 +92,7 @@ export function useExpenses(month: number, year: number) {
       device_id: getSyncCode(),
     });
     if (error) throw error;
-    fetchExpenses();
+    notifyExpenseChange();
   };
 
   const updateExpense = async (id: string, updates: Partial<ExpenseInput>) => {
@@ -99,9 +108,10 @@ export function useExpenses(month: number, year: number) {
       })
       .eq("id", id);
     if (error) {
-      fetchExpenses(); // Revert on error
+      fetchExpenses();
       throw error;
     }
+    notifyExpenseChange();
   };
 
   const deleteExpense = async (id: string) => {
@@ -115,9 +125,10 @@ export function useExpenses(month: number, year: number) {
       })
       .eq("id", id);
     if (error) {
-      fetchExpenses(); // Revert on error
+      fetchExpenses();
       throw error;
     }
+    notifyExpenseChange();
   };
 
   return {
