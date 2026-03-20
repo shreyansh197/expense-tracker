@@ -110,7 +110,7 @@ export function ExpenseList({
                 <span className="text-sm font-semibold text-gray-900 dark:text-white">
                   {formatCurrency(expense.amount)}
                 </span>
-                <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+                <div className="flex items-center gap-1 opacity-100 lg:opacity-0 lg:transition-opacity lg:group-hover:opacity-100">
                   <button
                     onClick={() => openEditForm(expense.id)}
                     className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800 dark:hover:text-gray-300"
