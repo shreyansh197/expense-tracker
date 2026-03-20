@@ -1,13 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "";
-const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
-
 export async function POST(req: NextRequest) {
   try {
+    const apiKey = process.env.GEMINI_API_KEY || "";
     const { expenses, salary, categories } = await req.json();
 
-    if (!GEMINI_API_KEY) {
+    if (!apiKey) {
       return NextResponse.json(
         { error: "AI service not configured. Add GEMINI_API_KEY to environment variables." },
         { status: 500 }
@@ -49,7 +47,9 @@ Give a financial health score out of 10 based on their spending vs budget ratio 
 
 Keep it concise, friendly, and specific to their data. Use ₹ for amounts. Do not hallucinate data — only reference what's in the expenses provided.`;
 
-    const response = await fetch(GEMINI_URL, {
+    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+    const response = await fetch(geminiUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -63,11 +63,15 @@ Keep it concise, friendly, and specific to their data. Use ₹ for amounts. Do n
 
     if (!response.ok) {
       const err = await response.text();
-      console.error("Gemini API error:", err);
-      return NextResponse.json(
-        { error: "AI service temporarily unavailable. Please try again." },
-        { status: 502 }
-      );
+      console.error("Gemini API error:", response.status, err);
+      const msg = response.status === 400
+        ? "Invalid request to AI service."
+        : response.status === 403 || response.status === 401
+        ? "AI API key is invalid. Check GEMINI_API_KEY in Vercel environment variables."
+        : response.status === 429
+        ? "AI rate limit reached. Please wait a moment and try again."
+        : `AI service error (${response.status}). Please try again.`;
+      return NextResponse.json({ error: msg }, { status: 502 });
     }
 
     const data = await response.json();
