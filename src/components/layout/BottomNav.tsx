@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, List, PlusCircle, Settings } from "lucide-react";
+import { LayoutDashboard, List, PlusCircle, Settings, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUIStore } from "@/stores/uiStore";
 
@@ -10,6 +10,7 @@ const navItems = [
   { href: "/", icon: LayoutDashboard, label: "Dashboard" },
   { href: "/expenses", icon: List, label: "Expenses" },
   { href: "#add", icon: PlusCircle, label: "Add", isAction: true },
+  { href: "/insights", icon: Sparkles, label: "Insights" },
   { href: "/settings", icon: Settings, label: "Settings" },
 ];
 

@@ -30,3 +30,7 @@ export function hasSyncCode(): boolean {
   if (typeof window === "undefined") return false;
   return !!localStorage.getItem(SYNC_CODE_KEY);
 }
+
+export function clearSyncCode(): void {
+  localStorage.removeItem(SYNC_CODE_KEY);
+}

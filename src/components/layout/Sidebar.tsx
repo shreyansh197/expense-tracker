@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, List, Settings, PlusCircle, Wallet } from "lucide-react";
+import { LayoutDashboard, List, Settings, PlusCircle, Wallet, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUIStore } from "@/stores/uiStore";
 
 const navItems = [
   { href: "/", icon: LayoutDashboard, label: "Dashboard" },
   { href: "/expenses", icon: List, label: "Expenses" },
+  { href: "/insights", icon: Sparkles, label: "AI Insights" },
   { href: "/settings", icon: Settings, label: "Settings" },
 ];
 

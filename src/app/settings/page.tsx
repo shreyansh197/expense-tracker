@@ -9,15 +9,15 @@ import { useExpenses } from "@/hooks/useExpenses";
 import { useUIStore } from "@/stores/uiStore";
 import { useTheme } from "@/components/providers/ThemeProvider";
 import { getMonthName } from "@/lib/utils";
-import { Download, Moon, Sun, Monitor, Plus, Trash2, Copy, Check } from "lucide-react";
+import { Download, Moon, Sun, Monitor, Plus, Trash2, Copy, Check, UserPlus } from "lucide-react";
 import type { Expense } from "@/types";
 import { CATEGORY_MAP, buildCategoryMap, getAllCategories, PRESET_COLORS, DEFAULT_CATEGORIES_META } from "@/lib/categories";
 import { InstallButton } from "@/components/pwa/InstallButton";
 import { useToast } from "@/components/ui/Toast";
-import { getSyncCode } from "@/lib/deviceId";
+import { getSyncCode, clearSyncCode } from "@/lib/deviceId";
 
 export default function SettingsPage() {
-  const { settings, updateSettings, addCategory, deleteCategory } = useSettings();
+  const { settings, updateSettings, addCategory, deleteCategory, resetSettings } = useSettings();
   const { currentMonth, currentYear } = useUIStore();
   const { expenses } = useExpenses(currentMonth, currentYear);
   const { theme, setTheme } = useTheme();
@@ -351,6 +351,28 @@ export default function SettingsPage() {
               JSON
             </button>
           </div>
+        </section>
+
+        {/* Start Fresh */}
+        <section className="rounded-xl border border-red-200 bg-white p-4 shadow-sm dark:border-red-900/50 dark:bg-gray-900">
+          <h2 className="mb-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
+            Start Fresh
+          </h2>
+          <p className="mb-3 text-xs text-gray-500 dark:text-gray-400">
+            Create a new account or join a different sync code. Your existing data stays safe in the cloud under the old sync code.
+          </p>
+          <button
+            onClick={() => {
+              if (!window.confirm("Start fresh? You can always rejoin your old sync code later.")) return;
+              clearSyncCode();
+              resetSettings();
+              window.location.href = "/";
+            }}
+            className="flex items-center gap-2 rounded-lg border border-red-200 px-4 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-900/20"
+          >
+            <UserPlus size={16} />
+            New User / Switch Account
+          </button>
         </section>
       </div>
     </AppShell>

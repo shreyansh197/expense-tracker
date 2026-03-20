@@ -85,5 +85,11 @@ export function useSettings() {
     }
   }, []);
 
-  return { settings, loading, isFirstVisit, updateSettings, addCategory, deleteCategory, markOnboarded };
+  const resetSettings = useCallback(() => {
+    localStorage.removeItem(STORAGE_KEY);
+    setSettings(DEFAULT_SETTINGS);
+    setIsFirstVisit(true);
+  }, []);
+
+  return { settings, loading, isFirstVisit, updateSettings, addCategory, deleteCategory, markOnboarded, resetSettings };
 }
