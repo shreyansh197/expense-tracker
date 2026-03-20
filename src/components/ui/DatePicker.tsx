@@ -77,12 +77,11 @@ export function DatePicker({ value, onChange, month, year }: DatePickerProps) {
   const todayDay = today.getDate();
   const isExpenseMonth = viewMonth === month && viewYear === year;
 
-  // Pad to full rows for consistent grid
+  // Always 6 rows (42 cells) for consistent calendar height
   const cells: (number | null)[] = [];
   for (let i = 0; i < firstDay; i++) cells.push(null);
   for (let d = 1; d <= daysInMonth; d++) cells.push(d);
-  const totalRows = Math.ceil(cells.length / 7);
-  while (cells.length < totalRows * 7) cells.push(null);
+  while (cells.length < 42) cells.push(null);
 
   return (
     <div ref={ref} className="relative">

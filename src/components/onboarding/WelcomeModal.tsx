@@ -5,7 +5,7 @@ import { Wallet, Link2, Copy, Check } from "lucide-react";
 import { createNewSyncCode, setSyncCode } from "@/lib/deviceId";
 
 interface WelcomeModalProps {
-  onComplete: (salary: number) => void;
+  onComplete: (salary?: number) => void;
 }
 
 export function WelcomeModal({ onComplete }: WelcomeModalProps) {
@@ -43,9 +43,7 @@ export function WelcomeModal({ onComplete }: WelcomeModalProps) {
     const code = joinCode.toUpperCase().trim();
     if (code.length < 4) return;
     setSyncCode(code);
-    const val = parseFloat(salary);
-    if (isNaN(val) || val <= 0) return;
-    onComplete(val);
+    onComplete();
   };
 
   return (
@@ -161,24 +159,6 @@ export function WelcomeModal({ onComplete }: WelcomeModalProps) {
               required
             />
 
-            <div>
-              <label className="mb-1.5 block text-xs font-medium text-gray-500 uppercase dark:text-gray-400">
-                Monthly Salary / Budget
-              </label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">₹</span>
-                <input
-                  type="number"
-                  min="1"
-                  value={salary}
-                  onChange={(e) => setSalary(e.target.value)}
-                  placeholder="e.g., 50000"
-                  className="w-full rounded-lg border border-gray-200 bg-white py-3 pl-7 pr-3 text-sm font-medium text-gray-900 placeholder:text-gray-300 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder:text-gray-600"
-                  required
-                />
-              </div>
-            </div>
-
             <div className="flex gap-2">
               <button
                 type="button"
@@ -189,7 +169,7 @@ export function WelcomeModal({ onComplete }: WelcomeModalProps) {
               </button>
               <button
                 type="submit"
-                disabled={joinCode.length < 4 || !salary || parseFloat(salary) <= 0}
+                disabled={joinCode.length < 4}
                 className="flex-1 rounded-lg bg-blue-600 py-3 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 disabled:opacity-40"
               >
                 Connect

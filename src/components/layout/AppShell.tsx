@@ -26,7 +26,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       {showOnboarding && (
         <WelcomeModal
           onComplete={(salary) => {
-            updateSettings({ salary });
+            if (salary) updateSettings({ salary });
             markOnboarded();
           }}
         />
