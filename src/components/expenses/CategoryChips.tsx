@@ -9,7 +9,7 @@ export function CategoryChips() {
   const { activeCategories, toggleCategory } = useUIStore();
 
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide lg:flex-wrap lg:overflow-visible">
       {CATEGORIES.map((cat) => {
         const isActive =
           activeCategories.length === 0 || activeCategories.includes(cat.id);
@@ -18,7 +18,7 @@ export function CategoryChips() {
             key={cat.id}
             onClick={() => toggleCategory(cat.id)}
             className={cn(
-              "rounded-full px-3 py-1 text-xs font-medium transition-all",
+              "shrink-0 rounded-full px-3 py-1 text-xs font-medium transition-all",
               isActive
                 ? "text-white shadow-sm"
                 : "bg-gray-100 text-gray-400 dark:bg-gray-800 dark:text-gray-500"

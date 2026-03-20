@@ -5,6 +5,7 @@ import { Trash2, Edit3 } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 import { CategoryBadge } from "./CategoryChips";
 import { useUIStore } from "@/stores/uiStore";
+import { useToast } from "@/components/ui/Toast";
 import type { Expense, CategoryId } from "@/types";
 
 interface ExpenseListProps {
@@ -27,6 +28,14 @@ export function ExpenseList({
   searchQuery,
 }: ExpenseListProps) {
   const openEditForm = useUIStore((s) => s.openEditForm);
+  const { toast } = useToast();
+
+  const handleDelete = (id: string) => {
+    if (window.confirm("Delete this expense?")) {
+      onDelete(id);
+      toast("Expense deleted");
+    }
+  };
 
   const filtered = useMemo(() => {
     let result = expenses;
@@ -119,7 +128,7 @@ export function ExpenseList({
                     <Edit3 size={14} />
                   </button>
                   <button
-                    onClick={() => onDelete(expense.id)}
+                    onClick={() => handleDelete(expense.id)}
                     className="rounded-lg p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/30 dark:hover:text-red-400"
                     aria-label="Delete expense"
                   >

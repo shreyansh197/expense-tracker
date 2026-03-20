@@ -13,12 +13,14 @@ import { Download, Moon, Sun, Monitor } from "lucide-react";
 import type { Expense } from "@/types";
 import { CATEGORY_MAP } from "@/lib/categories";
 import { InstallButton } from "@/components/pwa/InstallButton";
+import { useToast } from "@/components/ui/Toast";
 
 export default function SettingsPage() {
   const { settings, updateSettings } = useSettings();
   const { currentMonth, currentYear } = useUIStore();
   const { expenses } = useExpenses(currentMonth, currentYear);
   const { theme, setTheme } = useTheme();
+  const { toast } = useToast();
 
   const [salary, setSalary] = useState(settings.salary.toString());
   const [saving, setSaving] = useState(false);
@@ -33,6 +35,7 @@ export default function SettingsPage() {
     setSaving(true);
     try {
       await updateSettings({ salary: val });
+      toast("Salary updated");
     } finally {
       setSaving(false);
     }
@@ -55,6 +58,7 @@ export default function SettingsPage() {
     a.download = `expenses-${getMonthName(currentMonth)}-${currentYear}.csv`;
     a.click();
     URL.revokeObjectURL(url);
+    toast("CSV exported");
   };
 
   const handleExportJSON = () => {
@@ -72,6 +76,7 @@ export default function SettingsPage() {
     a.download = `expenses-${getMonthName(currentMonth)}-${currentYear}.json`;
     a.click();
     URL.revokeObjectURL(url);
+    toast("JSON exported");
   };
 
   return (

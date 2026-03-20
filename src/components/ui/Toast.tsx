@@ -1,0 +1,85 @@
+"use client";
+
+import { useState, useEffect, useCallback, createContext, useContext } from "react";
+import { CheckCircle, XCircle, AlertCircle, X } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+type ToastType = "success" | "error" | "info";
+
+interface Toast {
+  id: number;
+  message: string;
+  type: ToastType;
+}
+
+interface ToastContextType {
+  toast: (message: string, type?: ToastType) => void;
+}
+
+const ToastContext = createContext<ToastContextType>({ toast: () => {} });
+
+export const useToast = () => useContext(ToastContext);
+
+let nextId = 0;
+
+export function ToastProvider({ children }: { children: React.ReactNode }) {
+  const [toasts, setToasts] = useState<Toast[]>([]);
+
+  const addToast = useCallback((message: string, type: ToastType = "success") => {
+    const id = nextId++;
+    setToasts((prev) => [...prev, { id, message, type }]);
+    setTimeout(() => {
+      setToasts((prev) => prev.filter((t) => t.id !== id));
+    }, 3000);
+  }, []);
+
+  const removeToast = useCallback((id: number) => {
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+  }, []);
+
+  return (
+    <ToastContext.Provider value={{ toast: addToast }}>
+      {children}
+      <div className="fixed bottom-24 left-1/2 z-[100] flex w-full max-w-sm -translate-x-1/2 flex-col gap-2 px-4 lg:bottom-6 lg:left-auto lg:right-6 lg:translate-x-0 lg:px-0">
+        {toasts.map((t) => (
+          <ToastItem key={t.id} toast={t} onClose={() => removeToast(t.id)} />
+        ))}
+      </div>
+    </ToastContext.Provider>
+  );
+}
+
+function ToastItem({ toast, onClose }: { toast: Toast; onClose: () => void }) {
+  const [show, setShow] = useState(false);
+
+  useEffect(() => {
+    requestAnimationFrame(() => setShow(true));
+  }, []);
+
+  const Icon =
+    toast.type === "success" ? CheckCircle :
+    toast.type === "error" ? XCircle : AlertCircle;
+
+  const colors =
+    toast.type === "success"
+      ? "border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300"
+      : toast.type === "error"
+      ? "border-red-200 bg-red-50 text-red-800 dark:border-red-800 dark:bg-red-900/40 dark:text-red-300"
+      : "border-blue-200 bg-blue-50 text-blue-800 dark:border-blue-800 dark:bg-blue-900/40 dark:text-blue-300";
+
+  return (
+    <div
+      className={cn(
+        "flex items-center gap-3 rounded-xl border px-4 py-3 shadow-lg transition-all duration-300",
+        colors,
+        show ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
+      )}
+    >
+      <Icon size={18} className="shrink-0" />
+      <span className="flex-1 text-sm font-medium">{toast.message}</span>
+      <button onClick={onClose} className="shrink-0 opacity-60 hover:opacity-100">
+        <X size={14} />
+      </button>
+    </div>
+  );
+}

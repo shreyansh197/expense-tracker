@@ -40,7 +40,7 @@ export function KpiCards({
           <TrendingDown size={14} />
           <span>Spent</span>
         </div>
-        <p className="mt-1 text-2xl font-bold text-gray-900 dark:text-white">
+        <p className="mt-1 text-xl font-bold text-gray-900 sm:text-2xl dark:text-white">
           {formatCurrency(monthlyTotal)}
         </p>
         <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800">
@@ -103,7 +103,7 @@ export function KpiCards({
           <Wallet size={14} />
           <span>Budget</span>
         </div>
-        <p className="mt-1 text-2xl font-bold text-gray-900 dark:text-white">
+        <p className="mt-1 text-xl font-bold text-gray-900 sm:text-2xl dark:text-white">
           {formatCurrency(salary)}
         </p>
       </div>
@@ -114,7 +114,7 @@ export function KpiCards({
           <CalendarDays size={14} />
           <span>Avg / Day</span>
         </div>
-        <p className="mt-1 text-2xl font-bold text-gray-900 dark:text-white">
+        <p className="mt-1 text-xl font-bold text-gray-900 sm:text-2xl dark:text-white">
           {formatCurrency(avgDaily)}
         </p>
         {topCategory && (

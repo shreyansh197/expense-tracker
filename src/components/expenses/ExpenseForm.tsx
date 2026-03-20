@@ -5,6 +5,7 @@ import { X } from "lucide-react";
 import { CATEGORIES } from "@/lib/categories";
 import { cn } from "@/lib/utils";
 import { useUIStore } from "@/stores/uiStore";
+import { useToast } from "@/components/ui/Toast";
 import type { CategoryId, ExpenseInput, Expense } from "@/types";
 
 interface ExpenseFormProps {
@@ -23,6 +24,7 @@ export function ExpenseForm({
   year,
 }: ExpenseFormProps) {
   const closeForm = useUIStore((s) => s.closeForm);
+  const { toast } = useToast();
 
   const [category, setCategory] = useState<CategoryId>(editExpense?.category || "groceries");
   const [amount, setAmount] = useState(editExpense?.amount?.toString() || "");
@@ -85,6 +87,7 @@ export function ExpenseForm({
           });
         }
         closeForm();
+        toast(editExpense ? "Expense updated" : "Expense added");
       } catch (err) {
         setError("Failed to save expense. Please try again.");
       } finally {
