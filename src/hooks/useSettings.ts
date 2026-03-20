@@ -79,6 +79,10 @@ export function useSettings() {
 
   const markOnboarded = useCallback(() => {
     setIsFirstVisit(false);
+    // Persist default settings so isFirstVisit stays false on subsequent visits
+    if (!localStorage.getItem(STORAGE_KEY)) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...DEFAULT_SETTINGS, updatedAt: Date.now() }));
+    }
   }, []);
 
   return { settings, loading, isFirstVisit, updateSettings, addCategory, deleteCategory, markOnboarded };

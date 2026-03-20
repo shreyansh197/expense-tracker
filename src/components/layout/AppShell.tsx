@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { OfflineBanner } from "@/components/sync/SyncIndicator";
@@ -9,8 +10,13 @@ import { useSettings } from "@/hooks/useSettings";
 import { hasSyncCode } from "@/lib/deviceId";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
-  const { isFirstVisit, updateSettings, markOnboarded } = useSettings();
-  const showOnboarding = isFirstVisit || !hasSyncCode();
+  const { updateSettings, markOnboarded } = useSettings();
+  const [showOnboarding, setShowOnboarding] = useState(false);
+
+  useEffect(() => {
+    // Only check after hydration so localStorage is available
+    setShowOnboarding(!hasSyncCode());
+  }, []);
 
   return (
     <div className="flex h-screen flex-col bg-gray-50 dark:bg-gray-950">
@@ -28,6 +34,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           onComplete={(salary) => {
             if (salary) updateSettings({ salary });
             markOnboarded();
+            setShowOnboarding(false);
           }}
         />
       )}
