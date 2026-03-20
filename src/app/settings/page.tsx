@@ -12,6 +12,7 @@ import { getMonthName } from "@/lib/utils";
 import { Download, Moon, Sun, Monitor } from "lucide-react";
 import type { Expense } from "@/types";
 import { CATEGORY_MAP } from "@/lib/categories";
+import { InstallButton } from "@/components/pwa/InstallButton";
 
 export default function SettingsPage() {
   const { settings, updateSettings } = useSettings();
@@ -135,6 +136,17 @@ export default function SettingsPage() {
               );
             })}
           </div>
+        </section>
+
+        {/* Install App */}
+        <section className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+          <h2 className="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
+            Install
+          </h2>
+          <p className="mb-3 text-xs text-gray-500 dark:text-gray-400">
+            Install as an app on your device for quick access
+          </p>
+          <InstallButton />
         </section>
 
         {/* Export */}
