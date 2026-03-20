@@ -57,14 +57,12 @@ Keep it concise, friendly, and specific to their data. Use ₹ for amounts. Do n
       },
     });
 
-    const model = "gemini-2.0-flash-lite";
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+    // Try multiple models — each has its own separate quota
+    const models = ["gemini-2.0-flash-lite", "gemini-2.0-flash", "gemini-1.5-flash"];
+    let lastError = "";
 
-    // Try up to 2 times with a pause on rate limit
-    for (let attempt = 0; attempt < 2; attempt++) {
-      if (attempt > 0) {
-        await new Promise((r) => setTimeout(r, 2000));
-      }
+    for (const model of models) {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
       const response = await fetch(url, {
         method: "POST",
@@ -81,18 +79,13 @@ Keep it concise, friendly, and specific to their data. Use ₹ for amounts. Do n
       }
 
       const errBody = await response.text();
-      console.error(`Gemini ${response.status} (attempt ${attempt + 1}):`, errBody);
+      console.error(`Gemini (${model}) ${response.status}:`, errBody);
 
-      if (response.status === 429 && attempt === 0) {
-        continue; // retry once after delay
-      }
-
-      // Parse error message from Gemini
-      let detail = "";
+      // Parse error detail
       try {
         const parsed = JSON.parse(errBody);
-        detail = parsed?.error?.message || "";
-      } catch { /* ignore */ }
+        lastError = parsed?.error?.message || "";
+      } catch { lastError = errBody; }
 
       if (response.status === 403 || response.status === 401) {
         return NextResponse.json(
@@ -101,21 +94,19 @@ Keep it concise, friendly, and specific to their data. Use ₹ for amounts. Do n
         );
       }
 
-      if (response.status === 429) {
-        return NextResponse.json(
-          { error: `Rate limit reached. The free Gemini API allows limited requests per minute. Please wait 60 seconds and try again.${detail ? " (" + detail + ")" : ""}` },
-          { status: 502 }
-        );
-      }
+      // 429 = rate limited on this model, try next one
+      if (response.status === 429) continue;
 
+      // Other error — return it
       return NextResponse.json(
-        { error: `AI error ${response.status}: ${detail || "Unknown error. Please try again."}` },
+        { error: `AI error ${response.status}: ${lastError || "Unknown error."}` },
         { status: 502 }
       );
     }
 
+    // All models exhausted
     return NextResponse.json(
-      { error: "AI service is busy. Please wait 60 seconds and try again." },
+      { error: "All AI models are rate-limited. The free Gemini API has a daily limit. Please try again tomorrow, or upgrade your API key to a paid plan at https://ai.google.dev" },
       { status: 502 }
     );
   } catch (error) {
