@@ -1,12 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const MODELS = ["gemini-2.0-flash", "gemini-1.5-flash"];
-const MAX_RETRIES = 3;
-const RETRY_DELAY_MS = 3000;
+export const maxDuration = 30;
 
-function delay(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
+const MODELS = ["gemini-2.0-flash-lite", "gemini-2.0-flash", "gemini-1.5-flash"];
 
 export async function POST(req: NextRequest) {
   try {
@@ -63,13 +59,11 @@ Keep it concise, friendly, and specific to their data. Use ₹ for amounts. Do n
       },
     });
 
-    // Try each model with retries on rate limit
+    // Try each model once (no retries to avoid Vercel timeout)
     for (const model of MODELS) {
       const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
-      for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
-        if (attempt > 0) await delay(RETRY_DELAY_MS * attempt);
-
+      try {
         const response = await fetch(url, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -84,14 +78,8 @@ Keep it concise, friendly, and specific to their data. Use ₹ for amounts. Do n
           return NextResponse.json({ insights: text });
         }
 
-        if (response.status === 429) {
-          console.log(`Rate limited on ${model}, attempt ${attempt + 1}/${MAX_RETRIES}`);
-          continue; // retry after delay
-        }
-
-        // Non-retryable error
         const err = await response.text();
-        console.error(`Gemini API error (${model}):`, response.status, err);
+        console.error(`Gemini (${model}) ${response.status}:`, err);
 
         if (response.status === 403 || response.status === 401) {
           return NextResponse.json(
@@ -99,16 +87,17 @@ Keep it concise, friendly, and specific to their data. Use ₹ for amounts. Do n
             { status: 502 }
           );
         }
-        if (response.status === 400) {
-          return NextResponse.json({ error: "Invalid request to AI service." }, { status: 502 });
-        }
-        // For other errors, try next model
-        break;
+
+        // 429 or other error — try next model
+        continue;
+      } catch (fetchErr) {
+        console.error(`Fetch error for ${model}:`, fetchErr);
+        continue;
       }
     }
 
     return NextResponse.json(
-      { error: "AI service is busy. Please try again in a minute." },
+      { error: "AI service is busy. Please wait about 30 seconds and try again." },
       { status: 502 }
     );
   } catch (error) {

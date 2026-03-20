@@ -35,6 +35,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             if (salary) updateSettings({ salary });
             markOnboarded();
             setShowOnboarding(false);
+            // Full reload so useExpenses re-fetches with the new sync code
+            window.location.reload();
           }}
         />
       )}
