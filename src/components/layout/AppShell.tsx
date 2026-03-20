@@ -6,9 +6,11 @@ import { OfflineBanner } from "@/components/sync/SyncIndicator";
 import { ExpenseFormModal } from "@/components/expenses/ExpenseFormModal";
 import { WelcomeModal } from "@/components/onboarding/WelcomeModal";
 import { useSettings } from "@/hooks/useSettings";
+import { hasSyncCode } from "@/lib/deviceId";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const { isFirstVisit, updateSettings, markOnboarded } = useSettings();
+  const showOnboarding = isFirstVisit || !hasSyncCode();
 
   return (
     <div className="flex h-screen flex-col bg-gray-50 dark:bg-gray-950">
@@ -21,7 +23,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </div>
       <BottomNav />
       <ExpenseFormModal />
-      {isFirstVisit && (
+      {showOnboarding && (
         <WelcomeModal
           onComplete={(salary) => {
             updateSettings({ salary });

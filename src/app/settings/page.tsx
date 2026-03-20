@@ -9,11 +9,12 @@ import { useExpenses } from "@/hooks/useExpenses";
 import { useUIStore } from "@/stores/uiStore";
 import { useTheme } from "@/components/providers/ThemeProvider";
 import { getMonthName } from "@/lib/utils";
-import { Download, Moon, Sun, Monitor, Plus, Trash2 } from "lucide-react";
+import { Download, Moon, Sun, Monitor, Plus, Trash2, Copy, Check } from "lucide-react";
 import type { Expense } from "@/types";
 import { CATEGORY_MAP, buildCategoryMap, getAllCategories, PRESET_COLORS, DEFAULT_CATEGORIES_META } from "@/lib/categories";
 import { InstallButton } from "@/components/pwa/InstallButton";
 import { useToast } from "@/components/ui/Toast";
+import { getSyncCode } from "@/lib/deviceId";
 
 export default function SettingsPage() {
   const { settings, updateSettings, addCategory, deleteCategory } = useSettings();
@@ -27,6 +28,8 @@ export default function SettingsPage() {
   const [newCatName, setNewCatName] = useState("");
   const [newCatColor, setNewCatColor] = useState(PRESET_COLORS[0]);
   const [showAddCat, setShowAddCat] = useState(false);
+  const [codeCopied, setCodeCopied] = useState(false);
+  const syncCode = getSyncCode();
 
   useEffect(() => {
     setSalary(settings.salary.toString());
@@ -116,6 +119,34 @@ export default function SettingsPage() {
             </button>
           </div>
         </section>
+
+        {/* Sync Code */}
+        {syncCode && (
+          <section className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+            <h2 className="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
+              Sync Code
+            </h2>
+            <p className="mb-3 text-xs text-gray-500 dark:text-gray-400">
+              Use this code on your other devices to sync your expenses.
+            </p>
+            <div className="flex items-center gap-2 rounded-lg bg-gray-50 px-4 py-3 dark:bg-gray-800">
+              <span className="flex-1 font-mono text-lg font-bold tracking-[0.3em] text-blue-600 dark:text-blue-400">
+                {syncCode}
+              </span>
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(syncCode);
+                  setCodeCopied(true);
+                  setTimeout(() => setCodeCopied(false), 2000);
+                  toast("Sync code copied");
+                }}
+                className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700"
+              >
+                {codeCopied ? <Check size={16} className="text-emerald-500" /> : <Copy size={16} />}
+              </button>
+            </div>
+          </section>
+        )}
 
         {/* Categories */}
         <section className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900">

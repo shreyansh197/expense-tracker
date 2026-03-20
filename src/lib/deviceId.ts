@@ -1,11 +1,32 @@
-const DEVICE_ID_KEY = "expense-tracker-device-id";
+const SYNC_CODE_KEY = "expense-tracker-sync-code";
 
-export function getDeviceId(): string {
-  if (typeof window === "undefined") return "";
-  let id = localStorage.getItem(DEVICE_ID_KEY);
-  if (!id) {
-    id = crypto.randomUUID();
-    localStorage.setItem(DEVICE_ID_KEY, id);
+function generateSyncCode(): string {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let code = "";
+  const arr = new Uint8Array(6);
+  crypto.getRandomValues(arr);
+  for (let i = 0; i < 6; i++) {
+    code += chars[arr[i] % chars.length];
   }
-  return id;
+  return code;
+}
+
+export function getSyncCode(): string {
+  if (typeof window === "undefined") return "";
+  return localStorage.getItem(SYNC_CODE_KEY) || "";
+}
+
+export function setSyncCode(code: string): void {
+  localStorage.setItem(SYNC_CODE_KEY, code.toUpperCase().trim());
+}
+
+export function createNewSyncCode(): string {
+  const code = generateSyncCode();
+  setSyncCode(code);
+  return code;
+}
+
+export function hasSyncCode(): boolean {
+  if (typeof window === "undefined") return false;
+  return !!localStorage.getItem(SYNC_CODE_KEY);
 }
