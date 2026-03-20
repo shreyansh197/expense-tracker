@@ -167,13 +167,22 @@ export function WelcomeModal({ onComplete }: WelcomeModalProps) {
               </div>
             </div>
 
-            <button
-              type="submit"
-              disabled={!salary || parseFloat(salary) <= 0}
-              className="w-full rounded-lg bg-blue-600 py-3 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 disabled:opacity-40"
-            >
-              Get Started
-            </button>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setStep("choose")}
+                className="flex-1 rounded-lg border border-gray-200 py-3 text-sm font-medium text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-800"
+              >
+                Back
+              </button>
+              <button
+                type="submit"
+                disabled={!salary || parseFloat(salary) <= 0}
+                className="flex-1 rounded-lg bg-blue-600 py-3 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 disabled:opacity-40"
+              >
+                Get Started
+              </button>
+            </div>
           </form>
         )}
 
