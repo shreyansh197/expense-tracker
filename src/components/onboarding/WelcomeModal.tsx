@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Wallet, Link2, Copy, Check } from "lucide-react";
+import { Wallet, Link2, Copy, Check, Loader2 } from "lucide-react";
 import { createNewSyncCode, setSyncCode } from "@/lib/deviceId";
+import { supabase } from "@/lib/supabase";
 
 interface WelcomeModalProps {
   onComplete: (salary?: number) => void;
@@ -14,6 +15,8 @@ export function WelcomeModal({ onComplete }: WelcomeModalProps) {
   const [syncCode, setSyncCodeLocal] = useState("");
   const [joinCode, setJoinCode] = useState("");
   const [copied, setCopied] = useState(false);
+  const [joinError, setJoinError] = useState("");
+  const [validating, setValidating] = useState(false);
 
   const handleNew = () => {
     const code = createNewSyncCode();
@@ -38,10 +41,34 @@ export function WelcomeModal({ onComplete }: WelcomeModalProps) {
     onComplete(val);
   };
 
-  const handleJoinSubmit = (e: React.FormEvent) => {
+  const handleJoinSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const code = joinCode.toUpperCase().trim();
     if (code.length < 4) return;
+
+    setValidating(true);
+    setJoinError("");
+
+    // Verify the sync code exists in Supabase
+    const { count, error } = await supabase
+      .from("expenses")
+      .select("id", { count: "exact", head: true })
+      .eq("device_id", code)
+      .is("deleted_at", null)
+      .limit(1);
+
+    setValidating(false);
+
+    if (error) {
+      setJoinError("Could not verify sync code. Check your connection.");
+      return;
+    }
+
+    if (!count || count === 0) {
+      setJoinError("No account found with this sync code. Check and try again.");
+      return;
+    }
+
     setSyncCode(code);
     onComplete();
   };
@@ -151,7 +178,10 @@ export function WelcomeModal({ onComplete }: WelcomeModalProps) {
             <input
               type="text"
               value={joinCode}
-              onChange={(e) => setJoinCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ""))}
+              onChange={(e) => {
+                setJoinCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ""));
+                setJoinError("");
+              }}
               placeholder="e.g., AB3XK7"
               maxLength={10}
               autoFocus
@@ -159,20 +189,26 @@ export function WelcomeModal({ onComplete }: WelcomeModalProps) {
               required
             />
 
+            {joinError && (
+              <p className="text-xs font-medium text-red-500 dark:text-red-400">
+                {joinError}
+              </p>
+            )}
+
             <div className="flex gap-2">
               <button
                 type="button"
-                onClick={() => setStep("choose")}
+                onClick={() => { setStep("choose"); setJoinError(""); }}
                 className="flex-1 rounded-lg border border-gray-200 py-3 text-sm font-medium text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-800"
               >
                 Back
               </button>
               <button
                 type="submit"
-                disabled={joinCode.length < 4}
-                className="flex-1 rounded-lg bg-blue-600 py-3 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 disabled:opacity-40"
+                disabled={joinCode.length < 4 || validating}
+                className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-blue-600 py-3 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 disabled:opacity-40"
               >
-                Connect
+                {validating ? <><Loader2 size={14} className="animate-spin" /> Checking...</> : "Connect"}
               </button>
             </div>
           </form>

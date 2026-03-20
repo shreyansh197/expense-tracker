@@ -2,8 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 
 export const maxDuration = 30;
 
-const MODELS = ["gemini-2.0-flash-lite", "gemini-2.0-flash", "gemini-1.5-flash"];
-
 export async function POST(req: NextRequest) {
   try {
     const apiKey = process.env.GEMINI_API_KEY || "";
@@ -59,45 +57,65 @@ Keep it concise, friendly, and specific to their data. Use ₹ for amounts. Do n
       },
     });
 
-    // Try each model once (no retries to avoid Vercel timeout)
-    for (const model of MODELS) {
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+    const model = "gemini-2.0-flash-lite";
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
-      try {
-        const response = await fetch(url, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body,
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          const text =
-            data?.candidates?.[0]?.content?.parts?.[0]?.text ||
-            "Unable to generate insights. Please try again.";
-          return NextResponse.json({ insights: text });
-        }
-
-        const err = await response.text();
-        console.error(`Gemini (${model}) ${response.status}:`, err);
-
-        if (response.status === 403 || response.status === 401) {
-          return NextResponse.json(
-            { error: "AI API key is invalid. Check GEMINI_API_KEY in Vercel environment variables." },
-            { status: 502 }
-          );
-        }
-
-        // 429 or other error — try next model
-        continue;
-      } catch (fetchErr) {
-        console.error(`Fetch error for ${model}:`, fetchErr);
-        continue;
+    // Try up to 2 times with a pause on rate limit
+    for (let attempt = 0; attempt < 2; attempt++) {
+      if (attempt > 0) {
+        await new Promise((r) => setTimeout(r, 2000));
       }
+
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body,
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const text =
+          data?.candidates?.[0]?.content?.parts?.[0]?.text ||
+          "Unable to generate insights. Please try again.";
+        return NextResponse.json({ insights: text });
+      }
+
+      const errBody = await response.text();
+      console.error(`Gemini ${response.status} (attempt ${attempt + 1}):`, errBody);
+
+      if (response.status === 429 && attempt === 0) {
+        continue; // retry once after delay
+      }
+
+      // Parse error message from Gemini
+      let detail = "";
+      try {
+        const parsed = JSON.parse(errBody);
+        detail = parsed?.error?.message || "";
+      } catch { /* ignore */ }
+
+      if (response.status === 403 || response.status === 401) {
+        return NextResponse.json(
+          { error: "AI API key is invalid. Check GEMINI_API_KEY in Vercel environment variables." },
+          { status: 502 }
+        );
+      }
+
+      if (response.status === 429) {
+        return NextResponse.json(
+          { error: `Rate limit reached. The free Gemini API allows limited requests per minute. Please wait 60 seconds and try again.${detail ? " (" + detail + ")" : ""}` },
+          { status: 502 }
+        );
+      }
+
+      return NextResponse.json(
+        { error: `AI error ${response.status}: ${detail || "Unknown error. Please try again."}` },
+        { status: 502 }
+      );
     }
 
     return NextResponse.json(
-      { error: "AI service is busy. Please wait about 30 seconds and try again." },
+      { error: "AI service is busy. Please wait 60 seconds and try again." },
       { status: 502 }
     );
   } catch (error) {
