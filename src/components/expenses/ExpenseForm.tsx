@@ -6,6 +6,7 @@ import { CATEGORIES } from "@/lib/categories";
 import { cn } from "@/lib/utils";
 import { useUIStore } from "@/stores/uiStore";
 import { useToast } from "@/components/ui/Toast";
+import { DatePicker } from "@/components/ui/DatePicker";
 import type { CategoryId, ExpenseInput, Expense } from "@/types";
 
 interface ExpenseFormProps {
@@ -28,7 +29,7 @@ export function ExpenseForm({
 
   const [category, setCategory] = useState<CategoryId>(editExpense?.category || "groceries");
   const [amount, setAmount] = useState(editExpense?.amount?.toString() || "");
-  const [day, setDay] = useState(editExpense?.day?.toString() || new Date().getDate().toString());
+  const [day, setDay] = useState(editExpense?.day || new Date().getDate());
   const [remark, setRemark] = useState(editExpense?.remark || "");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -43,7 +44,7 @@ export function ExpenseForm({
     if (editExpense) {
       setCategory(editExpense.category);
       setAmount(editExpense.amount.toString());
-      setDay(editExpense.day.toString());
+      setDay(editExpense.day);
       setRemark(editExpense.remark || "");
     }
   }, [editExpense]);
@@ -59,8 +60,8 @@ export function ExpenseForm({
         return;
       }
 
-      const parsedDay = parseInt(day, 10);
-      if (!day || isNaN(parsedDay) || parsedDay < 1 || parsedDay > 31) {
+      const parsedDay = day;
+      if (parsedDay < 1 || parsedDay > 31) {
         setError("Enter a valid day (1-31)");
         return;
       }
@@ -151,38 +152,35 @@ export function ExpenseForm({
         </div>
       </div>
 
-      {/* Amount + Day */}
-      <div className="grid grid-cols-2 gap-3">
-        <div>
-          <label className="mb-1.5 block text-xs font-medium text-gray-500 uppercase dark:text-gray-400">
-            Amount (₹)
-          </label>
-          <input
-            ref={amountRef}
-            type="number"
-            min="1"
-            step="1"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            placeholder="0"
-            className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm font-medium text-gray-900 placeholder:text-gray-300 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder:text-gray-600"
-            required
-          />
-        </div>
-        <div>
-          <label className="mb-1.5 block text-xs font-medium text-gray-500 uppercase dark:text-gray-400">
-            Day
-          </label>
-          <input
-            type="number"
-            min="1"
-            max="31"
-            value={day}
-            onChange={(e) => setDay(e.target.value)}
-            className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm font-medium text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
-            required
-          />
-        </div>
+      {/* Amount */}
+      <div>
+        <label className="mb-1.5 block text-xs font-medium text-gray-500 uppercase dark:text-gray-400">
+          Amount (₹)
+        </label>
+        <input
+          ref={amountRef}
+          type="number"
+          min="1"
+          step="1"
+          value={amount}
+          onChange={(e) => setAmount(e.target.value)}
+          placeholder="0"
+          className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm font-medium text-gray-900 placeholder:text-gray-300 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder:text-gray-600"
+          required
+        />
+      </div>
+
+      {/* Date */}
+      <div>
+        <label className="mb-1.5 block text-xs font-medium text-gray-500 uppercase dark:text-gray-400">
+          Date
+        </label>
+        <DatePicker
+          value={day}
+          onChange={setDay}
+          month={month}
+          year={year}
+        />
       </div>
 
       {/* Remark */}

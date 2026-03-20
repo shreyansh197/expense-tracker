@@ -78,9 +78,14 @@ export function useExpenses(month: number, year: number) {
       remark: input.remark || null,
     });
     if (error) throw error;
+    fetchExpenses();
   };
 
   const updateExpense = async (id: string, updates: Partial<ExpenseInput>) => {
+    // Optimistic update
+    setExpenses((prev) =>
+      prev.map((e) => (e.id === id ? { ...e, ...updates } : e))
+    );
     const { error } = await supabase
       .from("expenses")
       .update({
@@ -88,10 +93,15 @@ export function useExpenses(month: number, year: number) {
         updated_at: new Date().toISOString(),
       })
       .eq("id", id);
-    if (error) throw error;
+    if (error) {
+      fetchExpenses(); // Revert on error
+      throw error;
+    }
   };
 
   const deleteExpense = async (id: string) => {
+    // Optimistic removal
+    setExpenses((prev) => prev.filter((e) => e.id !== id));
     const { error } = await supabase
       .from("expenses")
       .update({
@@ -99,7 +109,10 @@ export function useExpenses(month: number, year: number) {
         updated_at: new Date().toISOString(),
       })
       .eq("id", id);
-    if (error) throw error;
+    if (error) {
+      fetchExpenses(); // Revert on error
+      throw error;
+    }
   };
 
   return {

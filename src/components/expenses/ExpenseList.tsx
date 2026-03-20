@@ -33,7 +33,7 @@ export function ExpenseList({
   const handleDelete = (id: string) => {
     if (window.confirm("Delete this expense?")) {
       onDelete(id);
-      toast("Expense deleted");
+      toast("Expense deleted", "error");
     }
   };
 
