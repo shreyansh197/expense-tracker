@@ -80,11 +80,14 @@ export const PRESET_COLORS = [
   "#84CC16", "#A855F7", "#E11D48", "#0891B2", "#D946EF",
 ];
 
-export function getAllCategories(customCategories: CategoryMeta[] = []): CategoryMeta[] {
-  return [...DEFAULT_CATEGORIES_META, ...customCategories];
+export function getAllCategories(customCategories: CategoryMeta[] = [], hiddenDefaults: string[] = []): CategoryMeta[] {
+  const defaults = hiddenDefaults.length > 0
+    ? DEFAULT_CATEGORIES_META.filter((c) => !hiddenDefaults.includes(c.id))
+    : DEFAULT_CATEGORIES_META;
+  return [...defaults, ...customCategories];
 }
 
-export function buildCategoryMap(customCategories: CategoryMeta[] = []): Record<string, CategoryMeta> {
-  const all = getAllCategories(customCategories);
+export function buildCategoryMap(customCategories: CategoryMeta[] = [], hiddenDefaults: string[] = []): Record<string, CategoryMeta> {
+  const all = getAllCategories(customCategories, hiddenDefaults);
   return Object.fromEntries(all.map((c) => [c.id, c]));
 }

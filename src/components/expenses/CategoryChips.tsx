@@ -9,7 +9,7 @@ import type { CategoryId } from "@/types";
 export function CategoryChips() {
   const { activeCategories, toggleCategory } = useUIStore();
   const { settings } = useSettings();
-  const allCategories = getAllCategories(settings.customCategories);
+  const allCategories = getAllCategories(settings.customCategories, settings.hiddenDefaults);
 
   return (
     <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide lg:flex-wrap lg:overflow-visible">

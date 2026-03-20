@@ -19,6 +19,7 @@ export interface UserSettings {
   currency: string;
   categories: CategoryId[];
   customCategories: CategoryMeta[];
+  hiddenDefaults: CategoryId[];
   createdAt: number;
   updatedAt: number;
 }

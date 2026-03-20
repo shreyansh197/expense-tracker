@@ -12,6 +12,7 @@ const DEFAULT_SETTINGS: UserSettings = {
   currency: "INR",
   categories: DEFAULT_CATEGORIES,
   customCategories: [],
+  hiddenDefaults: [],
   createdAt: Date.now(),
   updatedAt: Date.now(),
 };
@@ -38,7 +39,7 @@ export function useSettings() {
   }, []);
 
   const updateSettings = useCallback(
-    async (updates: Partial<Pick<UserSettings, "salary" | "currency" | "categories" | "customCategories">>) => {
+    async (updates: Partial<Pick<UserSettings, "salary" | "currency" | "categories" | "customCategories" | "hiddenDefaults">>) => {
       setSettings((prev) => {
         const next = { ...prev, ...updates, updatedAt: Date.now() };
         localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
@@ -63,10 +64,12 @@ export function useSettings() {
 
   const deleteCategory = useCallback((id: string) => {
     setSettings((prev) => {
+      const isCustom = prev.customCategories.some((c) => c.id === id);
       const next = {
         ...prev,
         customCategories: prev.customCategories.filter((c) => c.id !== id),
         categories: prev.categories.filter((c) => c !== id),
+        hiddenDefaults: isCustom ? prev.hiddenDefaults : [...(prev.hiddenDefaults || []), id],
         updatedAt: Date.now(),
       };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(next));

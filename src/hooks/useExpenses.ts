@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
+import { getDeviceId } from "@/lib/deviceId";
 import type { Expense, ExpenseInput, CategoryId, SyncStatus } from "@/types";
 
 export function useExpenses(month: number, year: number) {
@@ -10,10 +11,13 @@ export function useExpenses(month: number, year: number) {
   const [syncStatus, setSyncStatus] = useState<SyncStatus>("synced");
 
   const fetchExpenses = useCallback(async () => {
+    const deviceId = getDeviceId();
+    if (!deviceId) return;
     setSyncStatus("syncing");
     const { data, error } = await supabase
       .from("expenses")
       .select("*")
+      .eq("device_id", deviceId)
       .eq("month", month)
       .eq("year", year)
       .is("deleted_at", null)
@@ -76,6 +80,7 @@ export function useExpenses(month: number, year: number) {
       month: input.month,
       year: input.year,
       remark: input.remark || null,
+      device_id: getDeviceId(),
     });
     if (error) throw error;
     fetchExpenses();

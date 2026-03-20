@@ -149,7 +149,7 @@ export default function SettingsPage() {
                     const name = newCatName.trim();
                     if (!name) return;
                     const id = name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
-                    const allCats = getAllCategories(settings.customCategories);
+                    const allCats = getAllCategories(settings.customCategories, settings.hiddenDefaults);
                     if (allCats.some((c) => c.id === id)) {
                       toast("Category already exists", "error");
                       return;
@@ -190,7 +190,9 @@ export default function SettingsPage() {
 
           {/* Default categories */}
           <div className="space-y-1.5">
-            {DEFAULT_CATEGORIES_META.map((cat) => (
+            {DEFAULT_CATEGORIES_META
+              .filter((cat) => !(settings.hiddenDefaults || []).includes(cat.id))
+              .map((cat) => (
               <div
                 key={cat.id}
                 className="flex items-center gap-3 rounded-lg px-2 py-1.5"
@@ -202,7 +204,15 @@ export default function SettingsPage() {
                 <span className="flex-1 text-sm text-gray-700 dark:text-gray-300">
                   {cat.label}
                 </span>
-                <span className="text-[10px] text-gray-400">default</span>
+                <button
+                  onClick={() => {
+                    deleteCategory(cat.id);
+                    toast("Category removed", "error");
+                  }}
+                  className="rounded-lg p-1 text-gray-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/30 dark:hover:text-red-400"
+                >
+                  <Trash2 size={14} />
+                </button>
               </div>
             ))}
             {/* Custom categories */}
@@ -230,6 +240,19 @@ export default function SettingsPage() {
               </div>
             ))}
           </div>
+
+          {/* Restore hidden defaults */}
+          {(settings.hiddenDefaults?.length ?? 0) > 0 && (
+            <button
+              onClick={() => {
+                updateSettings({ hiddenDefaults: [], categories: [...DEFAULT_CATEGORIES_META.map(c => c.id), ...settings.customCategories.map(c => c.id)] });
+                toast("Default categories restored");
+              }}
+              className="mt-3 text-xs font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400"
+            >
+              Restore {settings.hiddenDefaults.length} hidden default{settings.hiddenDefaults.length > 1 ? "s" : ""}
+            </button>
+          )}
         </section>
 
         {/* Theme */}

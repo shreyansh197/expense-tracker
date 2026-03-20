@@ -28,7 +28,7 @@ export function ExpenseForm({
   const closeForm = useUIStore((s) => s.closeForm);
   const { toast } = useToast();
   const { settings } = useSettings();
-  const allCategories = getAllCategories(settings.customCategories);
+  const allCategories = getAllCategories(settings.customCategories, settings.hiddenDefaults);
 
   const [category, setCategory] = useState<CategoryId>(editExpense?.category || "groceries");
   const [amount, setAmount] = useState(editExpense?.amount?.toString() || "");
