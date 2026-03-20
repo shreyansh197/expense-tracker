@@ -54,7 +54,8 @@ export function getMonthlySaving(salary: number, monthlyTotal: number): number {
 }
 
 /**
- * All category totals for a month
+ * All category totals for a month — includes orphan categories from expenses
+ * that aren't in the local categories list (e.g. before settings sync completes)
  */
 export function getAllCategoryTotals(
   expenses: Expense[],
@@ -62,10 +63,25 @@ export function getAllCategoryTotals(
   month: number,
   year: number
 ): CategoryTotal[] {
-  return categories.map((category) => ({
+  const knownSet = new Set(categories);
+  const result: CategoryTotal[] = categories.map((category) => ({
     category,
     total: getCategoryTotal(expenses, category, month, year),
   }));
+
+  // Find categories present in expenses but missing from settings
+  const active = activeExpenses(expenses, month, year);
+  const orphanMap = new Map<string, number>();
+  for (const e of active) {
+    if (!knownSet.has(e.category)) {
+      orphanMap.set(e.category, (orphanMap.get(e.category) || 0) + e.amount);
+    }
+  }
+  for (const [category, total] of orphanMap) {
+    result.push({ category, total });
+  }
+
+  return result;
 }
 
 /**
@@ -114,6 +130,7 @@ export function getTopCategory(
   month: number,
   year: number
 ): CategoryTotal | null {
+  // getAllCategoryTotals already includes orphan categories
   const totals = getAllCategoryTotals(expenses, categories, month, year);
   const nonZero = totals.filter((t) => t.total > 0);
   if (nonZero.length === 0) return null;
