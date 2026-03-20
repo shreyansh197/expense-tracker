@@ -9,12 +9,13 @@ import { useExpenses } from "@/hooks/useExpenses";
 import { useUIStore } from "@/stores/uiStore";
 import { useTheme } from "@/components/providers/ThemeProvider";
 import { getMonthName } from "@/lib/utils";
-import { Download, Moon, Sun, Monitor, Plus, Trash2, Copy, Check, UserPlus } from "lucide-react";
+import { Download, Moon, Sun, Monitor, Plus, Trash2, Copy, Check, UserPlus, AlertTriangle } from "lucide-react";
 import type { Expense } from "@/types";
 import { CATEGORY_MAP, buildCategoryMap, getAllCategories, PRESET_COLORS, DEFAULT_CATEGORIES_META } from "@/lib/categories";
 import { InstallButton } from "@/components/pwa/InstallButton";
 import { useToast } from "@/components/ui/Toast";
 import { getSyncCode, clearSyncCode } from "@/lib/deviceId";
+import { supabase } from "@/lib/supabase";
 
 export default function SettingsPage() {
   const { settings, updateSettings, addCategory, deleteCategory, resetSettings } = useSettings();
@@ -29,6 +30,7 @@ export default function SettingsPage() {
   const [newCatColor, setNewCatColor] = useState(PRESET_COLORS[0]);
   const [showAddCat, setShowAddCat] = useState(false);
   const [codeCopied, setCodeCopied] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const syncCode = getSyncCode();
 
   useEffect(() => {
@@ -373,6 +375,53 @@ export default function SettingsPage() {
             <UserPlus size={16} />
             New User / Switch Account
           </button>
+        </section>
+
+        {/* Delete All Data */}
+        <section className="rounded-xl border border-red-200 bg-white p-4 shadow-sm dark:border-red-900/50 dark:bg-gray-900">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="mt-0.5 shrink-0 text-red-500" size={18} />
+            <div className="flex-1">
+              <h2 className="text-sm font-semibold text-red-700 dark:text-red-400">
+                Delete All Data
+              </h2>
+              <p className="mt-1 mb-3 text-xs text-gray-500 dark:text-gray-400">
+                Permanently delete all expenses linked to your sync code. This cannot be undone.
+              </p>
+              <button
+                disabled={deleting}
+                onClick={async () => {
+                  if (!syncCode) return;
+                  const confirmed = window.prompt(
+                    `This will permanently delete ALL your expenses. Type your sync code (${syncCode}) to confirm:`
+                  );
+                  if (confirmed?.toUpperCase().trim() !== syncCode) {
+                    if (confirmed !== null) toast("Sync code didn't match. Deletion cancelled.", "error");
+                    return;
+                  }
+                  setDeleting(true);
+                  const { error } = await supabase
+                    .from("expenses")
+                    .delete()
+                    .eq("device_id", syncCode);
+                  setDeleting(false);
+                  if (error) {
+                    toast("Failed to delete data. Try again.", "error");
+                    console.error("Delete error:", error);
+                  } else {
+                    clearSyncCode();
+                    resetSettings();
+                    toast("All data deleted.");
+                    window.location.href = "/";
+                  }
+                }}
+                className="flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
+              >
+                <Trash2 size={14} />
+                {deleting ? "Deleting..." : "Delete All Expenses"}
+              </button>
+            </div>
+          </div>
         </section>
       </div>
     </AppShell>
