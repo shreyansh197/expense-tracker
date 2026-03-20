@@ -19,6 +19,12 @@ export function InstallButton() {
       return;
     }
 
+    // Check if the event was already captured by the global inline script
+    const saved = (window as unknown as Record<string, unknown>).__pwaInstallPrompt;
+    if (saved) {
+      setDeferredPrompt(saved as BeforeInstallPromptEvent);
+    }
+
     const handler = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e as BeforeInstallPromptEvent);
@@ -46,6 +52,7 @@ export function InstallButton() {
       setInstalled(true);
     }
     setDeferredPrompt(null);
+    (window as unknown as Record<string, unknown>).__pwaInstallPrompt = null;
   };
 
   if (deferredPrompt) {

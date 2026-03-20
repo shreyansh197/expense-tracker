@@ -1,8 +1,10 @@
 {
+  "id": "/",
   "name": "ExpenseTracker",
   "short_name": "Expenses",
   "description": "Track your monthly expenses with real-time sync",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#f9fafb",
   "theme_color": "#2563eb",
@@ -19,18 +21,22 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/icons/screenshot-wide.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "ExpenseTracker Dashboard"
     },
     {
-      "src": "/icons/icon-192.png",
-      "sizes": "192x192",
+      "src": "/icons/screenshot-narrow.png",
+      "sizes": "390x844",
       "type": "image/png",
-      "purpose": "maskable"
-    },
-    {
-      "src": "/icons/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
+      "form_factor": "narrow",
+      "label": "ExpenseTracker Mobile"
     }
   ]
 }
