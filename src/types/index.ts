@@ -18,20 +18,12 @@ export interface UserSettings {
   salary: number;
   currency: string;
   categories: CategoryId[];
+  customCategories: CategoryMeta[];
   createdAt: number;
   updatedAt: number;
 }
 
-export type CategoryId =
-  | "subscriptions"
-  | "transport"
-  | "groceries"
-  | "eat-out"
-  | "shopping"
-  | "miscellaneous"
-  | "credit-card"
-  | "internet"
-  | "sip-nps";
+export type CategoryId = string;
 
 export interface CategoryMeta {
   id: CategoryId;

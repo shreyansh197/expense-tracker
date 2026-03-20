@@ -7,8 +7,9 @@ import {
   ResponsiveContainer,
   Tooltip,
 } from "recharts";
-import { CATEGORY_MAP } from "@/lib/categories";
+import { buildCategoryMap } from "@/lib/categories";
 import { formatCurrency } from "@/lib/utils";
+import { useSettings } from "@/hooks/useSettings";
 import type { CategoryTotal } from "@/types";
 
 interface CategoryChartProps {
@@ -16,12 +17,14 @@ interface CategoryChartProps {
 }
 
 export function CategoryChart({ categoryTotals }: CategoryChartProps) {
+  const { settings } = useSettings();
+  const catMap = buildCategoryMap(settings.customCategories);
   const data = categoryTotals
     .filter((c) => c.total > 0)
     .map((c) => ({
-      name: CATEGORY_MAP[c.category]?.label || c.category,
+      name: catMap[c.category]?.label || c.category,
       value: c.total,
-      color: CATEGORY_MAP[c.category]?.color || "#6B7280",
+      color: catMap[c.category]?.color || "#6B7280",
     }));
 
   if (data.length === 0) {
@@ -65,6 +68,8 @@ export function CategoryChart({ categoryTotals }: CategoryChartProps) {
 }
 
 export function CategoryLegend({ categoryTotals }: CategoryChartProps) {
+  const { settings } = useSettings();
+  const catMap = buildCategoryMap(settings.customCategories);
   const nonZero = categoryTotals.filter((c) => c.total > 0);
   const total = nonZero.reduce((sum, c) => sum + c.total, 0);
 
@@ -73,7 +78,7 @@ export function CategoryLegend({ categoryTotals }: CategoryChartProps) {
       {nonZero
         .sort((a, b) => b.total - a.total)
         .map((c) => {
-          const meta = CATEGORY_MAP[c.category];
+          const meta = catMap[c.category];
           const pct = total > 0 ? Math.round((c.total / total) * 100) : 0;
           return (
             <div key={c.category} className="flex items-center gap-3">

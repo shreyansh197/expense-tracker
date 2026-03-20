@@ -1,6 +1,6 @@
 import type { CategoryId, CategoryMeta } from "@/types";
 
-export const CATEGORIES: CategoryMeta[] = [
+export const DEFAULT_CATEGORIES_META: CategoryMeta[] = [
   {
     id: "subscriptions",
     label: "Subscriptions",
@@ -66,8 +66,25 @@ export const CATEGORIES: CategoryMeta[] = [
   },
 ];
 
-export const CATEGORY_MAP: Record<CategoryId, CategoryMeta> = Object.fromEntries(
-  CATEGORIES.map((c) => [c.id, c])
-) as Record<CategoryId, CategoryMeta>;
+export const CATEGORIES = DEFAULT_CATEGORIES_META;
 
-export const DEFAULT_CATEGORIES: CategoryId[] = CATEGORIES.map((c) => c.id);
+export let CATEGORY_MAP: Record<string, CategoryMeta> = Object.fromEntries(
+  DEFAULT_CATEGORIES_META.map((c) => [c.id, c])
+);
+
+export const DEFAULT_CATEGORIES: CategoryId[] = DEFAULT_CATEGORIES_META.map((c) => c.id);
+
+export const PRESET_COLORS = [
+  "#8B5CF6", "#3B82F6", "#10B981", "#F97316", "#EC4899",
+  "#6B7280", "#EF4444", "#06B6D4", "#14B8A6", "#F59E0B",
+  "#84CC16", "#A855F7", "#E11D48", "#0891B2", "#D946EF",
+];
+
+export function getAllCategories(customCategories: CategoryMeta[] = []): CategoryMeta[] {
+  return [...DEFAULT_CATEGORIES_META, ...customCategories];
+}
+
+export function buildCategoryMap(customCategories: CategoryMeta[] = []): Record<string, CategoryMeta> {
+  const all = getAllCategories(customCategories);
+  return Object.fromEntries(all.map((c) => [c.id, c]));
+}

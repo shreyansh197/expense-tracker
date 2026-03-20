@@ -2,11 +2,12 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { X } from "lucide-react";
-import { CATEGORIES } from "@/lib/categories";
+import { getAllCategories } from "@/lib/categories";
 import { cn } from "@/lib/utils";
 import { useUIStore } from "@/stores/uiStore";
 import { useToast } from "@/components/ui/Toast";
 import { DatePicker } from "@/components/ui/DatePicker";
+import { useSettings } from "@/hooks/useSettings";
 import type { CategoryId, ExpenseInput, Expense } from "@/types";
 
 interface ExpenseFormProps {
@@ -26,6 +27,8 @@ export function ExpenseForm({
 }: ExpenseFormProps) {
   const closeForm = useUIStore((s) => s.closeForm);
   const { toast } = useToast();
+  const { settings } = useSettings();
+  const allCategories = getAllCategories(settings.customCategories);
 
   const [category, setCategory] = useState<CategoryId>(editExpense?.category || "groceries");
   const [amount, setAmount] = useState(editExpense?.amount?.toString() || "");
@@ -135,7 +138,7 @@ export function ExpenseForm({
           Category
         </label>
         <div className="flex flex-wrap gap-2">
-          {CATEGORIES.map((cat) => (
+          {allCategories.map((cat) => (
             <button
               key={cat.id}
               type="button"

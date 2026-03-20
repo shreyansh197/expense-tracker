@@ -9,7 +9,8 @@ import {
 } from "lucide-react";
 import { cn, formatCurrency } from "@/lib/utils";
 import { BUDGET_WARNING_THRESHOLD } from "@/lib/constants";
-import { CATEGORY_MAP } from "@/lib/categories";
+import { buildCategoryMap } from "@/lib/categories";
+import { useSettings } from "@/hooks/useSettings";
 import type { CategoryTotal } from "@/types";
 
 interface KpiCardsProps {
@@ -31,6 +32,8 @@ export function KpiCards({
 }: KpiCardsProps) {
   const isOverspent = remaining < 0;
   const isWarning = !isOverspent && budgetUsedPercent >= BUDGET_WARNING_THRESHOLD;
+  const { settings } = useSettings();
+  const catMap = buildCategoryMap(settings.customCategories);
 
   return (
     <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
@@ -122,9 +125,9 @@ export function KpiCards({
             Top:{" "}
             <span
               className="font-medium"
-              style={{ color: CATEGORY_MAP[topCategory.category]?.color }}
+              style={{ color: catMap[topCategory.category]?.color }}
             >
-              {CATEGORY_MAP[topCategory.category]?.label}
+              {catMap[topCategory.category]?.label}
             </span>
           </p>
         )}

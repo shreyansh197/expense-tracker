@@ -1,16 +1,19 @@
 "use client";
 
-import { CATEGORIES, CATEGORY_MAP } from "@/lib/categories";
+import { getAllCategories, buildCategoryMap } from "@/lib/categories";
 import { cn } from "@/lib/utils";
 import { useUIStore } from "@/stores/uiStore";
+import { useSettings } from "@/hooks/useSettings";
 import type { CategoryId } from "@/types";
 
 export function CategoryChips() {
   const { activeCategories, toggleCategory } = useUIStore();
+  const { settings } = useSettings();
+  const allCategories = getAllCategories(settings.customCategories);
 
   return (
     <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide lg:flex-wrap lg:overflow-visible">
-      {CATEGORIES.map((cat) => {
+      {allCategories.map((cat) => {
         const isActive =
           activeCategories.length === 0 || activeCategories.includes(cat.id);
         return (
@@ -34,7 +37,9 @@ export function CategoryChips() {
 }
 
 export function CategoryBadge({ category }: { category: CategoryId }) {
-  const meta = CATEGORY_MAP[category];
+  const { settings } = useSettings();
+  const map = buildCategoryMap(settings.customCategories);
+  const meta = map[category];
   if (!meta) return null;
 
   return (

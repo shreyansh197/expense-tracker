@@ -9,14 +9,14 @@ import { useExpenses } from "@/hooks/useExpenses";
 import { useUIStore } from "@/stores/uiStore";
 import { useTheme } from "@/components/providers/ThemeProvider";
 import { getMonthName } from "@/lib/utils";
-import { Download, Moon, Sun, Monitor } from "lucide-react";
+import { Download, Moon, Sun, Monitor, Plus, Trash2 } from "lucide-react";
 import type { Expense } from "@/types";
-import { CATEGORY_MAP } from "@/lib/categories";
+import { CATEGORY_MAP, buildCategoryMap, getAllCategories, PRESET_COLORS, DEFAULT_CATEGORIES_META } from "@/lib/categories";
 import { InstallButton } from "@/components/pwa/InstallButton";
 import { useToast } from "@/components/ui/Toast";
 
 export default function SettingsPage() {
-  const { settings, updateSettings } = useSettings();
+  const { settings, updateSettings, addCategory, deleteCategory } = useSettings();
   const { currentMonth, currentYear } = useUIStore();
   const { expenses } = useExpenses(currentMonth, currentYear);
   const { theme, setTheme } = useTheme();
@@ -24,6 +24,9 @@ export default function SettingsPage() {
 
   const [salary, setSalary] = useState(settings.salary.toString());
   const [saving, setSaving] = useState(false);
+  const [newCatName, setNewCatName] = useState("");
+  const [newCatColor, setNewCatColor] = useState(PRESET_COLORS[0]);
+  const [showAddCat, setShowAddCat] = useState(false);
 
   useEffect(() => {
     setSalary(settings.salary.toString());
@@ -43,10 +46,11 @@ export default function SettingsPage() {
 
   const handleExportCSV = () => {
     if (expenses.length === 0) return;
+    const catMap = buildCategoryMap(settings.customCategories);
     const headers = ["Day", "Category", "Amount", "Remark"];
     const rows = expenses.map((e: Expense) => [
       e.day,
-      CATEGORY_MAP[e.category]?.label || e.category,
+      catMap[e.category]?.label || e.category,
       e.amount,
       e.remark || "",
     ]);
@@ -63,9 +67,10 @@ export default function SettingsPage() {
 
   const handleExportJSON = () => {
     if (expenses.length === 0) return;
+    const catMap = buildCategoryMap(settings.customCategories);
     const data = expenses.map((e: Expense) => ({
       day: e.day,
-      category: CATEGORY_MAP[e.category]?.label || e.category,
+      category: catMap[e.category]?.label || e.category,
       amount: e.amount,
       remark: e.remark || "",
     }));
@@ -109,6 +114,121 @@ export default function SettingsPage() {
             >
               {saving ? "Saving..." : "Update"}
             </button>
+          </div>
+        </section>
+
+        {/* Categories */}
+        <section className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+              Categories
+            </h2>
+            <button
+              onClick={() => setShowAddCat(!showAddCat)}
+              className="flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-medium text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900/30"
+            >
+              <Plus size={14} />
+              Add
+            </button>
+          </div>
+
+          {/* Add category form */}
+          {showAddCat && (
+            <div className="mb-4 rounded-lg border border-gray-100 bg-gray-50 p-3 dark:border-gray-800 dark:bg-gray-800/50">
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  placeholder="Category name"
+                  value={newCatName}
+                  onChange={(e) => setNewCatName(e.target.value)}
+                  maxLength={30}
+                  className="flex-1 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
+                />
+                <button
+                  onClick={() => {
+                    const name = newCatName.trim();
+                    if (!name) return;
+                    const id = name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+                    const allCats = getAllCategories(settings.customCategories);
+                    if (allCats.some((c) => c.id === id)) {
+                      toast("Category already exists", "error");
+                      return;
+                    }
+                    addCategory({
+                      id,
+                      label: name,
+                      color: newCatColor,
+                      bgColor: newCatColor + "20",
+                      icon: "Tag",
+                    });
+                    setNewCatName("");
+                    setShowAddCat(false);
+                    toast("Category added");
+                  }}
+                  disabled={!newCatName.trim()}
+                  className="rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-40"
+                >
+                  Add
+                </button>
+              </div>
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {PRESET_COLORS.map((c) => (
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={() => setNewCatColor(c)}
+                    className="h-6 w-6 rounded-full border-2 transition-all"
+                    style={{
+                      backgroundColor: c,
+                      borderColor: newCatColor === c ? "#1d4ed8" : "transparent",
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Default categories */}
+          <div className="space-y-1.5">
+            {DEFAULT_CATEGORIES_META.map((cat) => (
+              <div
+                key={cat.id}
+                className="flex items-center gap-3 rounded-lg px-2 py-1.5"
+              >
+                <div
+                  className="h-3 w-3 shrink-0 rounded-full"
+                  style={{ backgroundColor: cat.color }}
+                />
+                <span className="flex-1 text-sm text-gray-700 dark:text-gray-300">
+                  {cat.label}
+                </span>
+                <span className="text-[10px] text-gray-400">default</span>
+              </div>
+            ))}
+            {/* Custom categories */}
+            {settings.customCategories.map((cat) => (
+              <div
+                key={cat.id}
+                className="flex items-center gap-3 rounded-lg px-2 py-1.5"
+              >
+                <div
+                  className="h-3 w-3 shrink-0 rounded-full"
+                  style={{ backgroundColor: cat.color }}
+                />
+                <span className="flex-1 text-sm text-gray-700 dark:text-gray-300">
+                  {cat.label}
+                </span>
+                <button
+                  onClick={() => {
+                    deleteCategory(cat.id);
+                    toast("Category deleted", "error");
+                  }}
+                  className="rounded-lg p-1 text-gray-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/30 dark:hover:text-red-400"
+                >
+                  <Trash2 size={14} />
+                </button>
+              </div>
+            ))}
           </div>
         </section>
 
