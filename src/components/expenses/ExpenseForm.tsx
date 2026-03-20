@@ -30,6 +30,8 @@ export function ExpenseForm({
   const [category, setCategory] = useState<CategoryId>(editExpense?.category || "groceries");
   const [amount, setAmount] = useState(editExpense?.amount?.toString() || "");
   const [day, setDay] = useState(editExpense?.day || new Date().getDate());
+  const [selectedMonth, setSelectedMonth] = useState(month);
+  const [selectedYear, setSelectedYear] = useState(year);
   const [remark, setRemark] = useState(editExpense?.remark || "");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -73,8 +75,8 @@ export function ExpenseForm({
             category,
             amount: parsedAmount,
             day: parsedDay,
-            month,
-            year,
+            month: selectedMonth,
+            year: selectedYear,
             remark: remark.trim() || undefined,
           });
         } else {
@@ -82,8 +84,8 @@ export function ExpenseForm({
             category,
             amount: parsedAmount,
             day: parsedDay,
-            month,
-            year,
+            month: selectedMonth,
+            year: selectedYear,
             remark: remark.trim() || undefined,
           });
         }
@@ -177,9 +179,13 @@ export function ExpenseForm({
         </label>
         <DatePicker
           value={day}
-          onChange={setDay}
-          month={month}
-          year={year}
+          onChange={(d, m, y) => {
+            setDay(d);
+            if (m !== undefined) setSelectedMonth(m);
+            if (y !== undefined) setSelectedYear(y);
+          }}
+          month={selectedMonth}
+          year={selectedYear}
         />
       </div>
 

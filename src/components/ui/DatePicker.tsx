@@ -1,10 +1,14 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Calendar, X } from "lucide-react";
+import { Calendar, ChevronLeft, ChevronRight, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const DAYS_OF_WEEK = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
+const MONTH_NAMES = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December",
+];
 
 function getDaysInMonth(month: number, year: number) {
   return new Date(year, month, 0).getDate();
@@ -16,14 +20,24 @@ function getFirstDayOfMonth(month: number, year: number) {
 
 interface DatePickerProps {
   value: number; // day of month
-  onChange: (day: number) => void;
+  onChange: (day: number, month?: number, year?: number) => void;
   month: number; // 1-12
   year: number;
 }
 
 export function DatePicker({ value, onChange, month, year }: DatePickerProps) {
   const [open, setOpen] = useState(false);
+  const [viewMonth, setViewMonth] = useState(month);
+  const [viewYear, setViewYear] = useState(year);
   const ref = useRef<HTMLDivElement>(null);
+
+  // Reset view to expense month/year when opening
+  useEffect(() => {
+    if (open) {
+      setViewMonth(month);
+      setViewYear(year);
+    }
+  }, [open, month, year]);
 
   // Close on outside click
   useEffect(() => {
@@ -37,23 +51,35 @@ export function DatePicker({ value, onChange, month, year }: DatePickerProps) {
     return () => document.removeEventListener("mousedown", handleClick);
   }, [open]);
 
-  const daysInMonth = getDaysInMonth(month, year);
-  const firstDay = getFirstDayOfMonth(month, year);
+  const displayMonthName = MONTH_NAMES[month - 1];
+  const displayDate = `${value} ${displayMonthName.slice(0, 3)} ${year}`;
+
+  const handleSelect = (day: number) => {
+    onChange(day, viewMonth, viewYear);
+    setOpen(false);
+  };
+
+  const goPrev = () => {
+    if (viewMonth === 1) { setViewMonth(12); setViewYear(viewYear - 1); }
+    else setViewMonth(viewMonth - 1);
+  };
+
+  const goNext = () => {
+    if (viewMonth === 12) { setViewMonth(1); setViewYear(viewYear + 1); }
+    else setViewMonth(viewMonth + 1);
+  };
+
+  const daysInMonth = getDaysInMonth(viewMonth, viewYear);
+  const firstDay = getFirstDayOfMonth(viewMonth, viewYear);
   const today = new Date();
   const isCurrentMonth =
-    today.getMonth() + 1 === month && today.getFullYear() === year;
+    today.getMonth() + 1 === viewMonth && today.getFullYear() === viewYear;
   const todayDay = today.getDate();
+  const isExpenseMonth = viewMonth === month && viewYear === year;
 
-  const monthName = new Date(year, month - 1).toLocaleString("default", {
-    month: "long",
-  });
-
-  // Build grid: leading blanks + day numbers
   const cells: (number | null)[] = [];
   for (let i = 0; i < firstDay; i++) cells.push(null);
   for (let d = 1; d <= daysInMonth; d++) cells.push(d);
-
-  const displayDate = `${value} ${monthName.slice(0, 3)} ${year}`;
 
   return (
     <div ref={ref} className="relative">
@@ -89,33 +115,37 @@ export function DatePicker({ value, onChange, month, year }: DatePickerProps) {
               )}
             >
               <CalendarGrid
-                monthName={monthName}
-                year={year}
+                viewMonth={viewMonth}
+                viewYear={viewYear}
                 cells={cells}
-                value={value}
+                value={isExpenseMonth ? value : -1}
                 isCurrentMonth={isCurrentMonth}
                 todayDay={todayDay}
-                onChange={(d) => { onChange(d); setOpen(false); }}
+                onSelect={handleSelect}
+                onPrev={goPrev}
+                onNext={goNext}
                 onClose={() => setOpen(false)}
               />
             </div>
           </div>
-          {/* Desktop: positioned dropdown */}
+          {/* Desktop: positioned dropdown — opens upward to avoid clipping */}
           <div
             className={cn(
-              "absolute z-50 hidden w-72 rounded-xl border border-gray-200 bg-white p-3 shadow-xl sm:block",
+              "absolute z-50 hidden w-80 rounded-xl border border-gray-200 bg-white p-3 shadow-xl sm:block",
               "dark:border-gray-700 dark:bg-gray-900",
-              "top-full mt-1.5 left-0"
+              "bottom-full mb-1.5 left-0"
             )}
           >
             <CalendarGrid
-              monthName={monthName}
-              year={year}
+              viewMonth={viewMonth}
+              viewYear={viewYear}
               cells={cells}
-              value={value}
+              value={isExpenseMonth ? value : -1}
               isCurrentMonth={isCurrentMonth}
               todayDay={todayDay}
-              onChange={(d) => { onChange(d); setOpen(false); }}
+              onSelect={handleSelect}
+              onPrev={goPrev}
+              onNext={goNext}
             />
           </div>
         </>
@@ -125,40 +155,62 @@ export function DatePicker({ value, onChange, month, year }: DatePickerProps) {
 }
 
 function CalendarGrid({
-  monthName,
-  year,
+  viewMonth,
+  viewYear,
   cells,
   value,
   isCurrentMonth,
   todayDay,
-  onChange,
+  onSelect,
+  onPrev,
+  onNext,
   onClose,
 }: {
-  monthName: string;
-  year: number;
+  viewMonth: number;
+  viewYear: number;
   cells: (number | null)[];
   value: number;
   isCurrentMonth: boolean;
   todayDay: number;
-  onChange: (day: number) => void;
+  onSelect: (day: number) => void;
+  onPrev: () => void;
+  onNext: () => void;
   onClose?: () => void;
 }) {
+  const monthName = MONTH_NAMES[viewMonth - 1];
+
   return (
     <>
-      {/* Header */}
+      {/* Header with nav */}
       <div className="mb-3 flex items-center justify-between">
+        <button
+          type="button"
+          onClick={onPrev}
+          className="rounded-lg p-1.5 text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
+        >
+          <ChevronLeft size={18} />
+        </button>
         <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">
-          {monthName} {year}
+          {monthName} {viewYear}
         </span>
-        {onClose && (
+        <div className="flex items-center gap-1">
           <button
             type="button"
-            onClick={onClose}
-            className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
+            onClick={onNext}
+            className="rounded-lg p-1.5 text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
           >
-            <X size={16} />
+            <ChevronRight size={18} />
           </button>
-        )}
+          {onClose && (
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
+            >
+              <X size={16} />
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Day-of-week headers */}
@@ -182,7 +234,7 @@ function CalendarGrid({
             <button
               key={day}
               type="button"
-              onClick={() => onChange(day)}
+              onClick={() => onSelect(day)}
               className={cn(
                 "flex h-10 w-full items-center justify-center rounded-lg text-sm font-medium transition-all",
                 day === value
@@ -191,7 +243,7 @@ function CalendarGrid({
                 isCurrentMonth &&
                   day === todayDay &&
                   day !== value &&
-                  "font-bold text-blue-600 dark:text-blue-400"
+                  "ring-1 ring-blue-400 font-bold text-blue-600 dark:text-blue-400 dark:ring-blue-500"
               )}
             >
               {day}
@@ -204,7 +256,7 @@ function CalendarGrid({
       {isCurrentMonth && (
         <button
           type="button"
-          onClick={() => onChange(todayDay)}
+          onClick={() => onSelect(todayDay)}
           className="mt-2 w-full rounded-lg bg-gray-50 py-2 text-xs font-medium text-blue-600 hover:bg-gray-100 dark:bg-gray-800 dark:text-blue-400 dark:hover:bg-gray-700"
         >
           Today ({todayDay})
