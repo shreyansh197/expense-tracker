@@ -58,7 +58,7 @@ Keep it concise, friendly, and specific to their data. Use ₹ for amounts. Do n
     });
 
     // Try multiple models — each has its own separate quota
-    const models = ["gemini-2.0-flash-lite", "gemini-2.0-flash", "gemini-1.5-flash"];
+    const models = ["gemini-2.0-flash-lite", "gemini-2.0-flash", "gemini-1.5-flash-8b"];
     let lastError = "";
 
     for (const model of models) {
@@ -94,8 +94,8 @@ Keep it concise, friendly, and specific to their data. Use ₹ for amounts. Do n
         );
       }
 
-      // 429 = rate limited on this model, try next one
-      if (response.status === 429) continue;
+      // 429 = rate limited, 404 = model retired — try next one
+      if (response.status === 429 || response.status === 404) continue;
 
       // Other error — return it
       return NextResponse.json(
