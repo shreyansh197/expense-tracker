@@ -6,6 +6,8 @@ import {
   TrendingDown,
   CalendarDays,
   AlertTriangle,
+  Clock,
+  Gauge,
 } from "lucide-react";
 import { cn, formatCurrency } from "@/lib/utils";
 import { BUDGET_WARNING_THRESHOLD } from "@/lib/constants";
@@ -20,6 +22,8 @@ interface KpiCardsProps {
   avgDaily: number;
   budgetUsedPercent: number;
   topCategory: CategoryTotal | null;
+  daysRemaining: number;
+  paceToStayUnder: number;
 }
 
 export function KpiCards({
@@ -29,11 +33,14 @@ export function KpiCards({
   avgDaily,
   budgetUsedPercent,
   topCategory,
+  daysRemaining,
+  paceToStayUnder,
 }: KpiCardsProps) {
   const isOverspent = remaining < 0;
   const isWarning = !isOverspent && budgetUsedPercent >= BUDGET_WARNING_THRESHOLD;
   const { settings } = useSettings();
   const catMap = buildCategoryMap(settings.customCategories);
+  const paceExceeded = avgDaily > paceToStayUnder && paceToStayUnder > 0;
 
   return (
     <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
@@ -62,7 +69,7 @@ export function KpiCards({
         <p className="mt-1 text-xs text-gray-400">{budgetUsedPercent}% of budget</p>
       </div>
 
-      {/* Remaining */}
+      {/* Remaining + Days Left — highlighted card */}
       <div
         className={cn(
           "rounded-xl border p-4 shadow-sm",
@@ -98,6 +105,17 @@ export function KpiCards({
         >
           {formatCurrency(Math.abs(remaining))}
         </p>
+        <div className="mt-1.5 flex items-center gap-1.5">
+          <Clock size={11} className="text-gray-400" />
+          <span className={cn(
+            "text-xs font-medium",
+            isOverspent ? "text-red-500 dark:text-red-400"
+              : isWarning ? "text-amber-600 dark:text-amber-400"
+              : "text-emerald-600 dark:text-emerald-400"
+          )}>
+            {daysRemaining === 0 ? "Month ended" : `${daysRemaining} day${daysRemaining !== 1 ? "s" : ""} left`}
+          </span>
+        </div>
       </div>
 
       {/* Budget */}
@@ -108,17 +126,6 @@ export function KpiCards({
         </div>
         <p className="mt-1 text-xl font-bold text-gray-900 sm:text-2xl dark:text-white">
           {formatCurrency(salary)}
-        </p>
-      </div>
-
-      {/* Avg Per Day */}
-      <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900">
-        <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-          <CalendarDays size={14} />
-          <span>Avg / Day</span>
-        </div>
-        <p className="mt-1 text-xl font-bold text-gray-900 sm:text-2xl dark:text-white">
-          {formatCurrency(avgDaily)}
         </p>
         {topCategory && (
           <p className="mt-1 text-xs text-gray-400">
@@ -131,6 +138,25 @@ export function KpiCards({
             </span>
           </p>
         )}
+      </div>
+
+      {/* Daily Pace */}
+      <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+        <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+          <Gauge size={14} />
+          <span>Daily Pace</span>
+        </div>
+        <p className={cn(
+          "mt-1 text-xl font-bold sm:text-2xl",
+          paceExceeded
+            ? "text-amber-600 dark:text-amber-400"
+            : "text-gray-900 dark:text-white"
+        )}>
+          {paceToStayUnder > 0 ? `${formatCurrency(paceToStayUnder)}/d` : "—"}
+        </p>
+        <p className="mt-1 text-xs text-gray-400">
+          Currently {formatCurrency(avgDaily)}/day
+        </p>
       </div>
     </div>
   );

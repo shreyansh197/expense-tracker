@@ -2,6 +2,7 @@
 
 export const dynamic = "force-dynamic";
 
+import { useRouter } from "next/navigation";
 import { AppShell } from "@/components/layout/AppShell";
 import { MonthSwitcher } from "@/components/layout/MonthSwitcher";
 import { SyncIndicator } from "@/components/sync/SyncIndicator";
@@ -12,10 +13,11 @@ import { useExpenses } from "@/hooks/useExpenses";
 import { useSettings } from "@/hooks/useSettings";
 import { useCalculations } from "@/hooks/useCalculations";
 import { useUIStore } from "@/stores/uiStore";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, getMonthName } from "@/lib/utils";
 import { CategoryBadge } from "@/components/expenses/CategoryChips";
 
 export default function DashboardPage() {
+  const router = useRouter();
   const { currentMonth, currentYear } = useUIStore();
   const { expenses, syncStatus } = useExpenses(currentMonth, currentYear);
   const { settings } = useSettings();
@@ -28,11 +30,24 @@ export default function DashboardPage() {
     categoryTotals,
     dailyTotals,
     topCategory,
+    daysRemaining,
+    paceToStayUnder,
   } = useCalculations(expenses, settings.categories, settings.salary, currentMonth, currentYear);
 
   const recentExpenses = [...expenses]
     .sort((a, b) => b.day - a.day || b.createdAt - a.createdAt)
     .slice(0, 5);
+
+  const handleCategoryClick = (categorySlug: string) => {
+    router.push(`/category/${encodeURIComponent(categorySlug)}?month=${currentMonth}&year=${currentYear}`);
+  };
+
+  const handleDayClick = (day: number) => {
+    const { setActiveCategories, setSearchQuery } = useUIStore.getState();
+    setActiveCategories([]);
+    setSearchQuery(`day:${day}`);
+    router.push("/expenses");
+  };
 
   return (
     <AppShell>
@@ -51,6 +66,8 @@ export default function DashboardPage() {
           avgDaily={avgDaily}
           budgetUsedPercent={budgetUsedPercent}
           topCategory={topCategory}
+          daysRemaining={daysRemaining}
+          paceToStayUnder={paceToStayUnder}
         />
 
         {/* Charts Row */}
@@ -59,9 +76,9 @@ export default function DashboardPage() {
             <h3 className="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
               Category Breakdown
             </h3>
-            <CategoryChart categoryTotals={categoryTotals} />
+            <CategoryChart categoryTotals={categoryTotals} onCategoryClick={handleCategoryClick} />
             <div className="mt-3">
-              <CategoryLegend categoryTotals={categoryTotals} />
+              <CategoryLegend categoryTotals={categoryTotals} onCategoryClick={handleCategoryClick} />
             </div>
           </div>
 
@@ -69,7 +86,7 @@ export default function DashboardPage() {
             <h3 className="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
               Daily Spending Trend
             </h3>
-            <DailyTrendChart dailyTotals={dailyTotals} />
+            <DailyTrendChart dailyTotals={dailyTotals} onBarClick={handleDayClick} />
           </div>
         </div>
 
@@ -91,17 +108,26 @@ export default function DashboardPage() {
               No expenses this month
             </p>
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-1">
               {recentExpenses.map((e) => (
                 <div
                   key={e.id}
-                  className="flex items-center justify-between rounded-lg px-2 py-1.5"
+                  className="flex items-center justify-between rounded-lg px-2 py-2 hover:bg-gray-50 dark:hover:bg-gray-800/50"
                 >
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-3 min-w-0">
                     <CategoryBadge category={e.category} />
-                    <span className="text-xs text-gray-400">Day {e.day}</span>
+                    <div className="min-w-0">
+                      {e.remark && (
+                        <p className="truncate text-sm text-gray-700 dark:text-gray-300">
+                          {e.remark}
+                        </p>
+                      )}
+                      <p className="text-xs text-gray-400">
+                        {e.day} {getMonthName(currentMonth).slice(0, 3)} {currentYear}
+                      </p>
+                    </div>
                   </div>
-                  <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                  <span className="ml-3 shrink-0 text-sm font-semibold text-gray-900 dark:text-white">
                     {formatCurrency(e.amount)}
                   </span>
                 </div>

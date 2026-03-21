@@ -138,6 +138,32 @@ export function getTopCategory(
 }
 
 /**
+ * Days remaining in month (including today)
+ */
+export function getDaysRemaining(month: number, year: number): number {
+  const now = new Date();
+  const currentMonth = now.getMonth() + 1;
+  const currentYear = now.getFullYear();
+  const daysInMonth = new Date(year, month, 0).getDate();
+
+  if (year < currentYear || (year === currentYear && month < currentMonth)) {
+    return 0; // Past month
+  }
+  if (year === currentYear && month === currentMonth) {
+    return Math.max(0, daysInMonth - now.getDate());
+  }
+  return daysInMonth; // Future month
+}
+
+/**
+ * Daily pace needed to stay under budget
+ */
+export function getPaceToStayUnder(remaining: number, daysRemaining: number): number {
+  if (daysRemaining <= 0) return 0;
+  return Math.max(0, Math.round(remaining / daysRemaining));
+}
+
+/**
  * Elapsed days in month (for avg/day calculation)
  */
 export function getElapsedDays(month: number, year: number): number {

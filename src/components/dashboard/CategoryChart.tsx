@@ -14,9 +14,10 @@ import type { CategoryTotal } from "@/types";
 
 interface CategoryChartProps {
   categoryTotals: CategoryTotal[];
+  onCategoryClick?: (categorySlug: string) => void;
 }
 
-export function CategoryChart({ categoryTotals }: CategoryChartProps) {
+export function CategoryChart({ categoryTotals, onCategoryClick }: CategoryChartProps) {
   const { settings } = useSettings();
   const catMap = buildCategoryMap(settings.customCategories);
   const data = categoryTotals
@@ -25,6 +26,7 @@ export function CategoryChart({ categoryTotals }: CategoryChartProps) {
       name: catMap[c.category]?.label || c.category,
       value: c.total,
       color: catMap[c.category]?.color || "#6B7280",
+      slug: c.category,
     }));
 
   if (data.length === 0) {
@@ -48,6 +50,8 @@ export function CategoryChart({ categoryTotals }: CategoryChartProps) {
             paddingAngle={3}
             dataKey="value"
             stroke="none"
+            style={{ cursor: onCategoryClick ? "pointer" : undefined }}
+            onClick={(_, idx) => onCategoryClick?.(data[idx].slug)}
           >
             {data.map((entry, idx) => (
               <Cell key={idx} fill={entry.color} />
@@ -67,7 +71,7 @@ export function CategoryChart({ categoryTotals }: CategoryChartProps) {
   );
 }
 
-export function CategoryLegend({ categoryTotals }: CategoryChartProps) {
+export function CategoryLegend({ categoryTotals, onCategoryClick }: CategoryChartProps) {
   const { settings } = useSettings();
   const catMap = buildCategoryMap(settings.customCategories);
   const nonZero = categoryTotals.filter((c) => c.total > 0);
@@ -81,13 +85,21 @@ export function CategoryLegend({ categoryTotals }: CategoryChartProps) {
           const meta = catMap[c.category];
           const pct = total > 0 ? Math.round((c.total / total) * 100) : 0;
           return (
-            <div key={c.category} className="flex items-center gap-3">
+            <div
+              key={c.category}
+              className="flex items-center gap-3 rounded-lg px-1 py-0.5 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800/50"
+              style={{ cursor: onCategoryClick ? "pointer" : undefined }}
+              onClick={() => onCategoryClick?.(c.category)}
+              role={onCategoryClick ? "button" : undefined}
+              tabIndex={onCategoryClick ? 0 : undefined}
+              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") onCategoryClick?.(c.category); }}
+            >
               <div
                 className="h-3 w-3 rounded-full flex-shrink-0"
                 style={{ backgroundColor: meta?.color }}
               />
               <span className="flex-1 text-sm text-gray-700 dark:text-gray-300">
-                {meta?.label}
+                {meta?.label || c.category}
               </span>
               <span className="text-sm font-medium text-gray-900 dark:text-white">
                 {formatCurrency(c.total)}

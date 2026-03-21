@@ -10,6 +10,8 @@ import {
   getBudgetUsedPercent,
   getTopCategory,
   getElapsedDays,
+  getDaysRemaining,
+  getPaceToStayUnder,
 } from "@/lib/calculations";
 import { getDaysInMonth } from "@/lib/utils";
 import type { Expense, CategoryId, DailyTotal, CategoryTotal } from "@/types";
@@ -59,6 +61,13 @@ export function useCalculations(
     [expenses, categories, month, year]
   );
 
+  const daysRemaining = useMemo(() => getDaysRemaining(month, year), [month, year]);
+
+  const paceToStayUnder = useMemo(
+    () => getPaceToStayUnder(remaining, daysRemaining),
+    [remaining, daysRemaining]
+  );
+
   return {
     monthlyTotal,
     remaining,
@@ -69,5 +78,7 @@ export function useCalculations(
     topCategory,
     daysInMonth,
     elapsedDays,
+    daysRemaining,
+    paceToStayUnder,
   };
 }

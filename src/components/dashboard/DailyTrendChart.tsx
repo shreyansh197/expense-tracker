@@ -14,9 +14,10 @@ import type { DailyTotal } from "@/types";
 
 interface DailyTrendChartProps {
   dailyTotals: DailyTotal[];
+  onBarClick?: (day: number) => void;
 }
 
-export function DailyTrendChart({ dailyTotals }: DailyTrendChartProps) {
+export function DailyTrendChart({ dailyTotals, onBarClick }: DailyTrendChartProps) {
   const hasData = dailyTotals.some((d) => d.total > 0);
 
   if (!hasData) {
@@ -30,7 +31,16 @@ export function DailyTrendChart({ dailyTotals }: DailyTrendChartProps) {
   return (
     <div className="h-[180px] w-full">
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={dailyTotals} barSize={8}>
+        <BarChart
+          data={dailyTotals}
+          barSize={8}
+          onClick={(state) => {
+            if (state?.activePayload?.[0]?.payload && onBarClick) {
+              onBarClick(state.activePayload[0].payload.day);
+            }
+          }}
+          style={{ cursor: onBarClick ? "pointer" : undefined }}
+        >
           <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb40" />
           <XAxis
             dataKey="day"
