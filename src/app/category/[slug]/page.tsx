@@ -44,6 +44,9 @@ export default function CategoryPage({ params }: { params: Promise<{ slug: strin
   const categoryTotal = getCategoryTotal(expenses, slug, month, year);
   const pctOfTotal = monthlyTotal > 0 ? Math.round((categoryTotal / monthlyTotal) * 100) : 0;
   const expenseCount = categoryExpenses.length;
+  const categoryBudget = (settings.categoryBudgets || {})[slug];
+  const budgetPct = categoryBudget ? Math.round((categoryTotal / categoryBudget) * 100) : 0;
+  const isOverBudget = categoryBudget && categoryTotal > categoryBudget;
 
   // Build last 6 months trend for this category
   const trendData: { label: string; total: number; month: number; year: number }[] = [];
@@ -88,9 +91,22 @@ export default function CategoryPage({ params }: { params: Promise<{ slug: strin
         <div className="grid grid-cols-3 gap-3">
           <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900">
             <p className="text-xs text-gray-500 dark:text-gray-400">Spent</p>
-            <p className="mt-1 text-xl font-bold text-gray-900 dark:text-white">
+            <p className={`mt-1 text-xl font-bold ${isOverBudget ? "text-red-500" : "text-gray-900 dark:text-white"}`}>
               {formatCurrency(categoryTotal)}
             </p>
+            {categoryBudget ? (
+              <div className="mt-2">
+                <div className="h-1.5 rounded-full bg-gray-100 dark:bg-gray-800">
+                  <div
+                    className={`h-1.5 rounded-full ${isOverBudget ? "bg-red-500" : budgetPct >= 80 ? "bg-amber-500" : "bg-emerald-500"}`}
+                    style={{ width: `${Math.min(budgetPct, 100)}%` }}
+                  />
+                </div>
+                <p className="mt-1 text-[10px] text-gray-400">
+                  {budgetPct}% of {formatCurrency(categoryBudget)} budget
+                </p>
+              </div>
+            ) : null}
           </div>
           <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900">
             <p className="text-xs text-gray-500 dark:text-gray-400">% of Total</p>

@@ -6,6 +6,8 @@ export interface Expense {
   month: number;
   year: number;
   remark?: string;
+  isRecurring?: boolean;
+  recurringId?: string;
   createdAt: number;
   updatedAt: number;
   deletedAt: number | null;
@@ -20,6 +22,9 @@ export interface UserSettings {
   categories: CategoryId[];
   customCategories: CategoryMeta[];
   hiddenDefaults: CategoryId[];
+  categoryBudgets: Record<CategoryId, number>;
+  recurringExpenses: RecurringExpense[];
+  savedFilters: SavedFilter[];
   createdAt: number;
   updatedAt: number;
 }
@@ -32,6 +37,28 @@ export interface CategoryMeta {
   color: string;
   bgColor: string;
   icon: string;
+}
+
+export type RecurringFrequency = "monthly";
+
+export interface RecurringExpense {
+  id: string;
+  category: CategoryId;
+  amount: number;
+  day: number;
+  remark: string;
+  frequency: RecurringFrequency;
+  active: boolean;
+  createdAt: number;
+}
+
+export interface SavedFilter {
+  id: string;
+  name: string;
+  categories: CategoryId[];
+  searchQuery: string;
+  amountMin?: number;
+  amountMax?: number;
 }
 
 export interface MonthYear {

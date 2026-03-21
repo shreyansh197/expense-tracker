@@ -5,7 +5,7 @@ import { DEFAULT_SALARY } from "@/lib/constants";
 import { DEFAULT_CATEGORIES } from "@/lib/categories";
 import { supabase } from "@/lib/supabase";
 import { getSyncCode } from "@/lib/deviceId";
-import type { UserSettings, CategoryMeta } from "@/types";
+import type { UserSettings, CategoryMeta, RecurringExpense, SavedFilter } from "@/types";
 
 const STORAGE_KEY = "expense-tracker-settings";
 
@@ -15,6 +15,9 @@ const DEFAULT_SETTINGS: UserSettings = {
   categories: DEFAULT_CATEGORIES,
   customCategories: [],
   hiddenDefaults: [],
+  categoryBudgets: {},
+  recurringExpenses: [],
+  savedFilters: [],
   createdAt: Date.now(),
   updatedAt: Date.now(),
 };
@@ -36,15 +39,31 @@ function saveLocal(s: UserSettings) {
 async function pushToSupabase(s: UserSettings) {
   const syncCode = getSyncCode();
   if (!syncCode) return;
-  await supabase.from("user_settings").upsert({
+  // Try with new columns first; fall back to legacy columns if they don't exist
+  const { error } = await supabase.from("user_settings").upsert({
     sync_code: syncCode,
     salary: s.salary,
     currency: s.currency,
     categories: s.categories,
     custom_categories: s.customCategories,
     hidden_defaults: s.hiddenDefaults,
+    category_budgets: s.categoryBudgets || {},
+    recurring_expenses: s.recurringExpenses || [],
+    saved_filters: s.savedFilters || [],
     updated_at: new Date(s.updatedAt).toISOString(),
   }, { onConflict: "sync_code" });
+  if (error && error.message?.includes("column")) {
+    // New columns not yet in DB — push without them
+    await supabase.from("user_settings").upsert({
+      sync_code: syncCode,
+      salary: s.salary,
+      currency: s.currency,
+      categories: s.categories,
+      custom_categories: s.customCategories,
+      hidden_defaults: s.hiddenDefaults,
+      updated_at: new Date(s.updatedAt).toISOString(),
+    }, { onConflict: "sync_code" });
+  }
 }
 
 /** Fetch settings from Supabase for a given sync code */
@@ -59,8 +78,11 @@ export async function fetchSettingsFromSupabase(syncCode: string): Promise<UserS
     salary: Number(data.salary),
     currency: data.currency as string,
     categories: data.categories as string[],
-    customCategories: data.custom_categories as CategoryMeta[],
-    hiddenDefaults: data.hidden_defaults as string[],
+    customCategories: (data.custom_categories as CategoryMeta[]) || [],
+    hiddenDefaults: (data.hidden_defaults as string[]) || [],
+    categoryBudgets: (data.category_budgets as Record<string, number>) ?? {},
+    recurringExpenses: (data.recurring_expenses as RecurringExpense[]) ?? [],
+    savedFilters: (data.saved_filters as SavedFilter[]) ?? [],
     createdAt: Date.now(),
     updatedAt: new Date(data.updated_at as string).getTime(),
   };
@@ -117,8 +139,11 @@ export function useSettings() {
             salary: Number(d.salary),
             currency: d.currency as string,
             categories: d.categories as string[],
-            customCategories: d.custom_categories as CategoryMeta[],
-            hiddenDefaults: d.hidden_defaults as string[],
+            customCategories: (d.custom_categories as CategoryMeta[]) || [],
+            hiddenDefaults: (d.hidden_defaults as string[]) || [],
+            categoryBudgets: (d.category_budgets as Record<string, number>) ?? {},
+            recurringExpenses: (d.recurring_expenses as RecurringExpense[]) ?? [],
+            savedFilters: (d.saved_filters as SavedFilter[]) ?? [],
             createdAt: Date.now(),
             updatedAt: new Date(d.updated_at as string).getTime(),
           };
@@ -137,7 +162,7 @@ export function useSettings() {
   }, []);
 
   const updateSettings = useCallback(
-    async (updates: Partial<Pick<UserSettings, "salary" | "currency" | "categories" | "customCategories" | "hiddenDefaults">>) => {
+    async (updates: Partial<Pick<UserSettings, "salary" | "currency" | "categories" | "customCategories" | "hiddenDefaults" | "categoryBudgets" | "recurringExpenses" | "savedFilters">>) => {
       setSettings((prev) => {
         const next = { ...prev, ...updates, updatedAt: Date.now() };
         saveLocal(next);

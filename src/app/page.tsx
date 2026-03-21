@@ -12,6 +12,7 @@ import { DailyTrendChart } from "@/components/dashboard/DailyTrendChart";
 import { useExpenses } from "@/hooks/useExpenses";
 import { useSettings } from "@/hooks/useSettings";
 import { useCalculations } from "@/hooks/useCalculations";
+import { useRecurringExpenses } from "@/hooks/useRecurringExpenses";
 import { useUIStore } from "@/stores/uiStore";
 import { formatCurrency, getMonthName } from "@/lib/utils";
 import { CategoryBadge } from "@/components/expenses/CategoryChips";
@@ -21,6 +22,9 @@ export default function DashboardPage() {
   const { currentMonth, currentYear } = useUIStore();
   const { expenses, syncStatus } = useExpenses(currentMonth, currentYear);
   const { settings } = useSettings();
+
+  // Auto-apply recurring expenses for current month
+  useRecurringExpenses(currentMonth, currentYear);
 
   const {
     monthlyTotal,
@@ -78,7 +82,7 @@ export default function DashboardPage() {
             </h3>
             <CategoryChart categoryTotals={categoryTotals} onCategoryClick={handleCategoryClick} />
             <div className="mt-3">
-              <CategoryLegend categoryTotals={categoryTotals} onCategoryClick={handleCategoryClick} />
+              <CategoryLegend categoryTotals={categoryTotals} onCategoryClick={handleCategoryClick} categoryBudgets={settings.categoryBudgets} />
             </div>
           </div>
 

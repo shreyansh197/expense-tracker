@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { Trash2, Edit3 } from "lucide-react";
+import { Trash2, Edit3, Repeat } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 import { CategoryBadge } from "./CategoryChips";
 import { useUIStore } from "@/stores/uiStore";
@@ -13,6 +13,9 @@ interface ExpenseListProps {
   onDelete: (id: string) => void;
   activeCategories: CategoryId[];
   searchQuery: string;
+  amountMin?: number;
+  amountMax?: number;
+  sortBy?: string;
 }
 
 interface DayGroup {
@@ -26,6 +29,9 @@ export function ExpenseList({
   onDelete,
   activeCategories,
   searchQuery,
+  amountMin,
+  amountMax,
+  sortBy = "day-desc",
 }: ExpenseListProps) {
   const openEditForm = useUIStore((s) => s.openEditForm);
   const { toast } = useToast();
@@ -45,18 +51,59 @@ export function ExpenseList({
     }
 
     if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
-      result = result.filter(
-        (e) =>
-          e.category.toLowerCase().includes(q) ||
-          (e.remark && e.remark.toLowerCase().includes(q))
-      );
+      const q = searchQuery.trim().toLowerCase();
+      // Support day:N filter from dashboard drill-down
+      const dayMatch = q.match(/^day:(\d+)$/);
+      if (dayMatch) {
+        const targetDay = parseInt(dayMatch[1], 10);
+        result = result.filter((e) => e.day === targetDay);
+      } else {
+        result = result.filter(
+          (e) =>
+            e.category.toLowerCase().includes(q) ||
+            (e.remark && e.remark.toLowerCase().includes(q))
+        );
+      }
+    }
+
+    // Amount range filters
+    if (amountMin !== undefined && !isNaN(amountMin)) {
+      result = result.filter((e) => e.amount >= amountMin);
+    }
+    if (amountMax !== undefined && !isNaN(amountMax)) {
+      result = result.filter((e) => e.amount <= amountMax);
     }
 
     return result;
-  }, [expenses, activeCategories, searchQuery]);
+  }, [expenses, activeCategories, searchQuery, amountMin, amountMax]);
 
   const grouped = useMemo(() => {
+    // For amount-based sorting, flatten all into one group
+    if (sortBy === "amount-desc" || sortBy === "amount-asc") {
+      const sorted = [...filtered].sort((a, b) =>
+        sortBy === "amount-desc" ? b.amount - a.amount : a.amount - b.amount
+      );
+      // Group by day after sorting
+      const map = new Map<number, Expense[]>();
+      for (const e of sorted) {
+        const arr = map.get(e.day) || [];
+        arr.push(e);
+        map.set(e.day, arr);
+      }
+      const groups: DayGroup[] = [];
+      for (const [day, exps] of map) {
+        groups.push({
+          day,
+          total: exps.reduce((s, e) => s + e.amount, 0),
+          expenses: exps,
+        });
+      }
+      return sortBy === "amount-desc"
+        ? groups.sort((a, b) => b.total - a.total)
+        : groups.sort((a, b) => a.total - b.total);
+    }
+
+    // Default: group by day, sort by day
     const map = new Map<number, Expense[]>();
     for (const e of filtered) {
       const arr = map.get(e.day) || [];
@@ -73,8 +120,10 @@ export function ExpenseList({
       });
     }
 
-    return groups.sort((a, b) => b.day - a.day);
-  }, [filtered]);
+    return sortBy === "day-asc"
+      ? groups.sort((a, b) => a.day - b.day)
+      : groups.sort((a, b) => b.day - a.day);
+  }, [filtered, sortBy]);
 
   if (grouped.length === 0) {
     return (
@@ -109,6 +158,11 @@ export function ExpenseList({
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <CategoryBadge category={expense.category} />
+                    {expense.isRecurring && (
+                      <span className="text-blue-400" aria-label="Recurring">
+                        <Repeat size={10} />
+                      </span>
+                    )}
                     {expense.remark && (
                       <span className="truncate text-xs text-gray-400">
                         {expense.remark}

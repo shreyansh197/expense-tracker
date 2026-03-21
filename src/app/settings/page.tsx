@@ -9,13 +9,16 @@ import { useExpenses } from "@/hooks/useExpenses";
 import { useUIStore } from "@/stores/uiStore";
 import { useTheme } from "@/components/providers/ThemeProvider";
 import { getMonthName } from "@/lib/utils";
-import { Download, Moon, Sun, Monitor, Plus, Trash2, Copy, Check, UserPlus, AlertTriangle } from "lucide-react";
+import { Download, Upload, Moon, Sun, Monitor, Plus, Trash2, Copy, Check, UserPlus, AlertTriangle } from "lucide-react";
 import type { Expense } from "@/types";
 import { CATEGORY_MAP, buildCategoryMap, getAllCategories, PRESET_COLORS, DEFAULT_CATEGORIES_META } from "@/lib/categories";
 import { InstallButton } from "@/components/pwa/InstallButton";
 import { useToast } from "@/components/ui/Toast";
 import { getSyncCode, clearSyncCode } from "@/lib/deviceId";
 import { supabase } from "@/lib/supabase";
+import { CategoryBudgetManager } from "@/components/settings/CategoryBudgetManager";
+import { RecurringManager } from "@/components/settings/RecurringManager";
+import { CSVImport } from "@/components/settings/CSVImport";
 
 export default function SettingsPage() {
   const { settings, updateSettings, addCategory, deleteCategory, resetSettings } = useSettings();
@@ -52,14 +55,16 @@ export default function SettingsPage() {
   const handleExportCSV = () => {
     if (expenses.length === 0) return;
     const catMap = buildCategoryMap(settings.customCategories);
-    const headers = ["Day", "Category", "Amount", "Remark"];
+    const headers = ["Day", "Month", "Year", "Category", "Amount", "Remark"];
     const rows = expenses.map((e: Expense) => [
       e.day,
-      catMap[e.category]?.label || e.category,
+      currentMonth,
+      currentYear,
+      `"${(catMap[e.category]?.label || e.category).replace(/"/g, '""')}"`,
       e.amount,
-      e.remark || "",
+      `"${(e.remark || "").replace(/"/g, '""')}"`,
     ]);
-    const csv = [headers, ...rows].map((r) => r.join(",")).join("\n");
+    const csv = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
     const blob = new Blob([csv], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -288,6 +293,22 @@ export default function SettingsPage() {
           )}
         </section>
 
+        {/* Category Budgets */}
+        <section className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+          <h2 className="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
+            Category Budgets
+          </h2>
+          <CategoryBudgetManager />
+        </section>
+
+        {/* Recurring Expenses */}
+        <section className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+          <h2 className="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
+            Recurring Expenses
+          </h2>
+          <RecurringManager />
+        </section>
+
         {/* Theme */}
         <section className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900">
           <h2 className="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
@@ -353,6 +374,14 @@ export default function SettingsPage() {
               JSON
             </button>
           </div>
+        </section>
+
+        {/* Import */}
+        <section className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+          <h2 className="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
+            Import CSV ({getMonthName(currentMonth)} {currentYear})
+          </h2>
+          <CSVImport />
         </section>
 
         {/* Start Fresh */}

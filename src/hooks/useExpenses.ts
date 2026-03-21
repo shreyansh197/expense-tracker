@@ -42,6 +42,8 @@ export function useExpenses(month: number, year: number) {
           month: row.month,
           year: row.year,
           remark: row.remark ?? undefined,
+          isRecurring: row.is_recurring ?? false,
+          recurringId: row.recurring_id ?? undefined,
           createdAt: new Date(row.created_at).getTime(),
           updatedAt: new Date(row.updated_at).getTime(),
           deletedAt: null,
@@ -82,7 +84,7 @@ export function useExpenses(month: number, year: number) {
   }, [month, year, fetchExpenses]);
 
   const addExpense = async (input: ExpenseInput) => {
-    const { error } = await supabase.from("expenses").insert({
+    const insertData: Record<string, unknown> = {
       category: input.category,
       amount: input.amount,
       day: input.day,
@@ -90,7 +92,10 @@ export function useExpenses(month: number, year: number) {
       year: input.year,
       remark: input.remark || null,
       device_id: getSyncCode(),
-    });
+    };
+    if (input.isRecurring) insertData.is_recurring = true;
+    if (input.recurringId) insertData.recurring_id = input.recurringId;
+    const { error } = await supabase.from("expenses").insert(insertData);
     if (error) throw error;
     notifyExpenseChange();
   };
