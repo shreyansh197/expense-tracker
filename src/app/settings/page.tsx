@@ -19,6 +19,7 @@ import { getSyncCode, clearSyncCode } from "@/lib/deviceId";
 import { supabase } from "@/lib/supabase";
 import { CategoryBudgetManager } from "@/components/settings/CategoryBudgetManager";
 import { RecurringManager } from "@/components/settings/RecurringManager";
+import { GoalsManager } from "@/components/settings/GoalsManager";
 import { CSVImport } from "@/components/settings/CSVImport";
 
 export default function SettingsPage() {
@@ -309,6 +310,44 @@ export default function SettingsPage() {
             Recurring Expenses
           </h2>
           <RecurringManager />
+        </section>
+
+        {/* Budget Rollover */}
+        <section className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                Budget Rollover
+              </h2>
+              <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
+                Carry unspent budget to the next month automatically
+              </p>
+            </div>
+            <button
+              role="switch"
+              aria-checked={settings.rolloverEnabled ?? false}
+              onClick={() => updateSettings({ rolloverEnabled: !settings.rolloverEnabled })}
+              className={`relative h-6 w-11 rounded-full transition-colors ${
+                settings.rolloverEnabled
+                  ? "bg-blue-600"
+                  : "bg-gray-300 dark:bg-gray-600"
+              }`}
+            >
+              <span
+                className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-transform ${
+                  settings.rolloverEnabled ? "translate-x-5" : ""
+                }`}
+              />
+            </button>
+          </div>
+        </section>
+
+        {/* Savings Goals */}
+        <section className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+          <h2 className="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
+            Savings Goals
+          </h2>
+          <GoalsManager />
         </section>
 
         {/* Theme */}

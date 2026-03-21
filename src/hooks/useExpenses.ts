@@ -88,6 +88,25 @@ export function useExpenses(month: number, year: number) {
   }, [month, year, fetchExpenses]);
 
   const addExpense = async (input: ExpenseInput) => {
+    const tempId = `temp-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+    const optimistic: Expense = {
+      id: tempId,
+      category: input.category as CategoryId,
+      amount: input.amount,
+      day: input.day,
+      month: input.month,
+      year: input.year,
+      remark: input.remark,
+      isRecurring: input.isRecurring ?? false,
+      recurringId: input.recurringId,
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+      deletedAt: null,
+      deviceId: "",
+    };
+    // Optimistic insert
+    setExpenses((prev) => [...prev, optimistic]);
+
     const insertData: Record<string, unknown> = {
       category: input.category,
       amount: input.amount,
@@ -100,7 +119,11 @@ export function useExpenses(month: number, year: number) {
     if (input.isRecurring) insertData.is_recurring = true;
     if (input.recurringId) insertData.recurring_id = input.recurringId;
     const { error } = await supabase.from("expenses").insert(insertData);
-    if (error) throw error;
+    if (error) {
+      // Rollback optimistic insert
+      setExpenses((prev) => prev.filter((e) => e.id !== tempId));
+      throw error;
+    }
     notifyExpenseChange();
   };
 
@@ -140,6 +163,24 @@ export function useExpenses(month: number, year: number) {
     notifyExpenseChange();
   };
 
+  const deleteExpenses = async (ids: string[]) => {
+    // Optimistic removal
+    const idSet = new Set(ids);
+    setExpenses((prev) => prev.filter((e) => !idSet.has(e.id)));
+    const now = new Date().toISOString();
+    for (const id of ids) {
+      const { error } = await supabase
+        .from("expenses")
+        .update({ deleted_at: now, updated_at: now })
+        .eq("id", id);
+      if (error) {
+        fetchExpenses();
+        throw error;
+      }
+    }
+    notifyExpenseChange();
+  };
+
   return {
     expenses,
     allExpenses: expenses,
@@ -148,5 +189,6 @@ export function useExpenses(month: number, year: number) {
     addExpense,
     updateExpense,
     deleteExpense,
+    deleteExpenses,
   };
 }

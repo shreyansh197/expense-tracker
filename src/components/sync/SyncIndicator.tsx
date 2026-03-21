@@ -2,6 +2,7 @@
 
 import { Wifi, WifiOff, RefreshCw, AlertCircle } from "lucide-react";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
+import { getPendingCount } from "@/lib/offlineQueue";
 import type { SyncStatus } from "@/types";
 import { cn } from "@/lib/utils";
 
@@ -11,6 +12,7 @@ interface SyncIndicatorProps {
 
 export function SyncIndicator({ syncStatus }: SyncIndicatorProps) {
   const isOnline = useOnlineStatus();
+  const pendingCount = getPendingCount();
 
   const effective = isOnline ? syncStatus : "offline";
 
@@ -30,6 +32,11 @@ export function SyncIndicator({ syncStatus }: SyncIndicatorProps) {
       {effective === "offline" && (
         <div className="flex items-center gap-1 text-gray-400" title="Offline">
           <WifiOff size={14} />
+          {pendingCount > 0 && (
+            <span className="ml-0.5 rounded-full bg-amber-500 px-1.5 py-0.5 text-[10px] font-bold text-white">
+              {pendingCount}
+            </span>
+          )}
         </div>
       )}
       {effective === "error" && (

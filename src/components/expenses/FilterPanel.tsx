@@ -18,6 +18,10 @@ interface FilterPanelProps {
   amountMax: string;
   onAmountMinChange: (v: string) => void;
   onAmountMaxChange: (v: string) => void;
+  dayMin: string;
+  dayMax: string;
+  onDayMinChange: (v: string) => void;
+  onDayMaxChange: (v: string) => void;
   onClear: () => void;
 }
 
@@ -26,6 +30,10 @@ export function FilterPanel({
   amountMax,
   onAmountMinChange,
   onAmountMaxChange,
+  dayMin,
+  dayMax,
+  onDayMinChange,
+  onDayMaxChange,
   onClear,
 }: FilterPanelProps) {
   const [open, setOpen] = useState(false);
@@ -36,7 +44,7 @@ export function FilterPanel({
   const [showSaveInput, setShowSaveInput] = useState(false);
 
   const savedFilters = settings.savedFilters || [];
-  const hasActiveFilters = amountMin !== "" || amountMax !== "" || activeCategories.length > 0 || searchQuery.trim() !== "";
+  const hasActiveFilters = amountMin !== "" || amountMax !== "" || dayMin !== "" || dayMax !== "" || activeCategories.length > 0 || searchQuery.trim() !== "";
 
   const handleSaveFilter = () => {
     const name = saveName.trim();
@@ -132,6 +140,34 @@ export function FilterPanel({
                   className="w-full rounded border border-gray-200 bg-white py-2 pl-6 pr-2 text-xs text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white"
                 />
               </div>
+            </div>
+          </div>
+
+          {/* Day range */}
+          <div className="mb-4">
+            <label className="mb-2 block text-xs font-medium text-gray-500 uppercase dark:text-gray-400">
+              Day Range
+            </label>
+            <div className="flex items-center gap-2">
+              <input
+                type="number"
+                min="1"
+                max="31"
+                placeholder="From"
+                value={dayMin}
+                onChange={(e) => onDayMinChange(e.target.value)}
+                className="w-full flex-1 rounded border border-gray-200 bg-white py-2 px-2 text-xs text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+              />
+              <span className="text-xs text-gray-400">to</span>
+              <input
+                type="number"
+                min="1"
+                max="31"
+                placeholder="To"
+                value={dayMax}
+                onChange={(e) => onDayMaxChange(e.target.value)}
+                className="w-full flex-1 rounded border border-gray-200 bg-white py-2 px-2 text-xs text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+              />
             </div>
           </div>
 

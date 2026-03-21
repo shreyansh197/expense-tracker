@@ -24,10 +24,23 @@ export function useCalculations(
   categories: CategoryId[],
   salary: number,
   month: number,
-  year: number
+  year: number,
+  rolloverEnabled?: boolean,
+  rolloverHistory?: Record<string, number>
 ) {
   const daysInMonth = useMemo(() => getDaysInMonth(month, year), [month, year]);
   const elapsedDays = useMemo(() => getElapsedDays(month, year), [month, year]);
+
+  // Calculate effective budget with rollover
+  const effectiveBudget = useMemo(() => {
+    if (!rolloverEnabled || !rolloverHistory) return salary;
+    let pm = month - 1;
+    let py = year;
+    if (pm <= 0) { pm = 12; py -= 1; }
+    const key = `${py}-${String(pm).padStart(2, "0")}`;
+    const rollover = rolloverHistory[key] ?? 0;
+    return salary + Math.max(0, rollover);
+  }, [salary, rolloverEnabled, rolloverHistory, month, year]);
 
   const monthlyTotal = useMemo(
     () => getMonthlyTotal(expenses, month, year),
@@ -35,13 +48,13 @@ export function useCalculations(
   );
 
   const remaining = useMemo(
-    () => getMonthlySaving(salary, monthlyTotal),
-    [salary, monthlyTotal]
+    () => getMonthlySaving(effectiveBudget, monthlyTotal),
+    [effectiveBudget, monthlyTotal]
   );
 
   const budgetUsedPercent = useMemo(
-    () => getBudgetUsedPercent(monthlyTotal, salary),
-    [monthlyTotal, salary]
+    () => getBudgetUsedPercent(monthlyTotal, effectiveBudget),
+    [monthlyTotal, effectiveBudget]
   );
 
   const avgDaily = useMemo(
@@ -77,8 +90,8 @@ export function useCalculations(
   );
 
   const forecast: Forecast = useMemo(
-    () => getEomForecast(monthlyTotal, salary, elapsedDays, daysInMonth),
-    [monthlyTotal, salary, elapsedDays, daysInMonth]
+    () => getEomForecast(monthlyTotal, effectiveBudget, elapsedDays, daysInMonth),
+    [monthlyTotal, effectiveBudget, elapsedDays, daysInMonth]
   );
 
   const anomalies: AnomalyResult[] = useMemo(
@@ -101,5 +114,6 @@ export function useCalculations(
     paceToStayUnder,
     forecast,
     anomalies,
+    effectiveBudget,
   };
 }

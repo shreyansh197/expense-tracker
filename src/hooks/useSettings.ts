@@ -5,7 +5,7 @@ import { DEFAULT_SALARY } from "@/lib/constants";
 import { DEFAULT_CATEGORIES } from "@/lib/categories";
 import { supabase } from "@/lib/supabase";
 import { getSyncCode } from "@/lib/deviceId";
-import type { UserSettings, CategoryMeta, RecurringExpense, SavedFilter } from "@/types";
+import type { UserSettings, CategoryMeta, RecurringExpense, SavedFilter, Goal } from "@/types";
 
 const STORAGE_KEY = "expense-tracker-settings";
 
@@ -18,6 +18,9 @@ const DEFAULT_SETTINGS: UserSettings = {
   categoryBudgets: {},
   recurringExpenses: [],
   savedFilters: [],
+  goals: [],
+  rolloverEnabled: false,
+  rolloverHistory: {},
   createdAt: Date.now(),
   updatedAt: Date.now(),
 };
@@ -50,6 +53,9 @@ async function pushToSupabase(s: UserSettings) {
     category_budgets: s.categoryBudgets || {},
     recurring_expenses: s.recurringExpenses || [],
     saved_filters: s.savedFilters || [],
+    goals: s.goals || [],
+    rollover_enabled: s.rolloverEnabled ?? false,
+    rollover_history: s.rolloverHistory || {},
     updated_at: new Date(s.updatedAt).toISOString(),
   }, { onConflict: "sync_code" });
   if (error && error.message?.includes("column")) {
@@ -83,6 +89,9 @@ export async function fetchSettingsFromSupabase(syncCode: string): Promise<UserS
     categoryBudgets: (data.category_budgets as Record<string, number>) ?? {},
     recurringExpenses: (data.recurring_expenses as RecurringExpense[]) ?? [],
     savedFilters: (data.saved_filters as SavedFilter[]) ?? [],
+    goals: (data.goals as Goal[]) ?? [],
+    rolloverEnabled: (data.rollover_enabled as boolean) ?? false,
+    rolloverHistory: (data.rollover_history as Record<string, number>) ?? {},
     createdAt: Date.now(),
     updatedAt: new Date(data.updated_at as string).getTime(),
   };
@@ -144,6 +153,9 @@ export function useSettings() {
             categoryBudgets: (d.category_budgets as Record<string, number>) ?? {},
             recurringExpenses: (d.recurring_expenses as RecurringExpense[]) ?? [],
             savedFilters: (d.saved_filters as SavedFilter[]) ?? [],
+            goals: (d.goals as Goal[]) ?? [],
+            rolloverEnabled: (d.rollover_enabled as boolean) ?? false,
+            rolloverHistory: (d.rollover_history as Record<string, number>) ?? {},
             createdAt: Date.now(),
             updatedAt: new Date(d.updated_at as string).getTime(),
           };
@@ -162,7 +174,7 @@ export function useSettings() {
   }, []);
 
   const updateSettings = useCallback(
-    async (updates: Partial<Pick<UserSettings, "salary" | "currency" | "categories" | "customCategories" | "hiddenDefaults" | "categoryBudgets" | "recurringExpenses" | "savedFilters">>) => {
+    async (updates: Partial<Pick<UserSettings, "salary" | "currency" | "categories" | "customCategories" | "hiddenDefaults" | "categoryBudgets" | "recurringExpenses" | "savedFilters" | "goals" | "rolloverEnabled" | "rolloverHistory">>) => {
       setSettings((prev) => {
         const next = { ...prev, ...updates, updatedAt: Date.now() };
         saveLocal(next);

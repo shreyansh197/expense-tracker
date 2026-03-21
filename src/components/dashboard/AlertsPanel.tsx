@@ -126,7 +126,7 @@ export function AlertsPanel({
   alerts.sort((a, b) => severity[a.severity] - severity[b.severity]);
 
   return (
-    <div className="space-y-2" role="alert" aria-label="Budget alerts">
+    <div className="space-y-2" role="alert" aria-live="polite" aria-label="Budget alerts">
       {alerts.some((a) => a.id.startsWith("anomaly-")) && (
         <div className="flex items-center gap-1.5 mb-1">
           <InfoTooltip title="Anomaly Detection (MAD)">

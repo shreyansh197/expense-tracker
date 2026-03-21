@@ -10,6 +10,8 @@ import { KpiCards } from "@/components/dashboard/KpiCards";
 import { CategoryChart, CategoryLegend } from "@/components/dashboard/CategoryChart";
 import { DailyTrendChart } from "@/components/dashboard/DailyTrendChart";
 import { AlertsPanel } from "@/components/dashboard/AlertsPanel";
+import { SubscriptionsSummary } from "@/components/dashboard/SubscriptionsSummary";
+import { SkeletonKpiCards, SkeletonChart } from "@/components/ui/Skeleton";
 import { useExpenses } from "@/hooks/useExpenses";
 import { useSettings } from "@/hooks/useSettings";
 import { useCalculations } from "@/hooks/useCalculations";
@@ -17,11 +19,12 @@ import { useRecurringExpenses } from "@/hooks/useRecurringExpenses";
 import { useUIStore } from "@/stores/uiStore";
 import { formatCurrency, getMonthName } from "@/lib/utils";
 import { CategoryBadge } from "@/components/expenses/CategoryChips";
+import { Repeat, Receipt, PlusCircle } from "lucide-react";
 
 export default function DashboardPage() {
   const router = useRouter();
   const { currentMonth, currentYear } = useUIStore();
-  const { expenses, syncStatus } = useExpenses(currentMonth, currentYear);
+  const { expenses, loading, syncStatus } = useExpenses(currentMonth, currentYear);
   const { settings } = useSettings();
 
   // Auto-apply recurring expenses for current month
@@ -40,7 +43,16 @@ export default function DashboardPage() {
     paceToStayUnder,
     forecast,
     anomalies,
-  } = useCalculations(expenses, settings.categories, settings.salary, currentMonth, currentYear);
+    effectiveBudget,
+  } = useCalculations(
+    expenses,
+    settings.categories,
+    settings.salary,
+    currentMonth,
+    currentYear,
+    settings.rolloverEnabled,
+    settings.rolloverHistory
+  );
 
   const recentExpenses = [...expenses]
     .sort((a, b) => b.day - a.day || b.createdAt - a.createdAt)
@@ -67,18 +79,31 @@ export default function DashboardPage() {
         </div>
 
         {/* KPI Cards */}
-        <KpiCards
-          monthlyTotal={monthlyTotal}
-          remaining={remaining}
-          salary={settings.salary}
-          avgDaily={avgDaily}
-          budgetUsedPercent={budgetUsedPercent}
-          topCategory={topCategory}
-          daysRemaining={daysRemaining}
-          paceToStayUnder={paceToStayUnder}
-          expenseCount={expenses.length}
-          forecast={forecast}
-        />
+        {loading ? (
+          <SkeletonKpiCards />
+        ) : (
+          <KpiCards
+            monthlyTotal={monthlyTotal}
+            remaining={remaining}
+            salary={effectiveBudget}
+            avgDaily={avgDaily}
+            budgetUsedPercent={budgetUsedPercent}
+            topCategory={topCategory}
+            daysRemaining={daysRemaining}
+            paceToStayUnder={paceToStayUnder}
+            expenseCount={expenses.length}
+            forecast={forecast}
+            rolloverAmount={
+              settings.rolloverEnabled && settings.rolloverHistory
+                ? (() => {
+                    let pm = currentMonth - 1, py = currentYear;
+                    if (pm <= 0) { pm = 12; py -= 1; }
+                    return settings.rolloverHistory[`${py}-${String(pm).padStart(2, "0")}`] ?? 0;
+                  })()
+                : 0
+            }
+          />
+        )}
 
         {/* Alerts */}
         <AlertsPanel
@@ -92,7 +117,16 @@ export default function DashboardPage() {
           onCategoryClick={handleCategoryClick}
         />
 
+        {/* Subscriptions Summary */}
+        <SubscriptionsSummary />
+
         {/* Charts Row */}
+        {loading ? (
+          <div className="grid gap-4 lg:grid-cols-2">
+            <SkeletonChart />
+            <SkeletonChart />
+          </div>
+        ) : (
         <div className="grid gap-4 lg:grid-cols-2">
           <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900">
             <h3 className="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
@@ -120,6 +154,7 @@ export default function DashboardPage() {
             />
           </div>
         </div>
+        )}
 
         {/* Recent Expenses */}
         <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900">
@@ -135,9 +170,16 @@ export default function DashboardPage() {
             </a>
           </div>
           {recentExpenses.length === 0 ? (
-            <p className="py-6 text-center text-sm text-gray-400">
-              No expenses this month
-            </p>
+            <div className="flex flex-col items-center gap-2 py-8 text-gray-400">
+              <Receipt className="h-8 w-8" />
+              <p className="text-sm">No expenses this month</p>
+              <button
+                onClick={() => router.push("/expenses")}
+                className="mt-1 flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400"
+              >
+                <PlusCircle className="h-3.5 w-3.5" /> Add Expense
+              </button>
+            </div>
           ) : (
             <div className="space-y-1">
               {recentExpenses.map((e) => (
@@ -150,6 +192,7 @@ export default function DashboardPage() {
                     <div className="min-w-0">
                       {e.remark && (
                         <p className="truncate text-sm text-gray-700 dark:text-gray-300">
+                          {e.isRecurring && <Repeat className="mr-1 inline h-3 w-3 text-blue-500" />}
                           {e.remark}
                         </p>
                       )}

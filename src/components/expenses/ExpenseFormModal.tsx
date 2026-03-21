@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useCallback } from "react";
+import { useEffect, useCallback, useRef } from "react";
 import { useUIStore } from "@/stores/uiStore";
 import { ExpenseForm } from "./ExpenseForm";
 import { useExpenses } from "@/hooks/useExpenses";
@@ -9,10 +9,28 @@ export function ExpenseFormModal() {
   const { showExpenseForm, editingExpenseId, closeForm, currentMonth, currentYear } =
     useUIStore();
   const { expenses, addExpense, updateExpense } = useExpenses(currentMonth, currentYear);
+  const previousFocusRef = useRef<HTMLElement | null>(null);
 
   const editExpense = editingExpenseId
     ? expenses.find((e) => e.id === editingExpenseId) ?? null
     : null;
+
+  // Save and restore focus
+  useEffect(() => {
+    if (showExpenseForm) {
+      previousFocusRef.current = document.activeElement as HTMLElement;
+      // Focus first input after render
+      requestAnimationFrame(() => {
+        const firstInput = document.querySelector<HTMLElement>(
+          ".expense-form-modal input, .expense-form-modal button"
+        );
+        firstInput?.focus();
+      });
+    } else if (previousFocusRef.current) {
+      previousFocusRef.current.focus();
+      previousFocusRef.current = null;
+    }
+  }, [showExpenseForm]);
 
   // Close on backdrop click or Escape
   const handleBackdropClick = useCallback(
@@ -41,7 +59,7 @@ export function ExpenseFormModal() {
       className="fixed inset-0 z-[60] flex items-end justify-center bg-black/40 backdrop-blur-sm lg:items-center"
       onClick={handleBackdropClick}
     >
-      <div className="w-full max-w-md max-h-[90vh] overflow-y-auto rounded-t-2xl bg-white p-6 shadow-xl dark:bg-gray-900 lg:max-h-none lg:overflow-visible lg:rounded-2xl">
+      <div className="expense-form-modal w-full max-w-md max-h-[90vh] overflow-y-auto rounded-t-2xl bg-white p-6 shadow-xl dark:bg-gray-900 lg:max-h-none lg:overflow-visible lg:rounded-2xl">
         <ExpenseForm
           onSubmit={addExpense}
           onUpdate={updateExpense}

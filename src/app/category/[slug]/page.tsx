@@ -2,7 +2,7 @@
 
 export const dynamic = "force-dynamic";
 
-import { use } from "react";
+import { use, useState, useEffect, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { AppShell } from "@/components/layout/AppShell";
 import { useExpenses } from "@/hooks/useExpenses";
@@ -11,6 +11,9 @@ import { useCalculations } from "@/hooks/useCalculations";
 import { buildCategoryMap } from "@/lib/categories";
 import { formatCurrency, getMonthName } from "@/lib/utils";
 import { getCategoryTotal } from "@/lib/calculations";
+import { supabase } from "@/lib/supabase";
+import { getSyncCode } from "@/lib/deviceId";
+import { SkeletonCategoryDetail } from "@/components/ui/Skeleton";
 import { ArrowLeft } from "lucide-react";
 import {
   BarChart,
@@ -29,7 +32,7 @@ export default function CategoryPage({ params }: { params: Promise<{ slug: strin
   const month = parseInt(searchParams.get("month") || `${new Date().getMonth() + 1}`, 10);
   const year = parseInt(searchParams.get("year") || `${new Date().getFullYear()}`, 10);
 
-  const { expenses } = useExpenses(month, year);
+  const { expenses, loading } = useExpenses(month, year);
   const { settings } = useSettings();
   const { monthlyTotal } = useCalculations(expenses, settings.categories, settings.salary, month, year);
   const catMap = buildCategoryMap(settings.customCategories, settings.hiddenDefaults);
@@ -48,23 +51,68 @@ export default function CategoryPage({ params }: { params: Promise<{ slug: strin
   const budgetPct = categoryBudget ? Math.round((categoryTotal / categoryBudget) * 100) : 0;
   const isOverBudget = categoryBudget && categoryTotal > categoryBudget;
 
-  // Build last 6 months trend for this category
-  const trendData: { label: string; total: number; month: number; year: number }[] = [];
-  for (let i = 5; i >= 0; i--) {
-    let m = month - i;
-    let y = year;
-    while (m <= 0) { m += 12; y -= 1; }
-    trendData.push({
-      label: `${getMonthName(m).slice(0, 3)}`,
-      total: 0,
-      month: m,
-      year: y,
-    });
-  }
+  // Enhanced stats
+  const enhancedStats = useMemo(() => {
+    if (categoryExpenses.length === 0) return null;
+    const amounts = categoryExpenses.map((e) => e.amount);
+    const avg = amounts.reduce((s, v) => s + v, 0) / amounts.length;
+    const largest = categoryExpenses.reduce((a, b) => (a.amount > b.amount ? a : b));
+    const smallest = categoryExpenses.reduce((a, b) => (a.amount < b.amount ? a : b));
+    return { avg, largest, smallest };
+  }, [categoryExpenses]);
 
-  // We only have current month's expenses loaded, fill what we can
-  const currentEntry = trendData.find((t) => t.month === month && t.year === year);
-  if (currentEntry) currentEntry.total = categoryTotal;
+  // Build last 6 months trend — fetch previous 5 months from Supabase
+  const [trendData, setTrendData] = useState<{ label: string; total: number; month: number; year: number }[]>([]);
+
+  useEffect(() => {
+    const months: { m: number; y: number }[] = [];
+    for (let i = 5; i >= 0; i--) {
+      let m = month - i;
+      let y = year;
+      while (m <= 0) { m += 12; y -= 1; }
+      months.push({ m, y });
+    }
+
+    const initial = months.map((my) => ({
+      label: getMonthName(my.m).slice(0, 3),
+      total: 0,
+      month: my.m,
+      year: my.y,
+    }));
+
+    // Fill current month from existing data
+    const currentEntry = initial.find((t) => t.month === month && t.year === year);
+    if (currentEntry) currentEntry.total = categoryTotal;
+
+    // Fetch previous months from Supabase
+    async function fetchTrend() {
+      const syncCode = getSyncCode();
+      if (!syncCode) { setTrendData(initial); return; }
+
+      const prev = months.filter((my) => !(my.m === month && my.y === year));
+      const promises = prev.map(async ({ m, y }) => {
+        const { data } = await supabase
+          .from("expenses")
+          .select("amount")
+          .eq("device_id", syncCode)
+          .eq("month", m)
+          .eq("year", y)
+          .eq("category", slug)
+          .is("deleted_at", null);
+        const total = (data ?? []).reduce((sum: number, r: { amount: number }) => sum + r.amount, 0);
+        return { m, y, total };
+      });
+
+      const results = await Promise.all(promises);
+      for (const r of results) {
+        const entry = initial.find((t) => t.month === r.m && t.year === r.y);
+        if (entry) entry.total = r.total;
+      }
+      setTrendData([...initial]);
+    }
+
+    fetchTrend();
+  }, [month, year, slug, categoryTotal]);
 
   return (
     <AppShell>
@@ -87,6 +135,10 @@ export default function CategoryPage({ params }: { params: Promise<{ slug: strin
           </div>
         </div>
 
+        {loading ? (
+          <SkeletonCategoryDetail />
+        ) : (
+        <>
         {/* KPI row */}
         <div className="grid grid-cols-3 gap-3">
           <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900">
@@ -122,12 +174,42 @@ export default function CategoryPage({ params }: { params: Promise<{ slug: strin
           </div>
         </div>
 
-        {/* Monthly trend chart (current month highlighted) */}
+        {/* Enhanced stats */}
+        {enhancedStats && (
+          <div className="grid grid-cols-3 gap-3">
+            <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+              <p className="text-xs text-gray-500 dark:text-gray-400">Avg Transaction</p>
+              <p className="mt-1 text-lg font-bold text-gray-900 dark:text-white">
+                {formatCurrency(enhancedStats.avg)}
+              </p>
+            </div>
+            <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+              <p className="text-xs text-gray-500 dark:text-gray-400">Largest</p>
+              <p className="mt-1 text-lg font-bold text-gray-900 dark:text-white">
+                {formatCurrency(enhancedStats.largest.amount)}
+              </p>
+              {enhancedStats.largest.remark && (
+                <p className="mt-0.5 truncate text-[10px] text-gray-400">{enhancedStats.largest.remark}</p>
+              )}
+            </div>
+            <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+              <p className="text-xs text-gray-500 dark:text-gray-400">Smallest</p>
+              <p className="mt-1 text-lg font-bold text-gray-900 dark:text-white">
+                {formatCurrency(enhancedStats.smallest.amount)}
+              </p>
+              {enhancedStats.smallest.remark && (
+                <p className="mt-0.5 truncate text-[10px] text-gray-400">{enhancedStats.smallest.remark}</p>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Monthly trend chart */}
         <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900">
           <h3 className="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
             Monthly Trend
           </h3>
-          {categoryTotal > 0 ? (
+          {trendData.some((d) => d.total > 0) ? (
             <div className="h-[160px] w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={trendData} barSize={28}>
@@ -154,11 +236,8 @@ export default function CategoryPage({ params }: { params: Promise<{ slug: strin
               </ResponsiveContainer>
             </div>
           ) : (
-            <p className="py-8 text-center text-sm text-gray-400">No data for this month</p>
+            <p className="py-8 text-center text-sm text-gray-400">No data yet</p>
           )}
-          <p className="mt-2 text-xs text-gray-400 text-center">
-            Full trend data available after multi-month loading is implemented
-          </p>
         </div>
 
         {/* Expenses list */}
@@ -195,6 +274,8 @@ export default function CategoryPage({ params }: { params: Promise<{ slug: strin
             </div>
           )}
         </div>
+        </>
+        )}
       </div>
     </AppShell>
   );

@@ -99,7 +99,7 @@ export function DailyTrendChart({ dailyTotals, stackedDailyTotals, activeCategor
   const tableDays = dailyTotals.filter((d) => d.total > 0);
 
   return (
-    <div>
+    <div role="img" aria-label="Daily spending trend chart">
       <div className="mb-2 flex justify-end gap-1">
         {hasStackedData && (
           <button

@@ -28,6 +28,7 @@ interface KpiCardsProps {
   paceToStayUnder: number;
   expenseCount: number;
   forecast: Forecast;
+  rolloverAmount?: number;
 }
 
 export function KpiCards({
@@ -41,6 +42,7 @@ export function KpiCards({
   paceToStayUnder,
   expenseCount,
   forecast,
+  rolloverAmount = 0,
 }: KpiCardsProps) {
   const isOverspent = remaining < 0;
   const isWarning = !isOverspent && budgetUsedPercent >= BUDGET_WARNING_THRESHOLD;
@@ -139,6 +141,11 @@ export function KpiCards({
         <p className="mt-1 text-xl font-bold text-gray-900 sm:text-2xl dark:text-white">
           {formatCurrency(salary)}
         </p>
+        {rolloverAmount > 0 && (
+          <p className="mt-0.5 text-[10px] text-blue-500">
+            Includes {formatCurrency(rolloverAmount)} rollover
+          </p>
+        )}
         {topCategory && (
           <p className="mt-1 text-xs text-gray-400">
             Top:{" "}

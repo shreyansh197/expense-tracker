@@ -1,21 +1,25 @@
 "use client";
 
-import { useMemo } from "react";
-import { Trash2, Edit3, Repeat } from "lucide-react";
+import { useMemo, useState, useCallback } from "react";
+import { Trash2, Edit3, Repeat, Receipt, PlusCircle, CheckSquare, Square, X } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 import { CategoryBadge } from "./CategoryChips";
 import { useUIStore } from "@/stores/uiStore";
 import { useToast } from "@/components/ui/Toast";
 import { useConfirm } from "@/components/ui/ConfirmDialog";
+import { filterExpenses, groupByDay } from "@/lib/filters";
 import type { Expense, CategoryId } from "@/types";
 
 interface ExpenseListProps {
   expenses: Expense[];
   onDelete: (id: string) => void;
+  onDeleteMany?: (ids: string[]) => void;
   activeCategories: CategoryId[];
   searchQuery: string;
   amountMin?: number;
   amountMax?: number;
+  dayMin?: number;
+  dayMax?: number;
   sortBy?: string;
 }
 
@@ -25,18 +29,26 @@ interface DayGroup {
   expenses: Expense[];
 }
 
+const PAGE_SIZE = 20;
+
 export function ExpenseList({
   expenses,
   onDelete,
+  onDeleteMany,
   activeCategories,
   searchQuery,
   amountMin,
   amountMax,
+  dayMin,
+  dayMax,
   sortBy = "day-desc",
 }: ExpenseListProps) {
   const openEditForm = useUIStore((s) => s.openEditForm);
+  const openAddForm = useUIStore((s) => s.openAddForm);
   const { toast } = useToast();
   const { confirm } = useConfirm();
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   const handleDelete = async (id: string) => {
     const ok = await confirm({
@@ -51,106 +63,165 @@ export function ExpenseList({
     }
   };
 
-  const filtered = useMemo(() => {
-    let result = expenses;
+  const filtered = useMemo(
+    () => filterExpenses(expenses, { activeCategories, searchQuery, amountMin, amountMax, dayMin, dayMax }),
+    [expenses, activeCategories, searchQuery, amountMin, amountMax, dayMin, dayMax]
+  );
 
-    if (activeCategories.length > 0) {
-      result = result.filter((e) => activeCategories.includes(e.category));
-    }
+  const grouped = useMemo(() => groupByDay(filtered, sortBy), [filtered, sortBy]);
 
-    if (searchQuery.trim()) {
-      const q = searchQuery.trim().toLowerCase();
-      // Support day:N filter from dashboard drill-down
-      const dayMatch = q.match(/^day:(\d+)$/);
-      if (dayMatch) {
-        const targetDay = parseInt(dayMatch[1], 10);
-        result = result.filter((e) => e.day === targetDay);
+  // Flatten for pagination count
+  const totalCount = useMemo(() => {
+    let c = 0;
+    for (const g of grouped) c += g.expenses.length;
+    return c;
+  }, [grouped]);
+
+  const hasMore = visibleCount < totalCount;
+
+  // Paginated groups
+  const paginatedGroups = useMemo(() => {
+    let count = 0;
+    const result: DayGroup[] = [];
+    for (const g of grouped) {
+      if (count >= visibleCount) break;
+      const remaining = visibleCount - count;
+      if (g.expenses.length <= remaining) {
+        result.push(g);
+        count += g.expenses.length;
       } else {
-        result = result.filter(
-          (e) =>
-            e.category.toLowerCase().includes(q) ||
-            (e.remark && e.remark.toLowerCase().includes(q))
-        );
-      }
-    }
-
-    // Amount range filters
-    if (amountMin !== undefined && !isNaN(amountMin)) {
-      result = result.filter((e) => e.amount >= amountMin);
-    }
-    if (amountMax !== undefined && !isNaN(amountMax)) {
-      result = result.filter((e) => e.amount <= amountMax);
-    }
-
-    return result;
-  }, [expenses, activeCategories, searchQuery, amountMin, amountMax]);
-
-  const grouped = useMemo(() => {
-    // For amount-based sorting, flatten all into one group
-    if (sortBy === "amount-desc" || sortBy === "amount-asc") {
-      const sorted = [...filtered].sort((a, b) =>
-        sortBy === "amount-desc" ? b.amount - a.amount : a.amount - b.amount
-      );
-      // Group by day after sorting
-      const map = new Map<number, Expense[]>();
-      for (const e of sorted) {
-        const arr = map.get(e.day) || [];
-        arr.push(e);
-        map.set(e.day, arr);
-      }
-      const groups: DayGroup[] = [];
-      for (const [day, exps] of map) {
-        groups.push({
-          day,
-          total: exps.reduce((s, e) => s + e.amount, 0),
-          expenses: exps,
+        result.push({
+          day: g.day,
+          expenses: g.expenses.slice(0, remaining),
+          total: g.expenses.slice(0, remaining).reduce((s, e) => s + e.amount, 0),
         });
+        count += remaining;
       }
-      return sortBy === "amount-desc"
-        ? groups.sort((a, b) => b.total - a.total)
-        : groups.sort((a, b) => a.total - b.total);
     }
+    return result;
+  }, [grouped, visibleCount]);
 
-    // Default: group by day, sort by day
-    const map = new Map<number, Expense[]>();
-    for (const e of filtered) {
-      const arr = map.get(e.day) || [];
-      arr.push(e);
-      map.set(e.day, arr);
-    }
+  // Selection helpers
+  const toggleSelect = useCallback((id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }, []);
 
-    const groups: DayGroup[] = [];
-    for (const [day, exps] of map) {
-      groups.push({
-        day,
-        total: exps.reduce((s, e) => s + e.amount, 0),
-        expenses: exps.sort((a, b) => b.amount - a.amount),
+  const toggleSelectDay = useCallback(
+    (dayExpenses: Expense[]) => {
+      setSelectedIds((prev) => {
+        const next = new Set(prev);
+        const allSelected = dayExpenses.every((e) => next.has(e.id));
+        if (allSelected) {
+          dayExpenses.forEach((e) => next.delete(e.id));
+        } else {
+          dayExpenses.forEach((e) => next.add(e.id));
+        }
+        return next;
       });
-    }
+    },
+    []
+  );
 
-    return sortBy === "day-asc"
-      ? groups.sort((a, b) => a.day - b.day)
-      : groups.sort((a, b) => b.day - a.day);
-  }, [filtered, sortBy]);
+  const handleBulkDelete = async () => {
+    const count = selectedIds.size;
+    const ok = await confirm({
+      title: `Delete ${count} expense${count !== 1 ? "s" : ""}`,
+      message: `Are you sure you want to delete ${count} selected expense${count !== 1 ? "s" : ""}? This cannot be undone.`,
+      confirmLabel: "Delete All",
+      variant: "danger",
+    });
+    if (ok) {
+      if (onDeleteMany) {
+        await onDeleteMany([...selectedIds]);
+      } else {
+        for (const id of selectedIds) {
+          onDelete(id);
+        }
+      }
+      setSelectedIds(new Set());
+      toast(`${count} expense${count !== 1 ? "s" : ""} deleted`, "error");
+    }
+  };
 
   if (grouped.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 text-gray-400">
-        <p className="text-sm">No expenses found</p>
-        <p className="mt-1 text-xs">Add your first expense to get started</p>
+      <div className="flex flex-col items-center justify-center gap-3 py-16 text-gray-400">
+        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800">
+          <Receipt size={28} className="text-gray-300 dark:text-gray-600" />
+        </div>
+        <div className="text-center">
+          <p className="text-sm font-medium text-gray-500 dark:text-gray-400">No expenses found</p>
+          <p className="mt-1 text-xs">
+            {searchQuery || activeCategories.length > 0
+              ? "Try adjusting your filters"
+              : "Add your first expense to get started"}
+          </p>
+        </div>
+        {!searchQuery && activeCategories.length === 0 && (
+          <button
+            onClick={openAddForm}
+            className="mt-1 flex items-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+          >
+            <PlusCircle size={14} />
+            Add Expense
+          </button>
+        )}
       </div>
     );
   }
 
   return (
     <div className="space-y-4">
-      {grouped.map((group) => (
+      {/* Batch action bar */}
+      {selectedIds.size > 0 && (
+        <div className="sticky top-0 z-10 flex items-center justify-between rounded-xl border border-blue-200 bg-blue-50 px-4 py-2.5 shadow-sm dark:border-blue-800 dark:bg-blue-950/50">
+          <span className="text-sm font-medium text-blue-700 dark:text-blue-300">
+            {selectedIds.size} selected
+          </span>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleBulkDelete}
+              className="flex items-center gap-1.5 rounded-lg bg-red-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-red-700"
+            >
+              <Trash2 size={12} />
+              Delete
+            </button>
+            <button
+              onClick={() => setSelectedIds(new Set())}
+              className="rounded-lg p-1.5 text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/30"
+              aria-label="Clear selection"
+            >
+              <X size={14} />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {paginatedGroups.map((group) => (
         <div key={group.day}>
           {/* Day header */}
           <div className="mb-2 flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase text-gray-500 dark:text-gray-400">
-              Day {group.day}
-            </span>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => toggleSelectDay(group.expenses)}
+                className="rounded p-0.5 text-gray-300 hover:text-gray-500 dark:text-gray-600 dark:hover:text-gray-400"
+                aria-label={`Select all day ${group.day}`}
+              >
+                {group.expenses.every((e) => selectedIds.has(e.id)) ? (
+                  <CheckSquare size={14} className="text-blue-500" />
+                ) : (
+                  <Square size={14} />
+                )}
+              </button>
+              <span className="text-xs font-semibold uppercase text-gray-500 dark:text-gray-400">
+                Day {group.day}
+              </span>
+            </div>
             <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
               {formatCurrency(group.total)}
             </span>
@@ -161,8 +232,29 @@ export function ExpenseList({
             {group.expenses.map((expense) => (
               <div
                 key={expense.id}
-                className="group flex items-center gap-3 rounded-xl border border-gray-100 bg-white px-4 py-3 shadow-sm transition-colors hover:border-gray-200 dark:border-gray-800 dark:bg-gray-900 dark:hover:border-gray-700"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") openEditForm(expense.id);
+                  if (e.key === "Delete" || e.key === "Backspace") handleDelete(expense.id);
+                  if (e.key === " ") { e.preventDefault(); toggleSelect(expense.id); }
+                }}
+                className={`group flex items-center gap-3 rounded-xl border px-4 py-3 shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/40 ${
+                  selectedIds.has(expense.id)
+                    ? "border-blue-300 bg-blue-50 dark:border-blue-700 dark:bg-blue-950/30"
+                    : "border-gray-100 bg-white hover:border-gray-200 dark:border-gray-800 dark:bg-gray-900 dark:hover:border-gray-700"
+                }`}
               >
+                <button
+                  onClick={() => toggleSelect(expense.id)}
+                  className="shrink-0 rounded p-0.5 text-gray-300 hover:text-gray-500 dark:text-gray-600 dark:hover:text-gray-400"
+                  aria-label="Select expense"
+                >
+                  {selectedIds.has(expense.id) ? (
+                    <CheckSquare size={14} className="text-blue-500" />
+                  ) : (
+                    <Square size={14} />
+                  )}
+                </button>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <CategoryBadge category={expense.category} />
@@ -202,6 +294,18 @@ export function ExpenseList({
           </div>
         </div>
       ))}
+
+      {/* Pagination */}
+      {hasMore && (
+        <div className="flex justify-center pt-2">
+          <button
+            onClick={() => setVisibleCount((v) => v + PAGE_SIZE)}
+            className="rounded-lg border border-gray-200 px-4 py-2 text-xs font-medium text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-800"
+          >
+            Show more ({totalCount - visibleCount} remaining)
+          </button>
+        </div>
+      )}
     </div>
   );
 }

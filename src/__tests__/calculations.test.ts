@@ -9,6 +9,8 @@ import {
   getAverageDailySpend,
   getBudgetUsedPercent,
   getTopCategory,
+  getEomForecast,
+  detectAnomalies,
 } from "../lib/calculations";
 import type { Expense, CategoryId } from "../types";
 
@@ -251,5 +253,60 @@ describe("Edge cases", () => {
     expect(getCategoryTotal(single, "groceries", MONTH, YEAR)).toBe(500);
     expect(getDailyTotal(single, 15, MONTH, YEAR)).toBe(500);
     expect(getMonthlySaving(SALARY, 500)).toBe(58900);
+  });
+});
+
+describe("getEomForecast", () => {
+  test("projects correctly with given daily avg", () => {
+    // getEomForecast(monthlyTotal, salary, elapsedDays, daysInMonth)
+    // 14247 total, salary=59400, 20 elapsed days, 31 total days
+    const result = getEomForecast(14247, SALARY, 20, 31);
+    expect(result.projectedTotal).toBeCloseTo(14247 / 20 * 31, 0);
+    expect(result.projectedRemaining).toBeCloseTo(SALARY - result.projectedTotal, 0);
+  });
+
+  test("returns zero forecast when 0 days elapsed", () => {
+    const result = getEomForecast(0, SALARY, 0, 31);
+    expect(result.projectedTotal).toBe(0);
+    expect(result.confidence).toBe("low");
+  });
+
+  test("confidence is high when daysElapsed >= 15", () => {
+    const result = getEomForecast(14247, SALARY, 20, 31);
+    expect(result.confidence).toBe("high");
+  });
+
+  test("confidence is low when daysElapsed < 7", () => {
+    const result = getEomForecast(2000, SALARY, 3, 31);
+    expect(result.confidence).toBe("low");
+  });
+});
+
+describe("detectAnomalies", () => {
+  test("returns empty for fewer than 3 expenses in category", () => {
+    const few = [
+      makeExpense({ category: "groceries", amount: 100 }),
+      makeExpense({ category: "groceries", amount: 200 }),
+    ];
+    expect(detectAnomalies(few, MONTH, YEAR)).toHaveLength(0);
+  });
+
+  test("flags an outlier expense", () => {
+    const normal = Array.from({ length: 5 }, (_, i) =>
+      makeExpense({ category: "groceries", amount: 100 + i * 10 })
+    );
+    const outlier = makeExpense({ category: "groceries", amount: 10000, id: "outlier" });
+    const all = [...normal, outlier];
+    const result = detectAnomalies(all, MONTH, YEAR);
+    expect(result.length).toBeGreaterThanOrEqual(1);
+    expect(result.some((a) => a.expense.id === "outlier")).toBe(true);
+  });
+
+  test("does not flag normal expenses", () => {
+    const normal = Array.from({ length: 10 }, (_, i) =>
+      makeExpense({ category: "groceries", amount: 100 + i * 5 })
+    );
+    const result = detectAnomalies(normal, MONTH, YEAR);
+    expect(result).toHaveLength(0);
   });
 });

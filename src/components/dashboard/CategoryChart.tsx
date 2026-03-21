@@ -87,7 +87,7 @@ export function CategoryChart({ categoryTotals, onCategoryClick, categoryBudgets
   }
 
   return (
-    <div>
+    <div role="img" aria-label="Category breakdown chart">
       <div className="mb-2 flex justify-end">
         <button
           onClick={() => setShowTable((v) => !v)}

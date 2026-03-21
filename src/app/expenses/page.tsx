@@ -2,7 +2,7 @@
 
 export const dynamic = "force-dynamic";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { AppShell } from "@/components/layout/AppShell";
 import { MonthSwitcher } from "@/components/layout/MonthSwitcher";
 import { SyncIndicator } from "@/components/sync/SyncIndicator";
@@ -15,6 +15,7 @@ import { useCalculations } from "@/hooks/useCalculations";
 import { useUIStore } from "@/stores/uiStore";
 import { Search, PlusCircle, ArrowUpDown } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
+import debounce from "lodash/debounce";
 
 type SortOption = "day-desc" | "day-asc" | "amount-desc" | "amount-asc";
 
@@ -28,7 +29,7 @@ export default function ExpensesPage() {
     setActiveCategories,
     openAddForm,
   } = useUIStore();
-  const { expenses, syncStatus, deleteExpense } = useExpenses(currentMonth, currentYear);
+  const { expenses, syncStatus, deleteExpense, deleteExpenses } = useExpenses(currentMonth, currentYear);
   const { settings } = useSettings();
   const { monthlyTotal } = useCalculations(
     expenses,
@@ -40,13 +41,30 @@ export default function ExpensesPage() {
 
   const [amountMin, setAmountMin] = useState("");
   const [amountMax, setAmountMax] = useState("");
+  const [dayMin, setDayMin] = useState("");
+  const [dayMax, setDayMax] = useState("");
   const [sortBy, setSortBy] = useState<SortOption>("day-desc");
+  const [localSearch, setLocalSearch] = useState(searchQuery);
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const debouncedSetSearch = useCallback(
+    debounce((val: string) => setSearchQuery(val), 300),
+    []
+  );
+
+  const handleSearchChange = (val: string) => {
+    setLocalSearch(val);
+    debouncedSetSearch(val);
+  };
 
   const handleClearFilters = () => {
     setActiveCategories([]);
     setSearchQuery("");
+    setLocalSearch("");
     setAmountMin("");
     setAmountMax("");
+    setDayMin("");
+    setDayMax("");
   };
 
   return (
@@ -87,8 +105,8 @@ export default function ExpensesPage() {
             <input
               type="text"
               placeholder="Search expenses..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              value={localSearch}
+              onChange={(e) => handleSearchChange(e.target.value)}
               className="w-full rounded-lg border border-gray-200 bg-white py-2.5 pl-9 pr-3 text-sm text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-900 dark:text-white dark:placeholder:text-gray-500"
             />
           </div>
@@ -110,6 +128,10 @@ export default function ExpensesPage() {
           amountMax={amountMax}
           onAmountMinChange={setAmountMin}
           onAmountMaxChange={setAmountMax}
+          dayMin={dayMin}
+          dayMax={dayMax}
+          onDayMinChange={setDayMin}
+          onDayMaxChange={setDayMax}
           onClear={handleClearFilters}
         />
 
@@ -120,10 +142,13 @@ export default function ExpensesPage() {
         <ExpenseList
           expenses={expenses}
           onDelete={deleteExpense}
+          onDeleteMany={deleteExpenses}
           activeCategories={activeCategories}
           searchQuery={searchQuery}
           amountMin={amountMin ? parseFloat(amountMin) : undefined}
           amountMax={amountMax ? parseFloat(amountMax) : undefined}
+          dayMin={dayMin ? parseInt(dayMin, 10) : undefined}
+          dayMax={dayMax ? parseInt(dayMax, 10) : undefined}
           sortBy={sortBy}
         />
       </div>

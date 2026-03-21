@@ -25,6 +25,9 @@ export interface UserSettings {
   categoryBudgets: Record<CategoryId, number>;
   recurringExpenses: RecurringExpense[];
   savedFilters: SavedFilter[];
+  goals?: Goal[];
+  rolloverEnabled?: boolean;
+  rolloverHistory?: Record<string, number>; // key: "YYYY-MM", value: unspent amount
   createdAt: number;
   updatedAt: number;
 }
@@ -49,6 +52,17 @@ export interface RecurringExpense {
   remark: string;
   frequency: RecurringFrequency;
   active: boolean;
+  createdAt: number;
+}
+
+export interface Goal {
+  id: string;
+  name: string;
+  targetAmount: number;
+  savedAmount: number;
+  deadline?: string; // "YYYY-MM" format
+  monthlyContribution?: number;
+  color: string;
   createdAt: number;
 }
 
