@@ -107,10 +107,7 @@ export function GoalsManager() {
 
   return (
     <div>
-      <div className="mb-3 flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-          Savings Goals
-        </h3>
+      <div className="mb-3 flex items-center justify-end">
         {!showForm && (
           <button
             onClick={() => setShowForm(true)}

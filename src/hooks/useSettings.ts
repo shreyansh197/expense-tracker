@@ -42,7 +42,8 @@ function saveLocal(s: UserSettings) {
 async function pushToSupabase(s: UserSettings) {
   const syncCode = getSyncCode();
   if (!syncCode) return;
-  // Try with new columns first; fall back to legacy columns if they don't exist
+
+  // Try with all columns (including newest: goals, rollover_enabled, rollover_history)
   const { error } = await supabase.from("user_settings").upsert({
     sync_code: syncCode,
     salary: s.salary,
@@ -58,17 +59,34 @@ async function pushToSupabase(s: UserSettings) {
     rollover_history: s.rolloverHistory || {},
     updated_at: new Date(s.updatedAt).toISOString(),
   }, { onConflict: "sync_code" });
+
   if (error && error.message?.includes("column")) {
-    // New columns not yet in DB — push without them
-    await supabase.from("user_settings").upsert({
+    // Fallback: try without the 3 newest columns (goals, rollover_enabled, rollover_history)
+    const { error: err2 } = await supabase.from("user_settings").upsert({
       sync_code: syncCode,
       salary: s.salary,
       currency: s.currency,
       categories: s.categories,
       custom_categories: s.customCategories,
       hidden_defaults: s.hiddenDefaults,
+      category_budgets: s.categoryBudgets || {},
+      recurring_expenses: s.recurringExpenses || [],
+      saved_filters: s.savedFilters || [],
       updated_at: new Date(s.updatedAt).toISOString(),
     }, { onConflict: "sync_code" });
+
+    if (err2 && err2.message?.includes("column")) {
+      // Last resort: only original columns
+      await supabase.from("user_settings").upsert({
+        sync_code: syncCode,
+        salary: s.salary,
+        currency: s.currency,
+        categories: s.categories,
+        custom_categories: s.customCategories,
+        hidden_defaults: s.hiddenDefaults,
+        updated_at: new Date(s.updatedAt).toISOString(),
+      }, { onConflict: "sync_code" });
+    }
   }
 }
 
