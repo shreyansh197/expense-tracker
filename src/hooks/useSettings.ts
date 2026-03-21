@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useSyncExternalStore } from "react";
 import { DEFAULT_SALARY } from "@/lib/constants";
 import { DEFAULT_CATEGORIES } from "@/lib/categories";
 import { supabase } from "@/lib/supabase";
@@ -24,6 +24,28 @@ const DEFAULT_SETTINGS: UserSettings = {
   createdAt: Date.now(),
   updatedAt: Date.now(),
 };
+
+// ── Shared module-level state so ALL useSettings() consumers stay in sync ──
+let _settings: UserSettings = DEFAULT_SETTINGS;
+const _listeners = new Set<() => void>();
+
+function _notify() {
+  _listeners.forEach((fn) => fn());
+}
+
+function _setShared(next: UserSettings) {
+  _settings = next;
+  _notify();
+}
+
+function _getSnapshot(): UserSettings {
+  return _settings;
+}
+
+function _subscribe(cb: () => void): () => void {
+  _listeners.add(cb);
+  return () => { _listeners.delete(cb); };
+}
 
 function loadSettings(): UserSettings {
   if (typeof window === "undefined") return DEFAULT_SETTINGS;
@@ -115,18 +137,25 @@ export async function fetchSettingsFromSupabase(syncCode: string): Promise<UserS
   };
 }
 
+// ── Initialization guards (module-level, run once across all consumers) ──
+let _initialized = false;
+let _pushGuard = false;
+
 export function useSettings() {
-  const [settings, setSettings] = useState<UserSettings>(DEFAULT_SETTINGS);
-  const [loading, setLoading] = useState(true);
+  const settings = useSyncExternalStore(_subscribe, _getSnapshot, () => DEFAULT_SETTINGS);
+  const [loading, setLoading] = useState(!_initialized);
   const [isFirstVisit, setIsFirstVisit] = useState(false);
-  const pushRef = useRef(false); // guard against double-push on mount
 
   // On mount: load from localStorage, then sync with Supabase
   useEffect(() => {
+    // Only initialize once across all instances
+    if (_initialized) { setLoading(false); return; }
+    _initialized = true;
+
     const hasExisting = localStorage.getItem(STORAGE_KEY) !== null;
     setIsFirstVisit(!hasExisting);
     const local = loadSettings();
-    setSettings(local);
+    _setShared(local);
     setLoading(false);
 
     const syncCode = getSyncCode();
@@ -136,8 +165,8 @@ export function useSettings() {
     fetchSettingsFromSupabase(syncCode).then((remote) => {
       if (!remote) {
         // No remote row yet — push local settings (migration for existing users)
-        if (hasExisting && !pushRef.current) {
-          pushRef.current = true;
+        if (hasExisting && !_pushGuard) {
+          _pushGuard = true;
           pushToSupabase(local);
         }
         return;
@@ -147,7 +176,7 @@ export function useSettings() {
       const remoteTs = remote.updatedAt || 0;
       if (remoteTs > localTs) {
         saveLocal(remote);
-        setSettings(remote);
+        _setShared(remote);
       } else if (localTs > remoteTs && hasExisting) {
         pushToSupabase(local);
       }
@@ -177,13 +206,10 @@ export function useSettings() {
             createdAt: Date.now(),
             updatedAt: new Date(d.updated_at as string).getTime(),
           };
-          setSettings((prev) => {
-            if (incoming.updatedAt > prev.updatedAt) {
-              saveLocal(incoming);
-              return incoming;
-            }
-            return prev;
-          });
+          if (incoming.updatedAt > _settings.updatedAt) {
+            saveLocal(incoming);
+            _setShared(incoming);
+          }
         }
       )
       .subscribe();
@@ -193,44 +219,38 @@ export function useSettings() {
 
   const updateSettings = useCallback(
     async (updates: Partial<Pick<UserSettings, "salary" | "currency" | "categories" | "customCategories" | "hiddenDefaults" | "categoryBudgets" | "recurringExpenses" | "savedFilters" | "goals" | "rolloverEnabled" | "rolloverHistory">>) => {
-      setSettings((prev) => {
-        const next = { ...prev, ...updates, updatedAt: Date.now() };
-        saveLocal(next);
-        pushToSupabase(next);
-        return next;
-      });
+      const next = { ..._settings, ...updates, updatedAt: Date.now() };
+      saveLocal(next);
+      _setShared(next);
+      pushToSupabase(next);
     },
     []
   );
 
   const addCategory = useCallback((cat: CategoryMeta) => {
-    setSettings((prev) => {
-      const next = {
-        ...prev,
-        customCategories: [...prev.customCategories, cat],
-        categories: [...prev.categories, cat.id],
-        updatedAt: Date.now(),
-      };
-      saveLocal(next);
-      pushToSupabase(next);
-      return next;
-    });
+    const next = {
+      ..._settings,
+      customCategories: [..._settings.customCategories, cat],
+      categories: [..._settings.categories, cat.id],
+      updatedAt: Date.now(),
+    };
+    saveLocal(next);
+    _setShared(next);
+    pushToSupabase(next);
   }, []);
 
   const deleteCategory = useCallback((id: string) => {
-    setSettings((prev) => {
-      const isCustom = prev.customCategories.some((c) => c.id === id);
-      const next = {
-        ...prev,
-        customCategories: prev.customCategories.filter((c) => c.id !== id),
-        categories: prev.categories.filter((c) => c !== id),
-        hiddenDefaults: isCustom ? prev.hiddenDefaults : [...(prev.hiddenDefaults || []), id],
-        updatedAt: Date.now(),
-      };
-      saveLocal(next);
-      pushToSupabase(next);
-      return next;
-    });
+    const isCustom = _settings.customCategories.some((c) => c.id === id);
+    const next = {
+      ..._settings,
+      customCategories: _settings.customCategories.filter((c) => c.id !== id),
+      categories: _settings.categories.filter((c) => c !== id),
+      hiddenDefaults: isCustom ? _settings.hiddenDefaults : [...(_settings.hiddenDefaults || []), id],
+      updatedAt: Date.now(),
+    };
+    saveLocal(next);
+    _setShared(next);
+    pushToSupabase(next);
   }, []);
 
   const markOnboarded = useCallback(() => {
@@ -238,13 +258,14 @@ export function useSettings() {
     if (!localStorage.getItem(STORAGE_KEY)) {
       const initial = { ...DEFAULT_SETTINGS, updatedAt: Date.now() };
       saveLocal(initial);
+      _setShared(initial);
       pushToSupabase(initial);
     }
   }, []);
 
   const resetSettings = useCallback(() => {
     localStorage.removeItem(STORAGE_KEY);
-    setSettings(DEFAULT_SETTINGS);
+    _setShared(DEFAULT_SETTINGS);
     setIsFirstVisit(true);
   }, []);
 
