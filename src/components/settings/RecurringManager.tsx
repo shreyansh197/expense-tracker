@@ -6,8 +6,10 @@ import { getAllCategories } from "@/lib/categories";
 import { formatCurrency } from "@/lib/utils";
 import { useToast } from "@/components/ui/Toast";
 import { useConfirm } from "@/components/ui/ConfirmDialog";
-import { Plus, Trash2, ToggleLeft, ToggleRight } from "lucide-react";
+import { Plus, Trash2, ToggleLeft, ToggleRight, Pencil, X, ArrowUpDown } from "lucide-react";
 import type { RecurringExpense, CategoryId } from "@/types";
+
+type SortKey = "day" | "amount" | "remark";
 
 export function RecurringManager() {
   const { settings, updateSettings } = useSettings();
@@ -17,12 +19,23 @@ export function RecurringManager() {
   const recurring = settings.recurringExpenses || [];
 
   const [showAdd, setShowAdd] = useState(false);
+  const [editId, setEditId] = useState<string | null>(null);
   const [category, setCategory] = useState<CategoryId>(allCategories[0]?.id || "miscellaneous");
   const [amount, setAmount] = useState("");
   const [day, setDay] = useState("1");
   const [remark, setRemark] = useState("");
+  const [sortKey, setSortKey] = useState<SortKey>("day");
 
-  const handleAdd = () => {
+  const resetForm = () => {
+    setCategory(allCategories[0]?.id || "miscellaneous");
+    setAmount("");
+    setDay("1");
+    setRemark("");
+    setEditId(null);
+    setShowAdd(false);
+  };
+
+  const handleSave = () => {
     const parsedAmount = parseFloat(amount);
     const parsedDay = parseInt(day, 10);
     if (isNaN(parsedAmount) || parsedAmount <= 0) {
@@ -33,22 +46,41 @@ export function RecurringManager() {
       toast("Day must be 1-28", "error");
       return;
     }
-    const newItem: RecurringExpense = {
-      id: `rec-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
-      category,
-      amount: parsedAmount,
-      day: parsedDay,
-      remark: remark.trim() || `${allCategories.find((c) => c.id === category)?.label || category} (recurring)`,
-      frequency: "monthly",
-      active: true,
-      createdAt: Date.now(),
-    };
-    updateSettings({ recurringExpenses: [...recurring, newItem] });
-    setAmount("");
-    setDay("1");
-    setRemark("");
-    setShowAdd(false);
-    toast("Recurring expense added");
+
+    if (editId) {
+      // Edit existing
+      const updated = recurring.map((r) =>
+        r.id === editId
+          ? { ...r, category, amount: parsedAmount, day: parsedDay, remark: remark.trim() || r.remark }
+          : r
+      );
+      updateSettings({ recurringExpenses: updated });
+      toast("Recurring expense updated");
+    } else {
+      // Add new
+      const newItem: RecurringExpense = {
+        id: `rec-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+        category,
+        amount: parsedAmount,
+        day: parsedDay,
+        remark: remark.trim() || `${allCategories.find((c) => c.id === category)?.label || category} (recurring)`,
+        frequency: "monthly",
+        active: true,
+        createdAt: Date.now(),
+      };
+      updateSettings({ recurringExpenses: [...recurring, newItem] });
+      toast("Recurring expense added");
+    }
+    resetForm();
+  };
+
+  const handleEdit = (r: RecurringExpense) => {
+    setEditId(r.id);
+    setCategory(r.category);
+    setAmount(String(r.amount));
+    setDay(String(r.day));
+    setRemark(r.remark);
+    setShowAdd(true);
   };
 
   const handleToggle = (id: string) => {
@@ -75,20 +107,57 @@ export function RecurringManager() {
 
   const catMap = Object.fromEntries(allCategories.map((c) => [c.id, c]));
 
+  // Sort
+  const sorted = [...recurring].sort((a, b) => {
+    if (sortKey === "day") return a.day - b.day;
+    if (sortKey === "amount") return b.amount - a.amount;
+    return a.remark.localeCompare(b.remark);
+  });
+
+  // Totals
+  const activeTotal = recurring.filter((r) => r.active).reduce((sum, r) => sum + r.amount, 0);
+  const totalAll = recurring.reduce((sum, r) => sum + r.amount, 0);
+
   return (
     <div className="space-y-3">
+      {/* Totals bar */}
+      {recurring.length > 0 && (
+        <div className="flex items-center justify-between rounded-lg bg-blue-50 px-3 py-2 dark:bg-blue-900/20">
+          <div className="text-xs text-gray-500 dark:text-gray-400">
+            Active: <span className="font-semibold text-blue-700 dark:text-blue-400">{formatCurrency(activeTotal)}</span>/mo
+            {activeTotal !== totalAll && (
+              <span className="ml-2 text-gray-400">
+                (Total incl. paused: {formatCurrency(totalAll)})
+              </span>
+            )}
+          </div>
+          <button
+            onClick={() => setSortKey((k) => k === "day" ? "amount" : k === "amount" ? "remark" : "day")}
+            className="flex items-center gap-1 text-[10px] font-medium text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+            title={`Sort by ${sortKey}`}
+          >
+            <ArrowUpDown size={10} />
+            {sortKey}
+          </button>
+        </div>
+      )}
+
       {recurring.length === 0 && !showAdd && (
         <p className="py-3 text-center text-xs text-gray-400">
           No recurring expenses yet. Add things like rent, SIP, subscriptions.
         </p>
       )}
 
-      {recurring.map((r) => {
+      {sorted.map((r) => {
         const cat = catMap[r.category];
         return (
           <div
             key={r.id}
-            className="flex items-center gap-3 rounded-lg border border-gray-100 bg-gray-50 px-3 py-2.5 dark:border-gray-800 dark:bg-gray-800/50"
+            className={`flex items-center gap-3 rounded-lg border px-3 py-2.5 ${
+              r.active
+                ? "border-gray-100 bg-gray-50 dark:border-gray-800 dark:bg-gray-800/50"
+                : "border-gray-100 bg-gray-50/50 opacity-60 dark:border-gray-800 dark:bg-gray-800/30"
+            }`}
           >
             <div
               className="h-2.5 w-2.5 shrink-0 rounded-full"
@@ -105,6 +174,13 @@ export function RecurringManager() {
             <span className="text-sm font-semibold text-gray-900 dark:text-white">
               {formatCurrency(r.amount)}
             </span>
+            <button
+              onClick={() => handleEdit(r)}
+              className="rounded p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+              title="Edit"
+            >
+              <Pencil size={13} />
+            </button>
             <button
               onClick={() => handleToggle(r.id)}
               className="text-gray-400 hover:text-blue-600 dark:hover:text-blue-400"
@@ -124,6 +200,14 @@ export function RecurringManager() {
 
       {showAdd ? (
         <div className="space-y-3 rounded-lg border border-gray-100 bg-gray-50 p-3 dark:border-gray-800 dark:bg-gray-800/50">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-medium text-gray-500">
+              {editId ? "Edit Recurring" : "Add Recurring"}
+            </span>
+            <button onClick={resetForm} className="text-gray-400 hover:text-gray-600">
+              <X size={14} />
+            </button>
+          </div>
           <div className="flex flex-wrap gap-1.5">
             {allCategories.map((cat) => (
               <button
@@ -175,13 +259,13 @@ export function RecurringManager() {
           />
           <div className="flex gap-2">
             <button
-              onClick={handleAdd}
+              onClick={handleSave}
               className="rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700"
             >
-              Add
+              {editId ? "Update" : "Add"}
             </button>
             <button
-              onClick={() => setShowAdd(false)}
+              onClick={resetForm}
               className="rounded-lg px-3 py-2 text-sm font-medium text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800"
             >
               Cancel

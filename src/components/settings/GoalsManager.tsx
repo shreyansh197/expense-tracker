@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Trash2, Target, X, Pencil } from "lucide-react";
+import { Plus, Trash2, X, Pencil, TrendingUp, Minus } from "lucide-react";
 import { useSettings } from "@/hooks/useSettings";
 import { useToast } from "@/components/ui/Toast";
 import { useConfirm } from "@/components/ui/ConfirmDialog";
@@ -16,6 +16,9 @@ export function GoalsManager() {
   const goals = settings.goals || [];
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
+  const [fundGoalId, setFundGoalId] = useState<string | null>(null);
+  const [fundAmount, setFundAmount] = useState("");
+  const [fundMode, setFundMode] = useState<"add" | "subtract">("add");
 
   const [name, setName] = useState("");
   const [targetAmount, setTargetAmount] = useState("");
@@ -91,22 +94,52 @@ export function GoalsManager() {
     }
   };
 
-  const handleAddFunds = (id: string) => {
-    const input = prompt("Amount to add (₹):");
-    if (!input) return;
-    const amount = parseFloat(input);
-    if (isNaN(amount) || amount <= 0) return;
-    const updated = goals.map((g) =>
-      g.id === id
-        ? { ...g, savedAmount: Math.min(g.savedAmount + amount, g.targetAmount) }
-        : g
-    );
+  const handleFundSave = () => {
+    if (!fundGoalId) return;
+    const amt = parseFloat(fundAmount);
+    if (isNaN(amt) || amt <= 0) {
+      toast("Enter a valid amount", "error");
+      return;
+    }
+    const updated = goals.map((g) => {
+      if (g.id !== fundGoalId) return g;
+      const newSaved = fundMode === "add"
+        ? Math.min(g.savedAmount + amt, g.targetAmount)
+        : Math.max(g.savedAmount - amt, 0);
+      return { ...g, savedAmount: newSaved };
+    });
     updateSettings({ goals: updated });
-    toast(`Added ${formatCurrency(amount)} to goal`);
+    toast(fundMode === "add" ? `Added ${formatCurrency(amt)}` : `Removed ${formatCurrency(amt)}`);
+    setFundGoalId(null);
+    setFundAmount("");
+    setFundMode("add");
   };
+
+  // Summary stats
+  const totalTarget = goals.reduce((s, g) => s + g.targetAmount, 0);
+  const totalSaved = goals.reduce((s, g) => s + g.savedAmount, 0);
+  const overallPct = totalTarget > 0 ? Math.round((totalSaved / totalTarget) * 100) : 0;
 
   return (
     <div>
+      {/* Summary bar */}
+      {goals.length > 0 && (
+        <div className="mb-3 rounded-lg bg-emerald-50 px-3 py-2 dark:bg-emerald-900/20">
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-gray-500 dark:text-gray-400">
+              Total progress: <span className="font-semibold text-emerald-700 dark:text-emerald-400">{formatCurrency(totalSaved)}</span> / {formatCurrency(totalTarget)}
+            </span>
+            <span className="font-semibold text-emerald-700 dark:text-emerald-400">{overallPct}%</span>
+          </div>
+          <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-emerald-100 dark:bg-emerald-900/30">
+            <div
+              className="h-full rounded-full bg-emerald-500 transition-all"
+              style={{ width: `${Math.min(overallPct, 100)}%` }}
+            />
+          </div>
+        </div>
+      )}
+
       <div className="mb-3 flex items-center justify-end">
         {!showForm && (
           <button
@@ -203,6 +236,10 @@ export function GoalsManager() {
           {goals.map((g) => {
             const pct = g.targetAmount > 0 ? Math.round((g.savedAmount / g.targetAmount) * 100) : 0;
             const isComplete = pct >= 100;
+            const remaining = g.targetAmount - g.savedAmount;
+            const monthsLeft = g.monthlyContribution && g.monthlyContribution > 0 && remaining > 0
+              ? Math.ceil(remaining / g.monthlyContribution) : null;
+
             return (
               <div
                 key={g.id}
@@ -217,10 +254,15 @@ export function GoalsManager() {
                     <span className="text-sm font-medium text-gray-900 dark:text-white">
                       {g.name}
                     </span>
+                    {isComplete && (
+                      <span className="rounded-full bg-emerald-100 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400">
+                        Done!
+                      </span>
+                    )}
                   </div>
                   <div className="flex items-center gap-1">
                     <button
-                      onClick={() => handleAddFunds(g.id)}
+                      onClick={() => { setFundGoalId(g.id); setFundMode("add"); setFundAmount(""); }}
                       className="rounded-lg px-2 py-1 text-[10px] font-medium text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900/30"
                     >
                       + Add
@@ -239,6 +281,60 @@ export function GoalsManager() {
                     </button>
                   </div>
                 </div>
+
+                {/* Add/Subtract Funds inline */}
+                {fundGoalId === g.id && (
+                  <div className="mb-2 flex items-center gap-2 rounded-lg bg-gray-50 px-2 py-2 dark:bg-gray-800">
+                    <div className="flex rounded-lg border border-gray-200 dark:border-gray-700">
+                      <button
+                        onClick={() => setFundMode("add")}
+                        className={`px-2 py-1 text-xs font-medium rounded-l-lg ${
+                          fundMode === "add"
+                            ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400"
+                            : "text-gray-400"
+                        }`}
+                      >
+                        <TrendingUp size={12} />
+                      </button>
+                      <button
+                        onClick={() => setFundMode("subtract")}
+                        className={`px-2 py-1 text-xs font-medium rounded-r-lg ${
+                          fundMode === "subtract"
+                            ? "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400"
+                            : "text-gray-400"
+                        }`}
+                      >
+                        <Minus size={12} />
+                      </button>
+                    </div>
+                    <div className="relative flex-1">
+                      <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-gray-400">₹</span>
+                      <input
+                        type="number"
+                        min="1"
+                        value={fundAmount}
+                        onChange={(e) => setFundAmount(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === "Enter") handleFundSave(); if (e.key === "Escape") setFundGoalId(null); }}
+                        autoFocus
+                        placeholder="Amount"
+                        className="w-full rounded border border-gray-200 bg-white py-1 pl-5 pr-2 text-xs dark:border-gray-700 dark:bg-gray-900 dark:text-white"
+                      />
+                    </div>
+                    <button
+                      onClick={handleFundSave}
+                      className="rounded px-2 py-1 text-xs font-medium text-blue-600 hover:bg-blue-50 dark:text-blue-400"
+                    >
+                      Save
+                    </button>
+                    <button
+                      onClick={() => setFundGoalId(null)}
+                      className="text-gray-400 hover:text-gray-600"
+                    >
+                      <X size={12} />
+                    </button>
+                  </div>
+                )}
+
                 <div className="h-2 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800">
                   <div
                     className="h-full rounded-full transition-all"
@@ -252,14 +348,17 @@ export function GoalsManager() {
                   <span>
                     {formatCurrency(g.savedAmount)} of {formatCurrency(g.targetAmount)} ({pct}%)
                   </span>
-                  {g.deadline && (
-                    <span>
-                      Due: {g.deadline}
-                    </span>
-                  )}
-                  {g.monthlyContribution && !g.deadline && (
-                    <span>{formatCurrency(g.monthlyContribution)}/mo</span>
-                  )}
+                  <span className="flex items-center gap-2">
+                    {monthsLeft && !isComplete && (
+                      <span className="text-blue-500">~{monthsLeft}mo left</span>
+                    )}
+                    {g.deadline && (
+                      <span>Due: {g.deadline}</span>
+                    )}
+                    {g.monthlyContribution && !g.deadline && (
+                      <span>{formatCurrency(g.monthlyContribution)}/mo</span>
+                    )}
+                  </span>
                 </div>
               </div>
             );
