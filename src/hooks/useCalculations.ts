@@ -13,9 +13,11 @@ import {
   getElapsedDays,
   getDaysRemaining,
   getPaceToStayUnder,
+  getEomForecast,
+  detectAnomalies,
 } from "@/lib/calculations";
 import { getDaysInMonth } from "@/lib/utils";
-import type { Expense, CategoryId, DailyTotal, CategoryTotal, StackedDailyTotal } from "@/types";
+import type { Expense, CategoryId, DailyTotal, CategoryTotal, StackedDailyTotal, Forecast, AnomalyResult } from "@/types";
 
 export function useCalculations(
   expenses: Expense[],
@@ -74,6 +76,16 @@ export function useCalculations(
     [remaining, daysRemaining]
   );
 
+  const forecast: Forecast = useMemo(
+    () => getEomForecast(monthlyTotal, salary, elapsedDays, daysInMonth),
+    [monthlyTotal, salary, elapsedDays, daysInMonth]
+  );
+
+  const anomalies: AnomalyResult[] = useMemo(
+    () => detectAnomalies(expenses, month, year),
+    [expenses, month, year]
+  );
+
   return {
     monthlyTotal,
     remaining,
@@ -87,5 +99,7 @@ export function useCalculations(
     elapsedDays,
     daysRemaining,
     paceToStayUnder,
+    forecast,
+    anomalies,
   };
 }

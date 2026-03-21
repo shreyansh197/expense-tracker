@@ -82,4 +82,17 @@ export interface CategoryTotal {
   total: number;
 }
 
+export interface Forecast {
+  projectedTotal: number;    // EOM projected spend
+  projectedRemaining: number; // salary - projectedTotal
+  confidence: "low" | "medium" | "high"; // based on elapsed days
+}
+
+export interface AnomalyResult {
+  expense: Expense;
+  zScore: number;            // how many MADs from median
+  categoryMedian: number;
+  categoryMad: number;
+}
+
 export type SyncStatus = "synced" | "syncing" | "offline" | "error";

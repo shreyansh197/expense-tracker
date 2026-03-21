@@ -38,6 +38,8 @@ export default function DashboardPage() {
     topCategory,
     daysRemaining,
     paceToStayUnder,
+    forecast,
+    anomalies,
   } = useCalculations(expenses, settings.categories, settings.salary, currentMonth, currentYear);
 
   const recentExpenses = [...expenses]
@@ -75,6 +77,7 @@ export default function DashboardPage() {
           daysRemaining={daysRemaining}
           paceToStayUnder={paceToStayUnder}
           expenseCount={expenses.length}
+          forecast={forecast}
         />
 
         {/* Alerts */}
@@ -84,6 +87,8 @@ export default function DashboardPage() {
           budgetUsedPercent={budgetUsedPercent}
           avgDaily={avgDaily}
           paceToStayUnder={paceToStayUnder}
+          forecast={forecast}
+          anomalies={anomalies}
           onCategoryClick={handleCategoryClick}
         />
 

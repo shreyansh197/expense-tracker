@@ -1,0 +1,447 @@
+// ─────────────────────────────────────────────────────────────
+// Expense Tracker — Prisma Schema
+// PostgreSQL · soft-delete · JSONB · composite indexes
+// ─────────────────────────────────────────────────────────────
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearch"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ═══════════════════════════  USERS & AUTH  ═══════════════════
+/// Core user identity. One row per registered person.
+model User {
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email          String    @unique @db.VarChar(255)
+  passwordHash   String?   @map("password_hash") @db.VarChar(255)
+  name           String    @db.VarChar(120)
+  avatarUrl      String?   @map("avatar_url") @db.Text
+  emailVerified  Boolean   @default(false) @map("email_verified")
+  defaultCurrency String   @default("INR") @map("default_currency") @db.VarChar(3)
+  timezone       String    @default("Asia/Kolkata") @db.VarChar(50)
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt      DateTime? @map("deleted_at") @db.Timestamptz
+
+  // Relations
+  accounts           Account[]
+  categories         Category[]
+  tags               Tag[]
+  merchants          Merchant[]
+  transactions       Transaction[]
+  rules              Rule[]
+  recurringSchedules RecurringSchedule[]
+  subscriptions      Subscription[]
+  goals              Goal[]
+  statements         Statement[]
+  receipts           Receipt[]
+  alerts             Alert[]
+  budgets            Budget[]
+  auditLogs          AuditLog[]
+
+  @@index([email])
+  @@index([deletedAt])
+  @@map("users")
+}
+
+// ═══════════════════════════  ACCOUNTS  ═══════════════════════
+/// A financial account (bank, credit card, cash wallet, etc.)
+model Account {
+  id                String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId            String      @map("user_id") @db.Uuid
+  name              String      @db.VarChar(100)
+  type              AccountType @default(CHECKING)
+  balance           Decimal     @default(0) @db.Decimal(14, 2)
+  currency          String      @default("INR") @db.VarChar(3)
+  institution       String?     @db.VarChar(120)  /// e.g. "HDFC Bank"
+  accountNumberLast4 String?    @map("account_number_last4") @db.VarChar(4)
+  isDefault         Boolean     @default(false) @map("is_default")
+  createdAt         DateTime    @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt         DateTime    @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt         DateTime?   @map("deleted_at") @db.Timestamptz
+
+  // Relations
+  user               User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions       Transaction[]
+  recurringSchedules RecurringSchedule[]
+  statements         Statement[]
+
+  @@index([userId, deletedAt])
+  @@index([userId, isDefault])
+  @@map("accounts")
+}
+
+enum AccountType {
+  CHECKING
+  SAVINGS
+  CREDIT_CARD
+  CASH
+  WALLET
+  INVESTMENT
+}
+
+// ═══════════════════════════  CATEGORIES  ═════════════════════
+/// Hierarchical expense/income categories. System defaults have
+/// userId = null and isSystem = true.
+model Category {
+  id        String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String?       @map("user_id") @db.Uuid
+  parentId  String?       @map("parent_id") @db.Uuid
+  name      String        @db.VarChar(60)
+  slug      String        @db.VarChar(60)
+  color     String        @default("#6B7280") @db.VarChar(9)
+  bgColor   String?       @map("bg_color") @db.VarChar(9)
+  icon      String        @default("Circle") @db.VarChar(40)
+  type      CategoryType  @default(EXPENSE)
+  sortOrder Int           @default(0) @map("sort_order")
+  isSystem  Boolean       @default(false) @map("is_system")
+  createdAt DateTime      @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime      @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt DateTime?     @map("deleted_at") @db.Timestamptz
+
+  // Self-referential tree
+  parent   Category?  @relation("CategoryTree", fields: [parentId], references: [id])
+  children Category[] @relation("CategoryTree")
+
+  // Relations
+  user               User?               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions       Transaction[]
+  budgets            Budget[]
+  merchantDefaults   Merchant[]          @relation("MerchantDefaultCategory")
+  recurringSchedules RecurringSchedule[]
+
+  @@unique([userId, slug])
+  @@index([userId, type, deletedAt])
+  @@index([parentId])
+  @@map("categories")
+}
+
+enum CategoryType {
+  EXPENSE
+  INCOME
+  TRANSFER
+}
+
+// ═══════════════════════════  TAGS  ═══════════════════════════
+/// Freeform labels users attach to transactions (M:N).
+model Tag {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  name      String   @db.VarChar(40)
+  color     String   @default("#3B82F6") @db.VarChar(9)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  user         User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions TransactionTag[]
+
+  @@unique([userId, name])
+  @@map("tags")
+}
+
+// ═══════════════════════════  MERCHANTS  ══════════════════════
+/// Payees / vendors for auto-categorisation and analytics.
+model Merchant {
+  id                 String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId             String   @map("user_id") @db.Uuid
+  name               String   @db.VarChar(120)
+  logoUrl            String?  @map("logo_url") @db.Text
+  defaultCategoryId  String?  @map("default_category_id") @db.Uuid
+  createdAt          DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt          DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  user            User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  defaultCategory Category?    @relation("MerchantDefaultCategory", fields: [defaultCategoryId], references: [id], onDelete: SetNull)
+  transactions    Transaction[]
+  recurringSchedules RecurringSchedule[]
+
+  @@unique([userId, name])
+  @@map("merchants")
+}
+
+// ═══════════════════════════  TRANSACTIONS  ═══════════════════
+/// The core ledger row. Every spend, earning, or transfer lands here.
+model Transaction {
+  id                  String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId              String          @map("user_id") @db.Uuid
+  accountId           String?         @map("account_id") @db.Uuid
+  categoryId          String?         @map("category_id") @db.Uuid
+  merchantId          String?         @map("merchant_id") @db.Uuid
+  recurringScheduleId String?         @map("recurring_schedule_id") @db.Uuid
+  type                TransactionType @default(EXPENSE)
+  amount              Decimal         @db.Decimal(14, 2)
+  currency            String          @default("INR") @db.VarChar(3)
+  description         String?         @db.VarChar(255)
+  notes               String?         @db.Text
+  date                DateTime        @db.Date
+  isRecurring         Boolean         @default(false) @map("is_recurring")
+  createdAt           DateTime        @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt           DateTime        @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt           DateTime?       @map("deleted_at") @db.Timestamptz
+
+  // Relations
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  account           Account?           @relation(fields: [accountId], references: [id], onDelete: SetNull)
+  category          Category?          @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  merchant          Merchant?          @relation(fields: [merchantId], references: [id], onDelete: SetNull)
+  recurringSchedule RecurringSchedule? @relation(fields: [recurringScheduleId], references: [id], onDelete: SetNull)
+  tags              TransactionTag[]
+  receipts          Receipt[]
+
+  @@index([userId, date, deletedAt])
+  @@index([userId, categoryId, date])
+  @@index([userId, accountId, date])
+  @@index([userId, merchantId])
+  @@index([recurringScheduleId])
+  @@map("transactions")
+}
+
+enum TransactionType {
+  EXPENSE
+  INCOME
+  TRANSFER
+}
+
+/// Join table for the Transaction ↔ Tag many-to-many.
+model TransactionTag {
+  transactionId String @map("transaction_id") @db.Uuid
+  tagId         String @map("tag_id") @db.Uuid
+
+  transaction Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  tag         Tag         @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([transactionId, tagId])
+  @@index([tagId])
+  @@map("transaction_tags")
+}
+
+// ═══════════════════════════  RULES  ══════════════════════════
+/// Auto-categorisation & tagging rules evaluated on transaction create/import.
+/// `conditions` example: { "merchant_contains": "Swiggy", "amount_gt": 100 }
+/// `actions` example:    { "set_category": "<uuid>", "add_tags": ["food"] }
+model Rule {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId     String   @map("user_id") @db.Uuid
+  name       String   @db.VarChar(100)
+  conditions Json     @db.JsonB
+  actions    Json     @db.JsonB
+  priority   Int      @default(0)
+  isActive   Boolean  @default(true) @map("is_active")
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isActive, priority])
+  @@map("rules")
+}
+
+// ═══════════════════════════  RECURRING SCHEDULES  ════════════
+/// Template for transactions that repeat (rent, SIP, salary, etc.)
+model RecurringSchedule {
+  id          String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId      String             @map("user_id") @db.Uuid
+  accountId   String?            @map("account_id") @db.Uuid
+  categoryId  String?            @map("category_id") @db.Uuid
+  merchantId  String?            @map("merchant_id") @db.Uuid
+  amount      Decimal            @db.Decimal(14, 2)
+  currency    String             @default("INR") @db.VarChar(3)
+  description String?            @db.VarChar(255)
+  frequency   RecurringFrequency @default(MONTHLY)
+  interval    Int                @default(1) /// e.g. interval=2 + MONTHLY = every 2 months
+  dayOfMonth  Int?               @map("day_of_month") /// 1-28
+  dayOfWeek   Int?               @map("day_of_week")  /// 0=Sun .. 6=Sat
+  startDate   DateTime           @map("start_date") @db.Date
+  endDate     DateTime?          @map("end_date") @db.Date
+  nextDueDate DateTime?          @map("next_due_date") @db.Date
+  isActive    Boolean            @default(true) @map("is_active")
+  createdAt   DateTime           @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt   DateTime           @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  account       Account?      @relation(fields: [accountId], references: [id], onDelete: SetNull)
+  category      Category?     @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  merchant      Merchant?     @relation(fields: [merchantId], references: [id], onDelete: SetNull)
+  transactions  Transaction[]
+  subscriptions Subscription[]
+
+  @@index([userId, isActive, nextDueDate])
+  @@map("recurring_schedules")
+}
+
+enum RecurringFrequency {
+  DAILY
+  WEEKLY
+  MONTHLY
+  YEARLY
+}
+
+// ═══════════════════════════  SUBSCRIPTIONS  ══════════════════
+/// SaaS / streaming / paid-service metadata layered on top of a
+/// RecurringSchedule. Tracks trial periods, cancellation, etc.
+model Subscription {
+  id                  String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId              String    @map("user_id") @db.Uuid
+  recurringScheduleId String    @map("recurring_schedule_id") @db.Uuid
+  providerName        String    @map("provider_name") @db.VarChar(120)
+  planName            String?   @map("plan_name") @db.VarChar(120)
+  billingUrl          String?   @map("billing_url") @db.Text
+  trialEndsAt         DateTime? @map("trial_ends_at") @db.Timestamptz
+  cancelledAt         DateTime? @map("cancelled_at") @db.Timestamptz
+  createdAt           DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt           DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+
+  user              User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recurringSchedule RecurringSchedule @relation(fields: [recurringScheduleId], references: [id], onDelete: Cascade)
+
+  @@index([userId, cancelledAt])
+  @@map("subscriptions")
+}
+
+// ═══════════════════════════  GOALS  ══════════════════════════
+/// Savings targets the user is working toward.
+model Goal {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId        String    @map("user_id") @db.Uuid
+  name          String    @db.VarChar(100)
+  targetAmount  Decimal   @map("target_amount") @db.Decimal(14, 2)
+  currentAmount Decimal   @default(0) @map("current_amount") @db.Decimal(14, 2)
+  currency      String    @default("INR") @db.VarChar(3)
+  targetDate    DateTime? @map("target_date") @db.Date
+  icon          String    @default("Target") @db.VarChar(40)
+  color         String    @default("#10B981") @db.VarChar(9)
+  isCompleted   Boolean   @default(false) @map("is_completed")
+  completedAt   DateTime? @map("completed_at") @db.Timestamptz
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt     DateTime? @map("deleted_at") @db.Timestamptz
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isCompleted, deletedAt])
+  @@map("goals")
+}
+
+// ═══════════════════════════  STATEMENTS  ═════════════════════
+/// Imported bank/credit-card statement files.
+model Statement {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId        String   @map("user_id") @db.Uuid
+  accountId     String?  @map("account_id") @db.Uuid
+  fileName      String   @map("file_name") @db.VarChar(255)
+  fileUrl       String   @map("file_url") @db.Text
+  periodStart   DateTime @map("period_start") @db.Date
+  periodEnd     DateTime @map("period_end") @db.Date
+  importedCount Int      @default(0) @map("imported_count")
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  account Account? @relation(fields: [accountId], references: [id], onDelete: SetNull)
+
+  @@index([userId, periodStart])
+  @@map("statements")
+}
+
+// ═══════════════════════════  RECEIPTS  ═══════════════════════
+/// Uploaded receipt images with optional OCR data.
+model Receipt {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId        String   @map("user_id") @db.Uuid
+  transactionId String?  @map("transaction_id") @db.Uuid
+  fileName      String   @map("file_name") @db.VarChar(255)
+  fileUrl       String   @map("file_url") @db.Text
+  fileSize      Int      @map("file_size") /// bytes
+  mimeType      String   @map("mime_type") @db.VarChar(50)
+  ocrData       Json?    @map("ocr_data") @db.JsonB /// extracted text, amounts, dates
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transaction Transaction? @relation(fields: [transactionId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([transactionId])
+  @@map("receipts")
+}
+
+// ═══════════════════════════  ALERTS  ═════════════════════════
+/// In-app notifications for budget breaches, goal milestones, renewals, etc.
+model Alert {
+  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  type      AlertType
+  title     String    @db.VarChar(200)
+  message   String    @db.Text
+  data      Json?     @db.JsonB /// payload (budget_id, goal_id, etc.)
+  isRead    Boolean   @default(false) @map("is_read")
+  readAt    DateTime? @map("read_at") @db.Timestamptz
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead, createdAt(sort: Desc)])
+  @@map("alerts")
+}
+
+enum AlertType {
+  BUDGET_WARNING      // 80% threshold
+  BUDGET_EXCEEDED     // 100%+
+  GOAL_MILESTONE      // 25/50/75/100%
+  GOAL_DEADLINE       // approaching target_date
+  SUBSCRIPTION_RENEWAL
+  RECURRING_DUE       // upcoming recurring charge
+  ANOMALY             // unusual spend
+  SYSTEM              // app updates, maintenance
+}
+
+// ═══════════════════════════  BUDGETS  ════════════════════════
+/// Global (categoryId = null) or per-category spending limit for a period.
+model Budget {
+  id         String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId     String       @map("user_id") @db.Uuid
+  categoryId String?      @map("category_id") @db.Uuid /// null = global budget
+  amount     Decimal      @db.Decimal(14, 2)
+  period     BudgetPeriod @default(MONTHLY)
+  startDate  DateTime     @map("start_date") @db.Date
+  endDate    DateTime?    @map("end_date") @db.Date     /// null = ongoing
+  rollover   Boolean      @default(false)               /// carry unused budget forward
+  createdAt  DateTime     @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt  DateTime     @updatedAt @map("updated_at") @db.Timestamptz
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category Category? @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, categoryId, period, startDate])
+  @@index([userId, period, startDate])
+  @@map("budgets")
+}
+
+enum BudgetPeriod {
+  WEEKLY
+  MONTHLY
+  YEARLY
+}
+
+// ═══════════════════════════  AUDIT LOGS  ═════════════════════
+/// Immutable append-only log of user and system actions.
+model AuditLog {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId     String?  @map("user_id") @db.Uuid /// null for system events
+  entityType String   @map("entity_type") @db.VarChar(50) /// e.g. "transaction", "budget"
+  entityId   String   @map("entity_id") @db.Uuid
+  action     String   @db.VarChar(20) /// CREATE, UPDATE, DELETE, RESTORE
+  changes    Json?    @db.JsonB /// { field: { old, new } }
+  ipAddress  String?  @map("ip_address") @db.VarChar(45)
+  userAgent  String?  @map("user_agent") @db.VarChar(512)
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([entityType, entityId])
+  @@map("audit_logs")
+}

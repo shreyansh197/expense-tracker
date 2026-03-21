@@ -8,12 +8,13 @@ import {
   Clock,
   Gauge,
   Percent,
+  TrendingUp,
 } from "lucide-react";
 import { cn, formatCurrency } from "@/lib/utils";
 import { BUDGET_WARNING_THRESHOLD } from "@/lib/constants";
 import { buildCategoryMap } from "@/lib/categories";
 import { useSettings } from "@/hooks/useSettings";
-import type { CategoryTotal } from "@/types";
+import type { CategoryTotal, Forecast } from "@/types";
 
 interface KpiCardsProps {
   monthlyTotal: number;
@@ -25,6 +26,7 @@ interface KpiCardsProps {
   daysRemaining: number;
   paceToStayUnder: number;
   expenseCount: number;
+  forecast: Forecast;
 }
 
 export function KpiCards({
@@ -37,6 +39,7 @@ export function KpiCards({
   daysRemaining,
   paceToStayUnder,
   expenseCount,
+  forecast,
 }: KpiCardsProps) {
   const isOverspent = remaining < 0;
   const isWarning = !isOverspent && budgetUsedPercent >= BUDGET_WARNING_THRESHOLD;
@@ -44,9 +47,12 @@ export function KpiCards({
   const catMap = buildCategoryMap(settings.customCategories);
   const paceExceeded = avgDaily > paceToStayUnder && paceToStayUnder > 0;
   const savingsRate = salary > 0 ? Math.round((remaining / salary) * 100) : 0;
+  const forecastOverBudget = forecast.projectedRemaining < 0;
+  const forecastWarning = !forecastOverBudget && salary > 0 && forecast.projectedTotal > salary * 0.8;
+  const confidenceLabel = { low: "Low conf.", medium: "Med conf.", high: "High conf." }[forecast.confidence];
 
   return (
-    <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
+    <div className="grid grid-cols-2 gap-3 lg:grid-cols-3">
       {/* Total Spent */}
       <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900">
         <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
@@ -165,7 +171,7 @@ export function KpiCards({
       </div>
 
       {/* Savings Rate */}
-      <div className="col-span-2 rounded-xl border border-gray-200 bg-white p-4 shadow-sm lg:col-span-1 dark:border-gray-800 dark:bg-gray-900">
+      <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900">
         <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
           <Percent size={14} />
           <span>Savings Rate</span>
@@ -182,6 +188,44 @@ export function KpiCards({
         </p>
         <p className="mt-1 text-xs text-gray-400">
           {remaining >= 0 ? `Saving ${formatCurrency(remaining)}` : `Over by ${formatCurrency(Math.abs(remaining))}`}
+        </p>
+      </div>
+
+      {/* EOM Forecast */}
+      <div className={cn(
+        "rounded-xl border p-4 shadow-sm",
+        forecastOverBudget
+          ? "border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950/50"
+          : forecastWarning
+            ? "border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/50"
+            : "border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900"
+      )}>
+        <div className={cn(
+          "flex items-center gap-2 text-sm",
+          forecastOverBudget
+            ? "text-red-600 dark:text-red-400"
+            : forecastWarning
+              ? "text-amber-600 dark:text-amber-400"
+              : "text-gray-500 dark:text-gray-400"
+        )}>
+          <TrendingUp size={14} />
+          <span>EOM Forecast</span>
+        </div>
+        <p className={cn(
+          "mt-1 text-xl font-bold sm:text-2xl",
+          forecastOverBudget
+            ? "text-red-700 dark:text-red-400"
+            : forecastWarning
+              ? "text-amber-700 dark:text-amber-400"
+              : "text-gray-900 dark:text-white"
+        )}>
+          {forecast.projectedTotal > 0 ? formatCurrency(forecast.projectedTotal) : "—"}
+        </p>
+        <p className="mt-1 text-xs text-gray-400">
+          {confidenceLabel}
+          {forecast.projectedTotal > 0 && salary > 0 && (
+            <> · {Math.round((forecast.projectedTotal / salary) * 100)}% of budget</>
+          )}
         </p>
       </div>
     </div>

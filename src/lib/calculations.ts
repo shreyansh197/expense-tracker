@@ -1,4 +1,4 @@
-import type { Expense, CategoryId, DailyTotal, CategoryTotal, StackedDailyTotal } from "@/types";
+import type { Expense, CategoryId, DailyTotal, CategoryTotal, StackedDailyTotal, Forecast, AnomalyResult } from "@/types";
 
 /** Filter active (non-deleted) expenses for a given month/year */
 function activeExpenses(expenses: Expense[], month: number, year: number): Expense[] {
@@ -204,4 +204,107 @@ export function getStackedDailyTotals(
     result.push(row);
   }
   return result;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// EOM FORECAST — linear projection: (totalSoFar / elapsedDays) × daysInMonth
+// ═══════════════════════════════════════════════════════════════
+
+/**
+ * Project end-of-month spend using simple daily-average extrapolation.
+ *
+ * Formula:  projected = (monthlyTotal / elapsedDays) × daysInMonth
+ *
+ * Confidence tiers:
+ *   - "low"    if elapsed <  7 days  (too little data)
+ *   - "medium" if elapsed < 15 days
+ *   - "high"   if elapsed >= 15 days
+ */
+export function getEomForecast(
+  monthlyTotal: number,
+  salary: number,
+  elapsedDays: number,
+  daysInMonth: number
+): Forecast {
+  if (elapsedDays <= 0) {
+    return { projectedTotal: 0, projectedRemaining: salary, confidence: "low" };
+  }
+  const avgPerDay = monthlyTotal / elapsedDays;
+  const projectedTotal = Math.round(avgPerDay * daysInMonth);
+  const projectedRemaining = salary - projectedTotal;
+  const confidence: Forecast["confidence"] =
+    elapsedDays < 7 ? "low" : elapsedDays < 15 ? "medium" : "high";
+
+  return { projectedTotal, projectedRemaining, confidence };
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ANOMALY DETECTION — Median Absolute Deviation (MAD)
+// ═══════════════════════════════════════════════════════════════
+
+/** Compute the median of a sorted-ascending number array. */
+function median(sorted: number[]): number {
+  const n = sorted.length;
+  if (n === 0) return 0;
+  const mid = Math.floor(n / 2);
+  return n % 2 === 0 ? (sorted[mid - 1] + sorted[mid]) / 2 : sorted[mid];
+}
+
+/**
+ * Detect anomalously large expenses within each category using MAD.
+ *
+ * MAD = median(|xi − median(X)|)
+ *
+ * A "modified z-score" for each expense is:
+ *   z = 0.6745 × (amount − categoryMedian) / MAD
+ *
+ * Expenses with z > threshold (default 3.0) are flagged.
+ *
+ * Returns only flagged expenses, sorted by z-score descending.
+ */
+export function detectAnomalies(
+  expenses: Expense[],
+  month: number,
+  year: number,
+  threshold: number = 3.0
+): AnomalyResult[] {
+  const active = activeExpenses(expenses, month, year);
+  if (active.length < 3) return []; // need meaningful data
+
+  // Group amounts by category
+  const catAmounts = new Map<string, number[]>();
+  for (const e of active) {
+    const arr = catAmounts.get(e.category) || [];
+    arr.push(e.amount);
+    catAmounts.set(e.category, arr);
+  }
+
+  const anomalies: AnomalyResult[] = [];
+
+  for (const [cat, amounts] of catAmounts) {
+    if (amounts.length < 3) continue; // need at least 3 txns in category
+    const sorted = [...amounts].sort((a, b) => a - b);
+    const med = median(sorted);
+    const deviations = sorted.map((v) => Math.abs(v - med)).sort((a, b) => a - b);
+    const mad = median(deviations);
+
+    if (mad === 0) continue; // all same amount → no anomaly possible
+
+    // Check each expense in this category
+    for (const e of active.filter((x) => x.category === cat)) {
+      const z = (0.6745 * (e.amount - med)) / mad;
+      if (z > threshold) {
+        anomalies.push({
+          expense: e,
+          zScore: Math.round(z * 10) / 10,
+          categoryMedian: Math.round(med),
+          categoryMad: Math.round(mad),
+        });
+      }
+    }
+  }
+
+  // Highest z-score first
+  anomalies.sort((a, b) => b.zScore - a.zScore);
+  return anomalies;
 }

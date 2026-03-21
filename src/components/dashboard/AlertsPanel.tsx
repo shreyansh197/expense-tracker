@@ -1,10 +1,10 @@
 "use client";
 
-import { AlertTriangle, TrendingUp, ArrowRight } from "lucide-react";
+import { AlertTriangle, TrendingUp, ArrowRight, Zap, Target } from "lucide-react";
 import { cn, formatCurrency } from "@/lib/utils";
 import { buildCategoryMap } from "@/lib/categories";
 import { useSettings } from "@/hooks/useSettings";
-import type { CategoryTotal } from "@/types";
+import type { CategoryTotal, Forecast, AnomalyResult } from "@/types";
 
 interface AlertsPanelProps {
   categoryTotals: CategoryTotal[];
@@ -12,6 +12,8 @@ interface AlertsPanelProps {
   budgetUsedPercent: number;
   avgDaily: number;
   paceToStayUnder: number;
+  forecast?: Forecast;
+  anomalies?: AnomalyResult[];
   onCategoryClick?: (slug: string) => void;
 }
 
@@ -29,6 +31,8 @@ export function AlertsPanel({
   budgetUsedPercent,
   avgDaily,
   paceToStayUnder,
+  forecast,
+  anomalies,
   onCategoryClick,
 }: AlertsPanelProps) {
   const { settings } = useSettings();
@@ -88,6 +92,32 @@ export function AlertsPanel({
     }
   }
 
+  // ── EOM Forecast alert ──
+  if (forecast && forecast.projectedTotal > 0 && forecast.confidence !== "low") {
+    if (forecast.projectedRemaining < 0) {
+      alerts.push({
+        id: "forecast-over",
+        severity: "warning",
+        message: `On track to overspend by ${formatCurrency(Math.abs(forecast.projectedRemaining))} this month`,
+        detail: `Projected: ${formatCurrency(forecast.projectedTotal)} · ${forecast.confidence} confidence`,
+      });
+    }
+  }
+
+  // ── Anomaly alerts (show top 3) ──
+  if (anomalies && anomalies.length > 0) {
+    for (const a of anomalies.slice(0, 3)) {
+      const label = catMap[a.expense.category]?.label || a.expense.category;
+      alerts.push({
+        id: `anomaly-${a.expense.id}`,
+        severity: "info",
+        message: `Unusual: ${formatCurrency(a.expense.amount)} in ${label}${a.expense.remark ? ` — "${a.expense.remark}"` : ""}`,
+        detail: `${a.zScore}× above typical (median ${formatCurrency(a.categoryMedian)})`,
+        action: () => onCategoryClick?.(a.expense.category),
+      });
+    }
+  }
+
   if (alerts.length === 0) return null;
 
   // Sort: critical first, then warning, then info
@@ -110,6 +140,8 @@ export function AlertsPanel({
         >
           {alert.severity === "critical" ? (
             <AlertTriangle size={16} className="mt-0.5 shrink-0" />
+          ) : alert.severity === "info" ? (
+            <Zap size={16} className="mt-0.5 shrink-0" />
           ) : (
             <TrendingUp size={16} className="mt-0.5 shrink-0" />
           )}
