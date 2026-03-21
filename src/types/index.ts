@@ -71,6 +71,12 @@ export interface DailyTotal {
   total: number;
 }
 
+export interface StackedDailyTotal {
+  day: number;
+  total: number;
+  [category: string]: number;
+}
+
 export interface CategoryTotal {
   category: CategoryId;
   total: number;

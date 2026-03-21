@@ -1,4 +1,4 @@
-import type { Expense, CategoryId, DailyTotal, CategoryTotal } from "@/types";
+import type { Expense, CategoryId, DailyTotal, CategoryTotal, StackedDailyTotal } from "@/types";
 
 /** Filter active (non-deleted) expenses for a given month/year */
 function activeExpenses(expenses: Expense[], month: number, year: number): Expense[] {
@@ -180,4 +180,28 @@ export function getElapsedDays(month: number, year: number): number {
   }
   // Future month
   return 0;
+}
+
+/**
+ * Stacked daily totals — each day has a total + per-category breakdown
+ */
+export function getStackedDailyTotals(
+  expenses: Expense[],
+  categories: CategoryId[],
+  month: number,
+  year: number,
+  daysInMonth: number
+): StackedDailyTotal[] {
+  const active = activeExpenses(expenses, month, year);
+  const result: StackedDailyTotal[] = [];
+  for (let day = 1; day <= daysInMonth; day++) {
+    const row: StackedDailyTotal = { day, total: 0 };
+    const dayExpenses = active.filter((e) => e.day === day);
+    for (const e of dayExpenses) {
+      row[e.category] = (row[e.category] as number || 0) + e.amount;
+      row.total += e.amount;
+    }
+    result.push(row);
+  }
+  return result;
 }

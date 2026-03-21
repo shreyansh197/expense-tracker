@@ -4,10 +4,10 @@ import {
   Wallet,
   PiggyBank,
   TrendingDown,
-  CalendarDays,
   AlertTriangle,
   Clock,
   Gauge,
+  Percent,
 } from "lucide-react";
 import { cn, formatCurrency } from "@/lib/utils";
 import { BUDGET_WARNING_THRESHOLD } from "@/lib/constants";
@@ -24,6 +24,7 @@ interface KpiCardsProps {
   topCategory: CategoryTotal | null;
   daysRemaining: number;
   paceToStayUnder: number;
+  expenseCount: number;
 }
 
 export function KpiCards({
@@ -35,15 +36,17 @@ export function KpiCards({
   topCategory,
   daysRemaining,
   paceToStayUnder,
+  expenseCount,
 }: KpiCardsProps) {
   const isOverspent = remaining < 0;
   const isWarning = !isOverspent && budgetUsedPercent >= BUDGET_WARNING_THRESHOLD;
   const { settings } = useSettings();
   const catMap = buildCategoryMap(settings.customCategories);
   const paceExceeded = avgDaily > paceToStayUnder && paceToStayUnder > 0;
+  const savingsRate = salary > 0 ? Math.round((remaining / salary) * 100) : 0;
 
   return (
-    <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+    <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
       {/* Total Spent */}
       <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900">
         <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
@@ -66,10 +69,12 @@ export function KpiCards({
             style={{ width: `${Math.min(budgetUsedPercent, 100)}%` }}
           />
         </div>
-        <p className="mt-1 text-xs text-gray-400">{budgetUsedPercent}% of budget</p>
+        <p className="mt-1 text-xs text-gray-400">
+          {budgetUsedPercent}% of budget · {expenseCount} txns
+        </p>
       </div>
 
-      {/* Remaining + Days Left — highlighted card */}
+      {/* Remaining + Days Left */}
       <div
         className={cn(
           "rounded-xl border p-4 shadow-sm",
@@ -95,7 +100,7 @@ export function KpiCards({
         </div>
         <p
           className={cn(
-            "mt-1 text-2xl font-bold",
+            "mt-1 text-xl font-bold sm:text-2xl",
             isOverspent
               ? "text-red-700 dark:text-red-400"
               : isWarning
@@ -156,6 +161,27 @@ export function KpiCards({
         </p>
         <p className="mt-1 text-xs text-gray-400">
           Currently {formatCurrency(avgDaily)}/day
+        </p>
+      </div>
+
+      {/* Savings Rate */}
+      <div className="col-span-2 rounded-xl border border-gray-200 bg-white p-4 shadow-sm lg:col-span-1 dark:border-gray-800 dark:bg-gray-900">
+        <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+          <Percent size={14} />
+          <span>Savings Rate</span>
+        </div>
+        <p className={cn(
+          "mt-1 text-xl font-bold sm:text-2xl",
+          savingsRate < 0
+            ? "text-red-600 dark:text-red-400"
+            : savingsRate < 20
+              ? "text-amber-600 dark:text-amber-400"
+              : "text-emerald-600 dark:text-emerald-400"
+        )}>
+          {savingsRate}%
+        </p>
+        <p className="mt-1 text-xs text-gray-400">
+          {remaining >= 0 ? `Saving ${formatCurrency(remaining)}` : `Over by ${formatCurrency(Math.abs(remaining))}`}
         </p>
       </div>
     </div>

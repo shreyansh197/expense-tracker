@@ -9,6 +9,7 @@ import { SyncIndicator } from "@/components/sync/SyncIndicator";
 import { KpiCards } from "@/components/dashboard/KpiCards";
 import { CategoryChart, CategoryLegend } from "@/components/dashboard/CategoryChart";
 import { DailyTrendChart } from "@/components/dashboard/DailyTrendChart";
+import { AlertsPanel } from "@/components/dashboard/AlertsPanel";
 import { useExpenses } from "@/hooks/useExpenses";
 import { useSettings } from "@/hooks/useSettings";
 import { useCalculations } from "@/hooks/useCalculations";
@@ -33,6 +34,7 @@ export default function DashboardPage() {
     avgDaily,
     categoryTotals,
     dailyTotals,
+    stackedDailyTotals,
     topCategory,
     daysRemaining,
     paceToStayUnder,
@@ -55,7 +57,7 @@ export default function DashboardPage() {
 
   return (
     <AppShell>
-      <div className="mx-auto max-w-4xl space-y-6 p-4 lg:p-6">
+      <div className="mx-auto max-w-5xl space-y-6 p-4 lg:p-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <MonthSwitcher />
@@ -72,6 +74,17 @@ export default function DashboardPage() {
           topCategory={topCategory}
           daysRemaining={daysRemaining}
           paceToStayUnder={paceToStayUnder}
+          expenseCount={expenses.length}
+        />
+
+        {/* Alerts */}
+        <AlertsPanel
+          categoryTotals={categoryTotals}
+          categoryBudgets={settings.categoryBudgets}
+          budgetUsedPercent={budgetUsedPercent}
+          avgDaily={avgDaily}
+          paceToStayUnder={paceToStayUnder}
+          onCategoryClick={handleCategoryClick}
         />
 
         {/* Charts Row */}
@@ -80,7 +93,12 @@ export default function DashboardPage() {
             <h3 className="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
               Category Breakdown
             </h3>
-            <CategoryChart categoryTotals={categoryTotals} onCategoryClick={handleCategoryClick} />
+            <CategoryChart
+              categoryTotals={categoryTotals}
+              onCategoryClick={handleCategoryClick}
+              categoryBudgets={settings.categoryBudgets}
+              expenses={expenses}
+            />
             <div className="mt-3">
               <CategoryLegend categoryTotals={categoryTotals} onCategoryClick={handleCategoryClick} categoryBudgets={settings.categoryBudgets} />
             </div>
@@ -90,7 +108,11 @@ export default function DashboardPage() {
             <h3 className="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
               Daily Spending Trend
             </h3>
-            <DailyTrendChart dailyTotals={dailyTotals} onBarClick={handleDayClick} />
+            <DailyTrendChart
+              dailyTotals={dailyTotals}
+              stackedDailyTotals={stackedDailyTotals}
+              onBarClick={handleDayClick}
+            />
           </div>
         </div>
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import {
   PieChart,
   Pie,
@@ -7,22 +8,69 @@ import {
   ResponsiveContainer,
   Tooltip,
 } from "recharts";
+import { Table2, PieChart as PieChartIcon } from "lucide-react";
 import { buildCategoryMap } from "@/lib/categories";
 import { formatCurrency } from "@/lib/utils";
 import { useSettings } from "@/hooks/useSettings";
-import type { CategoryTotal } from "@/types";
+import type { CategoryTotal, Expense } from "@/types";
 
 interface CategoryChartProps {
   categoryTotals: CategoryTotal[];
   onCategoryClick?: (categorySlug: string) => void;
   categoryBudgets?: Record<string, number>;
+  expenses?: Expense[];
 }
 
-export function CategoryChart({ categoryTotals, onCategoryClick }: CategoryChartProps) {
+function CustomTooltip({ active, payload, total, catMap, budgets, expenseCountMap }: {
+  active?: boolean;
+  payload?: Array<{ name: string; value: number; payload: { slug: string; color: string } }>;
+  total: number;
+  catMap: Record<string, { label: string; color: string }>;
+  budgets: Record<string, number>;
+  expenseCountMap: Record<string, number>;
+}) {
+  if (!active || !payload?.[0]) return null;
+  const item = payload[0];
+  const pct = total > 0 ? Math.round((item.value / total) * 100) : 0;
+  const budget = budgets[item.payload.slug];
+  const count = expenseCountMap[item.payload.slug] || 0;
+
+  return (
+    <div className="rounded-lg border border-gray-200 bg-white px-3 py-2 shadow-lg text-xs dark:border-gray-700 dark:bg-gray-900">
+      <p className="font-semibold text-gray-900 dark:text-white">{item.name}</p>
+      <p className="text-gray-600 dark:text-gray-400">
+        {formatCurrency(item.value)} · {pct}% · {count} txn{count !== 1 ? "s" : ""}
+      </p>
+      {budget && (
+        <p className={item.value > budget ? "text-red-500 mt-0.5" : "text-gray-400 mt-0.5"}>
+          Budget: {formatCurrency(budget)} ({Math.round((item.value / budget) * 100)}%)
+        </p>
+      )}
+    </div>
+  );
+}
+
+export function CategoryChart({ categoryTotals, onCategoryClick, categoryBudgets, expenses }: CategoryChartProps) {
+  const [showTable, setShowTable] = useState(false);
   const { settings } = useSettings();
   const catMap = buildCategoryMap(settings.customCategories);
-  const data = categoryTotals
-    .filter((c) => c.total > 0)
+  const budgets = categoryBudgets || {};
+
+  const nonZero = categoryTotals.filter((c) => c.total > 0);
+  const total = nonZero.reduce((sum, c) => sum + c.total, 0);
+
+  // Count expenses per category
+  const expenseCountMap: Record<string, number> = {};
+  if (expenses) {
+    for (const e of expenses) {
+      if (e.deletedAt === null) {
+        expenseCountMap[e.category] = (expenseCountMap[e.category] || 0) + 1;
+      }
+    }
+  }
+
+  const data = nonZero
+    .sort((a, b) => b.total - a.total)
     .map((c) => ({
       name: catMap[c.category]?.label || c.category,
       value: c.total,
@@ -39,35 +87,107 @@ export function CategoryChart({ categoryTotals, onCategoryClick }: CategoryChart
   }
 
   return (
-    <div className="h-[220px] w-full">
-      <ResponsiveContainer width="100%" height="100%">
-        <PieChart>
-          <Pie
-            data={data}
-            cx="50%"
-            cy="50%"
-            innerRadius={55}
-            outerRadius={85}
-            paddingAngle={3}
-            dataKey="value"
-            stroke="none"
-            style={{ cursor: onCategoryClick ? "pointer" : undefined }}
-            onClick={(_, idx) => onCategoryClick?.(data[idx].slug)}
-          >
-            {data.map((entry, idx) => (
-              <Cell key={idx} fill={entry.color} />
-            ))}
-          </Pie>
-          <Tooltip
-            formatter={(value: number) => formatCurrency(value)}
-            contentStyle={{
-              borderRadius: "8px",
-              border: "1px solid #e5e7eb",
-              fontSize: "13px",
-            }}
-          />
-        </PieChart>
-      </ResponsiveContainer>
+    <div>
+      <div className="mb-2 flex justify-end">
+        <button
+          onClick={() => setShowTable((v) => !v)}
+          className="flex items-center gap-1 rounded-md px-2 py-1 text-xs text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
+          aria-label={showTable ? "Show chart" : "Show table"}
+        >
+          {showTable ? <PieChartIcon size={13} /> : <Table2 size={13} />}
+          {showTable ? "Chart" : "Table"}
+        </button>
+      </div>
+
+      {showTable ? (
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm" role="table">
+            <thead>
+              <tr className="border-b border-gray-100 text-left text-xs text-gray-500 dark:border-gray-800 dark:text-gray-400">
+                <th className="pb-2 font-medium">Category</th>
+                <th className="pb-2 text-right font-medium">Amount</th>
+                <th className="pb-2 text-right font-medium">%</th>
+                <th className="pb-2 text-right font-medium">Budget</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.map((d) => {
+                const pct = total > 0 ? Math.round((d.value / total) * 100) : 0;
+                const budget = budgets[d.slug];
+                const budgetPct = budget ? Math.round((d.value / budget) * 100) : 0;
+                return (
+                  <tr
+                    key={d.slug}
+                    className="border-b border-gray-50 hover:bg-gray-50 dark:border-gray-800/50 dark:hover:bg-gray-800/30 cursor-pointer"
+                    onClick={() => onCategoryClick?.(d.slug)}
+                  >
+                    <td className="py-2">
+                      <div className="flex items-center gap-2">
+                        <div className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: d.color }} />
+                        <span className="text-gray-700 dark:text-gray-300">{d.name}</span>
+                      </div>
+                    </td>
+                    <td className="py-2 text-right font-medium text-gray-900 dark:text-white">
+                      {formatCurrency(d.value)}
+                    </td>
+                    <td className="py-2 text-right text-gray-500 dark:text-gray-400">{pct}%</td>
+                    <td className="py-2 text-right">
+                      {budget ? (
+                        <span className={budgetPct >= 100 ? "text-red-500" : budgetPct >= 80 ? "text-amber-500" : "text-gray-400"}>
+                          {budgetPct}%
+                        </span>
+                      ) : (
+                        <span className="text-gray-300 dark:text-gray-600">—</span>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+            <tfoot>
+              <tr className="font-medium">
+                <td className="pt-2 text-gray-700 dark:text-gray-300">Total</td>
+                <td className="pt-2 text-right text-gray-900 dark:text-white">{formatCurrency(total)}</td>
+                <td className="pt-2 text-right text-gray-500">100%</td>
+                <td />
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      ) : (
+        <div className="h-[220px] w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie
+                data={data}
+                cx="50%"
+                cy="50%"
+                innerRadius={55}
+                outerRadius={85}
+                paddingAngle={3}
+                dataKey="value"
+                stroke="none"
+                style={{ cursor: onCategoryClick ? "pointer" : undefined }}
+                onClick={(_, idx) => onCategoryClick?.(data[idx].slug)}
+              >
+                {data.map((entry, idx) => (
+                  <Cell key={idx} fill={entry.color} />
+                ))}
+              </Pie>
+              <Tooltip
+                content={
+                  <CustomTooltip
+                    total={total}
+                    catMap={catMap as Record<string, { label: string; color: string }>}
+                    budgets={budgets}
+                    expenseCountMap={expenseCountMap}
+                  />
+                }
+              />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+      )}
     </div>
   );
 }

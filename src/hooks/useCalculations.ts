@@ -6,6 +6,7 @@ import {
   getMonthlySaving,
   getAllCategoryTotals,
   getAllDailyTotals,
+  getStackedDailyTotals,
   getAverageDailySpend,
   getBudgetUsedPercent,
   getTopCategory,
@@ -14,7 +15,7 @@ import {
   getPaceToStayUnder,
 } from "@/lib/calculations";
 import { getDaysInMonth } from "@/lib/utils";
-import type { Expense, CategoryId, DailyTotal, CategoryTotal } from "@/types";
+import type { Expense, CategoryId, DailyTotal, CategoryTotal, StackedDailyTotal } from "@/types";
 
 export function useCalculations(
   expenses: Expense[],
@@ -56,6 +57,11 @@ export function useCalculations(
     [expenses, month, year, daysInMonth]
   );
 
+  const stackedDailyTotals: StackedDailyTotal[] = useMemo(
+    () => getStackedDailyTotals(expenses, categories, month, year, daysInMonth),
+    [expenses, categories, month, year, daysInMonth]
+  );
+
   const topCategory = useMemo(
     () => getTopCategory(expenses, categories, month, year),
     [expenses, categories, month, year]
@@ -75,6 +81,7 @@ export function useCalculations(
     avgDaily,
     categoryTotals,
     dailyTotals,
+    stackedDailyTotals,
     topCategory,
     daysInMonth,
     elapsedDays,
