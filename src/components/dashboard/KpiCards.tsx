@@ -14,6 +14,7 @@ import { cn, formatCurrency } from "@/lib/utils";
 import { BUDGET_WARNING_THRESHOLD } from "@/lib/constants";
 import { buildCategoryMap } from "@/lib/categories";
 import { useSettings } from "@/hooks/useSettings";
+import { InfoTooltip } from "@/components/ui/InfoTooltip";
 import type { CategoryTotal, Forecast } from "@/types";
 
 interface KpiCardsProps {
@@ -210,6 +211,17 @@ export function KpiCards({
         )}>
           <TrendingUp size={14} />
           <span>EOM Forecast</span>
+          <InfoTooltip title="End-of-Month Forecast">
+            <p>Projects your total spend by month end using your average daily spending so far.</p>
+            <p className="mt-1"><strong>Formula:</strong> (total spent ÷ days elapsed) × days in month</p>
+            <p className="mt-1"><strong>Confidence:</strong></p>
+            <ul className="ml-3 list-disc mt-0.5">
+              <li><strong>Low</strong> — less than 7 days of data</li>
+              <li><strong>Medium</strong> — 7–14 days of data</li>
+              <li><strong>High</strong> — 15+ days of data</li>
+            </ul>
+            <p className="mt-1">Turns <span className="text-amber-600 font-medium">amber</span> when projected to use 80%+ of budget, <span className="text-red-600 font-medium">red</span> when projected to overshoot.</p>
+          </InfoTooltip>
         </div>
         <p className={cn(
           "mt-1 text-xl font-bold sm:text-2xl",

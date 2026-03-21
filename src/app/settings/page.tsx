@@ -14,6 +14,7 @@ import type { Expense } from "@/types";
 import { CATEGORY_MAP, buildCategoryMap, getAllCategories, PRESET_COLORS, DEFAULT_CATEGORIES_META } from "@/lib/categories";
 import { InstallButton } from "@/components/pwa/InstallButton";
 import { useToast } from "@/components/ui/Toast";
+import { useConfirm } from "@/components/ui/ConfirmDialog";
 import { getSyncCode, clearSyncCode } from "@/lib/deviceId";
 import { supabase } from "@/lib/supabase";
 import { CategoryBudgetManager } from "@/components/settings/CategoryBudgetManager";
@@ -26,6 +27,7 @@ export default function SettingsPage() {
   const { expenses } = useExpenses(currentMonth, currentYear);
   const { theme, setTheme } = useTheme();
   const { toast } = useToast();
+  const { confirm } = useConfirm();
 
   const [salary, setSalary] = useState(settings.salary.toString());
   const [saving, setSaving] = useState(false);
@@ -393,8 +395,14 @@ export default function SettingsPage() {
             Create a new account or join a different sync code. Your existing data stays safe in the cloud under the old sync code.
           </p>
           <button
-            onClick={() => {
-              if (!window.confirm("Start fresh? You can always rejoin your old sync code later.")) return;
+            onClick={async () => {
+              const ok = await confirm({
+                title: "Start fresh?",
+                message: "Create a new account or join a different sync code. Your existing data stays safe in the cloud under the old sync code.",
+                confirmLabel: "Start Fresh",
+                variant: "warning",
+              });
+              if (!ok) return;
               clearSyncCode();
               resetSettings();
               window.location.href = "/";
@@ -421,11 +429,15 @@ export default function SettingsPage() {
                 disabled={deleting}
                 onClick={async () => {
                   if (!syncCode) return;
-                  const confirmed = window.prompt(
-                    `This will permanently delete ALL your expenses. Type your sync code (${syncCode}) to confirm:`
-                  );
-                  if (confirmed?.toUpperCase().trim() !== syncCode) {
-                    if (confirmed !== null) toast("Sync code didn't match. Deletion cancelled.", "error");
+                  const ok = await confirm({
+                    title: "Delete all data",
+                    message: "This will permanently delete ALL your expenses. This cannot be undone.",
+                    confirmLabel: "Delete Everything",
+                    variant: "danger",
+                    requireInput: syncCode,
+                    requireInputLabel: `Type your sync code (${syncCode}) to confirm:`,
+                  });
+                  if (!ok) {
                     return;
                   }
                   setDeleting(true);

@@ -4,6 +4,7 @@ import { AlertTriangle, TrendingUp, ArrowRight, Zap, Target } from "lucide-react
 import { cn, formatCurrency } from "@/lib/utils";
 import { buildCategoryMap } from "@/lib/categories";
 import { useSettings } from "@/hooks/useSettings";
+import { InfoTooltip } from "@/components/ui/InfoTooltip";
 import type { CategoryTotal, Forecast, AnomalyResult } from "@/types";
 
 interface AlertsPanelProps {
@@ -126,6 +127,17 @@ export function AlertsPanel({
 
   return (
     <div className="space-y-2" role="alert" aria-label="Budget alerts">
+      {alerts.some((a) => a.id.startsWith("anomaly-")) && (
+        <div className="flex items-center gap-1.5 mb-1">
+          <InfoTooltip title="Anomaly Detection (MAD)">
+            <p>Flags unusually large expenses compared to your typical spending in each category.</p>
+            <p className="mt-1"><strong>How it works:</strong> For each category, we calculate the median amount and the Median Absolute Deviation (MAD). Expenses that are more than 3× MAD above the median are flagged.</p>
+            <p className="mt-1">This helps you spot one-off big purchases or accidental double charges that stand out from your normal pattern.</p>
+            <p className="mt-1 text-[10px] opacity-60">Requires at least 3 transactions per category to detect anomalies.</p>
+          </InfoTooltip>
+          <span className="text-[10px] text-gray-400">Anomaly detection active</span>
+        </div>
+      )}
       {alerts.map((alert) => (
         <div
           key={alert.id}

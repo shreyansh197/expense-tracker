@@ -5,12 +5,14 @@ import { useSettings } from "@/hooks/useSettings";
 import { getAllCategories } from "@/lib/categories";
 import { formatCurrency } from "@/lib/utils";
 import { useToast } from "@/components/ui/Toast";
+import { useConfirm } from "@/components/ui/ConfirmDialog";
 import { Plus, Trash2, ToggleLeft, ToggleRight } from "lucide-react";
 import type { RecurringExpense, CategoryId } from "@/types";
 
 export function RecurringManager() {
   const { settings, updateSettings } = useSettings();
   const { toast } = useToast();
+  const { confirm } = useConfirm();
   const allCategories = getAllCategories(settings.customCategories, settings.hiddenDefaults);
   const recurring = settings.recurringExpenses || [];
 
@@ -57,8 +59,14 @@ export function RecurringManager() {
     });
   };
 
-  const handleDelete = (id: string) => {
-    if (!window.confirm("Remove this recurring expense?")) return;
+  const handleDelete = async (id: string) => {
+    const ok = await confirm({
+      title: "Remove recurring expense",
+      message: "Are you sure you want to remove this recurring expense?",
+      confirmLabel: "Remove",
+      variant: "danger",
+    });
+    if (!ok) return;
     updateSettings({
       recurringExpenses: recurring.filter((r) => r.id !== id),
     });

@@ -6,6 +6,7 @@ import { formatCurrency } from "@/lib/utils";
 import { CategoryBadge } from "./CategoryChips";
 import { useUIStore } from "@/stores/uiStore";
 import { useToast } from "@/components/ui/Toast";
+import { useConfirm } from "@/components/ui/ConfirmDialog";
 import type { Expense, CategoryId } from "@/types";
 
 interface ExpenseListProps {
@@ -35,9 +36,16 @@ export function ExpenseList({
 }: ExpenseListProps) {
   const openEditForm = useUIStore((s) => s.openEditForm);
   const { toast } = useToast();
+  const { confirm } = useConfirm();
 
-  const handleDelete = (id: string) => {
-    if (window.confirm("Delete this expense?")) {
+  const handleDelete = async (id: string) => {
+    const ok = await confirm({
+      title: "Delete expense",
+      message: "Are you sure you want to delete this expense?",
+      confirmLabel: "Delete",
+      variant: "danger",
+    });
+    if (ok) {
       onDelete(id);
       toast("Expense deleted", "error");
     }
