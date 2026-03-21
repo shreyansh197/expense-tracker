@@ -62,24 +62,28 @@ export function useExpenses(month: number, year: number) {
     // Listen for changes from other useExpenses instances (e.g. modal)
     expenseListeners.add(fetchExpenses);
 
-    const channel = supabase
-      .channel(`expenses-${month}-${year}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "expenses",
-        },
-        () => {
-          fetchExpenses();
-        }
-      )
-      .subscribe();
+    const syncCode = getSyncCode();
+    const channel = syncCode
+      ? supabase
+          .channel(`expenses-${syncCode}-${month}-${year}`)
+          .on(
+            "postgres_changes",
+            {
+              event: "*",
+              schema: "public",
+              table: "expenses",
+              filter: `device_id=eq.${syncCode}`,
+            },
+            () => {
+              fetchExpenses();
+            }
+          )
+          .subscribe()
+      : null;
 
     return () => {
       expenseListeners.delete(fetchExpenses);
-      supabase.removeChannel(channel);
+      if (channel) supabase.removeChannel(channel);
     };
   }, [month, year, fetchExpenses]);
 
