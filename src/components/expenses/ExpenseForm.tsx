@@ -38,6 +38,7 @@ export function ExpenseForm({
   const [remark, setRemark] = useState(editExpense?.remark || "");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const submittingRef = useRef(false);
 
   const amountRef = useRef<HTMLInputElement>(null);
 
@@ -57,6 +58,7 @@ export function ExpenseForm({
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
+      if (submittingRef.current) return;
       setError("");
 
       const parsedAmount = parseFloat(amount);
@@ -71,6 +73,7 @@ export function ExpenseForm({
         return;
       }
 
+      submittingRef.current = true;
       setSubmitting(true);
       try {
         if (editExpense && onUpdate) {
@@ -97,6 +100,7 @@ export function ExpenseForm({
       } catch (err) {
         setError("Failed to save expense. Please try again.");
       } finally {
+        submittingRef.current = false;
         setSubmitting(false);
       }
     },
