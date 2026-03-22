@@ -66,7 +66,7 @@ export function useBusinessCalculations(
       .map(([tag, data]) => ({ tag, ...data }))
       .sort((a, b) => b.expected - a.expected);
 
-    // Monthly collections (last 6 months)
+    // Monthly collections (last 6 months) — only count non-cancelled ledger payments
     const monthlyMap = new Map<string, { received: number; expected: number }>();
     for (let i = 5; i >= 0; i--) {
       const d = new Date();
@@ -75,6 +75,7 @@ export function useBusinessCalculations(
       monthlyMap.set(key, { received: 0, expected: 0 });
     }
     for (const p of allPayments) {
+      if (!nonCancelledIds.has(p.ledgerId)) continue;
       const d = new Date(p.date);
       const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
       if (monthlyMap.has(key)) {
