@@ -70,7 +70,7 @@ export function CategoryBadge({ category }: { category: CategoryId }) {
 
   return (
     <span
-      className="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium"
+      className="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium max-w-full truncate"
       style={{
         backgroundColor: meta.bgColor,
         color: meta.color,

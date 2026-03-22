@@ -187,9 +187,11 @@ export default function DashboardPage() {
                   key={e.id}
                   className="flex items-center justify-between rounded-lg px-2 py-2 hover:bg-gray-50 dark:hover:bg-gray-800/50"
                 >
-                  <div className="flex items-center gap-3 min-w-0 flex-1">
-                    <CategoryBadge category={e.category} />
-                    <div className="min-w-0 flex-1">
+                  <div className="grid min-w-0 flex-1" style={{ gridTemplateColumns: "5.5rem 1fr", gap: "0.75rem", alignItems: "center" }}>
+                    <div className="w-[5.5rem] flex justify-start">
+                      <CategoryBadge category={e.category} />
+                    </div>
+                    <div className="min-w-0">
                       <div className="flex items-center gap-1.5">
                         {e.isRecurring && <Repeat className="shrink-0 h-3 w-3 text-blue-500" />}
                         <p className="text-xs text-gray-400">
