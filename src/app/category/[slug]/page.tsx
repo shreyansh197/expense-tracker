@@ -229,7 +229,7 @@ export default function CategoryPage({ params }: { params: Promise<{ slug: strin
                   />
                   <Tooltip
                     formatter={(value: number) => [formatCurrency(value), categoryLabel]}
-                    contentStyle={{ borderRadius: "8px", border: "1px solid #e5e7eb", fontSize: "13px" }}
+                    contentStyle={{ borderRadius: "8px", border: "1px solid #e5e7eb", fontSize: "13px", backgroundColor: "var(--background)", color: "var(--foreground)" }}
                   />
                   <Bar dataKey="total" fill={categoryColor} radius={[4, 4, 0, 0]} />
                 </BarChart>

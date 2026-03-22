@@ -230,6 +230,8 @@ export function DailyTrendChart({ dailyTotals, stackedDailyTotals, activeCategor
                   borderRadius: "8px",
                   border: "1px solid #e5e7eb",
                   fontSize: "13px",
+                  backgroundColor: "var(--background)",
+                  color: "var(--foreground)",
                 }}
               />
               <Bar

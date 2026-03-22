@@ -26,7 +26,7 @@ export function CollectionChart({ data }: CollectionChartProps) {
       )}
       <ResponsiveContainer width="100%" height={220}>
         <BarChart data={formatted} margin={{ top: 5, right: 5, left: -10, bottom: 5 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" className="dark:[&_line]:!stroke-gray-700" />
           <XAxis dataKey="label" tick={{ fontSize: 11 }} />
           <YAxis tick={{ fontSize: 11 }} tickFormatter={(v: number) => `₹${(v / 1000).toFixed(0)}k`} />
           <Tooltip
@@ -34,7 +34,7 @@ export function CollectionChart({ data }: CollectionChartProps) {
               formatCurrency(value),
               name === "received" ? "Received" : "Expected",
             ]}
-            contentStyle={{ fontSize: 12, borderRadius: 8 }}
+            contentStyle={{ fontSize: 12, borderRadius: 8, backgroundColor: "var(--background)", borderColor: "var(--foreground, #e5e7eb)", color: "var(--foreground)" }}
           />
           <Legend
             formatter={(value) => (value === "received" ? "Received" : "Expected")}

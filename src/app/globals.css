@@ -54,6 +54,24 @@ input[type="number"] {
   scrollbar-width: none;
 }
 
+/* Dark mode overrides for recharts */
+.dark .recharts-cartesian-axis-tick text {
+  fill: #D1D5DB !important;
+}
+.dark .recharts-default-tooltip {
+  background-color: #1f2937 !important;
+  border-color: #374151 !important;
+}
+.dark .recharts-default-tooltip .recharts-tooltip-label {
+  color: #E5E7EB !important;
+}
+.dark .recharts-default-tooltip .recharts-tooltip-item {
+  color: #D1D5DB !important;
+}
+.dark .recharts-legend-item-text {
+  color: #D1D5DB !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
