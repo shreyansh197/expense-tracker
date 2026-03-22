@@ -187,18 +187,20 @@ export default function DashboardPage() {
                   key={e.id}
                   className="flex items-center justify-between rounded-lg px-2 py-2 hover:bg-gray-50 dark:hover:bg-gray-800/50"
                 >
-                  <div className="flex items-center gap-3 min-w-0">
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
                     <CategoryBadge category={e.category} />
-                    <div className="min-w-0">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-1.5">
+                        {e.isRecurring && <Repeat className="shrink-0 h-3 w-3 text-blue-500" />}
+                        <p className="text-xs text-gray-400">
+                          {e.day} {getMonthName(currentMonth).slice(0, 3)}
+                        </p>
+                      </div>
                       {e.remark && (
-                        <p className="truncate text-sm text-gray-700 dark:text-gray-300">
-                          {e.isRecurring && <Repeat className="mr-1 inline h-3 w-3 text-blue-500" />}
+                        <p className="truncate text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                           {e.remark}
                         </p>
                       )}
-                      <p className="text-xs text-gray-400">
-                        {e.day} {getMonthName(currentMonth).slice(0, 3)} {currentYear}
-                      </p>
                     </div>
                   </div>
                   <span className="ml-3 shrink-0 text-sm font-semibold text-gray-900 dark:text-white">

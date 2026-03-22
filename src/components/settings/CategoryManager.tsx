@@ -92,17 +92,25 @@ export function CategoryManager() {
   };
 
   const handleBudgetSave = (catId: CategoryId) => {
-    const val = parseFloat(budgetValue);
+    const trimmed = budgetValue.trim();
+    const next = { ...budgets };
+    // Empty or zero → remove the limit
+    if (trimmed === "" || parseFloat(trimmed) === 0) {
+      delete next[catId];
+      updateSettings({ categoryBudgets: next });
+      setBudgetEditId(null);
+      toast("Budget removed");
+      return;
+    }
+    const val = parseFloat(trimmed);
     if (isNaN(val) || val < 0) {
       toast("Enter a valid amount", "error");
       return;
     }
-    const next = { ...budgets };
-    if (val === 0) delete next[catId];
-    else next[catId] = val;
+    next[catId] = val;
     updateSettings({ categoryBudgets: next });
     setBudgetEditId(null);
-    toast(val === 0 ? "Budget removed" : "Budget saved");
+    toast("Budget saved");
   };
 
   const handleRestoreDefaults = () => {
