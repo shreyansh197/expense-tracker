@@ -18,6 +18,7 @@ const businessNav = [
   { href: "/", icon: LayoutDashboard, label: "Home" },
   { href: "/business", icon: Briefcase, label: "Business" },
   { href: "#add", icon: PlusCircle, label: "Add", isAction: true },
+  { href: "/expenses", icon: List, label: "Expenses" },
   { href: "/settings", icon: Settings, label: "Settings" },
 ];
 
