@@ -10,7 +10,7 @@ import { useTheme } from "@/components/providers/ThemeProvider";
 import { formatCurrency } from "@/lib/utils";
 import {
   Wallet, LinkIcon, Tag, Repeat, TrendingUp, Target, Palette,
-  Download, Zap, AlertTriangle, Sun, Moon, Monitor, Smartphone,
+  Download, Zap, AlertTriangle, Sun, Moon, Monitor, Smartphone, Briefcase,
 } from "lucide-react";
 import { InstallButton } from "@/components/pwa/InstallButton";
 import { useToast } from "@/components/ui/Toast";
@@ -61,6 +61,45 @@ export default function SettingsPage() {
         <h1 className="mb-4 text-lg font-bold text-gray-900 dark:text-white">Settings</h1>
 
         <SettingsAccordion defaultOpen={["budget", "sync"]}>
+
+          {/* ─── App Mode ─── */}
+          <AccordionSection
+            id="app-mode"
+            icon={<Briefcase size={18} />}
+            title="App Mode"
+            description={settings.businessMode ? "Business Owner Mode active" : "Personal expense tracking"}
+            headerRight={
+              <button
+                role="switch"
+                aria-checked={settings.businessMode ?? false}
+                onClick={() => updateSettings({ businessMode: !settings.businessMode })}
+                className={`relative h-6 w-11 rounded-full transition-colors ${
+                  settings.businessMode ? "bg-emerald-600" : "bg-gray-300 dark:bg-gray-600"
+                }`}
+              >
+                <span
+                  className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-transform ${
+                    settings.businessMode ? "translate-x-5" : ""
+                  }`}
+                />
+              </button>
+            }
+          >
+            <div className="space-y-3">
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                {settings.businessMode
+                  ? "Business Owner Mode adds a ledger system to track expected income, log payments received, and view collection analytics."
+                  : "Enable Business Owner Mode to track client payments, revenue expectations, and receivables alongside your expenses."}
+              </p>
+              {settings.businessMode && (
+                <div className="rounded-lg bg-emerald-50 p-3 dark:bg-emerald-900/20">
+                  <p className="text-xs font-medium text-emerald-700 dark:text-emerald-400">
+                    A &quot;Business&quot; tab is now visible in your navigation. Manage ledgers and payments there.
+                  </p>
+                </div>
+              )}
+            </div>
+          </AccordionSection>
 
           {/* ─── Budget / Salary ─── */}
           <AccordionSection

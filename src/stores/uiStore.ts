@@ -1,6 +1,8 @@
 import { create } from "zustand";
 import type { CategoryId } from "@/types";
 
+type AppMode = "personal" | "business";
+
 interface UIState {
   currentMonth: number;
   currentYear: number;
@@ -9,6 +11,8 @@ interface UIState {
   theme: "light" | "dark" | "system";
   showExpenseForm: boolean;
   editingExpenseId: string | null;
+  appMode: AppMode;
+  activeLedgerId: string | null;
 
   setMonth: (month: number, year: number) => void;
   nextMonth: () => void;
@@ -20,9 +24,16 @@ interface UIState {
   openAddForm: () => void;
   openEditForm: (id: string) => void;
   closeForm: () => void;
+  setAppMode: (mode: AppMode) => void;
+  setActiveLedger: (id: string | null) => void;
 }
 
 const now = new Date();
+
+function loadAppMode(): AppMode {
+  if (typeof window === "undefined") return "personal";
+  return (localStorage.getItem("expense-tracker-app-mode") as AppMode) || "personal";
+}
 
 export const useUIStore = create<UIState>((set) => ({
   currentMonth: now.getMonth() + 1,
@@ -32,6 +43,8 @@ export const useUIStore = create<UIState>((set) => ({
   theme: "system",
   showExpenseForm: false,
   editingExpenseId: null,
+  appMode: loadAppMode(),
+  activeLedgerId: null,
 
   setMonth: (month, year) => set({ currentMonth: month, currentYear: year }),
 
@@ -70,4 +83,9 @@ export const useUIStore = create<UIState>((set) => ({
   openAddForm: () => set({ showExpenseForm: true, editingExpenseId: null }),
   openEditForm: (id) => set({ showExpenseForm: true, editingExpenseId: id }),
   closeForm: () => set({ showExpenseForm: false, editingExpenseId: null }),
+  setAppMode: (mode) => {
+    localStorage.setItem("expense-tracker-app-mode", mode);
+    set({ appMode: mode });
+  },
+  setActiveLedger: (id) => set({ activeLedgerId: id }),
 }));

@@ -5,7 +5,7 @@ import { DEFAULT_SALARY } from "@/lib/constants";
 import { DEFAULT_CATEGORIES } from "@/lib/categories";
 import { supabase } from "@/lib/supabase";
 import { getSyncCode } from "@/lib/deviceId";
-import type { UserSettings, CategoryMeta, RecurringExpense, SavedFilter, Goal } from "@/types";
+import type { UserSettings, CategoryMeta, RecurringExpense, SavedFilter, Goal, RevenueExpectation } from "@/types";
 
 const STORAGE_KEY = "expense-tracker-settings";
 
@@ -21,6 +21,9 @@ const DEFAULT_SETTINGS: UserSettings = {
   goals: [],
   rolloverEnabled: false,
   rolloverHistory: {},
+  businessMode: false,
+  revenueExpectations: [],
+  businessTags: [],
   createdAt: Date.now(),
   updatedAt: Date.now(),
 };
@@ -79,6 +82,9 @@ async function pushToSupabase(s: UserSettings) {
     goals: s.goals || [],
     rollover_enabled: s.rolloverEnabled ?? false,
     rollover_history: s.rolloverHistory || {},
+    business_mode: s.businessMode ?? false,
+    revenue_expectations: s.revenueExpectations || [],
+    business_tags: s.businessTags || [],
     updated_at: new Date(s.updatedAt).toISOString(),
   }, { onConflict: "sync_code" });
 
@@ -132,6 +138,9 @@ export async function fetchSettingsFromSupabase(syncCode: string): Promise<UserS
     goals: (data.goals as Goal[]) ?? [],
     rolloverEnabled: (data.rollover_enabled as boolean) ?? false,
     rolloverHistory: (data.rollover_history as Record<string, number>) ?? {},
+    businessMode: (data.business_mode as boolean) ?? false,
+    revenueExpectations: (data.revenue_expectations as RevenueExpectation[]) ?? [],
+    businessTags: (data.business_tags as string[]) ?? [],
     createdAt: Date.now(),
     updatedAt: new Date(data.updated_at as string).getTime(),
   };
@@ -203,6 +212,9 @@ export function useSettings() {
             goals: (d.goals as Goal[]) ?? [],
             rolloverEnabled: (d.rollover_enabled as boolean) ?? false,
             rolloverHistory: (d.rollover_history as Record<string, number>) ?? {},
+            businessMode: (d.business_mode as boolean) ?? false,
+            revenueExpectations: (d.revenue_expectations as RevenueExpectation[]) ?? [],
+            businessTags: (d.business_tags as string[]) ?? [],
             createdAt: Date.now(),
             updatedAt: new Date(d.updated_at as string).getTime(),
           };
@@ -218,7 +230,7 @@ export function useSettings() {
   }, []);
 
   const updateSettings = useCallback(
-    async (updates: Partial<Pick<UserSettings, "salary" | "currency" | "categories" | "customCategories" | "hiddenDefaults" | "categoryBudgets" | "recurringExpenses" | "savedFilters" | "goals" | "rolloverEnabled" | "rolloverHistory">>) => {
+    async (updates: Partial<Pick<UserSettings, "salary" | "currency" | "categories" | "customCategories" | "hiddenDefaults" | "categoryBudgets" | "recurringExpenses" | "savedFilters" | "goals" | "rolloverEnabled" | "rolloverHistory" | "businessMode" | "revenueExpectations" | "businessTags">>) => {
       const next = { ..._settings, ...updates, updatedAt: Date.now() };
       saveLocal(next);
       _setShared(next);

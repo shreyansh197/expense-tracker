@@ -28,6 +28,9 @@ export interface UserSettings {
   goals?: Goal[];
   rolloverEnabled?: boolean;
   rolloverHistory?: Record<string, number>; // key: "YYYY-MM", value: unspent amount
+  businessMode?: boolean;
+  revenueExpectations?: RevenueExpectation[];
+  businessTags?: string[];
   createdAt: number;
   updatedAt: number;
 }
@@ -110,3 +113,46 @@ export interface AnomalyResult {
 }
 
 export type SyncStatus = "synced" | "syncing" | "offline" | "error";
+
+// ── Business Owner Mode ──
+
+export type LedgerStatus = "active" | "completed" | "cancelled";
+export type PaymentMethod = "bank_transfer" | "cash" | "upi" | "cheque" | "other";
+
+export interface Ledger {
+  id: string;
+  name: string;
+  expectedAmount: number;
+  currency: string;
+  status: LedgerStatus;
+  dueDate?: string; // ISO date
+  tags: string[];
+  notes: string;
+  createdAt: number;
+  updatedAt: number;
+  deletedAt: number | null;
+  deviceId: string;
+}
+
+export type LedgerInput = Omit<Ledger, "id" | "createdAt" | "updatedAt" | "deletedAt" | "deviceId">;
+
+export interface Payment {
+  id: string;
+  ledgerId: string;
+  amount: number;
+  date: string; // ISO date
+  method?: PaymentMethod;
+  reference?: string;
+  notes?: string;
+  createdAt: number;
+  updatedAt: number;
+  deletedAt: number | null;
+  deviceId: string;
+}
+
+export type PaymentInput = Omit<Payment, "id" | "createdAt" | "updatedAt" | "deletedAt" | "deviceId">;
+
+export interface RevenueExpectation {
+  month: string; // "YYYY-MM"
+  expectedRevenue: number;
+}
