@@ -1,6 +1,5 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -10,9 +9,6 @@ import {
   PlusCircle,
   Settings,
   Briefcase,
-  Receipt,
-  ArrowDownCircle,
-  ArrowUpDown,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUIStore } from "@/stores/uiStore";
@@ -34,14 +30,6 @@ const businessNav = [
   { href: "/settings", icon: Settings, label: "Settings" },
 ];
 
-/* ── SPEED-DIAL ACTIONS ───────────────────────────────────── */
-
-const speedDialActions = [
-  { key: "expense", label: "Add Expense", icon: Receipt },
-  { key: "income", label: "Add Income", icon: ArrowDownCircle },
-  { key: "transfer", label: "Add Transfer", icon: ArrowUpDown },
-];
-
 /* ── NAV BAR HEIGHT (px) ──────────────────────────────────── */
 const NAV_HEIGHT = 56;
 
@@ -53,28 +41,6 @@ export function BottomNav() {
   const { settings } = useSettings();
   const isBusiness = settings.businessMode;
   const isBusinessRoute = pathname.startsWith("/business");
-  const [fabOpen, setFabOpen] = useState(false);
-
-  // Close speed-dial on route change
-  useEffect(() => { setFabOpen(false); }, [pathname]);
-
-  // Close on Escape
-  useEffect(() => {
-    if (!fabOpen) return;
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setFabOpen(false);
-    };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
-  }, [fabOpen]);
-
-  const handleSpeedDialAction = useCallback(
-    (_key: string) => {
-      setFabOpen(false);
-      openAddForm();
-    },
-    [openAddForm],
-  );
 
   /* ── BUSINESS MODE — 5-item inline grid ────────────────── */
   if (isBusiness) {
@@ -143,67 +109,19 @@ export function BottomNav() {
   /* ── PERSONAL MODE — Separate FAB (z-40) + Nav bar (z-30) ── */
   return (
     <>
-      {/* ─── Speed-dial scrim ─── */}
-      {fabOpen && (
-        <div
-          className="fixed inset-0 z-40 bg-black/30 backdrop-blur-[2px] lg:hidden animate-[fadeIn_150ms_ease-out] motion-reduce:animate-none"
-          onClick={() => setFabOpen(false)}
-          aria-hidden="true"
-        />
-      )}
-
-      {/* ─── Speed-dial menu ─── */}
-      {fabOpen && (
-        <div
-          className="fixed left-1/2 z-40 flex -translate-x-1/2 flex-col items-center gap-3 lg:hidden animate-[slideUp_200ms_ease-out] motion-reduce:animate-none"
-          style={{
-            bottom: `calc(${NAV_HEIGHT}px + 40px + env(safe-area-inset-bottom, 0px))`,
-          }}
-        >
-          {speedDialActions.map((action) => {
-            const Icon = action.icon;
-            return (
-              <button
-                key={action.key}
-                onClick={() => handleSpeedDialAction(action.key)}
-                className="flex items-center gap-3 rounded-2xl bg-white px-4 py-3 shadow-xl ring-1 ring-black/5 transition-transform active:scale-95 dark:bg-gray-800 dark:ring-white/10"
-              >
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400">
-                  <Icon size={20} />
-                </div>
-                <span className="pr-2 text-sm font-medium text-gray-900 dark:text-gray-100">
-                  {action.label}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      )}
-
       {/* ─── FAB (own fixed layer, ABOVE nav) ─── */}
       <button
-        onClick={() => setFabOpen((prev) => !prev)}
-        aria-label={fabOpen ? "Close menu" : "Add"}
-        aria-expanded={fabOpen}
+        onClick={openAddForm}
+        aria-label="Add expense"
         className={cn(
-          "fixed left-1/2 z-40 flex h-14 w-14 -translate-x-1/2 items-center justify-center rounded-full shadow-lg shadow-blue-600/25 transition-all duration-200 active:scale-90 lg:hidden",
+          "fixed left-1/2 z-40 flex h-14 w-14 -translate-x-1/2 items-center justify-center rounded-full bg-blue-600 text-white shadow-lg shadow-blue-600/25 transition-transform duration-200 active:scale-90 lg:hidden",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-50 dark:focus-visible:ring-offset-gray-950",
-          fabOpen
-            ? "bg-gray-700 text-white dark:bg-gray-600"
-            : "bg-blue-600 text-white"
         )}
         style={{
-          bottom: `calc(${NAV_HEIGHT}px + env(safe-area-inset-bottom, 0px) - 8px)`,
+          bottom: `calc(${NAV_HEIGHT}px + env(safe-area-inset-bottom, 0px) + 12px)`,
         }}
       >
-        <Plus
-          size={26}
-          strokeWidth={2.5}
-          className={cn(
-            "transition-transform duration-200 motion-reduce:transition-none",
-            fabOpen && "rotate-45"
-          )}
-        />
+        <Plus size={26} strokeWidth={2.5} />
       </button>
 
       {/* ─── Nav bar (z-30, below FAB) ─── */}
