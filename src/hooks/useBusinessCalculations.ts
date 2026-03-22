@@ -34,7 +34,10 @@ export function useBusinessCalculations(
     }
 
     const totalExpected = nonCancelled.reduce((s, l) => s + l.expectedAmount, 0);
-    const totalReceived = allPayments.reduce((s, p) => s + p.amount, 0);
+    const nonCancelledIds = new Set(nonCancelled.map((l) => l.id));
+    const totalReceived = allPayments
+      .filter((p) => nonCancelledIds.has(p.ledgerId))
+      .reduce((s, p) => s + p.amount, 0);
     const collectionPercent = totalExpected > 0 ? (totalReceived / totalExpected) * 100 : 0;
 
     // Overdue

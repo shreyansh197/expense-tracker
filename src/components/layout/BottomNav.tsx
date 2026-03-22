@@ -36,6 +36,7 @@ const NAV_HEIGHT = 56;
 export function BottomNav() {
   const pathname = usePathname();
   const openAddForm = useUIStore((s) => s.openAddForm);
+  const openLedgerForm = useUIStore((s) => s.openLedgerForm);
   const { settings } = useSettings();
   const isBusiness = settings.businessMode;
   const isBusinessRoute = pathname.startsWith("/business");
@@ -46,7 +47,7 @@ export function BottomNav() {
 
   const handleFabClick = () => {
     if (isBusiness && isBusinessRoute) {
-      window.location.href = "/business?add=1";
+      openLedgerForm();
     } else {
       openAddForm();
     }

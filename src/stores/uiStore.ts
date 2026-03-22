@@ -11,6 +11,7 @@ interface UIState {
   theme: "light" | "dark" | "system";
   showExpenseForm: boolean;
   editingExpenseId: string | null;
+  showLedgerForm: boolean;
   appMode: AppMode;
   activeLedgerId: string | null;
 
@@ -24,6 +25,8 @@ interface UIState {
   openAddForm: () => void;
   openEditForm: (id: string) => void;
   closeForm: () => void;
+  openLedgerForm: () => void;
+  closeLedgerForm: () => void;
   setAppMode: (mode: AppMode) => void;
   setActiveLedger: (id: string | null) => void;
 }
@@ -43,6 +46,7 @@ export const useUIStore = create<UIState>((set) => ({
   theme: "system",
   showExpenseForm: false,
   editingExpenseId: null,
+  showLedgerForm: false,
   appMode: loadAppMode(),
   activeLedgerId: null,
 
@@ -83,6 +87,8 @@ export const useUIStore = create<UIState>((set) => ({
   openAddForm: () => set({ showExpenseForm: true, editingExpenseId: null }),
   openEditForm: (id) => set({ showExpenseForm: true, editingExpenseId: id }),
   closeForm: () => set({ showExpenseForm: false, editingExpenseId: null }),
+  openLedgerForm: () => set({ showLedgerForm: true }),
+  closeLedgerForm: () => set({ showLedgerForm: false }),
   setAppMode: (mode) => {
     localStorage.setItem("expense-tracker-app-mode", mode);
     set({ appMode: mode });

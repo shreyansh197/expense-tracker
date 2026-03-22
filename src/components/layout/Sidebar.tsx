@@ -73,8 +73,7 @@ export function Sidebar() {
         <button
           onClick={() => {
             if (isBusinessRoute) {
-              // Navigate to business page with add intent via URL
-              window.location.href = "/business?add=1";
+              useUIStore.getState().openLedgerForm();
             } else {
               openAddForm();
             }

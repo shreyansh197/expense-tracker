@@ -10,6 +10,7 @@ import { usePayments } from "@/hooks/usePayments";
 import { useAllPayments } from "@/hooks/useAllPayments";
 import { useBusinessCalculations } from "@/hooks/useBusinessCalculations";
 import { useSettings } from "@/hooks/useSettings";
+import { useUIStore } from "@/stores/uiStore";
 import { LedgerCard } from "@/components/business/LedgerCard";
 import { LedgerForm } from "@/components/business/LedgerForm";
 import { BusinessKpiCards } from "@/components/business/BusinessKpiCards";
@@ -70,14 +71,21 @@ export default function BusinessPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
 
-  // Handle ?add=1 from nav button
+  // Open ledger form when triggered from FAB / Sidebar via uiStore
+  const showLedgerFormStore = useUIStore((s) => s.showLedgerForm);
+  const closeLedgerForm = useUIStore((s) => s.closeLedgerForm);
+
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    if (params.get("add") === "1") {
+    if (showLedgerFormStore) {
       setShowForm(true);
-      window.history.replaceState({}, "", "/business");
+      closeLedgerForm();
     }
-  }, []);
+  }, [showLedgerFormStore, closeLedgerForm]);
+
+  // Cleanup on unmount — reset ledger form flag
+  useEffect(() => {
+    return () => { closeLedgerForm(); };
+  }, [closeLedgerForm]);
 
   const handleAddLedger = async (data: LedgerInput) => {
     await addLedger(data);
@@ -120,7 +128,7 @@ export default function BusinessPage() {
             )}
             <button
               onClick={() => setShowForm(true)}
-              className="flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-emerald-700 active:scale-[0.98]"
+              className="hidden items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-emerald-700 active:scale-[0.98] lg:flex"
             >
               <PlusCircle size={16} />
               New Ledger
