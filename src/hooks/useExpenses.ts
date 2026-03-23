@@ -10,13 +10,14 @@ import type { Expense, ExpenseInput, CategoryId, SyncStatus } from "@/types";
 const _cache = new Map<string, Expense[]>();
 const _listeners = new Set<() => void>();
 let _syncStatus: SyncStatus = "synced";
+const EMPTY: Expense[] = [];
 
 function cacheKey(m: number, y: number) { return `${m}:${y}`; }
 
 function _notify() { _listeners.forEach((fn) => fn()); }
 
 function _getExpenses(m: number, y: number): Expense[] {
-  return _cache.get(cacheKey(m, y)) ?? [];
+  return _cache.get(cacheKey(m, y)) ?? EMPTY;
 }
 
 function _setExpenses(m: number, y: number, expenses: Expense[]) {
@@ -64,7 +65,7 @@ function parseExpenses(data: Record<string, unknown>, month: number, year: numbe
 export function useExpenses(month: number, year: number) {
   const key = cacheKey(month, year);
   // Show cached data instantly; loading only when no cache exists
-  const expenses = useSyncExternalStore(_subscribe, () => _getExpenses(month, year), () => []);
+  const expenses = useSyncExternalStore(_subscribe, () => _getExpenses(month, year), () => EMPTY);
   const [loading, setLoading] = useState(() => !_cache.has(key));
   const [syncStatus, setSyncStatus] = useState<SyncStatus>(_syncStatus);
 
