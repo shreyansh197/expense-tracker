@@ -12,6 +12,7 @@ function getAppliedKey(recurringId: string, month: number, year: number): string
 }
 
 function getAppliedSet(): Set<string> {
+  if (typeof window === "undefined") return new Set();
   try {
     const raw = localStorage.getItem(APPLIED_KEY);
     if (raw) return new Set(JSON.parse(raw));
@@ -20,6 +21,7 @@ function getAppliedSet(): Set<string> {
 }
 
 function markApplied(key: string) {
+  if (typeof window === "undefined") return;
   const set = getAppliedSet();
   set.add(key);
   localStorage.setItem(APPLIED_KEY, JSON.stringify([...set]));

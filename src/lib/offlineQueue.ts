@@ -17,6 +17,7 @@ function readQueue(): QueuedOperation[] {
 }
 
 function writeQueue(ops: QueuedOperation[]) {
+  if (typeof window === "undefined") return;
   localStorage.setItem(QUEUE_KEY, JSON.stringify(ops));
 }
 

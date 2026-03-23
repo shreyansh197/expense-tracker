@@ -17,6 +17,7 @@ export function getSyncCode(): string {
 }
 
 export function setSyncCode(code: string): void {
+  if (typeof window === "undefined") return;
   localStorage.setItem(SYNC_CODE_KEY, code.toUpperCase().trim());
 }
 
@@ -32,5 +33,6 @@ export function hasSyncCode(): boolean {
 }
 
 export function clearSyncCode(): void {
+  if (typeof window === "undefined") return;
   localStorage.removeItem(SYNC_CODE_KEY);
 }

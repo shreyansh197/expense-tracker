@@ -61,6 +61,7 @@ function loadSettings(): UserSettings {
 }
 
 function saveLocal(s: UserSettings) {
+  if (typeof window === "undefined") return;
   localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
 }
 
@@ -142,6 +143,7 @@ export function useSettings() {
   const settings = useSyncExternalStore(_subscribe, _getSnapshot, () => DEFAULT_SETTINGS);
   const loading = false;
   const [isFirstVisit, setIsFirstVisit] = useState(() => {
+    if (typeof window === "undefined") return false;
     return localStorage.getItem(STORAGE_KEY) === null;
   });
 
