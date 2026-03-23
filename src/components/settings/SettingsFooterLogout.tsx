@@ -31,8 +31,10 @@ export function SettingsFooterLogout() {
           <button
             type="button"
             onClick={() => {
-              const el = document.getElementById("section-security");
-              el?.scrollIntoView({ behavior: "smooth", block: "start" });
+              window.dispatchEvent(new CustomEvent("settings:open-section", { detail: "security" }));
+              requestAnimationFrame(() => {
+                document.getElementById("header-security")?.scrollIntoView({ behavior: "smooth", block: "start" });
+              });
             }}
             className="text-blue-500 hover:text-blue-600 dark:text-blue-400 underline"
           >

@@ -71,6 +71,23 @@ export function SettingsAccordion({ children }: SettingsAccordionProps) {
     });
   }, []);
 
+  // Listen for external requests to open a section (e.g. from footer "Log out of all devices")
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const id = (e as CustomEvent<string>).detail;
+      if (id) {
+        setOpenSections((prev) => {
+          if (prev.has(id)) return prev;
+          const next = new Set(prev);
+          next.add(id);
+          return next;
+        });
+      }
+    };
+    window.addEventListener("settings:open-section", handler);
+    return () => window.removeEventListener("settings:open-section", handler);
+  }, []);
+
   return (
     <AccordionContext.Provider value={{ openSections, toggle }}>
       <div className="space-y-3">{children}</div>
