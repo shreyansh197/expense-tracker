@@ -48,7 +48,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         body: JSON.stringify({ email, password }),
       });
 
-      const data = await res.json();
+      let data;
+      try { data = await res.json(); } catch { return { error: "Server error. Please try again." }; }
       if (!res.ok) return { error: data.error ?? "Login failed" };
 
       if (data.requires2FA) {
@@ -78,7 +79,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         body: JSON.stringify({ email, password, name }),
       });
 
-      const data = await res.json();
+      let data;
+      try { data = await res.json(); } catch { return { error: "Server error. Please try again." }; }
       if (!res.ok) return { error: data.error ?? "Registration failed" };
 
       setAuthState({

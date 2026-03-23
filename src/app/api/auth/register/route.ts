@@ -31,6 +31,7 @@ export async function POST(req: NextRequest) {
 
   const { email, password, name } = parsed.data;
 
+  try {
   // Check for existing user
   const existing = await prisma.user.findUnique({
     where: { email: email.toLowerCase() },
@@ -146,6 +147,13 @@ export async function POST(req: NextRequest) {
     },
     { status: 201 },
   );
+  } catch (err) {
+    console.error("[register]", err);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 },
+    );
+  }
 }
 
 function parseDeviceName(ua: string): string {
