@@ -59,18 +59,16 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     );
   }
 
-  // Show auth modal for unauthenticated users
+  // Show auth landing page for unauthenticated users
   if (!isAuthenticated) {
     return (
-      <div className="flex h-screen flex-col bg-gray-50 dark:bg-gray-950">
-        <AuthModal
-          onComplete={(salary) => {
-            if (salary) updateSettings({ salary });
-            markOnboarded();
-            window.location.reload();
-          }}
-        />
-      </div>
+      <AuthModal
+        onComplete={(salary) => {
+          if (salary) updateSettings({ salary });
+          markOnboarded();
+          window.location.reload();
+        }}
+      />
     );
   }
 
