@@ -188,7 +188,7 @@ export function AuthModal({
   onComplete,
   initialMode = "register",
 }: AuthModalProps) {
-  const [mode, setMode] = useState<"choose" | "register" | "login">(
+  const [mode, setMode] = useState<"choose" | "register" | "login" | "totp">(
     initialMode === "join" ? "login" : "choose",
   );
   const [email, setEmail] = useState("");
@@ -198,8 +198,10 @@ export function AuthModal({
   const [loading, setLoading] = useState(false);
   const [salary, setSalary] = useState("");
   const [showSalary, setShowSalary] = useState(false);
+  const [pendingUserId, setPendingUserId] = useState<string | null>(null);
+  const [totpCode, setTotpCode] = useState("");
 
-  const { login, register } = useAuth();
+  const { login, loginWith2FA, register } = useAuth();
 
   const handleRegister = async () => {
     if (!email || !password) {
@@ -241,9 +243,27 @@ export function AuthModal({
       return;
     }
 
-    if (result.requires2FA) {
-      // TODO: Show TOTP input
-      setError("2FA verification required (coming soon)");
+    if (result.requires2FA && result.userId) {
+      setPendingUserId(result.userId);
+      setTotpCode("");
+      setError("");
+      setMode("totp");
+      return;
+    }
+
+    onComplete();
+  };
+
+  const handleVerify2FA = async () => {
+    if (!pendingUserId || totpCode.length !== 6) return;
+
+    setError("");
+    setLoading(true);
+    const result = await loginWith2FA(pendingUserId, totpCode);
+    setLoading(false);
+
+    if (result.error) {
+      setError(result.error);
       return;
     }
 
@@ -254,6 +274,71 @@ export function AuthModal({
     const val = parseFloat(salary);
     onComplete(val > 0 ? val : undefined);
   };
+
+  // ── TOTP verification step ─────────────────────────────────
+
+  if (mode === "totp") {
+    return (
+      <AuthPage>
+        <button
+          onClick={() => {
+            setMode("login");
+            setError("");
+            setPendingUserId(null);
+            setTotpCode("");
+          }}
+          className="mb-5 flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-700 dark:text-gray-500 dark:hover:text-gray-300 transition-colors"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back
+        </button>
+
+        <div className="mb-1 flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100 dark:bg-blue-900/40">
+          <Shield className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+        </div>
+        <h2 className="mt-3 text-xl font-bold text-gray-900 dark:text-white">
+          Two-Factor Authentication
+        </h2>
+        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400 mb-6">
+          Enter the 6-digit code from your authenticator app to continue.
+        </p>
+
+        <div className="space-y-4">
+          <input
+            type="text"
+            inputMode="numeric"
+            maxLength={6}
+            placeholder="000000"
+            value={totpCode}
+            onChange={(e) => setTotpCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+            autoFocus
+            className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3.5 text-center font-mono text-2xl tracking-[0.4em] text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow"
+            onKeyDown={(e) => { if (e.key === "Enter") handleVerify2FA(); }}
+          />
+
+          {error && (
+            <div className="flex items-start gap-2 rounded-xl bg-red-50 p-3.5 text-sm text-red-700 dark:bg-red-900/20 dark:text-red-400">
+              <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
+              {error}
+            </div>
+          )}
+
+          <button
+            onClick={handleVerify2FA}
+            disabled={totpCode.length !== 6 || loading}
+            className="w-full rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 py-3.5 text-base font-semibold text-white shadow-lg shadow-blue-600/20 hover:shadow-xl hover:shadow-blue-600/30 disabled:opacity-50 transition-all flex items-center justify-center gap-2"
+          >
+            {loading && <Loader2 className="h-4 w-4 animate-spin" />}
+            Verify & Sign In
+          </button>
+
+          <p className="text-center text-xs text-gray-400 dark:text-gray-500">
+            You can also use a recovery code
+          </p>
+        </div>
+      </AuthPage>
+    );
+  }
 
   // ── Salary step (after registration) ───────────────────────
 

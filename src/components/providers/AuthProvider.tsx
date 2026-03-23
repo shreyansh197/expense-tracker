@@ -24,7 +24,8 @@ import {
 
 interface AuthContextValue extends AuthState {
   isAuthenticated: boolean;
-  login: (email: string, password: string) => Promise<{ requires2FA?: boolean; error?: string }>;
+  login: (email: string, password: string) => Promise<{ requires2FA?: boolean; userId?: string; error?: string }>;
+  loginWith2FA: (userId: string, code: string) => Promise<{ error?: string }>;
   register: (email: string, password: string, name?: string) => Promise<{ error?: string }>;
   logout: () => Promise<void>;
   switchWorkspace: (workspaceId: string) => void;
@@ -55,8 +56,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!res.ok) return { error: data.error ?? "Login failed" };
 
       if (data.requires2FA) {
-        return { requires2FA: true };
+        return { requires2FA: true, userId: data.userId };
       }
+
+      setAuthState({
+        user: data.user as AuthUser,
+        tokens: {
+          accessToken: data.accessToken,
+          refreshToken: data.refreshToken,
+        },
+        workspaces: data.workspaces,
+        activeWorkspaceId: data.activeWorkspaceId,
+      });
+
+      return {};
+    },
+    [],
+  );
+
+  const loginWith2FA = useCallback(
+    async (userId: string, code: string) => {
+      const res = await fetch("/api/auth/login/verify-2fa", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, code }),
+      });
+
+      let data;
+      try { data = await res.json(); } catch { return { error: "Server error. Please try again." }; }
+      if (!res.ok) return { error: data.error ?? "Verification failed" };
 
       setAuthState({
         user: data.user as AuthUser,
@@ -163,6 +191,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         ...state,
         isAuthenticated: !!state.tokens?.accessToken,
         login,
+        loginWith2FA,
         register,
         logout,
         switchWorkspace,

@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 const PUBLIC_PATHS = new Set([
   "/api/auth/register",
   "/api/auth/login",
+  "/api/auth/login/verify-2fa",
   "/api/auth/refresh",
   "/api/auth/magic-link",
   "/api/auth/magic-link/verify",
