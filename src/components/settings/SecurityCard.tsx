@@ -4,7 +4,8 @@ import { useState, useEffect, useCallback, startTransition } from "react";
 import { authFetch } from "@/lib/authClient";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useToast } from "@/components/ui/Toast";
-import { Shield, Key, Smartphone, Trash2, Plus, Loader2 } from "lucide-react";
+import { Shield, Key, Smartphone, Trash2, Plus, Loader2, Copy, CheckCircle2 } from "lucide-react";
+import QRCode from "qrcode";
 
 interface SessionItem {
   id: string;
@@ -38,8 +39,11 @@ export function SecurityCard() {
   const [twoFAEnabled, setTwoFAEnabled] = useState(false);
   const [totpUri, setTotpUri] = useState<string | null>(null);
   const [totpSecret, setTotpSecret] = useState<string | null>(null);
+  const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
   const [verifyCode, setVerifyCode] = useState("");
   const [verifying2FA, setVerifying2FA] = useState(false);
+  const [recoveryCodes, setRecoveryCodes] = useState<string[] | null>(null);
+  const [copiedSecret, setCopiedSecret] = useState(false);
 
   const fetchSessions = useCallback(async () => {
     startTransition(() => setLoadingSessions(true));
@@ -98,8 +102,23 @@ export function SecurityCard() {
     const res = await authFetch("/api/auth/2fa");
     if (res.ok) {
       const data = await res.json();
+      if (data.enabled) {
+        setTwoFAEnabled(true);
+        return;
+      }
       setTotpUri(data.uri);
       setTotpSecret(data.secret);
+      // Generate QR code data URL
+      try {
+        const url = await QRCode.toDataURL(data.uri, {
+          width: 200,
+          margin: 2,
+          color: { dark: "#1e293b", light: "#ffffff" },
+        });
+        setQrDataUrl(url);
+      } catch {
+        // QR generation failed — user can still use manual entry
+      }
     }
   };
 
@@ -117,9 +136,11 @@ export function SecurityCard() {
         setTwoFAEnabled(true);
         setTotpUri(null);
         setTotpSecret(null);
+        setQrDataUrl(null);
         setVerifyCode("");
-        if (data.recoveryCodes) {
-          toast(`2FA enabled! Save your ${data.recoveryCodes.length} recovery codes`);
+        if (data.recoveryCodes?.length) {
+          setRecoveryCodes(data.recoveryCodes);
+          toast("2FA enabled! Save your recovery codes now.");
         } else {
           toast("2FA verified");
         }
@@ -134,6 +155,7 @@ export function SecurityCard() {
     const res = await authFetch("/api/auth/2fa", { method: "DELETE" });
     if (res.ok) {
       setTwoFAEnabled(false);
+      setRecoveryCodes(null);
       toast("2FA disabled");
     }
   };
@@ -157,11 +179,38 @@ export function SecurityCard() {
         </div>
 
         {twoFAEnabled ? (
-          <div className="space-y-2">
+          <div className="space-y-3">
             <div className="flex items-center gap-2 rounded-lg bg-emerald-50 px-3 py-2 dark:bg-emerald-900/20">
               <div className="h-2 w-2 rounded-full bg-emerald-500" />
               <span className="text-xs font-medium text-emerald-700 dark:text-emerald-400">2FA is enabled</span>
             </div>
+
+            {/* Recovery codes display (shown right after enabling) */}
+            {recoveryCodes && (
+              <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-800 dark:bg-amber-900/20">
+                <p className="text-xs font-semibold text-amber-800 dark:text-amber-300 mb-2">
+                  Save these recovery codes — you won&apos;t see them again!
+                </p>
+                <div className="grid grid-cols-2 gap-1.5 mb-3">
+                  {recoveryCodes.map((code, i) => (
+                    <code key={i} className="rounded bg-white px-2 py-1 text-center font-mono text-xs text-gray-700 dark:bg-gray-800 dark:text-gray-300">
+                      {code}
+                    </code>
+                  ))}
+                </div>
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(recoveryCodes.join("\n"));
+                    toast("Recovery codes copied");
+                  }}
+                  className="flex items-center gap-1.5 text-xs font-medium text-amber-700 hover:text-amber-800 dark:text-amber-400"
+                >
+                  <Copy size={12} />
+                  Copy all codes
+                </button>
+              </div>
+            )}
+
             <button
               onClick={disable2FA}
               className="text-xs text-red-500 hover:text-red-600 dark:text-red-400"
@@ -170,32 +219,91 @@ export function SecurityCard() {
             </button>
           </div>
         ) : totpUri ? (
-          <div className="space-y-3">
-            <p className="text-xs text-gray-500">Scan this QR code with your authenticator app, then enter the 6-digit code:</p>
-            {totpSecret && (
-              <div className="rounded-lg bg-gray-50 px-3 py-2 dark:bg-gray-800">
-                <p className="text-xs text-gray-400">Manual entry:</p>
-                <p className="font-mono text-xs text-gray-700 dark:text-gray-300 break-all">{totpSecret}</p>
+          <div className="space-y-4">
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              Scan this QR code with your authenticator app (Google Authenticator, Authy, etc.):
+            </p>
+
+            {/* QR Code */}
+            {qrDataUrl ? (
+              <div className="flex justify-center">
+                <div className="rounded-xl bg-white p-3 shadow-sm ring-1 ring-gray-200 dark:ring-gray-700">
+                  <img
+                    src={qrDataUrl}
+                    alt="TOTP QR Code"
+                    width={200}
+                    height={200}
+                    className="rounded-lg"
+                  />
+                </div>
+              </div>
+            ) : (
+              <div className="flex h-[200px] items-center justify-center rounded-xl bg-gray-50 dark:bg-gray-800">
+                <Loader2 size={20} className="animate-spin text-gray-400" />
               </div>
             )}
-            <div className="flex gap-2">
-              <input
-                type="text"
-                inputMode="numeric"
-                maxLength={6}
-                placeholder="000000"
-                value={verifyCode}
-                onChange={(e) => setVerifyCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                className="w-32 rounded-lg border border-gray-200 bg-white px-3 py-2 text-center font-mono text-sm tracking-[0.3em] dark:border-gray-700 dark:bg-gray-800 dark:text-white"
-              />
-              <button
-                onClick={verify2FA}
-                disabled={verifyCode.length !== 6 || verifying2FA}
-                className="rounded-lg bg-blue-600 px-4 py-2 text-xs font-medium text-white hover:bg-blue-700 disabled:opacity-50"
-              >
-                {verifying2FA ? "Verifying..." : "Verify"}
-              </button>
+
+            {/* Manual entry secret */}
+            {totpSecret && (
+              <div className="rounded-lg bg-gray-50 px-3 py-2.5 dark:bg-gray-800">
+                <p className="text-[10px] font-medium uppercase tracking-wider text-gray-400 mb-1">
+                  Can&apos;t scan? Enter manually:
+                </p>
+                <div className="flex items-center gap-2">
+                  <p className="flex-1 font-mono text-xs text-gray-700 dark:text-gray-300 break-all select-all">
+                    {totpSecret}
+                  </p>
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(totpSecret);
+                      setCopiedSecret(true);
+                      setTimeout(() => setCopiedSecret(false), 2000);
+                    }}
+                    className="shrink-0 p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                  >
+                    {copiedSecret ? <CheckCircle2 size={14} className="text-emerald-500" /> : <Copy size={14} />}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Verification input */}
+            <div>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
+                Enter the 6-digit code from your app:
+              </p>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={6}
+                  placeholder="000000"
+                  value={verifyCode}
+                  onChange={(e) => setVerifyCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                  className="w-32 rounded-lg border border-gray-200 bg-white px-3 py-2 text-center font-mono text-sm tracking-[0.3em] dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <button
+                  onClick={verify2FA}
+                  disabled={verifyCode.length !== 6 || verifying2FA}
+                  className="rounded-lg bg-blue-600 px-4 py-2 text-xs font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+                >
+                  {verifying2FA ? "Verifying..." : "Verify"}
+                </button>
+              </div>
             </div>
+
+            {/* Cancel */}
+            <button
+              onClick={() => {
+                setTotpUri(null);
+                setTotpSecret(null);
+                setQrDataUrl(null);
+                setVerifyCode("");
+              }}
+              className="text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+            >
+              Cancel setup
+            </button>
           </div>
         ) : (
           <button

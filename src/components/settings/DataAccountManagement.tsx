@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Download, LogOut, Trash2, AlertTriangle } from "lucide-react";
+import { Download, Trash2, AlertTriangle } from "lucide-react";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { authFetch, getActiveWorkspaceId } from "@/lib/authClient";
 import { useToast } from "@/components/ui/Toast";
@@ -9,9 +9,6 @@ import { useConfirm } from "@/components/ui/ConfirmDialog";
 
 const COPY = {
   dataMgmtTitle: "Data & Account Management",
-  resetSwitchTitle: "Reset / Switch",
-  resetSwitchHelp:
-    "Create a new account or join a different workspace. Your current data remains available in this workspace.",
   exportBackupTitle: "Export / Backup",
   exportBackupHelp:
     "Download your data or import from a backup before making significant changes.",
@@ -27,7 +24,7 @@ interface DataAccountManagementProps {
 }
 
 export function DataAccountManagement({ onScrollToExport }: DataAccountManagementProps) {
-  const { logout, workspaces, activeWorkspaceId } = useAuth();
+  const { workspaces, activeWorkspaceId } = useAuth();
   const { toast } = useToast();
   const { confirm } = useConfirm();
   const [deleting, setDeleting] = useState(false);
@@ -35,17 +32,6 @@ export function DataAccountManagement({ onScrollToExport }: DataAccountManagemen
   const activeWorkspace = workspaces.find((w) => w.id === activeWorkspaceId);
   const workspaceName = activeWorkspace?.name ?? "My Expenses";
   const isOwner = activeWorkspace?.role === "OWNER";
-
-  const handleResetSwitch = async () => {
-    const ok = await confirm({
-      title: COPY.resetSwitchTitle,
-      message: COPY.resetSwitchHelp,
-      confirmLabel: "Log Out & Switch",
-      variant: "warning",
-    });
-    if (!ok) return;
-    await logout();
-  };
 
   const handleExportFirst = () => {
     if (onScrollToExport) {
@@ -92,25 +78,8 @@ export function DataAccountManagement({ onScrollToExport }: DataAccountManagemen
 
   return (
     <div className="space-y-5">
-      {/* ─── Reset / Switch ─── */}
-      <div>
-        <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
-          {COPY.resetSwitchTitle}
-        </h3>
-        <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
-          {COPY.resetSwitchHelp}
-        </p>
-        <button
-          onClick={handleResetSwitch}
-          className="flex items-center gap-2 rounded-lg border border-gray-200 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800 transition-colors"
-        >
-          <LogOut size={16} />
-          Log Out &amp; Switch Account
-        </button>
-      </div>
-
       {/* ─── Export / Backup ─── */}
-      <div className="border-t border-gray-100 pt-5 dark:border-gray-800">
+      <div>
         <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
           {COPY.exportBackupTitle}
         </h3>
