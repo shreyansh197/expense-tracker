@@ -11,6 +11,10 @@ import {
   ArrowLeft,
   AlertCircle,
   Wallet,
+  TrendingUp,
+  PieChart,
+  Shield,
+  Smartphone,
 } from "lucide-react";
 import { useAuth } from "@/components/providers/AuthProvider";
 
@@ -20,32 +24,135 @@ interface AuthModalProps {
   inviteToken?: string;
 }
 
-/* ── Full-page wrapper with gradient background ─────────── */
-function AuthPage({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-950 dark:via-blue-950/40 dark:to-indigo-950/30 p-4 sm:p-6 md:p-8">
-      {/* Decorative blobs */}
-      <div className="pointer-events-none absolute -top-24 -right-24 h-96 w-96 rounded-full bg-blue-200/40 blur-3xl dark:bg-blue-900/20" />
-      <div className="pointer-events-none absolute -bottom-24 -left-24 h-96 w-96 rounded-full bg-purple-200/40 blur-3xl dark:bg-purple-900/20" />
-      <div className="pointer-events-none absolute top-1/3 left-1/2 -translate-x-1/2 h-[500px] w-[500px] rounded-full bg-indigo-100/50 blur-3xl dark:bg-indigo-900/10" />
+/* ── Feature items for the hero panel ────────────────────── */
+const FEATURES = [
+  {
+    icon: PieChart,
+    title: "Visual Analytics",
+    desc: "Beautiful charts and category breakdowns at a glance",
+    color: "text-violet-400",
+    bg: "bg-violet-500/20",
+  },
+  {
+    icon: TrendingUp,
+    title: "Budget Tracking",
+    desc: "Auto-rollover budgets with real-time remaining alerts",
+    color: "text-emerald-400",
+    bg: "bg-emerald-500/20",
+  },
+  {
+    icon: Shield,
+    title: "Secure by Default",
+    desc: "Two-factor auth, encrypted sessions & device management",
+    color: "text-blue-400",
+    bg: "bg-blue-500/20",
+  },
+  {
+    icon: Smartphone,
+    title: "Works Everywhere",
+    desc: "Full PWA support — install as an app on any device",
+    color: "text-amber-400",
+    bg: "bg-amber-500/20",
+  },
+];
 
-      <div className="relative z-10 w-full max-w-sm">
-        {/* Branding */}
-        <div className="mb-6 text-center sm:mb-8">
-          <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-600 shadow-lg shadow-blue-600/25">
-            <Wallet className="h-7 w-7 text-white" />
+/* ── Animated floating orbs (pure CSS) ──────────────────── */
+function FloatingOrbs() {
+  return (
+    <div className="pointer-events-none absolute inset-0 overflow-hidden">
+      <div className="absolute -top-20 -left-20 h-72 w-72 rounded-full bg-blue-500/15 blur-3xl animate-pulse" />
+      <div className="absolute top-1/3 -right-16 h-56 w-56 rounded-full bg-violet-500/15 blur-3xl animate-pulse [animation-delay:1s]" />
+      <div className="absolute -bottom-16 left-1/4 h-64 w-64 rounded-full bg-indigo-500/15 blur-3xl animate-pulse [animation-delay:2s]" />
+    </div>
+  );
+}
+
+/* ── Hero / branding panel (left side on desktop, top on mobile) */
+function HeroPanel() {
+  return (
+    <div className="relative flex flex-col justify-between overflow-hidden bg-gradient-to-br from-gray-900 via-blue-950 to-indigo-950 px-8 py-10 text-white lg:px-12 lg:py-14">
+      <FloatingOrbs />
+
+      <div className="relative z-10">
+        {/* Brand */}
+        <div className="flex items-center gap-3">
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/10 backdrop-blur-sm ring-1 ring-white/20">
+            <Wallet className="h-6 w-6" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-            ExpenseTracker
-          </h1>
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            Smart budgeting, effortless tracking
-          </p>
+          <span className="text-xl font-bold tracking-tight">ExpenseTracker</span>
         </div>
 
-        {/* Card */}
-        <div className="rounded-2xl border border-white/70 bg-white/80 p-6 shadow-xl backdrop-blur-md dark:border-gray-800/60 dark:bg-gray-900/80">
-          {children}
+        {/* Hero copy */}
+        <h1 className="mt-8 text-3xl font-extrabold leading-tight lg:text-4xl">
+          Take control of{" "}
+          <span className="bg-gradient-to-r from-blue-400 via-violet-400 to-purple-400 bg-clip-text text-transparent">
+            your finances
+          </span>
+        </h1>
+        <p className="mt-3 max-w-md text-sm leading-relaxed text-blue-100/70 lg:text-base">
+          Track every rupee, set smart budgets, and discover where your money
+          actually goes — all in one elegant app.
+        </p>
+      </div>
+
+      {/* Feature grid */}
+      <div className="relative z-10 mt-10 grid grid-cols-2 gap-3">
+        {FEATURES.map((f) => (
+          <div
+            key={f.title}
+            className="rounded-xl bg-white/[0.06] p-3.5 ring-1 ring-white/10 backdrop-blur-sm transition-colors hover:bg-white/[0.10]"
+          >
+            <div className={`mb-2 flex h-8 w-8 items-center justify-center rounded-lg ${f.bg}`}>
+              <f.icon className={`h-4 w-4 ${f.color}`} />
+            </div>
+            <p className="text-xs font-semibold text-white/90">{f.title}</p>
+            <p className="mt-0.5 text-[11px] leading-snug text-white/50">{f.desc}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Bottom tag */}
+      <p className="relative z-10 mt-8 text-[11px] text-white/30">
+        Trusted by thousands · Free forever · Open source
+      </p>
+    </div>
+  );
+}
+
+/* ── Full-page split wrapper ────────────────────────────── */
+function AuthPage({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="flex min-h-screen w-full flex-col lg:flex-row">
+      {/* Hero — full width on mobile (compact), left half on desktop */}
+      <div className="lg:w-1/2 lg:min-h-screen">
+        <HeroPanel />
+      </div>
+
+      {/* Form panel — right side */}
+      <div className="relative flex flex-1 items-center justify-center bg-gray-50 px-6 py-10 dark:bg-gray-950 lg:px-16">
+        {/* Subtle decorative dots */}
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          <div className="absolute -top-24 right-10 h-60 w-60 rounded-full bg-blue-100/50 blur-3xl dark:bg-blue-900/15" />
+          <div className="absolute -bottom-20 -left-10 h-48 w-48 rounded-full bg-purple-100/40 blur-3xl dark:bg-purple-900/10" />
+        </div>
+
+        <div className="relative z-10 w-full max-w-sm">
+          {/* Mobile branding (hidden on desktop since hero shows it) */}
+          <div className="mb-6 flex items-center gap-2 lg:hidden">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-600 shadow-md">
+              <Wallet className="h-5 w-5 text-white" />
+            </div>
+            <span className="text-lg font-bold text-gray-900 dark:text-white">ExpenseTracker</span>
+          </div>
+
+          {/* Card */}
+          <div className="rounded-2xl border border-gray-200/80 bg-white p-6 shadow-xl shadow-gray-200/40 dark:border-gray-800/60 dark:bg-gray-900 dark:shadow-none sm:p-8">
+            {children}
+          </div>
+
+          <p className="mt-4 text-center text-[11px] text-gray-400 dark:text-gray-600">
+            By continuing, you agree to our Terms of Service.
+          </p>
         </div>
       </div>
     </div>
@@ -128,15 +235,18 @@ export function AuthModal({
   if (showSalary) {
     return (
       <AuthPage>
-        <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+        <div className="mb-1 flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-900/40">
+          <TrendingUp className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+        </div>
+        <h2 className="mt-3 text-xl font-bold text-gray-900 dark:text-white">
           Set Your Monthly Budget
         </h2>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400 mb-6">
           Enter your monthly salary or budget to track spending against.
         </p>
 
         <div className="relative mb-6">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg">
+          <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-lg font-medium">
             ₹
           </span>
           <input
@@ -145,15 +255,16 @@ export function AuthModal({
             placeholder="e.g. 50000"
             value={salary}
             onChange={(e) => setSalary(e.target.value)}
-            className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 pl-8 pr-4 text-lg text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            autoFocus
+            className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3.5 pl-9 pr-4 text-lg font-medium text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow"
           />
         </div>
 
         <button
           onClick={handleSalarySubmit}
-          className="w-full rounded-xl bg-blue-600 py-3 text-base font-semibold text-white hover:bg-blue-700 transition-colors"
+          className="w-full rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 py-3.5 text-base font-semibold text-white shadow-lg shadow-blue-600/20 hover:shadow-xl hover:shadow-blue-600/30 transition-all"
         >
-          {salary ? "Get Started" : "Skip for Now"}
+          {salary ? "Get Started →" : "Skip for Now"}
         </button>
       </AuthPage>
     );
@@ -164,46 +275,46 @@ export function AuthModal({
   if (mode === "choose") {
     return (
       <AuthPage>
-        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-1">
+        <h2 className="text-xl font-bold text-gray-900 dark:text-white">
           Get Started
         </h2>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mb-5">
+        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400 mb-6">
           Track expenses, set budgets, and manage your finances.
         </p>
 
         <div className="space-y-3">
           <button
             onClick={() => setMode("register")}
-            className="group flex w-full items-center gap-3 rounded-xl border border-gray-200/80 bg-white/60 p-4 text-left transition-all hover:border-blue-300 hover:bg-blue-50 dark:border-gray-700/80 dark:bg-gray-800/60 dark:hover:border-blue-700 dark:hover:bg-blue-950/40"
+            className="group relative flex w-full items-center gap-4 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 p-4 text-left text-white shadow-lg shadow-blue-600/20 transition-all hover:shadow-xl hover:shadow-blue-600/30 hover:-translate-y-0.5 active:translate-y-0"
           >
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-100 transition-colors group-hover:bg-blue-200 dark:bg-blue-900/60 dark:group-hover:bg-blue-900">
-              <UserPlus className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-white/20 backdrop-blur-sm">
+              <UserPlus className="h-5 w-5" />
             </div>
             <div>
-              <div className="font-semibold text-gray-900 transition-colors group-hover:text-blue-700 dark:text-gray-100 dark:group-hover:text-blue-300">
-                Create Account
-              </div>
-              <div className="text-xs text-gray-500 dark:text-gray-400">
+              <div className="font-semibold text-base">Create Account</div>
+              <div className="text-xs text-blue-100/80">
                 Start fresh with a new workspace
               </div>
             </div>
+            <ArrowLeft className="ml-auto h-4 w-4 rotate-180 opacity-0 transition-all group-hover:opacity-100 group-hover:translate-x-1" />
           </button>
 
           <button
             onClick={() => setMode("login")}
-            className="group flex w-full items-center gap-3 rounded-xl border border-gray-200/80 bg-white/60 p-4 text-left transition-all hover:border-emerald-300 hover:bg-emerald-50 dark:border-gray-700/80 dark:bg-gray-800/60 dark:hover:border-emerald-700 dark:hover:bg-emerald-950/40"
+            className="group relative flex w-full items-center gap-4 rounded-xl border-2 border-gray-200 bg-white p-4 text-left transition-all hover:border-emerald-300 hover:shadow-lg hover:shadow-emerald-100 hover:-translate-y-0.5 active:translate-y-0 dark:border-gray-700 dark:bg-gray-800/50 dark:hover:border-emerald-700 dark:hover:shadow-emerald-900/10"
           >
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-100 transition-colors group-hover:bg-emerald-200 dark:bg-emerald-900/60 dark:group-hover:bg-emerald-900">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-emerald-100 transition-colors group-hover:bg-emerald-200 dark:bg-emerald-900/50 dark:group-hover:bg-emerald-900/70">
               <LogIn className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
             </div>
             <div>
-              <div className="font-semibold text-gray-900 transition-colors group-hover:text-emerald-700 dark:text-gray-100 dark:group-hover:text-emerald-300">
+              <div className="text-base font-semibold text-gray-900 dark:text-white">
                 Sign In
               </div>
               <div className="text-xs text-gray-500 dark:text-gray-400">
                 Access your existing account
               </div>
             </div>
+            <ArrowLeft className="ml-auto h-4 w-4 rotate-180 text-gray-300 opacity-0 transition-all group-hover:opacity-100 group-hover:translate-x-1 dark:text-gray-600" />
           </button>
         </div>
       </AuthPage>
@@ -221,61 +332,61 @@ export function AuthModal({
           setMode("choose");
           setError("");
         }}
-        className="mb-4 flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 transition-colors"
+        className="mb-5 flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-700 dark:text-gray-500 dark:hover:text-gray-300 transition-colors"
       >
         <ArrowLeft className="h-4 w-4" />
         Back
       </button>
 
-      <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-1">
-        {isRegister ? "Create Account" : "Sign In"}
+      <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+        {isRegister ? "Create Account" : "Welcome Back"}
       </h2>
-      <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+      <p className="mt-1 text-sm text-gray-500 dark:text-gray-400 mb-6">
         {isRegister
           ? "Set up your account to get started"
-          : "Welcome back! Sign in to continue"}
+          : "Sign in to continue tracking your expenses"}
       </p>
 
-      <div className="space-y-4">
+      <div className="space-y-3.5">
         {isRegister && (
           <div className="relative">
-            <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
             <input
               type="text"
               placeholder="Name (optional)"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 pl-10 pr-4 text-sm text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 pl-10 pr-4 text-sm text-gray-900 placeholder:text-gray-400 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow"
             />
           </div>
         )}
 
         <div className="relative">
-          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
           <input
             type="email"
-            placeholder="Email"
+            placeholder="Email address"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             autoComplete="email"
-            className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 pl-10 pr-4 text-sm text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 pl-10 pr-4 text-sm text-gray-900 placeholder:text-gray-400 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow"
           />
         </div>
 
         <div className="relative">
-          <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
           <input
             type="password"
             placeholder={isRegister ? "Password (min 8 chars)" : "Password"}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             autoComplete={isRegister ? "new-password" : "current-password"}
-            className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 pl-10 pr-4 text-sm text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 pl-10 pr-4 text-sm text-gray-900 placeholder:text-gray-400 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow"
           />
         </div>
 
         {error && (
-          <div className="flex items-start gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700 dark:bg-red-900/20 dark:text-red-400">
+          <div className="flex items-start gap-2 rounded-xl bg-red-50 p-3.5 text-sm text-red-700 dark:bg-red-900/20 dark:text-red-400">
             <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
             {error}
           </div>
@@ -284,13 +395,13 @@ export function AuthModal({
         <button
           onClick={isRegister ? handleRegister : handleLogin}
           disabled={loading}
-          className="w-full rounded-xl bg-blue-600 py-3 text-base font-semibold text-white hover:bg-blue-700 disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
+          className="w-full rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 py-3.5 text-base font-semibold text-white shadow-lg shadow-blue-600/20 hover:shadow-xl hover:shadow-blue-600/30 disabled:opacity-50 transition-all flex items-center justify-center gap-2"
         >
           {loading && <Loader2 className="h-4 w-4 animate-spin" />}
           {isRegister ? "Create Account" : "Sign In"}
         </button>
 
-        <p className="text-center text-xs text-gray-500 dark:text-gray-400">
+        <p className="text-center text-xs text-gray-500 dark:text-gray-400 pt-1">
           {isRegister ? (
             <>
               Already have an account?{" "}
@@ -299,7 +410,7 @@ export function AuthModal({
                   setMode("login");
                   setError("");
                 }}
-                className="text-blue-600 dark:text-blue-400 hover:underline"
+                className="font-medium text-blue-600 dark:text-blue-400 hover:underline"
               >
                 Sign in
               </button>
@@ -312,7 +423,7 @@ export function AuthModal({
                   setMode("register");
                   setError("");
                 }}
-                className="text-blue-600 dark:text-blue-400 hover:underline"
+                className="font-medium text-blue-600 dark:text-blue-400 hover:underline"
               >
                 Create one
               </button>
