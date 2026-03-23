@@ -5,30 +5,30 @@ export const dynamic = "force-dynamic";
 import { useState, useEffect } from "react";
 import { AppShell } from "@/components/layout/AppShell";
 import { useSettings } from "@/hooks/useSettings";
-import { useUIStore } from "@/stores/uiStore";
 import { useTheme } from "@/components/providers/ThemeProvider";
 import { formatCurrency } from "@/lib/utils";
 import {
   Wallet, LinkIcon, Tag, Repeat, TrendingUp, Target, Palette,
   Download, Zap, AlertTriangle, Sun, Moon, Monitor, Smartphone, Briefcase,
+  Shield, Users,
 } from "lucide-react";
 import { InstallButton } from "@/components/pwa/InstallButton";
 import { useToast } from "@/components/ui/Toast";
 import { SettingsAccordion, AccordionSection } from "@/components/settings/SettingsAccordion";
-import { SyncCard } from "@/components/settings/SyncCard";
+import { AccountCard } from "@/components/settings/AccountCard";
+import { SecurityCard } from "@/components/settings/SecurityCard";
+import { WorkspaceMembersCard } from "@/components/settings/WorkspaceMembersCard";
 import { CategoryManager } from "@/components/settings/CategoryManager";
 import { RecurringManager } from "@/components/settings/RecurringManager";
 import { GoalsManager } from "@/components/settings/GoalsManager";
 import { ExportImportWizard } from "@/components/settings/ExportImportWizard";
 import { AutoRulesManager } from "@/components/settings/AutoRulesManager";
 import { DangerZoneCard } from "@/components/settings/DangerZoneCard";
-import { getSyncCode } from "@/lib/deviceId";
 
 export default function SettingsPage() {
   const { settings, updateSettings } = useSettings();
   const { toast } = useToast();
   const { theme, setTheme } = useTheme();
-  const syncCode = getSyncCode();
 
   const [salary, setSalary] = useState(settings.salary.toString());
   const [saving, setSaving] = useState(false);
@@ -131,17 +131,35 @@ export default function SettingsPage() {
             </div>
           </AccordionSection>
 
-          {/* ─── Sync & Account ─── */}
-          {syncCode && (
-            <AccordionSection
-              id="sync"
-              icon={<LinkIcon size={18} />}
-              title="Sync & Account"
-              description="Manage your sync code and devices"
-            >
-              <SyncCard />
-            </AccordionSection>
-          )}
+          {/* ─── Account ─── */}
+          <AccordionSection
+            id="sync"
+            icon={<LinkIcon size={18} />}
+            title="Account & Workspace"
+            description="Manage your account and workspaces"
+          >
+            <AccountCard />
+          </AccordionSection>
+
+          {/* ─── Security ─── */}
+          <AccordionSection
+            id="security"
+            icon={<Shield size={18} />}
+            title="Security"
+            description="Two-factor auth, sessions, and devices"
+          >
+            <SecurityCard />
+          </AccordionSection>
+
+          {/* ─── Workspace Members ─── */}
+          <AccordionSection
+            id="members"
+            icon={<Users size={18} />}
+            title="Workspace Members"
+            description="Invite people and manage access"
+          >
+            <WorkspaceMembersCard />
+          </AccordionSection>
 
           {/* ─── Categories & Budgets ─── */}
           <AccordionSection

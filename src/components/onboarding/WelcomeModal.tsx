@@ -4,9 +4,6 @@ import { useState } from "react";
 import { Wallet, Link2, Copy, Check, Loader2 } from "lucide-react";
 import { createNewSyncCode, setSyncCode } from "@/lib/deviceId";
 import { supabase } from "@/lib/supabase";
-import { fetchSettingsFromSupabase } from "@/hooks/useSettings";
-
-const SETTINGS_STORAGE_KEY = "expense-tracker-settings";
 
 interface WelcomeModalProps {
   onComplete: (salary?: number) => void;
@@ -73,13 +70,6 @@ export function WelcomeModal({ onComplete }: WelcomeModalProps) {
     }
 
     setSyncCode(code);
-
-    // Fetch the account's settings (budget, categories) and pre-populate localStorage
-    // so the first render after join already has the correct values
-    const remoteSettings = await fetchSettingsFromSupabase(code);
-    if (remoteSettings) {
-      localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(remoteSettings));
-    }
 
     onComplete();
   };

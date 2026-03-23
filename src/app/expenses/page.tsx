@@ -13,7 +13,7 @@ import { useExpenses } from "@/hooks/useExpenses";
 import { useSettings } from "@/hooks/useSettings";
 import { useCalculations } from "@/hooks/useCalculations";
 import { useUIStore } from "@/stores/uiStore";
-import { Search, PlusCircle, ArrowUpDown } from "lucide-react";
+import { Search, PlusCircle } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 import debounce from "lodash/debounce";
 

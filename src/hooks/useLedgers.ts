@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { authFetch, getActiveWorkspaceId } from "@/lib/authClient";
+import { makeIdempotencyKey, enqueueOfflineMutation } from "@/lib/syncClient";
 import { supabase } from "@/lib/supabase";
-import { getSyncCode } from "@/lib/deviceId";
 import type { Ledger, LedgerInput, LedgerStatus, SyncStatus } from "@/types";
 
 // Global event to trigger re-fetch across all useLedgers instances
@@ -17,37 +18,41 @@ export function useLedgers() {
   const [syncStatus, setSyncStatus] = useState<SyncStatus>("synced");
 
   const fetchLedgers = useCallback(async () => {
-    const syncCode = getSyncCode();
-    if (!syncCode) return;
+    const wid = getActiveWorkspaceId();
+    if (!wid) return;
     setSyncStatus("syncing");
-    const { data, error } = await supabase
-      .from("business_ledgers")
-      .select("*")
-      .eq("device_id", syncCode)
-      .is("deleted_at", null)
-      .order("created_at", { ascending: false });
 
-    if (error) {
-      console.error("Fetch ledgers error:", error);
-      setSyncStatus("error");
-    } else {
-      setLedgers(
-        (data ?? []).map((row) => ({
-          id: row.id,
+    try {
+      const params = new URLSearchParams({ workspaceId: wid });
+      const res = await authFetch(`/api/sync/changes?${params}`);
+      if (!res.ok) {
+        setSyncStatus("error");
+        setLoading(false);
+        return;
+      }
+      const data = await res.json();
+      const all: Ledger[] = (data.changes?.businessLedgers ?? [])
+        .filter((l: Record<string, unknown>) => !l.deletedAt)
+        .map((row: Record<string, unknown>) => ({
+          id: row.id as string,
           name: row.name as string,
-          expectedAmount: Number(row.expected_amount),
+          expectedAmount: Number(row.expectedAmount),
           currency: row.currency as string,
           status: row.status as LedgerStatus,
-          dueDate: row.due_date ? new Date(row.due_date as string).toISOString() : undefined,
+          dueDate: row.dueDate ? new Date(row.dueDate as string).toISOString() : undefined,
           tags: (row.tags as string[]) || [],
           notes: (row.notes as string) || "",
-          createdAt: new Date(row.created_at as string).getTime(),
-          updatedAt: new Date(row.updated_at as string).getTime(),
+          createdAt: new Date(row.createdAt as string).getTime(),
+          updatedAt: new Date(row.updatedAt as string).getTime(),
           deletedAt: null,
           deviceId: "",
-        }))
-      );
+        }));
+      // Sort by createdAt descending
+      all.sort((a, b) => b.createdAt - a.createdAt);
+      setLedgers(all);
       setSyncStatus("synced");
+    } catch {
+      setSyncStatus("error");
     }
     setLoading(false);
   }, []);
@@ -56,17 +61,17 @@ export function useLedgers() {
     fetchLedgers();
     ledgerListeners.add(fetchLedgers);
 
-    const syncCode = getSyncCode();
-    const channel = syncCode
+    const wid = getActiveWorkspaceId();
+    const channel = wid
       ? supabase
-          .channel(`ledgers-${syncCode}`)
+          .channel(`ledgers-${wid}`)
           .on(
             "postgres_changes",
             {
               event: "*",
               schema: "public",
               table: "business_ledgers",
-              filter: `device_id=eq.${syncCode}`,
+              filter: `workspace_id=eq.${wid}`,
             },
             () => { fetchLedgers(); }
           )
@@ -91,19 +96,38 @@ export function useLedgers() {
     };
     setLedgers((prev) => [optimistic, ...prev]);
 
-    const { error } = await supabase.from("business_ledgers").insert({
-      name: input.name,
-      expected_amount: input.expectedAmount,
-      currency: input.currency,
-      status: input.status,
-      due_date: input.dueDate || null,
-      tags: input.tags,
-      notes: input.notes,
-      device_id: getSyncCode(),
-    });
-    if (error) {
+    const wid = getActiveWorkspaceId();
+    if (!wid) return;
+
+    const mutation = {
+      table: "business_ledgers" as const,
+      operation: "upsert" as const,
+      data: {
+        name: input.name,
+        expectedAmount: input.expectedAmount,
+        currency: input.currency,
+        status: input.status,
+        dueDate: input.dueDate || null,
+        tags: input.tags,
+        notes: input.notes,
+      },
+      idempotencyKey: makeIdempotencyKey(),
+    };
+
+    try {
+      const res = await authFetch("/api/sync/commit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ workspaceId: wid, mutations: [mutation] }),
+      });
+      if (!res.ok) {
+        setLedgers((prev) => prev.filter((l) => l.id !== tempId));
+        throw new Error("Failed to add ledger");
+      }
+    } catch (err) {
+      enqueueOfflineMutation(mutation);
       setLedgers((prev) => prev.filter((l) => l.id !== tempId));
-      throw error;
+      throw err;
     }
     notifyLedgerChange();
   };
@@ -112,36 +136,62 @@ export function useLedgers() {
     setLedgers((prev) =>
       prev.map((l) => (l.id === id ? { ...l, ...updates, updatedAt: Date.now() } : l))
     );
-    const dbUpdates: Record<string, unknown> = { updated_at: new Date().toISOString() };
-    if (updates.name !== undefined) dbUpdates.name = updates.name;
-    if (updates.expectedAmount !== undefined) dbUpdates.expected_amount = updates.expectedAmount;
-    if (updates.currency !== undefined) dbUpdates.currency = updates.currency;
-    if (updates.status !== undefined) dbUpdates.status = updates.status;
-    if (updates.dueDate !== undefined) dbUpdates.due_date = updates.dueDate || null;
-    if (updates.tags !== undefined) dbUpdates.tags = updates.tags;
-    if (updates.notes !== undefined) dbUpdates.notes = updates.notes;
+    const wid = getActiveWorkspaceId();
+    if (!wid) return;
 
-    const { error } = await supabase
-      .from("business_ledgers")
-      .update(dbUpdates)
-      .eq("id", id);
-    if (error) {
+    const mutation = {
+      table: "business_ledgers" as const,
+      operation: "upsert" as const,
+      id,
+      data: { ...updates },
+      idempotencyKey: makeIdempotencyKey(),
+    };
+
+    try {
+      const res = await authFetch("/api/sync/commit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ workspaceId: wid, mutations: [mutation] }),
+      });
+      if (!res.ok) {
+        fetchLedgers();
+        throw new Error("Failed to update ledger");
+      }
+    } catch (err) {
+      enqueueOfflineMutation(mutation);
       fetchLedgers();
-      throw error;
+      throw err;
     }
     notifyLedgerChange();
   };
 
   const deleteLedger = async (id: string) => {
     setLedgers((prev) => prev.filter((l) => l.id !== id));
-    const now = new Date().toISOString();
-    const { error } = await supabase
-      .from("business_ledgers")
-      .update({ deleted_at: now, updated_at: now })
-      .eq("id", id);
-    if (error) {
+    const wid = getActiveWorkspaceId();
+    if (!wid) return;
+
+    const mutation = {
+      table: "business_ledgers" as const,
+      operation: "delete" as const,
+      id,
+      data: {},
+      idempotencyKey: makeIdempotencyKey(),
+    };
+
+    try {
+      const res = await authFetch("/api/sync/commit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ workspaceId: wid, mutations: [mutation] }),
+      });
+      if (!res.ok) {
+        fetchLedgers();
+        throw new Error("Failed to delete ledger");
+      }
+    } catch (err) {
+      enqueueOfflineMutation(mutation);
       fetchLedgers();
-      throw error;
+      throw err;
     }
     notifyLedgerChange();
   };

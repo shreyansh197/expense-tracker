@@ -13,7 +13,6 @@ interface LedgerCardProps {
 }
 
 export function LedgerCard({ ledger, totalReceived }: LedgerCardProps) {
-  const remaining = ledger.expectedAmount - totalReceived;
   const percent = ledger.expectedAmount > 0 ? (totalReceived / ledger.expectedAmount) * 100 : 0;
   const isOverdue =
     ledger.status === "active" &&

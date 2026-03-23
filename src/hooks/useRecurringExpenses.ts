@@ -3,8 +3,6 @@
 import { useEffect, useRef } from "react";
 import { useSettings } from "@/hooks/useSettings";
 import { useExpenses } from "@/hooks/useExpenses";
-import { supabase } from "@/lib/supabase";
-import { getSyncCode } from "@/lib/deviceId";
 import type { RecurringExpense } from "@/types";
 
 const APPLIED_KEY = "expense-tracker-recurring-applied";
@@ -29,12 +27,12 @@ function markApplied(key: string) {
 
 export function useRecurringExpenses(month: number, year: number) {
   const { settings } = useSettings();
-  const { addExpense, loading } = useExpenses(month, year);
+  const { addExpense, expenses, loading } = useExpenses(month, year);
   const appliedRef = useRef(false);
 
   useEffect(() => {
     if (appliedRef.current) return;
-    if (loading) return; // Wait for expenses to load first
+    if (loading) return;
     const recurring = settings.recurringExpenses || [];
     const active = recurring.filter((r: RecurringExpense) => r.active);
     if (active.length === 0) return;
@@ -43,7 +41,6 @@ export function useRecurringExpenses(month: number, year: number) {
     const currentMonth = now.getMonth() + 1;
     const currentYear = now.getFullYear();
 
-    // Only auto-add for the current month
     if (month !== currentMonth || year !== currentYear) return;
 
     const today = now.getDate();
@@ -58,26 +55,16 @@ export function useRecurringExpenses(month: number, year: number) {
 
     appliedRef.current = true;
 
-    // Apply recurring expenses with DB-level dedup check
+    // Apply recurring expenses — dedup using already-fetched expenses list
     (async () => {
-      const syncCode = getSyncCode();
-      if (!syncCode) return;
-
       for (const r of candidates) {
         try {
-          // Check if this recurring expense was already inserted in Supabase
-          const { data: existing } = await supabase
-            .from("expenses")
-            .select("id")
-            .eq("device_id", syncCode)
-            .eq("month", month)
-            .eq("year", year)
-            .eq("recurring_id", r.id)
-            .is("deleted_at", null)
-            .limit(1);
+          // Check if this recurring expense already exists in the fetched data
+          const alreadyExists = expenses.some(
+            (e) => e.recurringId === r.id && !e.deletedAt
+          );
 
-          if (existing && existing.length > 0) {
-            // Already exists — just mark as applied locally
+          if (alreadyExists) {
             markApplied(getAppliedKey(r.id, month, year));
             continue;
           }
@@ -98,5 +85,5 @@ export function useRecurringExpenses(month: number, year: number) {
         }
       }
     })();
-  }, [settings.recurringExpenses, month, year, addExpense, loading]);
+  }, [settings.recurringExpenses, month, year, addExpense, expenses, loading]);
 }

@@ -97,7 +97,7 @@ export function ExpenseForm({
         }
         closeForm();
         toast(editExpense ? "Expense updated" : "Expense added");
-      } catch (err) {
+      } catch {
         setError("Failed to save expense. Please try again.");
       } finally {
         submittingRef.current = false;

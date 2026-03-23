@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, createContext, useContext, useRef, useEffect } from "react";
-import { AlertTriangle, X } from "lucide-react";
+import { AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface ConfirmOptions {

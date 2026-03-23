@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { Download } from "lucide-react";
-import { formatCurrency } from "@/lib/utils";
 import type { Ledger, Payment } from "@/types";
 
 interface BusinessExportProps {

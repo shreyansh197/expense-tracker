@@ -9,7 +9,7 @@ import { useSettings } from "@/hooks/useSettings";
 export function SubscriptionsSummary() {
   const { settings } = useSettings();
   const catMap = buildCategoryMap(settings.customCategories, settings.hiddenDefaults);
-  const recurring = settings.recurringExpenses || [];
+  const recurring = useMemo(() => settings.recurringExpenses || [], [settings.recurringExpenses]);
 
   const stats = useMemo(() => {
     const active = recurring.filter((r) => r.active);

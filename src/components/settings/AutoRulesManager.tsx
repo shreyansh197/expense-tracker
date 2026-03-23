@@ -6,7 +6,6 @@ import { useSettings } from "@/hooks/useSettings";
 import { getAllCategories } from "@/lib/categories";
 import { useToast } from "@/components/ui/Toast";
 import { useConfirm } from "@/components/ui/ConfirmDialog";
-import type { CategoryId } from "@/types";
 
 export interface AutoRule {
   id: string;

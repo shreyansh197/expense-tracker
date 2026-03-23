@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useSettings } from "@/hooks/useSettings";
-import { getAllCategories, buildCategoryMap } from "@/lib/categories";
+import { getAllCategories } from "@/lib/categories";
 import { formatCurrency } from "@/lib/utils";
 import { useToast } from "@/components/ui/Toast";
 import type { CategoryId } from "@/types";

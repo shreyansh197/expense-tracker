@@ -21,11 +21,10 @@ interface CategoryChartProps {
   expenses?: Expense[];
 }
 
-function CustomTooltip({ active, payload, total, catMap, budgets, expenseCountMap }: {
+function CustomTooltip({ active, payload, total, budgets, expenseCountMap }: {
   active?: boolean;
   payload?: Array<{ name: string; value: number; payload: { slug: string; color: string } }>;
   total: number;
-  catMap: Record<string, { label: string; color: string }>;
   budgets: Record<string, number>;
   expenseCountMap: Record<string, number>;
 }) {
@@ -178,7 +177,6 @@ export function CategoryChart({ categoryTotals, onCategoryClick, categoryBudgets
                 content={
                   <CustomTooltip
                     total={total}
-                    catMap={catMap as Record<string, { label: string; color: string }>}
                     budgets={budgets}
                     expenseCountMap={expenseCountMap}
                   />

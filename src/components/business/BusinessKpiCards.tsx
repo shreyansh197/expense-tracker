@@ -19,7 +19,6 @@ export function BusinessKpiCards({
   collectionPercent,
   activeCount,
   overdueCount,
-  completedCount,
 }: BusinessKpiCardsProps) {
   const cards = [
     {

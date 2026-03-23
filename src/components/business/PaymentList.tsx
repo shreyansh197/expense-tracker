@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { Trash2, Banknote, CreditCard, Smartphone, FileText, HelpCircle } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 import type { Payment, PaymentMethod } from "@/types";
@@ -34,12 +35,14 @@ export function PaymentList({ payments, onDelete }: PaymentListProps) {
     );
   }
 
-  let runningTotal = 0;
   // Payments come sorted desc by date. Show running total ascending.
-  const withRunning = [...payments].reverse().map((p) => {
-    runningTotal += p.amount;
-    return { ...p, runningTotal };
-  }).reverse();
+  const withRunning = useMemo(() => {
+    let total = 0;
+    return [...payments].reverse().map((p) => {
+      total += p.amount;
+      return { ...p, runningTotal: total };
+    }).reverse();
+  }, [payments]);
 
   return (
     <div className="space-y-1">

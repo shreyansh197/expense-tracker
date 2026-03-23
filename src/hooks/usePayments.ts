@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { authFetch, getActiveWorkspaceId } from "@/lib/authClient";
+import { makeIdempotencyKey, enqueueOfflineMutation } from "@/lib/syncClient";
 import { supabase } from "@/lib/supabase";
-import { getSyncCode } from "@/lib/deviceId";
 import type { Payment, PaymentInput, PaymentMethod, SyncStatus } from "@/types";
 
 // Global event to trigger re-fetch across all usePayments instances
@@ -18,37 +19,40 @@ export function usePayments(ledgerId: string | null) {
 
   const fetchPayments = useCallback(async () => {
     if (!ledgerId) { setPayments([]); setLoading(false); return; }
-    const syncCode = getSyncCode();
-    if (!syncCode) return;
+    const wid = getActiveWorkspaceId();
+    if (!wid) return;
     setSyncStatus("syncing");
-    const { data, error } = await supabase
-      .from("business_payments")
-      .select("*")
-      .eq("device_id", syncCode)
-      .eq("ledger_id", ledgerId)
-      .is("deleted_at", null)
-      .order("date", { ascending: false });
 
-    if (error) {
-      console.error("Fetch payments error:", error);
-      setSyncStatus("error");
-    } else {
-      setPayments(
-        (data ?? []).map((row) => ({
-          id: row.id,
-          ledgerId: row.ledger_id as string,
+    try {
+      const params = new URLSearchParams({ workspaceId: wid });
+      const res = await authFetch(`/api/sync/changes?${params}`);
+      if (!res.ok) {
+        setSyncStatus("error");
+        setLoading(false);
+        return;
+      }
+      const data = await res.json();
+      const all: Payment[] = (data.changes?.businessPayments ?? [])
+        .filter((p: Record<string, unknown>) => !p.deletedAt && p.ledgerId === ledgerId)
+        .map((row: Record<string, unknown>) => ({
+          id: row.id as string,
+          ledgerId: row.ledgerId as string,
           amount: Number(row.amount),
           date: row.date as string,
           method: (row.method as PaymentMethod) || undefined,
           reference: (row.reference as string) || undefined,
           notes: (row.notes as string) || undefined,
-          createdAt: new Date(row.created_at as string).getTime(),
-          updatedAt: new Date(row.updated_at as string).getTime(),
+          createdAt: new Date(row.createdAt as string).getTime(),
+          updatedAt: new Date(row.updatedAt as string).getTime(),
           deletedAt: null,
           deviceId: "",
-        }))
-      );
+        }));
+      // Sort by date descending
+      all.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      setPayments(all);
       setSyncStatus("synced");
+    } catch {
+      setSyncStatus("error");
     }
     setLoading(false);
   }, [ledgerId]);
@@ -57,17 +61,17 @@ export function usePayments(ledgerId: string | null) {
     fetchPayments();
     paymentListeners.add(fetchPayments);
 
-    const syncCode = getSyncCode();
-    const channel = syncCode && ledgerId
+    const wid = getActiveWorkspaceId();
+    const channel = wid && ledgerId
       ? supabase
-          .channel(`payments-${syncCode}-${ledgerId}`)
+          .channel(`payments-${wid}-${ledgerId}`)
           .on(
             "postgres_changes",
             {
               event: "*",
               schema: "public",
               table: "business_payments",
-              filter: `device_id=eq.${syncCode}`,
+              filter: `workspace_id=eq.${wid}`,
             },
             () => { fetchPayments(); }
           )
@@ -92,18 +96,37 @@ export function usePayments(ledgerId: string | null) {
     };
     setPayments((prev) => [optimistic, ...prev]);
 
-    const { error } = await supabase.from("business_payments").insert({
-      ledger_id: input.ledgerId,
-      amount: input.amount,
-      date: input.date,
-      method: input.method || null,
-      reference: input.reference || null,
-      notes: input.notes || null,
-      device_id: getSyncCode(),
-    });
-    if (error) {
+    const wid = getActiveWorkspaceId();
+    if (!wid) return;
+
+    const mutation = {
+      table: "business_payments" as const,
+      operation: "upsert" as const,
+      data: {
+        ledgerId: input.ledgerId,
+        amount: input.amount,
+        date: input.date,
+        method: input.method || null,
+        reference: input.reference || null,
+        notes: input.notes || null,
+      },
+      idempotencyKey: makeIdempotencyKey(),
+    };
+
+    try {
+      const res = await authFetch("/api/sync/commit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ workspaceId: wid, mutations: [mutation] }),
+      });
+      if (!res.ok) {
+        setPayments((prev) => prev.filter((p) => p.id !== tempId));
+        throw new Error("Failed to add payment");
+      }
+    } catch (err) {
+      enqueueOfflineMutation(mutation);
       setPayments((prev) => prev.filter((p) => p.id !== tempId));
-      throw error;
+      throw err;
     }
     notifyPaymentChange();
   };
@@ -112,34 +135,62 @@ export function usePayments(ledgerId: string | null) {
     setPayments((prev) =>
       prev.map((p) => (p.id === id ? { ...p, ...updates, updatedAt: Date.now() } : p))
     );
-    const dbUpdates: Record<string, unknown> = { updated_at: new Date().toISOString() };
-    if (updates.amount !== undefined) dbUpdates.amount = updates.amount;
-    if (updates.date !== undefined) dbUpdates.date = updates.date;
-    if (updates.method !== undefined) dbUpdates.method = updates.method || null;
-    if (updates.reference !== undefined) dbUpdates.reference = updates.reference || null;
-    if (updates.notes !== undefined) dbUpdates.notes = updates.notes || null;
+    const wid = getActiveWorkspaceId();
+    if (!wid) return;
 
-    const { error } = await supabase
-      .from("business_payments")
-      .update(dbUpdates)
-      .eq("id", id);
-    if (error) {
+    const mutation = {
+      table: "business_payments" as const,
+      operation: "upsert" as const,
+      id,
+      data: { ...updates },
+      idempotencyKey: makeIdempotencyKey(),
+    };
+
+    try {
+      const res = await authFetch("/api/sync/commit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ workspaceId: wid, mutations: [mutation] }),
+      });
+      if (!res.ok) {
+        fetchPayments();
+        throw new Error("Failed to update payment");
+      }
+    } catch (err) {
+      enqueueOfflineMutation(mutation);
       fetchPayments();
-      throw error;
+      throw err;
     }
     notifyPaymentChange();
   };
 
   const deletePayment = async (id: string) => {
     setPayments((prev) => prev.filter((p) => p.id !== id));
-    const now = new Date().toISOString();
-    const { error } = await supabase
-      .from("business_payments")
-      .update({ deleted_at: now, updated_at: now })
-      .eq("id", id);
-    if (error) {
+    const wid = getActiveWorkspaceId();
+    if (!wid) return;
+
+    const mutation = {
+      table: "business_payments" as const,
+      operation: "delete" as const,
+      id,
+      data: {},
+      idempotencyKey: makeIdempotencyKey(),
+    };
+
+    try {
+      const res = await authFetch("/api/sync/commit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ workspaceId: wid, mutations: [mutation] }),
+      });
+      if (!res.ok) {
+        fetchPayments();
+        throw new Error("Failed to delete payment");
+      }
+    } catch (err) {
+      enqueueOfflineMutation(mutation);
       fetchPayments();
-      throw error;
+      throw err;
     }
     notifyPaymentChange();
   };

@@ -24,7 +24,7 @@ export const SHORTCUTS: Omit<ShortcutDef, "action">[] = [
 
 export function useKeyboardShortcuts(onShowHelp: () => void) {
   const helpRef = useRef(onShowHelp);
-  helpRef.current = onShowHelp;
+  useEffect(() => { helpRef.current = onShowHelp; });
 
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     const target = e.target as HTMLElement;

@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertTriangle, TrendingUp, ArrowRight, Zap, Target } from "lucide-react";
+import { AlertTriangle, TrendingUp, ArrowRight, Zap } from "lucide-react";
 import { cn, formatCurrency } from "@/lib/utils";
 import { buildCategoryMap } from "@/lib/categories";
 import { useSettings } from "@/hooks/useSettings";

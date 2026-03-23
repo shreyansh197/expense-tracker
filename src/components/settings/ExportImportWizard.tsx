@@ -105,7 +105,7 @@ export function ExportImportWizard() {
         const parsed = JSON.parse(text);
         if (Array.isArray(parsed)) {
           // Simple JSON array
-          const rows: ParsedRow[] = parsed.map((item: Record<string, unknown>, i: number) => ({
+          const rows: ParsedRow[] = parsed.map((item: Record<string, unknown>) => ({
             day: Number(item.day) || 1,
             category: resolveCategory(String(item.category || "")),
             amount: Number(item.amount) || 0,

@@ -68,7 +68,7 @@ export const DEFAULT_CATEGORIES_META: CategoryMeta[] = [
 
 export const CATEGORIES = DEFAULT_CATEGORIES_META;
 
-export let CATEGORY_MAP: Record<string, CategoryMeta> = Object.fromEntries(
+export const CATEGORY_MAP: Record<string, CategoryMeta> = Object.fromEntries(
   DEFAULT_CATEGORIES_META.map((c) => [c.id, c])
 );
 

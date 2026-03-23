@@ -9,7 +9,6 @@ import {
   ResponsiveContainer,
   Tooltip,
   CartesianGrid,
-  Legend,
 } from "recharts";
 import { Table2, BarChart3, Layers } from "lucide-react";
 import { buildCategoryMap } from "@/lib/categories";
