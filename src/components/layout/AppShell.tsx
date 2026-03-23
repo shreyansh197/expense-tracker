@@ -5,12 +5,12 @@ import { Sidebar } from "@/components/layout/Sidebar";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { OfflineBanner } from "@/components/sync/SyncIndicator";
 import { ExpenseFormModal } from "@/components/expenses/ExpenseFormModal";
-import { WelcomeModal } from "@/components/onboarding/WelcomeModal";
+import { AuthModal } from "@/components/onboarding/AuthModal";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import { KeyboardShortcutsHelp } from "@/components/ui/KeyboardShortcutsHelp";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useSettings } from "@/hooks/useSettings";
-import { hasSyncCode } from "@/lib/deviceId";
+import { useAuth } from "@/components/providers/AuthProvider";
 
 function AppShellInner({ children }: { children: React.ReactNode }) {
   const [showShortcuts, setShowShortcuts] = useState(false);
@@ -43,15 +43,14 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const { updateSettings, markOnboarded } = useSettings();
-  const [showOnboarding, setShowOnboarding] = useState(true); // Default true — block until we confirm sync code exists
+  const { isAuthenticated } = useAuth();
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
     setHydrated(true);
-    setShowOnboarding(!hasSyncCode());
   }, []);
 
-  // Don't render any app content until hydrated and sync code is confirmed
+  // Don't render any app content until hydrated
   if (!hydrated) {
     return (
       <div className="flex h-screen items-center justify-center bg-gray-50 dark:bg-gray-950">
@@ -60,14 +59,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     );
   }
 
-  if (showOnboarding) {
+  // Show auth modal for unauthenticated users
+  if (!isAuthenticated) {
     return (
       <div className="flex h-screen flex-col bg-gray-50 dark:bg-gray-950">
-        <WelcomeModal
+        <AuthModal
           onComplete={(salary) => {
             if (salary) updateSettings({ salary });
             markOnboarded();
-            setShowOnboarding(false);
             window.location.reload();
           }}
         />

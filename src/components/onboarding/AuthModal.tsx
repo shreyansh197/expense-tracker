@@ -14,7 +14,7 @@ import {
 import { useAuth } from "@/components/providers/AuthProvider";
 
 interface AuthModalProps {
-  onComplete: () => void;
+  onComplete: (salary?: number) => void;
   initialMode?: "register" | "login" | "join";
   inviteToken?: string;
 }
@@ -86,8 +86,8 @@ export function AuthModal({
   };
 
   const handleSalarySubmit = () => {
-    // Salary is optional, proceed to completion
-    onComplete();
+    const val = parseFloat(salary);
+    onComplete(val > 0 ? val : undefined);
   };
 
   // ── Salary step (after registration) ───────────────────────
