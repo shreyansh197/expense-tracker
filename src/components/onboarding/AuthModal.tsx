@@ -366,6 +366,7 @@ export function AuthModal({
             value={salary}
             onChange={(e) => setSalary(e.target.value)}
             autoFocus
+            onKeyDown={(e) => { if (e.key === "Enter") handleSalarySubmit(); }}
             className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3.5 pl-9 pr-4 text-lg font-medium text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow"
           />
         </div>
@@ -457,7 +458,13 @@ export function AuthModal({
           : "Sign in to continue tracking your expenses"}
       </p>
 
-      <div className="space-y-3.5">
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (!loading) (isRegister ? handleRegister : handleLogin)();
+        }}
+        className="space-y-3.5"
+      >
         {isRegister && (
           <div className="relative">
             <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -503,7 +510,7 @@ export function AuthModal({
         )}
 
         <button
-          onClick={isRegister ? handleRegister : handleLogin}
+          type="submit"
           disabled={loading}
           className="w-full rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 py-3.5 text-base font-semibold text-white shadow-lg shadow-blue-600/20 hover:shadow-xl hover:shadow-blue-600/30 disabled:opacity-50 transition-all flex items-center justify-center gap-2"
         >
@@ -540,7 +547,7 @@ export function AuthModal({
             </>
           )}
         </p>
-      </div>
+      </form>
     </AuthPage>
   );
 }
