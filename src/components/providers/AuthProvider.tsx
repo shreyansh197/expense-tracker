@@ -5,6 +5,8 @@ import {
   useContext,
   useSyncExternalStore,
   useCallback,
+  useEffect,
+  useRef,
   type ReactNode,
 } from "react";
 import {
@@ -118,6 +120,42 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const switchWorkspace = useCallback((workspaceId: string) => {
     setAuthState({ activeWorkspaceId: workspaceId });
   }, []);
+
+  // ── Session heartbeat: detect revoked sessions ────────────
+  const logoutRef = useRef(logout);
+  logoutRef.current = logout;
+
+  useEffect(() => {
+    if (!state.tokens?.accessToken) return;
+
+    const INTERVAL_MS = 30_000; // 30 seconds
+
+    const checkSession = async () => {
+      try {
+        const res = await authFetch("/api/auth/check");
+        if (res.status === 401) {
+          // Session was revoked — force logout
+          clearAuthState();
+          setAuthState({ user: null, tokens: null, workspaces: [], activeWorkspaceId: null });
+        }
+      } catch {
+        // Network error — ignore, retry on next tick
+      }
+    };
+
+    const id = setInterval(checkSession, INTERVAL_MS);
+
+    // Also check when tab becomes visible again
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") checkSession();
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+
+    return () => {
+      clearInterval(id);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, [state.tokens?.accessToken]);
 
   return (
     <AuthContext.Provider

@@ -27,7 +27,8 @@ export function jsonError(message: string, status: number) {
 
 /**
  * Verify the access JWT and return the decoded payload.
- * Returns null (and you should return 401) if invalid.
+ * Also checks that the session has not been revoked in the database.
+ * Returns null (and you should return 401) if invalid or revoked.
  */
 export async function requireAuth(
   req: NextRequest,
@@ -38,6 +39,14 @@ export async function requireAuth(
     const payload: AccessTokenPayload = await verifyAccessToken(token);
     if (!payload.sub || !payload.sid || !payload.did || !payload.wid)
       return null;
+
+    // Check session is still valid in DB
+    const session = await prisma.session.findUnique({
+      where: { id: payload.sid },
+      select: { revokedAt: true },
+    });
+    if (!session || session.revokedAt) return null;
+
     return {
       userId: payload.sub,
       sessionId: payload.sid,
