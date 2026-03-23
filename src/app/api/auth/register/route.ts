@@ -149,8 +149,9 @@ export async function POST(req: NextRequest) {
   );
   } catch (err) {
     console.error("[register]", err);
+    const message = err instanceof Error ? err.message : "Unknown error";
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: "Internal server error", debug: message },
       { status: 500 },
     );
   }
