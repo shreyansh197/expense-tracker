@@ -1,8 +1,10 @@
 "use client";
 
-import { useState, useCallback, createContext, useContext, type ReactNode } from "react";
+import { useState, useCallback, useEffect, createContext, useContext, type ReactNode } from "react";
 import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+const STORAGE_KEY = "settings:v2:lastOpen";
 
 interface AccordionContextType {
   openSections: Set<string>;
@@ -16,11 +18,49 @@ const AccordionContext = createContext<AccordionContextType>({
 
 interface SettingsAccordionProps {
   children: ReactNode;
-  defaultOpen?: string[];
 }
 
-export function SettingsAccordion({ children, defaultOpen = [] }: SettingsAccordionProps) {
-  const [openSections, setOpenSections] = useState<Set<string>>(new Set(defaultOpen));
+function getInitialOpen(): Set<string> {
+  if (typeof window === "undefined") return new Set();
+
+  // 1. Deep-link via hash: /settings#security
+  const hash = window.location.hash.replace("#", "");
+  if (hash) return new Set([hash]);
+
+  // 2. Deep-link via query param: /settings?open=security
+  const params = new URLSearchParams(window.location.search);
+  const openParam = params.get("open");
+  if (openParam) return new Set([openParam]);
+
+  // 3. Restore last opened from localStorage
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) return new Set(JSON.parse(stored));
+  } catch { /* ignore */ }
+
+  // 4. Default: all collapsed
+  return new Set();
+}
+
+export function SettingsAccordion({ children }: SettingsAccordionProps) {
+  const [openSections, setOpenSections] = useState<Set<string>>(getInitialOpen);
+
+  // Persist open sections to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify([...openSections]));
+    } catch { /* ignore */ }
+  }, [openSections]);
+
+  // Scroll deep-linked section into view
+  useEffect(() => {
+    const hash = window.location.hash.replace("#", "");
+    if (hash) {
+      requestAnimationFrame(() => {
+        document.getElementById(`section-${hash}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    }
+  }, []);
 
   const toggle = useCallback((id: string) => {
     setOpenSections((prev) => {
@@ -78,6 +118,7 @@ export function AccordionSection({
     >
       <button
         type="button"
+        id={`header-${id}`}
         onClick={() => !alwaysOpen && toggle(id)}
         className={cn(
           "flex w-full items-center gap-3 px-4 py-3.5 text-left",
@@ -128,6 +169,7 @@ export function AccordionSection({
       <div
         id={`section-${id}`}
         role="region"
+        aria-labelledby={`header-${id}`}
         className={cn(
           "grid transition-[grid-template-rows] duration-200",
           isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"

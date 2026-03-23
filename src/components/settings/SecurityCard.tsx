@@ -9,6 +9,7 @@ import { Shield, Key, Smartphone, Trash2, Plus, Loader2 } from "lucide-react";
 interface SessionItem {
   id: string;
   deviceName: string;
+  platform: string;
   ipHash: string;
   lastActiveAt: string;
   createdAt: string;
@@ -18,6 +19,7 @@ interface SessionItem {
 interface DeviceItem {
   id: string;
   name: string;
+  platform: string;
   lastActiveAt: string;
   isCurrent: boolean;
 }

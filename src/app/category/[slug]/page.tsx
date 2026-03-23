@@ -11,8 +11,7 @@ import { useCalculations } from "@/hooks/useCalculations";
 import { buildCategoryMap } from "@/lib/categories";
 import { formatCurrency, getMonthName } from "@/lib/utils";
 import { getCategoryTotal } from "@/lib/calculations";
-import { supabase } from "@/lib/supabase";
-import { getSyncCode } from "@/lib/deviceId";
+import { authFetch, getActiveWorkspaceId } from "@/lib/authClient";
 import { SkeletonCategoryDetail } from "@/components/ui/Skeleton";
 import { ArrowLeft } from "lucide-react";
 import {
@@ -84,23 +83,26 @@ export default function CategoryPage({ params }: { params: Promise<{ slug: strin
     const currentEntry = initial.find((t) => t.month === month && t.year === year);
     if (currentEntry) currentEntry.total = categoryTotal;
 
-    // Fetch previous months from Supabase
+    // Fetch previous months from API
     async function fetchTrend() {
-      const syncCode = getSyncCode();
-      if (!syncCode) { setTrendData(initial); return; }
+      const wid = getActiveWorkspaceId();
+      if (!wid) { setTrendData(initial); return; }
 
       const prev = months.filter((my) => !(my.m === month && my.y === year));
       const promises = prev.map(async ({ m, y }) => {
-        const { data } = await supabase
-          .from("expenses")
-          .select("amount")
-          .eq("device_id", syncCode)
-          .eq("month", m)
-          .eq("year", y)
-          .eq("category", slug)
-          .is("deleted_at", null);
-        const total = (data ?? []).reduce((sum: number, r: { amount: number }) => sum + r.amount, 0);
-        return { m, y, total };
+        try {
+          const params = new URLSearchParams({ workspaceId: wid });
+          const res = await authFetch(`/api/sync/changes?${params}`);
+          if (!res.ok) return { m, y, total: 0 };
+          const data = await res.json();
+          const expenses = (data.changes?.expenses ?? [])
+            .filter((e: Record<string, unknown>) => !e.deletedAt)
+            .filter((e: Record<string, unknown>) => e.month === m && e.year === y && e.category === slug);
+          const total = expenses.reduce((sum: number, e: Record<string, unknown>) => sum + Number(e.amount), 0);
+          return { m, y, total };
+        } catch {
+          return { m, y, total: 0 };
+        }
       });
 
       const results = await Promise.all(promises);

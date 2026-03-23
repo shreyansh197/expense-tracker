@@ -74,12 +74,6 @@ export const syncCommitSchema = z.object({
   mutations: z.array(mutationSchema).min(1).max(100),
 });
 
-// ── Migration ────────────────────────────────────────────────
-
-export const migrateSyncCodeSchema = z.object({
-  syncCode: z.string().min(4).max(10),
-});
-
 // ── Settings update ──────────────────────────────────────────
 
 export const updateSettingsSchema = z.object({

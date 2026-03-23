@@ -9,8 +9,8 @@ import { useTheme } from "@/components/providers/ThemeProvider";
 import { formatCurrency } from "@/lib/utils";
 import {
   Wallet, LinkIcon, Tag, Repeat, TrendingUp, Target, Palette,
-  Download, Zap, AlertTriangle, Sun, Moon, Monitor, Smartphone, Briefcase,
-  Shield, Users,
+  Download, Zap, Sun, Moon, Monitor, Smartphone, Briefcase,
+  Shield, Users, Database,
 } from "lucide-react";
 import { InstallButton } from "@/components/pwa/InstallButton";
 import { useToast } from "@/components/ui/Toast";
@@ -23,7 +23,8 @@ import { RecurringManager } from "@/components/settings/RecurringManager";
 import { GoalsManager } from "@/components/settings/GoalsManager";
 import { ExportImportWizard } from "@/components/settings/ExportImportWizard";
 import { AutoRulesManager } from "@/components/settings/AutoRulesManager";
-import { DangerZoneCard } from "@/components/settings/DangerZoneCard";
+import { DataAccountManagement } from "@/components/settings/DataAccountManagement";
+import { SettingsFooterLogout } from "@/components/settings/SettingsFooterLogout";
 
 export default function SettingsPage() {
   const { settings, updateSettings } = useSettings();
@@ -60,9 +61,49 @@ export default function SettingsPage() {
       <div className="mx-auto max-w-2xl space-y-2 p-4 lg:p-6">
         <h1 className="mb-4 text-lg font-bold text-gray-900 dark:text-white">Settings</h1>
 
-        <SettingsAccordion defaultOpen={["budget", "sync"]}>
+        <SettingsAccordion>
 
-          {/* ─── App Mode ─── */}
+          {/* ─── 1. Account & Workspace ─── */}
+          <AccordionSection
+            id="account"
+            icon={<LinkIcon size={18} />}
+            title="Account & Workspace"
+            description="Manage your account and workspaces"
+          >
+            <AccountCard />
+          </AccordionSection>
+
+          {/* ─── 2. Monthly Budget ─── */}
+          <AccordionSection
+            id="budget"
+            icon={<Wallet size={18} />}
+            title="Monthly Budget"
+            description={`Currently ${formatCurrency(settings.salary)}`}
+            alwaysOpen
+          >
+            <div className="flex items-center gap-3">
+              <div className="relative flex-1">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">₹</span>
+                <input
+                  type="number"
+                  min="1"
+                  value={salary}
+                  onChange={(e) => setSalary(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Enter") handleSalaryUpdate(); }}
+                  className="w-full rounded-lg border border-gray-200 bg-white py-2.5 pl-7 pr-3 text-sm font-medium text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                />
+              </div>
+              <button
+                onClick={handleSalaryUpdate}
+                disabled={saving}
+                className="rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-blue-700 disabled:opacity-50"
+              >
+                {saving ? "Saving..." : "Update"}
+              </button>
+            </div>
+          </AccordionSection>
+
+          {/* ─── 3. App Mode ─── */}
           <AccordionSection
             id="app-mode"
             icon={<Briefcase size={18} />}
@@ -101,47 +142,7 @@ export default function SettingsPage() {
             </div>
           </AccordionSection>
 
-          {/* ─── Budget / Salary ─── */}
-          <AccordionSection
-            id="budget"
-            icon={<Wallet size={18} />}
-            title="Monthly Budget"
-            description={`Currently ${formatCurrency(settings.salary)}`}
-            alwaysOpen
-          >
-            <div className="flex items-center gap-3">
-              <div className="relative flex-1">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">₹</span>
-                <input
-                  type="number"
-                  min="1"
-                  value={salary}
-                  onChange={(e) => setSalary(e.target.value)}
-                  onKeyDown={(e) => { if (e.key === "Enter") handleSalaryUpdate(); }}
-                  className="w-full rounded-lg border border-gray-200 bg-white py-2.5 pl-7 pr-3 text-sm font-medium text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
-                />
-              </div>
-              <button
-                onClick={handleSalaryUpdate}
-                disabled={saving}
-                className="rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-blue-700 disabled:opacity-50"
-              >
-                {saving ? "Saving..." : "Update"}
-              </button>
-            </div>
-          </AccordionSection>
-
-          {/* ─── Account ─── */}
-          <AccordionSection
-            id="sync"
-            icon={<LinkIcon size={18} />}
-            title="Account & Workspace"
-            description="Manage your account and workspaces"
-          >
-            <AccountCard />
-          </AccordionSection>
-
-          {/* ─── Security ─── */}
+          {/* ─── 4. Security ─── */}
           <AccordionSection
             id="security"
             icon={<Shield size={18} />}
@@ -151,7 +152,7 @@ export default function SettingsPage() {
             <SecurityCard />
           </AccordionSection>
 
-          {/* ─── Workspace Members ─── */}
+          {/* ─── 5. Workspace Members ─── */}
           <AccordionSection
             id="members"
             icon={<Users size={18} />}
@@ -161,29 +162,64 @@ export default function SettingsPage() {
             <WorkspaceMembersCard />
           </AccordionSection>
 
-          {/* ─── Categories & Budgets ─── */}
+          {/* ─── 6. Export & Import ─── */}
           <AccordionSection
-            id="categories"
-            icon={<Tag size={18} />}
-            title="Categories & Budgets"
-            description="Manage categories and per-category limits"
-            badge={settings.customCategories.length > 0 ? `+${settings.customCategories.length} custom` : undefined}
+            id="export-import"
+            icon={<Download size={18} />}
+            title="Export & Import"
+            description="Backup, export, or import data"
           >
-            <CategoryManager />
+            <ExportImportWizard />
           </AccordionSection>
 
-          {/* ─── Recurring Expenses ─── */}
+          {/* ─── 7. Theme & Appearance ─── */}
           <AccordionSection
-            id="recurring"
-            icon={<Repeat size={18} />}
-            title="Recurring Expenses"
-            description={recurringCount > 0 ? `${recurringCount} items · ${formatCurrency(recurringTotal)}/mo` : "Auto-add monthly expenses"}
-            badge={recurringCount > 0 ? recurringCount : undefined}
+            id="theme"
+            icon={<Palette size={18} />}
+            title="Theme & Appearance"
+            description={`${theme.charAt(0).toUpperCase() + theme.slice(1)} mode`}
           >
-            <RecurringManager />
+            <div className="space-y-4">
+              <div className="flex gap-2">
+                {[
+                  { value: "light" as const, icon: Sun, label: "Light" },
+                  { value: "dark" as const, icon: Moon, label: "Dark" },
+                  { value: "system" as const, icon: Monitor, label: "System" },
+                ].map((opt) => {
+                  const Icon = opt.icon;
+                  const active = theme === opt.value;
+                  return (
+                    <button
+                      key={opt.value}
+                      onClick={() => setTheme(opt.value)}
+                      className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
+                        active
+                          ? "bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
+                          : "text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
+                      }`}
+                    >
+                      <Icon size={16} />
+                      {opt.label}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Install PWA */}
+              <div className="border-t border-gray-100 pt-4 dark:border-gray-800">
+                <div className="flex items-center gap-3 mb-3">
+                  <Smartphone size={16} className="text-gray-400" />
+                  <div>
+                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Install App</p>
+                    <p className="text-xs text-gray-400">Install as app for quick access</p>
+                  </div>
+                </div>
+                <InstallButton />
+              </div>
+            </div>
           </AccordionSection>
 
-          {/* ─── Budget Rollover ─── */}
+          {/* ─── 8. Budget Rollover ─── */}
           <AccordionSection
             id="rollover"
             icon={<TrendingUp size={18} />}
@@ -233,7 +269,7 @@ export default function SettingsPage() {
             </div>
           </AccordionSection>
 
-          {/* ─── Savings Goals ─── */}
+          {/* ─── 9. Savings Goals ─── */}
           <AccordionSection
             id="goals"
             icon={<Target size={18} />}
@@ -244,64 +280,7 @@ export default function SettingsPage() {
             <GoalsManager />
           </AccordionSection>
 
-          {/* ─── Theme & Appearance ─── */}
-          <AccordionSection
-            id="theme"
-            icon={<Palette size={18} />}
-            title="Theme & Appearance"
-            description={`${theme.charAt(0).toUpperCase() + theme.slice(1)} mode`}
-          >
-            <div className="space-y-4">
-              <div className="flex gap-2">
-                {[
-                  { value: "light" as const, icon: Sun, label: "Light" },
-                  { value: "dark" as const, icon: Moon, label: "Dark" },
-                  { value: "system" as const, icon: Monitor, label: "System" },
-                ].map((opt) => {
-                  const Icon = opt.icon;
-                  const active = theme === opt.value;
-                  return (
-                    <button
-                      key={opt.value}
-                      onClick={() => setTheme(opt.value)}
-                      className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-                        active
-                          ? "bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
-                          : "text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
-                      }`}
-                    >
-                      <Icon size={16} />
-                      {opt.label}
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Install PWA */}
-              <div className="border-t border-gray-100 pt-4 dark:border-gray-800">
-                <div className="flex items-center gap-3 mb-3">
-                  <Smartphone size={16} className="text-gray-400" />
-                  <div>
-                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Install App</p>
-                    <p className="text-xs text-gray-400">Install as app for quick access</p>
-                  </div>
-                </div>
-                <InstallButton />
-              </div>
-            </div>
-          </AccordionSection>
-
-          {/* ─── Export & Import ─── */}
-          <AccordionSection
-            id="export-import"
-            icon={<Download size={18} />}
-            title="Export & Import"
-            description="Backup, export, or import data"
-          >
-            <ExportImportWizard />
-          </AccordionSection>
-
-          {/* ─── Auto Rules ─── */}
+          {/* ─── 10. Auto Rules ─── */}
           <AccordionSection
             id="rules"
             icon={<Zap size={18} />}
@@ -311,18 +290,45 @@ export default function SettingsPage() {
             <AutoRulesManager />
           </AccordionSection>
 
-          {/* ─── Danger Zone ─── */}
+          {/* ─── 11. Categories ─── */}
           <AccordionSection
-            id="danger"
-            icon={<AlertTriangle size={18} />}
-            title="Danger Zone"
-            description="Reset or delete your data"
-            className="border-red-200 dark:border-red-900/50"
+            id="categories"
+            icon={<Tag size={18} />}
+            title="Categories & Budgets"
+            description="Manage expense categories and per-category limits"
           >
-            <DangerZoneCard />
+            <CategoryManager />
+          </AccordionSection>
+
+          {/* ─── 12. Recurring Expenses ─── */}
+          <AccordionSection
+            id="recurring"
+            icon={<Repeat size={18} />}
+            title="Recurring Expenses"
+            description={
+              recurringCount > 0
+                ? `${recurringCount} items · ${formatCurrency(recurringTotal)}/mo`
+                : "Set up automatic monthly expenses"
+            }
+            badge={recurringCount > 0 ? recurringCount : undefined}
+          >
+            <RecurringManager />
+          </AccordionSection>
+
+          {/* ─── 13. Data & Account Management ─── */}
+          <AccordionSection
+            id="data-management"
+            icon={<Database size={18} />}
+            title="Data & Account Management"
+            description="Export, reset, or delete workspace data"
+          >
+            <DataAccountManagement />
           </AccordionSection>
 
         </SettingsAccordion>
+
+        {/* ─── 12. Log Out Footer ─── */}
+        <SettingsFooterLogout />
       </div>
     </AppShell>
   );

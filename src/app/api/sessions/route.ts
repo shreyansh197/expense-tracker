@@ -12,21 +12,24 @@ export async function GET(req: NextRequest) {
   const sessions = await prisma.session.findMany({
     where: { userId: auth.userId, revokedAt: null, expiresAt: { gt: new Date() } },
     include: {
-      device: { select: { id: true, name: true, platform: true } },
+      device: { select: { id: true, name: true, platform: true, lastActiveAt: true } },
     },
     orderBy: { createdAt: "desc" },
   });
 
-  return NextResponse.json(
+  return NextResponse.json({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    sessions.map((s: any) => ({
+    sessions: sessions.map((s: any) => ({
       id: s.id,
-      device: s.device,
+      deviceName: s.device?.name ?? "Unknown Device",
+      platform: s.device?.platform ?? "web",
+      ipHash: s.ipHash ?? "",
       createdAt: s.createdAt,
+      lastActiveAt: s.device?.lastActiveAt ?? s.createdAt,
       expiresAt: s.expiresAt,
       isCurrent: s.id === auth.sessionId,
     })),
-  );
+  });
 }
 
 /** DELETE — revoke all sessions except current */

@@ -59,11 +59,15 @@ export async function GET(req: NextRequest) {
     orderBy: { lastActiveAt: "desc" },
   });
 
-  return NextResponse.json(
+  return NextResponse.json({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    devices.map((d: any) => ({
-      ...d,
+    devices: devices.map((d: any) => ({
+      id: d.id,
+      name: d.name,
+      platform: d.platform,
+      lastActiveAt: d.lastActiveAt,
+      createdAt: d.createdAt,
       isCurrent: d.id === auth.deviceId,
     })),
-  );
+  });
 }
