@@ -70,33 +70,33 @@ function FloatingOrbs() {
 /* ── Hero / branding panel (left side on desktop, top on mobile) */
 function HeroPanel() {
   return (
-    <div className="relative flex h-full flex-col justify-between overflow-hidden bg-gradient-to-br from-gray-900 via-blue-950 to-indigo-950 px-8 py-10 text-white lg:px-12 lg:py-14">
+    <div className="relative flex h-full flex-col justify-between overflow-hidden bg-gradient-to-br from-gray-900 via-blue-950 to-indigo-950 px-6 py-6 text-white lg:px-12 lg:py-14">
       <FloatingOrbs />
 
       <div className="relative z-10">
         {/* Brand */}
         <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/10 backdrop-blur-sm ring-1 ring-white/20">
-            <Wallet className="h-6 w-6" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 backdrop-blur-sm ring-1 ring-white/20 lg:h-11 lg:w-11">
+            <Wallet className="h-5 w-5 lg:h-6 lg:w-6" />
           </div>
-          <span className="text-xl font-bold tracking-tight">ExpenseTracker</span>
+          <span className="text-lg font-bold tracking-tight lg:text-xl">ExpenseTracker</span>
         </div>
 
-        {/* Hero copy */}
-        <h1 className="mt-8 text-3xl font-extrabold leading-tight lg:text-4xl">
+        {/* Hero copy — compact on mobile */}
+        <h1 className="mt-4 text-xl font-extrabold leading-tight lg:mt-8 lg:text-4xl">
           Take control of{" "}
           <span className="bg-gradient-to-r from-blue-400 via-violet-400 to-purple-400 bg-clip-text text-transparent">
             your finances
           </span>
         </h1>
-        <p className="mt-3 max-w-md text-sm leading-relaxed text-blue-100/70 lg:text-base">
+        <p className="mt-2 max-w-md text-xs leading-relaxed text-blue-100/70 lg:mt-3 lg:text-base">
           Track every rupee, set smart budgets, and discover where your money
-          actually goes — all in one elegant app.
+          actually goes.
         </p>
       </div>
 
-      {/* Feature grid */}
-      <div className="relative z-10 mt-10 grid grid-cols-2 gap-3">
+      {/* Feature grid — hidden on mobile, visible on desktop */}
+      <div className="relative z-10 mt-10 hidden grid-cols-2 gap-3 lg:grid">
         {FEATURES.map((f) => (
           <div
             key={f.title}
@@ -111,8 +111,21 @@ function HeroPanel() {
         ))}
       </div>
 
-      {/* Bottom tag */}
-      <p className="relative z-10 mt-8 text-[11px] text-white/30">
+      {/* Mobile feature pills — compact single row */}
+      <div className="relative z-10 mt-4 flex flex-wrap gap-2 lg:hidden">
+        {FEATURES.map((f) => (
+          <span
+            key={f.title}
+            className="inline-flex items-center gap-1.5 rounded-full bg-white/[0.08] px-3 py-1.5 text-[11px] font-medium text-white/70 ring-1 ring-white/10"
+          >
+            <f.icon className={`h-3 w-3 ${f.color}`} />
+            {f.title}
+          </span>
+        ))}
+      </div>
+
+      {/* Bottom tag — desktop only */}
+      <p className="relative z-10 mt-8 hidden text-[11px] text-white/30 lg:block">
         Trusted by thousands · Free forever · Open source
       </p>
     </div>
@@ -123,13 +136,13 @@ function HeroPanel() {
 function AuthPage({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen w-full flex-col lg:flex-row">
-      {/* Hero — full width on mobile (compact), left half on desktop */}
-      <div className="lg:w-1/2 lg:min-h-screen">
+      {/* Hero — compact on mobile, left half on desktop */}
+      <div className="shrink-0 lg:w-1/2 lg:min-h-screen">
         <HeroPanel />
       </div>
 
       {/* Form panel — right side */}
-      <div className="relative flex flex-1 items-center justify-center bg-gray-50 px-6 py-10 dark:bg-gray-950 lg:px-16">
+      <div className="relative flex flex-1 items-center justify-center bg-gray-50 px-6 py-8 dark:bg-gray-950 lg:px-16 lg:py-10">
         {/* Subtle decorative dots */}
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
           <div className="absolute -top-24 right-10 h-60 w-60 rounded-full bg-blue-100/50 blur-3xl dark:bg-blue-900/15" />
@@ -137,8 +150,8 @@ function AuthPage({ children }: { children: React.ReactNode }) {
         </div>
 
         <div className="relative z-10 w-full max-w-sm">
-          {/* Mobile branding (hidden on desktop since hero shows it) */}
-          <div className="mb-6 flex items-center gap-2 lg:hidden">
+          {/* Mobile branding — hidden since hero is visible above */}
+          <div className="hidden">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-600 shadow-md">
               <Wallet className="h-5 w-5 text-white" />
             </div>
