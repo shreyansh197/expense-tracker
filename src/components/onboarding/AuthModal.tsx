@@ -70,7 +70,7 @@ function FloatingOrbs() {
 /* ── Hero / branding panel (left side on desktop, top on mobile) */
 function HeroPanel() {
   return (
-    <div className="relative flex flex-col justify-between overflow-hidden bg-gradient-to-br from-gray-900 via-blue-950 to-indigo-950 px-8 py-10 text-white lg:px-12 lg:py-14">
+    <div className="relative flex h-full flex-col justify-between overflow-hidden bg-gradient-to-br from-gray-900 via-blue-950 to-indigo-950 px-8 py-10 text-white lg:px-12 lg:py-14">
       <FloatingOrbs />
 
       <div className="relative z-10">
