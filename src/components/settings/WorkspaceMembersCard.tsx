@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, startTransition } from "react";
 import { authFetch, getActiveWorkspaceId } from "@/lib/authClient";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useToast } from "@/components/ui/Toast";
@@ -43,7 +43,7 @@ export function WorkspaceMembersCard() {
 
   const fetchData = useCallback(async () => {
     if (!wid) return;
-    setLoading(true);
+    startTransition(() => setLoading(true));
     try {
       const [wsRes, invRes] = await Promise.all([
         authFetch(`/api/workspaces/${wid}`),
@@ -51,14 +51,14 @@ export function WorkspaceMembersCard() {
       ]);
       if (wsRes.ok) {
         const data = await wsRes.json();
-        setMembers(data.members ?? []);
+        startTransition(() => setMembers(data.members ?? []));
       }
       if (invRes.ok) {
         const data = await invRes.json();
-        setInvites(data.invites ?? []);
+        startTransition(() => setInvites(data.invites ?? []));
       }
     } catch { /* ignore */ }
-    setLoading(false);
+    startTransition(() => setLoading(false));
   }, [wid]);
 
   useEffect(() => {

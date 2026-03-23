@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, startTransition } from "react";
 import { authFetch } from "@/lib/authClient";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useToast } from "@/components/ui/Toast";
@@ -40,27 +40,27 @@ export function SecurityCard() {
   const [verifying2FA, setVerifying2FA] = useState(false);
 
   const fetchSessions = useCallback(async () => {
-    setLoadingSessions(true);
+    startTransition(() => setLoadingSessions(true));
     try {
       const res = await authFetch("/api/sessions");
       if (res.ok) {
         const data = await res.json();
-        setSessions(data.sessions ?? []);
+        startTransition(() => setSessions(data.sessions ?? []));
       }
     } catch { /* ignore */ }
-    setLoadingSessions(false);
+    startTransition(() => setLoadingSessions(false));
   }, []);
 
   const fetchDevices = useCallback(async () => {
-    setLoadingDevices(true);
+    startTransition(() => setLoadingDevices(true));
     try {
       const res = await authFetch("/api/devices");
       if (res.ok) {
         const data = await res.json();
-        setDevices(data.devices ?? []);
+        startTransition(() => setDevices(data.devices ?? []));
       }
     } catch { /* ignore */ }
-    setLoadingDevices(false);
+    startTransition(() => setLoadingDevices(false));
   }, []);
 
   const revokeSession = async (sessionId: string) => {

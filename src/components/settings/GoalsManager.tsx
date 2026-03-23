@@ -56,14 +56,14 @@ export function GoalsManager() {
       toast("Goal updated");
     } else {
       const goal: Goal = {
-        id: `goal-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+        id: crypto.randomUUID(),
         name: name.trim(),
         targetAmount: parseFloat(targetAmount),
         savedAmount: 0,
         monthlyContribution: monthlyContribution ? parseFloat(monthlyContribution) : undefined,
         deadline: deadline || undefined,
         color,
-        createdAt: Date.now(),
+        createdAt: 0,
       };
       updateSettings({ goals: [...goals, goal] });
       toast("Goal created");

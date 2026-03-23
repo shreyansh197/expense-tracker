@@ -27,6 +27,16 @@ interface PaymentListProps {
 }
 
 export function PaymentList({ payments, onDelete }: PaymentListProps) {
+  // Payments come sorted desc by date. Show running total ascending.
+  const withRunning = useMemo(() => {
+    if (payments.length === 0) return [];
+    let total = 0;
+    return [...payments].reverse().map((p) => {
+      total += p.amount;
+      return { ...p, runningTotal: total };
+    }).reverse();
+  }, [payments]);
+
   if (payments.length === 0) {
     return (
       <p className="py-6 text-center text-xs text-gray-400">
@@ -34,15 +44,6 @@ export function PaymentList({ payments, onDelete }: PaymentListProps) {
       </p>
     );
   }
-
-  // Payments come sorted desc by date. Show running total ascending.
-  const withRunning = useMemo(() => {
-    let total = 0;
-    return [...payments].reverse().map((p) => {
-      total += p.amount;
-      return { ...p, runningTotal: total };
-    }).reverse();
-  }, [payments]);
 
   return (
     <div className="space-y-1">

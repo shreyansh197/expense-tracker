@@ -2,7 +2,7 @@
 
 export const dynamic = "force-dynamic";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, startTransition } from "react";
 import { AppShell } from "@/components/layout/AppShell";
 import { PlusCircle, Search, Briefcase } from "lucide-react";
 import { useLedgers } from "@/hooks/useLedgers";
@@ -77,7 +77,7 @@ export default function BusinessPage() {
 
   useEffect(() => {
     if (showLedgerFormStore) {
-      setShowForm(true);
+      startTransition(() => setShowForm(true));
       closeLedgerForm();
     }
   }, [showLedgerFormStore, closeLedgerForm]);

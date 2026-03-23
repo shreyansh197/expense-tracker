@@ -104,7 +104,7 @@ export function ExpenseForm({
         setSubmitting(false);
       }
     },
-    [amount, day, category, month, year, remark, editExpense, onSubmit, onUpdate, closeForm]
+    [amount, day, category, remark, editExpense, onSubmit, onUpdate, closeForm, selectedMonth, selectedYear, toast]
   );
 
   const handleKeyDown = useCallback(

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, startTransition } from "react";
 import { authFetch, getActiveWorkspaceId } from "@/lib/authClient";
 import { supabase } from "@/lib/supabase";
 import type { Payment, PaymentMethod } from "@/types";
@@ -15,12 +15,12 @@ export function useAllPayments() {
 
   const fetchAll = useCallback(async () => {
     const wid = getActiveWorkspaceId();
-    if (!wid) { setLoading(false); return; }
+    if (!wid) { startTransition(() => setLoading(false)); return; }
 
     try {
       const params = new URLSearchParams({ workspaceId: wid });
       const res = await authFetch(`/api/sync/changes?${params}`);
-      if (!res.ok) { setLoading(false); return; }
+      if (!res.ok) { startTransition(() => setLoading(false)); return; }
       const data = await res.json();
 
       const all: Payment[] = (data.changes?.businessPayments ?? [])
@@ -40,9 +40,9 @@ export function useAllPayments() {
         }));
       // Sort by date descending
       all.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-      setPayments(all);
+      startTransition(() => setPayments(all));
     } catch { /* ignore */ }
-    setLoading(false);
+    startTransition(() => setLoading(false));
   }, []);
 
   useEffect(() => {

@@ -20,14 +20,14 @@ export function useTheme() {
   return useContext(ThemeContext);
 }
 
-export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>("system");
-  const [resolved, setResolved] = useState<"light" | "dark">("light");
+function getStoredTheme(): Theme {
+  if (typeof window === "undefined") return "system";
+  return (localStorage.getItem("theme") as Theme | null) ?? "system";
+}
 
-  useEffect(() => {
-    const stored = localStorage.getItem("theme") as Theme | null;
-    if (stored) setThemeState(stored);
-  }, []);
+export function ThemeProvider({ children }: { children: ReactNode }) {
+  const [theme, setThemeState] = useState<Theme>(getStoredTheme);
+  const [resolved, setResolved] = useState<"light" | "dark">("light");
 
   useEffect(() => {
     const mq = window.matchMedia("(prefers-color-scheme: dark)");

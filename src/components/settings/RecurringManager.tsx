@@ -59,14 +59,14 @@ export function RecurringManager() {
     } else {
       // Add new
       const newItem: RecurringExpense = {
-        id: `rec-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+        id: crypto.randomUUID(),
         category,
         amount: parsedAmount,
         day: parsedDay,
         remark: remark.trim() || `${allCategories.find((c) => c.id === category)?.label || category} (recurring)`,
         frequency: "monthly",
         active: true,
-        createdAt: Date.now(),
+        createdAt: 0,
       };
       updateSettings({ recurringExpenses: [...recurring, newItem] });
       toast("Recurring expense added");

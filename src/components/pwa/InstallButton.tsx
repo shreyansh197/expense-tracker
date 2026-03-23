@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, startTransition } from "react";
 import { Download, Smartphone, Monitor } from "lucide-react";
 
 interface BeforeInstallPromptEvent extends Event {
@@ -8,21 +8,23 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 }
 
+function isStandalone(): boolean {
+  if (typeof window === "undefined") return false;
+  return window.matchMedia("(display-mode: standalone)").matches;
+}
+
 export function InstallButton() {
   const [deferredPrompt, setDeferredPrompt] =
     useState<BeforeInstallPromptEvent | null>(null);
-  const [installed, setInstalled] = useState(false);
+  const [installed, setInstalled] = useState(isStandalone);
 
   useEffect(() => {
-    if (window.matchMedia("(display-mode: standalone)").matches) {
-      setInstalled(true);
-      return;
-    }
+    if (installed) return;
 
     // Check if the event was already captured by the global inline script
     const saved = (window as unknown as Record<string, unknown>).__pwaInstallPrompt;
     if (saved) {
-      setDeferredPrompt(saved as BeforeInstallPromptEvent);
+      startTransition(() => setDeferredPrompt(saved as BeforeInstallPromptEvent));
     }
 
     const handler = (e: Event) => {
@@ -34,7 +36,7 @@ export function InstallButton() {
     window.addEventListener("appinstalled", () => setInstalled(true));
 
     return () => window.removeEventListener("beforeinstallprompt", handler);
-  }, []);
+  }, [installed]);
 
   if (installed) {
     return (

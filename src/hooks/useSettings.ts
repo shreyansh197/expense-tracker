@@ -132,24 +132,23 @@ async function fetchSettingsFromApi(): Promise<UserSettings | null> {
   };
 }
 
-// ── Initialization guards (module-level, run once across all consumers) ──
-let _initialized = false;
+// ── Module-level initialization (runs once when module loads) ──
+if (typeof window !== "undefined") {
+  const local = loadSettings();
+  _setShared(local);
+}
 
 export function useSettings() {
   const settings = useSyncExternalStore(_subscribe, _getSnapshot, () => DEFAULT_SETTINGS);
-  const [loading, setLoading] = useState(!_initialized);
-  const [isFirstVisit, setIsFirstVisit] = useState(false);
+  const loading = false;
+  const [isFirstVisit, setIsFirstVisit] = useState(() => {
+    return localStorage.getItem(STORAGE_KEY) === null;
+  });
 
-  // On mount: load from localStorage, then sync with API
+  // On mount: sync with API
   useEffect(() => {
-    if (_initialized) { setLoading(false); return; }
-    _initialized = true;
-
     const hasExisting = localStorage.getItem(STORAGE_KEY) !== null;
-    setIsFirstVisit(!hasExisting);
-    const local = loadSettings();
-    _setShared(local);
-    setLoading(false);
+    const local = _getSnapshot();
 
     // Fetch remote settings via API and merge
     fetchSettingsFromApi().then((remote) => {
