@@ -67,36 +67,33 @@ function FloatingOrbs() {
   );
 }
 
-/* ── Hero / branding panel (left side on desktop, top on mobile) */
-function HeroPanel() {
+/* ── Hero / branding panel (desktop only — left side) ───── */
+function DesktopHeroPanel() {
   return (
-    <div className="relative flex h-full flex-col justify-between overflow-hidden bg-gradient-to-br from-gray-900 via-blue-950 to-indigo-950 px-6 py-6 text-white lg:px-12 lg:py-14">
+    <div className="relative flex h-full flex-col justify-between overflow-hidden bg-gradient-to-br from-gray-900 via-blue-950 to-indigo-950 px-12 py-14 text-white">
       <FloatingOrbs />
 
       <div className="relative z-10">
-        {/* Brand */}
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 backdrop-blur-sm ring-1 ring-white/20 lg:h-11 lg:w-11">
-            <Wallet className="h-5 w-5 lg:h-6 lg:w-6" />
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/10 backdrop-blur-sm ring-1 ring-white/20">
+            <Wallet className="h-6 w-6" />
           </div>
-          <span className="text-lg font-bold tracking-tight lg:text-xl">ExpenseTracker</span>
+          <span className="text-xl font-bold tracking-tight">ExpenseTracker</span>
         </div>
 
-        {/* Hero copy — compact on mobile */}
-        <h1 className="mt-4 text-xl font-extrabold leading-tight lg:mt-8 lg:text-4xl">
+        <h1 className="mt-8 text-4xl font-extrabold leading-tight">
           Take control of{" "}
           <span className="bg-gradient-to-r from-blue-400 via-violet-400 to-purple-400 bg-clip-text text-transparent">
             your finances
           </span>
         </h1>
-        <p className="mt-2 max-w-md text-xs leading-relaxed text-blue-100/70 lg:mt-3 lg:text-base">
+        <p className="mt-3 max-w-md text-base leading-relaxed text-blue-100/70">
           Track every rupee, set smart budgets, and discover where your money
-          actually goes.
+          actually goes — all in one elegant app.
         </p>
       </div>
 
-      {/* Feature grid — hidden on mobile, visible on desktop */}
-      <div className="relative z-10 mt-10 hidden grid-cols-2 gap-3 lg:grid">
+      <div className="relative z-10 mt-10 grid grid-cols-2 gap-3">
         {FEATURES.map((f) => (
           <div
             key={f.title}
@@ -111,64 +108,79 @@ function HeroPanel() {
         ))}
       </div>
 
-      {/* Mobile feature pills — compact single row */}
-      <div className="relative z-10 mt-4 flex flex-wrap gap-2 lg:hidden">
-        {FEATURES.map((f) => (
-          <span
-            key={f.title}
-            className="inline-flex items-center gap-1.5 rounded-full bg-white/[0.08] px-3 py-1.5 text-[11px] font-medium text-white/70 ring-1 ring-white/10"
-          >
-            <f.icon className={`h-3 w-3 ${f.color}`} />
-            {f.title}
-          </span>
-        ))}
-      </div>
-
-      {/* Bottom tag — desktop only */}
-      <p className="relative z-10 mt-8 hidden text-[11px] text-white/30 lg:block">
+      <p className="relative z-10 mt-8 text-[11px] text-white/30">
         Trusted by thousands · Free forever · Open source
       </p>
     </div>
   );
 }
 
-/* ── Full-page split wrapper ────────────────────────────── */
-function AuthPage({ children }: { children: React.ReactNode }) {
+/* ── Mobile full-screen layout ──────────────────────────── */
+function MobileAuthPage({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex min-h-screen w-full flex-col lg:flex-row">
-      {/* Hero — compact on mobile, left half on desktop */}
-      <div className="shrink-0 lg:w-1/2 lg:min-h-screen">
-        <HeroPanel />
+    <div className="relative flex min-h-[100dvh] flex-col bg-gradient-to-b from-gray-900 via-blue-950 to-indigo-950 lg:hidden">
+      <FloatingOrbs />
+
+      {/* Top branding area */}
+      <div className="relative z-10 flex flex-col items-center px-6 pt-12 pb-4">
+        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10 ring-1 ring-white/20 backdrop-blur-sm shadow-lg shadow-blue-900/30">
+          <Wallet className="h-7 w-7 text-white" />
+        </div>
+        <h1 className="mt-3 text-xl font-bold text-white">ExpenseTracker</h1>
+        <p className="mt-1 text-xs text-blue-200/60">Smart budgeting, effortless tracking</p>
       </div>
 
-      {/* Form panel — right side */}
-      <div className="relative flex flex-1 items-center justify-center bg-gray-50 px-6 py-8 dark:bg-gray-950 lg:px-16 lg:py-10">
-        {/* Subtle decorative dots */}
+      {/* Card area — pushed up with rounded top */}
+      <div className="relative z-10 mt-auto flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col rounded-t-3xl bg-white px-6 pt-6 pb-8 shadow-2xl shadow-black/20 dark:bg-gray-900"
+          style={{ paddingBottom: "calc(32px + env(safe-area-inset-bottom, 0px))" }}
+        >
+          <div className="flex-1 flex flex-col justify-center">
+            {children}
+          </div>
+          <p className="mt-4 text-center text-[10px] text-gray-400 dark:text-gray-600">
+            By continuing, you agree to our Terms of Service.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── Desktop split layout ───────────────────────────────── */
+function DesktopAuthPage({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="hidden min-h-screen w-full lg:flex lg:flex-row">
+      <div className="w-1/2 min-h-screen">
+        <DesktopHeroPanel />
+      </div>
+
+      <div className="relative flex flex-1 items-center justify-center bg-gray-50 px-16 py-10 dark:bg-gray-950">
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
           <div className="absolute -top-24 right-10 h-60 w-60 rounded-full bg-blue-100/50 blur-3xl dark:bg-blue-900/15" />
           <div className="absolute -bottom-20 -left-10 h-48 w-48 rounded-full bg-purple-100/40 blur-3xl dark:bg-purple-900/10" />
         </div>
 
         <div className="relative z-10 w-full max-w-sm">
-          {/* Mobile branding — hidden since hero is visible above */}
-          <div className="hidden">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-600 shadow-md">
-              <Wallet className="h-5 w-5 text-white" />
-            </div>
-            <span className="text-lg font-bold text-gray-900 dark:text-white">ExpenseTracker</span>
-          </div>
-
-          {/* Card */}
-          <div className="rounded-2xl border border-gray-200/80 bg-white p-6 shadow-xl shadow-gray-200/40 dark:border-gray-800/60 dark:bg-gray-900 dark:shadow-none sm:p-8">
+          <div className="rounded-2xl border border-gray-200/80 bg-white p-8 shadow-xl shadow-gray-200/40 dark:border-gray-800/60 dark:bg-gray-900 dark:shadow-none">
             {children}
           </div>
-
           <p className="mt-4 text-center text-[11px] text-gray-400 dark:text-gray-600">
             By continuing, you agree to our Terms of Service.
           </p>
         </div>
       </div>
     </div>
+  );
+}
+
+/* ── Combined wrapper that renders both (CSS hides one) ── */
+function AuthPage({ children }: { children: React.ReactNode }) {
+  return (
+    <>
+      <MobileAuthPage>{children}</MobileAuthPage>
+      <DesktopAuthPage>{children}</DesktopAuthPage>
+    </>
   );
 }
 
