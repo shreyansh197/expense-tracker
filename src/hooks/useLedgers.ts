@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useSyncExternalStore } from "react";
 import { authFetch, getActiveWorkspaceId } from "@/lib/authClient";
 import { makeIdempotencyKey, enqueueOfflineMutation } from "@/lib/syncClient";
+import { fetchSyncData, invalidateSyncCache } from "@/lib/syncFetch";
 import { supabase } from "@/lib/supabase";
 import type { Ledger, LedgerInput, LedgerStatus, SyncStatus } from "@/types";
 
@@ -16,11 +17,6 @@ function emitChange() {
   subscribers.forEach((fn) => fn());
 }
 
-function setGlobalLedgers(next: Ledger[] | ((prev: Ledger[]) => Ledger[])) {
-  cachedLedgers = typeof next === "function" ? next(cachedLedgers) : next;
-  emitChange();
-}
-
 function subscribeToLedgers(cb: () => void) {
   subscribers.add(cb);
   return () => { subscribers.delete(cb); };
@@ -30,8 +26,44 @@ function getSnapshot(): Ledger[] {
   return cachedLedgers.length === 0 ? EMPTY : cachedLedgers;
 }
 
-/* ─── Fetch guard ─── */
-let globalLastMutationAt = 0;
+/* ── Pending optimistic overrides ──
+ * When we mutate a ledger, we store the optimistic fields here keyed by ID.
+ * setGlobalLedgers merges server data with these overrides, so stale server
+ * reads can never revert an in-flight optimistic update.
+ * Overrides are cleared once the server data matches, or after 30s. */
+const pendingOverrides = new Map<string, { fields: Partial<Ledger>; at: number }>();
+const OVERRIDE_TTL = 30_000;
+
+/** Used by fetchLedgers — merges server data with pending overrides */
+function setGlobalLedgers(next: Ledger[]) {
+  const now = Date.now();
+  cachedLedgers = next.map((l) => {
+    const override = pendingOverrides.get(l.id);
+    if (!override) return l;
+    // Expired → remove and use server data
+    if (now - override.at > OVERRIDE_TTL) {
+      pendingOverrides.delete(l.id);
+      return l;
+    }
+    // Server data matches optimistic → override no longer needed
+    const allMatch = Object.entries(override.fields).every(
+      ([k, v]) => (l as unknown as Record<string, unknown>)[k] === v,
+    );
+    if (allMatch) {
+      pendingOverrides.delete(l.id);
+      return l;
+    }
+    // Override server data with optimistic fields
+    return { ...l, ...override.fields };
+  });
+  emitChange();
+}
+
+/** Used for direct optimistic writes — no merge needed */
+function setGlobalLedgersRaw(updater: (prev: Ledger[]) => Ledger[]) {
+  cachedLedgers = updater(cachedLedgers);
+  emitChange();
+}
 
 export function useLedgers() {
   const ledgers = useSyncExternalStore(subscribeToLedgers, getSnapshot, () => EMPTY);
@@ -39,22 +71,14 @@ export function useLedgers() {
   const [syncStatus, setSyncStatus] = useState<SyncStatus>("synced");
 
   const fetchLedgers = useCallback(async () => {
-    // Skip fetches within 3s of a mutation to avoid stale reads overwriting optimistic updates
-    if (Date.now() - globalLastMutationAt < 3000) return;
     const wid = getActiveWorkspaceId();
     if (!wid) return;
     setSyncStatus("syncing");
 
     try {
-      const params = new URLSearchParams({ workspaceId: wid });
-      const res = await authFetch(`/api/sync/changes?${params}`);
-      if (!res.ok) {
-        setSyncStatus("error");
-        setLoading(false);
-        return;
-      }
-      const data = await res.json();
-      const all: Ledger[] = (data.changes?.businessLedgers ?? [])
+      const data = await fetchSyncData(wid) as Record<string, unknown>;
+      const changes = data.changes as Record<string, unknown> | undefined;
+      const all: Ledger[] = ((changes?.businessLedgers ?? []) as Record<string, unknown>[])
         .filter((l: Record<string, unknown>) => !l.deletedAt)
         .map((row: Record<string, unknown>) => ({
           id: row.id as string,
@@ -70,9 +94,8 @@ export function useLedgers() {
           deletedAt: null,
           deviceId: "",
         }));
-      // Sort by createdAt descending
       all.sort((a, b) => b.createdAt - a.createdAt);
-      setGlobalLedgers(all);
+      setGlobalLedgers(all); // merges with pendingOverrides automatically
       setSyncStatus("synced");
     } catch {
       setSyncStatus("error");
@@ -115,7 +138,7 @@ export function useLedgers() {
       deletedAt: null,
       deviceId: "",
     };
-    setGlobalLedgers((prev) => [optimistic, ...prev]);
+    setGlobalLedgersRaw((prev) => [optimistic, ...prev]);
 
     const wid = getActiveWorkspaceId();
     if (!wid) return;
@@ -142,24 +165,34 @@ export function useLedgers() {
         body: JSON.stringify({ workspaceId: wid, mutations: [mutation] }),
       });
       if (!res.ok) {
-        setGlobalLedgers((prev) => prev.filter((l) => l.id !== tempId));
+        setGlobalLedgersRaw((prev) => prev.filter((l) => l.id !== tempId));
         throw new Error("Failed to add ledger");
       }
       const body = await res.json();
       const result = body.results?.[0];
       if (result?.status === "error") {
-        setGlobalLedgers((prev) => prev.filter((l) => l.id !== tempId));
+        setGlobalLedgersRaw((prev) => prev.filter((l) => l.id !== tempId));
         throw new Error(result.error ?? "Mutation failed");
+      }
+      // Replace temp ID with server-assigned ID
+      if (result?.id && result.id !== tempId) {
+        setGlobalLedgersRaw((prev) =>
+          prev.map((l) => (l.id === tempId ? { ...l, id: result.id } : l))
+        );
       }
     } catch (err) {
       enqueueOfflineMutation(mutation);
-      setGlobalLedgers((prev) => prev.filter((l) => l.id !== tempId));
+      setGlobalLedgersRaw((prev) => prev.filter((l) => l.id !== tempId));
       throw err;
     }
+    invalidateSyncCache();
+    fetchLedgers();
   };
 
   const updateLedger = async (id: string, updates: Partial<LedgerInput>) => {
-    setGlobalLedgers((prev) =>
+    // Store optimistic override so no fetch can revert it
+    pendingOverrides.set(id, { fields: updates as Partial<Ledger>, at: Date.now() });
+    setGlobalLedgersRaw((prev) =>
       prev.map((l) => (l.id === id ? { ...l, ...updates, updatedAt: Date.now() } : l))
     );
     const wid = getActiveWorkspaceId();
@@ -173,7 +206,6 @@ export function useLedgers() {
       idempotencyKey: makeIdempotencyKey(),
     };
 
-    globalLastMutationAt = Date.now();
     try {
       const res = await authFetch("/api/sync/commit", {
         method: "POST",
@@ -181,30 +213,31 @@ export function useLedgers() {
         body: JSON.stringify({ workspaceId: wid, mutations: [mutation] }),
       });
       if (!res.ok) {
-        globalLastMutationAt = 0;
+        pendingOverrides.delete(id);
         fetchLedgers();
         throw new Error("Failed to update ledger");
       }
-      // Check individual mutation result
       const body = await res.json();
       const result = body.results?.[0];
       if (result?.status === "error") {
-        globalLastMutationAt = 0;
+        pendingOverrides.delete(id);
         fetchLedgers();
         throw new Error(result.error ?? "Mutation failed");
       }
     } catch (err) {
-      globalLastMutationAt = 0;
+      pendingOverrides.delete(id);
       enqueueOfflineMutation(mutation);
       fetchLedgers();
       throw err;
     }
-    // Schedule a delayed re-fetch after the guard window to confirm server state
-    setTimeout(() => { globalLastMutationAt = 0; fetchLedgers(); }, 3500);
+    // Server confirmed — re-fetch to get confirmed data
+    // (override will auto-clear when server data matches)
+    invalidateSyncCache();
+    fetchLedgers();
   };
 
   const deleteLedger = async (id: string) => {
-    setGlobalLedgers((prev) => prev.filter((l) => l.id !== id));
+    setGlobalLedgersRaw((prev) => prev.filter((l) => l.id !== id));
     const wid = getActiveWorkspaceId();
     if (!wid) return;
 
@@ -216,7 +249,6 @@ export function useLedgers() {
       idempotencyKey: makeIdempotencyKey(),
     };
 
-    globalLastMutationAt = Date.now();
     try {
       const res = await authFetch("/api/sync/commit", {
         method: "POST",
@@ -224,24 +256,20 @@ export function useLedgers() {
         body: JSON.stringify({ workspaceId: wid, mutations: [mutation] }),
       });
       if (!res.ok) {
-        globalLastMutationAt = 0;
         fetchLedgers();
         throw new Error("Failed to delete ledger");
       }
       const body = await res.json();
       const result = body.results?.[0];
       if (result?.status === "error") {
-        globalLastMutationAt = 0;
         fetchLedgers();
         throw new Error(result.error ?? "Mutation failed");
       }
     } catch (err) {
-      globalLastMutationAt = 0;
       enqueueOfflineMutation(mutation);
       fetchLedgers();
       throw err;
     }
-    setTimeout(() => { globalLastMutationAt = 0; fetchLedgers(); }, 3500);
   };
 
   const completeLedger = async (id: string) => {

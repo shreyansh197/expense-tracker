@@ -5,6 +5,7 @@ import { DEFAULT_SALARY } from "@/lib/constants";
 import { DEFAULT_CATEGORIES } from "@/lib/categories";
 import { authFetch, getActiveWorkspaceId, isAuthenticated } from "@/lib/authClient";
 import { makeIdempotencyKey } from "@/lib/syncClient";
+import { fetchSyncData } from "@/lib/syncFetch";
 import { supabase } from "@/lib/supabase";
 import type { UserSettings, CategoryMeta } from "@/types";
 
@@ -105,32 +106,33 @@ async function fetchSettingsFromApi(): Promise<UserSettings | null> {
   const wid = getActiveWorkspaceId();
   if (!wid || !isAuthenticated()) return null;
 
-  const params = new URLSearchParams({ workspaceId: wid });
-  const res = await authFetch(`/api/sync/changes?${params}`);
-  if (!res.ok) return null;
+  try {
+    const data = await fetchSyncData(wid) as Record<string, unknown>;
+    const changes = data.changes as Record<string, unknown> | undefined;
+    const s = changes?.settings as Record<string, unknown> | null;
+    if (!s) return null;
 
-  const data = await res.json();
-  const s = data.changes?.settings;
-  if (!s) return null;
-
-  return {
-    salary: Number(s.salary),
-    currency: s.currency as string,
-    categories: (s.categories as string[]) || DEFAULT_CATEGORIES,
-    customCategories: (s.customCategories as CategoryMeta[]) || [],
-    hiddenDefaults: (s.hiddenDefaults as string[]) || [],
-    categoryBudgets: (s.categoryBudgets as Record<string, number>) ?? {},
-    recurringExpenses: s.recurringExpenses ?? [],
-    savedFilters: s.savedFilters ?? [],
-    goals: s.goals ?? [],
-    rolloverEnabled: (s.rolloverEnabled as boolean) ?? false,
-    rolloverHistory: (s.rolloverHistory as Record<string, number>) ?? {},
-    businessMode: (s.businessMode as boolean) ?? false,
-    revenueExpectations: s.revenueExpectations ?? [],
-    businessTags: (s.businessTags as string[]) ?? [],
-    createdAt: Date.now(),
-    updatedAt: new Date(s.updatedAt as string).getTime(),
-  };
+    return {
+      salary: Number(s.salary),
+      currency: s.currency as string,
+      categories: (s.categories as string[]) || DEFAULT_CATEGORIES,
+      customCategories: (s.customCategories as CategoryMeta[]) || [],
+      hiddenDefaults: (s.hiddenDefaults as string[]) || [],
+      categoryBudgets: (s.categoryBudgets as Record<string, number>) ?? {},
+      recurringExpenses: (s.recurringExpenses as UserSettings["recurringExpenses"]) ?? [],
+      savedFilters: (s.savedFilters as UserSettings["savedFilters"]) ?? [],
+      goals: (s.goals as UserSettings["goals"]) ?? [],
+      rolloverEnabled: (s.rolloverEnabled as boolean) ?? false,
+      rolloverHistory: (s.rolloverHistory as Record<string, number>) ?? {},
+      businessMode: (s.businessMode as boolean) ?? false,
+      revenueExpectations: (s.revenueExpectations as UserSettings["revenueExpectations"]) ?? [],
+      businessTags: (s.businessTags as string[]) ?? [],
+      createdAt: Date.now(),
+      updatedAt: new Date(s.updatedAt as string).getTime(),
+    };
+  } catch {
+    return null;
+  }
 }
 
 // ── Module-level initialization (runs once when module loads) ──

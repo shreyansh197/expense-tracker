@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect, useCallback, startTransition } from "react";
-import { authFetch, getActiveWorkspaceId } from "@/lib/authClient";
+import { getActiveWorkspaceId } from "@/lib/authClient";
+import { fetchSyncData } from "@/lib/syncFetch";
 import { supabase } from "@/lib/supabase";
 import type { Payment, PaymentMethod } from "@/types";
 
@@ -18,12 +19,10 @@ export function useAllPayments() {
     if (!wid) { startTransition(() => setLoading(false)); return; }
 
     try {
-      const params = new URLSearchParams({ workspaceId: wid });
-      const res = await authFetch(`/api/sync/changes?${params}`);
-      if (!res.ok) { startTransition(() => setLoading(false)); return; }
-      const data = await res.json();
+      const data = await fetchSyncData(wid) as Record<string, unknown>;
+      const changes = data.changes as Record<string, unknown> | undefined;
 
-      const all: Payment[] = (data.changes?.businessPayments ?? [])
+      const all: Payment[] = ((changes?.businessPayments ?? []) as Record<string, unknown>[])
         .filter((p: Record<string, unknown>) => !p.deletedAt)
         .map((row: Record<string, unknown>) => ({
           id: row.id as string,

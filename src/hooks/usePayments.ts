@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { authFetch, getActiveWorkspaceId } from "@/lib/authClient";
 import { makeIdempotencyKey, enqueueOfflineMutation } from "@/lib/syncClient";
+import { fetchSyncData } from "@/lib/syncFetch";
 import { supabase } from "@/lib/supabase";
 import type { Payment, PaymentInput, PaymentMethod, SyncStatus } from "@/types";
 
@@ -24,15 +25,9 @@ export function usePayments(ledgerId: string | null) {
     setSyncStatus("syncing");
 
     try {
-      const params = new URLSearchParams({ workspaceId: wid });
-      const res = await authFetch(`/api/sync/changes?${params}`);
-      if (!res.ok) {
-        setSyncStatus("error");
-        setLoading(false);
-        return;
-      }
-      const data = await res.json();
-      const all: Payment[] = (data.changes?.businessPayments ?? [])
+      const data = await fetchSyncData(wid) as Record<string, unknown>;
+      const changes = data.changes as Record<string, unknown> | undefined;
+      const all: Payment[] = ((changes?.businessPayments ?? []) as Record<string, unknown>[])
         .filter((p: Record<string, unknown>) => !p.deletedAt && p.ledgerId === ledgerId)
         .map((row: Record<string, unknown>) => ({
           id: row.id as string,

@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useSyncExternalStore } from "react";
 import { authFetch, getActiveWorkspaceId } from "@/lib/authClient";
 import { makeIdempotencyKey, enqueueOfflineMutation } from "@/lib/syncClient";
+import { fetchSyncData, invalidateSyncCache } from "@/lib/syncFetch";
 import { supabase } from "@/lib/supabase";
 import type { Expense, ExpenseInput, CategoryId, SyncStatus } from "@/types";
 
@@ -82,15 +83,7 @@ export function useExpenses(month: number, year: number) {
 
     const promise = (async () => {
       try {
-        const params = new URLSearchParams({ workspaceId: wid });
-        const res = await authFetch(`/api/sync/changes?${params}`);
-        if (!res.ok) {
-          _syncStatus = "error";
-          setSyncStatus("error");
-          setLoading(false);
-          return;
-        }
-        const data = await res.json();
+        const data = await fetchSyncData(wid) as Record<string, unknown>;
         const all = parseExpenses(data, month, year);
         _setExpenses(month, year, all);
         _syncStatus = "synced";

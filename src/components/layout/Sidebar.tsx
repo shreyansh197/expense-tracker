@@ -27,6 +27,7 @@ export function Sidebar() {
   const navItems = settings.businessMode ? businessNav : personalNav;
   const isBusinessRoute = pathname.startsWith("/business");
   const isLedgerDetail = /^\/business\/[^/]+/.test(pathname);
+  const shouldHideFAB = isLedgerDetail || pathname.startsWith("/settings");
 
   return (
     <aside className="hidden lg:flex lg:w-60 lg:flex-col lg:border-r lg:border-gray-200 lg:bg-white lg:dark:border-gray-800 lg:dark:bg-gray-950">
@@ -70,7 +71,7 @@ export function Sidebar() {
       </nav>
 
       {/* Add button */}
-      {!isLedgerDetail && (
+      {!shouldHideFAB && (
       <div className="border-t border-gray-200 p-3 dark:border-gray-800">
         <button
           onClick={() => {

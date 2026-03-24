@@ -41,6 +41,7 @@ export function BottomNav() {
   const isBusiness = settings.businessMode;
   const isBusinessRoute = pathname.startsWith("/business");
   const isLedgerDetail = /^\/business\/[^/]+/.test(pathname);
+  const shouldHideFAB = isLedgerDetail || pathname.startsWith("/settings");
 
   const navLinks = isBusiness ? businessLinks : personalLinks;
   const gridCols = navLinks.length;
@@ -57,7 +58,7 @@ export function BottomNav() {
   return (
     <>
       {/* ─── FAB (own fixed layer, ABOVE nav) ─── */}
-      {!isLedgerDetail && (
+      {!shouldHideFAB && (
       <button
         onClick={handleFabClick}
         aria-label={isBusiness && isBusinessRoute ? "Add ledger" : "Add expense"}
