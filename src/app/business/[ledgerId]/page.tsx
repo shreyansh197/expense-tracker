@@ -88,7 +88,7 @@ export default function LedgerDetailPage() {
 
   return (
     <AppShell>
-      <div className="mx-auto max-w-3xl space-y-6 p-4 lg:p-6">
+      <div className="mx-auto max-w-3xl xl:max-w-5xl space-y-6 p-4 lg:p-6">
         {/* Back + Actions */}
         <div className="flex items-center justify-between">
           <button

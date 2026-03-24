@@ -90,18 +90,40 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const ua = req.headers.get("user-agent") ?? "";
+  const ua = (req.headers.get("user-agent") ?? "").slice(0, 512);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const result = await prisma.$transaction(async (tx: any) => {
-    const device = await tx.device.create({
-      data: {
+    // Try to find an existing device with the same user-agent
+    let device = await tx.device.findFirst({
+      where: {
         userId: user.id,
         workspaceId: membership.workspaceId,
-        name: parseDeviceName(ua),
-        platform: "web",
-        userAgent: ua.slice(0, 512),
+        userAgent: ua,
+        revokedAt: null,
       },
     });
+
+    if (device) {
+      // Revoke all existing sessions on this device
+      await tx.session.updateMany({
+        where: { deviceId: device.id, revokedAt: null },
+        data: { revokedAt: new Date() },
+      });
+      await tx.device.update({
+        where: { id: device.id },
+        data: { lastActiveAt: new Date() },
+      });
+    } else {
+      device = await tx.device.create({
+        data: {
+          userId: user.id,
+          workspaceId: membership.workspaceId,
+          name: parseDeviceName(ua),
+          platform: "web",
+          userAgent: ua,
+        },
+      });
+    }
 
     const refreshTokenRaw = generateRefreshToken();
     const refreshTokenHash = hashToken(refreshTokenRaw);
@@ -114,7 +136,7 @@ export async function POST(req: NextRequest) {
         userId: user.id,
         deviceId: device.id,
         refreshTokenHash,
-        userAgent: ua.slice(0, 512),
+        userAgent: ua,
         ipHash: hashIp(
           req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown",
         ),

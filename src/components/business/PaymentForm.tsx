@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { DatePicker } from "@/components/ui/DatePicker";
 import type { PaymentInput, PaymentMethod } from "@/types";
 
 const PAYMENT_METHODS: { value: PaymentMethod; label: string }[] = [
@@ -74,12 +75,16 @@ export function PaymentForm({ ledgerId, onSubmit, onCancel }: PaymentFormProps) 
         {/* Date */}
         <div>
           <label className="mb-1 block text-[10px] font-medium text-gray-500">Date</label>
-          <input
-            type="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            className="w-full rounded-lg border border-gray-200 bg-white px-2 py-2 text-sm text-gray-900 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
-            required
+          <DatePicker
+            value={parseInt(date.split("-")[2], 10)}
+            month={parseInt(date.split("-")[1], 10)}
+            year={parseInt(date.split("-")[0], 10)}
+            onChange={(day, month, year) => {
+              const d = String(day).padStart(2, "0");
+              const m = String(month ?? parseInt(date.split("-")[1], 10)).padStart(2, "0");
+              const y = String(year ?? parseInt(date.split("-")[0], 10));
+              setDate(`${y}-${m}-${d}`);
+            }}
           />
         </div>
       </div>

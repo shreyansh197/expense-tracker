@@ -32,25 +32,17 @@ function getInitialOpen(): Set<string> {
   const openParam = params.get("open");
   if (openParam) return new Set([openParam]);
 
-  // 3. Restore last opened from localStorage
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) return new Set(JSON.parse(stored));
-  } catch { /* ignore */ }
-
-  // 4. Default: all collapsed
+  // 3. Default: all collapsed
   return new Set();
 }
 
 export function SettingsAccordion({ children }: SettingsAccordionProps) {
   const [openSections, setOpenSections] = useState<Set<string>>(getInitialOpen);
 
-  // Persist open sections to localStorage
+  // Clean up any stale localStorage from previous versions
   useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify([...openSections]));
-    } catch { /* ignore */ }
-  }, [openSections]);
+    try { localStorage.removeItem(STORAGE_KEY); } catch { /* ignore */ }
+  }, []);
 
   // Scroll deep-linked section into view
   useEffect(() => {

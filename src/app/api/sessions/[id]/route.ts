@@ -26,6 +26,17 @@ export async function DELETE(req: NextRequest, { params }: Params) {
     data: { revokedAt: new Date() },
   });
 
+  // Auto-revoke the device if it has no remaining active sessions
+  const remainingSessions = await prisma.session.count({
+    where: { deviceId: session.deviceId, revokedAt: null, expiresAt: { gt: new Date() } },
+  });
+  if (remainingSessions === 0) {
+    await prisma.device.update({
+      where: { id: session.deviceId },
+      data: { revokedAt: new Date() },
+    });
+  }
+
   await audit({
     userId: auth.userId,
     entityType: "session",

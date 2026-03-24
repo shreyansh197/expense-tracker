@@ -69,7 +69,7 @@ export default function ExpensesPage() {
 
   return (
     <AppShell>
-      <div className="mx-auto max-w-4xl space-y-4 p-4 lg:p-6">
+      <div className="mx-auto max-w-4xl xl:max-w-6xl space-y-4 p-4 lg:p-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <MonthSwitcher />

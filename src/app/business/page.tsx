@@ -114,7 +114,7 @@ export default function BusinessPage() {
 
   return (
     <AppShell>
-      <div className="mx-auto max-w-5xl space-y-6 p-4 lg:p-6">
+      <div className="mx-auto max-w-5xl xl:max-w-7xl space-y-6 p-4 lg:p-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { authFetch, getActiveWorkspaceId } from "@/lib/authClient";
 import { makeIdempotencyKey, enqueueOfflineMutation } from "@/lib/syncClient";
 import { supabase } from "@/lib/supabase";
@@ -16,6 +16,7 @@ export function useLedgers() {
   const [ledgers, setLedgers] = useState<Ledger[]>([]);
   const [loading, setLoading] = useState(true);
   const [syncStatus, setSyncStatus] = useState<SyncStatus>("synced");
+  const mutatingRef = useRef(false);
 
   const fetchLedgers = useCallback(async () => {
     const wid = getActiveWorkspaceId();
@@ -73,7 +74,7 @@ export function useLedgers() {
               table: "business_ledgers",
               filter: `workspace_id=eq.${wid}`,
             },
-            () => { fetchLedgers(); }
+            () => { if (!mutatingRef.current) fetchLedgers(); }
           )
           .subscribe()
       : null;
@@ -147,6 +148,7 @@ export function useLedgers() {
       idempotencyKey: makeIdempotencyKey(),
     };
 
+    mutatingRef.current = true;
     try {
       const res = await authFetch("/api/sync/commit", {
         method: "POST",
@@ -161,7 +163,10 @@ export function useLedgers() {
       enqueueOfflineMutation(mutation);
       fetchLedgers();
       throw err;
+    } finally {
+      mutatingRef.current = false;
     }
+    fetchLedgers();
     notifyLedgerChange();
   };
 
@@ -178,6 +183,7 @@ export function useLedgers() {
       idempotencyKey: makeIdempotencyKey(),
     };
 
+    mutatingRef.current = true;
     try {
       const res = await authFetch("/api/sync/commit", {
         method: "POST",
@@ -192,6 +198,8 @@ export function useLedgers() {
       enqueueOfflineMutation(mutation);
       fetchLedgers();
       throw err;
+    } finally {
+      mutatingRef.current = false;
     }
     notifyLedgerChange();
   };

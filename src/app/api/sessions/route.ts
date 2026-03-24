@@ -46,6 +46,23 @@ export async function DELETE(req: NextRequest) {
     data: { revokedAt: new Date() },
   });
 
+  // Auto-revoke devices that no longer have any active sessions
+  const orphanDevices = await prisma.device.findMany({
+    where: {
+      userId: auth.userId,
+      revokedAt: null,
+      id: { not: auth.deviceId },
+      sessions: { none: { revokedAt: null, expiresAt: { gt: new Date() } } },
+    },
+    select: { id: true },
+  });
+  if (orphanDevices.length > 0) {
+    await prisma.device.updateMany({
+      where: { id: { in: orphanDevices.map((d) => d.id) } },
+      data: { revokedAt: new Date() },
+    });
+  }
+
   await audit({
     userId: auth.userId,
     entityType: "session",

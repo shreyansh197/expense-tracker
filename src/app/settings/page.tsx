@@ -58,7 +58,7 @@ export default function SettingsPage() {
 
   return (
     <AppShell>
-      <div className="mx-auto max-w-2xl space-y-2 p-4 lg:p-6">
+      <div className="mx-auto max-w-2xl xl:max-w-4xl space-y-2 p-4 lg:p-6">
         <h1 className="mb-4 text-lg font-bold text-gray-900 dark:text-white">Settings</h1>
 
         <SettingsAccordion>
