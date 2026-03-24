@@ -29,12 +29,20 @@ export function DatePicker({ value, onChange, month, year }: DatePickerProps) {
   const [open, setOpen] = useState(false);
   const [viewMonth, setViewMonth] = useState(month);
   const [viewYear, setViewYear] = useState(year);
+  const [openUpward, setOpenUpward] = useState(true);
   const ref = useRef<HTMLDivElement>(null);
 
   const handleToggleOpen = () => {
     if (!open) {
       setViewMonth(month);
       setViewYear(year);
+      // Decide direction based on available space
+      if (ref.current) {
+        const rect = ref.current.getBoundingClientRect();
+        const spaceAbove = rect.top;
+        const spaceBelow = window.innerHeight - rect.bottom;
+        setOpenUpward(spaceAbove > spaceBelow && spaceAbove > 350);
+      }
     }
     setOpen(!open);
   };
@@ -130,12 +138,12 @@ export function DatePicker({ value, onChange, month, year }: DatePickerProps) {
               />
             </div>
           </div>
-          {/* Desktop: positioned dropdown — opens upward to avoid clipping */}
+          {/* Desktop: positioned dropdown — auto-detects direction */}
           <div
             className={cn(
               "absolute z-50 hidden w-80 rounded-xl border border-gray-200 bg-white p-3 shadow-xl sm:block",
               "dark:border-gray-700 dark:bg-gray-900",
-              "bottom-full mb-1.5 left-0"
+              openUpward ? "bottom-full mb-1.5 left-0" : "top-full mt-1.5 left-0"
             )}
           >
             <CalendarGrid

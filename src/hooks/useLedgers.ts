@@ -145,6 +145,12 @@ export function useLedgers() {
         setGlobalLedgers((prev) => prev.filter((l) => l.id !== tempId));
         throw new Error("Failed to add ledger");
       }
+      const body = await res.json();
+      const result = body.results?.[0];
+      if (result?.status === "error") {
+        setGlobalLedgers((prev) => prev.filter((l) => l.id !== tempId));
+        throw new Error(result.error ?? "Mutation failed");
+      }
     } catch (err) {
       enqueueOfflineMutation(mutation);
       setGlobalLedgers((prev) => prev.filter((l) => l.id !== tempId));
@@ -179,12 +185,22 @@ export function useLedgers() {
         fetchLedgers();
         throw new Error("Failed to update ledger");
       }
+      // Check individual mutation result
+      const body = await res.json();
+      const result = body.results?.[0];
+      if (result?.status === "error") {
+        globalLastMutationAt = 0;
+        fetchLedgers();
+        throw new Error(result.error ?? "Mutation failed");
+      }
     } catch (err) {
       globalLastMutationAt = 0;
       enqueueOfflineMutation(mutation);
       fetchLedgers();
       throw err;
     }
+    // Schedule a delayed re-fetch after the guard window to confirm server state
+    setTimeout(() => { globalLastMutationAt = 0; fetchLedgers(); }, 3500);
   };
 
   const deleteLedger = async (id: string) => {
@@ -212,12 +228,20 @@ export function useLedgers() {
         fetchLedgers();
         throw new Error("Failed to delete ledger");
       }
+      const body = await res.json();
+      const result = body.results?.[0];
+      if (result?.status === "error") {
+        globalLastMutationAt = 0;
+        fetchLedgers();
+        throw new Error(result.error ?? "Mutation failed");
+      }
     } catch (err) {
       globalLastMutationAt = 0;
       enqueueOfflineMutation(mutation);
       fetchLedgers();
       throw err;
     }
+    setTimeout(() => { globalLastMutationAt = 0; fetchLedgers(); }, 3500);
   };
 
   const completeLedger = async (id: string) => {
