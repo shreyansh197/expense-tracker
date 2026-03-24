@@ -16,9 +16,11 @@ export function useLedgers() {
   const [ledgers, setLedgers] = useState<Ledger[]>([]);
   const [loading, setLoading] = useState(true);
   const [syncStatus, setSyncStatus] = useState<SyncStatus>("synced");
-  const mutatingRef = useRef(false);
+  const lastMutationAt = useRef(0);
 
   const fetchLedgers = useCallback(async () => {
+    // Skip fetches within 3s of a mutation to avoid stale reads overwriting optimistic updates
+    if (Date.now() - lastMutationAt.current < 3000) return;
     const wid = getActiveWorkspaceId();
     if (!wid) return;
     setSyncStatus("syncing");
@@ -74,7 +76,7 @@ export function useLedgers() {
               table: "business_ledgers",
               filter: `workspace_id=eq.${wid}`,
             },
-            () => { if (!mutatingRef.current) fetchLedgers(); }
+            () => { fetchLedgers(); }
           )
           .subscribe()
       : null;
@@ -148,7 +150,7 @@ export function useLedgers() {
       idempotencyKey: makeIdempotencyKey(),
     };
 
-    mutatingRef.current = true;
+    lastMutationAt.current = Date.now();
     try {
       const res = await authFetch("/api/sync/commit", {
         method: "POST",
@@ -156,17 +158,17 @@ export function useLedgers() {
         body: JSON.stringify({ workspaceId: wid, mutations: [mutation] }),
       });
       if (!res.ok) {
+        lastMutationAt.current = 0;
         fetchLedgers();
         throw new Error("Failed to update ledger");
       }
     } catch (err) {
+      lastMutationAt.current = 0;
       enqueueOfflineMutation(mutation);
       fetchLedgers();
       throw err;
-    } finally {
-      mutatingRef.current = false;
     }
-    fetchLedgers();
+    // Trust the optimistic update — realtime will confirm after the guard window
     notifyLedgerChange();
   };
 
@@ -183,7 +185,7 @@ export function useLedgers() {
       idempotencyKey: makeIdempotencyKey(),
     };
 
-    mutatingRef.current = true;
+    lastMutationAt.current = Date.now();
     try {
       const res = await authFetch("/api/sync/commit", {
         method: "POST",
@@ -191,15 +193,15 @@ export function useLedgers() {
         body: JSON.stringify({ workspaceId: wid, mutations: [mutation] }),
       });
       if (!res.ok) {
+        lastMutationAt.current = 0;
         fetchLedgers();
         throw new Error("Failed to delete ledger");
       }
     } catch (err) {
+      lastMutationAt.current = 0;
       enqueueOfflineMutation(mutation);
       fetchLedgers();
       throw err;
-    } finally {
-      mutatingRef.current = false;
     }
     notifyLedgerChange();
   };
