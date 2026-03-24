@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { authFetch, getActiveWorkspaceId } from "@/lib/authClient";
 import { makeIdempotencyKey, enqueueOfflineMutation } from "@/lib/syncClient";
-import { fetchSyncData } from "@/lib/syncFetch";
+import { fetchSyncData, invalidateSyncCache } from "@/lib/syncFetch";
 import { supabase } from "@/lib/supabase";
 import type { Payment, PaymentInput, PaymentMethod, SyncStatus } from "@/types";
 
@@ -68,7 +68,7 @@ export function usePayments(ledgerId: string | null) {
               table: "business_payments",
               filter: `workspace_id=eq.${wid}`,
             },
-            () => { fetchPayments(); }
+            () => { invalidateSyncCache(); fetchPayments(); }
           )
           .subscribe()
       : null;
@@ -123,6 +123,7 @@ export function usePayments(ledgerId: string | null) {
       setPayments((prev) => prev.filter((p) => p.id !== tempId));
       throw err;
     }
+    invalidateSyncCache();
     notifyPaymentChange();
   };
 
@@ -156,6 +157,7 @@ export function usePayments(ledgerId: string | null) {
       fetchPayments();
       throw err;
     }
+    invalidateSyncCache();
     notifyPaymentChange();
   };
 
@@ -187,6 +189,7 @@ export function usePayments(ledgerId: string | null) {
       fetchPayments();
       throw err;
     }
+    invalidateSyncCache();
     notifyPaymentChange();
   };
 

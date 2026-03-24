@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, startTransition } from "react";
 import { getActiveWorkspaceId } from "@/lib/authClient";
-import { fetchSyncData } from "@/lib/syncFetch";
+import { fetchSyncData, invalidateSyncCache } from "@/lib/syncFetch";
 import { supabase } from "@/lib/supabase";
 import type { Payment, PaymentMethod } from "@/types";
 
@@ -54,7 +54,7 @@ export function useAllPayments() {
           .on(
             "postgres_changes",
             { event: "*", schema: "public", table: "business_payments", filter: `workspace_id=eq.${wid}` },
-            () => { fetchAll(); }
+            () => { invalidateSyncCache(); fetchAll(); }
           )
           .subscribe()
       : null;

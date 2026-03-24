@@ -118,7 +118,7 @@ export function useLedgers() {
               table: "business_ledgers",
               filter: `workspace_id=eq.${wid}`,
             },
-            () => { fetchLedgers(); }
+            () => { invalidateSyncCache(); fetchLedgers(); }
           )
           .subscribe()
       : null;

@@ -119,6 +119,7 @@ export function useExpenses(month: number, year: number) {
               filter: `workspace_id=eq.${wid}`,
             },
             () => {
+              invalidateSyncCache();
               fetchExpenses();
             }
           )
@@ -184,6 +185,7 @@ export function useExpenses(month: number, year: number) {
       _setExpenses(month, year, _getExpenses(month, year).filter((e) => e.id !== tempId));
       throw err;
     }
+    invalidateSyncCache();
     notifyExpenseChange();
   };
 
@@ -215,6 +217,7 @@ export function useExpenses(month: number, year: number) {
       fetchExpenses();
       throw err;
     }
+    invalidateSyncCache();
     notifyExpenseChange();
   };
 
@@ -246,6 +249,7 @@ export function useExpenses(month: number, year: number) {
       fetchExpenses();
       throw err;
     }
+    invalidateSyncCache();
     notifyExpenseChange();
   };
 
@@ -278,6 +282,7 @@ export function useExpenses(month: number, year: number) {
       fetchExpenses();
       throw err;
     }
+    invalidateSyncCache();
     notifyExpenseChange();
   };
 

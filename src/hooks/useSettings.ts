@@ -5,7 +5,7 @@ import { DEFAULT_SALARY } from "@/lib/constants";
 import { DEFAULT_CATEGORIES } from "@/lib/categories";
 import { authFetch, getActiveWorkspaceId, isAuthenticated } from "@/lib/authClient";
 import { makeIdempotencyKey } from "@/lib/syncClient";
-import { fetchSyncData } from "@/lib/syncFetch";
+import { fetchSyncData, invalidateSyncCache } from "@/lib/syncFetch";
 import { supabase } from "@/lib/supabase";
 import type { UserSettings, CategoryMeta } from "@/types";
 
@@ -184,6 +184,7 @@ export function useSettings() {
         { event: "*", schema: "public", table: "workspace_settings", filter: `workspace_id=eq.${wid}` },
         () => {
           // On realtime change, re-fetch from API
+          invalidateSyncCache();
           fetchSettingsFromApi().then((remote) => {
             if (remote && remote.updatedAt > _settings.updatedAt) {
               saveLocal(remote);
