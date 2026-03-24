@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { X } from "lucide-react";
+import { DatePicker } from "@/components/ui/DatePicker";
 import type { LedgerInput, LedgerStatus } from "@/types";
 import { useSettings } from "@/hooks/useSettings";
 
@@ -88,12 +89,39 @@ export function LedgerForm({ initial, onSubmit, onCancel, submitLabel = "Create 
       {/* Due Date */}
       <div>
         <label className="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">Due Date (optional)</label>
-        <input
-          type="date"
-          value={dueDate}
-          onChange={(e) => setDueDate(e.target.value)}
-          className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-900 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
-        />
+        {dueDate ? (
+          <div className="flex items-center gap-2">
+            <div className="flex-1">
+              <DatePicker
+                value={parseInt(dueDate.split("-")[2], 10)}
+                month={parseInt(dueDate.split("-")[1], 10)}
+                year={parseInt(dueDate.split("-")[0], 10)}
+                onChange={(day, month, year) => {
+                  const d = String(day).padStart(2, "0");
+                  const m = String(month ?? parseInt(dueDate.split("-")[1], 10)).padStart(2, "0");
+                  const y = String(year ?? parseInt(dueDate.split("-")[0], 10));
+                  setDueDate(`${y}-${m}-${d}`);
+                }}
+              />
+            </div>
+            <button
+              type="button"
+              onClick={() => setDueDate("")}
+              className="rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800"
+              title="Clear date"
+            >
+              <X size={16} />
+            </button>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setDueDate(new Date().toISOString().split("T")[0])}
+            className="w-full rounded-lg border border-dashed border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-400 hover:border-emerald-400 hover:text-emerald-600 dark:border-gray-600 dark:bg-gray-800 dark:hover:border-emerald-500 dark:hover:text-emerald-400"
+          >
+            + Set due date
+          </button>
+        )}
       </div>
 
       {/* Status (only for edit) */}
