@@ -1,26 +1,46 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useSyncExternalStore } from "react";
 import { authFetch, getActiveWorkspaceId } from "@/lib/authClient";
 import { makeIdempotencyKey, enqueueOfflineMutation } from "@/lib/syncClient";
 import { supabase } from "@/lib/supabase";
 import type { Ledger, LedgerInput, LedgerStatus, SyncStatus } from "@/types";
 
-// Global event to trigger re-fetch across all useLedgers instances
-const ledgerListeners = new Set<() => void>();
-function notifyLedgerChange() {
-  ledgerListeners.forEach((fn) => fn());
+/* ─── Global ledger cache (shared across all hook instances) ─── */
+
+let cachedLedgers: Ledger[] = [];
+const EMPTY: Ledger[] = [];
+const subscribers = new Set<() => void>();
+
+function emitChange() {
+  subscribers.forEach((fn) => fn());
 }
 
+function setGlobalLedgers(next: Ledger[] | ((prev: Ledger[]) => Ledger[])) {
+  cachedLedgers = typeof next === "function" ? next(cachedLedgers) : next;
+  emitChange();
+}
+
+function subscribeToLedgers(cb: () => void) {
+  subscribers.add(cb);
+  return () => { subscribers.delete(cb); };
+}
+
+function getSnapshot(): Ledger[] {
+  return cachedLedgers.length === 0 ? EMPTY : cachedLedgers;
+}
+
+/* ─── Fetch guard ─── */
+let globalLastMutationAt = 0;
+
 export function useLedgers() {
-  const [ledgers, setLedgers] = useState<Ledger[]>([]);
-  const [loading, setLoading] = useState(true);
+  const ledgers = useSyncExternalStore(subscribeToLedgers, getSnapshot, () => EMPTY);
+  const [loading, setLoading] = useState(cachedLedgers.length === 0);
   const [syncStatus, setSyncStatus] = useState<SyncStatus>("synced");
-  const lastMutationAt = useRef(0);
 
   const fetchLedgers = useCallback(async () => {
     // Skip fetches within 3s of a mutation to avoid stale reads overwriting optimistic updates
-    if (Date.now() - lastMutationAt.current < 3000) return;
+    if (Date.now() - globalLastMutationAt < 3000) return;
     const wid = getActiveWorkspaceId();
     if (!wid) return;
     setSyncStatus("syncing");
@@ -52,7 +72,7 @@ export function useLedgers() {
         }));
       // Sort by createdAt descending
       all.sort((a, b) => b.createdAt - a.createdAt);
-      setLedgers(all);
+      setGlobalLedgers(all);
       setSyncStatus("synced");
     } catch {
       setSyncStatus("error");
@@ -62,7 +82,6 @@ export function useLedgers() {
 
   useEffect(() => {
     fetchLedgers();
-    ledgerListeners.add(fetchLedgers);
 
     const wid = getActiveWorkspaceId();
     const channel = wid
@@ -82,7 +101,6 @@ export function useLedgers() {
       : null;
 
     return () => {
-      ledgerListeners.delete(fetchLedgers);
       if (channel) supabase.removeChannel(channel);
     };
   }, [fetchLedgers]);
@@ -97,7 +115,7 @@ export function useLedgers() {
       deletedAt: null,
       deviceId: "",
     };
-    setLedgers((prev) => [optimistic, ...prev]);
+    setGlobalLedgers((prev) => [optimistic, ...prev]);
 
     const wid = getActiveWorkspaceId();
     if (!wid) return;
@@ -124,19 +142,18 @@ export function useLedgers() {
         body: JSON.stringify({ workspaceId: wid, mutations: [mutation] }),
       });
       if (!res.ok) {
-        setLedgers((prev) => prev.filter((l) => l.id !== tempId));
+        setGlobalLedgers((prev) => prev.filter((l) => l.id !== tempId));
         throw new Error("Failed to add ledger");
       }
     } catch (err) {
       enqueueOfflineMutation(mutation);
-      setLedgers((prev) => prev.filter((l) => l.id !== tempId));
+      setGlobalLedgers((prev) => prev.filter((l) => l.id !== tempId));
       throw err;
     }
-    notifyLedgerChange();
   };
 
   const updateLedger = async (id: string, updates: Partial<LedgerInput>) => {
-    setLedgers((prev) =>
+    setGlobalLedgers((prev) =>
       prev.map((l) => (l.id === id ? { ...l, ...updates, updatedAt: Date.now() } : l))
     );
     const wid = getActiveWorkspaceId();
@@ -150,7 +167,7 @@ export function useLedgers() {
       idempotencyKey: makeIdempotencyKey(),
     };
 
-    lastMutationAt.current = Date.now();
+    globalLastMutationAt = Date.now();
     try {
       const res = await authFetch("/api/sync/commit", {
         method: "POST",
@@ -158,22 +175,20 @@ export function useLedgers() {
         body: JSON.stringify({ workspaceId: wid, mutations: [mutation] }),
       });
       if (!res.ok) {
-        lastMutationAt.current = 0;
+        globalLastMutationAt = 0;
         fetchLedgers();
         throw new Error("Failed to update ledger");
       }
     } catch (err) {
-      lastMutationAt.current = 0;
+      globalLastMutationAt = 0;
       enqueueOfflineMutation(mutation);
       fetchLedgers();
       throw err;
     }
-    // Trust the optimistic update — realtime will confirm after the guard window
-    notifyLedgerChange();
   };
 
   const deleteLedger = async (id: string) => {
-    setLedgers((prev) => prev.filter((l) => l.id !== id));
+    setGlobalLedgers((prev) => prev.filter((l) => l.id !== id));
     const wid = getActiveWorkspaceId();
     if (!wid) return;
 
@@ -185,7 +200,7 @@ export function useLedgers() {
       idempotencyKey: makeIdempotencyKey(),
     };
 
-    lastMutationAt.current = Date.now();
+    globalLastMutationAt = Date.now();
     try {
       const res = await authFetch("/api/sync/commit", {
         method: "POST",
@@ -193,17 +208,16 @@ export function useLedgers() {
         body: JSON.stringify({ workspaceId: wid, mutations: [mutation] }),
       });
       if (!res.ok) {
-        lastMutationAt.current = 0;
+        globalLastMutationAt = 0;
         fetchLedgers();
         throw new Error("Failed to delete ledger");
       }
     } catch (err) {
-      lastMutationAt.current = 0;
+      globalLastMutationAt = 0;
       enqueueOfflineMutation(mutation);
       fetchLedgers();
       throw err;
     }
-    notifyLedgerChange();
   };
 
   const completeLedger = async (id: string) => {
