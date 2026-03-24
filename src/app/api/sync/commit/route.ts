@@ -125,32 +125,40 @@ export async function POST(req: NextRequest) {
       } else if (mutation.table === "business_ledgers") {
         if (mutation.operation === "upsert") {
           const data = mutation.data as Record<string, unknown>;
-          const record = await prisma.businessLedger.upsert({
-            where: { id: (mutation.id ?? data.id) as string ?? "00000000-0000-0000-0000-000000000000" },
-            create: {
-              id: (mutation.id ?? data.id) as string | undefined,
-              workspaceId,
-              name: data.name as string,
-              expectedAmount: data.expectedAmount as number,
-              currency: (data.currency as string) ?? "INR",
-              status: (data.status as string) ?? "active",
-              dueDate: data.dueDate ? new Date(data.dueDate as string) : null,
-              tags: data.tags ?? [],
-              notes: (data.notes as string) ?? "",
-              version: 1,
-            },
-            update: {
-              name: data.name as string | undefined,
-              expectedAmount: data.expectedAmount as number | undefined,
-              currency: data.currency as string | undefined,
-              status: data.status as string | undefined,
-              dueDate: data.dueDate ? new Date(data.dueDate as string) : undefined,
-              tags: data.tags ?? undefined,
-              notes: data.notes as string | undefined,
-              deletedAt: data.deletedAt ? new Date(data.deletedAt as string) : undefined,
-              version: { increment: 1 },
-            },
-          });
+          const ledgerId = (mutation.id ?? data.id) as string | undefined;
+          let record: { id: string };
+          if (ledgerId) {
+            // Existing record — use update to avoid requiring all create-only fields
+            record = await prisma.businessLedger.update({
+              where: { id: ledgerId },
+              data: {
+                name: data.name as string | undefined,
+                expectedAmount: data.expectedAmount as number | undefined,
+                currency: data.currency as string | undefined,
+                status: data.status as string | undefined,
+                dueDate: data.dueDate ? new Date(data.dueDate as string) : undefined,
+                tags: data.tags ?? undefined,
+                notes: data.notes as string | undefined,
+                deletedAt: data.deletedAt ? new Date(data.deletedAt as string) : undefined,
+                version: { increment: 1 },
+              },
+            });
+          } else {
+            // New record — use create
+            record = await prisma.businessLedger.create({
+              data: {
+                workspaceId,
+                name: data.name as string,
+                expectedAmount: data.expectedAmount as number,
+                currency: (data.currency as string) ?? "INR",
+                status: (data.status as string) ?? "active",
+                dueDate: data.dueDate ? new Date(data.dueDate as string) : null,
+                tags: data.tags ?? [],
+                notes: (data.notes as string) ?? "",
+                version: 1,
+              },
+            });
+          }
           results.push({ idempotencyKey: mutation.idempotencyKey, status: "applied", id: record.id });
         } else {
           await prisma.businessLedger.update({
@@ -162,29 +170,35 @@ export async function POST(req: NextRequest) {
       } else if (mutation.table === "business_payments") {
         if (mutation.operation === "upsert") {
           const data = mutation.data as Record<string, unknown>;
-          const record = await prisma.businessPayment.upsert({
-            where: { id: (mutation.id ?? data.id) as string ?? "00000000-0000-0000-0000-000000000000" },
-            create: {
-              id: (mutation.id ?? data.id) as string | undefined,
-              workspaceId,
-              ledgerId: data.ledgerId as string,
-              amount: data.amount as number,
-              date: new Date(data.date as string),
-              method: (data.method as string) ?? null,
-              reference: (data.reference as string) ?? null,
-              notes: (data.notes as string) ?? null,
-              version: 1,
-            },
-            update: {
-              amount: data.amount as number | undefined,
-              date: data.date ? new Date(data.date as string) : undefined,
-              method: data.method as string | undefined,
-              reference: data.reference as string | undefined,
-              notes: data.notes as string | undefined,
-              deletedAt: data.deletedAt ? new Date(data.deletedAt as string) : undefined,
-              version: { increment: 1 },
-            },
-          });
+          const paymentId = (mutation.id ?? data.id) as string | undefined;
+          let record: { id: string };
+          if (paymentId) {
+            record = await prisma.businessPayment.update({
+              where: { id: paymentId },
+              data: {
+                amount: data.amount as number | undefined,
+                date: data.date ? new Date(data.date as string) : undefined,
+                method: data.method as string | undefined,
+                reference: data.reference as string | undefined,
+                notes: data.notes as string | undefined,
+                deletedAt: data.deletedAt ? new Date(data.deletedAt as string) : undefined,
+                version: { increment: 1 },
+              },
+            });
+          } else {
+            record = await prisma.businessPayment.create({
+              data: {
+                workspaceId,
+                ledgerId: data.ledgerId as string,
+                amount: data.amount as number,
+                date: new Date(data.date as string),
+                method: (data.method as string) ?? null,
+                reference: (data.reference as string) ?? null,
+                notes: (data.notes as string) ?? null,
+                version: 1,
+              },
+            });
+          }
           results.push({ idempotencyKey: mutation.idempotencyKey, status: "applied", id: record.id });
         } else {
           await prisma.businessPayment.update({
