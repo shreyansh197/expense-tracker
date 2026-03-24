@@ -228,6 +228,7 @@ export function SecurityCard() {
             {qrDataUrl ? (
               <div className="flex justify-center">
                 <div className="rounded-xl bg-white p-3 shadow-sm ring-1 ring-gray-200 dark:ring-gray-700">
+                  {/* eslint-disable-next-line @next/next/no-img-element -- data URL, next/image can't optimize */}
                   <img
                     src={qrDataUrl}
                     alt="TOTP QR Code"
