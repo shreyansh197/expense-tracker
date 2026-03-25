@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import {
   UserPlus,
   LogIn,
@@ -217,6 +217,11 @@ export function AuthModal({
   // Phone OTP
   const [phone, setPhone] = useState("");
   const [otpCode, setOtpCode] = useState("");
+  // Firebase refs — hold ConfirmationResult and RecaptchaVerifier between renders
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const confirmationResultRef = useRef<any>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const recaptchaVerifierRef = useRef<any>(null);
 
   const { login, loginWith2FA, register } = useAuth();
 
@@ -302,38 +307,53 @@ export function AuthModal({
     setError("");
     setLoading(true);
     try {
-      const res = await fetch("/api/auth/otp/send", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone: phone.trim() }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        setError(data.error ?? "Failed to send code");
-        return;
+      // Dynamically import Firebase to keep bundle small for non-phone users
+      const { RecaptchaVerifier, signInWithPhoneNumber } = await import("firebase/auth");
+      const { firebaseAuth } = await import("@/lib/firebase");
+
+      // Clear any existing verifier before creating a new one
+      if (recaptchaVerifierRef.current) {
+        try { recaptchaVerifierRef.current.clear(); } catch { /* ignore */ }
+        recaptchaVerifierRef.current = null;
       }
+
+      const appVerifier = new RecaptchaVerifier(firebaseAuth, "recaptcha-container", {
+        size: "invisible",
+      });
+      recaptchaVerifierRef.current = appVerifier;
+
+      const confirmationResult = await signInWithPhoneNumber(
+        firebaseAuth,
+        phone.trim(),
+        appVerifier,
+      );
+      confirmationResultRef.current = confirmationResult;
       setOtpCode("");
       setMode("otp-verify");
-    } catch {
-      setError("Network error. Please try again.");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to send code";
+      setError(msg);
     } finally {
       setLoading(false);
     }
   };
 
   const handleVerifyOtp = async () => {
-    if (otpCode.length !== 6) return;
+    if (otpCode.length !== 6 || !confirmationResultRef.current) return;
     setError("");
     setLoading(true);
     try {
+      const credential = await confirmationResultRef.current.confirm(otpCode);
+      const idToken = await credential.user.getIdToken();
+
       const res = await fetch("/api/auth/otp/verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone: phone.trim(), otp: otpCode }),
+        body: JSON.stringify({ idToken }),
       });
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error ?? "Invalid code");
+        setError(data.error ?? "Verification failed");
         return;
       }
       setAuthState({
@@ -343,8 +363,9 @@ export function AuthModal({
         activeWorkspaceId: data.activeWorkspaceId,
       });
       onComplete();
-    } catch {
-      setError("Network error. Please try again.");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Invalid code. Please try again.";
+      setError(msg);
     } finally {
       setLoading(false);
     }
@@ -407,6 +428,8 @@ export function AuthModal({
             Send Code
           </button>
         </div>
+        {/* Invisible reCAPTCHA container required by Firebase phone auth */}
+        <div id="recaptcha-container" />
       </AuthPage>
     );
   }

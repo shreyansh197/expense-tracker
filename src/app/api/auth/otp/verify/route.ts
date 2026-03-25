@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createRemoteJWKSet, jwtVerify } from "jose";
 import { prisma } from "@/lib/server/prisma";
-import { supabase } from "@/lib/supabase";
 import {
   signAccessToken,
   generateRefreshToken,
@@ -11,10 +11,22 @@ import {
 import { audit } from "@/lib/server/audit";
 import { DEFAULT_CATEGORIES } from "@/lib/categories";
 
-function normalizePhone(raw: string): string | null {
-  const stripped = raw.replace(/[\s\-().]/g, "");
-  if (!/^\+\d{7,15}$/.test(stripped)) return null;
-  return stripped;
+const FIREBASE_PROJECT_ID = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ?? "";
+const FIREBASE_JWKS = createRemoteJWKSet(
+  new URL("https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com"),
+);
+
+/** Verify a Firebase ID token and return the phone number from it */
+async function verifyFirebaseIdToken(idToken: string): Promise<string> {
+  const { payload } = await jwtVerify(idToken, FIREBASE_JWKS, {
+    issuer: `https://securetoken.google.com/${FIREBASE_PROJECT_ID}`,
+    audience: FIREBASE_PROJECT_ID,
+  });
+  const phone = payload["phone_number"];
+  if (typeof phone !== "string" || !phone) {
+    throw new Error("No phone_number in Firebase token");
+  }
+  return phone;
 }
 
 function parseDeviceName(ua: string): string {
@@ -30,7 +42,7 @@ function parseDeviceName(ua: string): string {
 
 /**
  * POST /api/auth/otp/verify
- * Body: { phone: string, otp: string }
+ * Body: { idToken: string }  — Firebase ID token from client-side phone auth
  * Returns: { user, accessToken, refreshToken, workspaces, activeWorkspaceId }
  */
 export async function POST(req: NextRequest) {
@@ -39,32 +51,18 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  const rawPhone = (body as { phone?: unknown }).phone;
-  const rawOtp = (body as { otp?: unknown }).otp;
-
-  if (typeof rawPhone !== "string" || typeof rawOtp !== "string") {
-    return NextResponse.json({ error: "phone and otp are required" }, { status: 400 });
+  const idToken = (body as { idToken?: unknown }).idToken;
+  if (typeof idToken !== "string" || !idToken) {
+    return NextResponse.json({ error: "idToken is required" }, { status: 400 });
   }
 
-  const phone = normalizePhone(rawPhone);
-  if (!phone) {
-    return NextResponse.json({ error: "Invalid phone number" }, { status: 400 });
-  }
-
-  if (!/^\d{6}$/.test(rawOtp.trim())) {
-    return NextResponse.json({ error: "OTP must be 6 digits" }, { status: 400 });
-  }
-
-  // Verify OTP via Supabase (handles expiry, rate-limiting, and token storage)
-  const { error: verifyError } = await supabase.auth.verifyOtp({
-    phone,
-    token: rawOtp.trim(),
-    type: "sms",
-  });
-
-  if (verifyError) {
+  // Verify Firebase ID token via Google public JWKS (no firebase-admin needed)
+  let phone: string;
+  try {
+    phone = await verifyFirebaseIdToken(idToken);
+  } catch {
     return NextResponse.json(
-      { error: "Invalid or expired code. Please request a new one." },
+      { error: "Invalid or expired token. Please try again." },
       { status: 401 },
     );
   }
