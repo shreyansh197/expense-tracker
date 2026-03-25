@@ -1,7 +1,7 @@
 "use client";
 
-import { useMemo } from "react";
-import { Trash2, Banknote, CreditCard, Smartphone, FileText, HelpCircle } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Trash2, Banknote, CreditCard, Smartphone, FileText, HelpCircle, X, Hash, StickyNote, Calendar, TrendingUp } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 import type { Payment, PaymentMethod } from "@/types";
 
@@ -21,20 +21,188 @@ const methodLabels: Record<PaymentMethod, string> = {
   other: "Other",
 };
 
+const methodColors: Record<PaymentMethod, string> = {
+  bank_transfer: "bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400",
+  upi: "bg-violet-50 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400",
+  cash: "bg-emerald-50 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400",
+  cheque: "bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400",
+  other: "bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400",
+};
+
+interface PaymentWithRunning extends Payment {
+  runningTotal: number;
+}
+
 interface PaymentListProps {
   payments: Payment[];
   onDelete: (id: string) => void;
 }
 
+function formatDate(dateStr: string) {
+  return new Date(dateStr).toLocaleDateString("en-IN", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+// ── Detail Modal ──────────────────────────────────────────────
+function PaymentDetailModal({
+  payment,
+  onClose,
+  onDelete,
+}: {
+  payment: PaymentWithRunning;
+  onClose: () => void;
+  onDelete: (id: string) => void;
+}) {
+  const Icon = payment.method ? methodIcons[payment.method] : HelpCircle;
+  const colorClass = payment.method ? methodColors[payment.method] : methodColors.other;
+
+  function handleDelete() {
+    onDelete(payment.id);
+    onClose();
+  }
+
+  return (
+    <>
+      {/* Backdrop */}
+      <div
+        className="fixed inset-0 z-40 bg-black/40 backdrop-blur-[2px]"
+        onClick={onClose}
+      />
+
+      {/* Sheet — slides up from bottom on mobile, centered on desktop */}
+      <div
+        className="fixed bottom-0 left-0 right-0 z-50 rounded-t-2xl bg-white shadow-2xl dark:bg-gray-900
+                    sm:bottom-auto sm:left-1/2 sm:top-1/2 sm:w-full sm:max-w-sm sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-2xl"
+        style={{ animation: "et-screen-in 0.22s ease both" }}
+      >
+        {/* Handle bar (mobile) */}
+        <div className="flex justify-center pt-3 sm:hidden">
+          <div className="h-1 w-10 rounded-full bg-gray-200 dark:bg-gray-700" />
+        </div>
+
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 pb-3 pt-4">
+          <h3 className="text-base font-semibold text-gray-900 dark:text-white">
+            Payment Details
+          </h3>
+          <button
+            onClick={onClose}
+            className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800"
+          >
+            <X size={18} />
+          </button>
+        </div>
+
+        {/* Amount hero */}
+        <div className="mx-5 mb-4 flex items-center gap-3 rounded-xl bg-emerald-50 px-4 py-3 dark:bg-emerald-900/20">
+          <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${colorClass}`}>
+            <Icon size={20} />
+          </div>
+          <div>
+            <p className="text-xl font-bold text-emerald-700 dark:text-emerald-400">
+              {formatCurrency(payment.amount)}
+            </p>
+            {payment.method && (
+              <p className="text-xs text-emerald-600/70 dark:text-emerald-500">
+                via {methodLabels[payment.method]}
+              </p>
+            )}
+          </div>
+        </div>
+
+        {/* Detail rows */}
+        <div className="space-y-0 divide-y divide-gray-100 px-5 dark:divide-gray-800">
+          <DetailRow icon={<Calendar size={14} />} label="Date" value={formatDate(payment.date)} />
+          {payment.method && (
+            <DetailRow
+              icon={<Icon size={14} />}
+              label="Payment Method"
+              value={methodLabels[payment.method]}
+            />
+          )}
+          {payment.reference && (
+            <DetailRow
+              icon={<Hash size={14} />}
+              label="Reference / Txn ID"
+              value={payment.reference}
+              mono
+            />
+          )}
+          {payment.notes && (
+            <DetailRow
+              icon={<StickyNote size={14} />}
+              label="Notes"
+              value={payment.notes}
+              multiline
+            />
+          )}
+          <DetailRow
+            icon={<TrendingUp size={14} />}
+            label="Running Total"
+            value={formatCurrency(payment.runningTotal)}
+          />
+        </div>
+
+        {/* Actions */}
+        <div className="px-5 pb-6 pt-4">
+          <button
+            onClick={handleDelete}
+            className="flex w-full items-center justify-center gap-2 rounded-xl border border-red-200 py-2.5 text-sm font-medium text-red-500 transition hover:bg-red-50 dark:border-red-800 dark:hover:bg-red-900/20"
+          >
+            <Trash2 size={15} />
+            Delete Payment
+          </button>
+        </div>
+      </div>
+    </>
+  );
+}
+
+function DetailRow({
+  icon,
+  label,
+  value,
+  mono = false,
+  multiline = false,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+  mono?: boolean;
+  multiline?: boolean;
+}) {
+  return (
+    <div className="flex items-start gap-3 py-3">
+      <span className="mt-0.5 shrink-0 text-gray-400">{icon}</span>
+      <div className="flex-1 min-w-0">
+        <p className="text-[10px] font-medium uppercase tracking-wide text-gray-400">{label}</p>
+        <p
+          className={`mt-0.5 text-sm text-gray-800 dark:text-gray-200 ${mono ? "font-mono" : ""} ${multiline ? "whitespace-pre-wrap" : "break-all"}`}
+        >
+          {value}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+// ── Payment List ──────────────────────────────────────────────
 export function PaymentList({ payments, onDelete }: PaymentListProps) {
-  // Payments come sorted desc by date. Show running total ascending.
+  const [selected, setSelected] = useState<PaymentWithRunning | null>(null);
+
   const withRunning = useMemo(() => {
     if (payments.length === 0) return [];
     let total = 0;
-    return [...payments].reverse().map((p) => {
-      total += p.amount;
-      return { ...p, runningTotal: total };
-    }).reverse();
+    return [...payments]
+      .reverse()
+      .map((p) => {
+        total += p.amount;
+        return { ...p, runningTotal: total };
+      })
+      .reverse();
   }, [payments]);
 
   if (payments.length === 0) {
@@ -46,55 +214,83 @@ export function PaymentList({ payments, onDelete }: PaymentListProps) {
   }
 
   return (
-    <div className="space-y-1">
-      {withRunning.map((p) => {
-        const Icon = p.method ? methodIcons[p.method] : HelpCircle;
-        return (
-          <div
-            key={p.id}
-            className="flex items-center gap-3 rounded-lg px-2 py-2 hover:bg-gray-50 dark:hover:bg-gray-800/50"
-          >
-            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">
-              <Icon size={14} />
-            </div>
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-semibold text-gray-900 dark:text-white">
+    <>
+      <div className="space-y-1">
+        {withRunning.map((p) => {
+          const Icon = p.method ? methodIcons[p.method] : HelpCircle;
+          const iconColor = p.method ? methodColors[p.method] : methodColors.other;
+
+          return (
+            <div
+              key={p.id}
+              role="button"
+              tabIndex={0}
+              onClick={() => setSelected(p)}
+              onKeyDown={(e) => e.key === "Enter" && setSelected(p)}
+              className="flex cursor-pointer items-start gap-3 rounded-xl px-3 py-3 transition
+                         hover:bg-gray-50 active:bg-gray-100
+                         dark:hover:bg-gray-800/50 dark:active:bg-gray-800"
+            >
+              {/* Method icon */}
+              <div className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${iconColor}`}>
+                <Icon size={15} />
+              </div>
+
+              {/* Info block */}
+              <div className="min-w-0 flex-1">
+                {/* Amount */}
+                <p className="text-sm font-semibold text-gray-900 dark:text-white">
                   {formatCurrency(p.amount)}
-                </span>
+                </p>
+
+                {/* Method badge */}
                 {p.method && (
-                  <span className="text-[10px] text-gray-400">
+                  <span className={`mt-1 inline-block rounded-md px-1.5 py-0.5 text-[10px] font-medium ${iconColor}`}>
                     {methodLabels[p.method]}
                   </span>
                 )}
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] text-gray-400">
-                  {new Date(p.date).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
-                </span>
+
+                {/* Date */}
+                <p className="mt-1 text-[11px] text-gray-400">
+                  {formatDate(p.date)}
+                </p>
+
+                {/* Reference */}
                 {p.reference && (
-                  <span className="truncate text-[10px] text-gray-400">
-                    Ref: {p.reference}
-                  </span>
+                  <p className="mt-0.5 truncate text-[11px] text-gray-400">
+                    <span className="font-medium text-gray-500 dark:text-gray-400">Ref:</span>{" "}
+                    {p.reference}
+                  </p>
+                )}
+
+                {/* Notes preview */}
+                {p.notes && (
+                  <p className="mt-0.5 truncate text-[11px] italic text-gray-400">
+                    {p.notes}
+                  </p>
                 )}
               </div>
-              {p.notes && (
-                <p className="mt-0.5 truncate text-[10px] text-gray-400">{p.notes}</p>
-              )}
+
+              {/* Running total */}
+              <div className="shrink-0 text-right">
+                <p className="text-[10px] text-gray-400">Running</p>
+                <p className="text-[11px] font-medium text-gray-600 dark:text-gray-300">
+                  {formatCurrency(p.runningTotal)}
+                </p>
+              </div>
             </div>
-            <div className="text-right shrink-0">
-              <p className="text-[10px] text-gray-400">Running: {formatCurrency(p.runningTotal)}</p>
-            </div>
-            <button
-              onClick={() => onDelete(p.id)}
-              className="shrink-0 rounded-md p-1 text-gray-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20"
-              title="Delete payment"
-            >
-              <Trash2 size={14} />
-            </button>
-          </div>
-        );
-      })}
-    </div>
+          );
+        })}
+      </div>
+
+      {/* Detail modal */}
+      {selected && (
+        <PaymentDetailModal
+          payment={selected}
+          onClose={() => setSelected(null)}
+          onDelete={onDelete}
+        />
+      )}
+    </>
   );
 }
