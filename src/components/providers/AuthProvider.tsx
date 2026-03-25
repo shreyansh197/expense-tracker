@@ -154,6 +154,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setAuthState({ activeWorkspaceId: workspaceId });
   }, []);
 
+  // ── Restore settings for user already in localStorage on page load ──
+  // switchSettingsUser is only called on explicit login/register, but auth state
+  // is restored from localStorage at module init — so we must sync settings here too.
+  useEffect(() => {
+    if (state.user?.id) {
+      switchSettingsUser(state.user.id);
+    }
+  }, [state.user?.id]);
+
   // ── Session heartbeat: detect revoked sessions ────────────
   const logoutRef = useRef(logout);
   useEffect(() => { logoutRef.current = logout; });
