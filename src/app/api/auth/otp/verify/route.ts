@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createHash } from "node:crypto";
 import { prisma } from "@/lib/server/prisma";
+import { supabase } from "@/lib/supabase";
 import {
   signAccessToken,
   generateRefreshToken,
@@ -15,10 +15,6 @@ function normalizePhone(raw: string): string | null {
   const stripped = raw.replace(/[\s\-().]/g, "");
   if (!/^\+\d{7,15}$/.test(stripped)) return null;
   return stripped;
-}
-
-function hashOtp(otp: string, phone: string): string {
-  return createHash("sha256").update(`${otp}:${phone}`).digest("hex");
 }
 
 function parseDeviceName(ua: string): string {
@@ -59,28 +55,21 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "OTP must be 6 digits" }, { status: 400 });
   }
 
-  const otpHash = hashOtp(rawOtp.trim(), phone);
+  // Verify OTP via Supabase (handles expiry, rate-limiting, and token storage)
+  const { error: verifyError } = await supabase.auth.verifyOtp({
+    phone,
+    token: rawOtp.trim(),
+    type: "sms",
+  });
+
+  if (verifyError) {
+    return NextResponse.json(
+      { error: "Invalid or expired code. Please request a new one." },
+      { status: 401 },
+    );
+  }
 
   try {
-    // Find the most recent matching, unused, non-expired OTP
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const otpRecord = await (prisma as any).phoneOtp.findFirst({
-      where: {
-        phone,
-        otpHash,
-        usedAt: null,
-        expiresAt: { gte: new Date() },
-      },
-      orderBy: { createdAt: "desc" },
-    });
-
-    if (!otpRecord) {
-      return NextResponse.json(
-        { error: "Invalid or expired code. Please request a new one." },
-        { status: 401 },
-      );
-    }
-
     const ua = (req.headers.get("user-agent") ?? "").slice(0, 512);
     const ipHash = hashIp(
       req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown",
@@ -88,12 +77,6 @@ export async function POST(req: NextRequest) {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const result = await prisma.$transaction(async (tx: any) => {
-      // Mark OTP as used
-      await tx.phoneOtp.update({
-        where: { id: otpRecord.id },
-        data: { usedAt: new Date() },
-      });
-
       // Find or create user by phone
       let dbUser = await tx.user.findFirst({
         where: { phone },
@@ -148,12 +131,6 @@ export async function POST(req: NextRequest) {
           data: { phoneVerifiedAt: new Date() },
         });
       }
-
-      // Link OTP record to user
-      await tx.phoneOtp.update({
-        where: { id: otpRecord.id },
-        data: { userId: dbUser.id },
-      });
 
       // Create or reuse device
       let device = await tx.device.findFirst({
