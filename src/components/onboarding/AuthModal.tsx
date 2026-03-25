@@ -15,8 +15,10 @@ import {
   PieChart,
   Shield,
   Smartphone,
+  Phone,
 } from "lucide-react";
 import { useAuth } from "@/components/providers/AuthProvider";
+import { setAuthState } from "@/lib/authClient";
 
 /* ── Google G color-mark SVG ──────────────────────────────── */
 function GoogleIcon({ className }: { className?: string }) {
@@ -200,7 +202,7 @@ export function AuthModal({
   onComplete,
   initialMode = "register",
 }: AuthModalProps) {
-  const [mode, setMode] = useState<"choose" | "register" | "login" | "totp">(
+  const [mode, setMode] = useState<"choose" | "register" | "login" | "totp" | "phone" | "otp-verify">(
     initialMode === "join" ? "login" : "choose",
   );
   const [email, setEmail] = useState("");
@@ -212,6 +214,9 @@ export function AuthModal({
   const [showSalary, setShowSalary] = useState(false);
   const [pendingUserId, setPendingUserId] = useState<string | null>(null);
   const [totpCode, setTotpCode] = useState("");
+  // Phone OTP
+  const [phone, setPhone] = useState("");
+  const [otpCode, setOtpCode] = useState("");
 
   const { login, loginWith2FA, register } = useAuth();
 
@@ -286,6 +291,189 @@ export function AuthModal({
     const val = parseFloat(salary);
     onComplete(val > 0 ? val : undefined);
   };
+
+  // ── Phone OTP handlers ──────────────────────────────────────
+
+  const handleSendOtp = async () => {
+    if (!phone.trim()) {
+      setError("Enter your phone number");
+      return;
+    }
+    setError("");
+    setLoading(true);
+    try {
+      const res = await fetch("/api/auth/otp/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone: phone.trim() }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error ?? "Failed to send code");
+        return;
+      }
+      setOtpCode("");
+      setMode("otp-verify");
+    } catch {
+      setError("Network error. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerifyOtp = async () => {
+    if (otpCode.length !== 6) return;
+    setError("");
+    setLoading(true);
+    try {
+      const res = await fetch("/api/auth/otp/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone: phone.trim(), otp: otpCode }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error ?? "Invalid code");
+        return;
+      }
+      setAuthState({
+        user: data.user,
+        tokens: { accessToken: data.accessToken, refreshToken: data.refreshToken },
+        workspaces: data.workspaces,
+        activeWorkspaceId: data.activeWorkspaceId,
+      });
+      onComplete();
+    } catch {
+      setError("Network error. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ── Phone number entry step ─────────────────────────────────
+
+  if (mode === "phone") {
+    return (
+      <AuthPage>
+        <button
+          onClick={() => { setMode("choose"); setError(""); }}
+          className="mb-5 flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-700 dark:text-gray-500 dark:hover:text-gray-300 transition-colors"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back
+        </button>
+
+        <div className="mb-1 flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100 dark:bg-blue-900/40">
+          <Phone className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+        </div>
+        <h2 className="mt-3 text-xl font-bold text-gray-900 dark:text-white">
+          Sign in with Phone
+        </h2>
+        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400 mb-6">
+          We’ll send a 6-digit code via SMS.
+        </p>
+
+        <div className="space-y-4">
+          <div className="relative">
+            <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <input
+              type="tel"
+              inputMode="tel"
+              placeholder="+91 9876 543 210"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              autoFocus
+              onKeyDown={(e) => { if (e.key === "Enter") handleSendOtp(); }}
+              className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 pl-10 pr-4 text-sm text-gray-900 placeholder:text-gray-400 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow"
+            />
+          </div>
+          <p className="text-[11px] text-gray-400">
+            Include country code, e.g. +91 for India, +1 for US.
+          </p>
+
+          {error && (
+            <div className="flex items-start gap-2 rounded-xl bg-red-50 p-3.5 text-sm text-red-700 dark:bg-red-900/20 dark:text-red-400">
+              <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
+              {error}
+            </div>
+          )}
+
+          <button
+            onClick={handleSendOtp}
+            disabled={loading || !phone.trim()}
+            className="w-full rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 py-3.5 text-base font-semibold text-white shadow-lg shadow-blue-600/20 hover:shadow-xl hover:shadow-blue-600/30 disabled:opacity-50 transition-all flex items-center justify-center gap-2"
+          >
+            {loading && <Loader2 className="h-4 w-4 animate-spin" />}
+            Send Code
+          </button>
+        </div>
+      </AuthPage>
+    );
+  }
+
+  // ── OTP verification step ───────────────────────────────────
+
+  if (mode === "otp-verify") {
+    return (
+      <AuthPage>
+        <button
+          onClick={() => { setMode("phone"); setError(""); setOtpCode(""); }}
+          className="mb-5 flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-700 dark:text-gray-500 dark:hover:text-gray-300 transition-colors"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back
+        </button>
+
+        <div className="mb-1 flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100 dark:bg-blue-900/40">
+          <Phone className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+        </div>
+        <h2 className="mt-3 text-xl font-bold text-gray-900 dark:text-white">
+          Enter the Code
+        </h2>
+        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400 mb-6">
+          Sent to <span className="font-medium text-gray-700 dark:text-gray-300">{phone}</span>
+        </p>
+
+        <div className="space-y-4">
+          <input
+            type="text"
+            inputMode="numeric"
+            maxLength={6}
+            placeholder="000000"
+            value={otpCode}
+            onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+            autoFocus
+            className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3.5 text-center font-mono text-2xl tracking-[0.4em] text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow"
+            onKeyDown={(e) => { if (e.key === "Enter") handleVerifyOtp(); }}
+          />
+
+          {error && (
+            <div className="flex items-start gap-2 rounded-xl bg-red-50 p-3.5 text-sm text-red-700 dark:bg-red-900/20 dark:text-red-400">
+              <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
+              {error}
+            </div>
+          )}
+
+          <button
+            onClick={handleVerifyOtp}
+            disabled={otpCode.length !== 6 || loading}
+            className="w-full rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 py-3.5 text-base font-semibold text-white shadow-lg shadow-blue-600/20 hover:shadow-xl hover:shadow-blue-600/30 disabled:opacity-50 transition-all flex items-center justify-center gap-2"
+          >
+            {loading && <Loader2 className="h-4 w-4 animate-spin" />}
+            Verify &amp; Sign In
+          </button>
+
+          <button
+            onClick={handleSendOtp}
+            disabled={loading}
+            className="w-full text-center text-xs text-blue-600 hover:underline dark:text-blue-400 disabled:opacity-50"
+          >
+            Didn’t receive it? Resend code
+          </button>
+        </div>
+      </AuthPage>
+    );
+  }
 
   // ── TOTP verification step ─────────────────────────────────
 
@@ -417,6 +605,20 @@ export function AuthModal({
             <div>
               <div className="text-sm font-semibold text-gray-900 dark:text-white">Continue with Google</div>
               <div className="text-xs text-gray-400">Sign in or create account instantly</div>
+            </div>
+          </button>
+
+          {/* Phone OTP */}
+          <button
+            onClick={() => { setMode("phone"); setError(""); }}
+            className="group relative flex w-full items-center gap-3 rounded-xl border-2 border-gray-200 bg-white p-3.5 text-left transition-all hover:border-gray-300 hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 dark:border-gray-700 dark:bg-gray-800/50 dark:hover:border-gray-600"
+          >
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-50 border border-blue-100 dark:bg-blue-900/30 dark:border-blue-800">
+              <Phone className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+            </div>
+            <div>
+              <div className="text-sm font-semibold text-gray-900 dark:text-white">Continue with Phone</div>
+              <div className="text-xs text-gray-400">Sign in via SMS code</div>
             </div>
           </button>
 
@@ -594,6 +796,14 @@ export function AuthModal({
       >
         <GoogleIcon className="h-4 w-4" />
         Google
+      </button>
+      <button
+        type="button"
+        onClick={() => { setMode("phone"); setError(""); }}
+        className="mt-2 flex w-full items-center justify-center gap-3 rounded-xl border border-gray-200 bg-white py-3 text-sm font-medium text-gray-700 transition-all hover:bg-gray-50 hover:shadow-sm active:scale-[0.98] dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+      >
+        <Phone className="h-4 w-4" />
+        Phone Number
       </button>
     </AuthPage>
   );

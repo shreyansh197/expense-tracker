@@ -10,6 +10,13 @@ const PUBLIC_PATHS = new Set([
   "/api/auth/magic-link/verify",
   "/api/auth/passkey/login-options",
   "/api/auth/passkey/login-verify",
+  // Google OAuth
+  "/api/auth/google",
+  "/api/auth/google/callback",
+  "/api/auth/google/exchange",
+  // Phone OTP
+  "/api/auth/otp/send",
+  "/api/auth/otp/verify",
   "/api/invites/preview",   // GET – public preview of invite
   "/api/migrate/sync-code", // POST – legacy migration
 ]);
