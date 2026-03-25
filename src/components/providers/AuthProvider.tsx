@@ -19,6 +19,7 @@ import {
   type AuthUser,
   type AuthWorkspace,
 } from "@/lib/authClient";
+import { switchSettingsUser, clearSettingsForCurrentUser } from "@/hooks/useSettings";
 
 // ── Context ──────────────────────────────────────────────────
 
@@ -68,6 +69,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         workspaces: data.workspaces,
         activeWorkspaceId: data.activeWorkspaceId,
       });
+      switchSettingsUser(data.user.id);
 
       return {};
     },
@@ -95,6 +97,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         workspaces: data.workspaces,
         activeWorkspaceId: data.activeWorkspaceId,
       });
+      switchSettingsUser(data.user.id);
 
       return {};
     },
@@ -124,6 +127,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         ],
         activeWorkspaceId: data.workspace.id,
       });
+      switchSettingsUser(data.user.id);
 
       return {};
     },
@@ -136,6 +140,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch {
       // Best-effort
     }
+    clearSettingsForCurrentUser();
     clearAuthState();
     setAuthState({
       user: null,

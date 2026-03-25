@@ -9,7 +9,11 @@ import { fetchSyncData, invalidateSyncCache } from "@/lib/syncFetch";
 import { supabase } from "@/lib/supabase";
 import type { UserSettings, CategoryMeta } from "@/types";
 
-const STORAGE_KEY = "expense-tracker-settings";
+const STORAGE_KEY_BASE = "expense-tracker-settings";
+function storageKeyForUser(userId: string | null): string {
+  return userId ? `${STORAGE_KEY_BASE}-${userId}` : STORAGE_KEY_BASE;
+}
+let _currentUserId: string | null = null;
 
 const DEFAULT_SETTINGS: UserSettings = {
   salary: DEFAULT_SALARY,
@@ -52,10 +56,10 @@ function _subscribe(cb: () => void): () => void {
   return () => { _listeners.delete(cb); };
 }
 
-function loadSettings(): UserSettings {
+function loadSettings(userId: string | null = _currentUserId): UserSettings {
   if (typeof window === "undefined") return DEFAULT_SETTINGS;
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(storageKeyForUser(userId));
     if (raw) return { ...DEFAULT_SETTINGS, ...JSON.parse(raw) };
   } catch { /* ignore */ }
   return DEFAULT_SETTINGS;
@@ -63,7 +67,7 @@ function loadSettings(): UserSettings {
 
 function saveLocal(s: UserSettings) {
   if (typeof window === "undefined") return;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
+  localStorage.setItem(storageKeyForUser(_currentUserId), JSON.stringify(s));
 }
 
 /** Push settings via sync/commit API */
@@ -137,8 +141,22 @@ async function fetchSettingsFromApi(): Promise<UserSettings | null> {
 
 // ── Module-level initialization (runs once when module loads) ──
 if (typeof window !== "undefined") {
-  const local = loadSettings();
+  const local = loadSettings(null);
   _setShared(local);
+}
+
+export function switchSettingsUser(userId: string) {
+  _currentUserId = userId;
+  const local = loadSettings(userId);
+  _setShared(local);
+}
+
+export function clearSettingsForCurrentUser() {
+  if (typeof window !== "undefined" && _currentUserId) {
+    localStorage.removeItem(storageKeyForUser(_currentUserId));
+  }
+  _currentUserId = null;
+  _setShared(DEFAULT_SETTINGS);
 }
 
 export function useSettings() {
@@ -146,12 +164,12 @@ export function useSettings() {
   const loading = false;
   const [isFirstVisit, setIsFirstVisit] = useState(() => {
     if (typeof window === "undefined") return false;
-    return localStorage.getItem(STORAGE_KEY) === null;
+    return localStorage.getItem(storageKeyForUser(_currentUserId)) === null;
   });
 
   // On mount: sync with API
   useEffect(() => {
-    const hasExisting = localStorage.getItem(STORAGE_KEY) !== null;
+    const hasExisting = localStorage.getItem(storageKeyForUser(_currentUserId)) !== null;
     const local = _getSnapshot();
 
     // Fetch remote settings via API and merge
@@ -236,7 +254,7 @@ export function useSettings() {
 
   const markOnboarded = useCallback(() => {
     setIsFirstVisit(false);
-    if (!localStorage.getItem(STORAGE_KEY)) {
+    if (!localStorage.getItem(storageKeyForUser(_currentUserId))) {
       const initial = { ...DEFAULT_SETTINGS, updatedAt: Date.now() };
       saveLocal(initial);
       _setShared(initial);
@@ -245,7 +263,7 @@ export function useSettings() {
   }, []);
 
   const resetSettings = useCallback(() => {
-    localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(storageKeyForUser(_currentUserId));
     _setShared(DEFAULT_SETTINGS);
     setIsFirstVisit(true);
   }, []);
