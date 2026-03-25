@@ -58,8 +58,8 @@ export function Sidebar() {
                 "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
                 isActive
                   ? isBiz
-                    ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
-                    : "bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
+                    ? "border-l-2 border-l-emerald-600 bg-emerald-50/50 text-emerald-700 dark:border-l-emerald-400 dark:bg-emerald-900/20 dark:text-emerald-400"
+                    : "border-l-2 border-l-blue-600 bg-blue-50/50 text-blue-700 dark:border-l-blue-400 dark:bg-blue-900/20 dark:text-blue-400"
                   : "text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
               )}
             >
@@ -82,10 +82,10 @@ export function Sidebar() {
             }
           }}
           className={cn(
-            "flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors active:scale-[0.98]",
+            "flex w-full items-center justify-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-medium shadow-sm transition-colors active:scale-[0.98]",
             isBusinessRoute
-              ? "bg-emerald-600 hover:bg-emerald-700"
-              : "bg-blue-600 hover:bg-blue-700"
+              ? "border-emerald-600 text-emerald-600 hover:bg-emerald-600 hover:text-white dark:border-emerald-500 dark:text-emerald-400 dark:hover:bg-emerald-600 dark:hover:text-white"
+              : "border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white dark:border-blue-500 dark:text-blue-400 dark:hover:bg-blue-600 dark:hover:text-white"
           )}
         >
           <PlusCircle size={18} />

@@ -8,15 +8,15 @@ import { useToast } from "@/components/ui/Toast";
 import { useConfirm } from "@/components/ui/ConfirmDialog";
 
 const COPY = {
-  dataMgmtTitle: "Data & Account Management",
+  dataMgmtTitle: "Workspace Removal",
   exportBackupTitle: "Export / Backup",
   exportBackupHelp:
     "Download your data or import from a backup before making significant changes.",
-  deleteWorkspaceTitle: "Delete Workspace Data",
+  deleteWorkspaceTitle: "Workspace Removal",
   deleteWorkspaceHelp:
-    "Permanently delete all expenses, ledgers, and attachments in this workspace. This action cannot be undone.",
+    "Permanently remove all expenses, ledgers, and attachments in this workspace. This action cannot be undone.",
   confirmDeletePrompt: "Type the workspace name to confirm.",
-  confirmDeleteCta: "Delete Workspace Data",
+  confirmDeleteCta: "Remove All Data",
 };
 
 interface DataAccountManagementProps {
@@ -118,7 +118,7 @@ export function DataAccountManagement({ onScrollToExport }: DataAccountManagemen
                 <button
                   disabled={deleting}
                   onClick={handleDeleteWorkspaceData}
-                  className="flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-xs font-medium text-white hover:bg-red-700 disabled:opacity-50 transition-colors"
+                  className="flex items-center gap-2 rounded-lg border border-red-600 px-4 py-2 text-xs font-medium text-red-600 hover:bg-red-600 hover:text-white disabled:opacity-50 transition-colors dark:border-red-500 dark:text-red-400 dark:hover:bg-red-600 dark:hover:text-white"
                 >
                   <Trash2 size={14} />
                   {deleting ? "Deleting..." : COPY.confirmDeleteCta}

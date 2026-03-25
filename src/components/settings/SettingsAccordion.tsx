@@ -120,7 +120,7 @@ export function AccordionSection({
   return (
     <section
       className={cn(
-        "rounded-xl border border-gray-200 bg-white shadow-sm transition-shadow dark:border-gray-800 dark:bg-gray-900",
+        "rounded-2xl border border-gray-200 bg-white shadow-sm transition-shadow dark:border-gray-800 dark:bg-gray-900",
         isOpen && "shadow-md dark:shadow-gray-950/30",
         className
       )}
@@ -137,7 +137,12 @@ export function AccordionSection({
         aria-expanded={isOpen}
         aria-controls={`section-${id}`}
       >
-        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400">
+        <span className={cn(
+          "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors",
+          isOpen
+            ? "bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400"
+            : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400"
+        )}>
           {icon}
         </span>
         <div className="flex-1 min-w-0">
@@ -180,9 +185,10 @@ export function AccordionSection({
         role="region"
         aria-labelledby={`header-${id}`}
         className={cn(
-          "grid transition-[grid-template-rows] duration-200",
+          "grid transition-[grid-template-rows] duration-[250ms]",
           isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
         )}
+        style={{ willChange: "grid-template-rows" }}
       >
         <div className="overflow-hidden">
           <div className="border-t border-gray-100 px-4 py-4 dark:border-gray-800">

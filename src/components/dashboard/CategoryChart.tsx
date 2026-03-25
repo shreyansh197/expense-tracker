@@ -10,7 +10,7 @@ import {
 } from "recharts";
 import { Table2, PieChart as PieChartIcon } from "lucide-react";
 import { buildCategoryMap } from "@/lib/categories";
-import { formatCurrency } from "@/lib/utils";
+import { cn, formatCurrency } from "@/lib/utils";
 import { useSettings } from "@/hooks/useSettings";
 import type { CategoryTotal, Expense } from "@/types";
 
@@ -88,14 +88,32 @@ export function CategoryChart({ categoryTotals, onCategoryClick, categoryBudgets
   return (
     <div role="img" aria-label="Category breakdown chart">
       <div className="mb-2 flex justify-end">
-        <button
-          onClick={() => setShowTable((v) => !v)}
-          className="flex items-center gap-1 rounded-md px-2 py-1 text-xs text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
-          aria-label={showTable ? "Show chart" : "Show table"}
-        >
-          {showTable ? <PieChartIcon size={13} /> : <Table2 size={13} />}
-          {showTable ? "Chart" : "Table"}
-        </button>
+        <div className="inline-flex rounded-lg bg-gray-100 p-0.5 dark:bg-gray-800">
+          <button
+            onClick={() => setShowTable(false)}
+            className={cn(
+              "flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-medium transition-colors",
+              !showTable
+                ? "bg-white text-gray-900 shadow-sm dark:bg-gray-700 dark:text-white"
+                : "text-gray-500 dark:text-gray-400"
+            )}
+          >
+            <PieChartIcon size={13} />
+            Chart
+          </button>
+          <button
+            onClick={() => setShowTable(true)}
+            className={cn(
+              "flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-medium transition-colors",
+              showTable
+                ? "bg-white text-gray-900 shadow-sm dark:bg-gray-700 dark:text-white"
+                : "text-gray-500 dark:text-gray-400"
+            )}
+          >
+            <Table2 size={13} />
+            Table
+          </button>
+        </div>
       </div>
 
       {showTable ? (

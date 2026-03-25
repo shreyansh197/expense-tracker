@@ -1,6 +1,7 @@
 "use client";
 
-import { AlertTriangle, TrendingUp, ArrowRight, Zap } from "lucide-react";
+import { useState } from "react";
+import { AlertTriangle, ArrowRight, Zap, ChevronDown } from "lucide-react";
 import { cn, formatCurrency } from "@/lib/utils";
 import { buildCategoryMap } from "@/lib/categories";
 import { useSettings } from "@/hooks/useSettings";
@@ -26,6 +27,8 @@ interface Alert {
   action?: () => void;
 }
 
+const MAX_VISIBLE = 2;
+
 export function AlertsPanel({
   categoryTotals,
   categoryBudgets,
@@ -38,6 +41,7 @@ export function AlertsPanel({
 }: AlertsPanelProps) {
   const { settings } = useSettings();
   const catMap = buildCategoryMap(settings.customCategories);
+  const [expanded, setExpanded] = useState(false);
 
   const alerts: Alert[] = [];
 
@@ -125,6 +129,9 @@ export function AlertsPanel({
   const severity = { critical: 0, warning: 1, info: 2 };
   alerts.sort((a, b) => severity[a.severity] - severity[b.severity]);
 
+  const visibleAlerts = expanded ? alerts : alerts.slice(0, MAX_VISIBLE);
+  const hiddenCount = alerts.length - MAX_VISIBLE;
+
   return (
     <div className="space-y-2" role="alert" aria-live="polite" aria-label="Budget alerts">
       {alerts.some((a) => a.id.startsWith("anomaly-")) && (
@@ -138,16 +145,16 @@ export function AlertsPanel({
           <span className="text-[10px] text-gray-400">Anomaly detection active</span>
         </div>
       )}
-      {alerts.map((alert) => (
+      {visibleAlerts.map((alert) => (
         <div
           key={alert.id}
           className={cn(
-            "flex items-start gap-3 rounded-lg border px-3 py-2.5 text-sm",
+            "flex items-start gap-3 rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm dark:border-gray-800 dark:bg-gray-900",
             alert.severity === "critical"
-              ? "border-red-200 bg-red-50 text-red-800 dark:border-red-800 dark:bg-red-950/50 dark:text-red-300"
+              ? "border-l-4 border-l-red-500 text-red-800 dark:text-red-300"
               : alert.severity === "warning"
-                ? "border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-800 dark:bg-amber-950/50 dark:text-amber-300"
-                : "border-blue-200 bg-blue-50 text-blue-800 dark:border-blue-800 dark:bg-blue-950/50 dark:text-blue-300"
+                ? "border-l-4 border-l-amber-500 text-amber-800 dark:text-amber-300"
+                : "border-l-4 border-l-blue-500 text-blue-800 dark:text-blue-300"
           )}
         >
           {alert.severity === "critical" ? (
@@ -155,7 +162,7 @@ export function AlertsPanel({
           ) : alert.severity === "info" ? (
             <Zap size={16} className="mt-0.5 shrink-0" />
           ) : (
-            <TrendingUp size={16} className="mt-0.5 shrink-0" />
+            <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-amber-500" />
           )}
           <div className="flex-1 min-w-0">
             <p className="font-medium">{alert.message}</p>
@@ -174,6 +181,15 @@ export function AlertsPanel({
           )}
         </div>
       ))}
+      {!expanded && hiddenCount > 0 && (
+        <button
+          onClick={() => setExpanded(true)}
+          className="flex w-full items-center justify-center gap-1 rounded-lg py-1.5 text-xs font-medium text-gray-500 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800/50 transition-colors"
+        >
+          Show {hiddenCount} more
+          <ChevronDown size={12} />
+        </button>
+      )}
     </div>
   );
 }

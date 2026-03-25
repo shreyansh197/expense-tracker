@@ -63,7 +63,7 @@ export function BottomNav() {
         onClick={handleFabClick}
         aria-label={isBusiness && isBusinessRoute ? "Add ledger" : "Add expense"}
         className={cn(
-          "fixed left-1/2 z-40 flex h-14 w-14 -translate-x-1/2 items-center justify-center rounded-full text-white shadow-lg transition-transform duration-200 active:scale-90 lg:hidden",
+          "fixed left-1/2 z-40 flex h-[52px] w-[52px] -translate-x-1/2 items-center justify-center rounded-full text-white shadow-lg ring-4 ring-white/80 transition-transform duration-200 active:scale-95 lg:hidden dark:ring-gray-950/80",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-50 dark:focus-visible:ring-offset-gray-950",
           accentColor === "emerald"
             ? "bg-emerald-600 shadow-emerald-600/25 focus-visible:ring-emerald-500"
@@ -73,13 +73,13 @@ export function BottomNav() {
           bottom: `calc(${NAV_HEIGHT}px + env(safe-area-inset-bottom, 0px) + 12px)`,
         }}
       >
-        <Plus size={26} strokeWidth={2.5} />
+        <Plus size={24} strokeWidth={2.5} />
       </button>
       )}
 
       {/* ─── Nav bar (z-30, below FAB) ─── */}
       <nav
-        className="fixed bottom-0 left-0 right-0 z-30 border-t border-gray-200 bg-white/80 backdrop-blur-lg dark:border-gray-800 dark:bg-gray-950/80 lg:hidden"
+        className="fixed bottom-0 left-0 right-0 z-30 bg-white/80 shadow-[0_-1px_3px_0_rgba(0,0,0,0.05)] backdrop-blur-lg backdrop-saturate-150 dark:bg-gray-950/80 dark:shadow-[0_-1px_3px_0_rgba(0,0,0,0.2)] lg:hidden"
         style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
       >
         <div
@@ -99,10 +99,13 @@ export function BottomNav() {
                 className={cn(
                   "flex flex-col items-center justify-center gap-0.5 py-1 transition-colors",
                   isActive
-                    ? isBiz
-                      ? "text-emerald-600 dark:text-emerald-400"
-                      : "text-blue-600 dark:text-blue-400"
-                    : "text-gray-500 dark:text-gray-400"
+                    ? cn(
+                        "border-t-2 pt-0.5",
+                        isBiz
+                          ? "border-t-emerald-600 text-emerald-600 dark:border-t-emerald-400 dark:text-emerald-400"
+                          : "border-t-blue-600 text-blue-600 dark:border-t-blue-400 dark:text-blue-400"
+                      )
+                    : "border-t-2 border-t-transparent pt-0.5 text-gray-500 dark:text-gray-400"
                 )}
               >
                 <Icon size={20} />

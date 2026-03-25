@@ -5,11 +5,41 @@
 :root {
   --background: #f9fafb;
   --foreground: #111827;
+  --surface: #ffffff;
+  --surface-secondary: #f9fafb;
+  --border: #e5e7eb;
+  --border-subtle: #f3f4f6;
+  --text-primary: #111827;
+  --text-secondary: #6b7280;
+  --text-tertiary: #9ca3af;
+  --accent: #2563eb;
+  --accent-soft: #eff6ff;
+  --success: #059669;
+  --success-soft: #ecfdf5;
+  --warning: #d97706;
+  --warning-soft: #fffbeb;
+  --danger: #dc2626;
+  --danger-soft: #fef2f2;
 }
 
 .dark {
   --background: #030712;
   --foreground: #f3f4f6;
+  --surface: #111827;
+  --surface-secondary: #1f2937;
+  --border: #374151;
+  --border-subtle: #1f2937;
+  --text-primary: #f3f4f6;
+  --text-secondary: #9ca3af;
+  --text-tertiary: #6b7280;
+  --accent: #3b82f6;
+  --accent-soft: rgba(59, 130, 246, 0.15);
+  --success: #34d399;
+  --success-soft: rgba(52, 211, 153, 0.15);
+  --warning: #fbbf24;
+  --warning-soft: rgba(251, 191, 36, 0.15);
+  --danger: #f87171;
+  --danger-soft: rgba(248, 113, 113, 0.15);
   --chart-tooltip-bg: #1f2937;
   --chart-tooltip-fg: #f3f4f6;
   --chart-tooltip-border: #374151;
@@ -18,6 +48,8 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-border: var(--border);
 }
 
 body {
@@ -38,6 +70,27 @@ body {
 
 html {
   scroll-behavior: smooth;
+}
+
+/* Tabular numbers for financial data */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Base interaction transitions */
+button, a {
+  transition: color 0.15s, background-color 0.15s, border-color 0.15s, opacity 0.15s;
+}
+
+/* Interactive card hover effect (desktop only) */
+.card-interactive {
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+@media (hover: hover) {
+  .card-interactive:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transform: translateY(-1px);
+  }
 }
 
 input[type="number"]::-webkit-inner-spin-button,
@@ -68,10 +121,15 @@ input[type="number"] {
   }
 }
 
-/* Dark mode recharts overrides */
+/* Recharts grid softening */
+.recharts-cartesian-grid line {
+  stroke: var(--border-subtle);
+  opacity: 0.5;
+}
 .dark .recharts-cartesian-axis-tick text {
   fill: #9CA3AF;
 }
 .dark .recharts-cartesian-grid line {
   stroke: #374151;
+  opacity: 0.4;
 }

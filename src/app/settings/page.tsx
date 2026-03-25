@@ -63,7 +63,12 @@ export default function SettingsPage() {
 
         <SettingsAccordion>
 
-          {/* ─── 1. Account & Workspace ─── */}
+          {/* ━━━ YOUR ACCOUNT ━━━ */}
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 pb-1 px-1">
+            Your Account
+          </h3>
+
+          {/* ─── Account & Workspace ─── */}
           <AccordionSection
             id="account"
             icon={<LinkIcon size={18} />}
@@ -73,7 +78,32 @@ export default function SettingsPage() {
             <AccountCard />
           </AccordionSection>
 
-          {/* ─── 2. Monthly Budget ─── */}
+          {/* ─── Security ─── */}
+          <AccordionSection
+            id="security"
+            icon={<Shield size={18} />}
+            title="Security"
+            description="Two-factor auth, sessions, and devices"
+          >
+            <SecurityCard />
+          </AccordionSection>
+
+          {/* ─── Workspace Members ─── */}
+          <AccordionSection
+            id="members"
+            icon={<Users size={18} />}
+            title="Workspace Members"
+            description="Invite people and manage access"
+          >
+            <WorkspaceMembersCard />
+          </AccordionSection>
+
+          {/* ━━━ FINANCES ━━━ */}
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 pt-4 pb-1 px-1">
+            Finances
+          </h3>
+
+          {/* ─── Monthly Budget ─── */}
           <AccordionSection
             id="budget"
             icon={<Wallet size={18} />}
@@ -103,123 +133,43 @@ export default function SettingsPage() {
             </div>
           </AccordionSection>
 
-          {/* ─── 3. App Mode ─── */}
+          {/* ─── Categories & Budgets ─── */}
           <AccordionSection
-            id="app-mode"
-            icon={<Briefcase size={18} />}
-            title="App Mode"
-            description={settings.businessMode ? "Business Owner Mode active" : "Personal expense tracking"}
-            headerRight={
-              <button
-                role="switch"
-                aria-checked={settings.businessMode ?? false}
-                onClick={() => updateSettings({ businessMode: !settings.businessMode })}
-                className={`relative h-6 w-11 rounded-full transition-colors ${
-                  settings.businessMode ? "bg-emerald-600" : "bg-gray-300 dark:bg-gray-600"
-                }`}
-              >
-                <span
-                  className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-transform ${
-                    settings.businessMode ? "translate-x-5" : ""
-                  }`}
-                />
-              </button>
+            id="categories"
+            icon={<Tag size={18} />}
+            title="Categories & Budgets"
+            description="Manage expense categories and per-category limits"
+          >
+            <CategoryManager />
+          </AccordionSection>
+
+          {/* ─── Recurring Expenses ─── */}
+          <AccordionSection
+            id="recurring"
+            icon={<Repeat size={18} />}
+            title="Recurring Expenses"
+            description={
+              recurringCount > 0
+                ? `${recurringCount} items · ${formatCurrency(recurringTotal)}/mo`
+                : "Set up automatic monthly expenses"
             }
+            badge={recurringCount > 0 ? recurringCount : undefined}
           >
-            <div className="space-y-3">
-              <p className="text-xs text-gray-500 dark:text-gray-400">
-                {settings.businessMode
-                  ? "Business Owner Mode adds a ledger system to track expected income, log payments received, and view collection analytics."
-                  : "Enable Business Owner Mode to track client payments, revenue expectations, and receivables alongside your expenses."}
-              </p>
-              {settings.businessMode && (
-                <div className="rounded-lg bg-emerald-50 p-3 dark:bg-emerald-900/20">
-                  <p className="text-xs font-medium text-emerald-700 dark:text-emerald-400">
-                    A &quot;Business&quot; tab is now visible in your navigation. Manage ledgers and payments there.
-                  </p>
-                </div>
-              )}
-            </div>
+            <RecurringManager />
           </AccordionSection>
 
-          {/* ─── 4. Security ─── */}
+          {/* ─── Savings Goals ─── */}
           <AccordionSection
-            id="security"
-            icon={<Shield size={18} />}
-            title="Security"
-            description="Two-factor auth, sessions, and devices"
+            id="goals"
+            icon={<Target size={18} />}
+            title="Savings Goals"
+            description={goalsCount > 0 ? `${goalsCount} active goal${goalsCount > 1 ? "s" : ""}` : "Track your savings targets"}
+            badge={goalsCount > 0 ? goalsCount : undefined}
           >
-            <SecurityCard />
+            <GoalsManager />
           </AccordionSection>
 
-          {/* ─── 5. Workspace Members ─── */}
-          <AccordionSection
-            id="members"
-            icon={<Users size={18} />}
-            title="Workspace Members"
-            description="Invite people and manage access"
-          >
-            <WorkspaceMembersCard />
-          </AccordionSection>
-
-          {/* ─── 6. Export & Import ─── */}
-          <AccordionSection
-            id="export-import"
-            icon={<Download size={18} />}
-            title="Export & Import"
-            description="Backup, export, or import data"
-          >
-            <ExportImportWizard />
-          </AccordionSection>
-
-          {/* ─── 7. Theme & Appearance ─── */}
-          <AccordionSection
-            id="theme"
-            icon={<Palette size={18} />}
-            title="Theme & Appearance"
-            description={`${theme.charAt(0).toUpperCase() + theme.slice(1)} mode`}
-          >
-            <div className="space-y-4">
-              <div className="flex gap-2">
-                {[
-                  { value: "light" as const, icon: Sun, label: "Light" },
-                  { value: "dark" as const, icon: Moon, label: "Dark" },
-                  { value: "system" as const, icon: Monitor, label: "System" },
-                ].map((opt) => {
-                  const Icon = opt.icon;
-                  const active = theme === opt.value;
-                  return (
-                    <button
-                      key={opt.value}
-                      onClick={() => setTheme(opt.value)}
-                      className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-                        active
-                          ? "bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
-                          : "text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
-                      }`}
-                    >
-                      <Icon size={16} />
-                      {opt.label}
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Install PWA */}
-              <div className="border-t border-gray-100 pt-4 dark:border-gray-800">
-                <div className="flex items-center gap-3 mb-3">
-                  <Smartphone size={16} className="text-gray-400" />
-                  <div>
-                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Install App</p>
-                    <p className="text-xs text-gray-400">Install as app for quick access</p>
-                  </div>
-                </div>
-                <InstallButton />
-              </div>
-            </div>
-          </AccordionSection>
-
-          {/* ─── 8. Budget Rollover ─── */}
+          {/* ─── Budget Rollover ─── */}
           <AccordionSection
             id="rollover"
             icon={<TrendingUp size={18} />}
@@ -269,60 +219,130 @@ export default function SettingsPage() {
             </div>
           </AccordionSection>
 
-          {/* ─── 9. Savings Goals ─── */}
-          <AccordionSection
-            id="goals"
-            icon={<Target size={18} />}
-            title="Savings Goals"
-            description={goalsCount > 0 ? `${goalsCount} active goal${goalsCount > 1 ? "s" : ""}` : "Track your savings targets"}
-            badge={goalsCount > 0 ? goalsCount : undefined}
-          >
-            <GoalsManager />
-          </AccordionSection>
+          {/* ━━━ AUTOMATION & DATA ━━━ */}
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 pt-4 pb-1 px-1">
+            Automation & Data
+          </h3>
 
-          {/* ─── 10. Auto Rules ─── */}
+          {/* ─── Smart Rules ─── */}
           <AccordionSection
             id="rules"
             icon={<Zap size={18} />}
-            title="Auto-Categorization Rules"
+            title="Smart Rules"
             description="Auto-assign categories based on patterns"
           >
             <AutoRulesManager />
           </AccordionSection>
 
-          {/* ─── 11. Categories ─── */}
+          {/* ─── Export & Import ─── */}
           <AccordionSection
-            id="categories"
-            icon={<Tag size={18} />}
-            title="Categories & Budgets"
-            description="Manage expense categories and per-category limits"
+            id="export-import"
+            icon={<Download size={18} />}
+            title="Export & Import"
+            description="Backup, export, or import data"
           >
-            <CategoryManager />
+            <ExportImportWizard />
           </AccordionSection>
 
-          {/* ─── 12. Recurring Expenses ─── */}
-          <AccordionSection
-            id="recurring"
-            icon={<Repeat size={18} />}
-            title="Recurring Expenses"
-            description={
-              recurringCount > 0
-                ? `${recurringCount} items · ${formatCurrency(recurringTotal)}/mo`
-                : "Set up automatic monthly expenses"
-            }
-            badge={recurringCount > 0 ? recurringCount : undefined}
-          >
-            <RecurringManager />
-          </AccordionSection>
-
-          {/* ─── 13. Data & Account Management ─── */}
+          {/* ─── Workspace Removal ─── */}
           <AccordionSection
             id="data-management"
             icon={<Database size={18} />}
-            title="Data & Account Management"
-            description="Export, reset, or delete workspace data"
+            title="Workspace Removal"
+            description="Remove or reset workspace data"
           >
             <DataAccountManagement />
+          </AccordionSection>
+
+          {/* ━━━ PREFERENCES ━━━ */}
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 pt-4 pb-1 px-1">
+            Preferences
+          </h3>
+
+          {/* ─── App Mode ─── */}
+          <AccordionSection
+            id="app-mode"
+            icon={<Briefcase size={18} />}
+            title="App Mode"
+            description={settings.businessMode ? "Business Owner Mode active" : "Personal expense tracking"}
+            headerRight={
+              <button
+                role="switch"
+                aria-checked={settings.businessMode ?? false}
+                onClick={() => updateSettings({ businessMode: !settings.businessMode })}
+                className={`relative h-6 w-11 rounded-full transition-colors ${
+                  settings.businessMode ? "bg-emerald-600" : "bg-gray-300 dark:bg-gray-600"
+                }`}
+              >
+                <span
+                  className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-transform ${
+                    settings.businessMode ? "translate-x-5" : ""
+                  }`}
+                />
+              </button>
+            }
+          >
+            <div className="space-y-3">
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                {settings.businessMode
+                  ? "Business Owner Mode adds a ledger system to track expected income, log payments received, and view collection analytics."
+                  : "Enable Business Owner Mode to track client payments, revenue expectations, and receivables alongside your expenses."}
+              </p>
+              {settings.businessMode && (
+                <div className="rounded-lg bg-emerald-50 p-3 dark:bg-emerald-900/20">
+                  <p className="text-xs font-medium text-emerald-700 dark:text-emerald-400">
+                    A &quot;Business&quot; tab is now visible in your navigation. Manage ledgers and payments there.
+                  </p>
+                </div>
+              )}
+            </div>
+          </AccordionSection>
+
+          {/* ─── Appearance ─── */}
+          <AccordionSection
+            id="theme"
+            icon={<Palette size={18} />}
+            title="Appearance"
+            description={`${theme.charAt(0).toUpperCase() + theme.slice(1)} mode`}
+          >
+            <div className="space-y-4">
+              <div className="flex gap-2">
+                {[
+                  { value: "light" as const, icon: Sun, label: "Light" },
+                  { value: "dark" as const, icon: Moon, label: "Dark" },
+                  { value: "system" as const, icon: Monitor, label: "System" },
+                ].map((opt) => {
+                  const Icon = opt.icon;
+                  const active = theme === opt.value;
+                  return (
+                    <button
+                      key={opt.value}
+                      onClick={() => setTheme(opt.value)}
+                      className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
+                        active
+                          ? "bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
+                          : "text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
+                      }`}
+                    >
+                      <Icon size={16} />
+                      {opt.label}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Install PWA */}
+              <div className="border-t border-gray-100 pt-4 dark:border-gray-800">
+                <div className="flex items-center gap-3 mb-3">
+                  <Smartphone size={16} className="text-gray-400" />
+                  <div>
+                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Install App</p>
+                    <p className="text-xs text-gray-400">Install as app for quick access</p>
+                  </div>
+                </div>
+                <InstallButton />
+              </div>
+            </div>
           </AccordionSection>
 
         </SettingsAccordion>

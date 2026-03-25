@@ -71,7 +71,7 @@ export default function DashboardPage() {
 
   return (
     <AppShell>
-      <div className="mx-auto max-w-5xl xl:max-w-7xl space-y-6 p-4 lg:p-6">
+      <div className="mx-auto max-w-5xl xl:max-w-7xl space-y-5 p-4 lg:p-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <MonthSwitcher />
@@ -157,7 +157,7 @@ export default function DashboardPage() {
         )}
 
         {/* Recent Expenses */}
-        <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+        <div className="rounded-xl bg-white p-4 shadow-sm dark:bg-gray-900">
           <div className="mb-3 flex items-center justify-between">
             <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
               Recent Expenses
@@ -181,7 +181,7 @@ export default function DashboardPage() {
               </button>
             </div>
           ) : (
-            <div className="space-y-1">
+            <div className="divide-y divide-gray-100 dark:divide-gray-800">
               {recentExpenses.map((e) => (
                 <div
                   key={e.id}
@@ -205,7 +205,7 @@ export default function DashboardPage() {
                       )}
                     </div>
                   </div>
-                  <span className="ml-3 shrink-0 text-sm font-semibold text-gray-900 dark:text-white">
+                  <span className="tabular-nums ml-3 shrink-0 text-sm font-semibold text-gray-900 dark:text-white">
                     {formatCurrency(e.amount)}
                   </span>
                 </div>

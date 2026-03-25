@@ -70,9 +70,9 @@ function ToastItem({ toast, onClose }: { toast: Toast; onClose: () => void }) {
   return (
     <div
       className={cn(
-        "flex items-center gap-3 rounded-xl border px-4 py-3 shadow-lg transition-all duration-300",
+        "flex items-center gap-3 rounded-xl border px-4 py-3 shadow-lg transition-all duration-200 ease-out",
         colors,
-        show ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
+        show ? "translate-y-0 scale-100 opacity-100" : "translate-y-5 scale-95 opacity-0"
       )}
     >
       <Icon size={18} className="shrink-0" />
