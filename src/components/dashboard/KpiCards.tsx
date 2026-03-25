@@ -7,7 +7,6 @@ import {
 } from "lucide-react";
 import { cn, formatCurrency } from "@/lib/utils";
 import { BUDGET_WARNING_THRESHOLD } from "@/lib/constants";
-import { useSettings } from "@/hooks/useSettings";
 import { InfoTooltip } from "@/components/ui/InfoTooltip";
 import type { CategoryTotal, Forecast } from "@/types";
 
@@ -39,7 +38,6 @@ export function KpiCards({
 }: KpiCardsProps) {
   const isOverspent = remaining < 0;
   const isWarning = !isOverspent && budgetUsedPercent >= BUDGET_WARNING_THRESHOLD;
-  const { settings } = useSettings();
   const paceExceeded = avgDaily > paceToStayUnder && paceToStayUnder > 0;
   const savingsRate = salary > 0 ? Math.round((remaining / salary) * 100) : 0;
   const forecastOverBudget = forecast.projectedRemaining < 0;

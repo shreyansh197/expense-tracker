@@ -156,7 +156,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // ── Session heartbeat: detect revoked sessions ────────────
   const logoutRef = useRef(logout);
-  logoutRef.current = logout;
+  useEffect(() => { logoutRef.current = logout; });
 
   useEffect(() => {
     if (!state.tokens?.accessToken) return;
