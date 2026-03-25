@@ -1,0 +1,234 @@
+"use client";
+
+import { useState } from "react";
+import { PiggyBank, TrendingUp, Minus, ChevronRight, X } from "lucide-react";
+import Link from "next/link";
+import { useSettings } from "@/hooks/useSettings";
+import { useToast } from "@/components/ui/Toast";
+import { formatCurrency } from "@/lib/utils";
+
+export function SavingsGoalsWidget() {
+  const { settings, updateSettings } = useSettings();
+  const { toast } = useToast();
+  const goals = settings.goals || [];
+
+  const [activeGoalId, setActiveGoalId] = useState<string | null>(null);
+  const [fundAmount, setFundAmount] = useState("");
+  const [fundMode, setFundMode] = useState<"add" | "subtract">("add");
+
+  if (goals.length === 0) return null;
+
+  const handleFund = () => {
+    if (!activeGoalId) return;
+    const amt = parseFloat(fundAmount);
+    if (isNaN(amt) || amt <= 0) {
+      toast("Enter a valid amount", "error");
+      return;
+    }
+    const updated = goals.map((g) => {
+      if (g.id !== activeGoalId) return g;
+      const newSaved =
+        fundMode === "add"
+          ? Math.min(g.savedAmount + amt, g.targetAmount)
+          : Math.max(g.savedAmount - amt, 0);
+      return { ...g, savedAmount: newSaved };
+    });
+    updateSettings({ goals: updated });
+    toast(
+      fundMode === "add"
+        ? `+${formatCurrency(amt)} added`
+        : `${formatCurrency(amt)} removed`,
+    );
+    setActiveGoalId(null);
+    setFundAmount("");
+    setFundMode("add");
+  };
+
+  const handleCancel = () => {
+    setActiveGoalId(null);
+    setFundAmount("");
+    setFundMode("add");
+  };
+
+  const totalTarget = goals.reduce((s, g) => s + g.targetAmount, 0);
+  const totalSaved = goals.reduce((s, g) => s + g.savedAmount, 0);
+  const overallPct = totalTarget > 0 ? Math.round((totalSaved / totalTarget) * 100) : 0;
+
+  return (
+    <div className="rounded-xl bg-white p-4 shadow-sm dark:bg-gray-900">
+      {/* Header */}
+      <div className="mb-3 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <PiggyBank size={15} className="text-emerald-500" />
+          <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+            Savings Goals
+          </h3>
+          <span className="tabular-nums rounded-full bg-emerald-100 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400">
+            {overallPct}%
+          </span>
+        </div>
+        <Link
+          href="/settings#goals"
+          className="flex items-center gap-0.5 text-xs font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+        >
+          Manage
+          <ChevronRight size={12} />
+        </Link>
+      </div>
+
+      {/* Overall progress bar */}
+      <div className="mb-4 h-1.5 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800">
+        <div
+          className="h-full rounded-full bg-emerald-500 transition-all"
+          style={{ width: `${Math.min(overallPct, 100)}%` }}
+        />
+      </div>
+
+      {/* Goal list */}
+      <div className="space-y-3">
+        {goals.map((g) => {
+          const pct =
+            g.targetAmount > 0
+              ? Math.round((g.savedAmount / g.targetAmount) * 100)
+              : 0;
+          const isComplete = pct >= 100;
+          const isActive = activeGoalId === g.id;
+
+          return (
+            <div key={g.id} className="space-y-1.5">
+              {/* Goal row */}
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex min-w-0 items-center gap-2">
+                  <span
+                    className="h-2.5 w-2.5 shrink-0 rounded-full"
+                    style={{ backgroundColor: g.color }}
+                  />
+                  <span className="truncate text-xs font-medium text-gray-800 dark:text-gray-200">
+                    {g.name}
+                  </span>
+                  {isComplete && (
+                    <span className="shrink-0 rounded-full bg-emerald-100 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400">
+                      Done!
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex shrink-0 items-center gap-2">
+                  <span className="tabular-nums whitespace-nowrap text-xs text-gray-500 dark:text-gray-400">
+                    {formatCurrency(g.savedAmount)}{" "}
+                    <span className="text-gray-300 dark:text-gray-600">/</span>{" "}
+                    {formatCurrency(g.targetAmount)}
+                  </span>
+                  {!isComplete && (
+                    <button
+                      onClick={() => {
+                        if (isActive) {
+                          handleCancel();
+                        } else {
+                          setActiveGoalId(g.id);
+                          setFundAmount("");
+                          setFundMode("add");
+                        }
+                      }}
+                      className="rounded-md bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-700 transition-colors hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400 dark:hover:bg-emerald-900/50"
+                    >
+                      {isActive ? "Cancel" : "+ Add"}
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Progress bar */}
+              <div className="h-1.5 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800">
+                <div
+                  className="h-full rounded-full transition-all duration-500"
+                  style={{
+                    width: `${Math.min(pct, 100)}%`,
+                    backgroundColor: g.color,
+                  }}
+                />
+              </div>
+              <div className="flex justify-between text-[10px] text-gray-400 dark:text-gray-600">
+                <span>{pct}% complete</span>
+                {g.deadline && (
+                  <span>
+                    Target:{" "}
+                    {new Date(g.deadline + "-01").toLocaleDateString("en-IN", {
+                      month: "short",
+                      year: "numeric",
+                    })}
+                  </span>
+                )}
+              </div>
+
+              {/* Inline fund form */}
+              {isActive && (
+                <div className="flex items-center gap-2 rounded-lg bg-gray-50 p-2 dark:bg-gray-800">
+                  {/* Add / Subtract toggle */}
+                  <div className="flex overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700">
+                    <button
+                      onClick={() => setFundMode("add")}
+                      title="Add funds"
+                      className={`px-2.5 py-1.5 text-xs font-medium transition-colors ${
+                        fundMode === "add"
+                          ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400"
+                          : "text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                      }`}
+                    >
+                      <TrendingUp size={12} />
+                    </button>
+                    <button
+                      onClick={() => setFundMode("subtract")}
+                      title="Remove funds"
+                      className={`px-2.5 py-1.5 text-xs font-medium transition-colors ${
+                        fundMode === "subtract"
+                          ? "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400"
+                          : "text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                      }`}
+                    >
+                      <Minus size={12} />
+                    </button>
+                  </div>
+
+                  {/* Amount input */}
+                  <div className="relative flex-1">
+                    <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-gray-400">₹</span>
+                    <input
+                      type="number"
+                      min="1"
+                      value={fundAmount}
+                      onChange={(e) => setFundAmount(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") handleFund();
+                        if (e.key === "Escape") handleCancel();
+                      }}
+                      autoFocus
+                      placeholder="Amount"
+                      className="w-full rounded-lg border border-gray-200 bg-white py-1.5 pl-6 pr-2 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
+                    />
+                  </div>
+
+                  <button
+                    onClick={handleFund}
+                    disabled={!fundAmount || parseFloat(fundAmount) <= 0}
+                    className="shrink-0 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-40"
+                  >
+                    Save
+                  </button>
+
+                  <button
+                    onClick={handleCancel}
+                    className="shrink-0 rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-gray-200 dark:hover:bg-gray-700"
+                    aria-label="Cancel"
+                  >
+                    <X size={12} />
+                  </button>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}

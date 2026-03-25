@@ -24,6 +24,7 @@ model User {
   recoveryCodes   String[]  @default([]) @map("recovery_codes") @db.VarChar(20)
   name            String    @default("") @db.VarChar(120)
   avatarUrl       String?   @map("avatar_url") @db.Text
+  googleId        String?   @unique @map("google_id") @db.VarChar(255)
   createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz
   updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz
   deletedAt       DateTime? @map("deleted_at") @db.Timestamptz

@@ -11,6 +11,7 @@ import { CategoryChart, CategoryLegend } from "@/components/dashboard/CategoryCh
 import { DailyTrendChart } from "@/components/dashboard/DailyTrendChart";
 import { AlertsPanel } from "@/components/dashboard/AlertsPanel";
 import { SubscriptionsSummary } from "@/components/dashboard/SubscriptionsSummary";
+import { SavingsGoalsWidget } from "@/components/dashboard/SavingsGoalsWidget";
 import { SkeletonKpiCards, SkeletonChart } from "@/components/ui/Skeleton";
 import { useExpenses } from "@/hooks/useExpenses";
 import { useSettings } from "@/hooks/useSettings";
@@ -119,6 +120,9 @@ export default function DashboardPage() {
 
         {/* Subscriptions Summary */}
         <SubscriptionsSummary />
+
+        {/* Savings Goals */}
+        <SavingsGoalsWidget />
 
         {/* Charts Row */}
         {loading ? (
