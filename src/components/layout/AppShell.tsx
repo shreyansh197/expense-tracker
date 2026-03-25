@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { BottomNav } from "@/components/layout/BottomNav";
-import { OfflineBanner } from "@/components/sync/SyncIndicator";
 import { ExpenseFormModal } from "@/components/expenses/ExpenseFormModal";
 import { AuthModal } from "@/components/onboarding/AuthModal";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
@@ -24,7 +23,6 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
       >
         Skip to main content
       </a>
-      <OfflineBanner />
       <div className="flex flex-1 overflow-hidden">
         <Sidebar />
         <main id="main-content" className="flex-1 overflow-y-auto pb-20 lg:pb-0">
