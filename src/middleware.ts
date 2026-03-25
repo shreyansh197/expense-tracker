@@ -14,10 +14,7 @@ const PUBLIC_PATHS = new Set([
   "/api/auth/google",
   "/api/auth/google/callback",
   "/api/auth/google/exchange",
-  // Phone OTP
-  "/api/auth/otp/send",
-  "/api/auth/otp/verify",
-  "/api/invites/preview",   // GET – public preview of invite
+  "/api/invites/preview",   // GET — public preview of invite
   "/api/migrate/sync-code", // POST – legacy migration
 ]);
 
