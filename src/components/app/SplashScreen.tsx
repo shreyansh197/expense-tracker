@@ -18,8 +18,12 @@ export function SplashScreen() {
   });
 
   useEffect(() => {
-    // If lazy init already set hidden (sessionStorage flag), do nothing
-    if (sessionStorage.getItem("et-splash-shown")) return;
+    // On SSR the lazy init can't read sessionStorage, so phase starts as "visible".
+    // If the session flag is already set (refresh), hide with a deferred setState.
+    if (sessionStorage.getItem("et-splash-shown")) {
+      const t = setTimeout(() => setPhase("hidden"), 0);
+      return () => clearTimeout(t);
+    }
 
     const fadeTimer = setTimeout(() => {
       setPhase("fading");
