@@ -2,12 +2,8 @@
 
 import {
   PiggyBank,
-  TrendingDown,
   AlertTriangle,
   Clock,
-  Gauge,
-  Percent,
-  TrendingUp,
 } from "lucide-react";
 import { cn, formatCurrency } from "@/lib/utils";
 import { BUDGET_WARNING_THRESHOLD } from "@/lib/constants";
@@ -54,13 +50,12 @@ export function KpiCards({
       {/* ── Hero Row: Spent + Remaining ── */}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         {/* Spent / Budget */}
-        <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+        <div className="rounded-xl bg-white p-5 shadow-sm dark:bg-gray-900 card-interactive">
           <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-            <TrendingDown size={14} />
             <span>Spent</span>
           </div>
           <div className="mt-1.5 flex items-baseline gap-1.5">
-            <p className="tabular-nums text-2xl font-bold text-gray-900 sm:text-3xl dark:text-white">
+            <p className="tabular-nums text-2xl font-semibold text-gray-900 sm:text-3xl dark:text-white">
               {formatCurrency(monthlyTotal)}
             </p>
             <span className="text-sm text-gray-400 dark:text-gray-500">/</span>
@@ -68,7 +63,7 @@ export function KpiCards({
               {formatCurrency(salary)}
             </span>
           </div>
-          <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800">
+          <div className="mt-3 h-2.5 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800">
             <div
               className={cn(
                 "h-full rounded-full transition-all",
@@ -96,12 +91,12 @@ export function KpiCards({
         {/* Remaining + Days Left */}
         <div
           className={cn(
-            "rounded-xl border p-5 shadow-sm",
+            "rounded-xl p-5 shadow-sm card-interactive",
             isOverspent
-              ? "border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950/50"
+              ? "bg-red-50 dark:bg-red-950/50"
               : isWarning
-                ? "border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/50"
-                : "border-emerald-200 bg-emerald-50 dark:border-emerald-800 dark:bg-emerald-950/50"
+                ? "bg-amber-50 dark:bg-amber-950/50"
+                : "bg-emerald-50 dark:bg-emerald-950/50"
           )}
         >
           <div
@@ -119,7 +114,7 @@ export function KpiCards({
           </div>
           <p
             className={cn(
-              "tabular-nums mt-1.5 text-2xl font-bold sm:text-3xl",
+              "tabular-nums mt-1.5 text-2xl font-semibold sm:text-3xl",
               isOverspent
                 ? "text-red-700 dark:text-red-400"
                 : isWarning
@@ -146,13 +141,12 @@ export function KpiCards({
       {/* ── Metrics Row: Pace, Savings, Forecast ── */}
       <div className="grid grid-cols-3 gap-3">
         {/* Spend Target */}
-        <div className="rounded-xl border border-gray-200 bg-white p-3 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+        <div className="rounded-xl bg-white p-3 shadow-sm dark:bg-gray-900 card-interactive">
           <div className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
-            <Gauge size={12} />
             <span>Spend Target</span>
           </div>
           <p className={cn(
-            "tabular-nums mt-1 text-lg font-bold",
+            "tabular-nums mt-1 text-lg font-semibold",
             paceExceeded
               ? "text-amber-600 dark:text-amber-400"
               : "text-gray-900 dark:text-white"
@@ -165,13 +159,12 @@ export function KpiCards({
         </div>
 
         {/* Saved */}
-        <div className="rounded-xl border border-gray-200 bg-white p-3 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+        <div className="rounded-xl bg-white p-3 shadow-sm dark:bg-gray-900 card-interactive">
           <div className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
-            <Percent size={12} />
             <span>Saved</span>
           </div>
           <p className={cn(
-            "tabular-nums mt-1 text-lg font-bold",
+            "tabular-nums mt-1 text-lg font-semibold",
             savingsRate < 0
               ? "text-red-600 dark:text-red-400"
               : savingsRate < 20
@@ -187,12 +180,12 @@ export function KpiCards({
 
         {/* Month-End Forecast */}
         <div className={cn(
-          "rounded-xl border p-3 shadow-sm",
+          "rounded-xl p-3 shadow-sm card-interactive",
           forecastOverBudget
-            ? "border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950/50"
+            ? "bg-red-50 dark:bg-red-950/50"
             : forecastWarning
-              ? "border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/50"
-              : "border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900"
+              ? "bg-amber-50 dark:bg-amber-950/50"
+              : "bg-white dark:bg-gray-900"
         )}>
           <div className={cn(
             "flex items-center gap-1.5 text-xs",
@@ -202,7 +195,6 @@ export function KpiCards({
                 ? "text-amber-600 dark:text-amber-400"
                 : "text-gray-500 dark:text-gray-400"
           )}>
-            <TrendingUp size={12} />
             <span>Forecast</span>
             <InfoTooltip title="End-of-Month Forecast">
               <p>Projects your total spend by month end using your average daily spending.</p>
@@ -215,7 +207,7 @@ export function KpiCards({
             </InfoTooltip>
           </div>
           <p className={cn(
-            "tabular-nums mt-1 text-lg font-bold",
+            "tabular-nums mt-1 text-lg font-semibold",
             forecastOverBudget
               ? "text-red-700 dark:text-red-400"
               : forecastWarning

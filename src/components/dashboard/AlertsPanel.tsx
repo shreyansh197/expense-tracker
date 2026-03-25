@@ -149,7 +149,7 @@ export function AlertsPanel({
         <div
           key={alert.id}
           className={cn(
-            "flex items-start gap-3 rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm dark:border-gray-800 dark:bg-gray-900",
+            "flex items-start gap-3 rounded-lg bg-white px-3 py-2.5 text-sm shadow-sm dark:bg-gray-900",
             alert.severity === "critical"
               ? "border-l-4 border-l-red-500 text-red-800 dark:text-red-300"
               : alert.severity === "warning"

@@ -137,12 +137,7 @@ export function AccordionSection({
         aria-expanded={isOpen}
         aria-controls={`section-${id}`}
       >
-        <span className={cn(
-          "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors",
-          isOpen
-            ? "bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400"
-            : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400"
-        )}>
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-gray-600 transition-colors dark:bg-gray-800 dark:text-gray-400">
           {icon}
         </span>
         <div className="flex-1 min-w-0">

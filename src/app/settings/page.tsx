@@ -58,7 +58,7 @@ export default function SettingsPage() {
 
   return (
     <AppShell>
-      <div className="mx-auto max-w-2xl xl:max-w-4xl space-y-2 p-4 lg:p-6">
+        <div className="mx-auto max-w-3xl space-y-2 p-4 lg:p-6">
         <h1 className="mb-4 text-lg font-bold text-gray-900 dark:text-white">Settings</h1>
 
         <SettingsAccordion>
@@ -99,7 +99,7 @@ export default function SettingsPage() {
           </AccordionSection>
 
           {/* ━━━ FINANCES ━━━ */}
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 pt-4 pb-1 px-1">
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 pt-6 pb-1 px-1">
             Finances
           </h3>
 
@@ -220,7 +220,7 @@ export default function SettingsPage() {
           </AccordionSection>
 
           {/* ━━━ AUTOMATION & DATA ━━━ */}
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 pt-4 pb-1 px-1">
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 pt-6 pb-1 px-1">
             Automation & Data
           </h3>
 
@@ -255,7 +255,7 @@ export default function SettingsPage() {
           </AccordionSection>
 
           {/* ━━━ PREFERENCES ━━━ */}
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 pt-4 pb-1 px-1">
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 pt-6 pb-1 px-1">
             Preferences
           </h3>
 

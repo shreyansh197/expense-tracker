@@ -97,17 +97,22 @@ export function BottomNav() {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "flex flex-col items-center justify-center gap-0.5 py-1 transition-colors",
+                  "relative flex flex-col items-center justify-center gap-0.5 py-1 transition-colors",
                   isActive
                     ? cn(
-                        "border-t-2 pt-0.5",
                         isBiz
-                          ? "border-t-emerald-600 text-emerald-600 dark:border-t-emerald-400 dark:text-emerald-400"
-                          : "border-t-blue-600 text-blue-600 dark:border-t-blue-400 dark:text-blue-400"
+                          ? "text-emerald-600 dark:text-emerald-400"
+                          : "text-blue-600 dark:text-blue-400"
                       )
-                    : "border-t-2 border-t-transparent pt-0.5 text-gray-500 dark:text-gray-400"
+                    : "text-gray-500 dark:text-gray-400"
                 )}
               >
+                {isActive && (
+                  <span className={cn(
+                    "absolute -top-2 h-1 w-5 rounded-full",
+                    isBiz ? "bg-emerald-600 dark:bg-emerald-400" : "bg-blue-600 dark:bg-blue-400"
+                  )} />
+                )}
                 <Icon size={20} />
                 <span className="text-[10px] font-medium">{item.label}</span>
               </Link>

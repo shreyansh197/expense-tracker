@@ -80,3 +80,20 @@ export function CategoryBadge({ category }: { category: CategoryId }) {
     </span>
   );
 }
+
+export function CategoryDot({ category }: { category: CategoryId }) {
+  const { settings } = useSettings();
+  const map = buildCategoryMap(settings.customCategories);
+  const meta = map[category];
+  if (!meta) return null;
+
+  return (
+    <span className="inline-flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-400 max-w-full truncate">
+      <span
+        className="h-2 w-2 shrink-0 rounded-full"
+        style={{ backgroundColor: meta.color }}
+      />
+      {meta.label}
+    </span>
+  );
+}

@@ -18,7 +18,7 @@ import { useCalculations } from "@/hooks/useCalculations";
 import { useRecurringExpenses } from "@/hooks/useRecurringExpenses";
 import { useUIStore } from "@/stores/uiStore";
 import { formatCurrency, getMonthName } from "@/lib/utils";
-import { CategoryBadge } from "@/components/expenses/CategoryChips";
+import { CategoryDot } from "@/components/expenses/CategoryChips";
 import { Repeat, Receipt, PlusCircle } from "lucide-react";
 
 export default function DashboardPage() {
@@ -71,7 +71,7 @@ export default function DashboardPage() {
 
   return (
     <AppShell>
-      <div className="mx-auto max-w-5xl xl:max-w-7xl space-y-5 p-4 lg:p-6">
+        <div className="mx-auto max-w-4xl xl:max-w-6xl space-y-5 p-4 lg:p-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <MonthSwitcher />
@@ -128,8 +128,8 @@ export default function DashboardPage() {
           </div>
         ) : (
         <div className="grid gap-4 lg:grid-cols-2">
-          <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900">
-            <h3 className="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
+          <div className="rounded-xl bg-white p-4 shadow-sm dark:bg-gray-900 card-interactive">
+            <h3 className="mb-3 text-sm font-medium text-gray-700 dark:text-gray-300">
               Category Breakdown
             </h3>
             <CategoryChart
@@ -143,8 +143,8 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900">
-            <h3 className="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
+          <div className="rounded-xl bg-white p-4 shadow-sm dark:bg-gray-900 card-interactive">
+            <h3 className="mb-3 text-sm font-medium text-gray-700 dark:text-gray-300">
               Daily Spending Trend
             </h3>
             <DailyTrendChart
@@ -157,9 +157,9 @@ export default function DashboardPage() {
         )}
 
         {/* Recent Expenses */}
-        <div className="rounded-xl bg-white p-4 shadow-sm dark:bg-gray-900">
+        <div className="rounded-xl bg-white p-4 shadow-sm dark:bg-gray-900 card-interactive">
           <div className="mb-3 flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+            <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
               Recent Expenses
             </h3>
             <a
@@ -189,7 +189,7 @@ export default function DashboardPage() {
                 >
                   <div className="grid min-w-0 flex-1" style={{ gridTemplateColumns: "5.5rem 1fr", gap: "0.75rem", alignItems: "center" }}>
                     <div className="w-[5.5rem] flex justify-start">
-                      <CategoryBadge category={e.category} />
+                      <CategoryDot category={e.category} />
                     </div>
                     <div className="min-w-0">
                       <div className="flex items-center gap-1.5">
