@@ -9,32 +9,31 @@ const DISPLAY_DURATION = 1500; // ms before fade starts
 const FADE_DURATION = 600;     // ms for fade transition
 
 export function SplashScreen() {
-  const [phase, setPhase] = useState<Phase>(() => {
-    // Lazy init: skip splash if already shown this session (SSR-safe)
-    if (typeof window !== "undefined" && sessionStorage.getItem("et-splash-shown")) {
-      return "hidden";
-    }
-    return "visible";
-  });
+  // Start hidden — server renders nothing (avoids hydration mismatch entirely).
+  // useEffect decides whether to show the splash only on the client.
+  const [phase, setPhase] = useState<Phase>("hidden");
 
   useEffect(() => {
-    // On SSR the lazy init can't read sessionStorage, so phase starts as "visible".
-    // If the session flag is already set (refresh), hide with a deferred setState.
-    if (sessionStorage.getItem("et-splash-shown")) {
-      const t = setTimeout(() => setPhase("hidden"), 0);
-      return () => clearTimeout(t);
-    }
+    // Already shown this browser session → stay hidden
+    if (sessionStorage.getItem("et-splash-shown")) return;
+
+    // First visit this session → show splash (deferred to avoid sync setState-in-effect)
+    const showTimer = setTimeout(() => setPhase("visible"), 0);
 
     const fadeTimer = setTimeout(() => {
       setPhase("fading");
-      const hideTimer = setTimeout(() => {
-        setPhase("hidden");
-        sessionStorage.setItem("et-splash-shown", "1");
-      }, FADE_DURATION);
-      return () => clearTimeout(hideTimer);
     }, DISPLAY_DURATION);
 
-    return () => clearTimeout(fadeTimer);
+    const hideTimer = setTimeout(() => {
+      setPhase("hidden");
+      sessionStorage.setItem("et-splash-shown", "1");
+    }, DISPLAY_DURATION + FADE_DURATION);
+
+    return () => {
+      clearTimeout(showTimer);
+      clearTimeout(fadeTimer);
+      clearTimeout(hideTimer);
+    };
   }, []);
 
   if (phase === "hidden") return null;
