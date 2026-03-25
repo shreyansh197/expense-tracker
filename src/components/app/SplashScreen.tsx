@@ -5,7 +5,7 @@ import { Wallet, TrendingUp, BarChart2, PiggyBank, DollarSign } from "lucide-rea
 
 type Phase = "visible" | "fading" | "hidden";
 
-const DISPLAY_DURATION = 1500; // ms before fade starts
+const DISPLAY_DURATION = 2200; // ms before fade starts
 const FADE_DURATION = 600;     // ms for fade transition
 
 export function SplashScreen() {

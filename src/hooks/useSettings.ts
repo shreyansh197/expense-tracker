@@ -152,9 +152,9 @@ export function switchSettingsUser(userId: string) {
 }
 
 export function clearSettingsForCurrentUser() {
-  if (typeof window !== "undefined" && _currentUserId) {
-    localStorage.removeItem(storageKeyForUser(_currentUserId));
-  }
+  // Do NOT remove localStorage — it's already user-scoped, so no leakage risk.
+  // Preserving it means the user's data loads instantly on next login without an API round-trip.
+  // We only reset the in-memory state so nothing is visible while logged out.
   _currentUserId = null;
   _setShared(DEFAULT_SETTINGS);
 }
