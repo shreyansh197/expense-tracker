@@ -59,8 +59,21 @@ function _subscribe(cb: () => void): () => void {
 function loadSettings(userId: string | null = _currentUserId): UserSettings {
   if (typeof window === "undefined") return DEFAULT_SETTINGS;
   try {
-    const raw = localStorage.getItem(storageKeyForUser(userId));
+    const key = storageKeyForUser(userId);
+    const raw = localStorage.getItem(key);
     if (raw) return { ...DEFAULT_SETTINGS, ...JSON.parse(raw) };
+
+    // Migration: check old unscoped key (pre user-scoped key change)
+    if (userId !== null) {
+      const oldRaw = localStorage.getItem(STORAGE_KEY_BASE);
+      if (oldRaw) {
+        const parsed = JSON.parse(oldRaw);
+        if (parsed.salary > 0 || parsed.updatedAt > 0) {
+          localStorage.setItem(key, oldRaw);
+          return { ...DEFAULT_SETTINGS, ...parsed };
+        }
+      }
+    }
   } catch { /* ignore */ }
   return DEFAULT_SETTINGS;
 }
@@ -275,14 +288,10 @@ export function useSettings() {
 
   const markOnboarded = useCallback(() => {
     setIsFirstVisit(false);
-    if (!localStorage.getItem(storageKeyForUser(_currentUserId))) {
-      const initial = { ...DEFAULT_SETTINGS, updatedAt: Date.now() };
-      saveLocal(initial);
-      _setShared(initial);
-      // Do NOT push to API here — initial settings have salary=0 which would
-      // overwrite any real data already in the DB. The DB row is created when
-      // the user explicitly sets their salary via updateSettings.
-    }
+    // Do NOT write to localStorage here.
+    // Writing DEFAULT_SETTINGS (salary=0) with updatedAt=Date.now() gives it a
+    // newer timestamp than the real DB data — local would then win the merge and
+    // permanently show salary=0 for existing users logging in on a new device.
   }, []);
 
   const resetSettings = useCallback(() => {
