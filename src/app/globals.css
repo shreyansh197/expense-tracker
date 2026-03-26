@@ -102,6 +102,12 @@ input[type="number"] {
   -moz-appearance: textfield;
 }
 
+/* Suppress browser-native password reveal button (Edge/IE/Chrome) */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+  display: none;
+}
+
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
