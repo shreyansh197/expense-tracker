@@ -30,8 +30,8 @@ const DEFAULT_SETTINGS: UserSettings = {
   businessMode: false,
   revenueExpectations: [],
   businessTags: [],
-  createdAt: Date.now(),
-  updatedAt: Date.now(),
+  createdAt: 0,
+  updatedAt: 0,
 };
 
 // ── Shared module-level state so ALL useSettings() consumers stay in sync ──
@@ -145,10 +145,40 @@ if (typeof window !== "undefined") {
   _setShared(local);
 }
 
+/** Fetch from API and merge — always called with _currentUserId already set. */
+function _syncFromApi() {
+  fetchSettingsFromApi().then((remote) => {
+    if (!remote) {
+      // No remote row yet — push local if there is user data saved
+      const hasLocal =
+        _currentUserId !== null &&
+        typeof window !== "undefined" &&
+        localStorage.getItem(storageKeyForUser(_currentUserId)) !== null;
+      if (hasLocal) pushToApi(_settings);
+      return;
+    }
+    const localTs = _settings.updatedAt || 0;
+    const remoteTs = remote.updatedAt || 0;
+    if (remoteTs > localTs) {
+      saveLocal(remote);
+      _setShared(remote);
+    } else {
+      const hasLocal =
+        _currentUserId !== null &&
+        typeof window !== "undefined" &&
+        localStorage.getItem(storageKeyForUser(_currentUserId)) !== null;
+      if (localTs > remoteTs && hasLocal) pushToApi(_settings);
+    }
+  }).catch(() => { /* ignore network errors */ });
+}
+
 export function switchSettingsUser(userId: string) {
   _currentUserId = userId;
   const local = loadSettings(userId);
   _setShared(local);
+  // Always sync from API here — _currentUserId is guaranteed set before the fetch resolves,
+  // eliminating the race condition with useEffect-based syncing.
+  _syncFromApi();
 }
 
 export function clearSettingsForCurrentUser() {
@@ -167,31 +197,10 @@ export function useSettings() {
     return localStorage.getItem(storageKeyForUser(_currentUserId)) === null;
   });
 
-  // On mount: sync with API
+  // On mount: subscribe to realtime workspace settings changes only.
+  // API sync is handled by switchSettingsUser (called from AuthProvider) which
+  // guarantees _currentUserId is set before the fetch resolves — no race condition.
   useEffect(() => {
-    const hasExisting = localStorage.getItem(storageKeyForUser(_currentUserId)) !== null;
-    const local = _getSnapshot();
-
-    // Fetch remote settings via API and merge
-    fetchSettingsFromApi().then((remote) => {
-      if (!remote) {
-        // No remote row yet — push local settings
-        if (hasExisting) {
-          pushToApi(local);
-        }
-        return;
-      }
-      const localTs = local.updatedAt || 0;
-      const remoteTs = remote.updatedAt || 0;
-      if (remoteTs > localTs) {
-        saveLocal(remote);
-        _setShared(remote);
-      } else if (localTs > remoteTs && hasExisting) {
-        pushToApi(local);
-      }
-    });
-
-    // Subscribe to realtime changes on this workspace's settings
     const wid = getActiveWorkspaceId();
     if (!wid) return;
 
