@@ -1,4 +1,4 @@
-const CACHE_NAME = "expense-tracker-v2";
+const CACHE_NAME = "expense-tracker-icons-f45110a9";
 
 self.addEventListener("install", () => {
   self.skipWaiting();
@@ -25,6 +25,25 @@ self.addEventListener("fetch", (event) => {
   if (request.method !== "GET" || request.url.includes("supabase.co")) {
     return;
   }
+
+  const url = new URL(request.url);
+
+  // Network-first for icons and manifest so PWA icon updates propagate
+  if (url.pathname.startsWith("/icons/") || url.pathname === "/manifest.json") {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          if (response.ok) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
+          }
+          return response;
+        })
+        .catch(() => caches.match(request)),
+    );
+    return;
+  }
+
   event.respondWith(
     fetch(request)
       .then((response) => {

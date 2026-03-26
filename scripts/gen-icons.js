@@ -1,10 +1,16 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 const sharp = require("sharp");
+const crypto = require("crypto");
 const fs = require("fs");
 const path = require("path");
 const iconsDir = "public/icons";
 
 const svgBuf = fs.readFileSync(path.join(iconsDir, "spendly-icon.svg"));
+const iconHash = crypto
+  .createHash("md5")
+  .update(svgBuf)
+  .digest("hex")
+  .slice(0, 8);
 
 async function gen() {
   const sizes = [
@@ -53,6 +59,33 @@ async function gen() {
     .png()
     .toFile(path.join(iconsDir, "apple-touch-icon.png"));
   console.log("Generated apple-touch-icon.png");
+
+  // Write icon version hash for cache-busting
+  fs.writeFileSync(
+    path.join(iconsDir, "version.json"),
+    JSON.stringify({ hash: iconHash }) + "\n",
+  );
+  console.log("Wrote icon version:", iconHash);
+
+  // Update manifest.json icon URLs with cache-busting query
+  const manifestPath = path.join("public", "manifest.json");
+  const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf-8"));
+  manifest.icons = manifest.icons.map((icon) => ({
+    ...icon,
+    src: icon.src.split("?")[0] + `?v=${iconHash}`,
+  }));
+  fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2) + "\n");
+  console.log("Updated manifest.json with icon version");
+
+  // Bump CACHE_NAME in sw.js so installed PWAs pick up the new SW
+  const swPath = path.join("public", "sw.js");
+  let sw = fs.readFileSync(swPath, "utf-8");
+  sw = sw.replace(
+    /const CACHE_NAME = "[^"]+";/,
+    `const CACHE_NAME = "expense-tracker-icons-${iconHash}";`,
+  );
+  fs.writeFileSync(swPath, sw);
+  console.log("Updated sw.js CACHE_NAME");
 }
 
 gen().catch((err) => {

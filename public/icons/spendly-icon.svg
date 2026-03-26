@@ -61,11 +61,11 @@
   </g>
 
   <!-- Upward trend line — subtle behind the S to convey tracking/growth -->
-  <g opacity="0.12" clip-path="url(#roundedSquare)">
+  <g opacity="0.28" clip-path="url(#roundedSquare)">
     <polyline
       points="90,400 170,340 250,360 330,280 410,220"
       stroke="#22d3ee"
-      stroke-width="4"
+      stroke-width="8"
       stroke-linecap="round"
       stroke-linejoin="round"
       fill="none"
@@ -73,7 +73,7 @@
     <polyline
       points="385,230 410,220 400,245"
       stroke="#22d3ee"
-      stroke-width="4"
+      stroke-width="8"
       stroke-linecap="round"
       stroke-linejoin="round"
       fill="none"
@@ -129,22 +129,20 @@
 
     <!-- Coin dot accent — top right of S -->
     <circle cx="62" cy="-110" r="14" fill="#fbbf24" opacity="0.9"/>
-    <!-- Bottom left end dot -->
-    <circle cx="-68" cy="138" r="14" fill="#f59e0b" opacity="0.9"/>
   </g>
 
   <!-- Coin element — top right corner, universal design -->
   <g filter="url(#coinGlow)" transform="translate(370, 115)">
     <circle cx="0" cy="0" r="42" fill="url(#coinGrad)"/>
-    <circle cx="0" cy="0" r="33" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="2"/>
+    <circle cx="0" cy="0" r="33" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="2.5"/>
     <!-- Inner concentric ring for coin authenticity -->
-    <circle cx="0" cy="0" r="24" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+    <circle cx="0" cy="0" r="24" fill="none" stroke="rgba(255,255,255,0.45)" stroke-width="2"/>
     <!-- Coin shine highlight -->
-    <ellipse cx="-12" cy="-14" rx="10" ry="16" fill="rgba(255,255,255,0.15)" transform="rotate(-30, -12, -14)"/>
+    <ellipse cx="-12" cy="-14" rx="10" ry="16" fill="rgba(255,255,255,0.2)" transform="rotate(-30, -12, -14)"/>
     <!-- Three horizontal ridges — universal coin texture -->
-    <line x1="-14" y1="-4" x2="14" y2="-4" stroke="rgba(255,255,255,0.3)" stroke-width="2" stroke-linecap="round"/>
-    <line x1="-16" y1="2" x2="16" y2="2" stroke="rgba(255,255,255,0.25)" stroke-width="2" stroke-linecap="round"/>
-    <line x1="-14" y1="8" x2="14" y2="8" stroke="rgba(255,255,255,0.2)" stroke-width="2" stroke-linecap="round"/>
+    <line x1="-14" y1="-4" x2="14" y2="-4" stroke="rgba(255,255,255,0.5)" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="-16" y1="2" x2="16" y2="2" stroke="rgba(255,255,255,0.45)" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="-14" y1="8" x2="14" y2="8" stroke="rgba(255,255,255,0.4)" stroke-width="2.5" stroke-linecap="round"/>
   </g>
 
   <!-- Small sparkle dots — activity feel -->
