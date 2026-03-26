@@ -79,7 +79,7 @@ export default function InvitePage() {
           </p>
           <button
             onClick={() => router.push("/")}
-            className="flex items-center gap-2 mx-auto text-sm text-blue-600 dark:text-blue-400 hover:underline"
+            className="flex items-center gap-2 mx-auto text-sm text-indigo-600 dark:text-indigo-400 hover:underline"
           >
             <ArrowLeft className="h-4 w-4" />
             Go to Dashboard
@@ -94,7 +94,7 @@ export default function InvitePage() {
   if (!preview) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+        <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
       </div>
     );
   }
@@ -122,8 +122,8 @@ export default function InvitePage() {
   return (
     <div className="flex min-h-screen items-center justify-center p-4">
       <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl dark:bg-gray-900">
-        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900 mx-auto mb-4">
-          <Users className="h-7 w-7 text-blue-600 dark:text-blue-400" />
+        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900 mx-auto mb-4">
+          <Users className="h-7 w-7 text-indigo-600 dark:text-indigo-400" />
         </div>
 
         <h2 className="text-center text-lg font-bold text-gray-900 dark:text-white mb-1">
@@ -146,7 +146,7 @@ export default function InvitePage() {
         <button
           onClick={handleAccept}
           disabled={accepting}
-          className="w-full rounded-xl bg-blue-600 py-3 text-base font-semibold text-white hover:bg-blue-700 disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
+          className="w-full rounded-xl bg-indigo-600 py-3 text-base font-semibold text-white hover:bg-indigo-700 disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
         >
           {accepting && <Loader2 className="h-4 w-4 animate-spin" />}
           {isAuthenticated ? "Accept Invite" : "Sign In to Accept"}

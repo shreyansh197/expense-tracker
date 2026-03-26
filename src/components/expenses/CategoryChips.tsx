@@ -49,8 +49,8 @@ export function CategoryChips() {
             className={cn(
               "shrink-0 rounded-full px-3 py-1 text-xs font-medium transition-all",
               isActive
-                ? "text-white shadow-sm"
-                : "bg-gray-100 text-gray-400 dark:bg-gray-800 dark:text-gray-500"
+                ? "text-white"
+                : "bg-gray-100/80 text-gray-500 dark:bg-gray-800/60 dark:text-gray-400"
             )}
             style={isActive ? { backgroundColor: cat.color } : undefined}
           >

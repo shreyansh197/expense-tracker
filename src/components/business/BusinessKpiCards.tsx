@@ -75,7 +75,7 @@ export function BusinessKpiCards({
         return (
           <div
             key={card.label}
-            className="rounded-xl border border-gray-200 bg-white p-3 shadow-sm dark:border-gray-800 dark:bg-gray-900"
+            className="rounded-2xl border border-gray-100 bg-white p-3 dark:border-gray-800 dark:bg-gray-900"
           >
             <div className="flex items-center gap-2">
               <div className={cn("flex h-7 w-7 items-center justify-center rounded-lg", card.bg)}>

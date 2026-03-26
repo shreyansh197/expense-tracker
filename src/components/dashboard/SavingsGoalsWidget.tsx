@@ -55,7 +55,7 @@ export function SavingsGoalsWidget() {
   const overallPct = totalTarget > 0 ? Math.round((totalSaved / totalTarget) * 100) : 0;
 
   return (
-    <div className="rounded-xl bg-white p-4 shadow-sm dark:bg-gray-900">
+    <div className="rounded-2xl border border-gray-100 bg-white p-4 dark:border-gray-800 dark:bg-gray-900">
       {/* Header */}
       <div className="mb-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -69,7 +69,7 @@ export function SavingsGoalsWidget() {
         </div>
         <Link
           href="/settings#goals"
-          className="flex items-center gap-0.5 text-xs font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+          className="flex items-center gap-0.5 text-xs font-medium text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
         >
           Manage
           <ChevronRight size={12} />
@@ -204,14 +204,14 @@ export function SavingsGoalsWidget() {
                       }}
                       autoFocus
                       placeholder="Amount"
-                      className="w-full rounded-lg border border-gray-200 bg-white py-1.5 pl-6 pr-2 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
+                      className="w-full rounded-lg border border-gray-200 bg-white py-1.5 pl-6 pr-2 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
                     />
                   </div>
 
                   <button
                     onClick={handleFund}
                     disabled={!fundAmount || parseFloat(fundAmount) <= 0}
-                    className="shrink-0 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-40"
+                    className="shrink-0 rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-indigo-700 disabled:opacity-40"
                   >
                     Save
                   </button>

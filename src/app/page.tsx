@@ -132,8 +132,8 @@ export default function DashboardPage() {
           </div>
         ) : (
         <div className="grid gap-4 lg:grid-cols-2">
-          <div className="rounded-xl bg-white p-4 shadow-sm dark:bg-gray-900 card-interactive">
-            <h3 className="mb-3 text-sm font-medium text-gray-700 dark:text-gray-300">
+          <div className="rounded-2xl border border-gray-100 bg-white p-4 dark:border-gray-800 dark:bg-gray-900 card-interactive">
+            <h3 className="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
               Category Breakdown
             </h3>
             <CategoryChart
@@ -147,8 +147,8 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="rounded-xl bg-white p-4 shadow-sm dark:bg-gray-900 card-interactive">
-            <h3 className="mb-3 text-sm font-medium text-gray-700 dark:text-gray-300">
+          <div className="rounded-2xl border border-gray-100 bg-white p-4 dark:border-gray-800 dark:bg-gray-900 card-interactive">
+            <h3 className="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
               Daily Spending Trend
             </h3>
             <DailyTrendChart
@@ -161,14 +161,14 @@ export default function DashboardPage() {
         )}
 
         {/* Recent Expenses */}
-        <div className="rounded-xl bg-white p-4 shadow-sm dark:bg-gray-900 card-interactive">
+        <div className="rounded-2xl border border-gray-100 bg-white p-4 dark:border-gray-800 dark:bg-gray-900 card-interactive">
           <div className="mb-3 flex items-center justify-between">
-            <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
               Recent Expenses
             </h3>
             <a
               href="/expenses"
-              className="text-xs font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400"
+              className="text-xs font-medium text-indigo-600 hover:text-indigo-700 dark:text-indigo-400"
             >
               View All →
             </a>
@@ -179,17 +179,17 @@ export default function DashboardPage() {
               <p className="text-sm">No expenses this month</p>
               <button
                 onClick={() => router.push("/expenses")}
-                className="mt-1 flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400"
+                className="mt-1 flex items-center gap-1 text-xs font-medium text-indigo-600 hover:text-indigo-700 dark:text-indigo-400"
               >
                 <PlusCircle className="h-3.5 w-3.5" /> Add Expense
               </button>
             </div>
           ) : (
-            <div className="divide-y divide-gray-100 dark:divide-gray-800">
+            <div className="divide-y divide-gray-50 dark:divide-gray-800/60">
               {recentExpenses.map((e) => (
                 <div
                   key={e.id}
-                  className="flex items-center justify-between rounded-lg px-2 py-2 hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                  className="flex items-center justify-between rounded-lg px-2 py-2.5 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800/30"
                 >
                   <div className="grid min-w-0 flex-1" style={{ gridTemplateColumns: "5.5rem 1fr", gap: "0.75rem", alignItems: "center" }}>
                     <div className="w-[5.5rem] flex justify-start">

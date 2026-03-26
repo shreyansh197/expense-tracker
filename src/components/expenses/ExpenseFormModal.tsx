@@ -59,7 +59,7 @@ export function ExpenseFormModal() {
       className="fixed inset-0 z-[60] flex items-end justify-center bg-black/40 backdrop-blur-sm lg:items-center"
       onClick={handleBackdropClick}
     >
-      <div className="expense-form-modal w-full max-w-md max-h-[90vh] overflow-y-auto rounded-t-2xl bg-white p-6 shadow-xl dark:bg-gray-900 lg:max-h-none lg:overflow-visible lg:rounded-2xl">
+      <div className="expense-form-modal w-full max-w-md max-h-[90vh] overflow-y-auto rounded-t-2xl border border-gray-100 bg-white p-6 shadow-lg dark:border-gray-800 dark:bg-gray-900 lg:max-h-none lg:overflow-visible lg:rounded-2xl">
         <ExpenseForm
           onSubmit={addExpense}
           onUpdate={updateExpense}

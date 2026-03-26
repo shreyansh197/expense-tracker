@@ -144,7 +144,7 @@ export function GoalsManager() {
         {!showForm && (
           <button
             onClick={() => setShowForm(true)}
-            className="flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-medium text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900/30"
+            className="flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-medium text-indigo-600 hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-900/30"
           >
             <Plus size={13} />
             Add Goal
@@ -218,7 +218,7 @@ export function GoalsManager() {
             <button
               onClick={handleSave}
               disabled={!name.trim() || !targetAmount || parseFloat(targetAmount) <= 0}
-              className="w-full rounded-lg bg-blue-600 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-40"
+              className="w-full rounded-lg bg-indigo-600 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700 disabled:opacity-40"
             >
               {editId ? "Update Goal" : "Create Goal"}
             </button>
@@ -262,7 +262,7 @@ export function GoalsManager() {
                   <div className="flex items-center gap-1">
                     <button
                       onClick={() => { setFundGoalId(g.id); setFundMode("add"); setFundAmount(""); }}
-                      className="rounded-lg px-2 py-1 text-[10px] font-medium text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900/30"
+                      className="rounded-lg px-2 py-1 text-[10px] font-medium text-indigo-600 hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-900/30"
                     >
                       + Add
                     </button>
@@ -321,7 +321,7 @@ export function GoalsManager() {
                     </div>
                     <button
                       onClick={handleFundSave}
-                      className="rounded px-2 py-1 text-xs font-medium text-blue-600 hover:bg-blue-50 dark:text-blue-400"
+                      className="rounded px-2 py-1 text-xs font-medium text-indigo-600 hover:bg-indigo-50 dark:text-indigo-400"
                     >
                       Save
                     </button>
@@ -349,7 +349,7 @@ export function GoalsManager() {
                   </span>
                   <span className="flex items-center gap-2">
                     {monthsLeft && !isComplete && (
-                      <span className="text-blue-500">~{monthsLeft}mo left</span>
+                      <span className="text-indigo-500">~{monthsLeft}mo left</span>
                     )}
                     {g.deadline && (
                       <span>Due: {g.deadline}</span>

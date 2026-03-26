@@ -165,7 +165,7 @@ export function ExpenseList({
         {!searchQuery && activeCategories.length === 0 && (
           <button
             onClick={openAddForm}
-            className="mt-1 flex items-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+            className="mt-1 flex items-center gap-1.5 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700"
           >
             <PlusCircle size={14} />
             Add Expense
@@ -179,8 +179,8 @@ export function ExpenseList({
     <div className="space-y-4">
       {/* Batch action bar */}
       {selectedIds.size > 0 && (
-        <div className="sticky top-0 z-10 flex items-center justify-between rounded-xl border border-blue-200 bg-blue-50 px-4 py-2.5 shadow-sm dark:border-blue-800 dark:bg-blue-950/50">
-          <span className="text-sm font-medium text-blue-700 dark:text-blue-300">
+        <div className="sticky top-0 z-10 flex items-center justify-between rounded-xl border border-indigo-200 bg-indigo-50 px-4 py-2.5 dark:border-indigo-800 dark:bg-indigo-950/50">
+          <span className="text-sm font-medium text-indigo-700 dark:text-indigo-300">
             {selectedIds.size} selected
           </span>
           <div className="flex items-center gap-2">
@@ -193,7 +193,7 @@ export function ExpenseList({
             </button>
             <button
               onClick={() => setSelectedIds(new Set())}
-              className="rounded-lg p-1.5 text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/30"
+              className="rounded-lg p-1.5 text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/30"
               aria-label="Clear selection"
             >
               <X size={14} />
@@ -213,7 +213,7 @@ export function ExpenseList({
                 aria-label={`Select all day ${group.day}`}
               >
                 {group.expenses.every((e) => selectedIds.has(e.id)) ? (
-                  <CheckSquare size={14} className="text-blue-500" />
+                  <CheckSquare size={14} className="text-indigo-500" />
                 ) : (
                   <Square size={14} />
                 )}
@@ -238,9 +238,9 @@ export function ExpenseList({
                   if (e.key === "Delete" || e.key === "Backspace") handleDelete(expense.id);
                   if (e.key === " ") { e.preventDefault(); toggleSelect(expense.id); }
                 }}
-                className={`group flex items-center gap-3 rounded-xl border px-4 py-3 shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/40 ${
+                className={`group flex items-center gap-3 rounded-2xl border px-4 py-3.5 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500/40 ${
                   selectedIds.has(expense.id)
-                    ? "border-blue-300 bg-blue-50 dark:border-blue-700 dark:bg-blue-950/30"
+                    ? "border-indigo-300 bg-indigo-50 dark:border-indigo-700 dark:bg-indigo-950/30"
                     : "border-gray-100 bg-white hover:border-gray-200 dark:border-gray-800 dark:bg-gray-900 dark:hover:border-gray-700"
                 }`}
               >
@@ -250,7 +250,7 @@ export function ExpenseList({
                   aria-label="Select expense"
                 >
                   {selectedIds.has(expense.id) ? (
-                    <CheckSquare size={14} className="text-blue-500" />
+                    <CheckSquare size={14} className="text-indigo-500" />
                   ) : (
                     <Square size={14} />
                   )}
@@ -259,7 +259,7 @@ export function ExpenseList({
                   <div className="flex items-center gap-2">
                     <CategoryBadge category={expense.category} />
                     {expense.isRecurring && (
-                      <span className="text-blue-400" aria-label="Recurring">
+                      <span className="text-indigo-400" aria-label="Recurring">
                         <Repeat size={10} />
                       </span>
                     )}
@@ -270,7 +270,7 @@ export function ExpenseList({
                     )}
                   </div>
                 </div>
-                <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                  <span className="tabular-nums text-sm font-semibold text-gray-900 dark:text-white">
                   {formatCurrency(expense.amount)}
                 </span>
                 <div className="flex items-center gap-1 opacity-100 lg:opacity-0 lg:transition-opacity lg:group-hover:opacity-100">

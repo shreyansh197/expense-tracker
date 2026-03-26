@@ -28,9 +28,9 @@ export function SubscriptionsSummary() {
   if (recurring.length === 0) return null;
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+    <div className="rounded-2xl border border-gray-100 bg-white p-4 dark:border-gray-800 dark:bg-gray-900">
       <div className="mb-3 flex items-center gap-2">
-        <Repeat size={14} className="text-blue-500" />
+        <Repeat size={14} className="text-indigo-500" />
         <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
           Recurring Summary
         </h3>
@@ -90,7 +90,7 @@ export function SubscriptionsSummary() {
 
       {/* All recurring items */}
       <details className="mt-2">
-        <summary className="cursor-pointer text-[10px] font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400">
+        <summary className="cursor-pointer text-[10px] font-medium text-indigo-600 hover:text-indigo-700 dark:text-indigo-400">
           View all ({recurring.length})
         </summary>
         <div className="mt-2 space-y-1">

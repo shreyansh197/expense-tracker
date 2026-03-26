@@ -120,8 +120,8 @@ export function AccordionSection({
   return (
     <section
       className={cn(
-        "rounded-2xl border border-gray-200 bg-white shadow-sm transition-shadow dark:border-gray-800 dark:bg-gray-900",
-        isOpen && "shadow-md dark:shadow-gray-950/30",
+        "rounded-2xl border border-gray-100 bg-white transition-shadow dark:border-gray-800 dark:bg-gray-900",
+        isOpen && "shadow-sm dark:shadow-gray-950/20",
         className
       )}
     >
@@ -137,7 +137,7 @@ export function AccordionSection({
         aria-expanded={isOpen}
         aria-controls={`section-${id}`}
       >
-        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-gray-600 transition-colors dark:bg-gray-800 dark:text-gray-400">
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-gray-50 text-gray-500 transition-colors dark:bg-gray-800 dark:text-gray-400">
           {icon}
         </span>
         <div className="flex-1 min-w-0">
@@ -149,7 +149,7 @@ export function AccordionSection({
               <span
                 className={cn(
                   "rounded-full px-1.5 py-0.5 text-[10px] font-semibold",
-                  badgeColor || "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400"
+                  badgeColor || "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-400"
                 )}
               >
                 {badge}
@@ -186,7 +186,7 @@ export function AccordionSection({
         style={{ willChange: "grid-template-rows" }}
       >
         <div className="overflow-hidden">
-          <div className="border-t border-gray-100 px-4 py-4 dark:border-gray-800">
+          <div className="border-t border-gray-50 px-4 py-4 dark:border-gray-800/60">
             {children}
           </div>
         </div>

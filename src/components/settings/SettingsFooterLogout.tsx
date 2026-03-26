@@ -36,7 +36,7 @@ export function SettingsFooterLogout() {
                 document.getElementById("header-security")?.scrollIntoView({ behavior: "smooth", block: "start" });
               });
             }}
-            className="text-blue-500 hover:text-blue-600 dark:text-blue-400 underline"
+            className="text-indigo-500 hover:text-indigo-600 dark:text-indigo-400 underline"
           >
             Log out of all devices
           </button>

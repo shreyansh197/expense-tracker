@@ -122,9 +122,9 @@ export function RecurringManager() {
     <div className="space-y-3">
       {/* Totals bar */}
       {recurring.length > 0 && (
-        <div className="flex items-center justify-between rounded-lg bg-blue-50 px-3 py-2 dark:bg-blue-900/20">
+        <div className="flex items-center justify-between rounded-lg bg-indigo-50 px-3 py-2 dark:bg-indigo-900/20">
           <div className="text-xs text-gray-500 dark:text-gray-400">
-            Active: <span className="font-semibold text-blue-700 dark:text-blue-400">{formatCurrency(activeTotal)}</span>/mo
+            Active: <span className="font-semibold text-indigo-700 dark:text-indigo-400">{formatCurrency(activeTotal)}</span>/mo
             {activeTotal !== totalAll && (
               <span className="ml-2 text-gray-400">
                 (Total incl. paused: {formatCurrency(totalAll)})
@@ -183,7 +183,7 @@ export function RecurringManager() {
             </button>
             <button
               onClick={() => handleToggle(r.id)}
-              className="text-gray-400 hover:text-blue-600 dark:hover:text-blue-400"
+              className="text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400"
               title={r.active ? "Pause" : "Resume"}
             >
               {r.active ? <ToggleRight size={20} className="text-emerald-500" /> : <ToggleLeft size={20} />}
@@ -234,7 +234,7 @@ export function RecurringManager() {
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 placeholder="0"
-                className="w-full rounded border border-gray-200 bg-white px-2.5 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none dark:border-gray-700 dark:bg-gray-900 dark:text-white"
+                className="w-full rounded border border-gray-200 bg-white px-2.5 py-2 text-sm text-gray-900 focus:border-indigo-500 focus:outline-none dark:border-gray-700 dark:bg-gray-900 dark:text-white"
               />
             </div>
             <div>
@@ -245,7 +245,7 @@ export function RecurringManager() {
                 max="28"
                 value={day}
                 onChange={(e) => setDay(e.target.value)}
-                className="w-full rounded border border-gray-200 bg-white px-2.5 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none dark:border-gray-700 dark:bg-gray-900 dark:text-white"
+                className="w-full rounded border border-gray-200 bg-white px-2.5 py-2 text-sm text-gray-900 focus:border-indigo-500 focus:outline-none dark:border-gray-700 dark:bg-gray-900 dark:text-white"
               />
             </div>
           </div>
@@ -255,12 +255,12 @@ export function RecurringManager() {
             onChange={(e) => setRemark(e.target.value)}
             placeholder="Remark (e.g., SIP - Mutual Fund)"
             maxLength={100}
-            className="w-full rounded border border-gray-200 bg-white px-2.5 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:outline-none dark:border-gray-700 dark:bg-gray-900 dark:text-white"
+            className="w-full rounded border border-gray-200 bg-white px-2.5 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-indigo-500 focus:outline-none dark:border-gray-700 dark:bg-gray-900 dark:text-white"
           />
           <div className="flex gap-2">
             <button
               onClick={handleSave}
-              className="rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700"
+              className="rounded-lg bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700"
             >
               {editId ? "Update" : "Add"}
             </button>
@@ -275,7 +275,7 @@ export function RecurringManager() {
       ) : (
         <button
           onClick={() => setShowAdd(true)}
-          className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900/30"
+          className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium text-indigo-600 hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-900/30"
         >
           <Plus size={14} />
           Add Recurring

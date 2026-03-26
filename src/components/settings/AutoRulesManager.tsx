@@ -196,7 +196,7 @@ export function AutoRulesManager() {
             value={name}
             onChange={(e) => setName(e.target.value)}
             maxLength={50}
-            className="w-full rounded border border-gray-200 bg-white px-2.5 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:outline-none dark:border-gray-700 dark:bg-gray-900 dark:text-white"
+            className="w-full rounded border border-gray-200 bg-white px-2.5 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-indigo-500 focus:outline-none dark:border-gray-700 dark:bg-gray-900 dark:text-white"
           />
           <div className="grid grid-cols-3 gap-2">
             <select
@@ -258,7 +258,7 @@ export function AutoRulesManager() {
             <button
               onClick={handleAdd}
               disabled={!name.trim() || !condValue.trim()}
-              className="rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-40"
+              className="rounded-lg bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-40"
             >
               Create Rule
             </button>
@@ -273,7 +273,7 @@ export function AutoRulesManager() {
       ) : (
         <button
           onClick={() => setShowForm(true)}
-          className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900/30"
+          className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium text-indigo-600 hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-900/30"
         >
           <Plus size={14} />
           Add Rule

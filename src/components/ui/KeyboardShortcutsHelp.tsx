@@ -26,7 +26,7 @@ export function KeyboardShortcutsHelp({ open, onClose }: KeyboardShortcutsHelpPr
       <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl dark:bg-gray-900">
         <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Keyboard size={18} className="text-blue-600" />
+            <Keyboard size={18} className="text-indigo-600" />
             <h2 className="text-base font-semibold text-gray-900 dark:text-white">
               Keyboard Shortcuts
             </h2>

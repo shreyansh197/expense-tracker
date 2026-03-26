@@ -134,7 +134,6 @@ export function SplashScreen() {
               position: "absolute", top: 0, left: 0, width: "40%", height: "100%",
               background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.45), transparent)",
               animation: "sp-beam 2.5s ease-in-out infinite",
-              animationDelay: "0.8s",
             }} />
           </div>
         </div>

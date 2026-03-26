@@ -25,7 +25,7 @@ export function SyncIndicator({ syncStatus }: SyncIndicatorProps) {
         </div>
       )}
       {effective === "syncing" && (
-        <div className="flex items-center gap-1 text-blue-600 dark:text-blue-400" title="Syncing...">
+        <div className="flex items-center gap-1 text-indigo-600 dark:text-indigo-400" title="Syncing...">
           <RefreshCw size={14} className="animate-spin" />
         </div>
       )}

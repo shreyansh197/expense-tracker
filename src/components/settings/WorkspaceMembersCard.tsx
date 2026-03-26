@@ -182,23 +182,23 @@ export function WorkspaceMembersCard() {
           <button
             onClick={createInvite}
             disabled={creatingInvite}
-            className="rounded-lg bg-blue-600 px-4 py-2 text-xs font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+            className="rounded-lg bg-indigo-600 px-4 py-2 text-xs font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
           >
             {creatingInvite ? "Creating..." : "Create Invite Link"}
           </button>
         </div>
 
         {inviteLink && (
-          <div className="mt-3 flex items-center gap-2 rounded-lg bg-blue-50 px-3 py-2 dark:bg-blue-900/20">
+          <div className="mt-3 flex items-center gap-2 rounded-lg bg-indigo-50 px-3 py-2 dark:bg-indigo-900/20">
             <input
               type="text"
               readOnly
               value={inviteLink}
-              className="flex-1 bg-transparent text-xs text-blue-700 dark:text-blue-400 truncate"
+              className="flex-1 bg-transparent text-xs text-indigo-700 dark:text-indigo-400 truncate"
             />
             <button
               onClick={copyInviteLink}
-              className="p-1 text-blue-500 hover:text-blue-600"
+              className="p-1 text-indigo-500 hover:text-indigo-600"
             >
               {copiedInvite ? <Check size={14} /> : <Copy size={14} />}
             </button>

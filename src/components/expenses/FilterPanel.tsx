@@ -86,14 +86,14 @@ export function FilterPanel({
           onClick={() => setOpen(!open)}
           className={`flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium transition-colors ${
             hasActiveFilters
-              ? "bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400"
+              ? "bg-indigo-50 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400"
               : "text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
           }`}
         >
           <SlidersHorizontal size={14} />
           Filters
           {hasActiveFilters && (
-            <span className="ml-1 flex h-4 w-4 items-center justify-center rounded-full bg-blue-600 text-[10px] text-white">
+            <span className="ml-1 flex h-4 w-4 items-center justify-center rounded-full bg-indigo-600 text-[10px] text-white">
               !
             </span>
           )}
@@ -125,7 +125,7 @@ export function FilterPanel({
                   placeholder="Min"
                   value={amountMin}
                   onChange={(e) => onAmountMinChange(e.target.value)}
-                  className="w-full rounded border border-gray-200 bg-white py-2 pl-6 pr-2 text-xs text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                  className="w-full rounded border border-gray-200 bg-white py-2 pl-6 pr-2 text-xs text-gray-900 placeholder:text-gray-400 focus:border-indigo-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white"
                 />
               </div>
               <span className="text-xs text-gray-400">to</span>
@@ -137,7 +137,7 @@ export function FilterPanel({
                   placeholder="Max"
                   value={amountMax}
                   onChange={(e) => onAmountMaxChange(e.target.value)}
-                  className="w-full rounded border border-gray-200 bg-white py-2 pl-6 pr-2 text-xs text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                  className="w-full rounded border border-gray-200 bg-white py-2 pl-6 pr-2 text-xs text-gray-900 placeholder:text-gray-400 focus:border-indigo-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white"
                 />
               </div>
             </div>
@@ -156,7 +156,7 @@ export function FilterPanel({
                 placeholder="From"
                 value={dayMin}
                 onChange={(e) => onDayMinChange(e.target.value)}
-                className="w-full flex-1 rounded border border-gray-200 bg-white py-2 px-2 text-xs text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                className="w-full flex-1 rounded border border-gray-200 bg-white py-2 px-2 text-xs text-gray-900 placeholder:text-gray-400 focus:border-indigo-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white"
               />
               <span className="text-xs text-gray-400">to</span>
               <input
@@ -166,7 +166,7 @@ export function FilterPanel({
                 placeholder="To"
                 value={dayMax}
                 onChange={(e) => onDayMaxChange(e.target.value)}
-                className="w-full flex-1 rounded border border-gray-200 bg-white py-2 px-2 text-xs text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                className="w-full flex-1 rounded border border-gray-200 bg-white py-2 px-2 text-xs text-gray-900 placeholder:text-gray-400 focus:border-indigo-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white"
               />
             </div>
           </div>
@@ -183,12 +183,12 @@ export function FilterPanel({
                   onKeyDown={(e) => e.key === "Enter" && handleSaveFilter()}
                   autoFocus
                   maxLength={30}
-                  className="flex-1 rounded border border-gray-200 bg-white px-2.5 py-1.5 text-xs text-gray-900 focus:border-blue-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                  className="flex-1 rounded border border-gray-200 bg-white px-2.5 py-1.5 text-xs text-gray-900 focus:border-indigo-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white"
                 />
                 <button
                   onClick={handleSaveFilter}
                   disabled={!saveName.trim()}
-                  className="rounded px-2.5 py-1.5 text-xs font-medium text-blue-600 hover:bg-blue-50 disabled:opacity-40 dark:text-blue-400"
+                  className="rounded px-2.5 py-1.5 text-xs font-medium text-indigo-600 hover:bg-indigo-50 disabled:opacity-40 dark:text-indigo-400"
                 >
                   Save
                 </button>
@@ -203,7 +203,7 @@ export function FilterPanel({
               <button
                 onClick={() => setShowSaveInput(true)}
                 disabled={!hasActiveFilters}
-                className="flex items-center gap-1.5 text-xs font-medium text-blue-600 hover:text-blue-700 disabled:opacity-40 dark:text-blue-400"
+                className="flex items-center gap-1.5 text-xs font-medium text-indigo-600 hover:text-indigo-700 disabled:opacity-40 dark:text-indigo-400"
               >
                 <Bookmark size={12} />
                 Save Current Filter
@@ -223,10 +223,10 @@ export function FilterPanel({
                     key={f.id}
                     className="flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-gray-50 dark:hover:bg-gray-800/50"
                   >
-                    <BookmarkCheck size={12} className="shrink-0 text-blue-500" />
+                    <BookmarkCheck size={12} className="shrink-0 text-indigo-500" />
                     <button
                       onClick={() => handleApplyFilter(f)}
-                      className="flex-1 text-left text-xs font-medium text-gray-700 hover:text-blue-600 dark:text-gray-300"
+                      className="flex-1 text-left text-xs font-medium text-gray-700 hover:text-indigo-600 dark:text-gray-300"
                     >
                       {f.name}
                     </button>

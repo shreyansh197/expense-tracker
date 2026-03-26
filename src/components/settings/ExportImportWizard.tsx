@@ -220,7 +220,7 @@ export function ExportImportWizard() {
           <button
             onClick={handleExportAll}
             disabled={expenses.length === 0}
-            className="flex items-center gap-2 rounded-lg border border-blue-200 px-3 py-2 text-sm font-medium text-blue-700 hover:bg-blue-50 disabled:opacity-40 dark:border-blue-800 dark:text-blue-400 dark:hover:bg-blue-900/20"
+            className="flex items-center gap-2 rounded-lg border border-indigo-200 px-3 py-2 text-sm font-medium text-indigo-700 hover:bg-indigo-50 disabled:opacity-40 dark:border-indigo-800 dark:text-indigo-400 dark:hover:bg-indigo-900/20"
           >
             <Download size={14} />
             Full Backup
@@ -244,7 +244,7 @@ export function ExportImportWizard() {
         {!preview && !importResult && (
           <button
             onClick={() => fileRef.current?.click()}
-            className="flex items-center gap-2 rounded-lg border border-dashed border-gray-300 px-4 py-3 text-sm font-medium text-gray-500 hover:border-blue-400 hover:text-blue-600 dark:border-gray-700 dark:text-gray-400 dark:hover:border-blue-600 dark:hover:text-blue-400 w-full justify-center"
+            className="flex items-center gap-2 rounded-lg border border-dashed border-gray-300 px-4 py-3 text-sm font-medium text-gray-500 hover:border-indigo-400 hover:text-indigo-600 dark:border-gray-700 dark:text-gray-400 dark:hover:border-indigo-600 dark:hover:text-indigo-400 w-full justify-center"
           >
             <Upload size={16} />
             Choose CSV or JSON file
@@ -307,7 +307,7 @@ export function ExportImportWizard() {
                 <button
                   onClick={handleImportConfirm}
                   disabled={importing || preview.filter((r) => !r.error).length === 0}
-                  className="rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-40"
+                  className="rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-40"
                 >
                   {importing ? "Importing..." : `Import ${preview.filter((r) => !r.error).length} rows`}
                 </button>

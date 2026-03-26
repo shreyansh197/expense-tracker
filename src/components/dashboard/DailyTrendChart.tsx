@@ -106,7 +106,7 @@ export function DailyTrendChart({ dailyTotals, stackedDailyTotals, activeCategor
             className={cn(
               "flex items-center gap-1 rounded-md px-2 py-1 text-xs transition-colors",
               stacked
-                ? "bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300"
+                ? "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300"
                 : "text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
             )}
             aria-label={stacked ? "Show simple bars" : "Stack by category"}

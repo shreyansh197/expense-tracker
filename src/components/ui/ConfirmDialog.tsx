@@ -71,8 +71,8 @@ export function ConfirmProvider({ children }: { children: React.ReactNode }) {
       border: "border-amber-200 dark:border-amber-800",
     },
     default: {
-      icon: "text-blue-500",
-      button: "bg-blue-600 hover:bg-blue-700 text-white",
+      icon: "text-indigo-500",
+      button: "bg-indigo-600 hover:bg-indigo-700 text-white",
       border: "border-gray-200 dark:border-gray-700",
     },
   };
@@ -115,7 +115,7 @@ export function ConfirmProvider({ children }: { children: React.ReactNode }) {
                       value={inputValue}
                       onChange={(e) => setInputValue(e.target.value)}
                       onKeyDown={(e) => { if (e.key === "Enter") handleConfirm(); }}
-                      className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                      className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white"
                       placeholder={pending.options.requireInput}
                     />
                   </div>

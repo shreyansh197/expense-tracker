@@ -128,7 +128,7 @@ export default function BusinessPage() {
             )}
             <button
               onClick={() => setShowForm(true)}
-              className="hidden items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-emerald-700 active:scale-[0.98] lg:flex"
+              className="hidden items-center gap-1.5 rounded-xl bg-emerald-600 px-3 py-2 text-sm font-medium text-white hover:bg-emerald-700 active:scale-[0.98] lg:flex"
             >
               <PlusCircle size={16} />
               New Ledger
@@ -138,7 +138,7 @@ export default function BusinessPage() {
 
         {/* Add Form */}
         {showForm && (
-          <div className="rounded-xl border border-emerald-200 bg-white p-4 shadow-sm dark:border-emerald-900/50 dark:bg-gray-900">
+          <div className="rounded-2xl border border-emerald-200/60 bg-white p-4 dark:border-emerald-900/40 dark:bg-gray-900">
             <LedgerForm onSubmit={handleAddLedger} onCancel={() => setShowForm(false)} />
           </div>
         )}
@@ -173,13 +173,13 @@ export default function BusinessPage() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search ledgers..."
-                className="w-full rounded-lg border border-gray-200 bg-white py-2 pl-8 pr-3 text-sm text-gray-900 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                className="w-full rounded-xl border border-gray-200 bg-white py-2 pl-8 pr-3 text-sm text-gray-900 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
               />
             </div>
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300"
+                className="rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300"
             >
               <option value="all">All Status</option>
               <option value="active">Active</option>

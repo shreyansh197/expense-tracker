@@ -101,7 +101,7 @@ export function DatePicker({ value, onChange, month, year }: DatePickerProps) {
           "flex w-full items-center gap-2 rounded-lg border px-3 py-2.5 text-sm font-medium transition-all",
           "border-gray-200 bg-white text-gray-900 hover:border-gray-300",
           "dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:hover:border-gray-600",
-          open && "border-blue-500 ring-2 ring-blue-500/20 dark:border-blue-500"
+          open && "border-indigo-500 ring-2 ring-indigo-500/20 dark:border-indigo-500"
         )}
       >
         <Calendar size={16} className="shrink-0 text-gray-400" />
@@ -248,12 +248,12 @@ function CalendarGrid({
               className={cn(
                 "flex h-10 w-full items-center justify-center rounded-lg text-sm font-medium transition-all",
                 day === value
-                  ? "bg-blue-600 text-white shadow-sm"
+                  ? "bg-indigo-600 text-white shadow-sm"
                   : "text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800",
                 isCurrentMonth &&
                   day === todayDay &&
                   day !== value &&
-                  "ring-1 ring-blue-400 font-bold text-blue-600 dark:text-blue-400 dark:ring-blue-500"
+                  "ring-1 ring-indigo-400 font-bold text-indigo-600 dark:text-indigo-400 dark:ring-indigo-500"
               )}
             >
               {day}
@@ -267,7 +267,7 @@ function CalendarGrid({
         <button
           type="button"
           onClick={() => onSelect(todayDay)}
-          className="mt-2 w-full rounded-lg bg-gray-50 py-2 text-xs font-medium text-blue-600 hover:bg-gray-100 dark:bg-gray-800 dark:text-blue-400 dark:hover:bg-gray-700"
+          className="mt-2 w-full rounded-lg bg-gray-50 py-2 text-xs font-medium text-indigo-600 hover:bg-gray-100 dark:bg-gray-800 dark:text-indigo-400 dark:hover:bg-gray-700"
         >
           Today ({todayDay})
         </button>

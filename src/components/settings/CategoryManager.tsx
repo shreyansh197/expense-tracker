@@ -229,7 +229,7 @@ export function CategoryManager() {
       {(settings.hiddenDefaults?.length ?? 0) > 0 && (
         <button
           onClick={handleRestoreDefaults}
-          className="flex items-center gap-1.5 text-xs font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400"
+          className="flex items-center gap-1.5 text-xs font-medium text-indigo-600 hover:text-indigo-700 dark:text-indigo-400"
         >
           <RotateCcw size={12} />
           Restore {settings.hiddenDefaults.length} hidden default
@@ -249,12 +249,12 @@ export function CategoryManager() {
               onKeyDown={(e) => { if (e.key === "Enter") handleAdd(); if (e.key === "Escape") setShowAdd(false); }}
               maxLength={30}
               autoFocus
-              className="flex-1 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
+              className="flex-1 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
             />
             <button
               onClick={handleAdd}
               disabled={!newName.trim()}
-              className="rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-40"
+              className="rounded-lg bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-40"
             >
               Add
             </button>
@@ -283,7 +283,7 @@ export function CategoryManager() {
       ) : (
         <button
           onClick={() => setShowAdd(true)}
-          className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900/30"
+          className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium text-indigo-600 hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-900/30"
         >
           <Plus size={14} />
           Add Category
@@ -355,7 +355,7 @@ function CategoryRow({
     <div
       className={`flex items-center gap-2 rounded-lg px-2 py-2 transition-colors ${
         isDragging ? "opacity-50" : ""
-      } ${isDragOver ? "bg-blue-50 dark:bg-blue-900/20" : "hover:bg-gray-50 dark:hover:bg-gray-800/50"}`}
+      } ${isDragOver ? "bg-indigo-50 dark:bg-indigo-900/20" : "hover:bg-gray-50 dark:hover:bg-gray-800/50"}`}
       draggable={draggable}
       onDragStart={draggable ? onDragStart : undefined}
       onDragOver={draggable ? (e) => { e.preventDefault(); onDragOver(); } : undefined}
@@ -380,7 +380,7 @@ function CategoryRow({
             onKeyDown={(e) => { if (e.key === "Enter") onSaveEdit(); if (e.key === "Escape") onCancelEdit(); }}
             maxLength={30}
             autoFocus
-            className="flex-1 rounded border border-gray-200 bg-white px-2 py-1 text-sm text-gray-900 focus:border-blue-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+            className="flex-1 rounded border border-gray-200 bg-white px-2 py-1 text-sm text-gray-900 focus:border-indigo-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white"
           />
           <div className="flex flex-wrap gap-0.5 max-w-[120px]">
             {PRESET_COLORS.slice(0, 12).map((c) => (
@@ -421,16 +421,16 @@ function CategoryRow({
                 onChange={(e) => onBudgetChange(e.target.value)}
                 onKeyDown={(e) => { if (e.key === "Enter") onBudgetSave(); if (e.key === "Escape") onBudgetCancel(); }}
                 autoFocus
-                className="w-20 rounded border border-gray-200 bg-white px-2 py-0.5 text-xs text-right text-gray-900 focus:border-blue-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                className="w-20 rounded border border-gray-200 bg-white px-2 py-0.5 text-xs text-right text-gray-900 focus:border-indigo-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white"
               />
-              <button onClick={onBudgetSave} className="rounded px-1.5 py-0.5 text-xs font-medium text-blue-600 hover:bg-blue-50 dark:text-blue-400">
+              <button onClick={onBudgetSave} className="rounded px-1.5 py-0.5 text-xs font-medium text-indigo-600 hover:bg-indigo-50 dark:text-indigo-400">
                 Save
               </button>
             </div>
           ) : (
             <button
               onClick={onBudgetStart}
-              className="text-xs font-medium text-gray-400 hover:text-blue-600 dark:hover:text-blue-400"
+              className="text-xs font-medium text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400"
             >
               {budget ? formatCurrency(budget) : "Set limit"}
             </button>

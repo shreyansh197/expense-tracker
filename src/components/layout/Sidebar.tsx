@@ -30,12 +30,12 @@ export function Sidebar() {
   const shouldHideFAB = isLedgerDetail || pathname.startsWith("/settings");
 
   return (
-    <aside className="hidden lg:flex lg:w-60 lg:flex-col lg:border-r lg:border-gray-200 lg:bg-white lg:dark:border-gray-800 lg:dark:bg-gray-950">
+    <aside className="hidden lg:flex lg:w-60 lg:flex-col lg:border-r lg:border-gray-200/80 lg:bg-white lg:dark:border-gray-800/60 lg:dark:bg-gray-900">
       {/* Logo */}
-      <div className="flex items-center gap-2.5 border-b border-gray-200 px-5 py-4 dark:border-gray-800">
+      <div className="flex items-center gap-2.5 border-b border-gray-100 px-5 py-5 dark:border-gray-800/60">
         <div className={cn(
           "flex h-8 w-8 items-center justify-center rounded-lg text-white",
-          isBusinessRoute ? "bg-emerald-600" : "bg-blue-600"
+          isBusinessRoute ? "bg-emerald-600" : "bg-indigo-600"
         )}>
           <Wallet size={18} />
         </div>
@@ -55,12 +55,12 @@ export function Sidebar() {
               key={item.href}
               href={item.href}
               className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
                 isActive
                   ? isBiz
-                    ? "border-l-2 border-l-emerald-600 bg-emerald-50/50 text-emerald-700 dark:border-l-emerald-400 dark:bg-emerald-900/20 dark:text-emerald-400"
-                    : "border-l-2 border-l-blue-600 bg-blue-50/50 text-blue-700 dark:border-l-blue-400 dark:bg-blue-900/20 dark:text-blue-400"
-                  : "text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
+                    ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400"
+                    : "bg-indigo-50 text-indigo-700 dark:bg-indigo-900/20 dark:text-indigo-400"
+                  : "text-gray-500 hover:bg-gray-50 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-800/50 dark:hover:text-gray-300"
               )}
             >
               <Icon size={18} />
@@ -72,7 +72,7 @@ export function Sidebar() {
 
       {/* Add button */}
       {!shouldHideFAB && (
-      <div className="border-t border-gray-200 p-3 dark:border-gray-800">
+      <div className="border-t border-gray-100 p-3 dark:border-gray-800/60">
         <button
           onClick={() => {
             if (isBusinessRoute) {
@@ -82,10 +82,10 @@ export function Sidebar() {
             }
           }}
           className={cn(
-            "flex w-full items-center justify-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-medium shadow-sm transition-colors active:scale-[0.98]",
+            "flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition-colors active:scale-[0.98]",
             isBusinessRoute
-              ? "border-emerald-600 text-emerald-600 hover:bg-emerald-600 hover:text-white dark:border-emerald-500 dark:text-emerald-400 dark:hover:bg-emerald-600 dark:hover:text-white"
-              : "border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white dark:border-blue-500 dark:text-blue-400 dark:hover:bg-blue-600 dark:hover:text-white"
+              ? "bg-emerald-600 text-white hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-700"
+              : "bg-indigo-600 text-white hover:bg-indigo-700 dark:bg-indigo-600 dark:hover:bg-indigo-700"
           )}
         >
           <PlusCircle size={18} />

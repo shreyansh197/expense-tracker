@@ -281,12 +281,12 @@ export function SecurityCard() {
                   placeholder="000000"
                   value={verifyCode}
                   onChange={(e) => setVerifyCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                  className="w-32 rounded-lg border border-gray-200 bg-white px-3 py-2 text-center font-mono text-sm tracking-[0.3em] dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-32 rounded-lg border border-gray-200 bg-white px-3 py-2 text-center font-mono text-sm tracking-[0.3em] dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 />
                 <button
                   onClick={verify2FA}
                   disabled={verifyCode.length !== 6 || verifying2FA}
-                  className="rounded-lg bg-blue-600 px-4 py-2 text-xs font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+                  className="rounded-lg bg-indigo-600 px-4 py-2 text-xs font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
                 >
                   {verifying2FA ? "Verifying..." : "Verify"}
                 </button>

@@ -77,7 +77,7 @@ export default function ExpensesPage() {
             <SyncIndicator syncStatus={syncStatus} />
             <button
               onClick={openAddForm}
-              className="hidden items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-blue-700 lg:flex"
+              className="hidden items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700 lg:flex"
             >
               <PlusCircle size={16} />
               Add Expense
@@ -86,7 +86,7 @@ export default function ExpensesPage() {
         </div>
 
         {/* Total summary */}
-        <div className="flex items-center justify-between rounded-xl bg-white px-4 py-3 shadow-sm border border-gray-200 dark:border-gray-800 dark:bg-gray-900">
+        <div className="flex items-center justify-between rounded-2xl border border-gray-100 bg-white px-4 py-3 dark:border-gray-800 dark:bg-gray-900">
           <span className="text-sm text-gray-500 dark:text-gray-400">
             Monthly Total
           </span>
@@ -107,13 +107,13 @@ export default function ExpensesPage() {
               placeholder="Search expenses..."
               value={localSearch}
               onChange={(e) => handleSearchChange(e.target.value)}
-              className="w-full rounded-lg border border-gray-200 bg-white py-2.5 pl-9 pr-3 text-sm text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-900 dark:text-white dark:placeholder:text-gray-500"
+              className="w-full rounded-xl border border-gray-200 bg-white py-3 pl-9 pr-3 text-sm text-gray-900 placeholder:text-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-gray-700 dark:bg-gray-900 dark:text-white dark:placeholder:text-gray-500"
             />
           </div>
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as SortOption)}
-            className="rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-xs text-gray-700 focus:border-blue-500 focus:outline-none dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300"
+            className="rounded-xl border border-gray-200 bg-white px-3 py-3 text-xs text-gray-700 focus:border-indigo-500 focus:outline-none dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300"
           >
             <option value="day-desc">Newest first</option>
             <option value="day-asc">Oldest first</option>

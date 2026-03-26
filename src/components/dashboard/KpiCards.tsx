@@ -48,7 +48,7 @@ export function KpiCards({
       {/* ── Hero Row: Spent + Remaining ── */}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         {/* Spent / Budget */}
-        <div className="rounded-xl bg-white p-5 shadow-sm dark:bg-gray-900 card-interactive">
+        <div className="rounded-2xl border border-gray-100 bg-white p-5 dark:border-gray-800 dark:bg-gray-900 card-interactive">
           <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
             <span>Spent</span>
           </div>
@@ -56,12 +56,12 @@ export function KpiCards({
             <p className="tabular-nums text-2xl font-semibold text-gray-900 sm:text-3xl dark:text-white">
               {formatCurrency(monthlyTotal)}
             </p>
-            <span className="text-sm text-gray-400 dark:text-gray-500">/</span>
-            <span className="tabular-nums text-sm font-medium text-gray-500 dark:text-gray-400">
+            <span className="text-sm text-gray-300 dark:text-gray-600">/</span>
+            <span className="tabular-nums text-sm font-medium text-gray-400 dark:text-gray-500">
               {formatCurrency(salary)}
             </span>
           </div>
-          <div className="mt-3 h-2.5 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800">
+          <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800">
             <div
               className={cn(
                 "h-full rounded-full transition-all",
@@ -69,17 +69,17 @@ export function KpiCards({
                   ? "bg-red-500"
                   : isWarning
                     ? "bg-amber-500"
-                    : "bg-blue-500"
+                    : "bg-indigo-500"
               )}
               style={{ width: `${Math.min(budgetUsedPercent, 100)}%` }}
             />
           </div>
-          <div className="mt-1.5 flex items-center justify-between">
+          <div className="mt-2 flex items-center justify-between">
             <p className="text-xs text-gray-500 dark:text-gray-400">
               {budgetUsedPercent}% of budget · {expenseCount} txns
             </p>
             {rolloverAmount > 0 && (
-              <p className="text-[10px] text-blue-500">
+              <p className="text-[10px] text-indigo-500">
                 +{formatCurrency(rolloverAmount)} rollover
               </p>
             )}
@@ -89,12 +89,12 @@ export function KpiCards({
         {/* Remaining + Days Left */}
         <div
           className={cn(
-            "rounded-xl p-5 shadow-sm card-interactive",
+            "rounded-2xl border p-5 card-interactive",
             isOverspent
-              ? "bg-red-50 dark:bg-red-950/50"
+              ? "border-red-200 bg-red-50 dark:border-red-900/40 dark:bg-red-950/30"
               : isWarning
-                ? "bg-amber-50 dark:bg-amber-950/50"
-                : "bg-emerald-50 dark:bg-emerald-950/50"
+                ? "border-amber-200 bg-amber-50 dark:border-amber-900/40 dark:bg-amber-950/30"
+                : "border-emerald-200 bg-emerald-50 dark:border-emerald-900/40 dark:bg-emerald-950/30"
           )}
         >
           <div
@@ -139,7 +139,7 @@ export function KpiCards({
       {/* ── Metrics Row: Pace, Savings, Forecast ── */}
       <div className="grid grid-cols-3 gap-3">
         {/* Spend Target */}
-        <div className="rounded-xl bg-white p-3 shadow-sm dark:bg-gray-900 card-interactive">
+        <div className="rounded-2xl border border-gray-100 bg-white p-3 dark:border-gray-800 dark:bg-gray-900">
           <div className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
             <span>Spend Target</span>
           </div>
@@ -157,7 +157,7 @@ export function KpiCards({
         </div>
 
         {/* Saved */}
-        <div className="rounded-xl bg-white p-3 shadow-sm dark:bg-gray-900 card-interactive">
+        <div className="rounded-2xl border border-gray-100 bg-white p-3 dark:border-gray-800 dark:bg-gray-900">
           <div className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
             <span>Saved</span>
           </div>
@@ -178,12 +178,12 @@ export function KpiCards({
 
         {/* Month-End Forecast */}
         <div className={cn(
-          "rounded-xl p-3 shadow-sm card-interactive",
+          "rounded-2xl border p-3",
           forecastOverBudget
-            ? "bg-red-50 dark:bg-red-950/50"
+            ? "border-red-200 bg-red-50 dark:border-red-900/40 dark:bg-red-950/30"
             : forecastWarning
-              ? "bg-amber-50 dark:bg-amber-950/50"
-              : "bg-white dark:bg-gray-900"
+              ? "border-amber-200 bg-amber-50 dark:border-amber-900/40 dark:bg-amber-950/30"
+              : "border-gray-100 bg-white dark:border-gray-800 dark:bg-gray-900"
         )}>
           <div className={cn(
             "flex items-center gap-1.5 text-xs",

@@ -120,13 +120,13 @@ export default function SettingsPage() {
                   value={salary}
                   onChange={(e) => setSalary(e.target.value)}
                   onKeyDown={(e) => { if (e.key === "Enter") handleSalaryUpdate(); }}
-                  className="w-full rounded-lg border border-gray-200 bg-white py-2.5 pl-7 pr-3 text-sm font-medium text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                  className="w-full rounded-xl border border-gray-200 bg-white py-2.5 pl-7 pr-3 text-sm font-medium text-gray-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
                 />
               </div>
               <button
                 onClick={handleSalaryUpdate}
                 disabled={saving}
-                className="rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-blue-700 disabled:opacity-50"
+                className="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
               >
                 {saving ? "Saving..." : "Update"}
               </button>
@@ -181,7 +181,7 @@ export default function SettingsPage() {
                 aria-checked={settings.rolloverEnabled ?? false}
                 onClick={() => updateSettings({ rolloverEnabled: !settings.rolloverEnabled })}
                 className={`relative h-6 w-11 rounded-full transition-colors ${
-                  settings.rolloverEnabled ? "bg-blue-600" : "bg-gray-300 dark:bg-gray-600"
+                  settings.rolloverEnabled ? "bg-indigo-600" : "bg-gray-300 dark:bg-gray-600"
                 }`}
               >
                 <span
@@ -318,10 +318,10 @@ export default function SettingsPage() {
                     <button
                       key={opt.value}
                       onClick={() => setTheme(opt.value)}
-                      className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
+                      className={`flex flex-1 items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
                         active
-                          ? "bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
-                          : "text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
+                          ? "bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400"
+                          : "text-gray-500 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800"
                       }`}
                     >
                       <Icon size={16} />

@@ -68,11 +68,11 @@ export function CategoryBudgetManager() {
                     if (e.key === "Escape") setEditingId(null);
                   }}
                   autoFocus
-                  className="w-20 rounded border border-gray-200 bg-white px-2 py-1 text-xs text-right text-gray-900 focus:border-blue-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                  className="w-20 rounded border border-gray-200 bg-white px-2 py-1 text-xs text-right text-gray-900 focus:border-indigo-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white"
                 />
                 <button
                   onClick={() => handleSave(cat.id)}
-                  className="rounded px-2 py-1 text-xs font-medium text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900/30"
+                  className="rounded px-2 py-1 text-xs font-medium text-indigo-600 hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-900/30"
                 >
                   Save
                 </button>
@@ -80,7 +80,7 @@ export function CategoryBudgetManager() {
             ) : (
               <button
                 onClick={() => handleStartEdit(cat.id)}
-                className="text-xs font-medium text-gray-400 hover:text-blue-600 dark:hover:text-blue-400"
+                className="text-xs font-medium text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400"
               >
                 {budget ? formatCurrency(budget) : "Set limit"}
               </button>

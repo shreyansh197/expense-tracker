@@ -149,12 +149,12 @@ export function AlertsPanel({
         <div
           key={alert.id}
           className={cn(
-            "flex items-start gap-3 rounded-lg bg-white px-3 py-2.5 text-sm shadow-sm dark:bg-gray-900",
+            "flex items-start gap-3 rounded-xl border px-3 py-2.5 text-sm",
             alert.severity === "critical"
-              ? "border-l-4 border-l-red-500 text-red-800 dark:text-red-300"
+              ? "border-red-200 bg-red-50/60 text-red-800 dark:border-red-900/40 dark:bg-red-950/20 dark:text-red-300"
               : alert.severity === "warning"
-                ? "border-l-4 border-l-amber-500 text-amber-800 dark:text-amber-300"
-                : "border-l-4 border-l-blue-500 text-blue-800 dark:text-blue-300"
+                ? "border-amber-200 bg-amber-50/60 text-amber-800 dark:border-amber-900/40 dark:bg-amber-950/20 dark:text-amber-300"
+                : "border-indigo-200 bg-indigo-50/60 text-indigo-800 dark:border-indigo-900/40 dark:bg-indigo-950/20 dark:text-indigo-300"
           )}
         >
           {alert.severity === "critical" ? (

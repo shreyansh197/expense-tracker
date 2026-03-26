@@ -63,11 +63,11 @@ export function BottomNav() {
         onClick={handleFabClick}
         aria-label={isBusiness && isBusinessRoute ? "Add ledger" : "Add expense"}
         className={cn(
-          "fixed left-1/2 z-40 flex h-[52px] w-[52px] -translate-x-1/2 items-center justify-center rounded-full text-white shadow-lg ring-4 ring-white/80 transition-transform duration-200 active:scale-95 lg:hidden dark:ring-gray-950/80",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-50 dark:focus-visible:ring-offset-gray-950",
+          "fixed left-1/2 z-40 flex h-[52px] w-[52px] -translate-x-1/2 items-center justify-center rounded-full text-white shadow-lg ring-2 ring-white/60 transition-transform duration-200 active:scale-95 lg:hidden dark:ring-gray-900/60",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-50 dark:focus-visible:ring-offset-gray-900",
           accentColor === "emerald"
             ? "bg-emerald-600 shadow-emerald-600/25 focus-visible:ring-emerald-500"
-            : "bg-blue-600 shadow-blue-600/25 focus-visible:ring-blue-500"
+            : "bg-indigo-600 shadow-indigo-600/25 focus-visible:ring-indigo-500"
         )}
         style={{
           bottom: `calc(${NAV_HEIGHT}px + env(safe-area-inset-bottom, 0px) + 12px)`,
@@ -79,7 +79,7 @@ export function BottomNav() {
 
       {/* ─── Nav bar (z-30, below FAB) ─── */}
       <nav
-        className="fixed bottom-0 left-0 right-0 z-30 bg-white/80 shadow-[0_-1px_3px_0_rgba(0,0,0,0.05)] backdrop-blur-lg backdrop-saturate-150 dark:bg-gray-950/80 dark:shadow-[0_-1px_3px_0_rgba(0,0,0,0.2)] lg:hidden"
+        className="fixed bottom-0 left-0 right-0 z-30 bg-white/90 shadow-[0_-1px_2px_0_rgba(0,0,0,0.03)] backdrop-blur-xl dark:bg-gray-900/90 dark:shadow-[0_-1px_2px_0_rgba(0,0,0,0.15)] lg:hidden"
         style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
       >
         <div
@@ -102,7 +102,7 @@ export function BottomNav() {
                     ? cn(
                         isBiz
                           ? "text-emerald-600 dark:text-emerald-400"
-                          : "text-blue-600 dark:text-blue-400"
+                          : "text-indigo-600 dark:text-indigo-400"
                       )
                     : "text-gray-500 dark:text-gray-400"
                 )}
@@ -110,7 +110,7 @@ export function BottomNav() {
                 {isActive && (
                   <span className={cn(
                     "absolute -top-2 h-1 w-5 rounded-full",
-                    isBiz ? "bg-emerald-600 dark:bg-emerald-400" : "bg-blue-600 dark:bg-blue-400"
+                    isBiz ? "bg-emerald-600 dark:bg-emerald-400" : "bg-indigo-600 dark:bg-indigo-400"
                   )} />
                 )}
                 <Icon size={20} />

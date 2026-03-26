@@ -58,7 +58,7 @@ export default function DeviceLinkPage() {
           </p>
           <button
             onClick={() => router.push("/")}
-            className="flex items-center gap-2 mx-auto text-sm text-blue-600 dark:text-blue-400 hover:underline"
+            className="flex items-center gap-2 mx-auto text-sm text-indigo-600 dark:text-indigo-400 hover:underline"
           >
             <ArrowLeft className="h-4 w-4" />
             Go to Dashboard
@@ -87,7 +87,7 @@ export default function DeviceLinkPage() {
   return (
     <div className="flex min-h-screen items-center justify-center p-4">
       <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl dark:bg-gray-900 text-center">
-        <Smartphone className="mx-auto h-12 w-12 text-blue-500 mb-4" />
+        <Smartphone className="mx-auto h-12 w-12 text-indigo-500 mb-4" />
         <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
           Link This Device
         </h2>
@@ -100,14 +100,14 @@ export default function DeviceLinkPage() {
         {!isAuthenticated && (
           <button
             onClick={handleAccept}
-            className="w-full rounded-xl bg-blue-600 py-3 text-base font-semibold text-white hover:bg-blue-700 transition-colors"
+            className="w-full rounded-xl bg-indigo-600 py-3 text-base font-semibold text-white hover:bg-indigo-700 transition-colors"
           >
             Sign In to Link
           </button>
         )}
 
         {isAuthenticated && accepting && (
-          <Loader2 className="mx-auto h-8 w-8 animate-spin text-blue-500" />
+          <Loader2 className="mx-auto h-8 w-8 animate-spin text-indigo-500" />
         )}
       </div>
     </div>
