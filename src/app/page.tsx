@@ -18,11 +18,13 @@ import { useSettings } from "@/hooks/useSettings";
 import { useCalculations } from "@/hooks/useCalculations";
 import { useRecurringExpenses } from "@/hooks/useRecurringExpenses";
 import { useUIStore } from "@/stores/uiStore";
-import { formatCurrency, getMonthName } from "@/lib/utils";
+import { getMonthName } from "@/lib/utils";
+import { useCurrency } from "@/hooks/useCurrency";
 import { CategoryDot } from "@/components/expenses/CategoryChips";
 import { Repeat, Receipt, PlusCircle } from "lucide-react";
 
 export default function DashboardPage() {
+  const { formatCurrency } = useCurrency();
   const router = useRouter();
   const { currentMonth, currentYear } = useUIStore();
   const { expenses, loading, syncStatus } = useExpenses(currentMonth, currentYear);

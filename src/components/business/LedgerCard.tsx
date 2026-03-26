@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Clock, CheckCircle2, XCircle, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { formatCurrency } from "@/lib/utils";
+import { useCurrency } from "@/hooks/useCurrency";
 import { LedgerProgressRing } from "./LedgerProgressRing";
 import type { Ledger } from "@/types";
 
@@ -13,6 +13,7 @@ interface LedgerCardProps {
 }
 
 export function LedgerCard({ ledger, totalReceived }: LedgerCardProps) {
+  const { formatCurrency } = useCurrency();
   const percent = ledger.expectedAmount > 0 ? (totalReceived / ledger.expectedAmount) * 100 : 0;
   const isOverdue =
     ledger.status === "active" &&

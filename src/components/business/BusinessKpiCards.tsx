@@ -1,7 +1,7 @@
 "use client";
 
-import { TrendingUp, AlertTriangle, CheckCircle2, Clock, IndianRupee } from "lucide-react";
-import { formatCurrency } from "@/lib/utils";
+import { TrendingUp, AlertTriangle, CheckCircle2, Clock, Banknote } from "lucide-react";
+import { useCurrency } from "@/hooks/useCurrency";
 import { cn } from "@/lib/utils";
 
 interface BusinessKpiCardsProps {
@@ -20,11 +20,12 @@ export function BusinessKpiCards({
   activeCount,
   overdueCount,
 }: BusinessKpiCardsProps) {
+  const { formatCurrency } = useCurrency();
   const cards = [
     {
       label: "Total Expected",
       value: formatCurrency(totalExpected),
-      icon: IndianRupee,
+      icon: Banknote,
       color: "text-gray-600 dark:text-gray-400",
       bg: "bg-gray-50 dark:bg-gray-800",
     },

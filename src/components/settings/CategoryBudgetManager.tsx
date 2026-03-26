@@ -3,11 +3,12 @@
 import { useState } from "react";
 import { useSettings } from "@/hooks/useSettings";
 import { getAllCategories } from "@/lib/categories";
-import { formatCurrency } from "@/lib/utils";
+import { useCurrency } from "@/hooks/useCurrency";
 import { useToast } from "@/components/ui/Toast";
 import type { CategoryId } from "@/types";
 
 export function CategoryBudgetManager() {
+  const { formatCurrency, symbol } = useCurrency();
   const { settings, updateSettings } = useSettings();
   const { toast } = useToast();
   const allCategories = getAllCategories(settings.customCategories, settings.hiddenDefaults);
@@ -57,7 +58,7 @@ export function CategoryBudgetManager() {
             </span>
             {isEditing ? (
               <div className="flex items-center gap-1.5">
-                <span className="text-xs text-gray-400">₹</span>
+                <span className="text-xs text-gray-400">{symbol}</span>
                 <input
                   type="number"
                   min="0"

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useCurrency } from "@/hooks/useCurrency";
 import {
   UserPlus,
   LogIn,
@@ -352,6 +353,7 @@ export function AuthModal({
   const [pendingUserId, setPendingUserId] = useState<string | null>(null);
   const [totpCode, setTotpCode] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const { symbol } = useCurrency();
 
   const { login, loginWith2FA, register } = useAuth();
 
@@ -503,7 +505,7 @@ export function AuthModal({
 
         <div className="relative mb-5">
           <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center gap-1">
-            <span className="text-lg font-semibold text-gray-400">₹</span>
+            <span className="text-lg font-semibold text-gray-400">{symbol}</span>
           </div>
           <input
             type="number"

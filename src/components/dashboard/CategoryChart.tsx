@@ -10,7 +10,8 @@ import {
 } from "recharts";
 import { Table2, PieChart as PieChartIcon } from "lucide-react";
 import { buildCategoryMap } from "@/lib/categories";
-import { cn, formatCurrency } from "@/lib/utils";
+import { cn } from "@/lib/utils";
+import { useCurrency } from "@/hooks/useCurrency";
 import { useSettings } from "@/hooks/useSettings";
 import type { CategoryTotal, Expense } from "@/types";
 
@@ -28,6 +29,7 @@ function CustomTooltip({ active, payload, total, budgets, expenseCountMap }: {
   budgets: Record<string, number>;
   expenseCountMap: Record<string, number>;
 }) {
+  const { formatCurrency } = useCurrency();
   if (!active || !payload?.[0]) return null;
   const item = payload[0];
   const pct = total > 0 ? Math.round((item.value / total) * 100) : 0;
@@ -52,6 +54,7 @@ function CustomTooltip({ active, payload, total, budgets, expenseCountMap }: {
 export function CategoryChart({ categoryTotals, onCategoryClick, categoryBudgets, expenses }: CategoryChartProps) {
   const [showTable, setShowTable] = useState(false);
   const { settings } = useSettings();
+  const { formatCurrency } = useCurrency();
   const catMap = buildCategoryMap(settings.customCategories);
   const budgets = categoryBudgets || {};
 
@@ -210,6 +213,7 @@ export function CategoryChart({ categoryTotals, onCategoryClick, categoryBudgets
 
 export function CategoryLegend({ categoryTotals, onCategoryClick, categoryBudgets }: CategoryChartProps) {
   const { settings } = useSettings();
+  const { formatCurrency } = useCurrency();
   const catMap = buildCategoryMap(settings.customCategories);
   const budgets = categoryBudgets || {};
   const nonZero = categoryTotals.filter((c) => c.total > 0);

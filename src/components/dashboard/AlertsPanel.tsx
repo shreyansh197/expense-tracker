@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { AlertTriangle, ArrowRight, Zap, ChevronDown } from "lucide-react";
-import { cn, formatCurrency } from "@/lib/utils";
+import { cn } from "@/lib/utils";
+import { useCurrency } from "@/hooks/useCurrency";
 import { buildCategoryMap } from "@/lib/categories";
 import { useSettings } from "@/hooks/useSettings";
 import { InfoTooltip } from "@/components/ui/InfoTooltip";
@@ -40,6 +41,7 @@ export function AlertsPanel({
   onCategoryClick,
 }: AlertsPanelProps) {
   const { settings } = useSettings();
+  const { formatCurrency } = useCurrency();
   const catMap = buildCategoryMap(settings.customCategories);
   const [expanded, setExpanded] = useState(false);
 

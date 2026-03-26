@@ -5,11 +5,12 @@ import { Plus, Trash2, X, Pencil, TrendingUp, Minus } from "lucide-react";
 import { useSettings } from "@/hooks/useSettings";
 import { useToast } from "@/components/ui/Toast";
 import { useConfirm } from "@/components/ui/ConfirmDialog";
-import { formatCurrency } from "@/lib/utils";
+import { useCurrency } from "@/hooks/useCurrency";
 import { PRESET_COLORS } from "@/lib/categories";
 import type { Goal } from "@/types";
 
 export function GoalsManager() {
+  const { formatCurrency, symbol } = useCurrency();
   const { settings, updateSettings } = useSettings();
   const { toast } = useToast();
   const { confirm } = useConfirm();
@@ -173,7 +174,7 @@ export function GoalsManager() {
             />
             <div className="grid grid-cols-2 gap-2">
               <div className="relative">
-                <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-gray-400">₹</span>
+                <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-gray-400">{symbol}</span>
                 <input
                   type="number"
                   placeholder="Target amount"
@@ -184,7 +185,7 @@ export function GoalsManager() {
                 />
               </div>
               <div className="relative">
-                <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-gray-400">₹</span>
+                <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-gray-400">{symbol}</span>
                 <input
                   type="number"
                   placeholder="Monthly contrib."
@@ -307,7 +308,7 @@ export function GoalsManager() {
                       </button>
                     </div>
                     <div className="relative flex-1">
-                      <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-gray-400">₹</span>
+                      <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-gray-400">{symbol}</span>
                       <input
                         type="number"
                         min="1"

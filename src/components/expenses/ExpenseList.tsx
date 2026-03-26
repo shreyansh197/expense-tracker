@@ -2,7 +2,7 @@
 
 import { useMemo, useState, useCallback } from "react";
 import { Trash2, Edit3, Repeat, Receipt, PlusCircle, CheckSquare, Square, X } from "lucide-react";
-import { formatCurrency } from "@/lib/utils";
+import { useCurrency } from "@/hooks/useCurrency";
 import { CategoryBadge } from "./CategoryChips";
 import { useUIStore } from "@/stores/uiStore";
 import { useToast } from "@/components/ui/Toast";
@@ -45,6 +45,7 @@ export function ExpenseList({
 }: ExpenseListProps) {
   const openEditForm = useUIStore((s) => s.openEditForm);
   const openAddForm = useUIStore((s) => s.openAddForm);
+  const { formatCurrency } = useCurrency();
   const { toast } = useToast();
   const { confirm } = useConfirm();
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());

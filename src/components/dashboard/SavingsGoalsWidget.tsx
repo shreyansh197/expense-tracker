@@ -5,10 +5,11 @@ import { PiggyBank, TrendingUp, Minus, ChevronRight, X } from "lucide-react";
 import Link from "next/link";
 import { useSettings } from "@/hooks/useSettings";
 import { useToast } from "@/components/ui/Toast";
-import { formatCurrency } from "@/lib/utils";
+import { useCurrency } from "@/hooks/useCurrency";
 
 export function SavingsGoalsWidget() {
   const { settings, updateSettings } = useSettings();
+  const { formatCurrency, symbol } = useCurrency();
   const { toast } = useToast();
   const goals = settings.goals || [];
 
@@ -192,7 +193,7 @@ export function SavingsGoalsWidget() {
 
                   {/* Amount input */}
                   <div className="relative flex-1">
-                    <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-gray-400">₹</span>
+                    <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-gray-400">{symbol}</span>
                     <input
                       type="number"
                       min="1"

@@ -9,7 +9,8 @@ import { useExpenses } from "@/hooks/useExpenses";
 import { useSettings } from "@/hooks/useSettings";
 import { useCalculations } from "@/hooks/useCalculations";
 import { buildCategoryMap } from "@/lib/categories";
-import { formatCurrency, getMonthName } from "@/lib/utils";
+import { getMonthName } from "@/lib/utils";
+import { useCurrency } from "@/hooks/useCurrency";
 import { getCategoryTotal } from "@/lib/calculations";
 import { authFetch, getActiveWorkspaceId } from "@/lib/authClient";
 import { SkeletonCategoryDetail } from "@/components/ui/Skeleton";
@@ -25,6 +26,7 @@ import {
 } from "recharts";
 
 export default function CategoryPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { formatCurrency } = useCurrency();
   const { slug } = use(params);
   const router = useRouter();
   const searchParams = useSearchParams();

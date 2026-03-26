@@ -14,9 +14,21 @@
       <stop offset="100%" stop-color="#22d3ee"/>
     </linearGradient>
 
+    <!-- Coin gradient: golden -->
+    <linearGradient id="coinGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%"   stop-color="#fcd34d"/>
+      <stop offset="100%" stop-color="#f59e0b"/>
+    </linearGradient>
+
     <!-- Glow filter for the S mark -->
     <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
       <feGaussianBlur in="SourceGraphic" stdDeviation="8" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+
+    <!-- Coin glow -->
+    <filter id="coinGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur"/>
       <feComposite in="SourceGraphic" in2="blur" operator="over"/>
     </filter>
 
@@ -48,19 +60,32 @@
     <line x1="384" y1="0" x2="384" y2="512" stroke="white" stroke-width="1"/>
   </g>
 
+  <!-- Upward trend line — subtle behind the S to convey tracking/growth -->
+  <g opacity="0.12" clip-path="url(#roundedSquare)">
+    <polyline
+      points="90,400 170,340 250,360 330,280 410,220"
+      stroke="#22d3ee"
+      stroke-width="4"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      fill="none"
+    />
+    <polyline
+      points="385,230 410,220 400,245"
+      stroke="#22d3ee"
+      stroke-width="4"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      fill="none"
+    />
+  </g>
+
   <!--
-    Spendly "S" mark — a bold, fluid S built from two arcs + a connecting
-    bar, evoking a coin/flow/spending motion.
-    The shape sits centered in a ~280×310 bounding box inside the 512×512 canvas.
+    Spendly "$" mark — the bold S with a vertical strike-through line,
+    turning it into a currency/finance symbol. Combined with a ₹ coin accent
+    to clearly communicate "expense tracking / money".
   -->
   <g filter="url(#glow)" transform="translate(256,256)">
-    <!--
-      The "S" is constructed as a single path:
-      - Top arc curves right → down
-      - Center bar sweeps left → right
-      - Bottom arc curves left → down
-      Each arc has a 38px stroke width and rounded linecap for a bold, friendly look.
-    -->
 
     <!-- Shadow / depth layer (slightly offset, lower opacity) -->
     <path
@@ -99,11 +124,33 @@
       fill="none"
     />
 
-    <!-- Coin dot accent — top right of S, a small glowing circle -->
-    <circle cx="62" cy="-110" r="14" fill="#22d3ee" opacity="0.9"/>
+    <!-- Vertical strike-through — turns S into $ currency symbol -->
+    <line x1="-4" y1="-170" x2="-4" y2="178" stroke="url(#accent)" stroke-width="10" stroke-linecap="round" opacity="0.85"/>
+
+    <!-- Coin dot accent — top right of S -->
+    <circle cx="62" cy="-110" r="14" fill="#fbbf24" opacity="0.9"/>
     <!-- Bottom left end dot -->
-    <circle cx="-68" cy="138" r="14" fill="#818cf8" opacity="0.9"/>
+    <circle cx="-68" cy="138" r="14" fill="#f59e0b" opacity="0.9"/>
   </g>
+
+  <!-- Coin element — top right corner, universal design -->
+  <g filter="url(#coinGlow)" transform="translate(370, 115)">
+    <circle cx="0" cy="0" r="42" fill="url(#coinGrad)"/>
+    <circle cx="0" cy="0" r="33" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="2"/>
+    <!-- Inner concentric ring for coin authenticity -->
+    <circle cx="0" cy="0" r="24" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+    <!-- Coin shine highlight -->
+    <ellipse cx="-12" cy="-14" rx="10" ry="16" fill="rgba(255,255,255,0.15)" transform="rotate(-30, -12, -14)"/>
+    <!-- Three horizontal ridges — universal coin texture -->
+    <line x1="-14" y1="-4" x2="14" y2="-4" stroke="rgba(255,255,255,0.3)" stroke-width="2" stroke-linecap="round"/>
+    <line x1="-16" y1="2" x2="16" y2="2" stroke="rgba(255,255,255,0.25)" stroke-width="2" stroke-linecap="round"/>
+    <line x1="-14" y1="8" x2="14" y2="8" stroke="rgba(255,255,255,0.2)" stroke-width="2" stroke-linecap="round"/>
+  </g>
+
+  <!-- Small sparkle dots — activity feel -->
+  <circle cx="340" cy="82" r="4" fill="#fcd34d" opacity="0.6"/>
+  <circle cx="405" cy="95" r="3" fill="#f59e0b" opacity="0.5"/>
+  <circle cx="320" cy="105" r="2.5" fill="#fbbf24" opacity="0.4"/>
 
   <!-- Subtle border ring -->
   <rect

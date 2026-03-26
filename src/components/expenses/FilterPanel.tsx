@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useUIStore } from "@/stores/uiStore";
 import { useSettings } from "@/hooks/useSettings";
+import { useCurrency } from "@/hooks/useCurrency";
 import { useToast } from "@/components/ui/Toast";
 import {
   SlidersHorizontal,
@@ -38,6 +39,7 @@ export function FilterPanel({
 }: FilterPanelProps) {
   const [open, setOpen] = useState(false);
   const { settings, updateSettings } = useSettings();
+  const { symbol } = useCurrency();
   const { activeCategories, searchQuery } = useUIStore();
   const { toast } = useToast();
   const [saveName, setSaveName] = useState("");
@@ -118,7 +120,7 @@ export function FilterPanel({
             </label>
             <div className="flex items-center gap-2">
               <div className="relative flex-1">
-                <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-gray-400">₹</span>
+                <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-gray-400">{symbol}</span>
                 <input
                   type="number"
                   min="0"
@@ -130,7 +132,7 @@ export function FilterPanel({
               </div>
               <span className="text-xs text-gray-400">to</span>
               <div className="relative flex-1">
-                <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-gray-400">₹</span>
+                <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-gray-400">{symbol}</span>
                 <input
                   type="number"
                   min="0"

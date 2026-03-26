@@ -2,12 +2,13 @@
 
 import { useMemo } from "react";
 import { Repeat, Calendar, Pause, Play } from "lucide-react";
-import { formatCurrency } from "@/lib/utils";
+import { useCurrency } from "@/hooks/useCurrency";
 import { buildCategoryMap } from "@/lib/categories";
 import { useSettings } from "@/hooks/useSettings";
 
 export function SubscriptionsSummary() {
   const { settings } = useSettings();
+  const { formatCurrency } = useCurrency();
   const catMap = buildCategoryMap(settings.customCategories, settings.hiddenDefaults);
   const recurring = useMemo(() => settings.recurringExpenses || [], [settings.recurringExpenses]);
 

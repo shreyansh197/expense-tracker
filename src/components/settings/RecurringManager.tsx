@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useSettings } from "@/hooks/useSettings";
 import { getAllCategories } from "@/lib/categories";
-import { formatCurrency } from "@/lib/utils";
+import { useCurrency } from "@/hooks/useCurrency";
 import { useToast } from "@/components/ui/Toast";
 import { useConfirm } from "@/components/ui/ConfirmDialog";
 import { Plus, Trash2, ToggleLeft, ToggleRight, Pencil, X, ArrowUpDown } from "lucide-react";
@@ -12,6 +12,7 @@ import type { RecurringExpense, CategoryId } from "@/types";
 type SortKey = "day" | "amount" | "remark";
 
 export function RecurringManager() {
+  const { formatCurrency, symbol } = useCurrency();
   const { settings, updateSettings } = useSettings();
   const { toast } = useToast();
   const { confirm } = useConfirm();
@@ -227,7 +228,7 @@ export function RecurringManager() {
           </div>
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="mb-1 block text-xs text-gray-500">Amount (₹)</label>
+              <label className="mb-1 block text-xs text-gray-500">Amount ({symbol})</label>
               <input
                 type="number"
                 min="1"

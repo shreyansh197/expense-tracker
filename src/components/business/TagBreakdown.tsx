@@ -1,12 +1,13 @@
 "use client";
 
-import { formatCurrency } from "@/lib/utils";
+import { useCurrency } from "@/hooks/useCurrency";
 
 interface TagBreakdownProps {
   data: { tag: string; expected: number; received: number; count: number }[];
 }
 
 export function TagBreakdown({ data }: TagBreakdownProps) {
+  const { formatCurrency } = useCurrency();
   if (data.length === 0) return null;
 
   return (

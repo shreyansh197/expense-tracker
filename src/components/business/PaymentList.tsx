@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { Trash2, Banknote, CreditCard, Smartphone, FileText, HelpCircle, X, Hash, StickyNote, Calendar, TrendingUp } from "lucide-react";
-import { formatCurrency } from "@/lib/utils";
+import { useCurrency } from "@/hooks/useCurrency";
 import type { Payment, PaymentMethod } from "@/types";
 
 const methodIcons: Record<PaymentMethod, typeof Banknote> = {
@@ -57,6 +57,7 @@ function PaymentDetailModal({
   onDelete: (id: string) => void;
 }) {
   const Icon = payment.method ? methodIcons[payment.method] : HelpCircle;
+  const { formatCurrency } = useCurrency();
   const colorClass = payment.method ? methodColors[payment.method] : methodColors.other;
 
   function handleDelete() {
@@ -191,6 +192,7 @@ function DetailRow({
 
 // ── Payment List ──────────────────────────────────────────────
 export function PaymentList({ payments, onDelete }: PaymentListProps) {
+  const { formatCurrency } = useCurrency();
   const [selected, setSelected] = useState<PaymentWithRunning | null>(null);
 
   const withRunning = useMemo(() => {

@@ -10,7 +10,7 @@ import {
   PRESET_COLORS,
   DEFAULT_CATEGORIES_META,
 } from "@/lib/categories";
-import { formatCurrency } from "@/lib/utils";
+import { useCurrency } from "@/hooks/useCurrency";
 import type { CategoryMeta, CategoryId } from "@/types";
 
 export function CategoryManager() {
@@ -351,6 +351,7 @@ function CategoryRow({
   onDragEnd,
   draggable,
 }: CategoryRowProps) {
+  const { formatCurrency, symbol } = useCurrency();
   return (
     <div
       className={`flex items-center gap-2 rounded-lg px-2 py-2 transition-colors ${
@@ -413,7 +414,7 @@ function CategoryRow({
           {/* Budget display/edit */}
           {isBudgetEditing ? (
             <div className="flex items-center gap-1">
-              <span className="text-xs text-gray-400">₹</span>
+              <span className="text-xs text-gray-400">{symbol}</span>
               <input
                 type="number"
                 min="0"

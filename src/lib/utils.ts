@@ -5,23 +5,42 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+export const SUPPORTED_CURRENCIES = [
+  { code: "INR", symbol: "₹", label: "Indian Rupee (₹)", locale: "en-IN" },
+  { code: "USD", symbol: "$", label: "US Dollar ($)", locale: "en-US" },
+  { code: "EUR", symbol: "€", label: "Euro (€)", locale: "de-DE" },
+  { code: "GBP", symbol: "£", label: "British Pound (£)", locale: "en-GB" },
+] as const;
+
+export type CurrencyCode = (typeof SUPPORTED_CURRENCIES)[number]["code"];
+
+function getCurrencyMeta(code: string) {
+  return SUPPORTED_CURRENCIES.find((c) => c.code === code) ?? SUPPORTED_CURRENCIES[0];
+}
+
 export function formatCurrency(amount: number, currency = "INR"): string {
-  return new Intl.NumberFormat("en-IN", {
+  const meta = getCurrencyMeta(currency);
+  return new Intl.NumberFormat(meta.locale, {
     style: "currency",
-    currency,
+    currency: meta.code,
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   }).format(amount);
 }
 
-export function formatCurrencyCompact(amount: number): string {
+export function formatCurrencyCompact(amount: number, currency = "INR"): string {
+  const meta = getCurrencyMeta(currency);
   if (amount >= 100000) {
-    return `₹${(amount / 100000).toFixed(1)}L`;
+    return `${meta.symbol}${(amount / 100000).toFixed(1)}L`;
   }
   if (amount >= 1000) {
-    return `₹${(amount / 1000).toFixed(1)}K`;
+    return `${meta.symbol}${(amount / 1000).toFixed(1)}K`;
   }
-  return `₹${amount}`;
+  return `${meta.symbol}${amount}`;
+}
+
+export function getCurrencySymbol(currency = "INR"): string {
+  return getCurrencyMeta(currency).symbol;
 }
 
 export function getDaysInMonth(month: number, year: number): number {

@@ -5,6 +5,7 @@ import { X } from "lucide-react";
 import { DatePicker } from "@/components/ui/DatePicker";
 import type { LedgerInput, LedgerStatus } from "@/types";
 import { useSettings } from "@/hooks/useSettings";
+import { useCurrency } from "@/hooks/useCurrency";
 
 interface LedgerFormProps {
   initial?: Partial<LedgerInput>;
@@ -14,6 +15,7 @@ interface LedgerFormProps {
 }
 
 export function LedgerForm({ initial, onSubmit, onCancel, submitLabel = "Create Ledger" }: LedgerFormProps) {
+  const { symbol } = useCurrency();
   const { settings } = useSettings();
   const [name, setName] = useState(initial?.name ?? "");
   const [expectedAmount, setExpectedAmount] = useState(initial?.expectedAmount?.toString() ?? "");
@@ -72,7 +74,7 @@ export function LedgerForm({ initial, onSubmit, onCancel, submitLabel = "Create 
       <div>
         <label className="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">Expected Amount</label>
         <div className="relative">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">₹</span>
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">{symbol}</span>
           <input
             type="number"
             min="1"

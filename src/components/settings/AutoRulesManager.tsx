@@ -6,6 +6,7 @@ import { useSettings } from "@/hooks/useSettings";
 import { getAllCategories } from "@/lib/categories";
 import { useToast } from "@/components/ui/Toast";
 import { useConfirm } from "@/components/ui/ConfirmDialog";
+import { useCurrency } from "@/hooks/useCurrency";
 
 export interface AutoRule {
   id: string;
@@ -78,6 +79,7 @@ export function useAutoRules() {
 }
 
 export function AutoRulesManager() {
+  const { symbol } = useCurrency();
   const { rules, addRule, removeRule, toggleRule } = useAutoRules();
   const { settings } = useSettings();
   const { toast } = useToast();
@@ -227,7 +229,7 @@ export function AutoRulesManager() {
             </select>
             <input
               type={condField === "amount" ? "number" : "text"}
-              placeholder={condField === "amount" ? "₹ amount" : "keyword"}
+              placeholder={condField === "amount" ? `${symbol} amount` : "keyword"}
               value={condValue}
               onChange={(e) => setCondValue(e.target.value)}
               className="rounded border border-gray-200 bg-white px-2 py-1.5 text-xs text-gray-700 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300"

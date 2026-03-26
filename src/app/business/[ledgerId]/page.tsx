@@ -21,11 +21,12 @@ import { LedgerProgressRing } from "@/components/business/LedgerProgressRing";
 import { PaymentForm } from "@/components/business/PaymentForm";
 import { PaymentList } from "@/components/business/PaymentList";
 import { LedgerForm } from "@/components/business/LedgerForm";
-import { formatCurrency } from "@/lib/utils";
+import { useCurrency } from "@/hooks/useCurrency";
 import { cn } from "@/lib/utils";
 import type { PaymentInput, LedgerInput } from "@/types";
 
 export default function LedgerDetailPage() {
+  const { formatCurrency } = useCurrency();
   const params = useParams();
   const router = useRouter();
   const ledgerId = params.ledgerId as string;

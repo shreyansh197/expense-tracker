@@ -5,7 +5,8 @@ import {
   AlertTriangle,
   Clock,
 } from "lucide-react";
-import { cn, formatCurrency } from "@/lib/utils";
+import { cn } from "@/lib/utils";
+import { useCurrency } from "@/hooks/useCurrency";
 import { BUDGET_WARNING_THRESHOLD } from "@/lib/constants";
 import { InfoTooltip } from "@/components/ui/InfoTooltip";
 import type { CategoryTotal, Forecast } from "@/types";
@@ -36,6 +37,7 @@ export function KpiCards({
   forecast,
   rolloverAmount = 0,
 }: KpiCardsProps) {
+  const { formatCurrency } = useCurrency();
   const isOverspent = remaining < 0;
   const isWarning = !isOverspent && budgetUsedPercent >= BUDGET_WARNING_THRESHOLD;
   const paceExceeded = avgDaily > paceToStayUnder && paceToStayUnder > 0;

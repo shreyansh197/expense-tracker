@@ -5,12 +5,13 @@ export const dynamic = "force-dynamic";
 import { useState, useEffect } from "react";
 import { AppShell } from "@/components/layout/AppShell";
 import { useSettings } from "@/hooks/useSettings";
+import { useCurrency } from "@/hooks/useCurrency";
 import { useTheme } from "@/components/providers/ThemeProvider";
-import { formatCurrency } from "@/lib/utils";
+import { SUPPORTED_CURRENCIES } from "@/lib/utils";
 import {
   Wallet, LinkIcon, Tag, Repeat, TrendingUp, Target, Palette,
   Download, Zap, Sun, Moon, Monitor, Smartphone, Briefcase,
-  Shield, Users, Database,
+  Shield, Users, Database, Globe,
 } from "lucide-react";
 import { InstallButton } from "@/components/pwa/InstallButton";
 import { useToast } from "@/components/ui/Toast";
@@ -28,6 +29,7 @@ import { SettingsFooterLogout } from "@/components/settings/SettingsFooterLogout
 
 export default function SettingsPage() {
   const { settings, updateSettings } = useSettings();
+  const { symbol, formatCurrency } = useCurrency();
   const { toast } = useToast();
   const { theme, setTheme } = useTheme();
 
@@ -111,25 +113,48 @@ export default function SettingsPage() {
             description={`Currently ${formatCurrency(settings.salary)}`}
             alwaysOpen
           >
-            <div className="flex items-center gap-3">
-              <div className="relative flex-1">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">₹</span>
-                <input
-                  type="number"
-                  min="1"
-                  value={salary}
-                  onChange={(e) => setSalary(e.target.value)}
-                  onKeyDown={(e) => { if (e.key === "Enter") handleSalaryUpdate(); }}
-                  className="w-full rounded-xl border border-gray-200 bg-white py-2.5 pl-7 pr-3 text-sm font-medium text-gray-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
-                />
+            <div className="space-y-3">
+              {/* Currency selector */}
+              <div>
+                <label className="mb-1.5 block text-xs font-medium text-gray-500 dark:text-gray-400">Currency</label>
+                <div className="flex gap-2">
+                  {SUPPORTED_CURRENCIES.map((c) => (
+                    <button
+                      key={c.code}
+                      onClick={() => updateSettings({ currency: c.code })}
+                      className={`flex items-center gap-1.5 rounded-xl border px-3 py-2 text-sm font-medium transition-colors ${
+                        settings.currency === c.code
+                          ? "border-indigo-500 bg-indigo-50 text-indigo-700 dark:border-indigo-500 dark:bg-indigo-900/30 dark:text-indigo-300"
+                          : "border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 dark:hover:border-gray-600 dark:hover:bg-gray-800"
+                      }`}
+                    >
+                      <span className="text-base">{c.symbol}</span>
+                      <span className="hidden sm:inline">{c.code}</span>
+                    </button>
+                  ))}
+                </div>
               </div>
-              <button
-                onClick={handleSalaryUpdate}
-                disabled={saving}
-                className="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
-              >
-                {saving ? "Saving..." : "Update"}
-              </button>
+              {/* Salary input */}
+              <div className="flex items-center gap-3">
+                <div className="relative flex-1">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">{symbol}</span>
+                  <input
+                    type="number"
+                    min="1"
+                    value={salary}
+                    onChange={(e) => setSalary(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === "Enter") handleSalaryUpdate(); }}
+                    className="w-full rounded-xl border border-gray-200 bg-white py-2.5 pl-7 pr-3 text-sm font-medium text-gray-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                  />
+                </div>
+                <button
+                  onClick={handleSalaryUpdate}
+                  disabled={saving}
+                  className="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+                >
+                  {saving ? "Saving..." : "Update"}
+                </button>
+              </div>
             </div>
           </AccordionSection>
 

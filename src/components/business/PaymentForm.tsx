@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { DatePicker } from "@/components/ui/DatePicker";
+import { useCurrency } from "@/hooks/useCurrency";
 import type { PaymentInput, PaymentMethod } from "@/types";
 
 const PAYMENT_METHODS: { value: PaymentMethod; label: string }[] = [
@@ -19,6 +20,7 @@ interface PaymentFormProps {
 }
 
 export function PaymentForm({ ledgerId, onSubmit, onCancel }: PaymentFormProps) {
+  const { symbol } = useCurrency();
   const [amount, setAmount] = useState("");
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   const [method, setMethod] = useState<PaymentMethod>("bank_transfer");
@@ -58,7 +60,7 @@ export function PaymentForm({ ledgerId, onSubmit, onCancel }: PaymentFormProps) 
         <div>
           <label className="mb-1 block text-[10px] font-medium text-gray-500">Amount</label>
           <div className="relative">
-            <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-gray-400">₹</span>
+            <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-gray-400">{symbol}</span>
             <input
               type="number"
               min="1"

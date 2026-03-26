@@ -12,7 +12,8 @@ import {
 } from "recharts";
 import { Table2, BarChart3, Layers } from "lucide-react";
 import { buildCategoryMap } from "@/lib/categories";
-import { cn, formatCurrency } from "@/lib/utils";
+import { cn } from "@/lib/utils";
+import { useCurrency } from "@/hooks/useCurrency";
 import { useSettings } from "@/hooks/useSettings";
 import type { DailyTotal, StackedDailyTotal, CategoryId } from "@/types";
 
@@ -29,6 +30,7 @@ function StackedTooltip({ active, payload, label, catMap }: {
   label?: string;
   catMap: Record<string, { label: string; color: string }>;
 }) {
+  const { formatCurrency } = useCurrency();
   if (!active || !payload?.length) return null;
   const total = payload.reduce((sum, p) => sum + (p.value || 0), 0);
   const nonZero = payload.filter((p) => p.value > 0);
@@ -58,6 +60,7 @@ export function DailyTrendChart({ dailyTotals, stackedDailyTotals, activeCategor
   const [stacked, setStacked] = useState(false);
   const [showTable, setShowTable] = useState(false);
   const { settings } = useSettings();
+  const { formatCurrency } = useCurrency();
   const catMap = buildCategoryMap(settings.customCategories);
 
   const hasData = dailyTotals.some((d) => d.total > 0);

@@ -1,7 +1,7 @@
 "use client";
 
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
-import { formatCurrency } from "@/lib/utils";
+import { useCurrency } from "@/hooks/useCurrency";
 
 interface CollectionChartProps {
   data: { month: string; received: number; expected: number }[];
@@ -12,6 +12,7 @@ function CollectionTooltip({ active, payload, label }: {
   payload?: Array<{ dataKey: string; value: number }>;
   label?: string;
 }) {
+  const { formatCurrency } = useCurrency();
   if (!active || !payload?.length) return null;
   return (
     <div className="rounded-lg border border-gray-200 bg-white px-3 py-2 shadow-lg text-xs dark:border-gray-700 dark:bg-gray-900">
@@ -31,6 +32,7 @@ function CollectionTooltip({ active, payload, label }: {
 }
 
 export function CollectionChart({ data }: CollectionChartProps) {
+  const { symbol } = useCurrency();
   if (data.length === 0) return null;
 
   const hasAnyReceived = data.some((d) => d.received > 0);
@@ -51,7 +53,7 @@ export function CollectionChart({ data }: CollectionChartProps) {
         <BarChart data={formatted} margin={{ top: 5, right: 5, left: -10, bottom: 5 }}>
           <CartesianGrid strokeDasharray="3 3" className="[&_line]:stroke-gray-200 dark:[&_line]:stroke-gray-700" />
           <XAxis dataKey="label" tick={{ fontSize: 11, fill: "#6B7280" }} className="dark:[&_text]:!fill-gray-400" />
-          <YAxis tick={{ fontSize: 11, fill: "#6B7280" }} tickFormatter={(v: number) => `₹${(v / 1000).toFixed(0)}k`} className="dark:[&_text]:!fill-gray-400" />
+          <YAxis tick={{ fontSize: 11, fill: "#6B7280" }} tickFormatter={(v: number) => `${symbol}${(v / 1000).toFixed(0)}k`} className="dark:[&_text]:!fill-gray-400" />
           <Tooltip content={<CollectionTooltip />} />
           <Legend
             formatter={(value) => {

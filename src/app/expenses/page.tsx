@@ -14,12 +14,13 @@ import { useSettings } from "@/hooks/useSettings";
 import { useCalculations } from "@/hooks/useCalculations";
 import { useUIStore } from "@/stores/uiStore";
 import { Search, PlusCircle } from "lucide-react";
-import { formatCurrency } from "@/lib/utils";
+import { useCurrency } from "@/hooks/useCurrency";
 import debounce from "lodash/debounce";
 
 type SortOption = "day-desc" | "day-asc" | "amount-desc" | "amount-asc";
 
 export default function ExpensesPage() {
+  const { formatCurrency } = useCurrency();
   const {
     currentMonth,
     currentYear,

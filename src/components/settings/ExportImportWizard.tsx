@@ -7,10 +7,12 @@ import { useSettings } from "@/hooks/useSettings";
 import { useUIStore } from "@/stores/uiStore";
 import { buildCategoryMap, getAllCategories } from "@/lib/categories";
 import { useToast } from "@/components/ui/Toast";
-import { getMonthName, formatCurrency } from "@/lib/utils";
+import { getMonthName } from "@/lib/utils";
+import { useCurrency } from "@/hooks/useCurrency";
 import type { Expense, ExpenseInput } from "@/types";
 
 export function ExportImportWizard() {
+  const { formatCurrency } = useCurrency();
   const { currentMonth, currentYear } = useUIStore();
   const { expenses, addExpense } = useExpenses(currentMonth, currentYear);
   const { settings } = useSettings();

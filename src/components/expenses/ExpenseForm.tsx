@@ -8,6 +8,7 @@ import { useUIStore } from "@/stores/uiStore";
 import { useToast } from "@/components/ui/Toast";
 import { DatePicker } from "@/components/ui/DatePicker";
 import { useSettings } from "@/hooks/useSettings";
+import { useCurrency } from "@/hooks/useCurrency";
 import type { CategoryId, ExpenseInput, Expense } from "@/types";
 
 interface ExpenseFormProps {
@@ -28,6 +29,7 @@ export function ExpenseForm({
   const closeForm = useUIStore((s) => s.closeForm);
   const { toast } = useToast();
   const { settings } = useSettings();
+  const { symbol } = useCurrency();
   const allCategories = getAllCategories(settings.customCategories, settings.hiddenDefaults);
 
   const [category, setCategory] = useState<CategoryId>(editExpense?.category || "groceries");
@@ -164,7 +166,7 @@ export function ExpenseForm({
       {/* Amount */}
       <div>
         <label className="mb-1.5 block text-xs font-medium text-gray-500 uppercase dark:text-gray-400">
-          Amount (₹)
+          Amount ({symbol})
         </label>
         <input
           ref={amountRef}
