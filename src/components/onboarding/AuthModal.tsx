@@ -226,11 +226,10 @@ function MobileAuthPage({ children }: { children: React.ReactNode }) {
   return (
     <div style={{
       position: "relative",
-      display: "flex", flexDirection: "column",
       minHeight: "100dvh",
       background: SP_BG,
       overflow: "hidden",
-    }} className="lg:hidden">
+    }} className="flex flex-col lg:hidden">
       <FloatingOrbs />
 
       {/* Subtle grid */}
