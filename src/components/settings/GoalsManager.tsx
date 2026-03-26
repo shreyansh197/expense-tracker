@@ -195,27 +195,25 @@ export function GoalsManager() {
                 />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-2">
-              <input
-                type="month"
-                placeholder="Deadline (optional)"
-                value={deadline}
-                onChange={(e) => setDeadline(e.target.value)}
-                className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-900 dark:text-white"
-              />
-              <div className="flex items-center gap-1.5 overflow-x-auto rounded-lg border border-gray-200 bg-white px-2 py-1.5 dark:border-gray-600 dark:bg-gray-900 scrollbar-hide">
-                {PRESET_COLORS.slice(0, 12).map((c) => (
-                  <button
-                    key={c}
-                    onClick={() => setColor(c)}
-                    title={c}
-                    className={`h-5 w-5 shrink-0 rounded-full border-2 transition-all ${
-                      color === c ? "border-gray-900 scale-110 dark:border-white" : "border-transparent"
-                    }`}
-                    style={{ backgroundColor: c }}
-                  />
-                ))}
-              </div>
+            <input
+              type="month"
+              placeholder="Deadline (optional)"
+              value={deadline}
+              onChange={(e) => setDeadline(e.target.value)}
+              className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-900 dark:text-white"
+            />
+            <div className="flex flex-wrap gap-1.5">
+              {PRESET_COLORS.map((c) => (
+                <button
+                  key={c}
+                  onClick={() => setColor(c)}
+                  title={c}
+                  className={`h-5 w-5 shrink-0 rounded-full border-2 transition-all hover:scale-110 ${
+                    color === c ? "border-gray-900 scale-110 dark:border-white" : "border-transparent"
+                  }`}
+                  style={{ backgroundColor: c }}
+                />
+              ))}
             </div>
             <button
               onClick={handleSave}
