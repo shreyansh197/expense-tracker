@@ -153,7 +153,7 @@ export function GoalsManager() {
       </div>
 
       {showForm && (
-        <div className="mb-4 rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800">
+        <div className="mb-4 overflow-hidden rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800">
           <div className="mb-3 flex items-center justify-between">
             <span className="text-xs font-medium text-gray-500">
               {editId ? "Edit Goal" : "New Goal"}
@@ -200,7 +200,7 @@ export function GoalsManager() {
               placeholder="Deadline (optional)"
               value={deadline}
               onChange={(e) => setDeadline(e.target.value)}
-              className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-900 dark:text-white"
+              className="min-w-0 max-w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-900 dark:text-white"
             />
             <div className="flex flex-wrap gap-1.5">
               {PRESET_COLORS.map((c) => (
