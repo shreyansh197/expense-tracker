@@ -1,4 +1,4 @@
-const CACHE_NAME = "expense-tracker-icons-f45110a9";
+const CACHE_NAME = "expense-tracker-icons-a1bc5e50";
 
 self.addEventListener("install", () => {
   self.skipWaiting();
