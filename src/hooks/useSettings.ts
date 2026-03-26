@@ -70,8 +70,10 @@ function saveLocal(s: UserSettings) {
   localStorage.setItem(storageKeyForUser(_currentUserId), JSON.stringify(s));
 }
 
-/** Push settings via sync/commit API */
+/** Push settings via sync/commit API — never pushes unmodified defaults */
 async function pushToApi(s: UserSettings) {
+  // Guard: never push default/unmodified settings to prevent overwriting real data
+  if (s.updatedAt === 0) return;
   const wid = getActiveWorkspaceId();
   if (!wid || !isAuthenticated()) return;
 
@@ -157,24 +159,25 @@ function _syncFromApi() {
     if (_currentUserId !== userIdAtCallTime) return;
 
     if (!remote) {
-      // No remote row yet — push local if there is user data saved
-      const hasLocal =
-        typeof window !== "undefined" &&
-        localStorage.getItem(storageKeyForUser(userIdAtCallTime)) !== null;
-      if (hasLocal) pushToApi(_settings);
+      // No remote row yet — do NOT push here; we might push stale default state.
+      // The DB row will be created when the user explicitly sets settings.
       return;
     }
     const localTs = _settings.updatedAt || 0;
     const remoteTs = remote.updatedAt || 0;
     if (remoteTs >= localTs) {
-      // Always prefer remote when timestamps are equal or newer
+      // Prefer remote — but never overwrite a valid local salary with remote salary=0.
+      // This guards against a bad DB state (e.g. from markOnboarded pushing defaults).
+      if (remote.salary === 0 && _settings.salary > 0) {
+        // Remote has been reset but local is intact — restore DB from local.
+        if (localTs > 0) pushToApi(_settings);
+        return;
+      }
       localStorage.setItem(storageKeyForUser(userIdAtCallTime), JSON.stringify(remote));
       _setShared(remote);
     } else {
-      const hasLocal =
-        typeof window !== "undefined" &&
-        localStorage.getItem(storageKeyForUser(userIdAtCallTime)) !== null;
-      if (hasLocal) pushToApi(_settings);
+      // Local is newer — push to remote to keep DB in sync.
+      if (localTs > 0) pushToApi(_settings);
     }
   }).catch(() => { /* ignore network errors */ });
 }
@@ -276,7 +279,9 @@ export function useSettings() {
       const initial = { ...DEFAULT_SETTINGS, updatedAt: Date.now() };
       saveLocal(initial);
       _setShared(initial);
-      pushToApi(initial);
+      // Do NOT push to API here — initial settings have salary=0 which would
+      // overwrite any real data already in the DB. The DB row is created when
+      // the user explicitly sets their salary via updateSettings.
     }
   }, []);
 
