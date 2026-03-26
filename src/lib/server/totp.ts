@@ -1,6 +1,6 @@
 import * as OTPAuth from "otpauth";
 
-const ISSUER = "ExpenseTracker";
+const ISSUER = "Spendly";
 
 /** Generate a new TOTP secret and provisioning URI. */
 export function generateTotpSecret(email: string): {

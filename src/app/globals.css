@@ -180,3 +180,57 @@ input[type="number"] {
   stroke: #334155;
   opacity: 0.4;
 }
+
+/* ── Spendly Fixed-Theme Splash / Hero Animations ─────────── */
+
+/* Slow animated gradient mesh background */
+@keyframes sp-gradient-shift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Breathing glow for logo outer ring */
+@keyframes sp-glow-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(99,102,241,0), 0 0 32px rgba(99,102,241,0.35), 0 0 80px rgba(34,211,238,0.15); }
+  50%       { box-shadow: 0 0 0 8px rgba(99,102,241,0.12), 0 0 48px rgba(99,102,241,0.55), 0 0 120px rgba(34,211,238,0.25); }
+}
+
+/* Diagonal shimmer sweep across logo circle */
+@keyframes sp-beam {
+  0%   { transform: translateX(-120%) skewX(-20deg); opacity: 0; }
+  30%  { opacity: 0.6; }
+  70%  { opacity: 0.4; }
+  100% { transform: translateX(220%) skewX(-20deg); opacity: 0; }
+}
+
+/* Stagger entrance for auth option cards */
+@keyframes sp-card-in {
+  from { opacity: 0; transform: translateY(20px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0)    scale(1); }
+}
+
+/* Form slide-in from slight right */
+@keyframes sp-form-in {
+  from { opacity: 0; transform: translateX(16px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* Float for decorative icons on splash */
+@keyframes sp-float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  33%       { transform: translateY(-12px) rotate(1.5deg); }
+  66%       { transform: translateY(-6px) rotate(-1deg); }
+}
+
+/* Orb pulse for hero background orbs */
+@keyframes sp-orb {
+  0%, 100% { transform: scale(1);   opacity: 0.6; }
+  50%       { transform: scale(1.15); opacity: 1; }
+}
+
+/* Tagline gradient shimmer */
+@keyframes sp-text-shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position:  200% center; }
+}

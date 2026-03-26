@@ -1,0 +1,115 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <defs>
+    <!-- Background gradient: deep navy → vivid indigo → violet -->
+    <linearGradient id="bg" x1="0" y1="0" x2="512" y2="512" gradientUnits="userSpaceOnUse">
+      <stop offset="0%"   stop-color="#0a0f1e"/>
+      <stop offset="45%"  stop-color="#1e1b6e"/>
+      <stop offset="100%" stop-color="#2d1458"/>
+    </linearGradient>
+
+    <!-- Icon accent gradient: indigo → cyan -->
+    <linearGradient id="accent" x1="120" y1="140" x2="392" y2="372" gradientUnits="userSpaceOnUse">
+      <stop offset="0%"   stop-color="#818cf8"/>
+      <stop offset="50%"  stop-color="#6366f1"/>
+      <stop offset="100%" stop-color="#22d3ee"/>
+    </linearGradient>
+
+    <!-- Glow filter for the S mark -->
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="8" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+
+    <!-- Soft inner glow on background -->
+    <radialGradient id="centerGlow" cx="50%" cy="45%" r="45%">
+      <stop offset="0%"   stop-color="#6366f1" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="transparent" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Clip to rounded square for maskable icons -->
+    <clipPath id="roundedSquare">
+      <rect width="512" height="512" rx="115" ry="115"/>
+    </clipPath>
+  </defs>
+
+  <!-- Rounded square background -->
+  <rect width="512" height="512" rx="115" ry="115" fill="url(#bg)"/>
+
+  <!-- Inner glow overlay -->
+  <rect width="512" height="512" rx="115" ry="115" fill="url(#centerGlow)"/>
+
+  <!-- Subtle grid texture -->
+  <g opacity="0.06" clip-path="url(#roundedSquare)">
+    <line x1="0" y1="128" x2="512" y2="128" stroke="white" stroke-width="1"/>
+    <line x1="0" y1="256" x2="512" y2="256" stroke="white" stroke-width="1"/>
+    <line x1="0" y1="384" x2="512" y2="384" stroke="white" stroke-width="1"/>
+    <line x1="128" y1="0" x2="128" y2="512" stroke="white" stroke-width="1"/>
+    <line x1="256" y1="0" x2="256" y2="512" stroke="white" stroke-width="1"/>
+    <line x1="384" y1="0" x2="384" y2="512" stroke="white" stroke-width="1"/>
+  </g>
+
+  <!--
+    Spendly "S" mark — a bold, fluid S built from two arcs + a connecting
+    bar, evoking a coin/flow/spending motion.
+    The shape sits centered in a ~280×310 bounding box inside the 512×512 canvas.
+  -->
+  <g filter="url(#glow)" transform="translate(256,256)">
+    <!--
+      The "S" is constructed as a single path:
+      - Top arc curves right → down
+      - Center bar sweeps left → right
+      - Bottom arc curves left → down
+      Each arc has a 38px stroke width and rounded linecap for a bold, friendly look.
+    -->
+
+    <!-- Shadow / depth layer (slightly offset, lower opacity) -->
+    <path
+      d="
+        M  62,-110
+        C  62,-110  62,-155 18,-155
+        C -26,-155 -78,-130 -78,-72
+        C -78,-18  -28,  8  22, 24
+        C  70, 40 100, 62 100,118
+        C 100,172  52,162   8,162
+        C -36,162 -68,138 -68,138
+      "
+      stroke="rgba(0,0,0,0.35)"
+      stroke-width="46"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      fill="none"
+      transform="translate(3,6)"
+    />
+
+    <!-- Main S stroke -->
+    <path
+      d="
+        M  62,-110
+        C  62,-110  62,-155 18,-155
+        C -26,-155 -78,-130 -78,-72
+        C -78,-18  -28,  8  22, 24
+        C  70, 40 100, 62 100,118
+        C 100,172  52,162   8,162
+        C -36,162 -68,138 -68,138
+      "
+      stroke="url(#accent)"
+      stroke-width="44"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      fill="none"
+    />
+
+    <!-- Coin dot accent — top right of S, a small glowing circle -->
+    <circle cx="62" cy="-110" r="14" fill="#22d3ee" opacity="0.9"/>
+    <!-- Bottom left end dot -->
+    <circle cx="-68" cy="138" r="14" fill="#818cf8" opacity="0.9"/>
+  </g>
+
+  <!-- Subtle border ring -->
+  <rect
+    width="512" height="512" rx="115" ry="115"
+    fill="none"
+    stroke="rgba(255,255,255,0.08)"
+    stroke-width="2"
+  />
+</svg>
