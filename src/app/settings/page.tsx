@@ -11,7 +11,7 @@ import { SUPPORTED_CURRENCIES } from "@/lib/utils";
 import {
   Wallet, LinkIcon, Tag, Repeat, TrendingUp, Target, Palette,
   Download, Zap, Sun, Moon, Monitor, Smartphone, Briefcase,
-  Shield, Users, Database, Globe,
+  Shield, Users, Database,
 } from "lucide-react";
 import { InstallButton } from "@/components/pwa/InstallButton";
 import { useToast } from "@/components/ui/Toast";

@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import {
   TrendingUp, BarChart2, PiggyBank, DollarSign,
-  Receipt, CreditCard, ArrowUpDown, Target, Coins, Wallet,
+  Receipt, CreditCard, ArrowUpDown, Target, Coins,
 } from "lucide-react";
 
 type Phase = "visible" | "fading" | "hidden";
@@ -122,13 +123,11 @@ export function SplashScreen() {
             position: "relative",
             width: 96, height: 96,
             borderRadius: "50%",
-            background: `linear-gradient(135deg, ${INDIGO} 0%, #4338ca 50%, ${VIOLET} 100%)`,
-            display: "flex", alignItems: "center", justifyContent: "center",
+            overflow: "hidden",
             boxShadow: `0 8px 40px rgba(99,102,241,0.5), 0 2px 12px rgba(99,102,241,0.3)`,
             animation: "et-icon-scale 0.55s cubic-bezier(0.34,1.56,0.64,1) both",
-            overflow: "hidden",
           }}>
-            <Wallet size={44} color="white" strokeWidth={1.6} />
+            <Image src="/icons/icon-192.png" alt="Spendly" width={96} height={96} style={{ display: "block", width: "100%", height: "100%" }} />
             {/* Shimmer beam */}
             <div style={{
               position: "absolute", top: 0, left: 0, width: "40%", height: "100%",

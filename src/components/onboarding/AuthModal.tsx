@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { useCurrency } from "@/hooks/useCurrency";
 import {
   UserPlus,
@@ -11,7 +12,6 @@ import {
   Loader2,
   ArrowLeft,
   AlertCircle,
-  Wallet,
   TrendingUp,
   PieChart,
   Shield,
@@ -144,11 +144,10 @@ function DesktopHeroPanel() {
             <div style={{
               position: "relative",
               width: 44, height: 44, borderRadius: 12,
-              background: `linear-gradient(135deg, ${SP_INDIGO}, #4338ca)`,
-              display: "flex", alignItems: "center", justifyContent: "center",
+              overflow: "hidden",
               boxShadow: `0 4px 20px rgba(99,102,241,0.4)`,
             }}>
-              <Wallet style={{ width: 22, height: 22, color: "white" }} />
+              <Image src="/icons/icon-192.png" alt="Spendly" width={44} height={44} style={{ display: "block", width: "100%", height: "100%" }} />
             </div>
           </div>
           <span style={{ fontSize: "1.25rem", fontWeight: 800, letterSpacing: "-0.03em" }}>
@@ -256,11 +255,10 @@ function MobileAuthPage({ children }: { children: React.ReactNode }) {
           <div style={{
             position: "relative",
             width: 56, height: 56, borderRadius: 16,
-            background: `linear-gradient(135deg, ${SP_INDIGO}, #4338ca)`,
-            display: "flex", alignItems: "center", justifyContent: "center",
+            overflow: "hidden",
             boxShadow: `0 6px 24px rgba(99,102,241,0.5)`,
           }}>
-            <Wallet style={{ width: 26, height: 26, color: "white" }} />
+            <Image src="/icons/icon-192.png" alt="Spendly" width={56} height={56} style={{ display: "block", width: "100%", height: "100%" }} />
           </div>
         </div>
         <h1 style={{
