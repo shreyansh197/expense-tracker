@@ -75,9 +75,24 @@ export const CATEGORY_MAP: Record<string, CategoryMeta> = Object.fromEntries(
 export const DEFAULT_CATEGORIES: CategoryId[] = DEFAULT_CATEGORIES_META.map((c) => c.id);
 
 export const PRESET_COLORS = [
-  "#8B5CF6", "#3B82F6", "#10B981", "#F97316", "#EC4899",
-  "#6B7280", "#EF4444", "#06B6D4", "#14B8A6", "#F59E0B",
-  "#84CC16", "#A855F7", "#E11D48", "#0891B2", "#D946EF",
+  // Purples & Violets
+  "#7C3AED", "#8B5CF6", "#A78BFA", "#C4B5FD", "#6366F1", "#818CF8",
+  // Blues
+  "#1D4ED8", "#3B82F6", "#60A5FA", "#93C5FD", "#0EA5E9", "#38BDF8",
+  // Cyans & Teals
+  "#0891B2", "#06B6D4", "#22D3EE", "#0D9488", "#14B8A6", "#2DD4BF",
+  // Greens
+  "#059669", "#10B981", "#34D399", "#4ADE80", "#84CC16", "#A3E635",
+  // Yellows & Ambers
+  "#D97706", "#F59E0B", "#FBBF24", "#FCD34D", "#CA8A04",
+  // Oranges
+  "#EA580C", "#F97316", "#FB923C",
+  // Reds & Roses
+  "#DC2626", "#EF4444", "#F87171", "#E11D48", "#FB7185",
+  // Pinks & Fuchsias
+  "#BE185D", "#EC4899", "#F472B6", "#A21CAF", "#D946EF", "#E879F9",
+  // Neutrals
+  "#374151", "#6B7280", "#9CA3AF",
 ];
 
 export function getAllCategories(customCategories: CategoryMeta[] = [], hiddenDefaults: string[] = []): CategoryMeta[] {

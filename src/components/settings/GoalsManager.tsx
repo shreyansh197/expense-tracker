@@ -203,13 +203,14 @@ export function GoalsManager() {
                 onChange={(e) => setDeadline(e.target.value)}
                 className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-900 dark:text-white"
               />
-              <div className="flex items-center gap-1 overflow-x-auto">
-                {PRESET_COLORS.slice(0, 8).map((c) => (
+              <div className="flex flex-wrap gap-1.5">
+                {PRESET_COLORS.map((c) => (
                   <button
                     key={c}
                     onClick={() => setColor(c)}
-                    className={`h-6 w-6 shrink-0 rounded-full border-2 ${
-                      color === c ? "border-gray-900 dark:border-white" : "border-transparent"
+                    title={c}
+                    className={`h-6 w-6 shrink-0 rounded-full border-2 transition-all hover:scale-110 ${
+                      color === c ? "border-gray-900 scale-110 dark:border-white" : "border-transparent"
                     }`}
                     style={{ backgroundColor: c }}
                   />

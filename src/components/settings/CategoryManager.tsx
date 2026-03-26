@@ -382,13 +382,14 @@ function CategoryRow({
             autoFocus
             className="flex-1 rounded border border-gray-200 bg-white px-2 py-1 text-sm text-gray-900 focus:border-blue-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white"
           />
-          <div className="flex gap-0.5">
-            {PRESET_COLORS.slice(0, 6).map((c) => (
+          <div className="flex flex-wrap gap-0.5 max-w-[120px]">
+            {PRESET_COLORS.slice(0, 12).map((c) => (
               <button
                 key={c}
                 type="button"
                 onClick={() => onEditColor(c)}
-                className="h-4 w-4 rounded-full border"
+                title={c}
+                className="h-4 w-4 rounded-full border transition-all hover:scale-110"
                 style={{
                   backgroundColor: c,
                   borderColor: editColor === c ? "#1d4ed8" : "transparent",
