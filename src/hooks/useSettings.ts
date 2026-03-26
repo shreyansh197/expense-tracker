@@ -147,37 +147,46 @@ if (typeof window !== "undefined") {
 
 /** Fetch from API and merge — always called with _currentUserId already set. */
 function _syncFromApi() {
+  // Capture userId at call time so the async callback uses the right key
+  // even if _currentUserId changes (e.g. logout) before the fetch resolves.
+  const userIdAtCallTime = _currentUserId;
+  if (!userIdAtCallTime) return; // Not logged in — skip
+
   fetchSettingsFromApi().then((remote) => {
+    // Bail out if user has logged out or switched accounts while fetch was in-flight
+    if (_currentUserId !== userIdAtCallTime) return;
+
     if (!remote) {
       // No remote row yet — push local if there is user data saved
       const hasLocal =
-        _currentUserId !== null &&
         typeof window !== "undefined" &&
-        localStorage.getItem(storageKeyForUser(_currentUserId)) !== null;
+        localStorage.getItem(storageKeyForUser(userIdAtCallTime)) !== null;
       if (hasLocal) pushToApi(_settings);
       return;
     }
     const localTs = _settings.updatedAt || 0;
     const remoteTs = remote.updatedAt || 0;
-    if (remoteTs > localTs) {
-      saveLocal(remote);
+    if (remoteTs >= localTs) {
+      // Always prefer remote when timestamps are equal or newer
+      localStorage.setItem(storageKeyForUser(userIdAtCallTime), JSON.stringify(remote));
       _setShared(remote);
     } else {
       const hasLocal =
-        _currentUserId !== null &&
         typeof window !== "undefined" &&
-        localStorage.getItem(storageKeyForUser(_currentUserId)) !== null;
-      if (localTs > remoteTs && hasLocal) pushToApi(_settings);
+        localStorage.getItem(storageKeyForUser(userIdAtCallTime)) !== null;
+      if (hasLocal) pushToApi(_settings);
     }
   }).catch(() => { /* ignore network errors */ });
 }
 
 export function switchSettingsUser(userId: string) {
+  // Skip if already set to this user — prevents double API sync from
+  // AuthProvider's useEffect firing after explicit login already handled it.
+  if (_currentUserId === userId) return;
   _currentUserId = userId;
   const local = loadSettings(userId);
   _setShared(local);
-  // Always sync from API here — _currentUserId is guaranteed set before the fetch resolves,
-  // eliminating the race condition with useEffect-based syncing.
+  // Sync from API — _currentUserId is captured inside _syncFromApi so it's safe.
   _syncFromApi();
 }
 
