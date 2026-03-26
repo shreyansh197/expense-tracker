@@ -196,8 +196,8 @@ export function OfflineScreen() {
             maxWidth: "280px",
           }}
         >
-          Your data is safe. Any changes you make will sync automatically when
-          you&rsquo;re back online.
+          Your data is safe. Please reconnect to the internet to continue
+          using the app and syncing your data.
         </p>
 
         {/* Retry button */}

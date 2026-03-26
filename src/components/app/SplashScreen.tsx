@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Wallet, TrendingUp, BarChart2, PiggyBank, DollarSign } from "lucide-react";
+import { Wallet, TrendingUp, BarChart2, PiggyBank, DollarSign, Receipt, CreditCard, ArrowUpDown, Target, Coins } from "lucide-react";
 
 type Phase = "visible" | "fading" | "hidden";
 
@@ -67,11 +67,18 @@ export function SplashScreen() {
         }}
       />
 
-      {/* Decorative corner icons */}
+      {/* Decorative floating icons — corners */}
       <FloatIcon icon={<TrendingUp size={80} />} style={{ top: "6%",  left:  "4%",  animationDelay: "0s" }} />
       <FloatIcon icon={<BarChart2  size={64} />} style={{ top: "8%",  right: "5%",  animationDelay: "0.6s" }} />
       <FloatIcon icon={<PiggyBank  size={72} />} style={{ bottom: "7%", left: "5%", animationDelay: "1.2s" }} />
       <FloatIcon icon={<DollarSign size={56} />} style={{ bottom: "8%", right: "4%", animationDelay: "0.3s" }} />
+      {/* Additional mid-edge floating icons */}
+      <FloatIcon icon={<Receipt     size={44} />} style={{ top: "42%", left:  "2%",  animationDelay: "0.9s" }} />
+      <FloatIcon icon={<CreditCard  size={40} />} style={{ top: "38%", right: "2%",  animationDelay: "1.5s" }} />
+      <FloatIcon icon={<ArrowUpDown size={36} />} style={{ top: "22%", left:  "12%", animationDelay: "0.4s" }} />
+      <FloatIcon icon={<Target      size={48} />} style={{ top: "20%", right: "10%", animationDelay: "1.8s" }} />
+      <FloatIcon icon={<Coins       size={52} />} style={{ bottom: "22%", left: "10%", animationDelay: "0.7s" }} />
+      <FloatIcon icon={<BarChart2   size={38} />} style={{ bottom: "20%", right: "9%",  animationDelay: "1.1s" }} />
 
       {/* Center content */}
       <div
