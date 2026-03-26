@@ -64,7 +64,7 @@ export function DailyTrendChart({ dailyTotals, stackedDailyTotals, activeCategor
 
   if (!hasData) {
     return (
-      <div className="flex h-[180px] items-center justify-center text-sm text-gray-400">
+      <div className="flex min-h-[180px] flex-1 items-center justify-center text-sm text-gray-400">
         No spending data yet
       </div>
     );
@@ -98,7 +98,7 @@ export function DailyTrendChart({ dailyTotals, stackedDailyTotals, activeCategor
   const tableDays = dailyTotals.filter((d) => d.total > 0);
 
   return (
-    <div role="img" aria-label="Daily spending trend chart">
+    <div role="img" aria-label="Daily spending trend chart" className="flex h-full flex-col">
       <div className="mb-2 flex justify-end gap-1">
         {hasStackedData && (
           <button
@@ -145,7 +145,7 @@ export function DailyTrendChart({ dailyTotals, stackedDailyTotals, activeCategor
       </div>
 
       {showTable ? (
-        <div className="max-h-[220px] overflow-y-auto overflow-x-auto">
+        <div className="flex-1 min-h-[180px] overflow-y-auto overflow-x-auto">
           <table className="w-full text-sm" role="table">
             <thead className="sticky top-0 bg-white dark:bg-gray-900">
               <tr className="border-b border-gray-100 text-left text-xs text-gray-500 dark:border-gray-800 dark:text-gray-400">
@@ -170,7 +170,7 @@ export function DailyTrendChart({ dailyTotals, stackedDailyTotals, activeCategor
           </table>
         </div>
       ) : stacked && stackedDailyTotals && catKeys.length > 0 ? (
-        <div className="h-[220px] w-full">
+        <div className="flex-1 min-h-[220px] w-full">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
               data={stackedDailyTotals}
@@ -213,7 +213,7 @@ export function DailyTrendChart({ dailyTotals, stackedDailyTotals, activeCategor
           </ResponsiveContainer>
         </div>
       ) : (
-        <div className="h-[180px] w-full">
+        <div className="flex-1 min-h-[180px] w-full">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
               data={dailyTotals}

@@ -147,15 +147,17 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-gray-100 bg-white p-4 dark:border-gray-800 dark:bg-gray-900 card-interactive">
+          <div className="flex flex-col rounded-2xl border border-gray-100 bg-white p-4 dark:border-gray-800 dark:bg-gray-900 card-interactive">
             <h3 className="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
               Daily Spending Trend
             </h3>
+            <div className="flex-1 min-h-0">
             <DailyTrendChart
               dailyTotals={dailyTotals}
               stackedDailyTotals={stackedDailyTotals}
               onBarClick={handleDayClick}
             />
+            </div>
           </div>
         </div>
         )}
