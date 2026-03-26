@@ -60,6 +60,40 @@ async function gen() {
     .toFile(path.join(iconsDir, "apple-touch-icon.png"));
   console.log("Generated apple-touch-icon.png");
 
+  // Generate ICO favicon (48x48 PNG wrapped in ICO container)
+  const faviconPng = await sharp(svgBuf).resize(48, 48).png().toBuffer();
+  // ICO format: header + directory entry + PNG data
+  const icoHeader = Buffer.alloc(6);
+  icoHeader.writeUInt16LE(0, 0); // reserved
+  icoHeader.writeUInt16LE(1, 2); // type: 1 = ICO
+  icoHeader.writeUInt16LE(1, 4); // count: 1 image
+  const icoDir = Buffer.alloc(16);
+  icoDir.writeUInt8(48, 0); // width
+  icoDir.writeUInt8(48, 1); // height
+  icoDir.writeUInt8(0, 2); // color palette
+  icoDir.writeUInt8(0, 3); // reserved
+  icoDir.writeUInt16LE(1, 4); // color planes
+  icoDir.writeUInt16LE(32, 6); // bits per pixel
+  icoDir.writeUInt32LE(faviconPng.length, 8); // image size
+  icoDir.writeUInt32LE(22, 12); // offset (6 + 16 = 22)
+  const ico = Buffer.concat([icoHeader, icoDir, faviconPng]);
+  // Write into src/app/ so Next.js serves it at /favicon.ico
+  fs.writeFileSync(path.join("src", "app", "favicon.ico"), ico);
+  console.log("Generated src/app/favicon.ico");
+
+  // Copy icon.png and apple-icon.png into src/app/ for Next.js metadata
+  await sharp(svgBuf)
+    .resize(192, 192)
+    .png()
+    .toFile(path.join("src", "app", "icon.png"));
+  console.log("Generated src/app/icon.png");
+
+  await sharp(svgBuf)
+    .resize(180, 180)
+    .png()
+    .toFile(path.join("src", "app", "apple-icon.png"));
+  console.log("Generated src/app/apple-icon.png");
+
   // Write icon version hash for cache-busting
   fs.writeFileSync(
     path.join(iconsDir, "version.json"),

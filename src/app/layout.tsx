@@ -14,6 +14,16 @@ export const metadata: Metadata = {
   title: "Spendly",
   description: "Spend smarter. Live better. Track expenses, set budgets, and sync across all your devices.",
   manifest: "/manifest.json",
+  icons: {
+    icon: [
+      { url: "/icons/favicon-32.png", sizes: "32x32", type: "image/png" },
+      { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [
+      { url: "/icons/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    ],
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
@@ -39,8 +49,6 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning className={inter.variable}>
       <head>
-        <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
-        <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png" />
         <script
           dangerouslySetInnerHTML={{
             __html: `window.__pwaInstallPrompt=null;window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();window.__pwaInstallPrompt=e;});`,
