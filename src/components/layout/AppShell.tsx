@@ -64,7 +64,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         onComplete={(salary) => {
           if (salary) updateSettings({ salary });
           markOnboarded();
-          window.location.reload();
+          window.location.replace("/");
         }}
       />
     );
