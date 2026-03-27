@@ -15,14 +15,14 @@ function CollectionTooltip({ active, payload, label }: {
   const { formatCurrency } = useCurrency();
   if (!active || !payload?.length) return null;
   return (
-    <div className="rounded-lg border border-gray-200 bg-white px-3 py-2 shadow-lg text-xs dark:border-gray-700 dark:bg-gray-900">
-      <p className="font-semibold text-gray-900 dark:text-white mb-1">{label}</p>
+    <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 shadow-lg text-xs dark:border-slate-700 dark:bg-slate-900">
+      <p className="font-semibold text-slate-900 dark:text-white mb-1">{label}</p>
       {payload.map((p) => (
         <div key={p.dataKey} className="flex justify-between gap-4">
-          <span className={p.dataKey === "received" ? "text-emerald-600 dark:text-emerald-400" : "text-gray-500 dark:text-gray-300"}>
+          <span className={p.dataKey === "received" ? "text-emerald-600 dark:text-emerald-400" : "text-slate-500 dark:text-slate-300"}>
             {p.dataKey === "received" ? "Received" : "Expected"}
           </span>
-          <span className="font-medium text-gray-900 dark:text-white">
+          <span className="font-medium text-slate-900 dark:text-white">
             {formatCurrency(p.value)}
           </span>
         </div>
@@ -42,18 +42,18 @@ export function CollectionChart({ data }: CollectionChartProps) {
   }));
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900">
-      <h3 className="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
+    <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+      <h3 className="mb-3 text-sm font-semibold text-slate-700 dark:text-slate-300">
         Monthly Collections
       </h3>
       {!hasAnyReceived && (
-        <p className="mb-2 text-xs text-gray-400">No payments received yet — grey bars show expected amounts.</p>
+        <p className="mb-2 text-xs text-slate-400">No payments received yet — grey bars show expected amounts.</p>
       )}
       <ResponsiveContainer width="100%" height={220}>
         <BarChart data={formatted} margin={{ top: 5, right: 5, left: -10, bottom: 5 }}>
-          <CartesianGrid strokeDasharray="3 3" className="[&_line]:stroke-gray-200 dark:[&_line]:stroke-gray-700" />
-          <XAxis dataKey="label" tick={{ fontSize: 11, fill: "#6B7280" }} className="dark:[&_text]:!fill-gray-400" />
-          <YAxis tick={{ fontSize: 11, fill: "#6B7280" }} tickFormatter={(v: number) => `${symbol}${(v / 1000).toFixed(0)}k`} className="dark:[&_text]:!fill-gray-400" />
+          <CartesianGrid strokeDasharray="3 3" className="[&_line]:stroke-slate-200 dark:[&_line]:stroke-slate-700" />
+          <XAxis dataKey="label" tick={{ fontSize: 11, fill: "#6B7280" }} className="dark:[&_text]:!fill-slate-400" />
+          <YAxis tick={{ fontSize: 11, fill: "#6B7280" }} tickFormatter={(v: number) => `${symbol}${(v / 1000).toFixed(0)}k`} className="dark:[&_text]:!fill-slate-400" />
           <Tooltip content={<CollectionTooltip />} />
           <Legend
             formatter={(value) => {

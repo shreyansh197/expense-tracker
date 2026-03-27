@@ -71,25 +71,25 @@ export function InstallButton() {
 
   // Fallback: show manual instructions
   return (
-    <div className="space-y-3 text-sm text-gray-600 dark:text-gray-400">
+    <div className="space-y-3 text-sm text-slate-600 dark:text-slate-400">
       <div className="flex items-start gap-2">
         <Smartphone size={16} className="mt-0.5 shrink-0" />
         <div>
-          <p className="font-medium text-gray-700 dark:text-gray-300">Android (Chrome)</p>
+          <p className="font-medium text-slate-700 dark:text-slate-300">Android (Chrome)</p>
           <p>Tap menu (⋮) → &quot;Install app&quot;</p>
         </div>
       </div>
       <div className="flex items-start gap-2">
         <Smartphone size={16} className="mt-0.5 shrink-0" />
         <div>
-          <p className="font-medium text-gray-700 dark:text-gray-300">iPhone (Safari)</p>
+          <p className="font-medium text-slate-700 dark:text-slate-300">iPhone (Safari)</p>
           <p>Tap Share (↑) → &quot;Add to Home Screen&quot;</p>
         </div>
       </div>
       <div className="flex items-start gap-2">
         <Monitor size={16} className="mt-0.5 shrink-0" />
         <div>
-          <p className="font-medium text-gray-700 dark:text-gray-300">Desktop (Chrome/Edge)</p>
+          <p className="font-medium text-slate-700 dark:text-slate-300">Desktop (Chrome/Edge)</p>
           <p>Click menu (⋮) → &quot;Save and Share&quot; → &quot;Install page as app&quot;</p>
         </div>
       </div>

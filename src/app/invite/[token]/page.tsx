@@ -69,12 +69,12 @@ export default function InvitePage() {
   if (error) {
     return (
       <div className="flex min-h-screen items-center justify-center p-4">
-        <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl dark:bg-gray-900 text-center">
+        <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl dark:bg-slate-900 text-center">
           <XCircle className="mx-auto h-12 w-12 text-red-500 mb-4" />
-          <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
+          <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-2">
             Invite Not Available
           </h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+          <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
             {error}
           </p>
           <button
@@ -104,12 +104,12 @@ export default function InvitePage() {
   if (accepted) {
     return (
       <div className="flex min-h-screen items-center justify-center p-4">
-        <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl dark:bg-gray-900 text-center">
+        <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl dark:bg-slate-900 text-center">
           <CheckCircle2 className="mx-auto h-12 w-12 text-emerald-500 mb-4" />
-          <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
+          <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-2">
             Joined Successfully!
           </h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <p className="text-sm text-slate-500 dark:text-slate-400">
             Redirecting to {preview.workspaceName}...
           </p>
         </div>
@@ -121,23 +121,23 @@ export default function InvitePage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center p-4">
-      <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl dark:bg-gray-900">
+      <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl dark:bg-slate-900">
         <div className="flex h-14 w-14 items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900 mx-auto mb-4">
           <Users className="h-7 w-7 text-indigo-600 dark:text-indigo-400" />
         </div>
 
-        <h2 className="text-center text-lg font-bold text-gray-900 dark:text-white mb-1">
+        <h2 className="text-center text-lg font-bold text-slate-900 dark:text-white mb-1">
           You&apos;re Invited!
         </h2>
-        <p className="text-center text-sm text-gray-500 dark:text-gray-400 mb-6">
+        <p className="text-center text-sm text-slate-500 dark:text-slate-400 mb-6">
           {preview.invitedBy} invited you to join
         </p>
 
-        <div className="rounded-xl bg-gray-50 p-4 dark:bg-gray-800 mb-6">
-          <div className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
+        <div className="rounded-xl bg-slate-50 p-4 dark:bg-slate-800 mb-6">
+          <div className="text-lg font-semibold text-slate-900 dark:text-white mb-1">
             {preview.workspaceName}
           </div>
-          <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+          <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
             <Shield className="h-3.5 w-3.5" />
             You&apos;ll join as {preview.role.toLowerCase()}
           </div>

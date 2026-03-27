@@ -26,8 +26,8 @@ export function BusinessKpiCards({
       label: "Total Expected",
       value: formatCurrency(totalExpected),
       icon: Banknote,
-      color: "text-gray-600 dark:text-gray-400",
-      bg: "bg-gray-50 dark:bg-gray-800",
+      color: "text-slate-600 dark:text-slate-400",
+      bg: "bg-slate-50 dark:bg-slate-800",
     },
     {
       label: "Total Received",
@@ -76,13 +76,13 @@ export function BusinessKpiCards({
         return (
           <div
             key={card.label}
-            className="rounded-2xl border border-gray-100 bg-white p-3 dark:border-gray-800 dark:bg-gray-900"
+            className="rounded-2xl border border-slate-100 bg-white p-3.5 dark:border-slate-800 dark:bg-slate-900"
           >
             <div className="flex items-center gap-2">
               <div className={cn("flex h-7 w-7 items-center justify-center rounded-lg", card.bg)}>
                 <Icon size={14} className={card.color} />
               </div>
-              <span className="text-[10px] font-medium text-gray-500 dark:text-gray-400">
+              <span className="text-[10px] font-medium uppercase tracking-wide text-slate-400 dark:text-slate-500">
                 {card.label}
               </span>
             </div>

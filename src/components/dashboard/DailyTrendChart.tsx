@@ -36,20 +36,20 @@ function StackedTooltip({ active, payload, label, catMap }: {
   const nonZero = payload.filter((p) => p.value > 0);
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-white px-3 py-2 shadow-lg text-xs dark:border-gray-700 dark:bg-gray-900">
-      <p className="font-semibold text-gray-900 dark:text-white mb-1">Day {label}</p>
+    <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 shadow-lg text-xs dark:border-slate-700 dark:bg-slate-900">
+      <p className="font-semibold text-slate-900 dark:text-white mb-1">Day {label}</p>
       {nonZero.map((p) => (
         <div key={p.dataKey} className="flex justify-between gap-4">
-          <span className="text-gray-600 dark:text-gray-400" style={{ color: p.color }}>
+          <span className="text-slate-600 dark:text-slate-400" style={{ color: p.color }}>
             {catMap[p.dataKey]?.label || p.dataKey}
           </span>
-          <span className="font-medium text-gray-900 dark:text-white">{formatCurrency(p.value)}</span>
+          <span className="font-medium text-slate-900 dark:text-white">{formatCurrency(p.value)}</span>
         </div>
       ))}
       {nonZero.length > 1 && (
-        <div className="border-t border-gray-100 dark:border-gray-800 mt-1 pt-1 flex justify-between gap-4 font-semibold">
-          <span className="text-gray-700 dark:text-gray-300">Total</span>
-          <span className="text-gray-900 dark:text-white">{formatCurrency(total)}</span>
+        <div className="border-t border-slate-100 dark:border-slate-800 mt-1 pt-1 flex justify-between gap-4 font-semibold">
+          <span className="text-slate-700 dark:text-slate-300">Total</span>
+          <span className="text-slate-900 dark:text-white">{formatCurrency(total)}</span>
         </div>
       )}
     </div>
@@ -67,7 +67,7 @@ export function DailyTrendChart({ dailyTotals, stackedDailyTotals, activeCategor
 
   if (!hasData) {
     return (
-      <div className="flex min-h-[180px] flex-1 items-center justify-center text-sm text-gray-400">
+      <div className="flex min-h-[180px] flex-1 items-center justify-center text-sm text-slate-400">
         No spending data yet
       </div>
     );
@@ -110,7 +110,7 @@ export function DailyTrendChart({ dailyTotals, stackedDailyTotals, activeCategor
               "flex items-center gap-1 rounded-md px-2 py-1 text-xs transition-colors",
               stacked
                 ? "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300"
-                : "text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
+                : "text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
             )}
             aria-label={stacked ? "Show simple bars" : "Stack by category"}
             aria-pressed={stacked}
@@ -119,14 +119,14 @@ export function DailyTrendChart({ dailyTotals, stackedDailyTotals, activeCategor
             Stacked
           </button>
         )}
-        <div className="inline-flex rounded-lg bg-gray-100 p-0.5 dark:bg-gray-800">
+        <div className="inline-flex rounded-lg bg-slate-100 p-0.5 dark:bg-slate-800">
           <button
             onClick={() => setShowTable(false)}
             className={cn(
               "flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-medium transition-colors",
               !showTable
-                ? "bg-white text-gray-900 shadow-sm dark:bg-gray-700 dark:text-white"
-                : "text-gray-500 dark:text-gray-400"
+                ? "bg-white text-slate-900 shadow-sm dark:bg-slate-700 dark:text-white"
+                : "text-slate-500 dark:text-slate-400"
             )}
           >
             <BarChart3 size={13} />
@@ -137,8 +137,8 @@ export function DailyTrendChart({ dailyTotals, stackedDailyTotals, activeCategor
             className={cn(
               "flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-medium transition-colors",
               showTable
-                ? "bg-white text-gray-900 shadow-sm dark:bg-gray-700 dark:text-white"
-                : "text-gray-500 dark:text-gray-400"
+                ? "bg-white text-slate-900 shadow-sm dark:bg-slate-700 dark:text-white"
+                : "text-slate-500 dark:text-slate-400"
             )}
           >
             <Table2 size={13} />
@@ -150,8 +150,8 @@ export function DailyTrendChart({ dailyTotals, stackedDailyTotals, activeCategor
       {showTable ? (
         <div className="flex-1 min-h-[180px] overflow-y-auto overflow-x-auto">
           <table className="w-full text-sm" role="table">
-            <thead className="sticky top-0 bg-white dark:bg-gray-900">
-              <tr className="border-b border-gray-100 text-left text-xs text-gray-500 dark:border-gray-800 dark:text-gray-400">
+            <thead className="sticky top-0 bg-white dark:bg-slate-900">
+              <tr className="border-b border-slate-100 text-left text-xs text-slate-500 dark:border-slate-800 dark:text-slate-400">
                 <th className="pb-2 font-medium">Day</th>
                 <th className="pb-2 text-right font-medium">Spent</th>
               </tr>
@@ -160,11 +160,11 @@ export function DailyTrendChart({ dailyTotals, stackedDailyTotals, activeCategor
               {tableDays.map((d) => (
                 <tr
                   key={d.day}
-                  className="border-b border-gray-50 hover:bg-gray-50 dark:border-gray-800/50 dark:hover:bg-gray-800/30 cursor-pointer"
+                  className="border-b border-slate-50 hover:bg-slate-50 dark:border-slate-800/50 dark:hover:bg-slate-800/30 cursor-pointer"
                   onClick={() => onBarClick?.(d.day)}
                 >
-                  <td className="py-1.5 text-gray-700 dark:text-gray-300">{d.day}</td>
-                  <td className="py-1.5 text-right font-medium text-gray-900 dark:text-white">
+                  <td className="py-1.5 text-slate-700 dark:text-slate-300">{d.day}</td>
+                  <td className="py-1.5 text-right font-medium text-slate-900 dark:text-white">
                     {formatCurrency(d.total)}
                   </td>
                 </tr>

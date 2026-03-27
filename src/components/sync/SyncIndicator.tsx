@@ -30,7 +30,7 @@ export function SyncIndicator({ syncStatus }: SyncIndicatorProps) {
         </div>
       )}
       {effective === "offline" && (
-        <div className="flex items-center gap-1 text-gray-400" title="Offline">
+        <div className="flex items-center gap-1 text-slate-400" title="Offline">
           <WifiOff size={14} />
           {pendingCount > 0 && (
             <span className="ml-0.5 rounded-full bg-amber-500 px-1.5 py-0.5 text-[10px] font-bold text-white">

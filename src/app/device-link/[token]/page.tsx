@@ -48,12 +48,12 @@ export default function DeviceLinkPage() {
   if (error) {
     return (
       <div className="flex min-h-screen items-center justify-center p-4">
-        <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl dark:bg-gray-900 text-center">
+        <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl dark:bg-slate-900 text-center">
           <XCircle className="mx-auto h-12 w-12 text-red-500 mb-4" />
-          <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
+          <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-2">
             Device Link Failed
           </h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+          <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
             {error}
           </p>
           <button
@@ -71,12 +71,12 @@ export default function DeviceLinkPage() {
   if (accepted) {
     return (
       <div className="flex min-h-screen items-center justify-center p-4">
-        <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl dark:bg-gray-900 text-center">
+        <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl dark:bg-slate-900 text-center">
           <CheckCircle2 className="mx-auto h-12 w-12 text-emerald-500 mb-4" />
-          <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
+          <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-2">
             Device Linked!
           </h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <p className="text-sm text-slate-500 dark:text-slate-400">
             Redirecting to dashboard...
           </p>
         </div>
@@ -86,12 +86,12 @@ export default function DeviceLinkPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center p-4">
-      <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl dark:bg-gray-900 text-center">
+      <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl dark:bg-slate-900 text-center">
         <Smartphone className="mx-auto h-12 w-12 text-indigo-500 mb-4" />
-        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
+        <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-2">
           Link This Device
         </h2>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+        <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
           {isAuthenticated
             ? "Connecting this device to your workspace..."
             : "Sign in to link this device to your account."}

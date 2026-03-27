@@ -136,12 +136,12 @@ export function AutoRulesManager() {
 
   return (
     <div className="space-y-3">
-      <p className="text-xs text-gray-500 dark:text-gray-400">
+      <p className="text-xs text-slate-500 dark:text-slate-400">
         Auto-categorize expenses based on remark or amount patterns.
       </p>
 
       {rules.length === 0 && !showForm && (
-        <p className="py-3 text-center text-xs text-gray-400">
+        <p className="py-3 text-center text-xs text-slate-400">
           No rules yet. Create one to auto-categorize your expenses.
         </p>
       )}
@@ -151,16 +151,16 @@ export function AutoRulesManager() {
           key={rule.id}
           className={`flex items-center gap-3 rounded-lg border px-3 py-2.5 ${
             rule.enabled
-              ? "border-gray-100 bg-gray-50 dark:border-gray-800 dark:bg-gray-800/50"
-              : "border-gray-100 bg-gray-50/50 opacity-60 dark:border-gray-800 dark:bg-gray-800/30"
+              ? "border-slate-100 bg-slate-50 dark:border-slate-800 dark:bg-slate-800/50"
+              : "border-slate-100 bg-slate-50/50 opacity-60 dark:border-slate-800 dark:bg-slate-800/30"
           }`}
         >
-          <Zap size={14} className={rule.enabled ? "text-amber-500" : "text-gray-400"} />
+          <Zap size={14} className={rule.enabled ? "text-amber-500" : "text-slate-400"} />
           <div className="flex-1 min-w-0">
-            <p className="truncate text-sm font-medium text-gray-700 dark:text-gray-300">
+            <p className="truncate text-sm font-medium text-slate-700 dark:text-slate-300">
               {rule.name}
             </p>
-            <p className="text-[10px] text-gray-400">
+            <p className="text-[10px] text-slate-400">
               If {rule.condition.field} {rule.condition.operator.replace("_", " ")}{" "}
               &ldquo;{rule.condition.value}&rdquo; → {rule.action.type === "set_category" ? catMap[rule.action.value]?.label || rule.action.value : "Flag"}
             </p>
@@ -170,14 +170,14 @@ export function AutoRulesManager() {
             className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${
               rule.enabled
                 ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400"
-                : "bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400"
+                : "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400"
             }`}
           >
             {rule.enabled ? "ON" : "OFF"}
           </button>
           <button
             onClick={() => handleDelete(rule.id)}
-            className="rounded p-1 text-gray-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/30"
+            className="rounded p-1 text-slate-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/30"
           >
             <Trash2 size={14} />
           </button>
@@ -185,10 +185,10 @@ export function AutoRulesManager() {
       ))}
 
       {showForm ? (
-        <div className="space-y-3 rounded-lg border border-gray-100 bg-gray-50 p-3 dark:border-gray-800 dark:bg-gray-800/50">
+        <div className="space-y-3 rounded-lg border border-slate-100 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-800/50">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-gray-500">New Rule</span>
-            <button onClick={resetForm} className="text-gray-400 hover:text-gray-600">
+            <span className="text-xs font-medium text-slate-500">New Rule</span>
+            <button onClick={resetForm} className="text-slate-400 hover:text-slate-600">
               <X size={14} />
             </button>
           </div>
@@ -198,13 +198,13 @@ export function AutoRulesManager() {
             value={name}
             onChange={(e) => setName(e.target.value)}
             maxLength={50}
-            className="w-full rounded border border-gray-200 bg-white px-2.5 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-indigo-500 focus:outline-none dark:border-gray-700 dark:bg-gray-900 dark:text-white"
+            className="w-full rounded border border-slate-200 bg-white px-2.5 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-white"
           />
           <div className="grid grid-cols-3 gap-2">
             <select
               value={condField}
               onChange={(e) => setCondField(e.target.value as "remark" | "amount")}
-              className="rounded border border-gray-200 bg-white px-2 py-1.5 text-xs text-gray-700 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300"
+              className="rounded border border-slate-200 bg-white px-2 py-1.5 text-xs text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300"
             >
               <option value="remark">Remark</option>
               <option value="amount">Amount</option>
@@ -212,7 +212,7 @@ export function AutoRulesManager() {
             <select
               value={condOp}
               onChange={(e) => setCondOp(e.target.value as typeof condOp)}
-              className="rounded border border-gray-200 bg-white px-2 py-1.5 text-xs text-gray-700 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300"
+              className="rounded border border-slate-200 bg-white px-2 py-1.5 text-xs text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300"
             >
               {condField === "remark" ? (
                 <>
@@ -232,14 +232,14 @@ export function AutoRulesManager() {
               placeholder={condField === "amount" ? `${symbol} amount` : "keyword"}
               value={condValue}
               onChange={(e) => setCondValue(e.target.value)}
-              className="rounded border border-gray-200 bg-white px-2 py-1.5 text-xs text-gray-700 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300"
+              className="rounded border border-slate-200 bg-white px-2 py-1.5 text-xs text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300"
             />
           </div>
           <div className="grid grid-cols-2 gap-2">
             <select
               value={actionType}
               onChange={(e) => setActionType(e.target.value as "set_category" | "flag")}
-              className="rounded border border-gray-200 bg-white px-2 py-1.5 text-xs text-gray-700 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300"
+              className="rounded border border-slate-200 bg-white px-2 py-1.5 text-xs text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300"
             >
               <option value="set_category">Set Category</option>
               <option value="flag">Flag for Review</option>
@@ -248,7 +248,7 @@ export function AutoRulesManager() {
               <select
                 value={actionValue}
                 onChange={(e) => setActionValue(e.target.value)}
-                className="rounded border border-gray-200 bg-white px-2 py-1.5 text-xs text-gray-700 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300"
+                className="rounded border border-slate-200 bg-white px-2 py-1.5 text-xs text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300"
               >
                 {allCategories.map((c) => (
                   <option key={c.id} value={c.id}>{c.label}</option>
@@ -266,7 +266,7 @@ export function AutoRulesManager() {
             </button>
             <button
               onClick={resetForm}
-              className="rounded-lg px-3 py-2 text-sm font-medium text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800"
+              className="rounded-lg px-3 py-2 text-sm font-medium text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"
             >
               Cancel
             </button>

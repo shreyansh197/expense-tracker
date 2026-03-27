@@ -199,14 +199,14 @@ export function ExportImportWizard() {
     <div className="space-y-4">
       {/* Export section */}
       <div>
-        <h3 className="mb-2 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+        <h3 className="mb-2 text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
           Export ({getMonthName(currentMonth)} {currentYear})
         </h3>
         <div className="flex flex-wrap gap-2">
           <button
             onClick={handleExportCSV}
             disabled={expenses.length === 0}
-            className="flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-40 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
+            className="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-40 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
           >
             <FileSpreadsheet size={14} />
             CSV
@@ -214,7 +214,7 @@ export function ExportImportWizard() {
           <button
             onClick={handleExportJSON}
             disabled={expenses.length === 0}
-            className="flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-40 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
+            className="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-40 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
           >
             <FileJson size={14} />
             JSON
@@ -231,8 +231,8 @@ export function ExportImportWizard() {
       </div>
 
       {/* Import section */}
-      <div className="border-t border-gray-100 pt-4 dark:border-gray-800">
-        <h3 className="mb-2 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+      <div className="border-t border-slate-100 pt-4 dark:border-slate-800">
+        <h3 className="mb-2 text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
           Import
         </h3>
         <input
@@ -246,7 +246,7 @@ export function ExportImportWizard() {
         {!preview && !importResult && (
           <button
             onClick={() => fileRef.current?.click()}
-            className="flex items-center gap-2 rounded-lg border border-dashed border-gray-300 px-4 py-3 text-sm font-medium text-gray-500 hover:border-indigo-400 hover:text-indigo-600 dark:border-gray-700 dark:text-gray-400 dark:hover:border-indigo-600 dark:hover:text-indigo-400 w-full justify-center"
+            className="flex items-center gap-2 rounded-lg border border-dashed border-slate-300 px-4 py-3 text-sm font-medium text-slate-500 hover:border-indigo-400 hover:text-indigo-600 dark:border-slate-700 dark:text-slate-400 dark:hover:border-indigo-600 dark:hover:text-indigo-400 w-full justify-center"
           >
             <Upload size={16} />
             Choose CSV or JSON file
@@ -256,28 +256,28 @@ export function ExportImportWizard() {
         {/* Preview */}
         {preview && (
           <div className="space-y-3">
-            <div className="max-h-48 overflow-auto rounded-lg border border-gray-200 dark:border-gray-700">
+            <div className="max-h-48 overflow-auto rounded-lg border border-slate-200 dark:border-slate-700">
               <table className="w-full text-xs">
-                <thead className="bg-gray-50 dark:bg-gray-800">
+                <thead className="bg-slate-50 dark:bg-slate-800">
                   <tr>
-                    <th className="px-2 py-1.5 text-left text-gray-500">Day</th>
-                    <th className="px-2 py-1.5 text-left text-gray-500">Category</th>
-                    <th className="px-2 py-1.5 text-right text-gray-500">Amount</th>
-                    <th className="px-2 py-1.5 text-left text-gray-500">Remark</th>
-                    <th className="px-2 py-1.5 text-gray-500">Status</th>
+                    <th className="px-2 py-1.5 text-left text-slate-500">Day</th>
+                    <th className="px-2 py-1.5 text-left text-slate-500">Category</th>
+                    <th className="px-2 py-1.5 text-right text-slate-500">Amount</th>
+                    <th className="px-2 py-1.5 text-left text-slate-500">Remark</th>
+                    <th className="px-2 py-1.5 text-slate-500">Status</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                   {preview.slice(0, 20).map((row, i) => (
                     <tr key={i} className={row.error ? "bg-red-50/50 dark:bg-red-900/10" : ""}>
-                      <td className="px-2 py-1.5 text-gray-700 dark:text-gray-300">{row.day}</td>
-                      <td className="px-2 py-1.5 text-gray-700 dark:text-gray-300">
+                      <td className="px-2 py-1.5 text-slate-700 dark:text-slate-300">{row.day}</td>
+                      <td className="px-2 py-1.5 text-slate-700 dark:text-slate-300">
                         {catMap[row.category]?.label || row.category}
                       </td>
-                      <td className="px-2 py-1.5 text-right text-gray-900 dark:text-white font-medium">
+                      <td className="px-2 py-1.5 text-right text-slate-900 dark:text-white font-medium">
                         {formatCurrency(row.amount)}
                       </td>
-                      <td className="px-2 py-1.5 text-gray-500 max-w-[120px] truncate">{row.remark}</td>
+                      <td className="px-2 py-1.5 text-slate-500 max-w-[120px] truncate">{row.remark}</td>
                       <td className="px-2 py-1.5 text-center">
                         {row.error ? (
                           <AlertTriangle size={12} className="inline text-red-500" />
@@ -291,18 +291,18 @@ export function ExportImportWizard() {
               </table>
             </div>
             {preview.length > 20 && (
-              <p className="text-xs text-gray-400 text-center">
+              <p className="text-xs text-slate-400 text-center">
                 Showing 20 of {preview.length} rows
               </p>
             )}
             <div className="flex items-center justify-between">
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-slate-500">
                 {preview.filter((r) => !r.error).length} valid, {preview.filter((r) => r.error).length} errors
               </p>
               <div className="flex gap-2">
                 <button
                   onClick={() => setPreview(null)}
-                  className="rounded-lg px-3 py-1.5 text-sm font-medium text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800"
+                  className="rounded-lg px-3 py-1.5 text-sm font-medium text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"
                 >
                   Cancel
                 </button>

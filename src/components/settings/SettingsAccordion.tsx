@@ -120,8 +120,8 @@ export function AccordionSection({
   return (
     <section
       className={cn(
-        "rounded-2xl border border-gray-100 bg-white transition-shadow dark:border-gray-800 dark:bg-gray-900",
-        isOpen && "shadow-sm dark:shadow-gray-950/20",
+        "rounded-2xl border border-slate-100 bg-white transition-shadow dark:border-slate-800 dark:bg-slate-900",
+        isOpen && "shadow-sm dark:shadow-slate-950/20",
         className
       )}
     >
@@ -137,12 +137,12 @@ export function AccordionSection({
         aria-expanded={isOpen}
         aria-controls={`section-${id}`}
       >
-        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-gray-50 text-gray-500 transition-colors dark:bg-gray-800 dark:text-gray-400">
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-slate-50 text-slate-500 transition-colors dark:bg-slate-800 dark:text-slate-400">
           {icon}
         </span>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <h2 className="text-sm font-semibold text-gray-900 dark:text-white">
+            <h2 className="text-sm font-semibold text-slate-900 dark:text-white">
               {title}
             </h2>
             {badge !== undefined && (
@@ -157,7 +157,7 @@ export function AccordionSection({
             )}
           </div>
           {description && (
-            <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400 truncate">
+            <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400 truncate">
               {description}
             </p>
           )}
@@ -169,7 +169,7 @@ export function AccordionSection({
           <ChevronDown
             size={16}
             className={cn(
-              "shrink-0 text-gray-400 transition-transform duration-200",
+              "shrink-0 text-slate-400 transition-transform duration-200",
               isOpen && "rotate-180"
             )}
           />
@@ -186,7 +186,7 @@ export function AccordionSection({
         style={{ willChange: "grid-template-rows" }}
       >
         <div className="overflow-hidden">
-          <div className="border-t border-gray-50 px-4 py-4 dark:border-gray-800/60">
+          <div className="border-t border-slate-50 px-4 py-4 dark:border-slate-800/60">
             {children}
           </div>
         </div>

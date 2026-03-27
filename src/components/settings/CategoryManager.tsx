@@ -239,7 +239,7 @@ export function CategoryManager() {
 
       {/* Add category form */}
       {showAdd ? (
-        <div className="rounded-lg border border-gray-100 bg-gray-50 p-3 dark:border-gray-800 dark:bg-gray-800/50">
+        <div className="rounded-lg border border-slate-100 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-800/50">
           <div className="flex gap-2">
             <input
               type="text"
@@ -249,7 +249,7 @@ export function CategoryManager() {
               onKeyDown={(e) => { if (e.key === "Enter") handleAdd(); if (e.key === "Escape") setShowAdd(false); }}
               maxLength={30}
               autoFocus
-              className="flex-1 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
+              className="flex-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
             />
             <button
               onClick={handleAdd}
@@ -260,7 +260,7 @@ export function CategoryManager() {
             </button>
             <button
               onClick={() => setShowAdd(false)}
-              className="rounded-lg px-2 py-2 text-sm text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800"
+              className="rounded-lg px-2 py-2 text-sm text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"
             >
               <X size={16} />
             </button>
@@ -290,7 +290,7 @@ export function CategoryManager() {
         </button>
       )}
 
-      <p className="text-[10px] text-gray-400">
+      <p className="text-[10px] text-slate-400">
         Tap the budget amount to set per-category spending limits. Drag custom categories to reorder.
       </p>
     </div>
@@ -356,7 +356,7 @@ function CategoryRow({
     <div
       className={`flex items-center gap-2 rounded-lg px-2 py-2 transition-colors ${
         isDragging ? "opacity-50" : ""
-      } ${isDragOver ? "bg-indigo-50 dark:bg-indigo-900/20" : "hover:bg-gray-50 dark:hover:bg-gray-800/50"}`}
+      } ${isDragOver ? "bg-indigo-50 dark:bg-indigo-900/20" : "hover:bg-slate-50 dark:hover:bg-slate-800/50"}`}
       draggable={draggable}
       onDragStart={draggable ? onDragStart : undefined}
       onDragOver={draggable ? (e) => { e.preventDefault(); onDragOver(); } : undefined}
@@ -364,7 +364,7 @@ function CategoryRow({
       onDragEnd={draggable ? onDragEnd : undefined}
     >
       {draggable && (
-        <GripVertical size={14} className="shrink-0 cursor-grab text-gray-300 dark:text-gray-600" />
+        <GripVertical size={14} className="shrink-0 cursor-grab text-slate-300 dark:text-slate-600" />
       )}
 
       <div
@@ -381,7 +381,7 @@ function CategoryRow({
             onKeyDown={(e) => { if (e.key === "Enter") onSaveEdit(); if (e.key === "Escape") onCancelEdit(); }}
             maxLength={30}
             autoFocus
-            className="flex-1 rounded border border-gray-200 bg-white px-2 py-1 text-sm text-gray-900 focus:border-indigo-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+            className="flex-1 rounded border border-slate-200 bg-white px-2 py-1 text-sm text-slate-900 focus:border-indigo-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
           />
           <div className="flex flex-wrap gap-0.5 max-w-[120px]">
             {PRESET_COLORS.slice(0, 12).map((c) => (
@@ -401,20 +401,20 @@ function CategoryRow({
           <button onClick={onSaveEdit} className="rounded p-0.5 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/30">
             <Check size={14} />
           </button>
-          <button onClick={onCancelEdit} className="rounded p-0.5 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800">
+          <button onClick={onCancelEdit} className="rounded p-0.5 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
             <X size={14} />
           </button>
         </div>
       ) : (
         <>
-          <span className="flex-1 text-sm text-gray-700 dark:text-gray-300">
+          <span className="flex-1 text-sm text-slate-700 dark:text-slate-300">
             {cat.label}
           </span>
 
           {/* Budget display/edit */}
           {isBudgetEditing ? (
             <div className="flex items-center gap-1">
-              <span className="text-xs text-gray-400">{symbol}</span>
+              <span className="text-xs text-slate-400">{symbol}</span>
               <input
                 type="number"
                 min="0"
@@ -422,7 +422,7 @@ function CategoryRow({
                 onChange={(e) => onBudgetChange(e.target.value)}
                 onKeyDown={(e) => { if (e.key === "Enter") onBudgetSave(); if (e.key === "Escape") onBudgetCancel(); }}
                 autoFocus
-                className="w-20 rounded border border-gray-200 bg-white px-2 py-0.5 text-xs text-right text-gray-900 focus:border-indigo-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                className="w-20 rounded border border-slate-200 bg-white px-2 py-0.5 text-xs text-right text-slate-900 focus:border-indigo-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
               />
               <button onClick={onBudgetSave} className="rounded px-1.5 py-0.5 text-xs font-medium text-indigo-600 hover:bg-indigo-50 dark:text-indigo-400">
                 Save
@@ -431,7 +431,7 @@ function CategoryRow({
           ) : (
             <button
               onClick={onBudgetStart}
-              className="text-xs font-medium text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400"
+              className="text-xs font-medium text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400"
             >
               {budget ? formatCurrency(budget) : "Set limit"}
             </button>
@@ -440,7 +440,7 @@ function CategoryRow({
           {isCustom && (
             <button
               onClick={onStartEdit}
-              className="rounded p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+              className="rounded p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
               aria-label={`Edit ${cat.label}`}
             >
               <Pencil size={12} />
@@ -448,7 +448,7 @@ function CategoryRow({
           )}
           <button
             onClick={onDelete}
-            className="rounded p-1 text-gray-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/30 dark:hover:text-red-400"
+            className="rounded p-1 text-slate-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/30 dark:hover:text-red-400"
             aria-label={`Remove ${cat.label}`}
           >
             <Trash2 size={14} />

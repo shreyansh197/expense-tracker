@@ -126,13 +126,13 @@ export function ExpenseForm({
     >
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+        <h3 className="text-lg font-semibold text-slate-900 dark:text-white">
           {editExpense ? "Edit Expense" : "Add Expense"}
         </h3>
         <button
           type="button"
           onClick={closeForm}
-          className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
+          className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
         >
           <X size={18} />
         </button>
@@ -140,7 +140,7 @@ export function ExpenseForm({
 
       {/* Category Selector */}
       <div>
-        <label className="mb-2 block text-xs font-medium text-gray-500 uppercase dark:text-gray-400">
+        <label className="mb-2 block text-xs font-medium text-slate-500 uppercase dark:text-slate-400">
           Category
         </label>
         <div className="flex flex-wrap gap-2">
@@ -153,7 +153,7 @@ export function ExpenseForm({
                 "rounded-full px-3 py-1.5 text-xs font-medium transition-all",
                 category === cat.id
                   ? "text-white shadow-sm"
-                  : "bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700"
+                  : "bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700"
               )}
               style={category === cat.id ? { backgroundColor: cat.color } : undefined}
             >
@@ -165,7 +165,7 @@ export function ExpenseForm({
 
       {/* Amount */}
       <div>
-        <label className="mb-1.5 block text-xs font-medium text-gray-500 uppercase dark:text-gray-400">
+        <label className="mb-1.5 block text-xs font-medium text-slate-500 uppercase dark:text-slate-400">
           Amount ({symbol})
         </label>
         <input
@@ -176,14 +176,14 @@ export function ExpenseForm({
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
           placeholder="0"
-          className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-lg font-semibold text-gray-900 placeholder:text-gray-300 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder:text-gray-600"
+          className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-lg font-semibold text-slate-900 placeholder:text-slate-300 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-600"
           required
         />
       </div>
 
       {/* Date */}
       <div>
-        <label className="mb-1.5 block text-xs font-medium text-gray-500 uppercase dark:text-gray-400">
+        <label className="mb-1.5 block text-xs font-medium text-slate-500 uppercase dark:text-slate-400">
           Date
         </label>
         <DatePicker
@@ -200,8 +200,8 @@ export function ExpenseForm({
 
       {/* Remark */}
       <div>
-        <label className="mb-1.5 block text-xs font-medium text-gray-500 uppercase dark:text-gray-400">
-          Remark <span className="text-gray-300 dark:text-gray-600">(optional)</span>
+        <label className="mb-1.5 block text-xs font-medium text-slate-500 uppercase dark:text-slate-400">
+          Remark <span className="text-slate-300 dark:text-slate-600">(optional)</span>
         </label>
         <input
           type="text"
@@ -209,7 +209,7 @@ export function ExpenseForm({
           onChange={(e) => setRemark(e.target.value)}
           placeholder="e.g., Dinner at restaurant"
           maxLength={200}
-          className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-900 placeholder:text-gray-300 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder:text-gray-600"
+          className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-300 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-600"
         />
       </div>
 

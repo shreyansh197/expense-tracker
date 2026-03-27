@@ -87,14 +87,14 @@ export function BusinessExport({ ledgers, allPayments, receivedByLedger }: Busin
       <select
         value={format}
         onChange={(e) => setFormat(e.target.value as "csv" | "json")}
-        className="rounded-lg border border-gray-200 bg-white px-2 py-1.5 text-xs text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300"
+        className="rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-xs text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
       >
         <option value="csv">CSV</option>
         <option value="json">JSON</option>
       </select>
       <button
         onClick={exportData}
-        className="flex items-center gap-1 rounded-lg bg-gray-100 px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+        className="flex items-center gap-1 rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
       >
         <Download size={12} />
         Export

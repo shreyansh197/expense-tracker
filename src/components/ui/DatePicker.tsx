@@ -99,12 +99,12 @@ export function DatePicker({ value, onChange, month, year }: DatePickerProps) {
         onClick={handleToggleOpen}
         className={cn(
           "flex w-full items-center gap-2 rounded-lg border px-3 py-2.5 text-sm font-medium transition-all",
-          "border-gray-200 bg-white text-gray-900 hover:border-gray-300",
-          "dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:hover:border-gray-600",
+          "border-slate-200 bg-white text-slate-900 hover:border-slate-300",
+          "dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:hover:border-slate-600",
           open && "border-indigo-500 ring-2 ring-indigo-500/20 dark:border-indigo-500"
         )}
       >
-        <Calendar size={16} className="shrink-0 text-gray-400" />
+        <Calendar size={16} className="shrink-0 text-slate-400" />
         <span>{displayDate}</span>
       </button>
 
@@ -120,8 +120,8 @@ export function DatePicker({ value, onChange, month, year }: DatePickerProps) {
           >
             <div
               className={cn(
-                "w-full max-w-sm rounded-2xl border border-gray-200 bg-white p-4 shadow-2xl",
-                "dark:border-gray-700 dark:bg-gray-900"
+                "w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-4 shadow-2xl",
+                "dark:border-slate-700 dark:bg-slate-900"
               )}
             >
               <CalendarGrid
@@ -141,8 +141,8 @@ export function DatePicker({ value, onChange, month, year }: DatePickerProps) {
           {/* Desktop: positioned dropdown — auto-detects direction */}
           <div
             className={cn(
-              "absolute z-50 hidden w-80 rounded-xl border border-gray-200 bg-white p-3 shadow-xl sm:block",
-              "dark:border-gray-700 dark:bg-gray-900",
+              "absolute z-50 hidden w-80 rounded-xl border border-slate-200 bg-white p-3 shadow-xl sm:block",
+              "dark:border-slate-700 dark:bg-slate-900",
               openUpward ? "bottom-full mb-1.5 left-0" : "top-full mt-1.5 left-0"
             )}
           >
@@ -196,18 +196,18 @@ function CalendarGrid({
         <button
           type="button"
           onClick={onPrev}
-          className="rounded-lg p-1.5 text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
+          className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
         >
           <ChevronLeft size={18} />
         </button>
-        <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">
+        <span className="text-sm font-semibold text-slate-800 dark:text-slate-200">
           {monthName} {viewYear}
         </span>
         <div className="flex items-center gap-1">
           <button
             type="button"
             onClick={onNext}
-            className="rounded-lg p-1.5 text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
+            className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
           >
             <ChevronRight size={18} />
           </button>
@@ -215,7 +215,7 @@ function CalendarGrid({
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
+              className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
             >
               <X size={16} />
             </button>
@@ -228,7 +228,7 @@ function CalendarGrid({
         {DAYS_OF_WEEK.map((d) => (
           <div
             key={d}
-            className="flex h-8 items-center justify-center text-[11px] font-semibold uppercase text-gray-400 dark:text-gray-500"
+            className="flex h-8 items-center justify-center text-[11px] font-semibold uppercase text-slate-400 dark:text-slate-500"
           >
             {d}
           </div>
@@ -249,7 +249,7 @@ function CalendarGrid({
                 "flex h-10 w-full items-center justify-center rounded-lg text-sm font-medium transition-all",
                 day === value
                   ? "bg-indigo-600 text-white shadow-sm"
-                  : "text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800",
+                  : "text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800",
                 isCurrentMonth &&
                   day === todayDay &&
                   day !== value &&
@@ -267,7 +267,7 @@ function CalendarGrid({
         <button
           type="button"
           onClick={() => onSelect(todayDay)}
-          className="mt-2 w-full rounded-lg bg-gray-50 py-2 text-xs font-medium text-indigo-600 hover:bg-gray-100 dark:bg-gray-800 dark:text-indigo-400 dark:hover:bg-gray-700"
+          className="mt-2 w-full rounded-lg bg-slate-50 py-2 text-xs font-medium text-indigo-600 hover:bg-slate-100 dark:bg-slate-800 dark:text-indigo-400 dark:hover:bg-slate-700"
         >
           Today ({todayDay})
         </button>

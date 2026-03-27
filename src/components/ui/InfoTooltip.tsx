@@ -33,24 +33,24 @@ export function InfoTooltip({ title, children, className }: InfoTooltipProps) {
     <div className={cn("relative inline-flex", className)} ref={ref}>
       <button
         onClick={() => setOpen((v) => !v)}
-        className="rounded-full p-0.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:text-gray-300 dark:hover:bg-gray-800 transition-colors"
+        className="rounded-full p-0.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:text-slate-300 dark:hover:bg-slate-800 transition-colors"
         aria-label={`Info: ${title}`}
         type="button"
       >
         <Info size={13} />
       </button>
       {open && (
-        <div className="absolute right-0 top-full z-50 mt-1 w-64 rounded-lg border border-gray-200 bg-white p-3 shadow-lg dark:border-gray-700 dark:bg-gray-900 sm:w-72">
+        <div className="absolute right-0 top-full z-50 mt-1 w-64 rounded-lg border border-slate-200 bg-white p-3 shadow-lg dark:border-slate-700 dark:bg-slate-900 sm:w-72">
           <div className="flex items-start justify-between gap-2">
-            <h4 className="text-xs font-semibold text-gray-900 dark:text-white">{title}</h4>
+            <h4 className="text-xs font-semibold text-slate-900 dark:text-white">{title}</h4>
             <button
               onClick={() => setOpen(false)}
-              className="shrink-0 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+              className="shrink-0 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
             >
               <X size={12} />
             </button>
           </div>
-          <div className="mt-1.5 text-xs leading-relaxed text-gray-600 dark:text-gray-400">
+          <div className="mt-1.5 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
             {children}
           </div>
         </div>

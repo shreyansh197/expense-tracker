@@ -73,7 +73,7 @@ export function ConfirmProvider({ children }: { children: React.ReactNode }) {
     default: {
       icon: "text-indigo-500",
       button: "bg-indigo-600 hover:bg-indigo-700 text-white",
-      border: "border-gray-200 dark:border-gray-700",
+      border: "border-slate-200 dark:border-slate-700",
     },
   };
 
@@ -89,7 +89,7 @@ export function ConfirmProvider({ children }: { children: React.ReactNode }) {
           aria-label={pending.options.title}
         >
           <div className={cn(
-            "w-full max-w-sm rounded-xl border bg-white p-5 shadow-xl dark:bg-gray-900",
+            "w-full max-w-sm rounded-xl border bg-white p-5 shadow-xl dark:bg-slate-900",
             variantColors[pending.options.variant || "default"].border
           )}>
             <div className="flex items-start gap-3">
@@ -98,15 +98,15 @@ export function ConfirmProvider({ children }: { children: React.ReactNode }) {
                 className={cn("mt-0.5 shrink-0", variantColors[pending.options.variant || "default"].icon)}
               />
               <div className="flex-1 min-w-0">
-                <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
+                <h3 className="text-sm font-semibold text-slate-900 dark:text-white">
                   {pending.options.title}
                 </h3>
-                <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
                   {pending.options.message}
                 </p>
                 {pending.options.requireInput && (
                   <div className="mt-3">
-                    <label className="text-xs text-gray-500 dark:text-gray-400">
+                    <label className="text-xs text-slate-500 dark:text-slate-400">
                       {pending.options.requireInputLabel || `Type "${pending.options.requireInput}" to confirm`}
                     </label>
                     <input
@@ -115,7 +115,7 @@ export function ConfirmProvider({ children }: { children: React.ReactNode }) {
                       value={inputValue}
                       onChange={(e) => setInputValue(e.target.value)}
                       onKeyDown={(e) => { if (e.key === "Enter") handleConfirm(); }}
-                      className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                      className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                       placeholder={pending.options.requireInput}
                     />
                   </div>
@@ -126,7 +126,7 @@ export function ConfirmProvider({ children }: { children: React.ReactNode }) {
             <div className="mt-4 flex justify-end gap-2">
               <button
                 onClick={handleCancel}
-                className="rounded-lg px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+                className="rounded-lg px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
               >
                 {pending.options.cancelLabel || "Cancel"}
               </button>

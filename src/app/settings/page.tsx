@@ -61,12 +61,12 @@ export default function SettingsPage() {
   return (
     <AppShell>
         <div className="mx-auto max-w-3xl space-y-2 p-4 lg:p-6">
-        <h1 className="mb-4 text-lg font-bold text-gray-900 dark:text-white">Settings</h1>
+        <h1 className="mb-4 text-lg font-bold text-slate-900 dark:text-white">Settings</h1>
 
         <SettingsAccordion>
 
           {/* ━━━ YOUR ACCOUNT ━━━ */}
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 pb-1 px-1">
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 pb-1 px-1">
             Your Account
           </h3>
 
@@ -101,7 +101,7 @@ export default function SettingsPage() {
           </AccordionSection>
 
           {/* ━━━ FINANCES ━━━ */}
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 pt-6 pb-1 px-1">
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 pt-6 pb-1 px-1">
             Finances
           </h3>
 
@@ -116,7 +116,7 @@ export default function SettingsPage() {
             <div className="space-y-3">
               {/* Currency selector */}
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-gray-500 dark:text-gray-400">Currency</label>
+                <label className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-slate-400">Currency</label>
                 <div className="flex gap-2">
                   {SUPPORTED_CURRENCIES.map((c) => (
                     <button
@@ -125,7 +125,7 @@ export default function SettingsPage() {
                       className={`flex items-center gap-1.5 rounded-xl border px-3 py-2 text-sm font-medium transition-colors ${
                         settings.currency === c.code
                           ? "border-indigo-500 bg-indigo-50 text-indigo-700 dark:border-indigo-500 dark:bg-indigo-900/30 dark:text-indigo-300"
-                          : "border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 dark:hover:border-gray-600 dark:hover:bg-gray-800"
+                          : "border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-400 dark:hover:border-slate-600 dark:hover:bg-slate-800"
                       }`}
                     >
                       <span className="text-base">{c.symbol}</span>
@@ -137,14 +137,14 @@ export default function SettingsPage() {
               {/* Salary input */}
               <div className="flex items-center gap-3">
                 <div className="relative flex-1">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">{symbol}</span>
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-slate-400">{symbol}</span>
                   <input
                     type="number"
                     min="1"
                     value={salary}
                     onChange={(e) => setSalary(e.target.value)}
                     onKeyDown={(e) => { if (e.key === "Enter") handleSalaryUpdate(); }}
-                    className="w-full rounded-xl border border-gray-200 bg-white py-2.5 pl-7 pr-3 text-sm font-medium text-gray-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                    className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-7 pr-3 text-sm font-medium text-slate-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                   />
                 </div>
                 <button
@@ -206,7 +206,7 @@ export default function SettingsPage() {
                 aria-checked={settings.rolloverEnabled ?? false}
                 onClick={() => updateSettings({ rolloverEnabled: !settings.rolloverEnabled })}
                 className={`relative h-6 w-11 rounded-full transition-colors ${
-                  settings.rolloverEnabled ? "bg-indigo-600" : "bg-gray-300 dark:bg-gray-600"
+                  settings.rolloverEnabled ? "bg-indigo-600" : "bg-slate-300 dark:bg-slate-600"
                 }`}
               >
                 <span
@@ -218,21 +218,21 @@ export default function SettingsPage() {
             }
           >
             <div className="space-y-3">
-              <p className="text-xs text-gray-500 dark:text-gray-400">
+              <p className="text-xs text-slate-500 dark:text-slate-400">
                 {settings.rolloverEnabled
                   ? "Unspent budget from previous months will be added to your current month's budget."
                   : "Enable rollover to carry forward unspent budget automatically."}
               </p>
               {settings.rolloverEnabled && settings.rolloverHistory && Object.keys(settings.rolloverHistory).length > 0 && (
-                <div className="rounded-lg bg-gray-50 p-3 dark:bg-gray-800">
-                  <h4 className="mb-2 text-xs font-medium text-gray-500">Rollover History</h4>
+                <div className="rounded-lg bg-slate-50 p-3 dark:bg-slate-800">
+                  <h4 className="mb-2 text-xs font-medium text-slate-500">Rollover History</h4>
                   <div className="space-y-1">
                     {Object.entries(settings.rolloverHistory)
                       .sort(([a], [b]) => b.localeCompare(a))
                       .slice(0, 6)
                       .map(([key, amount]) => (
                         <div key={key} className="flex items-center justify-between text-xs">
-                          <span className="text-gray-500">{key}</span>
+                          <span className="text-slate-500">{key}</span>
                           <span className={`font-medium ${amount >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400"}`}>
                             {amount >= 0 ? "+" : ""}{formatCurrency(amount)}
                           </span>
@@ -245,7 +245,7 @@ export default function SettingsPage() {
           </AccordionSection>
 
           {/* ━━━ AUTOMATION & DATA ━━━ */}
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 pt-6 pb-1 px-1">
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 pt-6 pb-1 px-1">
             Automation & Data
           </h3>
 
@@ -280,7 +280,7 @@ export default function SettingsPage() {
           </AccordionSection>
 
           {/* ━━━ PREFERENCES ━━━ */}
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 pt-6 pb-1 px-1">
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 pt-6 pb-1 px-1">
             Preferences
           </h3>
 
@@ -296,7 +296,7 @@ export default function SettingsPage() {
                 aria-checked={settings.businessMode ?? false}
                 onClick={() => updateSettings({ businessMode: !settings.businessMode })}
                 className={`relative h-6 w-11 rounded-full transition-colors ${
-                  settings.businessMode ? "bg-emerald-600" : "bg-gray-300 dark:bg-gray-600"
+                  settings.businessMode ? "bg-emerald-600" : "bg-slate-300 dark:bg-slate-600"
                 }`}
               >
                 <span
@@ -308,7 +308,7 @@ export default function SettingsPage() {
             }
           >
             <div className="space-y-3">
-              <p className="text-xs text-gray-500 dark:text-gray-400">
+              <p className="text-xs text-slate-500 dark:text-slate-400">
                 {settings.businessMode
                   ? "Business Owner Mode adds a ledger system to track expected income, log payments received, and view collection analytics."
                   : "Enable Business Owner Mode to track client payments, revenue expectations, and receivables alongside your expenses."}
@@ -346,7 +346,7 @@ export default function SettingsPage() {
                       className={`flex flex-1 items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
                         active
                           ? "bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400"
-                          : "text-gray-500 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800"
+                          : "text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800"
                       }`}
                     >
                       <Icon size={16} />
@@ -357,12 +357,12 @@ export default function SettingsPage() {
               </div>
 
               {/* Install PWA */}
-              <div className="border-t border-gray-100 pt-4 dark:border-gray-800">
+              <div className="border-t border-slate-100 pt-4 dark:border-slate-800">
                 <div className="flex items-center gap-3 mb-3">
-                  <Smartphone size={16} className="text-gray-400" />
+                  <Smartphone size={16} className="text-slate-400" />
                   <div>
-                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Install App</p>
-                    <p className="text-xs text-gray-400">Install as app for quick access</p>
+                    <p className="text-sm font-medium text-slate-700 dark:text-slate-300">Install App</p>
+                    <p className="text-xs text-slate-400">Install as app for quick access</p>
                   </div>
                 </div>
                 <InstallButton />

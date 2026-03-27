@@ -58,16 +58,16 @@ export function PaymentForm({ ledgerId, onSubmit, onCancel }: PaymentFormProps) 
       <div className="grid grid-cols-2 gap-3">
         {/* Amount */}
         <div>
-          <label className="mb-1 block text-[10px] font-medium text-gray-500">Amount</label>
+          <label className="mb-1 block text-[10px] font-medium text-slate-500">Amount</label>
           <div className="relative">
-            <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-gray-400">{symbol}</span>
+            <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-slate-400">{symbol}</span>
             <input
               type="number"
               min="1"
               step="any"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
-              className="w-full rounded-lg border border-gray-200 bg-white py-2 pl-6 pr-2 text-sm text-gray-900 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+              className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-6 pr-2 text-sm text-slate-900 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
               required
               autoFocus
             />
@@ -76,7 +76,7 @@ export function PaymentForm({ ledgerId, onSubmit, onCancel }: PaymentFormProps) 
 
         {/* Date */}
         <div>
-          <label className="mb-1 block text-[10px] font-medium text-gray-500">Date</label>
+          <label className="mb-1 block text-[10px] font-medium text-slate-500">Date</label>
           <DatePicker
             value={parseInt(date.split("-")[2], 10)}
             month={parseInt(date.split("-")[1], 10)}
@@ -94,11 +94,11 @@ export function PaymentForm({ ledgerId, onSubmit, onCancel }: PaymentFormProps) 
       <div className="grid grid-cols-2 gap-3">
         {/* Method */}
         <div>
-          <label className="mb-1 block text-[10px] font-medium text-gray-500">Method</label>
+          <label className="mb-1 block text-[10px] font-medium text-slate-500">Method</label>
           <select
             value={method}
             onChange={(e) => setMethod(e.target.value as PaymentMethod)}
-            className="w-full rounded-lg border border-gray-200 bg-white px-2 py-2 text-sm text-gray-900 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+            className="w-full rounded-lg border border-slate-200 bg-white px-2 py-2 text-sm text-slate-900 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
           >
             {PAYMENT_METHODS.map((m) => (
               <option key={m.value} value={m.value}>{m.label}</option>
@@ -108,26 +108,26 @@ export function PaymentForm({ ledgerId, onSubmit, onCancel }: PaymentFormProps) 
 
         {/* Reference */}
         <div>
-          <label className="mb-1 block text-[10px] font-medium text-gray-500">Reference</label>
+          <label className="mb-1 block text-[10px] font-medium text-slate-500">Reference</label>
           <input
             type="text"
             value={reference}
             onChange={(e) => setReference(e.target.value)}
             placeholder="Txn ID..."
-            className="w-full rounded-lg border border-gray-200 bg-white px-2 py-2 text-sm text-gray-900 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+            className="w-full rounded-lg border border-slate-200 bg-white px-2 py-2 text-sm text-slate-900 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
           />
         </div>
       </div>
 
       {/* Notes */}
       <div>
-        <label className="mb-1 block text-[10px] font-medium text-gray-500">Notes</label>
+        <label className="mb-1 block text-[10px] font-medium text-slate-500">Notes</label>
         <input
           type="text"
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           placeholder="Optional note..."
-          className="w-full rounded-lg border border-gray-200 bg-white px-2 py-2 text-sm text-gray-900 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+          className="w-full rounded-lg border border-slate-200 bg-white px-2 py-2 text-sm text-slate-900 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
         />
       </div>
 
@@ -143,7 +143,7 @@ export function PaymentForm({ ledgerId, onSubmit, onCancel }: PaymentFormProps) 
         <button
           type="button"
           onClick={onCancel}
-          className="rounded-lg bg-gray-100 px-3 py-2 text-xs font-medium text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300"
+          className="rounded-lg bg-slate-100 px-3 py-2 text-xs font-medium text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300"
         >
           Cancel
         </button>

@@ -182,22 +182,22 @@ export function CSVImport() {
         />
         <label
           htmlFor="csv-import"
-          className="flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed border-gray-300 px-4 py-3 text-sm font-medium text-gray-500 transition-colors hover:border-indigo-400 hover:bg-indigo-50 hover:text-indigo-600 dark:border-gray-700 dark:text-gray-400 dark:hover:border-indigo-600 dark:hover:bg-indigo-900/20 dark:hover:text-indigo-400"
+          className="flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed border-slate-300 px-4 py-3 text-sm font-medium text-slate-500 transition-colors hover:border-indigo-400 hover:bg-indigo-50 hover:text-indigo-600 dark:border-slate-700 dark:text-slate-400 dark:hover:border-indigo-600 dark:hover:bg-indigo-900/20 dark:hover:text-indigo-400"
         >
           <Upload size={16} />
           Choose CSV File
         </label>
-        <p className="mt-1.5 text-xs text-gray-400">
+        <p className="mt-1.5 text-xs text-slate-400">
           Expected format: Day, Category, Amount, Remark (header row optional)
         </p>
       </div>
 
       {/* Preview */}
       {preview && (
-        <div className="rounded-lg border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
-          <div className="flex items-center justify-between border-b border-gray-100 px-4 py-2.5 dark:border-gray-800">
+        <div className="rounded-lg border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
+          <div className="flex items-center justify-between border-b border-slate-100 px-4 py-2.5 dark:border-slate-800">
             <div className="flex items-center gap-3 text-xs">
-              <span className="font-medium text-gray-700 dark:text-gray-300">
+              <span className="font-medium text-slate-700 dark:text-slate-300">
                 {preview.length} rows
               </span>
               {validCount > 0 && (
@@ -213,20 +213,20 @@ export function CSVImport() {
                 </span>
               )}
             </div>
-            <button onClick={handleCancel} className="text-gray-400 hover:text-gray-600">
+            <button onClick={handleCancel} className="text-slate-400 hover:text-slate-600">
               <X size={16} />
             </button>
           </div>
 
           <div className="max-h-[240px] overflow-y-auto">
             <table className="w-full text-xs">
-              <thead className="sticky top-0 bg-gray-50 dark:bg-gray-800">
+              <thead className="sticky top-0 bg-slate-50 dark:bg-slate-800">
                 <tr>
-                  <th className="px-3 py-1.5 text-left font-medium text-gray-500">Day</th>
-                  <th className="px-3 py-1.5 text-left font-medium text-gray-500">Category</th>
-                  <th className="px-3 py-1.5 text-right font-medium text-gray-500">Amount</th>
-                  <th className="px-3 py-1.5 text-left font-medium text-gray-500">Remark</th>
-                  <th className="px-3 py-1.5 text-left font-medium text-gray-500">Status</th>
+                  <th className="px-3 py-1.5 text-left font-medium text-slate-500">Day</th>
+                  <th className="px-3 py-1.5 text-left font-medium text-slate-500">Category</th>
+                  <th className="px-3 py-1.5 text-right font-medium text-slate-500">Amount</th>
+                  <th className="px-3 py-1.5 text-left font-medium text-slate-500">Remark</th>
+                  <th className="px-3 py-1.5 text-left font-medium text-slate-500">Status</th>
                 </tr>
               </thead>
               <tbody>
@@ -235,12 +235,12 @@ export function CSVImport() {
                     key={i}
                     className={row.error ? "bg-red-50/50 dark:bg-red-900/10" : ""}
                   >
-                    <td className="px-3 py-1.5 text-gray-700 dark:text-gray-300">{row.day}</td>
-                    <td className="px-3 py-1.5 text-gray-700 dark:text-gray-300">{row.category}</td>
-                    <td className="px-3 py-1.5 text-right text-gray-700 dark:text-gray-300">
+                    <td className="px-3 py-1.5 text-slate-700 dark:text-slate-300">{row.day}</td>
+                    <td className="px-3 py-1.5 text-slate-700 dark:text-slate-300">{row.category}</td>
+                    <td className="px-3 py-1.5 text-right text-slate-700 dark:text-slate-300">
                       {isNaN(row.amount) ? "—" : formatCurrency(row.amount)}
                     </td>
-                    <td className="max-w-[120px] truncate px-3 py-1.5 text-gray-400">{row.remark}</td>
+                    <td className="max-w-[120px] truncate px-3 py-1.5 text-slate-400">{row.remark}</td>
                     <td className="px-3 py-1.5">
                       {row.error ? (
                         <span className="text-red-500">{row.error}</span>
@@ -253,16 +253,16 @@ export function CSVImport() {
               </tbody>
             </table>
             {(preview.length > 50) && (
-              <p className="px-3 py-2 text-xs text-gray-400">
+              <p className="px-3 py-2 text-xs text-slate-400">
                 Showing first 50 of {preview.length} rows
               </p>
             )}
           </div>
 
-          <div className="flex items-center justify-end gap-2 border-t border-gray-100 px-4 py-2.5 dark:border-gray-800">
+          <div className="flex items-center justify-end gap-2 border-t border-slate-100 px-4 py-2.5 dark:border-slate-800">
             <button
               onClick={handleCancel}
-              className="rounded-lg px-3 py-2 text-xs font-medium text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800"
+              className="rounded-lg px-3 py-2 text-xs font-medium text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"
             >
               Cancel
             </button>

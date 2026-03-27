@@ -48,7 +48,7 @@ export default function AuthCompletePage() {
     <div className="flex min-h-screen items-center justify-center bg-slate-50 dark:bg-slate-950">
       <div className="flex flex-col items-center gap-4">
         <div className="h-10 w-10 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
-        <p className="text-sm text-gray-500 dark:text-gray-400">Signing you in…</p>
+        <p className="text-sm text-slate-500 dark:text-slate-400">Signing you in…</p>
       </div>
     </div>
   );

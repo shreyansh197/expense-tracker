@@ -144,19 +144,19 @@ export function AlertsPanel({
             <p className="mt-1">This helps you spot one-off big purchases or accidental double charges that stand out from your normal pattern.</p>
             <p className="mt-1 text-[10px] opacity-60">Requires at least 3 transactions per category to detect anomalies.</p>
           </InfoTooltip>
-          <span className="text-[10px] text-gray-400">Anomaly detection active</span>
+          <span className="text-[10px] text-slate-400">Anomaly detection active</span>
         </div>
       )}
       {visibleAlerts.map((alert) => (
         <div
           key={alert.id}
           className={cn(
-            "flex items-start gap-3 rounded-xl border px-3 py-2.5 text-sm",
+            "flex items-start gap-3 rounded-xl border px-3.5 py-3 text-sm",
             alert.severity === "critical"
-              ? "border-red-200 bg-red-50/60 text-red-800 dark:border-red-900/40 dark:bg-red-950/20 dark:text-red-300"
+              ? "border-red-100 bg-red-50/50 text-red-800 dark:border-red-900/30 dark:bg-red-950/15 dark:text-red-300"
               : alert.severity === "warning"
-                ? "border-amber-200 bg-amber-50/60 text-amber-800 dark:border-amber-900/40 dark:bg-amber-950/20 dark:text-amber-300"
-                : "border-indigo-200 bg-indigo-50/60 text-indigo-800 dark:border-indigo-900/40 dark:bg-indigo-950/20 dark:text-indigo-300"
+                ? "border-amber-100 bg-amber-50/50 text-amber-800 dark:border-amber-900/30 dark:bg-amber-950/15 dark:text-amber-300"
+                : "border-indigo-100 bg-indigo-50/50 text-indigo-800 dark:border-indigo-900/30 dark:bg-indigo-950/15 dark:text-indigo-300"
           )}
         >
           {alert.severity === "critical" ? (
@@ -186,7 +186,7 @@ export function AlertsPanel({
       {!expanded && hiddenCount > 0 && (
         <button
           onClick={() => setExpanded(true)}
-          className="flex w-full items-center justify-center gap-1 rounded-lg py-1.5 text-xs font-medium text-gray-500 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800/50 transition-colors"
+          className="flex w-full items-center justify-center gap-1 rounded-lg py-1.5 text-xs font-medium text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800/50 transition-colors"
         >
           Show {hiddenCount} more
           <ChevronDown size={12} />

@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, List, Settings, PlusCircle, Wallet, Briefcase } from "lucide-react";
+import { LayoutDashboard, List, Settings, PlusCircle, Briefcase } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUIStore } from "@/stores/uiStore";
 import { useSettings } from "@/hooks/useSettings";
@@ -30,22 +31,19 @@ export function Sidebar() {
   const shouldHideFAB = isLedgerDetail || pathname.startsWith("/settings");
 
   return (
-    <aside className="hidden lg:flex lg:w-60 lg:flex-col lg:border-r lg:border-gray-200/80 lg:bg-white lg:dark:border-gray-800/60 lg:dark:bg-gray-900">
+    <aside className="hidden lg:flex lg:w-60 lg:flex-col lg:border-r lg:border-slate-200/80 lg:bg-white lg:dark:border-slate-800/60 lg:dark:bg-slate-900">
       {/* Logo */}
-      <div className="flex items-center gap-2.5 border-b border-gray-100 px-5 py-5 dark:border-gray-800/60">
-        <div className={cn(
-          "flex h-8 w-8 items-center justify-center rounded-lg text-white",
-          isBusinessRoute ? "bg-emerald-600" : "bg-indigo-600"
-        )}>
-          <Wallet size={18} />
+      <div className="flex items-center gap-2.5 border-b border-slate-100 px-5 py-5 dark:border-slate-800/60">
+        <div className="h-8 w-8 overflow-hidden rounded-lg shadow-sm">
+          <Image src="/icons/icon-192.png" alt="Spendly" width={32} height={32} className="h-full w-full" />
         </div>
-        <span className="text-lg font-bold tracking-tight text-gray-900 dark:text-white">
+        <span className="text-lg font-bold tracking-tight text-slate-900 dark:text-white">
           Spendly
         </span>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 space-y-1 px-3 py-4">
+      <nav className="flex-1 space-y-0.5 px-3 py-4">
         {navItems.map((item) => {
           const isActive = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
           const Icon = item.icon;
@@ -55,12 +53,12 @@ export function Sidebar() {
               key={item.href}
               href={item.href}
               className={cn(
-                "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
+                "flex items-center gap-3 rounded-xl px-3 py-2.5 text-[0.8125rem] font-medium transition-colors",
                 isActive
                   ? isBiz
                     ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400"
                     : "bg-indigo-50 text-indigo-700 dark:bg-indigo-900/20 dark:text-indigo-400"
-                  : "text-gray-500 hover:bg-gray-50 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-800/50 dark:hover:text-gray-300"
+                  : "text-slate-500 hover:bg-slate-50 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800/50 dark:hover:text-slate-300"
               )}
             >
               <Icon size={18} />
@@ -72,7 +70,7 @@ export function Sidebar() {
 
       {/* Add button */}
       {!shouldHideFAB && (
-      <div className="border-t border-gray-100 p-3 dark:border-gray-800/60">
+      <div className="border-t border-slate-100 p-3 dark:border-slate-800/60">
         <button
           onClick={() => {
             if (isBusinessRoute) {

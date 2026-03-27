@@ -41,7 +41,7 @@ function LedgerListWithTotals({
 
   if (filtered.length === 0) {
     return (
-      <div className="flex flex-col items-center gap-2 py-12 text-gray-400">
+      <div className="flex flex-col items-center gap-2 py-12 text-slate-400">
         <Briefcase className="h-10 w-10" />
         <p className="text-sm">No ledgers found</p>
       </div>
@@ -96,9 +96,9 @@ export default function BusinessPage() {
     return (
       <AppShell>
         <div className="flex flex-col items-center justify-center gap-4 p-8 text-center">
-          <Briefcase className="h-12 w-12 text-gray-300" />
-          <h2 className="text-lg font-semibold text-gray-700 dark:text-gray-300">Business Mode is Off</h2>
-          <p className="max-w-sm text-sm text-gray-500">
+          <Briefcase className="h-12 w-12 text-slate-300" />
+          <h2 className="text-lg font-semibold text-slate-700 dark:text-slate-300">Business Mode is Off</h2>
+          <p className="max-w-sm text-sm text-slate-500">
             Enable Business Owner Mode in Settings to start tracking ledgers and payments.
           </p>
           <a
@@ -118,8 +118,8 @@ export default function BusinessPage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-lg font-bold text-gray-900 dark:text-white">Business</h1>
-            <p className="text-xs text-gray-500">{ledgers.length} ledger{ledgers.length !== 1 ? "s" : ""}</p>
+            <h1 className="text-lg font-bold text-slate-900 dark:text-white">Business</h1>
+            <p className="text-xs text-slate-500">{ledgers.length} ledger{ledgers.length !== 1 ? "s" : ""}</p>
           </div>
           <div className="flex items-center gap-3">
             <SyncIndicator syncStatus={syncStatus} />
@@ -138,7 +138,7 @@ export default function BusinessPage() {
 
         {/* Add Form */}
         {showForm && (
-          <div className="rounded-2xl border border-emerald-200/60 bg-white p-4 dark:border-emerald-900/40 dark:bg-gray-900">
+          <div className="rounded-2xl border border-emerald-200/60 bg-white p-4 dark:border-emerald-900/40 dark:bg-slate-900">
             <LedgerForm onSubmit={handleAddLedger} onCancel={() => setShowForm(false)} />
           </div>
         )}
@@ -167,19 +167,19 @@ export default function BusinessPage() {
         {ledgers.length > 0 && (
           <div className="flex items-center gap-3">
             <div className="relative flex-1">
-              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search ledgers..."
-                className="w-full rounded-xl border border-gray-200 bg-white py-2 pl-8 pr-3 text-sm text-gray-900 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                className="w-full rounded-xl border border-slate-200 bg-white py-2 pl-8 pr-3 text-sm text-slate-900 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
               />
             </div>
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-                className="rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300"
+                className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
             >
               <option value="all">All Status</option>
               <option value="active">Active</option>
@@ -193,11 +193,11 @@ export default function BusinessPage() {
         {loading ? (
           <div className="space-y-3">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-24 animate-pulse rounded-xl bg-gray-100 dark:bg-gray-800" />
+              <div key={i} className="h-24 animate-pulse rounded-xl bg-slate-100 dark:bg-slate-800" />
             ))}
           </div>
         ) : ledgers.length === 0 && !showForm ? (
-          <div className="flex flex-col items-center gap-3 py-16 text-gray-400">
+          <div className="flex flex-col items-center gap-3 py-16 text-slate-400">
             <Briefcase className="h-12 w-12" />
             <p className="text-sm">No ledgers yet</p>
             <button

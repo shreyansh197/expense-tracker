@@ -44,7 +44,7 @@ export default function LedgerDetailPage() {
     return (
       <AppShell>
         <div className="flex flex-col items-center justify-center gap-4 p-8">
-          <p className="text-sm text-gray-500">Ledger not found</p>
+          <p className="text-sm text-slate-500">Ledger not found</p>
           <button
             onClick={() => router.push("/business")}
             className="text-sm text-emerald-600 hover:text-emerald-700"
@@ -82,7 +82,7 @@ export default function LedgerDetailPage() {
   const statusConfig = {
     active: { icon: Clock, label: "Active", color: "text-blue-600 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-400" },
     completed: { icon: CheckCircle2, label: "Completed", color: "text-emerald-600 bg-emerald-50 dark:bg-emerald-900/30 dark:text-emerald-400" },
-    cancelled: { icon: XCircle, label: "Cancelled", color: "text-gray-500 bg-gray-100 dark:bg-gray-800 dark:text-gray-400" },
+    cancelled: { icon: XCircle, label: "Cancelled", color: "text-slate-500 bg-slate-100 dark:bg-slate-800 dark:text-slate-400" },
   };
   const status = statusConfig[ledger.status];
   const StatusIcon = status.icon;
@@ -94,7 +94,7 @@ export default function LedgerDetailPage() {
         <div className="flex items-center justify-between">
           <button
             onClick={() => router.push("/business")}
-            className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+            className="flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
           >
             <ArrowLeft size={16} />
             Back
@@ -102,14 +102,14 @@ export default function LedgerDetailPage() {
           <div className="flex items-center gap-2">
             <button
               onClick={() => setShowEditForm(!showEditForm)}
-              className="rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800"
+              className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800"
               title="Edit ledger"
             >
               <Edit3 size={16} />
             </button>
             <button
               onClick={() => setShowDeleteConfirm(true)}
-              className="rounded-lg p-2 text-gray-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20"
+              className="rounded-lg p-2 text-slate-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20"
               title="Delete ledger"
             >
               <Trash2 size={16} />
@@ -118,11 +118,11 @@ export default function LedgerDetailPage() {
         </div>
 
         {/* Header Card */}
-        <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
           <div className="flex items-start gap-4">
             <LedgerProgressRing received={totalReceived} expected={ledger.expectedAmount} size={64} strokeWidth={5} />
             <div className="min-w-0 flex-1">
-              <h1 className="text-lg font-bold text-gray-900 dark:text-white">{ledger.name}</h1>
+              <h1 className="text-lg font-bold text-slate-900 dark:text-white">{ledger.name}</h1>
               <div className="mt-1 flex flex-wrap items-center gap-2">
                 <span className={cn("inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium", status.color)}>
                   <StatusIcon size={12} />
@@ -135,7 +135,7 @@ export default function LedgerDetailPage() {
                   </span>
                 )}
                 {ledger.dueDate && (
-                  <span className="text-xs text-gray-400">
+                  <span className="text-xs text-slate-400">
                     Due {new Date(ledger.dueDate).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
                   </span>
                 )}
@@ -144,17 +144,17 @@ export default function LedgerDetailPage() {
           </div>
 
           {/* Amount breakdown */}
-          <div className="mt-4 grid grid-cols-3 gap-3 border-t border-gray-100 pt-4 dark:border-gray-800">
+          <div className="mt-4 grid grid-cols-3 gap-3 border-t border-slate-100 pt-4 dark:border-slate-800">
             <div>
-              <p className="text-[10px] font-medium text-gray-400">Expected</p>
-              <p className="text-sm font-bold text-gray-900 dark:text-white">{formatCurrency(ledger.expectedAmount)}</p>
+              <p className="text-[10px] font-medium text-slate-400">Expected</p>
+              <p className="text-sm font-bold text-slate-900 dark:text-white">{formatCurrency(ledger.expectedAmount)}</p>
             </div>
             <div>
-              <p className="text-[10px] font-medium text-gray-400">Received</p>
+              <p className="text-[10px] font-medium text-slate-400">Received</p>
               <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400">{formatCurrency(totalReceived)}</p>
             </div>
             <div>
-              <p className="text-[10px] font-medium text-gray-400">Remaining</p>
+              <p className="text-[10px] font-medium text-slate-400">Remaining</p>
               <p className={cn("text-sm font-bold", remaining <= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-amber-600 dark:text-amber-400")}>
                 {formatCurrency(Math.max(0, remaining))}
               </p>
@@ -163,7 +163,7 @@ export default function LedgerDetailPage() {
 
           {/* Progress bar */}
           <div className="mt-3">
-            <div className="h-2 w-full rounded-full bg-gray-100 dark:bg-gray-800">
+            <div className="h-2 w-full rounded-full bg-slate-100 dark:bg-slate-800">
               <div
                 className={cn(
                   "h-2 rounded-full transition-all",
@@ -184,7 +184,7 @@ export default function LedgerDetailPage() {
               {ledger.tags.map((tag) => (
                 <span
                   key={tag}
-                  className="rounded-full bg-gray-100 px-2 py-0.5 text-[10px] text-gray-500 dark:bg-gray-800 dark:text-gray-400"
+                  className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] text-slate-500 dark:bg-slate-800 dark:text-slate-400"
                 >
                   {tag}
                 </span>
@@ -213,7 +213,7 @@ export default function LedgerDetailPage() {
 
         {/* Edit Form */}
         {showEditForm && (
-          <div className="rounded-xl border border-emerald-200 bg-white p-4 shadow-sm dark:border-emerald-900/50 dark:bg-gray-900">
+          <div className="rounded-xl border border-emerald-200 bg-white p-4 shadow-sm dark:border-emerald-900/50 dark:bg-slate-900">
             <LedgerForm
               initial={{
                 name: ledger.name,
@@ -233,16 +233,16 @@ export default function LedgerDetailPage() {
 
         {/* Notes */}
         {ledger.notes && !showEditForm && (
-          <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900">
-            <h3 className="mb-2 text-xs font-semibold text-gray-500">Notes</h3>
-            <p className="whitespace-pre-wrap text-sm text-gray-700 dark:text-gray-300">{ledger.notes}</p>
+          <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <h3 className="mb-2 text-xs font-semibold text-slate-500">Notes</h3>
+            <p className="whitespace-pre-wrap text-sm text-slate-700 dark:text-slate-300">{ledger.notes}</p>
           </div>
         )}
 
         {/* Payments Section */}
-        <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+        <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
           <div className="mb-3 flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+            <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">
               Payments ({payments.length})
             </h3>
             {ledger.status === "active" && (
@@ -269,7 +269,7 @@ export default function LedgerDetailPage() {
           {loading ? (
             <div className="space-y-2">
               {[1, 2].map((i) => (
-                <div key={i} className="h-12 animate-pulse rounded-lg bg-gray-100 dark:bg-gray-800" />
+                <div key={i} className="h-12 animate-pulse rounded-lg bg-slate-100 dark:bg-slate-800" />
               ))}
             </div>
           ) : (
@@ -280,9 +280,9 @@ export default function LedgerDetailPage() {
         {/* Delete Confirm */}
         {showDeleteConfirm && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-            <div className="w-full max-w-sm rounded-xl bg-white p-6 shadow-xl dark:bg-gray-900">
-              <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Delete Ledger?</h3>
-              <p className="mt-2 text-xs text-gray-500">
+            <div className="w-full max-w-sm rounded-xl bg-white p-6 shadow-xl dark:bg-slate-900">
+              <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Delete Ledger?</h3>
+              <p className="mt-2 text-xs text-slate-500">
                 This will remove &quot;{ledger.name}&quot; and all its payments. This action cannot be undone.
               </p>
               <div className="mt-4 flex gap-2">
@@ -294,7 +294,7 @@ export default function LedgerDetailPage() {
                 </button>
                 <button
                   onClick={() => setShowDeleteConfirm(false)}
-                  className="rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300"
+                  className="rounded-lg bg-slate-100 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300"
                 >
                   Cancel
                 </button>

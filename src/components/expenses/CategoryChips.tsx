@@ -50,7 +50,7 @@ export function CategoryChips() {
               "shrink-0 rounded-full px-3 py-1 text-xs font-medium transition-all",
               isActive
                 ? "text-white"
-                : "bg-gray-100/80 text-gray-500 dark:bg-gray-800/60 dark:text-gray-400"
+                : "bg-slate-100/80 text-slate-500 dark:bg-slate-800/60 dark:text-slate-400"
             )}
             style={isActive ? { backgroundColor: cat.color } : undefined}
           >
@@ -88,7 +88,7 @@ export function CategoryDot({ category }: { category: CategoryId }) {
   if (!meta) return null;
 
   return (
-    <span className="inline-flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-400 max-w-full truncate">
+    <span className="inline-flex items-center gap-1.5 text-xs text-slate-600 dark:text-slate-400 max-w-full truncate">
       <span
         className="h-2 w-2 shrink-0 rounded-full"
         style={{ backgroundColor: meta.color }}

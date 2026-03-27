@@ -63,8 +63,8 @@ export function BottomNav() {
         onClick={handleFabClick}
         aria-label={isBusiness && isBusinessRoute ? "Add ledger" : "Add expense"}
         className={cn(
-          "fixed left-1/2 z-40 flex h-[52px] w-[52px] -translate-x-1/2 items-center justify-center rounded-full text-white shadow-lg ring-2 ring-white/60 transition-transform duration-200 active:scale-95 lg:hidden dark:ring-gray-900/60",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-50 dark:focus-visible:ring-offset-gray-900",
+          "fixed left-1/2 z-40 flex h-[52px] w-[52px] -translate-x-1/2 items-center justify-center rounded-full text-white shadow-lg ring-2 ring-white/60 transition-transform duration-200 active:scale-95 lg:hidden dark:ring-slate-900/60",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-50 dark:focus-visible:ring-offset-slate-900",
           accentColor === "emerald"
             ? "bg-emerald-600 shadow-emerald-600/25 focus-visible:ring-emerald-500"
             : "bg-indigo-600 shadow-indigo-600/25 focus-visible:ring-indigo-500"
@@ -79,7 +79,7 @@ export function BottomNav() {
 
       {/* ─── Nav bar (z-30, below FAB) ─── */}
       <nav
-        className="fixed bottom-0 left-0 right-0 z-30 bg-white/90 shadow-[0_-1px_2px_0_rgba(0,0,0,0.03)] backdrop-blur-xl dark:bg-gray-900/90 dark:shadow-[0_-1px_2px_0_rgba(0,0,0,0.15)] lg:hidden"
+        className="fixed bottom-0 left-0 right-0 z-30 border-t border-slate-100/80 bg-white/95 backdrop-blur-xl dark:border-slate-800/60 dark:bg-slate-900/95 lg:hidden"
         style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
       >
         <div
@@ -97,14 +97,14 @@ export function BottomNav() {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "relative flex flex-col items-center justify-center gap-0.5 py-1 transition-colors",
+                  "relative flex flex-col items-center justify-center gap-1 py-1 transition-colors",
                   isActive
                     ? cn(
                         isBiz
                           ? "text-emerald-600 dark:text-emerald-400"
                           : "text-indigo-600 dark:text-indigo-400"
                       )
-                    : "text-gray-500 dark:text-gray-400"
+                    : "text-slate-500 dark:text-slate-400"
                 )}
               >
                 {isActive && (

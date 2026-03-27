@@ -56,12 +56,12 @@ export function SavingsGoalsWidget() {
   const overallPct = totalTarget > 0 ? Math.round((totalSaved / totalTarget) * 100) : 0;
 
   return (
-    <div className="rounded-2xl border border-gray-100 bg-white p-4 dark:border-gray-800 dark:bg-gray-900">
+    <div className="rounded-2xl border border-slate-100 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
       {/* Header */}
       <div className="mb-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <PiggyBank size={15} className="text-emerald-500" />
-          <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+          <h3 className="text-[0.8125rem] font-semibold text-slate-700 dark:text-slate-300">
             Savings Goals
           </h3>
           <span className="tabular-nums rounded-full bg-emerald-100 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400">
@@ -78,7 +78,7 @@ export function SavingsGoalsWidget() {
       </div>
 
       {/* Overall progress bar */}
-      <div className="mb-4 h-1.5 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800">
+      <div className="mb-4 h-1.5 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
         <div
           className="h-full rounded-full bg-emerald-500 transition-all"
           style={{ width: `${Math.min(overallPct, 100)}%` }}
@@ -104,7 +104,7 @@ export function SavingsGoalsWidget() {
                     className="h-2.5 w-2.5 shrink-0 rounded-full"
                     style={{ backgroundColor: g.color }}
                   />
-                  <span className="truncate text-xs font-medium text-gray-800 dark:text-gray-200">
+                  <span className="truncate text-xs font-medium text-slate-800 dark:text-slate-200">
                     {g.name}
                   </span>
                   {isComplete && (
@@ -115,9 +115,9 @@ export function SavingsGoalsWidget() {
                 </div>
 
                 <div className="flex shrink-0 items-center gap-2">
-                  <span className="tabular-nums whitespace-nowrap text-xs text-gray-500 dark:text-gray-400">
+                  <span className="tabular-nums whitespace-nowrap text-xs text-slate-500 dark:text-slate-400">
                     {formatCurrency(g.savedAmount)}{" "}
-                    <span className="text-gray-300 dark:text-gray-600">/</span>{" "}
+                    <span className="text-slate-300 dark:text-slate-600">/</span>{" "}
                     {formatCurrency(g.targetAmount)}
                   </span>
                   {!isComplete && (
@@ -140,7 +140,7 @@ export function SavingsGoalsWidget() {
               </div>
 
               {/* Progress bar */}
-              <div className="h-1.5 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800">
+              <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
                 <div
                   className="h-full rounded-full transition-all duration-500"
                   style={{
@@ -149,7 +149,7 @@ export function SavingsGoalsWidget() {
                   }}
                 />
               </div>
-              <div className="flex justify-between text-[10px] text-gray-400 dark:text-gray-600">
+              <div className="flex justify-between text-[10px] text-slate-400 dark:text-slate-600">
                 <span>{pct}% complete</span>
                 {g.deadline && (
                   <span>
@@ -164,16 +164,16 @@ export function SavingsGoalsWidget() {
 
               {/* Inline fund form */}
               {isActive && (
-                <div className="flex items-center gap-2 rounded-lg bg-gray-50 p-2 dark:bg-gray-800">
+                <div className="flex items-center gap-2 rounded-lg bg-slate-50 p-2 dark:bg-slate-800">
                   {/* Add / Subtract toggle */}
-                  <div className="flex overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700">
+                  <div className="flex overflow-hidden rounded-lg border border-slate-200 dark:border-slate-700">
                     <button
                       onClick={() => setFundMode("add")}
                       title="Add funds"
                       className={`px-2.5 py-1.5 text-xs font-medium transition-colors ${
                         fundMode === "add"
                           ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400"
-                          : "text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                          : "text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700"
                       }`}
                     >
                       <TrendingUp size={12} />
@@ -184,7 +184,7 @@ export function SavingsGoalsWidget() {
                       className={`px-2.5 py-1.5 text-xs font-medium transition-colors ${
                         fundMode === "subtract"
                           ? "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400"
-                          : "text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                          : "text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700"
                       }`}
                     >
                       <Minus size={12} />
@@ -193,7 +193,7 @@ export function SavingsGoalsWidget() {
 
                   {/* Amount input */}
                   <div className="relative flex-1">
-                    <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-gray-400">{symbol}</span>
+                    <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-slate-400">{symbol}</span>
                     <input
                       type="number"
                       min="1"
@@ -205,7 +205,7 @@ export function SavingsGoalsWidget() {
                       }}
                       autoFocus
                       placeholder="Amount"
-                      className="w-full rounded-lg border border-gray-200 bg-white py-1.5 pl-6 pr-2 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
+                      className="w-full rounded-lg border border-slate-200 bg-white py-1.5 pl-6 pr-2 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                     />
                   </div>
 
@@ -219,7 +219,7 @@ export function SavingsGoalsWidget() {
 
                   <button
                     onClick={handleCancel}
-                    className="shrink-0 rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-gray-200 dark:hover:bg-gray-700"
+                    className="shrink-0 rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-200 dark:hover:bg-slate-700"
                     aria-label="Cancel"
                   >
                     <X size={12} />

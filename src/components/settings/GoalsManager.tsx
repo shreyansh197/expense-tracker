@@ -127,7 +127,7 @@ export function GoalsManager() {
       {goals.length > 0 && (
         <div className="mb-3 rounded-lg bg-emerald-50 px-3 py-2 dark:bg-emerald-900/20">
           <div className="flex items-center justify-between text-xs">
-            <span className="text-gray-500 dark:text-gray-400">
+            <span className="text-slate-500 dark:text-slate-400">
               Total progress: <span className="font-semibold text-emerald-700 dark:text-emerald-400">{formatCurrency(totalSaved)}</span> / {formatCurrency(totalTarget)}
             </span>
             <span className="font-semibold text-emerald-700 dark:text-emerald-400">{overallPct}%</span>
@@ -154,12 +154,12 @@ export function GoalsManager() {
       </div>
 
       {showForm && (
-        <div className="mb-4 overflow-hidden rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800">
+        <div className="mb-4 overflow-hidden rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800">
           <div className="mb-3 flex items-center justify-between">
-            <span className="text-xs font-medium text-gray-500">
+            <span className="text-xs font-medium text-slate-500">
               {editId ? "Edit Goal" : "New Goal"}
             </span>
-            <button onClick={resetForm} className="text-gray-400 hover:text-gray-600">
+            <button onClick={resetForm} className="text-slate-400 hover:text-slate-600">
               <X size={14} />
             </button>
           </div>
@@ -170,29 +170,29 @@ export function GoalsManager() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               maxLength={40}
-              className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-900 dark:text-white"
+              className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-900 dark:text-white"
             />
             <div className="grid grid-cols-2 gap-2">
               <div className="relative">
-                <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-gray-400">{symbol}</span>
+                <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-slate-400">{symbol}</span>
                 <input
                   type="number"
                   placeholder="Target amount"
                   value={targetAmount}
                   onChange={(e) => setTargetAmount(e.target.value)}
                   min="1"
-                  className="w-full rounded-lg border border-gray-200 bg-white py-2 pl-6 pr-3 text-sm dark:border-gray-600 dark:bg-gray-900 dark:text-white"
+                  className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-6 pr-3 text-sm dark:border-slate-600 dark:bg-slate-900 dark:text-white"
                 />
               </div>
               <div className="relative">
-                <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-gray-400">{symbol}</span>
+                <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-slate-400">{symbol}</span>
                 <input
                   type="number"
                   placeholder="Monthly contrib."
                   value={monthlyContribution}
                   onChange={(e) => setMonthlyContribution(e.target.value)}
                   min="0"
-                  className="w-full rounded-lg border border-gray-200 bg-white py-2 pl-6 pr-3 text-sm dark:border-gray-600 dark:bg-gray-900 dark:text-white"
+                  className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-6 pr-3 text-sm dark:border-slate-600 dark:bg-slate-900 dark:text-white"
                 />
               </div>
             </div>
@@ -201,7 +201,7 @@ export function GoalsManager() {
               placeholder="Deadline (optional)"
               value={deadline}
               onChange={(e) => setDeadline(e.target.value)}
-              className="min-w-0 max-w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-900 dark:text-white"
+              className="min-w-0 max-w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-900 dark:text-white"
             />
             <div className="flex flex-wrap gap-1.5">
               {PRESET_COLORS.map((c) => (
@@ -210,7 +210,7 @@ export function GoalsManager() {
                   onClick={() => setColor(c)}
                   title={c}
                   className={`h-5 w-5 shrink-0 rounded-full border-2 transition-all hover:scale-110 ${
-                    color === c ? "border-gray-900 scale-110 dark:border-white" : "border-transparent"
+                    color === c ? "border-slate-900 scale-110 dark:border-white" : "border-transparent"
                   }`}
                   style={{ backgroundColor: c }}
                 />
@@ -228,7 +228,7 @@ export function GoalsManager() {
       )}
 
       {goals.length === 0 && !showForm ? (
-        <p className="py-4 text-center text-xs text-gray-400">
+        <p className="py-4 text-center text-xs text-slate-400">
           No goals yet. Set a savings target to track your progress.
         </p>
       ) : (
@@ -243,7 +243,7 @@ export function GoalsManager() {
             return (
               <div
                 key={g.id}
-                className="rounded-xl border border-gray-200 bg-white p-3 dark:border-gray-800 dark:bg-gray-900"
+                className="rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-900"
               >
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
@@ -251,7 +251,7 @@ export function GoalsManager() {
                       className="h-3 w-3 rounded-full"
                       style={{ backgroundColor: g.color }}
                     />
-                    <span className="text-sm font-medium text-gray-900 dark:text-white">
+                    <span className="text-sm font-medium text-slate-900 dark:text-white">
                       {g.name}
                     </span>
                     {isComplete && (
@@ -269,13 +269,13 @@ export function GoalsManager() {
                     </button>
                     <button
                       onClick={() => handleEdit(g)}
-                      className="rounded p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                      className="rounded p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
                     >
                       <Pencil size={12} />
                     </button>
                     <button
                       onClick={() => handleDelete(g.id)}
-                      className="rounded p-1 text-gray-400 hover:text-red-500"
+                      className="rounded p-1 text-slate-400 hover:text-red-500"
                     >
                       <Trash2 size={12} />
                     </button>
@@ -284,14 +284,14 @@ export function GoalsManager() {
 
                 {/* Add/Subtract Funds inline */}
                 {fundGoalId === g.id && (
-                  <div className="mb-2 flex items-center gap-2 rounded-lg bg-gray-50 px-2 py-2 dark:bg-gray-800">
-                    <div className="flex rounded-lg border border-gray-200 dark:border-gray-700">
+                  <div className="mb-2 flex items-center gap-2 rounded-lg bg-slate-50 px-2 py-2 dark:bg-slate-800">
+                    <div className="flex rounded-lg border border-slate-200 dark:border-slate-700">
                       <button
                         onClick={() => setFundMode("add")}
                         className={`px-2 py-1 text-xs font-medium rounded-l-lg ${
                           fundMode === "add"
                             ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400"
-                            : "text-gray-400"
+                            : "text-slate-400"
                         }`}
                       >
                         <TrendingUp size={12} />
@@ -301,14 +301,14 @@ export function GoalsManager() {
                         className={`px-2 py-1 text-xs font-medium rounded-r-lg ${
                           fundMode === "subtract"
                             ? "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400"
-                            : "text-gray-400"
+                            : "text-slate-400"
                         }`}
                       >
                         <Minus size={12} />
                       </button>
                     </div>
                     <div className="relative flex-1">
-                      <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-gray-400">{symbol}</span>
+                      <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-slate-400">{symbol}</span>
                       <input
                         type="number"
                         min="1"
@@ -317,7 +317,7 @@ export function GoalsManager() {
                         onKeyDown={(e) => { if (e.key === "Enter") handleFundSave(); if (e.key === "Escape") setFundGoalId(null); }}
                         autoFocus
                         placeholder="Amount"
-                        className="w-full rounded border border-gray-200 bg-white py-1 pl-5 pr-2 text-xs dark:border-gray-700 dark:bg-gray-900 dark:text-white"
+                        className="w-full rounded border border-slate-200 bg-white py-1 pl-5 pr-2 text-xs dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                       />
                     </div>
                     <button
@@ -328,14 +328,14 @@ export function GoalsManager() {
                     </button>
                     <button
                       onClick={() => setFundGoalId(null)}
-                      className="text-gray-400 hover:text-gray-600"
+                      className="text-slate-400 hover:text-slate-600"
                     >
                       <X size={12} />
                     </button>
                   </div>
                 )}
 
-                <div className="h-2 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800">
+                <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
                   <div
                     className="h-full rounded-full transition-all"
                     style={{
@@ -344,7 +344,7 @@ export function GoalsManager() {
                     }}
                   />
                 </div>
-                <div className="mt-1.5 flex items-center justify-between text-[10px] text-gray-400">
+                <div className="mt-1.5 flex items-center justify-between text-[10px] text-slate-400">
                   <span>
                     {formatCurrency(g.savedAmount)} of {formatCurrency(g.targetAmount)} ({pct}%)
                   </span>

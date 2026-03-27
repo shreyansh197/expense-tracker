@@ -174,8 +174,8 @@ export function SecurityCard() {
       {/* ─── Two-Factor Authentication ─── */}
       <div>
         <div className="flex items-center gap-2 mb-3">
-          <Shield size={16} className="text-gray-500" />
-          <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Two-Factor Authentication</h3>
+          <Shield size={16} className="text-slate-500" />
+          <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">Two-Factor Authentication</h3>
         </div>
 
         {twoFAEnabled ? (
@@ -193,7 +193,7 @@ export function SecurityCard() {
                 </p>
                 <div className="grid grid-cols-2 gap-1.5 mb-3">
                   {recoveryCodes.map((code, i) => (
-                    <code key={i} className="rounded bg-white px-2 py-1 text-center font-mono text-xs text-gray-700 dark:bg-gray-800 dark:text-gray-300">
+                    <code key={i} className="rounded bg-white px-2 py-1 text-center font-mono text-xs text-slate-700 dark:bg-slate-800 dark:text-slate-300">
                       {code}
                     </code>
                   ))}
@@ -220,14 +220,14 @@ export function SecurityCard() {
           </div>
         ) : totpUri ? (
           <div className="space-y-4">
-            <p className="text-xs text-gray-500 dark:text-gray-400">
+            <p className="text-xs text-slate-500 dark:text-slate-400">
               Scan this QR code with your authenticator app (Google Authenticator, Authy, etc.):
             </p>
 
             {/* QR Code */}
             {qrDataUrl ? (
               <div className="flex justify-center">
-                <div className="rounded-xl bg-white p-3 shadow-sm ring-1 ring-gray-200 dark:ring-gray-700">
+                <div className="rounded-xl bg-white p-3 shadow-sm ring-1 ring-slate-200 dark:ring-slate-700">
                   {/* eslint-disable-next-line @next/next/no-img-element -- data URL, next/image can't optimize */}
                   <img
                     src={qrDataUrl}
@@ -239,19 +239,19 @@ export function SecurityCard() {
                 </div>
               </div>
             ) : (
-              <div className="flex h-[200px] items-center justify-center rounded-xl bg-gray-50 dark:bg-gray-800">
-                <Loader2 size={20} className="animate-spin text-gray-400" />
+              <div className="flex h-[200px] items-center justify-center rounded-xl bg-slate-50 dark:bg-slate-800">
+                <Loader2 size={20} className="animate-spin text-slate-400" />
               </div>
             )}
 
             {/* Manual entry secret */}
             {totpSecret && (
-              <div className="rounded-lg bg-gray-50 px-3 py-2.5 dark:bg-gray-800">
-                <p className="text-[10px] font-medium uppercase tracking-wider text-gray-400 mb-1">
+              <div className="rounded-lg bg-slate-50 px-3 py-2.5 dark:bg-slate-800">
+                <p className="text-[10px] font-medium uppercase tracking-wider text-slate-400 mb-1">
                   Can&apos;t scan? Enter manually:
                 </p>
                 <div className="flex items-center gap-2">
-                  <p className="flex-1 font-mono text-xs text-gray-700 dark:text-gray-300 break-all select-all">
+                  <p className="flex-1 font-mono text-xs text-slate-700 dark:text-slate-300 break-all select-all">
                     {totpSecret}
                   </p>
                   <button
@@ -260,7 +260,7 @@ export function SecurityCard() {
                       setCopiedSecret(true);
                       setTimeout(() => setCopiedSecret(false), 2000);
                     }}
-                    className="shrink-0 p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                    className="shrink-0 p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
                   >
                     {copiedSecret ? <CheckCircle2 size={14} className="text-emerald-500" /> : <Copy size={14} />}
                   </button>
@@ -270,7 +270,7 @@ export function SecurityCard() {
 
             {/* Verification input */}
             <div>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
+              <p className="text-xs text-slate-500 dark:text-slate-400 mb-2">
                 Enter the 6-digit code from your app:
               </p>
               <div className="flex gap-2">
@@ -281,7 +281,7 @@ export function SecurityCard() {
                   placeholder="000000"
                   value={verifyCode}
                   onChange={(e) => setVerifyCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                  className="w-32 rounded-lg border border-gray-200 bg-white px-3 py-2 text-center font-mono text-sm tracking-[0.3em] dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-32 rounded-lg border border-slate-200 bg-white px-3 py-2 text-center font-mono text-sm tracking-[0.3em] dark:border-slate-700 dark:bg-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 />
                 <button
                   onClick={verify2FA}
@@ -301,7 +301,7 @@ export function SecurityCard() {
                 setQrDataUrl(null);
                 setVerifyCode("");
               }}
-              className="text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+              className="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
             >
               Cancel setup
             </button>
@@ -309,7 +309,7 @@ export function SecurityCard() {
         ) : (
           <button
             onClick={setup2FA}
-            className="flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
+            className="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
           >
             <Plus size={14} />
             Enable 2FA
@@ -321,8 +321,8 @@ export function SecurityCard() {
       <div>
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <Key size={16} className="text-gray-500" />
-            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Active Sessions</h3>
+            <Key size={16} className="text-slate-500" />
+            <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">Active Sessions</h3>
           </div>
           {sessions.length > 1 && (
             <button
@@ -336,25 +336,25 @@ export function SecurityCard() {
         </div>
 
         {loadingSessions ? (
-          <div className="flex items-center gap-2 text-xs text-gray-400">
+          <div className="flex items-center gap-2 text-xs text-slate-400">
             <Loader2 size={14} className="animate-spin" />
             Loading...
           </div>
         ) : sessions.length === 0 ? (
-          <p className="text-xs text-gray-400">No active sessions</p>
+          <p className="text-xs text-slate-400">No active sessions</p>
         ) : (
           <div className="space-y-2">
             {sessions.map((s) => (
               <div
                 key={s.id}
-                className="flex items-center justify-between rounded-lg bg-gray-50 px-3 py-2 dark:bg-gray-800"
+                className="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2 dark:bg-slate-800"
               >
                 <div>
-                  <p className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                  <p className="text-xs font-medium text-slate-700 dark:text-slate-300">
                     {s.deviceName || "Unknown Device"}
                     {s.isCurrent && <span className="ml-2 text-emerald-500">(current)</span>}
                   </p>
-                  <p className="text-[10px] text-gray-400">
+                  <p className="text-[10px] text-slate-400">
                     Last active: {new Date(s.lastActiveAt).toLocaleDateString()}
                   </p>
                 </div>
@@ -375,30 +375,30 @@ export function SecurityCard() {
       {/* ─── Linked Devices ─── */}
       <div>
         <div className="flex items-center gap-2 mb-3">
-          <Smartphone size={16} className="text-gray-500" />
-          <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Linked Devices</h3>
+          <Smartphone size={16} className="text-slate-500" />
+          <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">Linked Devices</h3>
         </div>
 
         {loadingDevices ? (
-          <div className="flex items-center gap-2 text-xs text-gray-400">
+          <div className="flex items-center gap-2 text-xs text-slate-400">
             <Loader2 size={14} className="animate-spin" />
             Loading...
           </div>
         ) : devices.length === 0 ? (
-          <p className="text-xs text-gray-400">No linked devices</p>
+          <p className="text-xs text-slate-400">No linked devices</p>
         ) : (
           <div className="space-y-2">
             {devices.map((d) => (
               <div
                 key={d.id}
-                className="flex items-center justify-between rounded-lg bg-gray-50 px-3 py-2 dark:bg-gray-800"
+                className="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2 dark:bg-slate-800"
               >
                 <div>
-                  <p className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                  <p className="text-xs font-medium text-slate-700 dark:text-slate-300">
                     {d.name || "Unnamed Device"}
                     {d.isCurrent && <span className="ml-2 text-emerald-500">(this device)</span>}
                   </p>
-                  <p className="text-[10px] text-gray-400">
+                  <p className="text-[10px] text-slate-400">
                     Last active: {new Date(d.lastActiveAt).toLocaleDateString()}
                   </p>
                 </div>

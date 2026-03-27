@@ -119,13 +119,13 @@ export function WorkspaceMembersCard() {
       {/* ─── Members List ─── */}
       <div>
         <div className="flex items-center gap-2 mb-3">
-          <Users size={16} className="text-gray-500" />
-          <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Members</h3>
-          <span className="text-xs text-gray-400">({members.length})</span>
+          <Users size={16} className="text-slate-500" />
+          <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">Members</h3>
+          <span className="text-xs text-slate-400">({members.length})</span>
         </div>
 
         {loading ? (
-          <div className="flex items-center gap-2 text-xs text-gray-400">
+          <div className="flex items-center gap-2 text-xs text-slate-400">
             <Loader2 size={14} className="animate-spin" />
             Loading...
           </div>
@@ -136,16 +136,16 @@ export function WorkspaceMembersCard() {
               return (
                 <div
                   key={m.id}
-                  className="flex items-center justify-between rounded-lg bg-gray-50 px-3 py-2 dark:bg-gray-800"
+                  className="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2 dark:bg-slate-800"
                 >
                   <div className="flex items-center gap-3">
-                    <RoleIcon size={14} className={m.role === "OWNER" ? "text-amber-500" : m.role === "ADMIN" ? "text-blue-500" : "text-gray-400"} />
+                    <RoleIcon size={14} className={m.role === "OWNER" ? "text-amber-500" : m.role === "ADMIN" ? "text-blue-500" : "text-slate-400"} />
                     <div>
-                      <p className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                      <p className="text-xs font-medium text-slate-700 dark:text-slate-300">
                         {m.name || m.email}
-                        {m.id === user?.id && <span className="ml-1 text-gray-400">(you)</span>}
+                        {m.id === user?.id && <span className="ml-1 text-slate-400">(you)</span>}
                       </p>
-                      <p className="text-[10px] text-gray-400">{m.role}</p>
+                      <p className="text-[10px] text-slate-400">{m.role}</p>
                     </div>
                   </div>
                   {m.role !== "OWNER" && m.id !== user?.id && (
@@ -166,15 +166,15 @@ export function WorkspaceMembersCard() {
       {/* ─── Create Invite ─── */}
       <div>
         <div className="flex items-center gap-2 mb-3">
-          <UserPlus size={16} className="text-gray-500" />
-          <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Invite Members</h3>
+          <UserPlus size={16} className="text-slate-500" />
+          <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">Invite Members</h3>
         </div>
 
         <div className="flex items-center gap-2">
           <select
             value={inviteRole}
             onChange={(e) => setInviteRole(e.target.value as "MEMBER" | "ADMIN")}
-            className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+            className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs dark:border-slate-700 dark:bg-slate-800 dark:text-white"
           >
             <option value="MEMBER">Member</option>
             <option value="ADMIN">Admin</option>
@@ -209,18 +209,18 @@ export function WorkspaceMembersCard() {
       {/* ─── Active Invites ─── */}
       {invites.length > 0 && (
         <div>
-          <h3 className="text-xs font-medium text-gray-500 mb-2">Pending Invites</h3>
+          <h3 className="text-xs font-medium text-slate-500 mb-2">Pending Invites</h3>
           <div className="space-y-1">
             {invites.map((inv) => (
               <div
                 key={inv.id}
-                className="flex items-center justify-between rounded-lg bg-gray-50 px-3 py-2 dark:bg-gray-800"
+                className="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2 dark:bg-slate-800"
               >
                 <div>
-                  <p className="text-xs text-gray-600 dark:text-gray-400">
+                  <p className="text-xs text-slate-600 dark:text-slate-400">
                     {inv.role} invite
                   </p>
-                  <p className="text-[10px] text-gray-400">
+                  <p className="text-[10px] text-slate-400">
                     Expires: {new Date(inv.expiresAt).toLocaleDateString()}
                   </p>
                 </div>

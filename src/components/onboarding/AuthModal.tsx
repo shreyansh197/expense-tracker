@@ -278,16 +278,16 @@ function MobileAuthPage({ children }: { children: React.ReactNode }) {
         </p>
       </div>
 
-      {/* Card — theme-aware (white / dark:gray-900) */}
+      {/* Card — theme-aware (white / dark:slate-900) */}
       <div style={{ position: "relative", zIndex: 1, flex: 1, display: "flex", flexDirection: "column", marginTop: "auto" }}>
         <div
-          className="flex-1 flex flex-col rounded-t-3xl bg-white px-6 pt-7 pb-8 shadow-2xl shadow-black/30 dark:bg-gray-900"
+          className="flex-1 flex flex-col rounded-t-3xl bg-white px-6 pt-7 pb-8 shadow-2xl shadow-black/30 dark:bg-slate-900"
           style={{ paddingBottom: "calc(32px + env(safe-area-inset-bottom, 0px))" }}
         >
           <div className="flex-1 flex flex-col justify-center">
             {children}
           </div>
-          <p className="mt-4 text-center text-[10px] text-gray-400 dark:text-gray-600">
+          <p className="mt-4 text-center text-[10px] text-slate-400 dark:text-slate-600">
             By continuing, you agree to our Terms of Service.
           </p>
         </div>
@@ -304,7 +304,7 @@ function DesktopAuthPage({ children }: { children: React.ReactNode }) {
         <DesktopHeroPanel />
       </div>
 
-      <div className="relative flex flex-1 items-center justify-center bg-gray-50 px-16 py-10 dark:bg-gray-950">
+      <div className="relative flex flex-1 items-center justify-center bg-slate-50 px-16 py-10 dark:bg-slate-950">
         {/* Subtle decorative orbs — use Tailwind so they follow theme */}
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
           <div className="absolute -top-24 right-10 h-60 w-60 rounded-full bg-indigo-100/60 blur-3xl dark:bg-indigo-900/10" />
@@ -312,10 +312,10 @@ function DesktopAuthPage({ children }: { children: React.ReactNode }) {
         </div>
 
         <div className="relative z-10 w-full max-w-sm" style={{ animation: "sp-form-in 0.45s ease both" }}>
-          <div className="rounded-2xl border border-gray-200/80 bg-white p-8 shadow-xl shadow-gray-200/60 dark:border-gray-800/60 dark:bg-gray-900 dark:shadow-none">
+          <div className="rounded-2xl border border-slate-200/80 bg-white p-8 shadow-xl shadow-slate-200/60 dark:border-slate-800/60 dark:bg-slate-900 dark:shadow-none">
             {children}
           </div>
-          <p className="mt-4 text-center text-[11px] text-gray-400 dark:text-gray-600">
+          <p className="mt-4 text-center text-[11px] text-slate-400 dark:text-slate-600">
             By continuing, you agree to our Terms of Service.
           </p>
         </div>
@@ -434,7 +434,7 @@ export function AuthModal({
       <AuthPage>
         <button
           onClick={() => { setMode("login"); setError(""); setPendingUserId(null); setTotpCode(""); }}
-          className="mb-6 flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-700 dark:text-gray-500 dark:hover:text-gray-300 transition-colors"
+          className="mb-6 flex items-center gap-1.5 text-sm text-slate-400 hover:text-slate-700 dark:text-slate-500 dark:hover:text-slate-300 transition-colors"
         >
           <ArrowLeft className="h-4 w-4" /> Back
         </button>
@@ -442,10 +442,10 @@ export function AuthModal({
         <div className="mb-1 flex h-11 w-11 items-center justify-center rounded-2xl bg-indigo-100 dark:bg-indigo-900/40 ring-1 ring-indigo-200 dark:ring-indigo-700/50">
           <Shield className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
         </div>
-        <h2 className="mt-3 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+        <h2 className="mt-3 text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
           Two-Factor Auth
         </h2>
-        <p className="mt-1.5 text-sm text-gray-500 dark:text-gray-400 mb-7">
+        <p className="mt-1.5 text-sm text-slate-500 dark:text-slate-400 mb-7">
           Enter the 6-digit code from your authenticator app.
         </p>
 
@@ -458,7 +458,7 @@ export function AuthModal({
             value={totpCode}
             onChange={(e) => setTotpCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
             autoFocus
-            className="w-full rounded-2xl border border-gray-200 bg-gray-50 py-4 text-center font-mono text-2xl tracking-[0.5em] text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all placeholder:tracking-normal placeholder:text-gray-300 dark:placeholder:text-gray-600"
+            className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-4 text-center font-mono text-2xl tracking-[0.5em] text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all placeholder:tracking-normal placeholder:text-slate-300 dark:placeholder:text-slate-600"
             onKeyDown={(e) => { if (e.key === "Enter") handleVerify2FA(); }}
           />
 
@@ -478,7 +478,7 @@ export function AuthModal({
             Verify &amp; Sign In
           </button>
 
-          <p className="text-center text-xs text-gray-400 dark:text-gray-600">
+          <p className="text-center text-xs text-slate-400 dark:text-slate-600">
             You can also use a recovery code
           </p>
         </div>
@@ -494,16 +494,16 @@ export function AuthModal({
         <div className="mb-1 flex h-11 w-11 items-center justify-center rounded-2xl bg-cyan-100 dark:bg-cyan-900/30 ring-1 ring-cyan-200 dark:ring-cyan-700/50">
           <Sparkles className="h-5 w-5 text-cyan-600 dark:text-cyan-400" />
         </div>
-        <h2 className="mt-3 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+        <h2 className="mt-3 text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
           Set your budget
         </h2>
-        <p className="mt-1.5 text-sm text-gray-500 dark:text-gray-400 mb-7">
+        <p className="mt-1.5 text-sm text-slate-500 dark:text-slate-400 mb-7">
           Enter your monthly income or budget. You can change this anytime in Settings.
         </p>
 
         <div className="relative mb-5">
           <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center gap-1">
-            <span className="text-lg font-semibold text-gray-400">{symbol}</span>
+            <span className="text-lg font-semibold text-slate-400">{symbol}</span>
           </div>
           <input
             type="number"
@@ -513,7 +513,7 @@ export function AuthModal({
             onChange={(e) => setSalary(e.target.value)}
             autoFocus
             onKeyDown={(e) => { if (e.key === "Enter") handleSalarySubmit(); }}
-            className="w-full rounded-2xl border border-gray-200 bg-gray-50 py-4 pl-10 pr-4 text-xl font-semibold text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all placeholder:text-gray-300 dark:placeholder:text-gray-600 placeholder:font-normal"
+            className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-4 pl-10 pr-4 text-xl font-semibold text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all placeholder:text-slate-300 dark:placeholder:text-slate-600 placeholder:font-normal"
           />
         </div>
 
@@ -530,7 +530,7 @@ export function AuthModal({
         {salary && (
           <button onClick={() => handleSalarySubmit()} className="hidden" aria-hidden />
         )}
-        <p className="text-center text-xs text-gray-400 dark:text-gray-600 mt-3">
+        <p className="text-center text-xs text-slate-400 dark:text-slate-600 mt-3">
           You&apos;re all set — this is the last step!
         </p>
       </AuthPage>
@@ -543,10 +543,10 @@ export function AuthModal({
     return (
       <AuthPage>
         <div className="mb-1">
-          <h2 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+          <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
             Welcome to Spendly
           </h2>
-          <p className="mt-1.5 text-sm text-gray-500 dark:text-gray-400">
+          <p className="mt-1.5 text-sm text-slate-500 dark:text-slate-400">
             Track expenses, set budgets, and take control.
           </p>
         </div>
@@ -555,24 +555,24 @@ export function AuthModal({
           {/* Google — prominent secondary */}
           <button
             onClick={() => { window.location.href = "/api/auth/google"; }}
-            className="group relative flex w-full items-center gap-3.5 rounded-2xl border-2 border-gray-200 bg-white px-4 py-3.5 text-left transition-all hover:border-gray-300 hover:shadow-lg hover:shadow-gray-100 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:border-gray-700 dark:bg-gray-800/60 dark:hover:border-gray-600 dark:hover:shadow-none"
+            className="group relative flex w-full items-center gap-3.5 rounded-2xl border-2 border-slate-200 bg-white px-4 py-3.5 text-left transition-all hover:border-slate-300 hover:shadow-lg hover:shadow-slate-100 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800/60 dark:hover:border-slate-600 dark:hover:shadow-none"
             style={{ animation: "sp-card-in 0.4s ease both", animationDelay: "0.05s" }}
           >
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white shadow-sm border border-gray-100 dark:bg-gray-900 dark:border-gray-700">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white shadow-sm border border-slate-100 dark:bg-slate-900 dark:border-slate-700">
               <GoogleIcon className="h-5 w-5" />
             </div>
             <div className="flex-1 min-w-0">
-              <div className="text-sm font-semibold text-gray-900 dark:text-white">Continue with Google</div>
-              <div className="text-xs text-gray-400 dark:text-gray-500">Sign in or create account instantly</div>
+              <div className="text-sm font-semibold text-slate-900 dark:text-white">Continue with Google</div>
+              <div className="text-xs text-slate-400 dark:text-slate-500">Sign in or create account instantly</div>
             </div>
-            <ChevronRight className="h-4 w-4 text-gray-300 group-hover:text-gray-400 transition-colors dark:text-gray-600 dark:group-hover:text-gray-400" />
+            <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-slate-400 transition-colors dark:text-slate-600 dark:group-hover:text-slate-400" />
           </button>
 
           {/* OR divider */}
           <div className="relative flex items-center gap-3">
-            <div className="flex-1 border-t border-gray-200 dark:border-gray-700/80" />
-            <span className="text-[11px] font-medium text-gray-400 dark:text-gray-600 uppercase tracking-wide">or</span>
-            <div className="flex-1 border-t border-gray-200 dark:border-gray-700/80" />
+            <div className="flex-1 border-t border-slate-200 dark:border-slate-700/80" />
+            <span className="text-[11px] font-medium text-slate-400 dark:text-slate-600 uppercase tracking-wide">or</span>
+            <div className="flex-1 border-t border-slate-200 dark:border-slate-700/80" />
           </div>
 
           {/* Create Account — primary CTA */}
@@ -603,17 +603,17 @@ export function AuthModal({
           {/* Sign In — secondary */}
           <button
             onClick={() => setMode("login")}
-            className="group relative flex w-full items-center gap-4 rounded-2xl border-2 border-gray-200 bg-white px-4 py-3.5 text-left transition-all hover:border-indigo-200 hover:shadow-md hover:shadow-indigo-50 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:border-gray-700 dark:bg-gray-800/60 dark:hover:border-indigo-700/60 dark:hover:shadow-none"
+            className="group relative flex w-full items-center gap-4 rounded-2xl border-2 border-slate-200 bg-white px-4 py-3.5 text-left transition-all hover:border-indigo-200 hover:shadow-md hover:shadow-indigo-50 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800/60 dark:hover:border-indigo-700/60 dark:hover:shadow-none"
             style={{ animation: "sp-card-in 0.4s ease both", animationDelay: "0.19s" }}
           >
             <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-indigo-50 transition-colors group-hover:bg-indigo-100 dark:bg-indigo-900/30 dark:group-hover:bg-indigo-900/50">
               <LogIn className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
             </div>
             <div className="flex-1 min-w-0">
-              <div className="text-base font-semibold text-gray-900 dark:text-white leading-tight">Sign In</div>
-              <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Access your existing account</div>
+              <div className="text-base font-semibold text-slate-900 dark:text-white leading-tight">Sign In</div>
+              <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Access your existing account</div>
             </div>
-            <ChevronRight className="h-4 w-4 text-gray-300 group-hover:text-indigo-400 group-hover:translate-x-0.5 transition-all dark:text-gray-600" />
+            <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-indigo-400 group-hover:translate-x-0.5 transition-all dark:text-slate-600" />
           </button>
         </div>
       </AuthPage>
@@ -628,15 +628,15 @@ export function AuthModal({
     <AuthPage>
       <button
         onClick={() => { setMode("choose"); setError(""); }}
-        className="mb-6 flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-700 dark:text-gray-500 dark:hover:text-gray-300 transition-colors"
+        className="mb-6 flex items-center gap-1.5 text-sm text-slate-400 hover:text-slate-700 dark:text-slate-500 dark:hover:text-slate-300 transition-colors"
       >
         <ArrowLeft className="h-4 w-4" /> Back
       </button>
 
-      <h2 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+      <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
         {isRegister ? "Create account" : "Welcome back"}
       </h2>
-      <p className="mt-1.5 text-sm text-gray-500 dark:text-gray-400 mb-7">
+      <p className="mt-1.5 text-sm text-slate-500 dark:text-slate-400 mb-7">
         {isRegister
           ? "Set up your Spendly account in seconds"
           : "Sign in to continue tracking your finances"}
@@ -648,45 +648,45 @@ export function AuthModal({
       >
         {isRegister && (
           <div className="relative">
-            <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500" />
+            <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 dark:text-slate-500" />
             <input
               type="text"
               placeholder="Name (optional)"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3.5 pl-10 pr-4 text-sm text-gray-900 placeholder:text-gray-400 dark:border-gray-700 dark:bg-gray-800/80 dark:text-white dark:placeholder:text-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+              className="w-full rounded-xl border border-slate-200 bg-slate-50 py-3.5 pl-10 pr-4 text-sm text-slate-900 placeholder:text-slate-400 dark:border-slate-700 dark:bg-slate-800/80 dark:text-white dark:placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
             />
           </div>
         )}
 
         <div className="relative">
-          <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500" />
+          <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 dark:text-slate-500" />
           <input
             type="email"
             placeholder="Email address"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             autoComplete="email"
-            className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3.5 pl-10 pr-4 text-sm text-gray-900 placeholder:text-gray-400 dark:border-gray-700 dark:bg-gray-800/80 dark:text-white dark:placeholder:text-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+            className="w-full rounded-xl border border-slate-200 bg-slate-50 py-3.5 pl-10 pr-4 text-sm text-slate-900 placeholder:text-slate-400 dark:border-slate-700 dark:bg-slate-800/80 dark:text-white dark:placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
           />
         </div>
 
         <div className="relative">
-          <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500" />
+          <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 dark:text-slate-500" />
           <input
             type={showPassword ? "text" : "password"}
             placeholder={isRegister ? "Password (min 8 chars)" : "Password"}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             autoComplete={isRegister ? "new-password" : "current-password"}
-            className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3.5 pl-10 pr-11 text-sm text-gray-900 placeholder:text-gray-400 dark:border-gray-700 dark:bg-gray-800/80 dark:text-white dark:placeholder:text-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all [&::-ms-reveal]:hidden [&::-ms-clear]:hidden [&::-webkit-contacts-auto-fill-button]:hidden [&::-webkit-credentials-auto-fill-button]:hidden"
+            className="w-full rounded-xl border border-slate-200 bg-slate-50 py-3.5 pl-10 pr-11 text-sm text-slate-900 placeholder:text-slate-400 dark:border-slate-700 dark:bg-slate-800/80 dark:text-white dark:placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all [&::-ms-reveal]:hidden [&::-ms-clear]:hidden [&::-webkit-contacts-auto-fill-button]:hidden [&::-webkit-credentials-auto-fill-button]:hidden"
             style={{ WebkitTextSecurity: showPassword ? "none" : undefined } as React.CSSProperties}
           />
           <button
             type="button"
             tabIndex={-1}
             onClick={() => setShowPassword((v) => !v)}
-            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors"
+            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 transition-colors"
             aria-label={showPassword ? "Hide password" : "Show password"}
           >
             {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -713,7 +713,7 @@ export function AuthModal({
           {isRegister ? "Create Account" : "Sign In"}
         </button>
 
-        <p className="text-center text-xs text-gray-500 dark:text-gray-400 pt-1">
+        <p className="text-center text-xs text-slate-500 dark:text-slate-400 pt-1">
           {isRegister ? (
             <>
               Already have an account?{" "}
@@ -736,14 +736,14 @@ export function AuthModal({
 
       {/* OR + Google button */}
       <div className="mt-6 relative flex items-center gap-3">
-        <div className="flex-1 border-t border-gray-200 dark:border-gray-700/80" />
-        <span className="text-[11px] font-medium text-gray-400 dark:text-gray-600 uppercase tracking-wide">or continue with</span>
-        <div className="flex-1 border-t border-gray-200 dark:border-gray-700/80" />
+        <div className="flex-1 border-t border-slate-200 dark:border-slate-700/80" />
+        <span className="text-[11px] font-medium text-slate-400 dark:text-slate-600 uppercase tracking-wide">or continue with</span>
+        <div className="flex-1 border-t border-slate-200 dark:border-slate-700/80" />
       </div>
       <button
         type="button"
         onClick={() => { window.location.href = "/api/auth/google"; }}
-        className="mt-3 flex w-full items-center justify-center gap-3 rounded-xl border border-gray-200 bg-white py-3 text-sm font-medium text-gray-700 transition-all hover:bg-gray-50 hover:border-gray-300 hover:shadow-sm active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700/80 dark:hover:border-gray-600"
+        className="mt-3 flex w-full items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white py-3 text-sm font-medium text-slate-700 transition-all hover:bg-slate-50 hover:border-slate-300 hover:shadow-sm active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700/80 dark:hover:border-slate-600"
       >
         <GoogleIcon className="h-4 w-4" />
         Google

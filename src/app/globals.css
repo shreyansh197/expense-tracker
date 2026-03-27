@@ -3,57 +3,68 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --background: #f9fafb;
-  --foreground: #111827;
+  --background: #f8fafc;
+  --foreground: #0f172a;
   --surface: #ffffff;
-  --surface-secondary: #f3f4f6;
-  --border: #e5e7eb;
-  --border-subtle: #f3f4f6;
-  --text-primary: #111827;
-  --text-secondary: #6b7280;
-  --text-tertiary: #9ca3af;
+  --surface-secondary: #f1f5f9;
+  --surface-tertiary: #e2e8f0;
+  --border: #e2e8f0;
+  --border-subtle: #f1f5f9;
+  --text-primary: #0f172a;
+  --text-secondary: #64748b;
+  --text-tertiary: #94a3b8;
+  --text-link: #4f46e5;
   --accent: #4f46e5;
   --accent-soft: #eef2ff;
+  --accent-hover: #4338ca;
   --success: #059669;
   --success-soft: #ecfdf5;
   --warning: #d97706;
   --warning-soft: #fffbeb;
   --danger: #dc2626;
   --danger-soft: #fef2f2;
-  --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
-  --card-shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.06);
+  --card-shadow: 0 1px 2px rgba(0, 0, 0, 0.03), 0 1px 3px rgba(0, 0, 0, 0.02);
+  --card-shadow-hover: 0 4px 16px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.03);
+  --ring-focus: 0 0 0 2px #eef2ff, 0 0 0 4px #6366f1;
+  --overlay: rgba(0, 0, 0, 0.4);
   --section-gap: 1.5rem;
 }
 
 .dark {
-  --background: #111827;
-  --foreground: #f3f4f6;
-  --surface: #1f2937;
-  --surface-secondary: #374151;
-  --border: #374151;
-  --border-subtle: #1f2937;
-  --text-primary: #f3f4f6;
-  --text-secondary: #9ca3af;
-  --text-tertiary: #6b7280;
+  --background: #0f172a;
+  --foreground: #e2e8f0;
+  --surface: #1e293b;
+  --surface-secondary: #334155;
+  --surface-tertiary: #475569;
+  --border: #334155;
+  --border-subtle: #1e293b;
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-tertiary: #64748b;
+  --text-link: #818cf8;
   --accent: #6366f1;
   --accent-soft: rgba(99, 102, 241, 0.15);
+  --accent-hover: #818cf8;
   --success: #34d399;
-  --success-soft: rgba(52, 211, 153, 0.12);
+  --success-soft: rgba(52, 211, 153, 0.10);
   --warning: #fbbf24;
-  --warning-soft: rgba(251, 191, 36, 0.12);
+  --warning-soft: rgba(251, 191, 36, 0.10);
   --danger: #f87171;
-  --danger-soft: rgba(248, 113, 113, 0.12);
-  --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.2), 0 1px 2px rgba(0, 0, 0, 0.12);
-  --card-shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.25);
-  --chart-tooltip-bg: #1f2937;
-  --chart-tooltip-fg: #f3f4f6;
-  --chart-tooltip-border: #374151;
+  --danger-soft: rgba(248, 113, 113, 0.10);
+  --card-shadow: 0 1px 2px rgba(0, 0, 0, 0.25), 0 0 1px rgba(0, 0, 0, 0.1);
+  --card-shadow-hover: 0 4px 16px rgba(0, 0, 0, 0.3);
+  --ring-focus: 0 0 0 2px rgba(99, 102, 241, 0.2), 0 0 0 4px #818cf8;
+  --overlay: rgba(0, 0, 0, 0.6);
+  --chart-tooltip-bg: #1e293b;
+  --chart-tooltip-fg: #f1f5f9;
+  --chart-tooltip-border: #334155;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-surface: var(--surface);
+  --color-surface-secondary: var(--surface-secondary);
   --color-border: var(--border);
 }
 
@@ -90,12 +101,62 @@ button, a {
 
 /* Interactive card hover effect (desktop only) */
 .card-interactive {
-  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
 }
 @media (hover: hover) {
   .card-interactive:hover {
     box-shadow: var(--card-shadow-hover);
+    transform: translateY(-1px);
   }
+}
+
+/* ── Reusable card base ──────────────────────────────────── */
+.card-base {
+  border-radius: 1rem;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  box-shadow: var(--card-shadow);
+}
+
+/* ── Type hierarchy ──────────────────────────────────────── */
+.page-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+  color: var(--text-primary);
+}
+.section-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.4;
+  color: var(--text-primary);
+}
+.card-title {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  line-height: 1.4;
+  color: var(--text-secondary);
+}
+.body-text {
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--text-primary);
+}
+.meta-text {
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--text-tertiary);
+}
+
+/* ── Focus ring utility ──────────────────────────────────── */
+.focus-ring {
+  outline: none;
+}
+.focus-ring:focus-visible {
+  box-shadow: var(--ring-focus);
 }
 
 input[type="number"]::-webkit-inner-spin-button,
@@ -182,14 +243,21 @@ input[type="password"]::-ms-clear {
 /* Recharts grid softening */
 .recharts-cartesian-grid line {
   stroke: var(--border);
-  opacity: 0.3;
+  opacity: 0.25;
 }
 .recharts-cartesian-axis-tick text {
   fill: var(--text-tertiary);
+  font-size: 0.6875rem;
 }
 .dark .recharts-cartesian-grid line {
   stroke: var(--border);
-  opacity: 0.2;
+  opacity: 0.15;
+}
+.recharts-tooltip-wrapper {
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.08));
+}
+.dark .recharts-tooltip-wrapper {
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3));
 }
 
 /* ── Spendly Fixed-Theme Splash / Hero Animations ─────────── */

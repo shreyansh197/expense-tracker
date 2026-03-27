@@ -50,23 +50,23 @@ export function KpiCards({
       {/* ── Hero Row: Spent + Remaining ── */}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         {/* Spent / Budget */}
-        <div className="rounded-2xl border border-gray-100 bg-white p-5 dark:border-gray-800 dark:bg-gray-900 card-interactive">
-          <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-            <span>Spent</span>
-          </div>
-          <div className="mt-1.5 flex items-baseline gap-1.5">
-            <p className="tabular-nums text-2xl font-semibold text-gray-900 sm:text-3xl dark:text-white">
+        <div className="rounded-2xl border border-slate-100 bg-white p-5 dark:border-slate-800 dark:bg-slate-900 card-interactive">
+          <p className="text-xs font-medium uppercase tracking-wide text-slate-400 dark:text-slate-500">
+            Spent
+          </p>
+          <div className="mt-2 flex items-baseline gap-1.5">
+            <p className="tabular-nums text-2xl font-bold text-slate-900 sm:text-3xl dark:text-white">
               {formatCurrency(monthlyTotal)}
             </p>
-            <span className="text-sm text-gray-300 dark:text-gray-600">/</span>
-            <span className="tabular-nums text-sm font-medium text-gray-400 dark:text-gray-500">
+            <span className="text-sm text-slate-300 dark:text-slate-600">/</span>
+            <span className="tabular-nums text-sm font-medium text-slate-400 dark:text-slate-500">
               {formatCurrency(salary)}
             </span>
           </div>
-          <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800">
+          <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
             <div
               className={cn(
-                "h-full rounded-full transition-all",
+                "h-full rounded-full transition-all duration-500",
                 isOverspent
                   ? "bg-red-500"
                   : isWarning
@@ -76,12 +76,12 @@ export function KpiCards({
               style={{ width: `${Math.min(budgetUsedPercent, 100)}%` }}
             />
           </div>
-          <div className="mt-2 flex items-center justify-between">
-            <p className="text-xs text-gray-500 dark:text-gray-400">
+          <div className="mt-2.5 flex items-center justify-between">
+            <p className="text-xs text-slate-500 dark:text-slate-400">
               {budgetUsedPercent}% of budget · {expenseCount} txns
             </p>
             {rolloverAmount > 0 && (
-              <p className="text-[10px] text-indigo-500">
+              <p className="text-[10px] font-medium text-indigo-500">
                 +{formatCurrency(rolloverAmount)} rollover
               </p>
             )}
@@ -93,15 +93,15 @@ export function KpiCards({
           className={cn(
             "rounded-2xl border p-5 card-interactive",
             isOverspent
-              ? "border-red-200 bg-red-50 dark:border-red-900/40 dark:bg-red-950/30"
+              ? "border-red-100 bg-red-50/80 dark:border-red-900/30 dark:bg-red-950/20"
               : isWarning
-                ? "border-amber-200 bg-amber-50 dark:border-amber-900/40 dark:bg-amber-950/30"
-                : "border-emerald-200 bg-emerald-50 dark:border-emerald-900/40 dark:bg-emerald-950/30"
+                ? "border-amber-100 bg-amber-50/80 dark:border-amber-900/30 dark:bg-amber-950/20"
+                : "border-emerald-100 bg-emerald-50/80 dark:border-emerald-900/30 dark:bg-emerald-950/20"
           )}
         >
           <div
             className={cn(
-              "flex items-center gap-2 text-sm",
+              "flex items-center gap-2 text-xs font-medium uppercase tracking-wide",
               isOverspent
                 ? "text-red-600 dark:text-red-400"
                 : isWarning
@@ -109,12 +109,12 @@ export function KpiCards({
                   : "text-emerald-600 dark:text-emerald-400"
             )}
           >
-            {isOverspent ? <AlertTriangle size={14} /> : <PiggyBank size={14} />}
+            {isOverspent ? <AlertTriangle size={13} /> : <PiggyBank size={13} />}
             <span>{isOverspent ? "Overspent" : "Remaining"}</span>
           </div>
           <p
             className={cn(
-              "tabular-nums mt-1.5 text-2xl font-semibold sm:text-3xl",
+              "tabular-nums mt-2 text-2xl font-bold sm:text-3xl",
               isOverspent
                 ? "text-red-700 dark:text-red-400"
                 : isWarning
@@ -124,8 +124,8 @@ export function KpiCards({
           >
             {formatCurrency(Math.abs(remaining))}
           </p>
-          <div className="mt-2 flex items-center gap-1.5">
-            <Clock size={11} className="text-gray-400" />
+          <div className="mt-2.5 flex items-center gap-1.5">
+            <Clock size={11} className="text-slate-400" />
             <span className={cn(
               "text-xs font-medium",
               isOverspent ? "text-red-500 dark:text-red-400"
@@ -141,30 +141,30 @@ export function KpiCards({
       {/* ── Metrics Row: Pace, Savings, Forecast ── */}
       <div className="grid grid-cols-3 gap-3">
         {/* Spend Target */}
-        <div className="rounded-2xl border border-gray-100 bg-white p-3 dark:border-gray-800 dark:bg-gray-900">
-          <div className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
-            <span>Spend Target</span>
-          </div>
+        <div className="rounded-2xl border border-slate-100 bg-white p-3.5 dark:border-slate-800 dark:bg-slate-900">
+          <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400 dark:text-slate-500">
+            Spend Target
+          </p>
           <p className={cn(
-            "tabular-nums mt-1 text-lg font-semibold",
+            "tabular-nums mt-1.5 text-lg font-bold",
             paceExceeded
               ? "text-amber-600 dark:text-amber-400"
-              : "text-gray-900 dark:text-white"
+              : "text-slate-900 dark:text-white"
           )}>
             {paceToStayUnder > 0 ? `${formatCurrency(paceToStayUnder)}/d` : "—"}
           </p>
-          <p className="tabular-nums mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
+          <p className="tabular-nums mt-0.5 text-[11px] text-slate-500 dark:text-slate-400">
             Now {formatCurrency(avgDaily)}/day
           </p>
         </div>
 
         {/* Saved */}
-        <div className="rounded-2xl border border-gray-100 bg-white p-3 dark:border-gray-800 dark:bg-gray-900">
-          <div className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
-            <span>Saved</span>
-          </div>
+        <div className="rounded-2xl border border-slate-100 bg-white p-3.5 dark:border-slate-800 dark:bg-slate-900">
+          <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400 dark:text-slate-500">
+            Saved
+          </p>
           <p className={cn(
-            "tabular-nums mt-1 text-lg font-semibold",
+            "tabular-nums mt-1.5 text-lg font-bold",
             savingsRate < 0
               ? "text-red-600 dark:text-red-400"
               : savingsRate < 20
@@ -173,27 +173,27 @@ export function KpiCards({
           )}>
             {savingsRate}%
           </p>
-          <p className="tabular-nums mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
+          <p className="tabular-nums mt-0.5 text-[11px] text-slate-500 dark:text-slate-400">
             {remaining >= 0 ? formatCurrency(remaining) : `−${formatCurrency(Math.abs(remaining))}`}
           </p>
         </div>
 
         {/* Month-End Forecast */}
         <div className={cn(
-          "rounded-2xl border p-3",
+          "rounded-2xl border p-3.5",
           forecastOverBudget
-            ? "border-red-200 bg-red-50 dark:border-red-900/40 dark:bg-red-950/30"
+            ? "border-red-100 bg-red-50/80 dark:border-red-900/30 dark:bg-red-950/20"
             : forecastWarning
-              ? "border-amber-200 bg-amber-50 dark:border-amber-900/40 dark:bg-amber-950/30"
-              : "border-gray-100 bg-white dark:border-gray-800 dark:bg-gray-900"
+              ? "border-amber-100 bg-amber-50/80 dark:border-amber-900/30 dark:bg-amber-950/20"
+              : "border-slate-100 bg-white dark:border-slate-800 dark:bg-slate-900"
         )}>
           <div className={cn(
-            "flex items-center gap-1.5 text-xs",
+            "flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wide",
             forecastOverBudget
               ? "text-red-600 dark:text-red-400"
               : forecastWarning
                 ? "text-amber-600 dark:text-amber-400"
-                : "text-gray-500 dark:text-gray-400"
+                : "text-slate-400 dark:text-slate-500"
           )}>
             <span>Forecast</span>
             <InfoTooltip title="End-of-Month Forecast">
@@ -207,16 +207,16 @@ export function KpiCards({
             </InfoTooltip>
           </div>
           <p className={cn(
-            "tabular-nums mt-1 text-lg font-semibold",
+            "tabular-nums mt-1.5 text-lg font-bold",
             forecastOverBudget
               ? "text-red-700 dark:text-red-400"
               : forecastWarning
                 ? "text-amber-700 dark:text-amber-400"
-                : "text-gray-900 dark:text-white"
+                : "text-slate-900 dark:text-white"
           )}>
             {forecast.projectedTotal > 0 ? formatCurrency(forecast.projectedTotal) : "—"}
           </p>
-          <p className="tabular-nums mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">
+          <p className="tabular-nums mt-0.5 text-[11px] text-slate-500 dark:text-slate-400">
             {forecast.projectedTotal > 0 && salary > 0
               ? `${Math.round((forecast.projectedTotal / salary) * 100)}% of budget`
               : "\u00A0"}

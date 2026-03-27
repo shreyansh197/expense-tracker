@@ -58,13 +58,13 @@ export function LedgerForm({ initial, onSubmit, onCancel, submitLabel = "Create 
     <form onSubmit={handleSubmit} className="space-y-4">
       {/* Name */}
       <div>
-        <label className="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">Name / Client</label>
+        <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-400">Name / Client</label>
         <input
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="e.g. Client: Acme Corp"
-          className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-900 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+          className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
           required
           autoFocus
         />
@@ -72,9 +72,9 @@ export function LedgerForm({ initial, onSubmit, onCancel, submitLabel = "Create 
 
       {/* Expected Amount */}
       <div>
-        <label className="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">Expected Amount</label>
+        <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-400">Expected Amount</label>
         <div className="relative">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">{symbol}</span>
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-slate-400">{symbol}</span>
           <input
             type="number"
             min="1"
@@ -82,7 +82,7 @@ export function LedgerForm({ initial, onSubmit, onCancel, submitLabel = "Create 
             value={expectedAmount}
             onChange={(e) => setExpectedAmount(e.target.value)}
             placeholder="0"
-            className="w-full rounded-lg border border-gray-200 bg-white py-2.5 pl-7 pr-3 text-sm text-gray-900 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+            className="w-full rounded-lg border border-slate-200 bg-white py-2.5 pl-7 pr-3 text-sm text-slate-900 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
             required
           />
         </div>
@@ -90,7 +90,7 @@ export function LedgerForm({ initial, onSubmit, onCancel, submitLabel = "Create 
 
       {/* Due Date */}
       <div>
-        <label className="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">Due Date (optional)</label>
+        <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-400">Due Date (optional)</label>
         {dueDate ? (
           <div className="flex items-center gap-2">
             <div className="flex-1">
@@ -109,7 +109,7 @@ export function LedgerForm({ initial, onSubmit, onCancel, submitLabel = "Create 
             <button
               type="button"
               onClick={() => setDueDate("")}
-              className="rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800"
+              className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800"
               title="Clear date"
             >
               <X size={16} />
@@ -119,7 +119,7 @@ export function LedgerForm({ initial, onSubmit, onCancel, submitLabel = "Create 
           <button
             type="button"
             onClick={() => setDueDate(new Date().toISOString().split("T")[0])}
-            className="w-full rounded-lg border border-dashed border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-400 hover:border-emerald-400 hover:text-emerald-600 dark:border-gray-600 dark:bg-gray-800 dark:hover:border-emerald-500 dark:hover:text-emerald-400"
+            className="w-full rounded-lg border border-dashed border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-400 hover:border-emerald-400 hover:text-emerald-600 dark:border-slate-600 dark:bg-slate-800 dark:hover:border-emerald-500 dark:hover:text-emerald-400"
           >
             + Set due date
           </button>
@@ -129,11 +129,11 @@ export function LedgerForm({ initial, onSubmit, onCancel, submitLabel = "Create 
       {/* Status (only for edit) */}
       {initial && (
         <div>
-          <label className="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">Status</label>
+          <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-400">Status</label>
           <select
             value={status}
             onChange={(e) => setStatus(e.target.value as LedgerStatus)}
-            className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-900 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+            className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
           >
             <option value="active">Active</option>
             <option value="completed">Completed</option>
@@ -144,7 +144,7 @@ export function LedgerForm({ initial, onSubmit, onCancel, submitLabel = "Create 
 
       {/* Tags */}
       <div>
-        <label className="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">Tags</label>
+        <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-400">Tags</label>
         <div className="flex gap-2">
           <input
             type="text"
@@ -152,12 +152,12 @@ export function LedgerForm({ initial, onSubmit, onCancel, submitLabel = "Create 
             onChange={(e) => setTagInput(e.target.value)}
             onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleAddTag(); } }}
             placeholder="Add tag..."
-            className="flex-1 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+            className="flex-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
           />
           <button
             type="button"
             onClick={handleAddTag}
-            className="rounded-lg bg-gray-100 px-3 py-2 text-xs font-medium text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+            className="rounded-lg bg-slate-100 px-3 py-2 text-xs font-medium text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
           >
             Add
           </button>
@@ -181,13 +181,13 @@ export function LedgerForm({ initial, onSubmit, onCancel, submitLabel = "Create 
 
       {/* Notes */}
       <div>
-        <label className="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">Notes</label>
+        <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-400">Notes</label>
         <textarea
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           rows={3}
           placeholder="Any details about this ledger..."
-          className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-900 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+          className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
         />
       </div>
 
@@ -203,7 +203,7 @@ export function LedgerForm({ initial, onSubmit, onCancel, submitLabel = "Create 
         <button
           type="button"
           onClick={onCancel}
-          className="rounded-lg bg-gray-100 px-4 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+          className="rounded-lg bg-slate-100 px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
         >
           Cancel
         </button>

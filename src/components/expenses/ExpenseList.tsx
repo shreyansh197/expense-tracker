@@ -151,13 +151,13 @@ export function ExpenseList({
 
   if (grouped.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center gap-3 py-16 text-gray-400">
-        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800">
-          <Receipt size={28} className="text-gray-300 dark:text-gray-600" />
+      <div className="flex flex-col items-center justify-center gap-3 py-16 text-slate-400">
+        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800">
+          <Receipt size={28} className="text-slate-300 dark:text-slate-600" />
         </div>
         <div className="text-center">
-          <p className="text-sm font-medium text-gray-500 dark:text-gray-400">No expenses found</p>
-          <p className="mt-1 text-xs">
+          <p className="text-sm font-medium text-slate-500 dark:text-slate-400">No expenses found</p>
+          <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">
             {searchQuery || activeCategories.length > 0
               ? "Try adjusting your filters"
               : "Add your first expense to get started"}
@@ -210,7 +210,7 @@ export function ExpenseList({
             <div className="flex items-center gap-2">
               <button
                 onClick={() => toggleSelectDay(group.expenses)}
-                className="rounded p-0.5 text-gray-300 hover:text-gray-500 dark:text-gray-600 dark:hover:text-gray-400"
+                className="rounded p-0.5 text-slate-300 hover:text-slate-500 dark:text-slate-600 dark:hover:text-slate-400"
                 aria-label={`Select all day ${group.day}`}
               >
                 {group.expenses.every((e) => selectedIds.has(e.id)) ? (
@@ -219,11 +219,11 @@ export function ExpenseList({
                   <Square size={14} />
                 )}
               </button>
-              <span className="text-xs font-semibold uppercase text-gray-500 dark:text-gray-400">
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
                 Day {group.day}
               </span>
             </div>
-            <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+            <span className="tabular-nums text-xs font-medium text-slate-500 dark:text-slate-400">
               {formatCurrency(group.total)}
             </span>
           </div>
@@ -242,12 +242,12 @@ export function ExpenseList({
                 className={`group flex items-center gap-3 rounded-2xl border px-4 py-3.5 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500/40 ${
                   selectedIds.has(expense.id)
                     ? "border-indigo-300 bg-indigo-50 dark:border-indigo-700 dark:bg-indigo-950/30"
-                    : "border-gray-100 bg-white hover:border-gray-200 dark:border-gray-800 dark:bg-gray-900 dark:hover:border-gray-700"
+                    : "border-slate-100 bg-white hover:border-slate-200 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-slate-700"
                 }`}
               >
                 <button
                   onClick={() => toggleSelect(expense.id)}
-                  className="shrink-0 rounded p-0.5 text-gray-300 hover:text-gray-500 dark:text-gray-600 dark:hover:text-gray-400"
+                  className="shrink-0 rounded p-0.5 text-slate-300 hover:text-slate-500 dark:text-slate-600 dark:hover:text-slate-400"
                   aria-label="Select expense"
                 >
                   {selectedIds.has(expense.id) ? (
@@ -265,26 +265,26 @@ export function ExpenseList({
                       </span>
                     )}
                     {expense.remark && (
-                      <span className="truncate text-xs text-gray-400">
+                      <span className="truncate text-xs text-slate-400">
                         {expense.remark}
                       </span>
                     )}
                   </div>
                 </div>
-                  <span className="tabular-nums text-sm font-semibold text-gray-900 dark:text-white">
+                  <span className="tabular-nums text-sm font-bold text-slate-900 dark:text-white">
                   {formatCurrency(expense.amount)}
                 </span>
                 <div className="flex items-center gap-1 opacity-100 lg:opacity-0 lg:transition-opacity lg:group-hover:opacity-100">
                   <button
                     onClick={() => openEditForm(expense.id)}
-                    className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800 dark:hover:text-gray-300"
+                    className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-300"
                     aria-label="Edit expense"
                   >
                     <Edit3 size={14} />
                   </button>
                   <button
                     onClick={() => handleDelete(expense.id)}
-                    className="rounded-lg p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/30 dark:hover:text-red-400"
+                    className="rounded-lg p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/30 dark:hover:text-red-400"
                     aria-label="Delete expense"
                   >
                     <Trash2 size={14} />
@@ -301,7 +301,7 @@ export function ExpenseList({
         <div className="flex justify-center pt-2">
           <button
             onClick={() => setVisibleCount((v) => v + PAGE_SIZE)}
-            className="rounded-lg border border-gray-200 px-4 py-2 text-xs font-medium text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-800"
+            className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800"
           >
             Show more ({totalCount - visibleCount} remaining)
           </button>
