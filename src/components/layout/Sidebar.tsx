@@ -77,6 +77,7 @@ export function Sidebar() {
       {!shouldHideFAB && (
       <div className="p-3" style={{ borderTop: '1px solid var(--border-subtle)' }}>
         <button
+          data-tour="fab-desktop"
           onClick={() => {
             if (isBusinessRoute) {
               useUIStore.getState().openLedgerForm();

@@ -60,6 +60,7 @@ export function BottomNav() {
       {/* ─── FAB (own fixed layer, ABOVE nav) ─── */}
       {!shouldHideFAB && (
       <button
+        data-tour="fab"
         onClick={handleFabClick}
         aria-label={isBusiness && isBusinessRoute ? "Add ledger" : "Add expense"}
         className={cn(
@@ -100,6 +101,7 @@ export function BottomNav() {
               <Link
                 key={item.href}
                 href={item.href}
+                {...(item.label === "Settings" ? { "data-tour": "nav-settings" } : {})}
                 className={cn(
                   "relative flex flex-col items-center justify-center gap-0.5 py-1.5 transition-colors",
                   isActive
