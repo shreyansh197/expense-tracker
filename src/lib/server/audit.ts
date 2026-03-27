@@ -19,6 +19,7 @@ type AuditAction =
   | "member.remove"
   | "device.revoke"
   | "session.revoke"
+  | "user.delete_account"
   | "migration.sync_code";
 
 export async function audit(params: {
