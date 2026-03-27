@@ -74,9 +74,9 @@ export default function DashboardPage() {
 
   return (
     <AppShell>
-        <div data-tour="dashboard" className="fade-in mx-auto min-h-[80vh] max-w-4xl xl:max-w-6xl space-y-5 p-4 lg:p-6">
+        <div className="fade-in mx-auto min-h-[80vh] max-w-4xl xl:max-w-6xl space-y-5 p-4 lg:p-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div data-tour="dashboard" className="flex items-center justify-between">
           <MonthSwitcher />
           <SyncIndicator syncStatus={syncStatus} />
         </div>

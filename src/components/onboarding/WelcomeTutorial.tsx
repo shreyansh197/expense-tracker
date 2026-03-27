@@ -25,12 +25,19 @@ const STEPS: Step[] = [
   {
     selector: '[data-tour="dashboard"]',
     title: "Your spending at a glance",
-    body: "Category breakdowns, daily trends, and a month-end forecast — all updating in real time.",
+    body: "Switch months here to browse your spending history. On mobile, you can also swipe left or right anywhere on the screen to jump between months.",
   },
   {
     selector: '[data-tour="nav-settings"]',
+    selectorDesktop: '[data-tour="nav-settings-desktop"]',
     title: "Make it yours",
     body: "Set a monthly budget, customise categories, recurring expenses, and savings goals.",
+  },
+  {
+    selector: "",
+    title: "Pro tips \u2728",
+    body: "\u2022 Swipe left / right to switch months\n\u2022 Press \u201C?\u201D on desktop to see all keyboard shortcuts\n\u2022 Long-press an expense to edit or delete it\n\u2022 Set a budget in Settings to unlock forecasts & alerts",
+    centered: true,
   },
   {
     selector: "",
@@ -89,13 +96,12 @@ export function WelcomeTutorial({ onComplete }: WelcomeTutorialProps) {
     };
   }, [measure]);
 
-  // Skip step if target is missing (e.g. FAB hidden on settings page)
+  // Skip step if target element is missing (e.g. FAB hidden on settings page)
   useEffect(() => {
     if (current.centered) return;
     const isDesktop = window.innerWidth >= 1024;
     const sel = isDesktop && current.selectorDesktop ? current.selectorDesktop : current.selector;
     if (!document.querySelector(sel)) {
-      // defer to avoid synchronous setState in effect
       const id = requestAnimationFrame(() => {
         if (isLast) onComplete();
         else setStep((s) => s + 1);
@@ -105,28 +111,33 @@ export function WelcomeTutorial({ onComplete }: WelcomeTutorialProps) {
   }, [step, current, isLast, onComplete]);
 
   /* ── Card positioning ───────────────────────────────────── */
+  const cardWidth = Math.min(320, (typeof window !== "undefined" ? window.innerWidth : 360) - 32);
+
   const cardStyle: React.CSSProperties = {};
   if (rect) {
     const targetCenterY = rect.top + rect.height / 2;
     const aboveCenter = targetCenterY < window.innerHeight / 2;
     if (aboveCenter) {
-      // Card below target
-      cardStyle.top = rect.top + rect.height + 16;
+      cardStyle.top = Math.min(rect.top + rect.height + 16, window.innerHeight - 200);
     } else {
-      // Card above target
-      cardStyle.bottom = window.innerHeight - rect.top + 16;
+      cardStyle.bottom = Math.max(window.innerHeight - rect.top + 16, 16);
     }
-    // Horizontal: center on target, clamp to viewport
-    const cardWidth = Math.min(320, window.innerWidth - 32);
     let left = rect.left + rect.width / 2 - cardWidth / 2;
     left = Math.max(16, Math.min(left, window.innerWidth - cardWidth - 16));
     cardStyle.left = left;
     cardStyle.width = cardWidth;
   }
 
+  const centeredStyle: React.CSSProperties = {
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+    width: cardWidth,
+  };
+
   return (
     <div className="fixed inset-0 z-[200]" aria-modal="true" role="dialog">
-      {/* Overlay with spotlight cutout using box-shadow */}
+      {/* Overlay with spotlight cutout */}
       {rect ? (
         <div
           className="fixed rounded-xl transition-all duration-300 ease-out"
@@ -136,28 +147,20 @@ export function WelcomeTutorial({ onComplete }: WelcomeTutorialProps) {
             width: rect.width,
             height: rect.height,
             boxShadow: "0 0 0 9999px rgba(0,0,0,0.6)",
-            zIndex: 200,
             pointerEvents: "none",
           }}
         />
       ) : (
-        <div className="fixed inset-0 bg-black/60" style={{ zIndex: 200 }} />
+        <div className="fixed inset-0 bg-black/60" />
       )}
 
-      {/* Card */}
+      {/* Card — always above overlay */}
       <div
         className="fixed z-[201] rounded-2xl p-5 shadow-2xl transition-all duration-300"
         style={{
           background: "var(--surface)",
           border: "1px solid var(--border)",
-          ...(current.centered
-            ? {
-                top: "50%",
-                left: "50%",
-                transform: "translate(-50%, -50%)",
-                width: Math.min(320, typeof window !== "undefined" ? window.innerWidth - 32 : 320),
-              }
-            : cardStyle),
+          ...(rect ? cardStyle : centeredStyle),
         }}
       >
         {/* Close / Skip */}
@@ -180,7 +183,7 @@ export function WelcomeTutorial({ onComplete }: WelcomeTutorialProps) {
           {current.title}
         </h2>
         <p
-          className="mt-1.5 text-sm leading-relaxed"
+          className="mt-1.5 whitespace-pre-line text-sm leading-relaxed"
           style={{ color: "var(--text-secondary)" }}
         >
           {current.body}

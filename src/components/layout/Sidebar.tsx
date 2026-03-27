@@ -56,6 +56,7 @@ export function Sidebar() {
             <Link
               key={item.href}
               href={item.href}
+              {...(item.label === "Settings" ? { "data-tour": "nav-settings-desktop" } : {})}
               className={cn(
                 "flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-all",
                 isActive
