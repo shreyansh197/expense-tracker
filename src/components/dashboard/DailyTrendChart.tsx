@@ -10,11 +10,12 @@ import {
   Tooltip,
   CartesianGrid,
 } from "recharts";
-import { Table2, BarChart3, Layers } from "lucide-react";
+import { Table2, BarChart3, Layers, TrendingUp } from "lucide-react";
 import { buildCategoryMap } from "@/lib/categories";
 import { cn } from "@/lib/utils";
 import { useCurrency } from "@/hooks/useCurrency";
 import { useSettings } from "@/hooks/useSettings";
+import { EmptyState } from "@/components/ui/EmptyState";
 import type { DailyTotal, StackedDailyTotal, CategoryId } from "@/types";
 
 interface DailyTrendChartProps {
@@ -67,9 +68,12 @@ export function DailyTrendChart({ dailyTotals, stackedDailyTotals, activeCategor
 
   if (!hasData) {
     return (
-      <div className="flex min-h-[180px] flex-1 items-center justify-center text-sm text-slate-400">
-        No spending data yet
-      </div>
+      <EmptyState
+        icon={TrendingUp}
+        secondaryIcon={BarChart3}
+        title="No daily data"
+        description="Your spending patterns will appear here as you log expenses."
+      />
     );
   }
 
@@ -110,8 +114,11 @@ export function DailyTrendChart({ dailyTotals, stackedDailyTotals, activeCategor
               "flex items-center gap-1 rounded-md px-2 py-1 text-xs transition-colors",
               stacked
                 ? "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300"
-                : "text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
+                : ""
             )}
+            style={!stacked ? { color: 'var(--text-secondary)' } : undefined}
+            onMouseEnter={e => { if (!stacked) e.currentTarget.style.background = 'var(--surface-secondary)'; }}
+            onMouseLeave={e => { if (!stacked) e.currentTarget.style.background = ''; }}
             aria-label={stacked ? "Show simple bars" : "Stack by category"}
             aria-pressed={stacked}
           >
@@ -121,27 +128,17 @@ export function DailyTrendChart({ dailyTotals, stackedDailyTotals, activeCategor
         )}
         <div className="segmented-control">
           <button
+            data-active={!showTable}
             onClick={() => setShowTable(false)}
-            className={cn(
-              "flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-medium transition-colors",
-              !showTable
-                ? "bg-white text-slate-900 shadow-sm dark:bg-slate-700 dark:text-white"
-                : ""
-            )}
-            style={showTable ? { color: 'var(--text-secondary)' } : undefined}
+            className="flex items-center gap-1"
           >
             <BarChart3 size={13} />
             Chart
           </button>
           <button
+            data-active={showTable}
             onClick={() => setShowTable(true)}
-            className={cn(
-              "flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-medium transition-colors",
-              showTable
-                ? "bg-white text-slate-900 shadow-sm dark:bg-slate-700 dark:text-white"
-                : ""
-            )}
-            style={!showTable ? { color: 'var(--text-secondary)' } : undefined}
+            className="flex items-center gap-1"
           >
             <Table2 size={13} />
             Table
@@ -152,8 +149,8 @@ export function DailyTrendChart({ dailyTotals, stackedDailyTotals, activeCategor
       {showTable ? (
         <div className="flex-1 min-h-[180px] overflow-y-auto overflow-x-auto">
           <table className="w-full text-sm" role="table">
-            <thead className="sticky top-0 bg-white dark:bg-slate-900">
-              <tr className="border-b border-slate-100 text-left text-xs text-slate-500 dark:border-slate-800 dark:text-slate-400">
+            <thead className="sticky top-0" style={{ background: 'var(--surface)' }}>
+              <tr style={{ borderBottom: '1px solid var(--border-subtle)', color: 'var(--text-secondary)' }} className="text-left text-xs">
                 <th className="pb-2 font-medium">Day</th>
                 <th className="pb-2 text-right font-medium">Spent</th>
               </tr>
@@ -162,11 +159,14 @@ export function DailyTrendChart({ dailyTotals, stackedDailyTotals, activeCategor
               {tableDays.map((d) => (
                 <tr
                   key={d.day}
-                  className="border-b border-slate-50 hover:bg-slate-50 dark:border-slate-800/50 dark:hover:bg-slate-800/30 cursor-pointer"
+                  className="cursor-pointer transition-colors"
+                  style={{ borderBottom: '1px solid var(--border-subtle)' }}
+                  onMouseEnter={e => { e.currentTarget.style.background = 'var(--surface-secondary)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = ''; }}
                   onClick={() => onBarClick?.(d.day)}
                 >
-                  <td className="py-1.5 text-slate-700 dark:text-slate-300">{d.day}</td>
-                  <td className="py-1.5 text-right font-medium text-slate-900 dark:text-white">
+                  <td className="py-1.5" style={{ color: 'var(--text-primary)' }}>{d.day}</td>
+                  <td className="py-1.5 text-right font-medium" style={{ color: 'var(--text-primary)' }}>
                     {formatCurrency(d.total)}
                   </td>
                 </tr>
@@ -190,13 +190,13 @@ export function DailyTrendChart({ dailyTotals, stackedDailyTotals, activeCategor
               <CartesianGrid vertical={false} />
               <XAxis
                 dataKey="day"
-                tick={{ fontSize: 10, fill: "#9CA3AF" }}
+                tick={{ fontSize: 10 }}
                 axisLine={false}
                 tickLine={false}
                 interval={4}
               />
               <YAxis
-                tick={{ fontSize: 10, fill: "#9CA3AF" }}
+                tick={{ fontSize: 10 }}
                 axisLine={false}
                 tickLine={false}
                 tickFormatter={(v: number) => (v >= 1000 ? `${v / 1000}K` : `${v}`)}
@@ -233,13 +233,13 @@ export function DailyTrendChart({ dailyTotals, stackedDailyTotals, activeCategor
               <CartesianGrid vertical={false} />
               <XAxis
                 dataKey="day"
-                tick={{ fontSize: 10, fill: "#9CA3AF" }}
+                tick={{ fontSize: 10 }}
                 axisLine={false}
                 tickLine={false}
                 interval={4}
               />
               <YAxis
-                tick={{ fontSize: 10, fill: "#9CA3AF" }}
+                tick={{ fontSize: 10 }}
                 axisLine={false}
                 tickLine={false}
                 tickFormatter={(v: number) => (v >= 1000 ? `${v / 1000}K` : `${v}`)}

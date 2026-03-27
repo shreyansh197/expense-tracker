@@ -48,12 +48,12 @@ export default function DeviceLinkPage() {
   if (error) {
     return (
       <div className="flex min-h-screen items-center justify-center p-4">
-        <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl dark:bg-slate-900 text-center">
+        <div className="w-full max-w-sm rounded-2xl p-6 shadow-xl text-center" style={{ background: 'var(--surface)' }}>
           <XCircle className="mx-auto h-12 w-12 text-red-500 mb-4" />
-          <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-2">
+          <h2 className="text-lg font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
             Device Link Failed
           </h2>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
+          <p className="text-sm mb-6" style={{ color: 'var(--text-secondary)' }}>
             {error}
           </p>
           <button
@@ -71,12 +71,12 @@ export default function DeviceLinkPage() {
   if (accepted) {
     return (
       <div className="flex min-h-screen items-center justify-center p-4">
-        <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl dark:bg-slate-900 text-center">
+        <div className="w-full max-w-sm rounded-2xl p-6 shadow-xl text-center" style={{ background: 'var(--surface)' }}>
           <CheckCircle2 className="mx-auto h-12 w-12 text-emerald-500 mb-4" />
-          <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-2">
+          <h2 className="text-lg font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
             Device Linked!
           </h2>
-          <p className="text-sm text-slate-500 dark:text-slate-400">
+          <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
             Redirecting to dashboard...
           </p>
         </div>
@@ -86,12 +86,12 @@ export default function DeviceLinkPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center p-4">
-      <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl dark:bg-slate-900 text-center">
+      <div className="w-full max-w-sm rounded-2xl p-6 shadow-xl text-center" style={{ background: 'var(--surface)' }}>
         <Smartphone className="mx-auto h-12 w-12 text-indigo-500 mb-4" />
-        <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-2">
+        <h2 className="text-lg font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
           Link This Device
         </h2>
-        <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
+        <p className="text-sm mb-6" style={{ color: 'var(--text-secondary)' }}>
           {isAuthenticated
             ? "Connecting this device to your workspace..."
             : "Sign in to link this device to your account."}

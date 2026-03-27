@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { X } from "lucide-react";
+import { X, Loader2 } from "lucide-react";
 import { getAllCategories } from "@/lib/categories";
 import { cn } from "@/lib/utils";
 import { useUIStore } from "@/stores/uiStore";
@@ -32,7 +32,14 @@ export function ExpenseForm({
   const { symbol } = useCurrency();
   const allCategories = getAllCategories(settings.customCategories, settings.hiddenDefaults);
 
-  const [category, setCategory] = useState<CategoryId>(editExpense?.category || "groceries");
+  const [category, setCategory] = useState<CategoryId>(() => {
+    if (editExpense?.category) return editExpense.category;
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("spendly-last-category") as CategoryId | null;
+      if (saved && allCategories.some((c) => c.id === saved)) return saved;
+    }
+    return "groceries";
+  });
   const [amount, setAmount] = useState(editExpense?.amount?.toString() || "");
   const [day, setDay] = useState(editExpense?.day || new Date().getDate());
   const [selectedMonth, setSelectedMonth] = useState(month);
@@ -40,6 +47,7 @@ export function ExpenseForm({
   const [remark, setRemark] = useState(editExpense?.remark || "");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [amountTouched, setAmountTouched] = useState(false);
   const submittingRef = useRef(false);
 
   const amountRef = useRef<HTMLInputElement>(null);
@@ -98,6 +106,7 @@ export function ExpenseForm({
           });
         }
         closeForm();
+        localStorage.setItem("spendly-last-category", category);
         toast(editExpense ? "Expense updated" : "Expense added");
       } catch {
         setError("Failed to save expense. Please try again.");
@@ -118,6 +127,8 @@ export function ExpenseForm({
     [closeForm]
   );
 
+  const amountInvalid = amountTouched && (amount === "" || isNaN(parseFloat(amount)) || parseFloat(amount) <= 0);
+
   return (
     <form
       onSubmit={handleSubmit}
@@ -126,13 +137,17 @@ export function ExpenseForm({
     >
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-slate-900 dark:text-white">
-          {editExpense ? "Edit Expense" : "Add Expense"}
+        <h3 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>
+          {editExpense ? "Edit Expense" : "Add an Expense"}
         </h3>
         <button
           type="button"
           onClick={closeForm}
-          className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+          className="rounded-lg p-1.5 transition-colors"
+          style={{ color: 'var(--text-muted)' }}
+          onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--surface-secondary)'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.background = ''; }}
+          aria-label="Close form"
         >
           <X size={18} />
         </button>
@@ -140,7 +155,7 @@ export function ExpenseForm({
 
       {/* Category Selector */}
       <div>
-        <label className="mb-2 block text-xs font-medium text-slate-500 uppercase dark:text-slate-400">
+        <label className="form-label mb-2 uppercase">
           Category
         </label>
         <div className="flex flex-wrap gap-2">
@@ -153,9 +168,15 @@ export function ExpenseForm({
                 "rounded-full px-3 py-1.5 text-xs font-medium transition-all",
                 category === cat.id
                   ? "text-white shadow-sm"
-                  : "bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700"
+                  : ""
               )}
-              style={category === cat.id ? { backgroundColor: cat.color } : undefined}
+              style={
+                category === cat.id
+                  ? { backgroundColor: cat.color }
+                  : { background: 'var(--surface-secondary)', color: 'var(--text-secondary)' }
+              }
+              onMouseEnter={category !== cat.id ? (e) => { e.currentTarget.style.background = 'var(--surface-tertiary)'; } : undefined}
+              onMouseLeave={category !== cat.id ? (e) => { e.currentTarget.style.background = 'var(--surface-secondary)'; } : undefined}
             >
               {cat.label}
             </button>
@@ -165,7 +186,7 @@ export function ExpenseForm({
 
       {/* Amount */}
       <div>
-        <label className="mb-1.5 block text-xs font-medium text-slate-500 uppercase dark:text-slate-400">
+        <label className="form-label mb-1.5 uppercase">
           Amount ({symbol})
         </label>
         <input
@@ -174,16 +195,21 @@ export function ExpenseForm({
           min="1"
           step="1"
           value={amount}
-          onChange={(e) => setAmount(e.target.value)}
+          onChange={(e) => { setAmount(e.target.value); if (amountTouched) setAmountTouched(true); }}
+          onBlur={() => setAmountTouched(true)}
           placeholder="0"
-          className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-lg font-semibold text-slate-900 placeholder:text-slate-300 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-600"
+          className={cn("form-input w-full text-lg font-semibold", amountInvalid && "!border-red-400 !ring-red-400/20")}
           required
+          aria-invalid={amountInvalid || undefined}
         />
+        {amountInvalid && (
+          <p className="mt-1 text-xs font-medium text-red-500">Enter a valid positive amount</p>
+        )}
       </div>
 
       {/* Date */}
       <div>
-        <label className="mb-1.5 block text-xs font-medium text-slate-500 uppercase dark:text-slate-400">
+        <label className="form-label mb-1.5 uppercase">
           Date
         </label>
         <DatePicker
@@ -200,8 +226,8 @@ export function ExpenseForm({
 
       {/* Remark */}
       <div>
-        <label className="mb-1.5 block text-xs font-medium text-slate-500 uppercase dark:text-slate-400">
-          Remark <span className="text-slate-300 dark:text-slate-600">(optional)</span>
+        <label className="form-label mb-1.5 uppercase">
+          Remark <span style={{ color: 'var(--text-muted)' }}>(optional)</span>
         </label>
         <input
           type="text"
@@ -209,7 +235,7 @@ export function ExpenseForm({
           onChange={(e) => setRemark(e.target.value)}
           placeholder="e.g., Dinner at restaurant"
           maxLength={200}
-          className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-300 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-600"
+          className="form-input w-full"
         />
       </div>
 
@@ -222,8 +248,9 @@ export function ExpenseForm({
       <button
         type="submit"
         disabled={submitting}
-        className="w-full rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-indigo-700 disabled:opacity-50"
+        className="flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-indigo-700 disabled:opacity-50"
       >
+        {submitting && <Loader2 size={16} className="animate-spin" />}
         {submitting
           ? "Saving..."
           : editExpense

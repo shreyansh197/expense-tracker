@@ -60,7 +60,7 @@ export default function SettingsPage() {
 
   return (
     <AppShell>
-        <div className="mx-auto max-w-3xl space-y-2 p-4 lg:p-6">
+        <div className="fade-in mx-auto max-w-3xl space-y-2 p-4 lg:p-6">
         <h1 className="text-page-title mb-4">Settings</h1>
 
         <SettingsAccordion>

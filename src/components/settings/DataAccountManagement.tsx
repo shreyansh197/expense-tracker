@@ -80,15 +80,18 @@ export function DataAccountManagement({ onScrollToExport }: DataAccountManagemen
     <div className="space-y-5">
       {/* ─── Export / Backup ─── */}
       <div>
-        <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">
+        <h3 className="text-sm font-semibold mb-1" style={{ color: 'var(--text-primary)' }}>
           {COPY.exportBackupTitle}
         </h3>
-        <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">
+        <p className="text-xs mb-3" style={{ color: 'var(--text-secondary)' }}>
           {COPY.exportBackupHelp}
         </p>
         <button
           onClick={handleExportFirst}
-          className="flex items-center gap-2 rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 transition-colors"
+          className="flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors"
+          style={{ color: 'var(--text-primary)', border: '1px solid var(--border)' }}
+          onMouseEnter={e => { e.currentTarget.style.background = 'var(--surface-secondary)'; }}
+          onMouseLeave={e => { e.currentTarget.style.background = ''; }}
         >
           <Download size={16} />
           Go to Export &amp; Import
@@ -104,13 +107,16 @@ export function DataAccountManagement({ onScrollToExport }: DataAccountManagemen
               <h3 className="text-sm font-semibold text-red-700 dark:text-red-400 mb-1">
                 {COPY.deleteWorkspaceTitle}
               </h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">
+              <p className="text-xs mb-3" style={{ color: 'var(--text-secondary)' }}>
                 {COPY.deleteWorkspaceHelp}
               </p>
               <div className="flex flex-wrap gap-2">
                 <button
                   onClick={handleExportFirst}
-                  className="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-xs font-medium text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 transition-colors"
+                  className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium transition-colors"
+                  style={{ color: 'var(--text-secondary)', border: '1px solid var(--border)' }}
+                  onMouseEnter={e => { e.currentTarget.style.background = 'var(--surface-secondary)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = ''; }}
                 >
                   <Download size={14} />
                   Export first

@@ -34,6 +34,7 @@ export function KeyboardShortcutsHelp({ open, onClose }: KeyboardShortcutsHelpPr
           <button
             onClick={onClose}
             className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+            aria-label="Close keyboard shortcuts"
           >
             <X size={16} />
           </button>

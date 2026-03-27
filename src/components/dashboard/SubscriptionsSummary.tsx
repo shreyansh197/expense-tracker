@@ -1,10 +1,11 @@
 "use client";
 
 import { useMemo } from "react";
-import { Repeat, Calendar, Pause, Play } from "lucide-react";
+import { Repeat, Calendar, Pause, Play, CalendarClock } from "lucide-react";
 import { useCurrency } from "@/hooks/useCurrency";
 import { buildCategoryMap } from "@/lib/categories";
 import { useSettings } from "@/hooks/useSettings";
+import { EmptyState } from "@/components/ui/EmptyState";
 
 export function SubscriptionsSummary() {
   const { settings } = useSettings();
@@ -26,7 +27,16 @@ export function SubscriptionsSummary() {
     return { active, paused, totalMonthly, pctOfBudget, upcoming };
   }, [recurring, settings.salary]);
 
-  if (recurring.length === 0) return null;
+  if (recurring.length === 0) return (
+    <div className="card p-5">
+      <EmptyState
+        icon={Repeat}
+        secondaryIcon={CalendarClock}
+        title="No recurring expenses"
+        description="Set up recurring expenses in Settings to track your subscriptions."
+      />
+    </div>
+  );
 
   return (
     <div className="card p-5">
@@ -62,25 +72,28 @@ export function SubscriptionsSummary() {
       {/* Upcoming */}
       {stats.upcoming.length > 0 && (
         <div>
-          <p className="mb-1.5 text-[10px] font-medium uppercase text-gray-400">
+          <p className="mb-1.5 text-[10px] font-medium uppercase" style={{ color: 'var(--text-muted)' }}>
             Upcoming This Month
           </p>
           <div className="space-y-1">
             {stats.upcoming.slice(0, 3).map((r) => (
               <div
                 key={r.id}
-                className="flex items-center justify-between rounded-lg px-2 py-1.5 hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                className="flex items-center justify-between rounded-lg px-2 py-1.5 transition-colors"
+                style={{ cursor: 'default' }}
+                onMouseEnter={e => { e.currentTarget.style.background = 'var(--surface-secondary)'; }}
+                onMouseLeave={e => { e.currentTarget.style.background = ''; }}
               >
                 <div className="flex items-center gap-2">
-                  <Calendar size={11} className="text-gray-400" />
-                  <span className="text-xs text-gray-600 dark:text-gray-300">
+                  <Calendar size={11} style={{ color: 'var(--text-muted)' }} />
+                  <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>
                     Day {r.day}
                   </span>
-                  <span className="text-xs text-gray-400">
+                  <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
                     {catMap[r.category]?.label || r.category}
                   </span>
                 </div>
-                <span className="text-xs font-medium text-gray-900 dark:text-white">
+                <span className="text-xs font-medium" style={{ color: 'var(--text-primary)' }}>
                   {formatCurrency(r.amount)}
                 </span>
               </div>
@@ -104,20 +117,17 @@ export function SubscriptionsSummary() {
                 {r.active ? (
                   <Play size={10} className="text-emerald-500" />
                 ) : (
-                  <Pause size={10} className="text-gray-400" />
+                  <Pause size={10} style={{ color: 'var(--text-muted)' }} />
                 )}
                 <span
-                  className={
-                    r.active
-                      ? "text-gray-600 dark:text-gray-300"
-                      : "text-gray-400 line-through"
-                  }
+                  className={r.active ? "" : "line-through"}
+                  style={{ color: r.active ? 'var(--text-secondary)' : 'var(--text-muted)' }}
                 >
                   {r.remark || catMap[r.category]?.label || r.category}
                 </span>
-                <span className="text-gray-400">Day {r.day}</span>
+                <span className="text-xs" style={{ color: 'var(--text-muted)' }}>Day {r.day}</span>
               </div>
-              <span className="font-medium text-gray-900 dark:text-white">
+              <span className="font-medium" style={{ color: 'var(--text-primary)' }}>
                 {formatCurrency(r.amount)}
               </span>
             </div>

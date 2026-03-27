@@ -62,8 +62,9 @@ export function Sidebar() {
                   ? isBiz
                     ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400 border-l-[3px] border-emerald-600 dark:border-emerald-400"
                     : "bg-indigo-50 text-indigo-700 dark:bg-indigo-900/15 dark:text-indigo-400 border-l-[3px] border-indigo-600 dark:border-indigo-400"
-                  : "text-gray-500 hover:bg-gray-50 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300 border-l-[3px] border-transparent"
+                  : "border-l-[3px] border-transparent"
               )}
+              style={!isActive ? { color: 'var(--text-secondary)' } : undefined}
             >
               <Icon size={18} />
               {item.label}

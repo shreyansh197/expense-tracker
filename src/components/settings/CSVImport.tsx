@@ -182,22 +182,23 @@ export function CSVImport() {
         />
         <label
           htmlFor="csv-import"
-          className="flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed border-slate-300 px-4 py-3 text-sm font-medium text-slate-500 transition-colors hover:border-indigo-400 hover:bg-indigo-50 hover:text-indigo-600 dark:border-slate-700 dark:text-slate-400 dark:hover:border-indigo-600 dark:hover:bg-indigo-900/20 dark:hover:text-indigo-400"
+          className="flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed px-4 py-3 text-sm font-medium transition-colors hover:border-indigo-400 hover:bg-indigo-50 hover:text-indigo-600 dark:hover:border-indigo-600 dark:hover:bg-indigo-900/20 dark:hover:text-indigo-400"
+          style={{ borderColor: 'var(--border)', color: 'var(--text-secondary)' }}
         >
           <Upload size={16} />
           Choose CSV File
         </label>
-        <p className="mt-1.5 text-xs text-slate-400">
+        <p className="mt-1.5 text-xs" style={{ color: 'var(--text-muted)' }}>
           Expected format: Day, Category, Amount, Remark (header row optional)
         </p>
       </div>
 
       {/* Preview */}
       {preview && (
-        <div className="rounded-lg border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
-          <div className="flex items-center justify-between border-b border-slate-100 px-4 py-2.5 dark:border-slate-800">
+        <div className="rounded-lg" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
+          <div className="flex items-center justify-between px-4 py-2.5" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
             <div className="flex items-center gap-3 text-xs">
-              <span className="font-medium text-slate-700 dark:text-slate-300">
+              <span className="font-medium" style={{ color: 'var(--text-primary)' }}>
                 {preview.length} rows
               </span>
               {validCount > 0 && (
@@ -213,20 +214,20 @@ export function CSVImport() {
                 </span>
               )}
             </div>
-            <button onClick={handleCancel} className="text-slate-400 hover:text-slate-600">
+            <button onClick={handleCancel} style={{ color: 'var(--text-muted)' }}>
               <X size={16} />
             </button>
           </div>
 
           <div className="max-h-[240px] overflow-y-auto">
             <table className="w-full text-xs">
-              <thead className="sticky top-0 bg-slate-50 dark:bg-slate-800">
+              <thead className="sticky top-0" style={{ background: 'var(--surface-secondary)' }}>
                 <tr>
-                  <th className="px-3 py-1.5 text-left font-medium text-slate-500">Day</th>
-                  <th className="px-3 py-1.5 text-left font-medium text-slate-500">Category</th>
-                  <th className="px-3 py-1.5 text-right font-medium text-slate-500">Amount</th>
-                  <th className="px-3 py-1.5 text-left font-medium text-slate-500">Remark</th>
-                  <th className="px-3 py-1.5 text-left font-medium text-slate-500">Status</th>
+                  <th className="px-3 py-1.5 text-left font-medium" style={{ color: 'var(--text-secondary)' }}>Day</th>
+                  <th className="px-3 py-1.5 text-left font-medium" style={{ color: 'var(--text-secondary)' }}>Category</th>
+                  <th className="px-3 py-1.5 text-right font-medium" style={{ color: 'var(--text-secondary)' }}>Amount</th>
+                  <th className="px-3 py-1.5 text-left font-medium" style={{ color: 'var(--text-secondary)' }}>Remark</th>
+                  <th className="px-3 py-1.5 text-left font-medium" style={{ color: 'var(--text-secondary)' }}>Status</th>
                 </tr>
               </thead>
               <tbody>
@@ -235,12 +236,12 @@ export function CSVImport() {
                     key={i}
                     className={row.error ? "bg-red-50/50 dark:bg-red-900/10" : ""}
                   >
-                    <td className="px-3 py-1.5 text-slate-700 dark:text-slate-300">{row.day}</td>
-                    <td className="px-3 py-1.5 text-slate-700 dark:text-slate-300">{row.category}</td>
-                    <td className="px-3 py-1.5 text-right text-slate-700 dark:text-slate-300">
+                    <td className="px-3 py-1.5" style={{ color: 'var(--text-primary)' }}>{row.day}</td>
+                    <td className="px-3 py-1.5" style={{ color: 'var(--text-primary)' }}>{row.category}</td>
+                    <td className="px-3 py-1.5 text-right" style={{ color: 'var(--text-primary)' }}>
                       {isNaN(row.amount) ? "—" : formatCurrency(row.amount)}
                     </td>
-                    <td className="max-w-[120px] truncate px-3 py-1.5 text-slate-400">{row.remark}</td>
+                    <td className="max-w-[120px] truncate px-3 py-1.5" style={{ color: 'var(--text-muted)' }}>{row.remark}</td>
                     <td className="px-3 py-1.5">
                       {row.error ? (
                         <span className="text-red-500">{row.error}</span>
@@ -253,16 +254,19 @@ export function CSVImport() {
               </tbody>
             </table>
             {(preview.length > 50) && (
-              <p className="px-3 py-2 text-xs text-slate-400">
+              <p className="px-3 py-2 text-xs" style={{ color: 'var(--text-muted)' }}>
                 Showing first 50 of {preview.length} rows
               </p>
             )}
           </div>
 
-          <div className="flex items-center justify-end gap-2 border-t border-slate-100 px-4 py-2.5 dark:border-slate-800">
+          <div className="flex items-center justify-end gap-2 px-4 py-2.5" style={{ borderTop: '1px solid var(--border-subtle)' }}>
             <button
               onClick={handleCancel}
-              className="rounded-lg px-3 py-2 text-xs font-medium text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"
+              className="rounded-lg px-3 py-2 text-xs font-medium transition-colors"
+              style={{ color: 'var(--text-secondary)' }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'var(--surface-secondary)'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = ''; }}
             >
               Cancel
             </button>

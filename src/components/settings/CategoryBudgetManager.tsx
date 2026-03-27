@@ -53,12 +53,12 @@ export function CategoryBudgetManager() {
               className="h-3 w-3 shrink-0 rounded-full"
               style={{ backgroundColor: cat.color }}
             />
-            <span className="flex-1 text-sm text-slate-700 dark:text-slate-300">
+            <span className="flex-1 text-sm" style={{ color: 'var(--text-primary)' }}>
               {cat.label}
             </span>
             {isEditing ? (
               <div className="flex items-center gap-1.5">
-                <span className="text-xs text-slate-400">{symbol}</span>
+                <span className="text-xs" style={{ color: 'var(--text-muted)' }}>{symbol}</span>
                 <input
                   type="number"
                   min="0"
@@ -69,7 +69,7 @@ export function CategoryBudgetManager() {
                     if (e.key === "Escape") setEditingId(null);
                   }}
                   autoFocus
-                  className="w-20 rounded border border-slate-200 bg-white px-2 py-1 text-xs text-right text-slate-900 focus:border-indigo-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                  className="form-input w-20 px-2 py-1 text-xs text-right"
                 />
                 <button
                   onClick={() => handleSave(cat.id)}
@@ -81,7 +81,8 @@ export function CategoryBudgetManager() {
             ) : (
               <button
                 onClick={() => handleStartEdit(cat.id)}
-                className="text-xs font-medium text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400"
+                className="text-xs font-medium hover:text-indigo-600 dark:hover:text-indigo-400"
+                style={{ color: 'var(--text-muted)' }}
               >
                 {budget ? formatCurrency(budget) : "Set limit"}
               </button>
@@ -89,7 +90,7 @@ export function CategoryBudgetManager() {
           </div>
         );
       })}
-      <p className="mt-2 text-xs text-slate-400">
+      <p className="mt-2 text-xs" style={{ color: 'var(--text-muted)' }}>
         Set per-category spending limits. You&#39;ll see warnings when approaching these limits.
       </p>
     </div>

@@ -99,12 +99,11 @@ export function DatePicker({ value, onChange, month, year }: DatePickerProps) {
         onClick={handleToggleOpen}
         className={cn(
           "flex w-full items-center gap-2 rounded-lg border px-3 py-2.5 text-sm font-medium transition-all",
-          "border-slate-200 bg-white text-slate-900 hover:border-slate-300",
-          "dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:hover:border-slate-600",
           open && "border-indigo-500 ring-2 ring-indigo-500/20 dark:border-indigo-500"
         )}
+        style={{ borderColor: open ? undefined : 'var(--border)', background: 'var(--surface)', color: 'var(--text-primary)' }}
       >
-        <Calendar size={16} className="shrink-0 text-slate-400" />
+        <Calendar size={16} className="shrink-0" style={{ color: 'var(--text-muted)' }} />
         <span>{displayDate}</span>
       </button>
 
@@ -120,9 +119,9 @@ export function DatePicker({ value, onChange, month, year }: DatePickerProps) {
           >
             <div
               className={cn(
-                "w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-4 shadow-2xl",
-                "dark:border-slate-700 dark:bg-slate-900"
+                "w-full max-w-sm rounded-2xl border p-4 shadow-2xl"
               )}
+              style={{ borderColor: 'var(--border)', background: 'var(--surface)' }}
             >
               <CalendarGrid
                 viewMonth={viewMonth}
@@ -141,10 +140,10 @@ export function DatePicker({ value, onChange, month, year }: DatePickerProps) {
           {/* Desktop: positioned dropdown — auto-detects direction */}
           <div
             className={cn(
-              "absolute z-50 hidden w-80 rounded-xl border border-slate-200 bg-white p-3 shadow-xl sm:block",
-              "dark:border-slate-700 dark:bg-slate-900",
+              "absolute z-50 hidden w-80 rounded-xl border p-3 shadow-xl sm:block",
               openUpward ? "bottom-full mb-1.5 left-0" : "top-full mt-1.5 left-0"
             )}
+            style={{ borderColor: 'var(--border)', background: 'var(--surface)' }}
           >
             <CalendarGrid
               viewMonth={viewMonth}
@@ -196,18 +195,26 @@ function CalendarGrid({
         <button
           type="button"
           onClick={onPrev}
-          className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
+          className="rounded-lg p-1.5 transition-colors"
+          style={{ color: 'var(--text-secondary)' }}
+          onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--surface-secondary)'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.background = ''; }}
+          aria-label="Previous month"
         >
           <ChevronLeft size={18} />
         </button>
-        <span className="text-sm font-semibold text-slate-800 dark:text-slate-200">
+        <span className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
           {monthName} {viewYear}
         </span>
         <div className="flex items-center gap-1">
           <button
             type="button"
             onClick={onNext}
-            className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
+            className="rounded-lg p-1.5 transition-colors"
+            style={{ color: 'var(--text-secondary)' }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--surface-secondary)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = ''; }}
+            aria-label="Next month"
           >
             <ChevronRight size={18} />
           </button>
@@ -215,7 +222,11 @@ function CalendarGrid({
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+              className="rounded-lg p-1 transition-colors"
+              style={{ color: 'var(--text-muted)' }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--surface-secondary)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = ''; }}
+              aria-label="Close calendar"
             >
               <X size={16} />
             </button>
@@ -228,7 +239,8 @@ function CalendarGrid({
         {DAYS_OF_WEEK.map((d) => (
           <div
             key={d}
-            className="flex h-8 items-center justify-center text-[11px] font-semibold uppercase text-slate-400 dark:text-slate-500"
+            className="flex h-8 items-center justify-center text-[11px] font-semibold uppercase"
+            style={{ color: 'var(--text-muted)' }}
           >
             {d}
           </div>
@@ -239,22 +251,26 @@ function CalendarGrid({
       <div className="grid grid-cols-7 gap-0.5">
         {cells.map((day, i) =>
           day === null ? (
-            <div key={`blank-${i}`} className="h-10" />
+            <div key={`blank-${i}`} className="h-11" />
           ) : (
             <button
               key={day}
               type="button"
               onClick={() => onSelect(day)}
               className={cn(
-                "flex h-10 w-full items-center justify-center rounded-lg text-sm font-medium transition-all",
+                "flex h-11 w-full items-center justify-center rounded-lg text-sm font-medium transition-all",
                 day === value
                   ? "bg-indigo-600 text-white shadow-sm"
-                  : "text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800",
+                  : "",
+                day !== value && "hover:opacity-80",
                 isCurrentMonth &&
                   day === todayDay &&
                   day !== value &&
                   "ring-1 ring-indigo-400 font-bold text-indigo-600 dark:text-indigo-400 dark:ring-indigo-500"
               )}
+              style={day !== value ? { color: 'var(--text-primary)', background: 'transparent' } : undefined}
+              onMouseEnter={day !== value ? (e) => { e.currentTarget.style.background = 'var(--surface-secondary)'; } : undefined}
+              onMouseLeave={day !== value ? (e) => { e.currentTarget.style.background = 'transparent'; } : undefined}
             >
               {day}
             </button>
@@ -267,7 +283,10 @@ function CalendarGrid({
         <button
           type="button"
           onClick={() => onSelect(todayDay)}
-          className="mt-2 w-full rounded-lg bg-slate-50 py-2 text-xs font-medium text-indigo-600 hover:bg-slate-100 dark:bg-slate-800 dark:text-indigo-400 dark:hover:bg-slate-700"
+          className="mt-2 w-full rounded-lg py-2 text-xs font-medium text-indigo-600 transition-colors dark:text-indigo-400"
+          style={{ background: 'var(--surface-secondary)' }}
+          onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--surface-hover)'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--surface-secondary)'; }}
         >
           Today ({todayDay})
         </button>

@@ -93,6 +93,7 @@ function PaymentDetailModal({
             onClick={onClose}
             className="rounded-lg p-1.5 transition-colors"
             style={{ color: 'var(--text-tertiary)' }}
+            aria-label="Close payment details"
           >
             <X size={18} />
           </button>

@@ -11,8 +11,10 @@ export function MonthSwitcher() {
     <div className="flex items-center gap-1">
       <button
         onClick={prevMonth}
-        className="flex h-9 w-9 items-center justify-center rounded-lg transition-colors hover:bg-gray-100 dark:hover:bg-white/5"
+        className="flex h-9 w-9 items-center justify-center rounded-lg transition-colors"
         style={{ color: 'var(--text-tertiary)' }}
+        onMouseEnter={e => { e.currentTarget.style.background = 'var(--surface-secondary)'; }}
+        onMouseLeave={e => { e.currentTarget.style.background = ''; }}
         aria-label="Previous month"
       >
         <ChevronLeft size={18} />
@@ -25,8 +27,10 @@ export function MonthSwitcher() {
       </h2>
       <button
         onClick={nextMonth}
-        className="flex h-9 w-9 items-center justify-center rounded-lg transition-colors hover:bg-gray-100 dark:hover:bg-white/5"
+        className="flex h-9 w-9 items-center justify-center rounded-lg transition-colors"
         style={{ color: 'var(--text-tertiary)' }}
+        onMouseEnter={e => { e.currentTarget.style.background = 'var(--surface-secondary)'; }}
+        onMouseLeave={e => { e.currentTarget.style.background = ''; }}
         aria-label="Next month"
       >
         <ChevronRight size={18} />

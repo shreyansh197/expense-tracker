@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { PiggyBank, TrendingUp, Minus, ChevronRight, X } from "lucide-react";
+import { PiggyBank, TrendingUp, Minus, ChevronRight, X, Target } from "lucide-react";
 import Link from "next/link";
 import { useSettings } from "@/hooks/useSettings";
 import { useToast } from "@/components/ui/Toast";
 import { useCurrency } from "@/hooks/useCurrency";
+import { EmptyState } from "@/components/ui/EmptyState";
 
 export function SavingsGoalsWidget() {
   const { settings, updateSettings } = useSettings();
@@ -17,7 +18,16 @@ export function SavingsGoalsWidget() {
   const [fundAmount, setFundAmount] = useState("");
   const [fundMode, setFundMode] = useState<"add" | "subtract">("add");
 
-  if (goals.length === 0) return null;
+  if (goals.length === 0) return (
+    <div className="card p-5">
+      <EmptyState
+        icon={Target}
+        secondaryIcon={PiggyBank}
+        title="No savings goals"
+        description="Create goals in Settings to track your progress toward saving targets."
+      />
+    </div>
+  );
 
   const handleFund = () => {
     if (!activeGoalId) return;
@@ -104,7 +114,7 @@ export function SavingsGoalsWidget() {
                     className="h-2.5 w-2.5 shrink-0 rounded-full"
                     style={{ backgroundColor: g.color }}
                   />
-                  <span className="truncate text-xs font-medium text-gray-800 dark:text-gray-200">
+                  <span className="truncate text-xs font-medium" style={{ color: 'var(--text-primary)' }}>
                     {g.name}
                   </span>
                   {isComplete && (
@@ -115,9 +125,9 @@ export function SavingsGoalsWidget() {
                 </div>
 
                 <div className="flex shrink-0 items-center gap-2">
-                  <span className="tabular-nums whitespace-nowrap text-xs text-gray-500 dark:text-gray-400">
+                  <span className="tabular-nums whitespace-nowrap text-xs" style={{ color: 'var(--text-secondary)' }}>
                     {formatCurrency(g.savedAmount)}{" "}
-                    <span className="text-gray-300 dark:text-gray-600">/</span>{" "}
+                    <span style={{ color: 'var(--text-muted)' }}>/</span>{" "}
                     {formatCurrency(g.targetAmount)}
                   </span>
                   {!isComplete && (
@@ -149,7 +159,7 @@ export function SavingsGoalsWidget() {
                   }}
                 />
               </div>
-              <div className="flex justify-between text-[10px] text-gray-400 dark:text-gray-600">
+              <div className="flex justify-between text-[10px]" style={{ color: 'var(--text-muted)' }}>
                 <span>{pct}% complete</span>
                 {g.deadline && (
                   <span>
@@ -164,17 +174,20 @@ export function SavingsGoalsWidget() {
 
               {/* Inline fund form */}
               {isActive && (
-                <div className="flex items-center gap-2 rounded-lg bg-gray-50 p-2 dark:bg-gray-800">
+                <div className="flex items-center gap-2 rounded-lg p-2" style={{ background: 'var(--surface-secondary)' }}>
                   {/* Add / Subtract toggle */}
-                  <div className="flex overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700">
+                  <div className="flex overflow-hidden rounded-lg" style={{ border: '1px solid var(--border)' }}>
                     <button
                       onClick={() => setFundMode("add")}
                       title="Add funds"
                       className={`px-2.5 py-1.5 text-xs font-medium transition-colors ${
                         fundMode === "add"
                           ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400"
-                          : "text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                          : ""
                       }`}
+                      style={fundMode !== "add" ? { color: 'var(--text-muted)' } : undefined}
+                      onMouseEnter={e => { if (fundMode !== 'add') e.currentTarget.style.background = 'var(--surface-hover)'; }}
+                      onMouseLeave={e => { if (fundMode !== 'add') e.currentTarget.style.background = ''; }}
                     >
                       <TrendingUp size={12} />
                     </button>
@@ -184,8 +197,11 @@ export function SavingsGoalsWidget() {
                       className={`px-2.5 py-1.5 text-xs font-medium transition-colors ${
                         fundMode === "subtract"
                           ? "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400"
-                          : "text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                          : ""
                       }`}
+                      style={fundMode !== "subtract" ? { color: 'var(--text-muted)' } : undefined}
+                      onMouseEnter={e => { if (fundMode !== 'subtract') e.currentTarget.style.background = 'var(--surface-hover)'; }}
+                      onMouseLeave={e => { if (fundMode !== 'subtract') e.currentTarget.style.background = ''; }}
                     >
                       <Minus size={12} />
                     </button>
@@ -193,7 +209,7 @@ export function SavingsGoalsWidget() {
 
                   {/* Amount input */}
                   <div className="relative flex-1">
-                    <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-gray-400">{symbol}</span>
+                    <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs" style={{ color: 'var(--text-muted)' }}>{symbol}</span>
                     <input
                       type="number"
                       min="1"
@@ -205,7 +221,7 @@ export function SavingsGoalsWidget() {
                       }}
                       autoFocus
                       placeholder="Amount"
-                      className="w-full rounded-lg border border-gray-200 bg-white py-1.5 pl-6 pr-2 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
+                      className="form-input w-full py-1.5 pl-6 pr-2 text-xs"
                     />
                   </div>
 
@@ -219,7 +235,10 @@ export function SavingsGoalsWidget() {
 
                   <button
                     onClick={handleCancel}
-                    className="shrink-0 rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-gray-200 dark:hover:bg-gray-700"
+                    className="shrink-0 rounded-lg p-1.5 transition-colors"
+                    style={{ color: 'var(--text-muted)' }}
+                    onMouseEnter={e => { e.currentTarget.style.background = 'var(--surface-hover)'; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = ''; }}
                     aria-label="Cancel"
                   >
                     <X size={12} />

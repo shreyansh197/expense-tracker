@@ -44,7 +44,10 @@ export default function ExpensesPage() {
   const [amountMax, setAmountMax] = useState("");
   const [dayMin, setDayMin] = useState("");
   const [dayMax, setDayMax] = useState("");
-  const [sortBy, setSortBy] = useState<SortOption>("day-desc");
+  const [sortBy, setSortBy] = useState<SortOption>(() => {
+    if (typeof window === "undefined") return "day-desc";
+    return (localStorage.getItem("spendly-expenses-sort") as SortOption) || "day-desc";
+  });
   const [localSearch, setLocalSearch] = useState(searchQuery);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -70,7 +73,7 @@ export default function ExpensesPage() {
 
   return (
     <AppShell>
-      <div className="mx-auto max-w-4xl xl:max-w-6xl space-y-4 p-4 lg:p-6">
+      <div className="fade-in mx-auto min-h-[80vh] max-w-4xl xl:max-w-6xl space-y-4 p-4 lg:p-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <MonthSwitcher />
@@ -115,7 +118,7 @@ export default function ExpensesPage() {
           </div>
           <select
             value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as SortOption)}
+            onChange={(e) => { const v = e.target.value as SortOption; setSortBy(v); localStorage.setItem("spendly-expenses-sort", v); }}
             className="rounded-xl px-3 py-3 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
             style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-secondary)' }}
           >

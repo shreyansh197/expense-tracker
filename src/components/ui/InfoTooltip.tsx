@@ -46,6 +46,7 @@ export function InfoTooltip({ title, children, className }: InfoTooltipProps) {
             <button
               onClick={() => setOpen(false)}
               className="shrink-0 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+              aria-label="Close tooltip"
             >
               <X size={12} />
             </button>

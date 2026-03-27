@@ -1,9 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import {
   PiggyBank,
   AlertTriangle,
   Clock,
+  ChevronDown,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCurrency } from "@/hooks/useCurrency";
@@ -38,6 +40,18 @@ export function KpiCards({
   rolloverAmount = 0,
 }: KpiCardsProps) {
   const { formatCurrency } = useCurrency();
+  const [expanded, setExpanded] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return localStorage.getItem("spendly-kpi-expanded") === "true";
+  });
+
+  const toggleExpanded = () => {
+    setExpanded((prev) => {
+      localStorage.setItem("spendly-kpi-expanded", String(!prev));
+      return !prev;
+    });
+  };
+
   const isOverspent = remaining < 0;
   const isWarning = !isOverspent && budgetUsedPercent >= BUDGET_WARNING_THRESHOLD;
   const paceExceeded = avgDaily > paceToStayUnder && paceToStayUnder > 0;
@@ -136,8 +150,27 @@ export function KpiCards({
         </div>
       </div>
 
-      {/* ── Metrics Row: Pace, Savings, Forecast ── */}
-      <div className="grid grid-cols-3 gap-3">
+      {/* ── Toggle + Metrics Row ── */}
+      <div>
+        <button
+          onClick={toggleExpanded}
+          className="flex w-full items-center justify-center gap-1 rounded-lg py-1.5 text-xs font-medium transition-colors"
+          style={{ color: 'var(--text-tertiary)' }}
+          onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--text-secondary)'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-tertiary)'; }}
+          aria-expanded={expanded}
+        >
+          {expanded ? "Hide details" : "More details"}
+          <ChevronDown size={14} className={cn("transition-transform duration-200", expanded && "rotate-180")} />
+        </button>
+        <div
+          className={cn(
+            "grid transition-all duration-300 ease-in-out",
+            expanded ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+          )}
+        >
+          <div className="overflow-hidden">
+      <div className="grid grid-cols-3 gap-3 pt-1">
         {/* Spend Target */}
         <div className="card-sm p-3.5">
           <p className="text-meta font-medium">Spend Target</p>
@@ -215,6 +248,9 @@ export function KpiCards({
               ? `${Math.round((forecast.projectedTotal / salary) * 100)}% of budget`
               : "\u00A0"}
           </p>
+        </div>
+      </div>
+          </div>
         </div>
       </div>
     </div>

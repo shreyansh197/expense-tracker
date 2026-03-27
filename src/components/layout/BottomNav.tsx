@@ -63,8 +63,8 @@ export function BottomNav() {
         onClick={handleFabClick}
         aria-label={isBusiness && isBusinessRoute ? "Add ledger" : "Add expense"}
         className={cn(
-          "fixed left-1/2 z-40 flex h-[54px] w-[54px] -translate-x-1/2 items-center justify-center rounded-full text-white shadow-lg shadow-black/15 ring-[3px] ring-white/70 transition-all duration-200 active:scale-90 lg:hidden dark:ring-gray-900/70",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-50 dark:focus-visible:ring-offset-gray-900",
+          "fixed left-1/2 z-40 flex h-[54px] w-[54px] -translate-x-1/2 items-center justify-center rounded-full text-white shadow-lg shadow-black/15 ring-[3px] ring-white/70 transition-all duration-200 active:scale-90 lg:hidden",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
           accentColor === "emerald"
             ? "bg-emerald-600 hover:bg-emerald-700 focus-visible:ring-emerald-500"
             : "bg-indigo-600 hover:bg-indigo-700 focus-visible:ring-indigo-500"
@@ -108,8 +108,9 @@ export function BottomNav() {
                           ? "text-emerald-600 dark:text-emerald-400"
                           : "text-indigo-600 dark:text-indigo-400"
                       )
-                    : "text-gray-400 dark:text-gray-500"
+                    : ""
                 )}
+                style={!isActive ? { color: 'var(--text-muted)' } : undefined}
               >
                 {isActive && (
                   <span className={cn(

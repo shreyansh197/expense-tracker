@@ -22,8 +22,8 @@ export function LedgerCard({ ledger, totalReceived }: LedgerCardProps) {
     totalReceived < ledger.expectedAmount;
 
   const statusConfig = {
-    active: { icon: Clock, label: "Active", color: "text-blue-600 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-400" },
-    completed: { icon: CheckCircle2, label: "Completed", color: "text-emerald-600 bg-emerald-50 dark:bg-emerald-900/30 dark:text-emerald-400" },
+    active: { icon: Clock, label: "Payment Pending", color: "text-blue-600 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-400" },
+    completed: { icon: CheckCircle2, label: "Paid", color: "text-emerald-600 bg-emerald-50 dark:bg-emerald-900/30 dark:text-emerald-400" },
     cancelled: { icon: XCircle, label: "Cancelled", color: "text-gray-500 bg-gray-100 dark:bg-gray-800 dark:text-gray-400" },
   };
 
@@ -39,7 +39,7 @@ export function LedgerCard({ ledger, totalReceived }: LedgerCardProps) {
         <LedgerProgressRing received={totalReceived} expected={ledger.expectedAmount} />
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <h3 className="truncate text-sm font-semibold text-gray-900 dark:text-white">
+            <h3 className="truncate text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
               {ledger.name}
             </h3>
             {isOverdue && (
@@ -54,18 +54,23 @@ export function LedgerCard({ ledger, totalReceived }: LedgerCardProps) {
               <StatusIcon size={10} />
               {status.label}
             </span>
+            {isOverdue && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-red-50 px-1.5 py-0.5 text-[10px] font-medium text-red-600 dark:bg-red-900/30 dark:text-red-400">
+                Past Due
+              </span>
+            )}
             {ledger.dueDate && (
-              <span className="text-[10px] text-gray-400">
+              <span className="text-[10px]" style={{ color: 'var(--text-muted)' }}>
                 Due {new Date(ledger.dueDate).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
               </span>
             )}
           </div>
         </div>
         <div className="text-right shrink-0">
-          <p className="text-sm font-bold text-gray-900 dark:text-white">
+          <p className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>
             {formatCurrency(totalReceived)}
           </p>
-          <p className="text-[10px] text-gray-400">
+          <p className="text-[10px]" style={{ color: 'var(--text-muted)' }}>
             of {formatCurrency(ledger.expectedAmount)}
           </p>
         </div>
@@ -94,13 +99,14 @@ export function LedgerCard({ ledger, totalReceived }: LedgerCardProps) {
           {ledger.tags.slice(0, 3).map((tag) => (
             <span
               key={tag}
-              className="rounded-full bg-gray-100 px-1.5 py-0.5 text-[10px] text-gray-500 dark:bg-gray-800 dark:text-gray-400"
+              className="rounded-full px-1.5 py-0.5 text-[10px]"
+              style={{ background: 'var(--surface-secondary)', color: 'var(--text-secondary)' }}
             >
               {tag}
             </span>
           ))}
           {ledger.tags.length > 3 && (
-            <span className="text-[10px] text-gray-400">+{ledger.tags.length - 3}</span>
+            <span className="text-[10px]" style={{ color: 'var(--text-muted)' }}>+{ledger.tags.length - 3}</span>
           )}
         </div>
       )}

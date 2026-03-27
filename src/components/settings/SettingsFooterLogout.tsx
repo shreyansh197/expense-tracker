@@ -22,11 +22,11 @@ export function SettingsFooterLogout() {
 
   return (
     <div
-      className="mt-6 border-t border-slate-200 pt-6 dark:border-slate-800"
-      style={{ paddingBottom: "calc(16px + env(safe-area-inset-bottom, 0px))" }}
+        className="mt-6 pt-6"
+        style={{ borderTop: '1px solid var(--border)', paddingBottom: "calc(16px + env(safe-area-inset-bottom, 0px))" }}
     >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-xs text-slate-400">
+        <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
           Logs out the current session only.{" "}
           <button
             type="button"

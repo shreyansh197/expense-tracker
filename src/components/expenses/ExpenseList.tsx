@@ -1,7 +1,7 @@
 "use client";
 
-import { useMemo, useState, useCallback } from "react";
-import { Trash2, Edit3, Repeat, Receipt, PlusCircle, CheckSquare, Square, X } from "lucide-react";
+import { useMemo, useState, useCallback, useRef } from "react";
+import { Trash2, Edit3, Repeat, Receipt, PlusCircle, CheckSquare, Square, X, Wallet } from "lucide-react";
 import { useCurrency } from "@/hooks/useCurrency";
 import { CategoryBadge } from "./CategoryChips";
 import { useUIStore } from "@/stores/uiStore";
@@ -50,23 +50,39 @@ export function ExpenseList({
   const { confirm } = useConfirm();
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const [pendingDeletes, setPendingDeletes] = useState<Set<string>>(new Set());
+  const pendingTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
   const handleDelete = async (id: string) => {
-    const ok = await confirm({
-      title: "Delete expense",
-      message: "Are you sure you want to delete this expense?",
-      confirmLabel: "Delete",
-      variant: "danger",
-    });
-    if (ok) {
+    // Optimistically hide the expense and show undo toast
+    setPendingDeletes((prev) => new Set(prev).add(id));
+    const timer = setTimeout(() => {
       onDelete(id);
-      toast("Expense deleted", "error");
-    }
+      setPendingDeletes((prev) => {
+        const next = new Set(prev);
+        next.delete(id);
+        return next;
+      });
+      pendingTimers.current.delete(id);
+    }, 5000);
+    pendingTimers.current.set(id, timer);
+    toast("Expense deleted", "error", {
+      label: "Undo",
+      onClick: () => {
+        clearTimeout(pendingTimers.current.get(id));
+        pendingTimers.current.delete(id);
+        setPendingDeletes((prev) => {
+          const next = new Set(prev);
+          next.delete(id);
+          return next;
+        });
+      },
+    });
   };
 
   const filtered = useMemo(
-    () => filterExpenses(expenses, { activeCategories, searchQuery, amountMin, amountMax, dayMin, dayMax }),
-    [expenses, activeCategories, searchQuery, amountMin, amountMax, dayMin, dayMax]
+    () => filterExpenses(expenses, { activeCategories, searchQuery, amountMin, amountMax, dayMin, dayMax }).filter((e) => !pendingDeletes.has(e.id)),
+    [expenses, activeCategories, searchQuery, amountMin, amountMax, dayMin, dayMax, pendingDeletes]
   );
 
   const grouped = useMemo(() => groupByDay(filtered, sortBy), [filtered, sortBy]);
@@ -137,10 +153,11 @@ export function ExpenseList({
       variant: "danger",
     });
     if (ok) {
+      const ids = [...selectedIds];
       if (onDeleteMany) {
-        await onDeleteMany([...selectedIds]);
+        await onDeleteMany(ids);
       } else {
-        for (const id of selectedIds) {
+        for (const id of ids) {
           onDelete(id);
         }
       }
@@ -151,16 +168,22 @@ export function ExpenseList({
 
   if (grouped.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center gap-3 py-20">
-        <div className="flex h-16 w-16 items-center justify-center rounded-2xl" style={{ background: 'var(--surface-secondary)' }}>
+      <div className="fade-in flex flex-col items-center justify-center gap-3 py-20">
+        <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl" style={{ background: 'var(--surface-secondary)' }}>
           <Receipt size={28} style={{ color: 'var(--text-muted)' }} />
+          <div
+            className="absolute -bottom-1 -right-1 flex h-7 w-7 items-center justify-center rounded-lg"
+            style={{ background: 'var(--surface)', border: '1px solid var(--border)', boxShadow: 'var(--card-shadow)' }}
+          >
+            <Wallet size={14} style={{ color: 'var(--text-tertiary)' }} />
+          </div>
         </div>
         <div className="text-center">
           <p className="text-sm font-semibold" style={{ color: 'var(--text-secondary)' }}>No expenses found</p>
-          <p className="mt-1 text-xs" style={{ color: 'var(--text-tertiary)' }}>
+          <p className="mt-1 max-w-xs text-xs" style={{ color: 'var(--text-tertiary)' }}>
             {searchQuery || activeCategories.length > 0
-              ? "Try adjusting your filters"
-              : "Add your first expense to get started"}
+              ? "Try adjusting your filters or search terms."
+              : "Track where your money goes \u2014 add your first expense to see insights here."}
           </p>
         </div>
         {!searchQuery && activeCategories.length === 0 && (
@@ -169,7 +192,7 @@ export function ExpenseList({
             className="mt-2 flex items-center gap-1.5 rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-indigo-600/20 transition-all hover:bg-indigo-700 active:scale-[0.97]"
           >
             <PlusCircle size={14} />
-            Add Expense
+            Add an Expense
           </button>
         )}
       </div>
@@ -243,12 +266,14 @@ export function ExpenseList({
                 className={`group flex items-center gap-3 rounded-2xl border px-4 py-3.5 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500/40 ${
                   selectedIds.has(expense.id)
                     ? "border-indigo-300 bg-indigo-50 dark:border-indigo-700 dark:bg-indigo-950/30"
-                    : "border-gray-100 bg-white hover:border-gray-200 dark:border-gray-800 dark:bg-gray-900 dark:hover:border-gray-700"
+                    : ""
                 }`}
+                style={!selectedIds.has(expense.id) ? { background: 'var(--surface)', borderColor: 'var(--border)' } : undefined}
               >
                 <button
                   onClick={() => toggleSelect(expense.id)}
-                  className="shrink-0 rounded p-0.5 text-gray-300 hover:text-gray-500 dark:text-gray-600 dark:hover:text-gray-400"
+                  className="shrink-0 rounded p-0.5 transition-colors"
+                  style={{ color: 'var(--text-muted)' }}
                   aria-label="Select expense"
                 >
                   {selectedIds.has(expense.id) ? (
@@ -266,7 +291,7 @@ export function ExpenseList({
                       </span>
                     )}
                     {expense.remark && (
-                      <span className="truncate text-xs text-gray-400">
+                      <span className="truncate text-xs" style={{ color: 'var(--text-muted)' }}>
                         {expense.remark}
                       </span>
                     )}
@@ -278,14 +303,18 @@ export function ExpenseList({
                 <div className="flex items-center gap-1 opacity-100 lg:opacity-0 lg:transition-opacity lg:group-hover:opacity-100">
                   <button
                     onClick={() => openEditForm(expense.id)}
-                    className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800 dark:hover:text-gray-300"
+                    className="rounded-lg p-1.5 transition-colors"
+                    style={{ color: 'var(--text-muted)' }}
+                    onMouseEnter={e => { e.currentTarget.style.background = 'var(--surface-secondary)'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = ''; e.currentTarget.style.color = 'var(--text-muted)'; }}
                     aria-label="Edit expense"
                   >
                     <Edit3 size={14} />
                   </button>
                   <button
                     onClick={() => handleDelete(expense.id)}
-                    className="rounded-lg p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/30 dark:hover:text-red-400"
+                    className="rounded-lg p-1.5 transition-colors hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/30 dark:hover:text-red-400"
+                    style={{ color: 'var(--text-muted)' }}
                     aria-label="Delete expense"
                   >
                     <Trash2 size={14} />

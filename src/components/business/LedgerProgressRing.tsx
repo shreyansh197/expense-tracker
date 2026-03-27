@@ -29,7 +29,7 @@ export function LedgerProgressRing({
       ? "text-blue-500"
       : percent > 0
       ? "text-amber-500"
-      : "text-slate-300 dark:text-slate-600";
+      : "";
 
   return (
     <div className={cn("relative inline-flex items-center justify-center", className)}>
@@ -39,24 +39,23 @@ export function LedgerProgressRing({
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke="currentColor"
+          stroke="var(--border)"
           strokeWidth={strokeWidth}
-          className="text-slate-200 dark:text-slate-700"
         />
         <circle
           cx={size / 2}
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke="currentColor"
+          stroke={percent > 0 ? "currentColor" : "var(--text-muted)"}
           strokeWidth={strokeWidth}
           strokeDasharray={circumference}
           strokeDashoffset={offset}
           strokeLinecap="round"
-          className={color}
+          className={color || undefined}
         />
       </svg>
-      <span className="absolute text-[10px] font-bold text-slate-700 dark:text-slate-300">
+      <span className="absolute text-[10px] font-bold" style={{ color: 'var(--text-primary)' }}>
         {Math.round(percent)}%
       </span>
     </div>

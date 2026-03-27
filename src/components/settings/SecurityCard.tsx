@@ -174,8 +174,8 @@ export function SecurityCard() {
       {/* ─── Two-Factor Authentication ─── */}
       <div>
         <div className="flex items-center gap-2 mb-3">
-          <Shield size={16} className="text-slate-500" />
-          <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">Two-Factor Authentication</h3>
+          <Shield size={16} style={{ color: 'var(--text-secondary)' }} />
+          <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Two-Factor Authentication</h3>
         </div>
 
         {twoFAEnabled ? (
@@ -193,7 +193,7 @@ export function SecurityCard() {
                 </p>
                 <div className="grid grid-cols-2 gap-1.5 mb-3">
                   {recoveryCodes.map((code, i) => (
-                    <code key={i} className="rounded bg-white px-2 py-1 text-center font-mono text-xs text-slate-700 dark:bg-slate-800 dark:text-slate-300">
+                    <code key={i} className="rounded px-2 py-1 text-center font-mono text-xs" style={{ background: 'var(--surface-secondary)', color: 'var(--text-primary)' }}>
                       {code}
                     </code>
                   ))}
@@ -220,14 +220,14 @@ export function SecurityCard() {
           </div>
         ) : totpUri ? (
           <div className="space-y-4">
-            <p className="text-xs text-slate-500 dark:text-slate-400">
+            <p className="text-xs mb-2" style={{ color: 'var(--text-secondary)' }}>
               Scan this QR code with your authenticator app (Google Authenticator, Authy, etc.):
             </p>
 
             {/* QR Code */}
             {qrDataUrl ? (
               <div className="flex justify-center">
-                <div className="rounded-xl bg-white p-3 shadow-sm ring-1 ring-slate-200 dark:ring-slate-700">
+                <div className="rounded-xl p-3 shadow-sm" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
                   {/* eslint-disable-next-line @next/next/no-img-element -- data URL, next/image can't optimize */}
                   <img
                     src={qrDataUrl}
@@ -239,19 +239,19 @@ export function SecurityCard() {
                 </div>
               </div>
             ) : (
-              <div className="flex h-[200px] items-center justify-center rounded-xl bg-slate-50 dark:bg-slate-800">
-                <Loader2 size={20} className="animate-spin text-slate-400" />
+              <div className="flex h-[200px] items-center justify-center rounded-xl" style={{ background: 'var(--surface-secondary)' }}>
+                <Loader2 size={20} className="animate-spin" style={{ color: 'var(--text-muted)' }} />
               </div>
             )}
 
             {/* Manual entry secret */}
             {totpSecret && (
-              <div className="rounded-lg bg-slate-50 px-3 py-2.5 dark:bg-slate-800">
-                <p className="text-[10px] font-medium uppercase tracking-wider text-slate-400 mb-1">
+              <div className="rounded-lg px-3 py-2.5" style={{ background: 'var(--surface-secondary)' }}>
+                <p className="text-[10px] font-medium uppercase tracking-wider mb-1" style={{ color: 'var(--text-muted)' }}>
                   Can&apos;t scan? Enter manually:
                 </p>
                 <div className="flex items-center gap-2">
-                  <p className="flex-1 font-mono text-xs text-slate-700 dark:text-slate-300 break-all select-all">
+                  <p className="flex-1 font-mono text-xs break-all select-all" style={{ color: 'var(--text-primary)' }}>
                     {totpSecret}
                   </p>
                   <button
@@ -260,7 +260,8 @@ export function SecurityCard() {
                       setCopiedSecret(true);
                       setTimeout(() => setCopiedSecret(false), 2000);
                     }}
-                    className="shrink-0 p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                    className="shrink-0 p-1 transition-colors"
+                    style={{ color: 'var(--text-muted)' }}
                   >
                     {copiedSecret ? <CheckCircle2 size={14} className="text-emerald-500" /> : <Copy size={14} />}
                   </button>
@@ -270,7 +271,7 @@ export function SecurityCard() {
 
             {/* Verification input */}
             <div>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mb-2">
+              <p className="text-xs mb-2" style={{ color: 'var(--text-secondary)' }}>
                 Enter the 6-digit code from your app:
               </p>
               <div className="flex gap-2">
@@ -281,7 +282,7 @@ export function SecurityCard() {
                   placeholder="000000"
                   value={verifyCode}
                   onChange={(e) => setVerifyCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                  className="w-32 rounded-lg border border-slate-200 bg-white px-3 py-2 text-center font-mono text-sm tracking-[0.3em] dark:border-slate-700 dark:bg-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="form-input w-32 text-center font-mono text-sm tracking-[0.3em]"
                 />
                 <button
                   onClick={verify2FA}
@@ -301,7 +302,7 @@ export function SecurityCard() {
                 setQrDataUrl(null);
                 setVerifyCode("");
               }}
-              className="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+              className="text-xs transition-colors" style={{ color: 'var(--text-muted)' }}
             >
               Cancel setup
             </button>
@@ -309,7 +310,10 @@ export function SecurityCard() {
         ) : (
           <button
             onClick={setup2FA}
-            className="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+            className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium transition-colors"
+            style={{ color: 'var(--text-primary)', border: '1px solid var(--border)' }}
+            onMouseEnter={e => { e.currentTarget.style.background = 'var(--surface-secondary)'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = ''; }}
           >
             <Plus size={14} />
             Enable 2FA
@@ -321,8 +325,8 @@ export function SecurityCard() {
       <div>
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <Key size={16} className="text-slate-500" />
-            <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">Active Sessions</h3>
+            <Key size={16} style={{ color: 'var(--text-secondary)' }} />
+            <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Active Sessions</h3>
           </div>
           {sessions.length > 1 && (
             <button
@@ -336,25 +340,26 @@ export function SecurityCard() {
         </div>
 
         {loadingSessions ? (
-          <div className="flex items-center gap-2 text-xs text-slate-400">
+          <div className="flex items-center gap-2 text-xs" style={{ color: 'var(--text-muted)' }}>
             <Loader2 size={14} className="animate-spin" />
             Loading...
           </div>
         ) : sessions.length === 0 ? (
-          <p className="text-xs text-slate-400">No active sessions</p>
+          <p className="text-xs" style={{ color: 'var(--text-muted)' }}>No active sessions</p>
         ) : (
           <div className="space-y-2">
             {sessions.map((s) => (
               <div
                 key={s.id}
-                className="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2 dark:bg-slate-800"
+                className="flex items-center justify-between rounded-lg px-3 py-2"
+                style={{ background: 'var(--surface-secondary)' }}
               >
                 <div>
-                  <p className="text-xs font-medium text-slate-700 dark:text-slate-300">
+                  <p className="text-xs font-medium" style={{ color: 'var(--text-primary)' }}>
                     {s.deviceName || "Unknown Device"}
                     {s.isCurrent && <span className="ml-2 text-emerald-500">(current)</span>}
                   </p>
-                  <p className="text-[10px] text-slate-400">
+                  <p className="text-[10px]" style={{ color: 'var(--text-muted)' }}>
                     Last active: {new Date(s.lastActiveAt).toLocaleDateString()}
                   </p>
                 </div>
@@ -375,30 +380,31 @@ export function SecurityCard() {
       {/* ─── Linked Devices ─── */}
       <div>
         <div className="flex items-center gap-2 mb-3">
-          <Smartphone size={16} className="text-slate-500" />
-          <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">Linked Devices</h3>
+          <Smartphone size={16} style={{ color: 'var(--text-secondary)' }} />
+          <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Linked Devices</h3>
         </div>
 
         {loadingDevices ? (
-          <div className="flex items-center gap-2 text-xs text-slate-400">
+          <div className="flex items-center gap-2 text-xs" style={{ color: 'var(--text-muted)' }}>
             <Loader2 size={14} className="animate-spin" />
             Loading...
           </div>
         ) : devices.length === 0 ? (
-          <p className="text-xs text-slate-400">No linked devices</p>
+          <p className="text-xs" style={{ color: 'var(--text-muted)' }}>No linked devices</p>
         ) : (
           <div className="space-y-2">
             {devices.map((d) => (
               <div
                 key={d.id}
-                className="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2 dark:bg-slate-800"
+                className="flex items-center justify-between rounded-lg px-3 py-2"
+                style={{ background: 'var(--surface-secondary)' }}
               >
                 <div>
-                  <p className="text-xs font-medium text-slate-700 dark:text-slate-300">
+                  <p className="text-xs font-medium" style={{ color: 'var(--text-primary)' }}>
                     {d.name || "Unnamed Device"}
                     {d.isCurrent && <span className="ml-2 text-emerald-500">(this device)</span>}
                   </p>
-                  <p className="text-[10px] text-slate-400">
+                  <p className="text-[10px]" style={{ color: 'var(--text-muted)' }}>
                     Last active: {new Date(d.lastActiveAt).toLocaleDateString()}
                   </p>
                 </div>

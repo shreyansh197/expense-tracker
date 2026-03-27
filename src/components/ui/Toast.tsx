@@ -6,14 +6,20 @@ import { cn } from "@/lib/utils";
 
 type ToastType = "success" | "error" | "info";
 
+interface ToastAction {
+  label: string;
+  onClick: () => void;
+}
+
 interface Toast {
   id: number;
   message: string;
   type: ToastType;
+  action?: ToastAction;
 }
 
 interface ToastContextType {
-  toast: (message: string, type?: ToastType) => void;
+  toast: (message: string, type?: ToastType, action?: ToastAction) => void;
 }
 
 const ToastContext = createContext<ToastContextType>({ toast: () => {} });
@@ -25,12 +31,12 @@ let nextId = 0;
 export function ToastProvider({ children }: { children: React.ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([]);
 
-  const addToast = useCallback((message: string, type: ToastType = "success") => {
+  const addToast = useCallback((message: string, type: ToastType = "success", action?: ToastAction) => {
     const id = nextId++;
-    setToasts((prev) => [...prev, { id, message, type }]);
+    setToasts((prev) => [...prev, { id, message, type, action }]);
     setTimeout(() => {
       setToasts((prev) => prev.filter((t) => t.id !== id));
-    }, 3000);
+    }, action ? 6000 : 3000);
   }, []);
 
   const removeToast = useCallback((id: number) => {
@@ -77,7 +83,18 @@ function ToastItem({ toast, onClose }: { toast: Toast; onClose: () => void }) {
     >
       <Icon size={18} className="shrink-0" />
       <span className="flex-1 text-sm font-medium">{toast.message}</span>
-      <button onClick={onClose} className="shrink-0 opacity-60 hover:opacity-100">
+      {toast.action && (
+        <button
+          onClick={() => {
+            toast.action!.onClick();
+            onClose();
+          }}
+          className="shrink-0 text-xs font-bold underline underline-offset-2 opacity-90 hover:opacity-100"
+        >
+          {toast.action.label}
+        </button>
+      )}
+      <button onClick={onClose} className="shrink-0 opacity-60 hover:opacity-100" aria-label="Dismiss">
         <X size={14} />
       </button>
     </div>

@@ -127,7 +127,7 @@ export function GoalsManager() {
       {goals.length > 0 && (
         <div className="mb-3 rounded-lg bg-emerald-50 px-3 py-2 dark:bg-emerald-900/20">
           <div className="flex items-center justify-between text-xs">
-            <span className="text-slate-500 dark:text-slate-400">
+            <span style={{ color: 'var(--text-secondary)' }}>
               Total progress: <span className="font-semibold text-emerald-700 dark:text-emerald-400">{formatCurrency(totalSaved)}</span> / {formatCurrency(totalTarget)}
             </span>
             <span className="font-semibold text-emerald-700 dark:text-emerald-400">{overallPct}%</span>
@@ -154,12 +154,12 @@ export function GoalsManager() {
       </div>
 
       {showForm && (
-        <div className="mb-4 overflow-hidden rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800">
+        <div className="mb-4 overflow-hidden rounded-xl p-4" style={{ background: 'var(--surface-secondary)', border: '1px solid var(--border)' }}>
           <div className="mb-3 flex items-center justify-between">
-            <span className="text-xs font-medium text-slate-500">
+            <span className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>
               {editId ? "Edit Goal" : "New Goal"}
             </span>
-            <button onClick={resetForm} className="text-slate-400 hover:text-slate-600">
+            <button onClick={resetForm} style={{ color: 'var(--text-muted)' }} aria-label="Close form">
               <X size={14} />
             </button>
           </div>
@@ -170,29 +170,29 @@ export function GoalsManager() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               maxLength={40}
-              className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-900 dark:text-white"
+              className="form-input text-sm"
             />
             <div className="grid grid-cols-2 gap-2">
               <div className="relative">
-                <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-slate-400">{symbol}</span>
+                <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs" style={{ color: 'var(--text-muted)' }}>{symbol}</span>
                 <input
                   type="number"
                   placeholder="Target amount"
                   value={targetAmount}
                   onChange={(e) => setTargetAmount(e.target.value)}
                   min="1"
-                  className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-6 pr-3 text-sm dark:border-slate-600 dark:bg-slate-900 dark:text-white"
+                  className="form-input py-2 pl-6 pr-3 text-sm"
                 />
               </div>
               <div className="relative">
-                <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-slate-400">{symbol}</span>
+                <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs" style={{ color: 'var(--text-muted)' }}>{symbol}</span>
                 <input
                   type="number"
                   placeholder="Monthly contrib."
                   value={monthlyContribution}
                   onChange={(e) => setMonthlyContribution(e.target.value)}
                   min="0"
-                  className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-6 pr-3 text-sm dark:border-slate-600 dark:bg-slate-900 dark:text-white"
+                  className="form-input py-2 pl-6 pr-3 text-sm"
                 />
               </div>
             </div>
@@ -201,7 +201,7 @@ export function GoalsManager() {
               placeholder="Deadline (optional)"
               value={deadline}
               onChange={(e) => setDeadline(e.target.value)}
-              className="min-w-0 max-w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-900 dark:text-white"
+              className="min-w-0 max-w-full form-input px-3 py-2 text-sm"
             />
             <div className="flex flex-wrap gap-1.5">
               {PRESET_COLORS.map((c) => (
@@ -228,7 +228,7 @@ export function GoalsManager() {
       )}
 
       {goals.length === 0 && !showForm ? (
-        <p className="py-4 text-center text-xs text-slate-400">
+        <p className="py-4 text-center text-xs" style={{ color: 'var(--text-muted)' }}>
           No goals yet. Set a savings target to track your progress.
         </p>
       ) : (
@@ -243,7 +243,8 @@ export function GoalsManager() {
             return (
               <div
                 key={g.id}
-                className="rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-900"
+                className="rounded-xl p-3"
+                style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
               >
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
@@ -251,7 +252,7 @@ export function GoalsManager() {
                       className="h-3 w-3 rounded-full"
                       style={{ backgroundColor: g.color }}
                     />
-                    <span className="text-sm font-medium text-slate-900 dark:text-white">
+                    <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
                       {g.name}
                     </span>
                     {isComplete && (
@@ -269,13 +270,17 @@ export function GoalsManager() {
                     </button>
                     <button
                       onClick={() => handleEdit(g)}
-                      className="rounded p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                      className="rounded p-1 transition-colors"
+                      style={{ color: 'var(--text-muted)' }}
+                      aria-label="Edit goal"
                     >
                       <Pencil size={12} />
                     </button>
                     <button
                       onClick={() => handleDelete(g.id)}
-                      className="rounded p-1 text-slate-400 hover:text-red-500"
+                      className="rounded p-1 transition-colors hover:text-red-500"
+                      style={{ color: 'var(--text-muted)' }}
+                      aria-label="Delete goal"
                     >
                       <Trash2 size={12} />
                     </button>
@@ -284,15 +289,17 @@ export function GoalsManager() {
 
                 {/* Add/Subtract Funds inline */}
                 {fundGoalId === g.id && (
-                  <div className="mb-2 flex items-center gap-2 rounded-lg bg-slate-50 px-2 py-2 dark:bg-slate-800">
-                    <div className="flex rounded-lg border border-slate-200 dark:border-slate-700">
+                  <div className="mb-2 flex items-center gap-2 rounded-lg px-2 py-2" style={{ background: 'var(--surface-secondary)' }}>
+                    <div className="flex rounded-lg" style={{ border: '1px solid var(--border)' }}>
                       <button
                         onClick={() => setFundMode("add")}
                         className={`px-2 py-1 text-xs font-medium rounded-l-lg ${
                           fundMode === "add"
                             ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400"
-                            : "text-slate-400"
+                            : ""
                         }`}
+                        style={fundMode !== "add" ? { color: 'var(--text-muted)' } : undefined}
+                        aria-label="Add funds"
                       >
                         <TrendingUp size={12} />
                       </button>
@@ -301,14 +308,16 @@ export function GoalsManager() {
                         className={`px-2 py-1 text-xs font-medium rounded-r-lg ${
                           fundMode === "subtract"
                             ? "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400"
-                            : "text-slate-400"
+                            : ""
                         }`}
+                        style={fundMode !== "subtract" ? { color: 'var(--text-muted)' } : undefined}
+                        aria-label="Subtract funds"
                       >
                         <Minus size={12} />
                       </button>
                     </div>
                     <div className="relative flex-1">
-                      <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-slate-400">{symbol}</span>
+                      <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs" style={{ color: 'var(--text-muted)' }}>{symbol}</span>
                       <input
                         type="number"
                         min="1"
@@ -317,7 +326,7 @@ export function GoalsManager() {
                         onKeyDown={(e) => { if (e.key === "Enter") handleFundSave(); if (e.key === "Escape") setFundGoalId(null); }}
                         autoFocus
                         placeholder="Amount"
-                        className="w-full rounded border border-slate-200 bg-white py-1 pl-5 pr-2 text-xs dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+                        className="form-input py-1 pl-5 pr-2 text-xs"
                       />
                     </div>
                     <button
@@ -328,14 +337,15 @@ export function GoalsManager() {
                     </button>
                     <button
                       onClick={() => setFundGoalId(null)}
-                      className="text-slate-400 hover:text-slate-600"
+                      style={{ color: 'var(--text-muted)' }}
+                      aria-label="Cancel"
                     >
                       <X size={12} />
                     </button>
                   </div>
                 )}
 
-                <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+                <div className="h-2 w-full overflow-hidden rounded-full" style={{ background: 'var(--surface-secondary)' }}>
                   <div
                     className="h-full rounded-full transition-all"
                     style={{
@@ -344,7 +354,7 @@ export function GoalsManager() {
                     }}
                   />
                 </div>
-                <div className="mt-1.5 flex items-center justify-between text-[10px] text-slate-400">
+                <div className="mt-1.5 flex items-center justify-between text-[10px]" style={{ color: 'var(--text-muted)' }}>
                   <span>
                     {formatCurrency(g.savedAmount)} of {formatCurrency(g.targetAmount)} ({pct}%)
                   </span>

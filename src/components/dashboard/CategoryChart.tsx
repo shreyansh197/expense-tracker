@@ -5,14 +5,15 @@ import {
   PieChart,
   Pie,
   Cell,
+  Sector,
   ResponsiveContainer,
   Tooltip,
 } from "recharts";
-import { Table2, PieChart as PieChartIcon } from "lucide-react";
+import { Table2, PieChart as PieChartIcon, BarChart3 } from "lucide-react";
 import { buildCategoryMap } from "@/lib/categories";
-import { cn } from "@/lib/utils";
 import { useCurrency } from "@/hooks/useCurrency";
 import { useSettings } from "@/hooks/useSettings";
+import { EmptyState } from "@/components/ui/EmptyState";
 import type { CategoryTotal, Expense } from "@/types";
 
 interface CategoryChartProps {
@@ -43,7 +44,7 @@ function CustomTooltip({ active, payload, total, budgets, expenseCountMap }: {
         {formatCurrency(item.value)} · {pct}% · {count} txn{count !== 1 ? "s" : ""}
       </p>
       {budget && (
-        <p className={item.value > budget ? "text-red-500 mt-0.5" : "text-slate-400 mt-0.5"}>
+        <p className={item.value > budget ? "text-red-500 mt-0.5" : "mt-0.5"} style={item.value <= budget ? { color: 'var(--text-muted)' } : undefined}>
           Budget: {formatCurrency(budget)} ({Math.round((item.value / budget) * 100)}%)
         </p>
       )}
@@ -82,9 +83,12 @@ export function CategoryChart({ categoryTotals, onCategoryClick, categoryBudgets
 
   if (data.length === 0) {
     return (
-      <div className="flex h-[200px] items-center justify-center text-sm text-slate-400">
-        No expenses yet this month
-      </div>
+      <EmptyState
+        icon={PieChartIcon}
+        secondaryIcon={BarChart3}
+        title="No spending yet"
+        description="Add your first expense to see where your money goes."
+      />
     );
   }
 
@@ -93,27 +97,17 @@ export function CategoryChart({ categoryTotals, onCategoryClick, categoryBudgets
       <div className="mb-2 flex justify-end">
         <div className="segmented-control">
           <button
+            data-active={!showTable}
             onClick={() => setShowTable(false)}
-            className={cn(
-              "flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-medium transition-colors",
-              !showTable
-                ? "bg-white text-slate-900 shadow-sm dark:bg-slate-700 dark:text-white"
-                : ""
-            )}
-            style={showTable ? { color: 'var(--text-secondary)' } : undefined}
+            className="flex items-center gap-1"
           >
             <PieChartIcon size={13} />
             Chart
           </button>
           <button
+            data-active={showTable}
             onClick={() => setShowTable(true)}
-            className={cn(
-              "flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-medium transition-colors",
-              showTable
-                ? "bg-white text-slate-900 shadow-sm dark:bg-slate-700 dark:text-white"
-                : ""
-            )}
-            style={!showTable ? { color: 'var(--text-secondary)' } : undefined}
+            className="flex items-center gap-1"
           >
             <Table2 size={13} />
             Table
@@ -125,7 +119,7 @@ export function CategoryChart({ categoryTotals, onCategoryClick, categoryBudgets
         <div className="overflow-x-auto">
           <table className="w-full text-sm" role="table">
             <thead>
-              <tr className="border-b border-slate-100 text-left text-xs text-slate-500 dark:border-slate-800 dark:text-slate-400">
+              <tr style={{ borderBottom: '1px solid var(--border-subtle)', color: 'var(--text-secondary)' }} className="text-left text-xs">
                 <th className="pb-2 font-medium">Category</th>
                 <th className="pb-2 text-right font-medium">Amount</th>
                 <th className="pb-2 text-right font-medium">%</th>
@@ -140,26 +134,29 @@ export function CategoryChart({ categoryTotals, onCategoryClick, categoryBudgets
                 return (
                   <tr
                     key={d.slug}
-                    className="border-b border-slate-50 hover:bg-slate-50 dark:border-slate-800/50 dark:hover:bg-slate-800/30 cursor-pointer"
+                    className="cursor-pointer transition-colors"
+                    style={{ borderBottom: '1px solid var(--border-subtle)' }}
+                    onMouseEnter={e => { e.currentTarget.style.background = 'var(--surface-secondary)'; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = ''; }}
                     onClick={() => onCategoryClick?.(d.slug)}
                   >
                     <td className="py-2">
                       <div className="flex items-center gap-2">
                         <div className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: d.color }} />
-                        <span className="text-slate-700 dark:text-slate-300">{d.name}</span>
+                        <span style={{ color: 'var(--text-primary)' }}>{d.name}</span>
                       </div>
                     </td>
-                    <td className="py-2 text-right font-medium text-slate-900 dark:text-white">
+                    <td className="py-2 text-right font-medium" style={{ color: 'var(--text-primary)' }}>
                       {formatCurrency(d.value)}
                     </td>
-                    <td className="py-2 text-right text-slate-500 dark:text-slate-400">{pct}%</td>
+                    <td className="py-2 text-right" style={{ color: 'var(--text-secondary)' }}>{pct}%</td>
                     <td className="py-2 text-right">
                       {budget ? (
-                        <span className={budgetPct >= 100 ? "text-red-500" : budgetPct >= 80 ? "text-amber-500" : "text-slate-400"}>
+                        <span className={budgetPct >= 100 ? "text-red-500" : budgetPct >= 80 ? "text-amber-500" : ""} style={budgetPct < 80 ? { color: 'var(--text-muted)' } : undefined}>
                           {budgetPct}%
                         </span>
                       ) : (
-                        <span className="text-slate-300 dark:text-slate-600">—</span>
+                        <span style={{ color: 'var(--text-muted)' }}>—</span>
                       )}
                     </td>
                   </tr>
@@ -168,9 +165,9 @@ export function CategoryChart({ categoryTotals, onCategoryClick, categoryBudgets
             </tbody>
             <tfoot>
               <tr className="font-medium">
-                <td className="pt-2 text-slate-700 dark:text-slate-300">Total</td>
-                <td className="pt-2 text-right text-slate-900 dark:text-white">{formatCurrency(total)}</td>
-                <td className="pt-2 text-right text-slate-500">100%</td>
+                <td className="pt-2" style={{ color: 'var(--text-primary)' }}>Total</td>
+                <td className="pt-2 text-right" style={{ color: 'var(--text-primary)' }}>{formatCurrency(total)}</td>
+                <td className="pt-2 text-right" style={{ color: 'var(--text-secondary)' }}>100%</td>
                 <td />
               </tr>
             </tfoot>
@@ -189,6 +186,16 @@ export function CategoryChart({ categoryTotals, onCategoryClick, categoryBudgets
                 paddingAngle={3}
                 dataKey="value"
                 stroke="none"
+                activeShape={(props: unknown) => {
+                  const p = props as Record<string, number>;
+                  return (
+                    <Sector
+                      {...(props as Record<string, unknown>)}
+                      innerRadius={p.innerRadius - 2}
+                      outerRadius={p.outerRadius + 4}
+                    />
+                  );
+                }}
                 style={{ cursor: onCategoryClick ? "pointer" : undefined }}
                 onClick={(_, idx) => onCategoryClick?.(data[idx].slug)}
               >
@@ -235,8 +242,10 @@ export function CategoryLegend({ categoryTotals, onCategoryClick, categoryBudget
           return (
             <div
               key={c.category}
-              className="rounded-lg px-1 py-0.5 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50"
+              className="rounded-lg px-1 py-0.5 transition-colors"
               style={{ cursor: onCategoryClick ? "pointer" : undefined }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'var(--surface-secondary)'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = ''; }}
               onClick={() => onCategoryClick?.(c.category)}
               role={onCategoryClick ? "button" : undefined}
               tabIndex={onCategoryClick ? 0 : undefined}
@@ -247,18 +256,18 @@ export function CategoryLegend({ categoryTotals, onCategoryClick, categoryBudget
                   className="h-3 w-3 rounded-full flex-shrink-0"
                   style={{ backgroundColor: meta?.color }}
                 />
-                <span className="flex-1 text-sm text-slate-700 dark:text-slate-300">
+                <span className="flex-1 text-sm" style={{ color: 'var(--text-primary)' }}>
                   {meta?.label || c.category}
                 </span>
-                <span className="text-sm font-medium text-slate-900 dark:text-white">
+                <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
                   {formatCurrency(c.total)}
                 </span>
-                <span className="w-10 text-right text-xs text-slate-400">{pct}%</span>
+                <span className="w-10 text-right text-xs" style={{ color: 'var(--text-muted)' }}>{pct}%</span>
               </div>
               {budget ? (
                 <div className="ml-6 mt-1">
                   <div className="flex items-center gap-2">
-                    <div className="h-1.5 flex-1 rounded-full bg-slate-100 dark:bg-slate-800">
+                    <div className="h-1.5 flex-1 rounded-full" style={{ background: 'var(--surface-secondary)' }}>
                       <div
                         className={`h-1.5 rounded-full transition-all ${
                           isOverBudget ? "bg-red-500" : isNearBudget ? "bg-amber-500" : "bg-emerald-500"
@@ -267,8 +276,8 @@ export function CategoryLegend({ categoryTotals, onCategoryClick, categoryBudget
                       />
                     </div>
                     <span className={`text-[10px] font-medium ${
-                      isOverBudget ? "text-red-500" : isNearBudget ? "text-amber-500" : "text-slate-400"
-                    }`}>
+                      isOverBudget ? "text-red-500" : isNearBudget ? "text-amber-500" : ""
+                    }`} style={!isOverBudget && !isNearBudget ? { color: 'var(--text-muted)' } : undefined}>
                       {budgetPct}%
                     </span>
                   </div>

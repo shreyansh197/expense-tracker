@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { ExpenseFormModal } from "@/components/expenses/ExpenseFormModal";
@@ -10,10 +10,29 @@ import { KeyboardShortcutsHelp } from "@/components/ui/KeyboardShortcutsHelp";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useSettings } from "@/hooks/useSettings";
 import { useAuth } from "@/components/providers/AuthProvider";
+import { useUIStore } from "@/stores/uiStore";
 
 function AppShellInner({ children }: { children: React.ReactNode }) {
   const [showShortcuts, setShowShortcuts] = useState(false);
   useKeyboardShortcuts(() => setShowShortcuts(true));
+  const { nextMonth, prevMonth } = useUIStore();
+
+  // Swipe to navigate months (mobile)
+  const touchStart = useRef<{ x: number; y: number } | null>(null);
+  const onTouchStart = useCallback((e: React.TouchEvent) => {
+    touchStart.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+  }, []);
+  const onTouchEnd = useCallback((e: React.TouchEvent) => {
+    if (!touchStart.current) return;
+    const dx = e.changedTouches[0].clientX - touchStart.current.x;
+    const dy = e.changedTouches[0].clientY - touchStart.current.y;
+    touchStart.current = null;
+    // Only trigger if horizontal swipe is dominant and >80px
+    if (Math.abs(dx) > 80 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+      if (dx > 0) prevMonth();
+      else nextMonth();
+    }
+  }, [nextMonth, prevMonth]);
 
   return (
     <>
@@ -25,7 +44,12 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
       </a>
       <div className="flex flex-1 overflow-hidden">
         <Sidebar />
-        <main id="main-content" className="flex-1 overflow-y-auto pb-20 lg:pb-0">
+        <main
+          id="main-content"
+          className="flex-1 overflow-y-auto pb-20 lg:pb-0"
+          onTouchStart={onTouchStart}
+          onTouchEnd={onTouchEnd}
+        >
           <ErrorBoundary>{children}</ErrorBoundary>
         </main>
       </div>

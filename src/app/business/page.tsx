@@ -2,9 +2,10 @@
 
 export const dynamic = "force-dynamic";
 
-import { useState, useEffect, startTransition } from "react";
+import { useState, useEffect, startTransition, useMemo } from "react";
 import { AppShell } from "@/components/layout/AppShell";
-import { PlusCircle, Search, Briefcase } from "lucide-react";
+import { PlusCircle, Search, Briefcase, ArrowRightLeft } from "lucide-react";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { useLedgers } from "@/hooks/useLedgers";
 import { usePayments } from "@/hooks/usePayments";
 import { useAllPayments } from "@/hooks/useAllPayments";
@@ -39,7 +40,19 @@ function LedgerListWithTotals({
     return true;
   });
 
-  if (filtered.length === 0) {
+  // Sort by most recent creation, active status first
+  const sorted = useMemo(() => {
+    return [...filtered].sort((a, b) => {
+      // Active ledgers before completed/cancelled
+      const statusOrder = { active: 0, completed: 1, cancelled: 2 } as const;
+      const aOrder = statusOrder[a.status] ?? 1;
+      const bOrder = statusOrder[b.status] ?? 1;
+      if (aOrder !== bOrder) return aOrder - bOrder;
+      return b.createdAt - a.createdAt;
+    });
+  }, [filtered]);
+
+  if (sorted.length === 0) {
     return (
       <div className="flex flex-col items-center gap-3 py-16" style={{ color: 'var(--text-tertiary)' }}>
         <Briefcase className="h-10 w-10" />
@@ -50,7 +63,7 @@ function LedgerListWithTotals({
 
   return (
     <div className="grid gap-3 sm:grid-cols-2">
-      {filtered.map((ledger) => (
+      {sorted.map((ledger) => (
         <LedgerCardWithPayments key={ledger.id} ledger={ledger} />
       ))}
     </div>
@@ -95,18 +108,13 @@ export default function BusinessPage() {
   if (!settings.businessMode) {
     return (
       <AppShell>
-        <div className="flex flex-col items-center justify-center gap-4 p-8 text-center">
-          <Briefcase className="h-12 w-12 text-slate-300" />
-          <h2 className="text-lg font-semibold text-slate-700 dark:text-slate-300">Business Mode is Off</h2>
-          <p className="max-w-sm text-sm text-slate-500">
-            Enable Business Owner Mode in Settings to start tracking ledgers and payments.
-          </p>
-          <a
-            href="/settings"
-            className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
-          >
-            Go to Settings
-          </a>
+        <div className="flex flex-col items-center justify-center p-8 text-center">
+          <EmptyState
+            icon={Briefcase}
+            title="Business Mode is Off"
+            description="Enable Business Mode in Settings to unlock ledger tracking, collection charts, and payment management."
+            action={{ label: "Go to Settings", onClick: () => window.location.href = "/settings", color: "emerald" }}
+          />
         </div>
       </AppShell>
     );
@@ -114,7 +122,7 @@ export default function BusinessPage() {
 
   return (
     <AppShell>
-      <div className="mx-auto max-w-5xl xl:max-w-7xl space-y-6 p-4 lg:p-6">
+      <div className="fade-in mx-auto min-h-[80vh] max-w-5xl xl:max-w-7xl space-y-6 p-4 lg:p-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
@@ -199,20 +207,13 @@ export default function BusinessPage() {
             ))}
           </div>
         ) : ledgers.length === 0 && !showForm ? (
-          <div className="flex flex-col items-center gap-3 py-20" style={{ color: 'var(--text-tertiary)' }}>
-            <div className="flex h-16 w-16 items-center justify-center rounded-2xl" style={{ background: 'var(--surface-secondary)' }}>
-              <Briefcase className="h-8 w-8" style={{ color: 'var(--text-muted)' }} />
-            </div>
-            <p className="text-sm font-semibold" style={{ color: 'var(--text-secondary)' }}>No ledgers yet</p>
-            <p className="text-xs" style={{ color: 'var(--text-tertiary)' }}>Create a ledger to start tracking payments</p>
-            <button
-              onClick={() => setShowForm(true)}
-              className="mt-2 flex items-center gap-1.5 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-emerald-600/20 hover:bg-emerald-700 active:scale-[0.97]"
-            >
-              <PlusCircle size={16} />
-              Create Your First Ledger
-            </button>
-          </div>
+          <EmptyState
+            icon={Briefcase}
+            secondaryIcon={ArrowRightLeft}
+            title="Ready to track payments"
+            description="Create your first ledger to start managing clients and collections."
+            action={{ label: "Create Your First Ledger", onClick: () => setShowForm(true), color: "emerald" }}
+          />
         ) : (
           <LedgerListWithTotals
             ledgers={ledgers}

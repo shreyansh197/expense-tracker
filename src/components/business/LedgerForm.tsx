@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { X } from "lucide-react";
+import { X, Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { DatePicker } from "@/components/ui/DatePicker";
 import type { LedgerInput, LedgerStatus } from "@/types";
 import { useSettings } from "@/hooks/useSettings";
@@ -14,7 +15,7 @@ interface LedgerFormProps {
   submitLabel?: string;
 }
 
-export function LedgerForm({ initial, onSubmit, onCancel, submitLabel = "Create Ledger" }: LedgerFormProps) {
+export function LedgerForm({ initial, onSubmit, onCancel, submitLabel = "Create a Ledger" }: LedgerFormProps) {
   const { symbol } = useCurrency();
   const { settings } = useSettings();
   const [name, setName] = useState(initial?.name ?? "");
@@ -25,6 +26,8 @@ export function LedgerForm({ initial, onSubmit, onCancel, submitLabel = "Create 
   const [tagInput, setTagInput] = useState("");
   const [tags, setTags] = useState<string[]>(initial?.tags ?? []);
   const [submitting, setSubmitting] = useState(false);
+  const [amountTouched, setAmountTouched] = useState(false);
+  const amountInvalid = amountTouched && (expectedAmount === "" || isNaN(parseFloat(expectedAmount)) || parseFloat(expectedAmount) <= 0);
 
   const handleAddTag = () => {
     const t = tagInput.trim();
@@ -58,13 +61,13 @@ export function LedgerForm({ initial, onSubmit, onCancel, submitLabel = "Create 
     <form onSubmit={handleSubmit} className="space-y-4">
       {/* Name */}
       <div>
-        <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-400">Name / Client</label>
+        <label className="form-label">Name / Client</label>
         <input
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="e.g. Client: Acme Corp"
-          className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+          className="form-input w-full"
           required
           autoFocus
         />
@@ -72,25 +75,30 @@ export function LedgerForm({ initial, onSubmit, onCancel, submitLabel = "Create 
 
       {/* Expected Amount */}
       <div>
-        <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-400">Expected Amount</label>
+        <label className="form-label">Expected Amount</label>
         <div className="relative">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-slate-400">{symbol}</span>
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm" style={{ color: 'var(--text-muted)' }}>{symbol}</span>
           <input
             type="number"
             min="1"
             step="any"
             value={expectedAmount}
             onChange={(e) => setExpectedAmount(e.target.value)}
+            onBlur={() => setAmountTouched(true)}
             placeholder="0"
-            className="w-full rounded-lg border border-slate-200 bg-white py-2.5 pl-7 pr-3 text-sm text-slate-900 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+            className={cn("form-input w-full pl-7", amountInvalid && "!border-red-400 !ring-red-400/20")}
             required
+            aria-invalid={amountInvalid || undefined}
           />
         </div>
+        {amountInvalid && (
+          <p className="mt-1 text-xs font-medium text-red-500">Enter a valid positive amount</p>
+        )}
       </div>
 
       {/* Due Date */}
       <div>
-        <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-400">Due Date (optional)</label>
+        <label className="form-label">Due Date (optional)</label>
         {dueDate ? (
           <div className="flex items-center gap-2">
             <div className="flex-1">
@@ -109,7 +117,10 @@ export function LedgerForm({ initial, onSubmit, onCancel, submitLabel = "Create 
             <button
               type="button"
               onClick={() => setDueDate("")}
-              className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800"
+              className="rounded-lg p-2 transition-colors"
+              style={{ color: 'var(--text-muted)' }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--surface-secondary)'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = ''; e.currentTarget.style.color = 'var(--text-muted)'; }}
               title="Clear date"
             >
               <X size={16} />
@@ -119,7 +130,8 @@ export function LedgerForm({ initial, onSubmit, onCancel, submitLabel = "Create 
           <button
             type="button"
             onClick={() => setDueDate(new Date().toISOString().split("T")[0])}
-            className="w-full rounded-lg border border-dashed border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-400 hover:border-emerald-400 hover:text-emerald-600 dark:border-slate-600 dark:bg-slate-800 dark:hover:border-emerald-500 dark:hover:text-emerald-400"
+            className="w-full rounded-lg border border-dashed px-3 py-2.5 text-sm hover:border-emerald-400 hover:text-emerald-600 dark:hover:border-emerald-500 dark:hover:text-emerald-400"
+            style={{ borderColor: 'var(--border)', background: 'var(--surface)', color: 'var(--text-muted)' }}
           >
             + Set due date
           </button>
@@ -129,11 +141,11 @@ export function LedgerForm({ initial, onSubmit, onCancel, submitLabel = "Create 
       {/* Status (only for edit) */}
       {initial && (
         <div>
-          <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-400">Status</label>
+          <label className="form-label">Status</label>
           <select
             value={status}
             onChange={(e) => setStatus(e.target.value as LedgerStatus)}
-            className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+            className="form-select w-full"
           >
             <option value="active">Active</option>
             <option value="completed">Completed</option>
@@ -144,7 +156,7 @@ export function LedgerForm({ initial, onSubmit, onCancel, submitLabel = "Create 
 
       {/* Tags */}
       <div>
-        <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-400">Tags</label>
+        <label className="form-label">Tags</label>
         <div className="flex gap-2">
           <input
             type="text"
@@ -152,12 +164,15 @@ export function LedgerForm({ initial, onSubmit, onCancel, submitLabel = "Create 
             onChange={(e) => setTagInput(e.target.value)}
             onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleAddTag(); } }}
             placeholder="Add tag..."
-            className="flex-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+            className="form-input flex-1"
           />
           <button
             type="button"
             onClick={handleAddTag}
-            className="rounded-lg bg-slate-100 px-3 py-2 text-xs font-medium text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+            className="rounded-lg px-3 py-2 text-xs font-medium transition-colors"
+            style={{ background: 'var(--surface-secondary)', color: 'var(--text-secondary)' }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--surface-hover)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--surface-secondary)'; }}
           >
             Add
           </button>
@@ -181,13 +196,13 @@ export function LedgerForm({ initial, onSubmit, onCancel, submitLabel = "Create 
 
       {/* Notes */}
       <div>
-        <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-400">Notes</label>
+        <label className="form-label">Notes</label>
         <textarea
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           rows={3}
           placeholder="Any details about this ledger..."
-          className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+          className="form-input w-full"
         />
       </div>
 
@@ -196,14 +211,18 @@ export function LedgerForm({ initial, onSubmit, onCancel, submitLabel = "Create 
         <button
           type="submit"
           disabled={submitting || !name.trim() || !expectedAmount}
-          className="flex-1 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-emerald-700 disabled:opacity-50"
+          className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-emerald-700 disabled:opacity-50"
         >
+          {submitting && <Loader2 size={16} className="animate-spin" />}
           {submitting ? "Saving..." : submitLabel}
         </button>
         <button
           type="button"
           onClick={onCancel}
-          className="rounded-lg bg-slate-100 px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+          className="rounded-lg px-4 py-2.5 text-sm font-medium transition-colors"
+          style={{ background: 'var(--surface-secondary)', color: 'var(--text-secondary)' }}
+          onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--surface-hover)'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--surface-secondary)'; }}
         >
           Cancel
         </button>

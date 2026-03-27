@@ -51,18 +51,18 @@ export function CollectionChart({ data }: CollectionChartProps) {
       )}
       <ResponsiveContainer width="100%" height={220}>
         <BarChart data={formatted} margin={{ top: 5, right: 5, left: -10, bottom: 5 }}>
-          <CartesianGrid strokeDasharray="3 3" className="[&_line]:stroke-slate-200 dark:[&_line]:stroke-slate-700" />
-          <XAxis dataKey="label" tick={{ fontSize: 11, fill: "#6B7280" }} className="dark:[&_text]:!fill-slate-400" />
-          <YAxis tick={{ fontSize: 11, fill: "#6B7280" }} tickFormatter={(v: number) => `${symbol}${(v / 1000).toFixed(0)}k`} className="dark:[&_text]:!fill-slate-400" />
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="label" tick={{ fontSize: 11 }} />
+          <YAxis tick={{ fontSize: 11 }} tickFormatter={(v: number) => `${symbol}${(v / 1000).toFixed(0)}k`} />
           <Tooltip content={<CollectionTooltip />} />
           <Legend
             formatter={(value) => {
-              const color = value === "received" ? "#10b981" : "#6B7280";
+              const color = value === "received" ? "#10b981" : "var(--text-tertiary)";
               return <span style={{ color }}>{value === "received" ? "Received" : "Expected"}</span>;
             }}
             wrapperStyle={{ fontSize: 11 }}
           />
-          <Bar dataKey="expected" fill="#e5e7eb" stroke="#d1d5db" strokeWidth={1} radius={[4, 4, 0, 0]} />
+          <Bar dataKey="expected" fill="var(--surface-tertiary)" radius={[4, 4, 0, 0]} />
           <Bar dataKey="received" fill="#10b981" radius={[4, 4, 0, 0]} />
         </BarChart>
       </ResponsiveContainer>
