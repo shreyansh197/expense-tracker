@@ -1,6 +1,17 @@
 const CACHE_NAME = "expense-tracker-icons-a1bc5e50";
 
-self.addEventListener("install", () => {
+const PRECACHE_URLS = [
+  "/icons/icon-192.png",
+  "/icons/icon-512.png",
+  "/icons/apple-touch-icon.png",
+  "/icons/favicon-32.png",
+  "/manifest.json",
+];
+
+self.addEventListener("install", (event) => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE_URLS)),
+  );
   self.skipWaiting();
 });
 
