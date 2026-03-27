@@ -5,6 +5,7 @@ import { Sidebar } from "@/components/layout/Sidebar";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { ExpenseFormModal } from "@/components/expenses/ExpenseFormModal";
 import { AuthModal } from "@/components/onboarding/AuthModal";
+import { WelcomeTutorial } from "@/components/onboarding/WelcomeTutorial";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import { KeyboardShortcutsHelp } from "@/components/ui/KeyboardShortcutsHelp";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
@@ -64,13 +65,22 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
 }
 
 export function AppShell({ children }: { children: React.ReactNode }) {
-  const { updateSettings, markOnboarded } = useSettings();
+  const { updateSettings, markOnboarded, isFirstVisit } = useSettings();
   const { isAuthenticated } = useAuth();
   const [hydrated, setHydrated] = useState(false);
+  const [showTutorial, setShowTutorial] = useState(false);
 
   useEffect(() => {
     setHydrated(true);
   }, []);
+
+  // Show tutorial for first-time authenticated users
+  useEffect(() => {
+    if (hydrated && isAuthenticated && isFirstVisit) {
+      const seen = localStorage.getItem("spendly-tutorial-seen");
+      if (!seen) setShowTutorial(true);
+    }
+  }, [hydrated, isAuthenticated, isFirstVisit]);
 
   // Don't render any app content until hydrated
   if (!hydrated) {
@@ -97,6 +107,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex h-screen flex-col" style={{ background: 'var(--background)' }}>
       <AppShellInner>{children}</AppShellInner>
+      {showTutorial && (
+        <WelcomeTutorial
+          onComplete={() => {
+            setShowTutorial(false);
+            localStorage.setItem("spendly-tutorial-seen", "1");
+          }}
+        />
+      )}
     </div>
   );
 }
