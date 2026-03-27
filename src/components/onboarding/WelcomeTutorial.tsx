@@ -25,7 +25,7 @@ const STEPS: Step[] = [
   {
     selector: '[data-tour="dashboard"]',
     title: "Your spending at a glance",
-    body: "Switch months here to browse your spending history. On mobile, you can also swipe left or right anywhere on the screen to jump between months.",
+    body: "Switch months here to browse your spending history. You can also swipe left or right anywhere on the screen to jump between months.",
   },
   {
     selector: '[data-tour="nav-settings"]',
@@ -36,7 +36,7 @@ const STEPS: Step[] = [
   {
     selector: "",
     title: "Pro tips \u2728",
-    body: "\u2022 Swipe left / right to switch months\n\u2022 Press \u201C?\u201D on desktop to see all keyboard shortcuts\n\u2022 Long-press an expense to edit or delete it\n\u2022 Set a budget in Settings to unlock forecasts & alerts",
+    body: "\u2022 Swipe left / right to switch months\n\u2022 Press Shift + ? to see all keyboard shortcuts\n\u2022 Enable Business Mode in Settings for ledger tracking & invoices\n\u2022 Set a budget in Settings to unlock forecasts & alerts",
     centered: true,
   },
   {

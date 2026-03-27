@@ -21,6 +21,7 @@ import { useUIStore } from "@/stores/uiStore";
 import { getMonthName } from "@/lib/utils";
 import { useCurrency } from "@/hooks/useCurrency";
 import { CategoryDot } from "@/components/expenses/CategoryChips";
+import { QuickHelpButton } from "@/components/ui/QuickHelpButton";
 import { Repeat, Receipt, PlusCircle } from "lucide-react";
 
 export default function DashboardPage() {
@@ -78,7 +79,10 @@ export default function DashboardPage() {
         {/* Header */}
         <div data-tour="dashboard" className="flex items-center justify-between">
           <MonthSwitcher />
-          <SyncIndicator syncStatus={syncStatus} />
+          <div className="flex items-center gap-2">
+            <SyncIndicator syncStatus={syncStatus} />
+            <QuickHelpButton />
+          </div>
         </div>
 
         {/* KPI Cards */}
