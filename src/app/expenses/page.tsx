@@ -78,7 +78,7 @@ export default function ExpensesPage() {
             <SyncIndicator syncStatus={syncStatus} />
             <button
               onClick={openAddForm}
-              className="hidden items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-indigo-700 lg:flex"
+              className="hidden items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-indigo-600/20 transition-all hover:bg-indigo-700 active:scale-[0.97] lg:flex"
             >
               <PlusCircle size={16} />
               Add Expense
@@ -87,11 +87,11 @@ export default function ExpensesPage() {
         </div>
 
         {/* Total summary */}
-        <div className="flex items-center justify-between rounded-2xl border border-slate-100 bg-white px-5 py-3.5 dark:border-slate-800 dark:bg-slate-900">
-          <span className="text-xs font-medium uppercase tracking-wide text-slate-400 dark:text-slate-500">
+        <div className="card flex items-center justify-between px-5 py-3.5">
+          <span className="text-section-title">
             Monthly Total
           </span>
-          <span className="tabular-nums text-xl font-bold text-slate-900 dark:text-white">
+          <span className="tabular-nums text-lg font-bold" style={{ color: 'var(--text-primary)' }}>
             {formatCurrency(monthlyTotal)}
           </span>
         </div>
@@ -101,20 +101,23 @@ export default function ExpensesPage() {
           <div className="relative flex-1">
             <Search
               size={16}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+              className="absolute left-3.5 top-1/2 -translate-y-1/2"
+              style={{ color: 'var(--text-tertiary)' }}
             />
             <input
               type="text"
               placeholder="Search expenses..."
               value={localSearch}
               onChange={(e) => handleSearchChange(e.target.value)}
-              className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-9 pr-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-slate-700 dark:bg-slate-900 dark:text-white dark:placeholder:text-slate-500"
+              className="w-full rounded-xl py-3 pl-10 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+              style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
             />
           </div>
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as SortOption)}
-            className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-xs text-slate-700 focus:border-indigo-500 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300"
+            className="rounded-xl px-3 py-3 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+            style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-secondary)' }}
           >
             <option value="day-desc">Newest first</option>
             <option value="day-asc">Oldest first</option>

@@ -7,54 +7,53 @@
   --foreground: #0f172a;
   --surface: #ffffff;
   --surface-secondary: #f1f5f9;
-  --surface-tertiary: #e2e8f0;
+  --surface-hover: #f8fafc;
   --border: #e2e8f0;
   --border-subtle: #f1f5f9;
   --text-primary: #0f172a;
   --text-secondary: #64748b;
   --text-tertiary: #94a3b8;
-  --text-link: #4f46e5;
+  --text-muted: #cbd5e1;
   --accent: #4f46e5;
   --accent-soft: #eef2ff;
-  --accent-hover: #4338ca;
+  --accent-gradient: linear-gradient(135deg, #6366f1, #8b5cf6);
   --success: #059669;
   --success-soft: #ecfdf5;
   --warning: #d97706;
   --warning-soft: #fffbeb;
   --danger: #dc2626;
   --danger-soft: #fef2f2;
-  --card-shadow: 0 1px 2px rgba(0, 0, 0, 0.03), 0 1px 3px rgba(0, 0, 0, 0.02);
-  --card-shadow-hover: 0 4px 16px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.03);
-  --ring-focus: 0 0 0 2px #eef2ff, 0 0 0 4px #6366f1;
-  --overlay: rgba(0, 0, 0, 0.4);
+  --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+  --card-shadow-hover: 0 4px 16px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.03);
   --section-gap: 1.5rem;
+  --chart-tooltip-bg: #ffffff;
+  --chart-tooltip-fg: #0f172a;
+  --chart-tooltip-border: #e2e8f0;
 }
 
 .dark {
   --background: #0f172a;
-  --foreground: #e2e8f0;
+  --foreground: #f1f5f9;
   --surface: #1e293b;
   --surface-secondary: #334155;
-  --surface-tertiary: #475569;
+  --surface-hover: #283548;
   --border: #334155;
   --border-subtle: #1e293b;
   --text-primary: #f1f5f9;
   --text-secondary: #94a3b8;
   --text-tertiary: #64748b;
-  --text-link: #818cf8;
-  --accent: #6366f1;
-  --accent-soft: rgba(99, 102, 241, 0.15);
-  --accent-hover: #818cf8;
+  --text-muted: #475569;
+  --accent: #818cf8;
+  --accent-soft: rgba(129, 140, 248, 0.12);
+  --accent-gradient: linear-gradient(135deg, #818cf8, #a78bfa);
   --success: #34d399;
-  --success-soft: rgba(52, 211, 153, 0.10);
+  --success-soft: rgba(52, 211, 153, 0.12);
   --warning: #fbbf24;
-  --warning-soft: rgba(251, 191, 36, 0.10);
+  --warning-soft: rgba(251, 191, 36, 0.12);
   --danger: #f87171;
-  --danger-soft: rgba(248, 113, 113, 0.10);
-  --card-shadow: 0 1px 2px rgba(0, 0, 0, 0.25), 0 0 1px rgba(0, 0, 0, 0.1);
-  --card-shadow-hover: 0 4px 16px rgba(0, 0, 0, 0.3);
-  --ring-focus: 0 0 0 2px rgba(99, 102, 241, 0.2), 0 0 0 4px #818cf8;
-  --overlay: rgba(0, 0, 0, 0.6);
+  --danger-soft: rgba(248, 113, 113, 0.12);
+  --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.25), 0 1px 2px rgba(0, 0, 0, 0.15);
+  --card-shadow-hover: 0 4px 16px rgba(0, 0, 0, 0.35), 0 2px 4px rgba(0, 0, 0, 0.2);
   --chart-tooltip-bg: #1e293b;
   --chart-tooltip-fg: #f1f5f9;
   --chart-tooltip-border: #334155;
@@ -64,7 +63,6 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-surface: var(--surface);
-  --color-surface-secondary: var(--surface-secondary);
   --color-border: var(--border);
 }
 
@@ -106,57 +104,85 @@ button, a {
 @media (hover: hover) {
   .card-interactive:hover {
     box-shadow: var(--card-shadow-hover);
-    transform: translateY(-1px);
   }
 }
 
-/* ── Reusable card base ──────────────────────────────────── */
-.card-base {
-  border-radius: 1rem;
-  border: 1px solid var(--border);
+/* ── Card utility classes ──────────────────────────────────── */
+.card {
   background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  box-shadow: var(--card-shadow);
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+@media (hover: hover) {
+  .card:hover {
+    box-shadow: var(--card-shadow-hover);
+  }
+}
+.card-sm {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 0.875rem;
   box-shadow: var(--card-shadow);
 }
 
-/* ── Type hierarchy ──────────────────────────────────────── */
-.page-title {
+/* ── Typography scale ──────────────────────────────────────── */
+.text-page-title {
   font-size: 1.5rem;
   font-weight: 700;
+  line-height: 1.25;
   letter-spacing: -0.025em;
-  line-height: 1.2;
   color: var(--text-primary);
 }
-.section-title {
-  font-size: 0.875rem;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  line-height: 1.4;
-  color: var(--text-primary);
-}
-.card-title {
+.text-section-title {
   font-size: 0.8125rem;
   font-weight: 600;
-  letter-spacing: 0;
   line-height: 1.4;
   color: var(--text-secondary);
 }
-.body-text {
+.text-card-title {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--text-secondary);
+}
+.text-body {
   font-size: 0.875rem;
+  font-weight: 400;
   line-height: 1.6;
   color: var(--text-primary);
 }
-.meta-text {
+.text-meta {
   font-size: 0.75rem;
+  font-weight: 400;
   line-height: 1.5;
   color: var(--text-tertiary);
 }
 
-/* ── Focus ring utility ──────────────────────────────────── */
-.focus-ring {
-  outline: none;
+/* ── Segmented control (chart mode toggle) ─────────────────── */
+.segmented-control {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  background: var(--surface-secondary);
+  border-radius: 0.625rem;
 }
-.focus-ring:focus-visible {
-  box-shadow: var(--ring-focus);
+.segmented-control button {
+  padding: 4px 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border-radius: 0.5rem;
+  color: var(--text-tertiary);
+  transition: all 0.15s ease;
+}
+.segmented-control button[data-active="true"] {
+  background: var(--surface);
+  color: var(--text-primary);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+.segmented-control button:not([data-active="true"]):hover {
+  color: var(--text-secondary);
 }
 
 input[type="number"]::-webkit-inner-spin-button,
@@ -247,7 +273,7 @@ input[type="password"]::-ms-clear {
 }
 .recharts-cartesian-axis-tick text {
   fill: var(--text-tertiary);
-  font-size: 0.6875rem;
+  font-size: 11px;
 }
 .dark .recharts-cartesian-grid line {
   stroke: var(--border);

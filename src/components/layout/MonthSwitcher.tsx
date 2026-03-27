@@ -11,17 +11,22 @@ export function MonthSwitcher() {
     <div className="flex items-center gap-1">
       <button
         onClick={prevMonth}
-        className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:text-slate-500 dark:hover:bg-slate-800 dark:hover:text-slate-300"
+        className="flex h-9 w-9 items-center justify-center rounded-lg transition-colors hover:bg-gray-100 dark:hover:bg-white/5"
+        style={{ color: 'var(--text-tertiary)' }}
         aria-label="Previous month"
       >
         <ChevronLeft size={18} />
       </button>
-      <h2 className="min-w-[140px] text-center text-base font-semibold tracking-tight text-slate-900 dark:text-white">
+      <h2
+        className="min-w-[148px] rounded-lg px-3 py-1.5 text-center text-sm font-semibold tracking-tight"
+        style={{ color: 'var(--text-primary)', background: 'var(--surface-secondary)' }}
+      >
         {getMonthName(currentMonth)} {currentYear}
       </h2>
       <button
         onClick={nextMonth}
-        className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:text-slate-500 dark:hover:bg-slate-800 dark:hover:text-slate-300"
+        className="flex h-9 w-9 items-center justify-center rounded-lg transition-colors hover:bg-gray-100 dark:hover:bg-white/5"
+        style={{ color: 'var(--text-tertiary)' }}
         aria-label="Next month"
       >
         <ChevronRight size={18} />

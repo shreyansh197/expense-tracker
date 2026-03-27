@@ -120,8 +120,8 @@ export function AccordionSection({
   return (
     <section
       className={cn(
-        "rounded-2xl border border-slate-100 bg-white transition-shadow dark:border-slate-800 dark:bg-slate-900",
-        isOpen && "shadow-sm dark:shadow-slate-950/20",
+        "card overflow-hidden",
+        isOpen && "shadow-sm",
         className
       )}
     >
@@ -137,12 +137,12 @@ export function AccordionSection({
         aria-expanded={isOpen}
         aria-controls={`section-${id}`}
       >
-        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-slate-50 text-slate-500 transition-colors dark:bg-slate-800 dark:text-slate-400">
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl transition-colors" style={{ background: 'var(--surface-secondary)', color: 'var(--text-secondary)' }}>
           {icon}
         </span>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <h2 className="text-sm font-semibold text-slate-900 dark:text-white">
+            <h2 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
               {title}
             </h2>
             {badge !== undefined && (
@@ -157,7 +157,7 @@ export function AccordionSection({
             )}
           </div>
           {description && (
-            <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400 truncate">
+            <p className="mt-0.5 text-xs truncate" style={{ color: 'var(--text-tertiary)' }}>
               {description}
             </p>
           )}
@@ -169,9 +169,10 @@ export function AccordionSection({
           <ChevronDown
             size={16}
             className={cn(
-              "shrink-0 text-slate-400 transition-transform duration-200",
+              "shrink-0 transition-transform duration-200",
               isOpen && "rotate-180"
             )}
+            style={{ color: 'var(--text-tertiary)' }}
           />
         )}
       </button>
@@ -186,7 +187,7 @@ export function AccordionSection({
         style={{ willChange: "grid-template-rows" }}
       >
         <div className="overflow-hidden">
-          <div className="border-t border-slate-50 px-4 py-4 dark:border-slate-800/60">
+          <div className="border-t px-4 py-4" style={{ borderColor: 'var(--border)' }}>
             {children}
           </div>
         </div>

@@ -61,12 +61,12 @@ export default function SettingsPage() {
   return (
     <AppShell>
         <div className="mx-auto max-w-3xl space-y-2 p-4 lg:p-6">
-        <h1 className="mb-4 text-lg font-bold text-slate-900 dark:text-white">Settings</h1>
+        <h1 className="text-page-title mb-4">Settings</h1>
 
         <SettingsAccordion>
 
           {/* ━━━ YOUR ACCOUNT ━━━ */}
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 pb-1 px-1">
+          <h3 className="text-[11px] font-bold uppercase tracking-wider pb-1 px-1" style={{ color: 'var(--text-tertiary)' }}>
             Your Account
           </h3>
 
@@ -101,7 +101,7 @@ export default function SettingsPage() {
           </AccordionSection>
 
           {/* ━━━ FINANCES ━━━ */}
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 pt-6 pb-1 px-1">
+          <h3 className="text-[11px] font-bold uppercase tracking-wider pt-6 pb-1 px-1" style={{ color: 'var(--text-tertiary)' }}>
             Finances
           </h3>
 
@@ -116,17 +116,18 @@ export default function SettingsPage() {
             <div className="space-y-3">
               {/* Currency selector */}
               <div>
-                <label className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-slate-400">Currency</label>
+                <label className="mb-1.5 block text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>Currency</label>
                 <div className="flex gap-2">
                   {SUPPORTED_CURRENCIES.map((c) => (
                     <button
                       key={c.code}
                       onClick={() => updateSettings({ currency: c.code })}
-                      className={`flex items-center gap-1.5 rounded-xl border px-3 py-2 text-sm font-medium transition-colors ${
+                      className={`flex items-center gap-1.5 rounded-xl border px-3 py-2.5 text-sm font-medium transition-colors ${
                         settings.currency === c.code
                           ? "border-indigo-500 bg-indigo-50 text-indigo-700 dark:border-indigo-500 dark:bg-indigo-900/30 dark:text-indigo-300"
-                          : "border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-400 dark:hover:border-slate-600 dark:hover:bg-slate-800"
+                          : "hover:opacity-80"
                       }`}
+                      style={settings.currency !== c.code ? { border: '1px solid var(--border)', color: 'var(--text-secondary)' } : undefined}
                     >
                       <span className="text-base">{c.symbol}</span>
                       <span className="hidden sm:inline">{c.code}</span>
@@ -137,20 +138,21 @@ export default function SettingsPage() {
               {/* Salary input */}
               <div className="flex items-center gap-3">
                 <div className="relative flex-1">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-slate-400">{symbol}</span>
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm" style={{ color: 'var(--text-tertiary)' }}>{symbol}</span>
                   <input
                     type="number"
                     min="1"
                     value={salary}
                     onChange={(e) => setSalary(e.target.value)}
                     onKeyDown={(e) => { if (e.key === "Enter") handleSalaryUpdate(); }}
-                    className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-7 pr-3 text-sm font-medium text-slate-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                    className="w-full rounded-xl py-2.5 pl-7 pr-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                    style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
                   />
                 </div>
                 <button
                   onClick={handleSalaryUpdate}
                   disabled={saving}
-                  className="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+                  className="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-indigo-600/20 hover:bg-indigo-700 active:scale-[0.97] disabled:opacity-50"
                 >
                   {saving ? "Saving..." : "Update"}
                 </button>
@@ -218,21 +220,21 @@ export default function SettingsPage() {
             }
           >
             <div className="space-y-3">
-              <p className="text-xs text-slate-500 dark:text-slate-400">
+              <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
                 {settings.rolloverEnabled
                   ? "Unspent budget from previous months will be added to your current month's budget."
                   : "Enable rollover to carry forward unspent budget automatically."}
               </p>
               {settings.rolloverEnabled && settings.rolloverHistory && Object.keys(settings.rolloverHistory).length > 0 && (
-                <div className="rounded-lg bg-slate-50 p-3 dark:bg-slate-800">
-                  <h4 className="mb-2 text-xs font-medium text-slate-500">Rollover History</h4>
+                <div className="rounded-xl p-3" style={{ background: 'var(--surface-secondary)' }}>
+                  <h4 className="text-meta font-medium mb-2">Rollover History</h4>
                   <div className="space-y-1">
                     {Object.entries(settings.rolloverHistory)
                       .sort(([a], [b]) => b.localeCompare(a))
                       .slice(0, 6)
                       .map(([key, amount]) => (
                         <div key={key} className="flex items-center justify-between text-xs">
-                          <span className="text-slate-500">{key}</span>
+                          <span style={{ color: 'var(--text-tertiary)' }}>{key}</span>
                           <span className={`font-medium ${amount >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400"}`}>
                             {amount >= 0 ? "+" : ""}{formatCurrency(amount)}
                           </span>
@@ -245,7 +247,7 @@ export default function SettingsPage() {
           </AccordionSection>
 
           {/* ━━━ AUTOMATION & DATA ━━━ */}
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 pt-6 pb-1 px-1">
+          <h3 className="text-[11px] font-bold uppercase tracking-wider pt-6 pb-1 px-1" style={{ color: 'var(--text-tertiary)' }}>
             Automation & Data
           </h3>
 
@@ -280,7 +282,7 @@ export default function SettingsPage() {
           </AccordionSection>
 
           {/* ━━━ PREFERENCES ━━━ */}
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 pt-6 pb-1 px-1">
+          <h3 className="text-[11px] font-bold uppercase tracking-wider pt-6 pb-1 px-1" style={{ color: 'var(--text-tertiary)' }}>
             Preferences
           </h3>
 
@@ -308,7 +310,7 @@ export default function SettingsPage() {
             }
           >
             <div className="space-y-3">
-              <p className="text-xs text-slate-500 dark:text-slate-400">
+              <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
                 {settings.businessMode
                   ? "Business Owner Mode adds a ledger system to track expected income, log payments received, and view collection analytics."
                   : "Enable Business Owner Mode to track client payments, revenue expectations, and receivables alongside your expenses."}
@@ -346,8 +348,9 @@ export default function SettingsPage() {
                       className={`flex flex-1 items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
                         active
                           ? "bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400"
-                          : "text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800"
+                          : ""
                       }`}
+                      style={!active ? { color: 'var(--text-secondary)' } : undefined}
                     >
                       <Icon size={16} />
                       {opt.label}
@@ -357,12 +360,12 @@ export default function SettingsPage() {
               </div>
 
               {/* Install PWA */}
-              <div className="border-t border-slate-100 pt-4 dark:border-slate-800">
+              <div className="pt-4" style={{ borderTop: '1px solid var(--border)' }}>
                 <div className="flex items-center gap-3 mb-3">
-                  <Smartphone size={16} className="text-slate-400" />
+                  <Smartphone size={16} style={{ color: 'var(--text-tertiary)' }} />
                   <div>
-                    <p className="text-sm font-medium text-slate-700 dark:text-slate-300">Install App</p>
-                    <p className="text-xs text-slate-400">Install as app for quick access</p>
+                    <p className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Install App</p>
+                    <p className="text-xs" style={{ color: 'var(--text-tertiary)' }}>Install as app for quick access</p>
                   </div>
                 </div>
                 <InstallButton />

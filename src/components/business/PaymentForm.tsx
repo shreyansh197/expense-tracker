@@ -52,22 +52,23 @@ export function PaymentForm({ ledgerId, onSubmit, onCancel }: PaymentFormProps) 
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-3 rounded-lg border border-emerald-200 bg-emerald-50/50 p-3 dark:border-emerald-900/50 dark:bg-emerald-900/10">
+    <form onSubmit={handleSubmit} className="space-y-3 rounded-xl p-4" style={{ background: 'var(--surface-secondary)', border: '1px solid var(--border)' }}>
       <h4 className="text-xs font-semibold text-emerald-700 dark:text-emerald-400">Log Payment</h4>
 
       <div className="grid grid-cols-2 gap-3">
         {/* Amount */}
         <div>
-          <label className="mb-1 block text-[10px] font-medium text-slate-500">Amount</label>
+          <label className="mb-1 block text-[10px] font-medium" style={{ color: 'var(--text-tertiary)' }}>Amount</label>
           <div className="relative">
-            <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-slate-400">{symbol}</span>
+            <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs" style={{ color: 'var(--text-tertiary)' }}>{symbol}</span>
             <input
               type="number"
               min="1"
               step="any"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
-              className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-6 pr-2 text-sm text-slate-900 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+              className="w-full rounded-xl py-2.5 pl-6 pr-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+              style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
               required
               autoFocus
             />
@@ -76,7 +77,7 @@ export function PaymentForm({ ledgerId, onSubmit, onCancel }: PaymentFormProps) 
 
         {/* Date */}
         <div>
-          <label className="mb-1 block text-[10px] font-medium text-slate-500">Date</label>
+          <label className="mb-1 block text-[10px] font-medium" style={{ color: 'var(--text-tertiary)' }}>Date</label>
           <DatePicker
             value={parseInt(date.split("-")[2], 10)}
             month={parseInt(date.split("-")[1], 10)}
@@ -94,11 +95,12 @@ export function PaymentForm({ ledgerId, onSubmit, onCancel }: PaymentFormProps) 
       <div className="grid grid-cols-2 gap-3">
         {/* Method */}
         <div>
-          <label className="mb-1 block text-[10px] font-medium text-slate-500">Method</label>
+          <label className="mb-1 block text-[10px] font-medium" style={{ color: 'var(--text-tertiary)' }}>Method</label>
           <select
             value={method}
             onChange={(e) => setMethod(e.target.value as PaymentMethod)}
-            className="w-full rounded-lg border border-slate-200 bg-white px-2 py-2 text-sm text-slate-900 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+            className="w-full rounded-xl px-2 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+            style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
           >
             {PAYMENT_METHODS.map((m) => (
               <option key={m.value} value={m.value}>{m.label}</option>
@@ -108,26 +110,28 @@ export function PaymentForm({ ledgerId, onSubmit, onCancel }: PaymentFormProps) 
 
         {/* Reference */}
         <div>
-          <label className="mb-1 block text-[10px] font-medium text-slate-500">Reference</label>
+          <label className="mb-1 block text-[10px] font-medium" style={{ color: 'var(--text-tertiary)' }}>Reference</label>
           <input
             type="text"
             value={reference}
             onChange={(e) => setReference(e.target.value)}
             placeholder="Txn ID..."
-            className="w-full rounded-lg border border-slate-200 bg-white px-2 py-2 text-sm text-slate-900 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+            className="w-full rounded-xl px-2 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+            style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
           />
         </div>
       </div>
 
       {/* Notes */}
       <div>
-        <label className="mb-1 block text-[10px] font-medium text-slate-500">Notes</label>
+        <label className="mb-1 block text-[10px] font-medium" style={{ color: 'var(--text-tertiary)' }}>Notes</label>
         <input
           type="text"
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           placeholder="Optional note..."
-          className="w-full rounded-lg border border-slate-200 bg-white px-2 py-2 text-sm text-slate-900 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+          className="w-full rounded-xl px-2 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+          style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
         />
       </div>
 
@@ -136,14 +140,15 @@ export function PaymentForm({ ledgerId, onSubmit, onCancel }: PaymentFormProps) 
         <button
           type="submit"
           disabled={submitting || !amount}
-          className="flex-1 rounded-lg bg-emerald-600 px-3 py-2 text-xs font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
+          className="flex-1 rounded-xl bg-emerald-600 px-3 py-2.5 text-xs font-semibold text-white shadow-sm shadow-emerald-600/20 hover:bg-emerald-700 active:scale-[0.97] disabled:opacity-50"
         >
           {submitting ? "Saving..." : "Log Payment"}
         </button>
         <button
           type="button"
           onClick={onCancel}
-          className="rounded-lg bg-slate-100 px-3 py-2 text-xs font-medium text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300"
+          className="rounded-xl px-3 py-2.5 text-xs font-medium transition-colors"
+          style={{ background: 'var(--surface-secondary)', color: 'var(--text-secondary)' }}
         >
           Cancel
         </button>

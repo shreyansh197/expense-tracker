@@ -94,7 +94,8 @@ export default function LedgerDetailPage() {
         <div className="flex items-center justify-between">
           <button
             onClick={() => router.push("/business")}
-            className="flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+            className="flex items-center gap-1.5 text-sm hover:opacity-70 transition-opacity"
+            style={{ color: 'var(--text-tertiary)' }}
           >
             <ArrowLeft size={16} />
             Back
@@ -102,7 +103,8 @@ export default function LedgerDetailPage() {
           <div className="flex items-center gap-2">
             <button
               onClick={() => setShowEditForm(!showEditForm)}
-              className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800"
+              className="rounded-lg p-2 transition-colors"
+              style={{ color: 'var(--text-tertiary)' }}
               title="Edit ledger"
             >
               <Edit3 size={16} />
@@ -118,11 +120,11 @@ export default function LedgerDetailPage() {
         </div>
 
         {/* Header Card */}
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <div className="card p-5">
           <div className="flex items-start gap-4">
             <LedgerProgressRing received={totalReceived} expected={ledger.expectedAmount} size={64} strokeWidth={5} />
             <div className="min-w-0 flex-1">
-              <h1 className="text-lg font-bold text-slate-900 dark:text-white">{ledger.name}</h1>
+              <h1 className="text-lg font-bold" style={{ color: 'var(--text-primary)' }}>{ledger.name}</h1>
               <div className="mt-1 flex flex-wrap items-center gap-2">
                 <span className={cn("inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium", status.color)}>
                   <StatusIcon size={12} />
@@ -135,7 +137,7 @@ export default function LedgerDetailPage() {
                   </span>
                 )}
                 {ledger.dueDate && (
-                  <span className="text-xs text-slate-400">
+                  <span className="text-xs" style={{ color: 'var(--text-tertiary)' }}>
                     Due {new Date(ledger.dueDate).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
                   </span>
                 )}
@@ -144,18 +146,18 @@ export default function LedgerDetailPage() {
           </div>
 
           {/* Amount breakdown */}
-          <div className="mt-4 grid grid-cols-3 gap-3 border-t border-slate-100 pt-4 dark:border-slate-800">
+          <div className="mt-4 grid grid-cols-3 gap-3 pt-4" style={{ borderTop: '1px solid var(--border)' }}>
             <div>
-              <p className="text-[10px] font-medium text-slate-400">Expected</p>
-              <p className="text-sm font-bold text-slate-900 dark:text-white">{formatCurrency(ledger.expectedAmount)}</p>
+              <p className="text-meta font-medium">Expected</p>
+              <p className="text-sm font-bold tabular-nums" style={{ color: 'var(--text-primary)' }}>{formatCurrency(ledger.expectedAmount)}</p>
             </div>
             <div>
-              <p className="text-[10px] font-medium text-slate-400">Received</p>
-              <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400">{formatCurrency(totalReceived)}</p>
+              <p className="text-meta font-medium">Received</p>
+              <p className="text-sm font-bold tabular-nums text-emerald-600 dark:text-emerald-400">{formatCurrency(totalReceived)}</p>
             </div>
             <div>
-              <p className="text-[10px] font-medium text-slate-400">Remaining</p>
-              <p className={cn("text-sm font-bold", remaining <= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-amber-600 dark:text-amber-400")}>
+              <p className="text-meta font-medium">Remaining</p>
+              <p className={cn("text-sm font-bold tabular-nums", remaining <= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-amber-600 dark:text-amber-400")}>
                 {formatCurrency(Math.max(0, remaining))}
               </p>
             </div>
@@ -163,10 +165,10 @@ export default function LedgerDetailPage() {
 
           {/* Progress bar */}
           <div className="mt-3">
-            <div className="h-2 w-full rounded-full bg-slate-100 dark:bg-slate-800">
+            <div className="h-2 w-full rounded-full" style={{ background: 'var(--surface-secondary)' }}>
               <div
                 className={cn(
-                  "h-2 rounded-full transition-all",
+                  "h-2 rounded-full transition-all duration-500",
                   totalReceived >= ledger.expectedAmount
                     ? "bg-emerald-500"
                     : isOverdue
@@ -184,7 +186,8 @@ export default function LedgerDetailPage() {
               {ledger.tags.map((tag) => (
                 <span
                   key={tag}
-                  className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] text-slate-500 dark:bg-slate-800 dark:text-slate-400"
+                  className="rounded-full px-2 py-0.5 text-[10px]"
+                  style={{ background: 'var(--surface-secondary)', color: 'var(--text-secondary)' }}
                 >
                   {tag}
                 </span>
@@ -213,7 +216,7 @@ export default function LedgerDetailPage() {
 
         {/* Edit Form */}
         {showEditForm && (
-          <div className="rounded-xl border border-emerald-200 bg-white p-4 shadow-sm dark:border-emerald-900/50 dark:bg-slate-900">
+          <div className="card p-5">
             <LedgerForm
               initial={{
                 name: ledger.name,
@@ -233,16 +236,16 @@ export default function LedgerDetailPage() {
 
         {/* Notes */}
         {ledger.notes && !showEditForm && (
-          <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-            <h3 className="mb-2 text-xs font-semibold text-slate-500">Notes</h3>
-            <p className="whitespace-pre-wrap text-sm text-slate-700 dark:text-slate-300">{ledger.notes}</p>
+          <div className="card p-5">
+            <h3 className="text-meta font-semibold mb-2">Notes</h3>
+            <p className="whitespace-pre-wrap text-sm" style={{ color: 'var(--text-secondary)' }}>{ledger.notes}</p>
           </div>
         )}
 
         {/* Payments Section */}
-        <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <div className="card p-5">
           <div className="mb-3 flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+            <h3 className="text-card-title">
               Payments ({payments.length})
             </h3>
             {ledger.status === "active" && (
@@ -269,7 +272,7 @@ export default function LedgerDetailPage() {
           {loading ? (
             <div className="space-y-2">
               {[1, 2].map((i) => (
-                <div key={i} className="h-12 animate-pulse rounded-lg bg-slate-100 dark:bg-slate-800" />
+                <div key={i} className="h-12 animate-pulse rounded-lg" style={{ background: 'var(--surface-secondary)' }} />
               ))}
             </div>
           ) : (
@@ -280,9 +283,9 @@ export default function LedgerDetailPage() {
         {/* Delete Confirm */}
         {showDeleteConfirm && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-            <div className="w-full max-w-sm rounded-xl bg-white p-6 shadow-xl dark:bg-slate-900">
-              <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Delete Ledger?</h3>
-              <p className="mt-2 text-xs text-slate-500">
+            <div className="w-full max-w-sm rounded-xl p-6 shadow-xl" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
+              <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Delete Ledger?</h3>
+              <p className="mt-2 text-xs" style={{ color: 'var(--text-tertiary)' }}>
                 This will remove &quot;{ledger.name}&quot; and all its payments. This action cannot be undone.
               </p>
               <div className="mt-4 flex gap-2">

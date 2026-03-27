@@ -50,9 +50,9 @@ export function CategoryChips() {
               "shrink-0 rounded-full px-3 py-1 text-xs font-medium transition-all",
               isActive
                 ? "text-white"
-                : "bg-slate-100/80 text-slate-500 dark:bg-slate-800/60 dark:text-slate-400"
+                : ""
             )}
-            style={isActive ? { backgroundColor: cat.color } : undefined}
+            style={isActive ? { backgroundColor: cat.color } : { background: 'var(--surface-secondary)', color: 'var(--text-secondary)' }}
           >
             {cat.label}
           </button>

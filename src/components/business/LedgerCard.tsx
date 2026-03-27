@@ -24,7 +24,7 @@ export function LedgerCard({ ledger, totalReceived }: LedgerCardProps) {
   const statusConfig = {
     active: { icon: Clock, label: "Active", color: "text-blue-600 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-400" },
     completed: { icon: CheckCircle2, label: "Completed", color: "text-emerald-600 bg-emerald-50 dark:bg-emerald-900/30 dark:text-emerald-400" },
-    cancelled: { icon: XCircle, label: "Cancelled", color: "text-slate-500 bg-slate-100 dark:bg-slate-800 dark:text-slate-400" },
+    cancelled: { icon: XCircle, label: "Cancelled", color: "text-gray-500 bg-gray-100 dark:bg-gray-800 dark:text-gray-400" },
   };
 
   const status = statusConfig[ledger.status];
@@ -33,13 +33,13 @@ export function LedgerCard({ ledger, totalReceived }: LedgerCardProps) {
   return (
     <Link
       href={`/business/${ledger.id}`}
-      className="block rounded-2xl border border-slate-100 bg-white p-4 transition-all hover:border-slate-200 card-interactive dark:border-slate-800 dark:bg-slate-900"
+      className="card block p-4 transition-all"
     >
       <div className="flex items-start gap-3">
         <LedgerProgressRing received={totalReceived} expected={ledger.expectedAmount} />
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <h3 className="truncate text-sm font-semibold text-slate-900 dark:text-white">
+            <h3 className="truncate text-sm font-semibold text-gray-900 dark:text-white">
               {ledger.name}
             </h3>
             {isOverdue && (
@@ -55,17 +55,17 @@ export function LedgerCard({ ledger, totalReceived }: LedgerCardProps) {
               {status.label}
             </span>
             {ledger.dueDate && (
-              <span className="text-[10px] text-slate-400">
+              <span className="text-[10px] text-gray-400">
                 Due {new Date(ledger.dueDate).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
               </span>
             )}
           </div>
         </div>
         <div className="text-right shrink-0">
-          <p className="tabular-nums text-sm font-bold text-slate-900 dark:text-white">
+          <p className="text-sm font-bold text-gray-900 dark:text-white">
             {formatCurrency(totalReceived)}
           </p>
-          <p className="text-[10px] text-slate-400">
+          <p className="text-[10px] text-gray-400">
             of {formatCurrency(ledger.expectedAmount)}
           </p>
         </div>
@@ -73,10 +73,10 @@ export function LedgerCard({ ledger, totalReceived }: LedgerCardProps) {
 
       {/* Progress bar */}
       <div className="mt-3">
-        <div className="h-1.5 w-full rounded-full bg-slate-100 dark:bg-slate-800">
+        <div className="h-2 w-full rounded-full" style={{ background: 'var(--surface-secondary)' }}>
           <div
             className={cn(
-              "h-1.5 rounded-full transition-all",
+              "h-2 rounded-full transition-all duration-500",
               percent >= 100
                 ? "bg-emerald-500"
                 : isOverdue
@@ -94,13 +94,13 @@ export function LedgerCard({ ledger, totalReceived }: LedgerCardProps) {
           {ledger.tags.slice(0, 3).map((tag) => (
             <span
               key={tag}
-              className="rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] text-slate-500 dark:bg-slate-800 dark:text-slate-400"
+              className="rounded-full bg-gray-100 px-1.5 py-0.5 text-[10px] text-gray-500 dark:bg-gray-800 dark:text-gray-400"
             >
               {tag}
             </span>
           ))}
           {ledger.tags.length > 3 && (
-            <span className="text-[10px] text-slate-400">+{ledger.tags.length - 3}</span>
+            <span className="text-[10px] text-gray-400">+{ledger.tags.length - 3}</span>
           )}
         </div>
       )}

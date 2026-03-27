@@ -31,19 +31,23 @@ export function Sidebar() {
   const shouldHideFAB = isLedgerDetail || pathname.startsWith("/settings");
 
   return (
-    <aside className="hidden lg:flex lg:w-60 lg:flex-col lg:border-r lg:border-slate-200/80 lg:bg-white lg:dark:border-slate-800/60 lg:dark:bg-slate-900">
+    <aside className="hidden lg:flex lg:w-[15rem] lg:flex-col" style={{ background: 'var(--surface)', borderRight: '1px solid var(--border)' }}>
       {/* Logo */}
-      <div className="flex items-center gap-2.5 border-b border-slate-100 px-5 py-5 dark:border-slate-800/60">
-        <div className="h-8 w-8 overflow-hidden rounded-lg shadow-sm">
-          <Image src="/icons/icon-192.png" alt="Spendly" width={32} height={32} className="h-full w-full" />
-        </div>
-        <span className="text-lg font-bold tracking-tight text-slate-900 dark:text-white">
+      <div className="flex items-center gap-2.5 px-5 py-5" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+        <Image
+          src="/icons/icon-192.png"
+          alt="Spendly"
+          width={32}
+          height={32}
+          className="rounded-lg"
+        />
+        <span className="text-lg font-bold tracking-tight" style={{ color: 'var(--text-primary)' }}>
           Spendly
         </span>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 space-y-0.5 px-3 py-4">
+      <nav className="flex-1 space-y-1 px-3 py-4">
         {navItems.map((item) => {
           const isActive = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
           const Icon = item.icon;
@@ -53,12 +57,12 @@ export function Sidebar() {
               key={item.href}
               href={item.href}
               className={cn(
-                "flex items-center gap-3 rounded-xl px-3 py-2.5 text-[0.8125rem] font-medium transition-colors",
+                "flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-all",
                 isActive
                   ? isBiz
-                    ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400"
-                    : "bg-indigo-50 text-indigo-700 dark:bg-indigo-900/20 dark:text-indigo-400"
-                  : "text-slate-500 hover:bg-slate-50 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800/50 dark:hover:text-slate-300"
+                    ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400 border-l-[3px] border-emerald-600 dark:border-emerald-400"
+                    : "bg-indigo-50 text-indigo-700 dark:bg-indigo-900/15 dark:text-indigo-400 border-l-[3px] border-indigo-600 dark:border-indigo-400"
+                  : "text-gray-500 hover:bg-gray-50 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300 border-l-[3px] border-transparent"
               )}
             >
               <Icon size={18} />
@@ -70,7 +74,7 @@ export function Sidebar() {
 
       {/* Add button */}
       {!shouldHideFAB && (
-      <div className="border-t border-slate-100 p-3 dark:border-slate-800/60">
+      <div className="p-3" style={{ borderTop: '1px solid var(--border-subtle)' }}>
         <button
           onClick={() => {
             if (isBusinessRoute) {
@@ -80,10 +84,10 @@ export function Sidebar() {
             }
           }}
           className={cn(
-            "flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition-colors active:scale-[0.98]",
+            "flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all active:scale-[0.97]",
             isBusinessRoute
-              ? "bg-emerald-600 text-white hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-700"
-              : "bg-indigo-600 text-white hover:bg-indigo-700 dark:bg-indigo-600 dark:hover:bg-indigo-700"
+              ? "bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm shadow-emerald-600/20"
+              : "bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm shadow-indigo-600/20"
           )}
         >
           <PlusCircle size={18} />

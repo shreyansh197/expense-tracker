@@ -11,10 +11,10 @@ export function Skeleton({ className, style }: SkeletonProps) {
   return (
     <div
       className={cn(
-        "animate-pulse rounded-lg bg-slate-200 dark:bg-slate-700",
+        "animate-pulse rounded-lg",
         className
       )}
-      style={style}
+      style={{ background: 'var(--surface-secondary)', ...style }}
     />
   );
 }
@@ -25,11 +25,11 @@ export function SkeletonKpiCards() {
       {Array.from({ length: 6 }).map((_, i) => (
         <div
           key={i}
-          className="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900"
+          className="card-sm p-4"
         >
           <Skeleton className="mb-2 h-3 w-16" />
           <Skeleton className="mb-2 h-7 w-24" />
-          <Skeleton className="h-1.5 w-full rounded-full" />
+          <Skeleton className="h-2 w-full" />
         </div>
       ))}
     </div>
@@ -39,9 +39,9 @@ export function SkeletonKpiCards() {
 export function SkeletonChart() {
   const heights = [45, 70, 35, 80, 55, 65, 40, 75];
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+    <div className="card p-5">
       <Skeleton className="mb-3 h-4 w-32" />
-      <div className="flex items-end justify-between gap-1 h-[180px] pt-4">
+      <div className="flex items-end justify-between gap-1 h-[220px] pt-4">
         {heights.map((h, i) => (
           <Skeleton
             key={i}
@@ -67,7 +67,8 @@ export function SkeletonExpenseList() {
             {Array.from({ length: 3 }).map((_, i) => (
               <div
                 key={i}
-                className="flex items-center gap-3 rounded-xl border border-slate-100 bg-white px-4 py-3 dark:border-slate-800 dark:bg-slate-900"
+                className="flex items-center gap-3 rounded-xl px-4 py-3"
+                style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
               >
                 <Skeleton className="h-5 w-16 rounded-full" />
                 <Skeleton className="h-3 w-24 flex-1" />
@@ -88,7 +89,7 @@ export function SkeletonCategoryDetail() {
         {Array.from({ length: 3 }).map((_, i) => (
           <div
             key={i}
-            className="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900"
+            className="card-sm p-4"
           >
             <Skeleton className="mb-2 h-3 w-14" />
             <Skeleton className="h-6 w-20" />

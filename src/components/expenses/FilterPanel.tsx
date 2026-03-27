@@ -89,8 +89,9 @@ export function FilterPanel({
           className={`flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium transition-colors ${
             hasActiveFilters
               ? "bg-indigo-50 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400"
-              : "text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
+              : ""
           }`}
+          style={!hasActiveFilters ? { color: 'var(--text-secondary)' } : undefined}
         >
           <SlidersHorizontal size={14} />
           Filters
@@ -103,7 +104,8 @@ export function FilterPanel({
         {hasActiveFilters && (
           <button
             onClick={onClear}
-            className="flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+            className="flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs transition-colors"
+            style={{ color: 'var(--text-tertiary)' }}
           >
             <X size={12} />
             Clear
@@ -112,34 +114,36 @@ export function FilterPanel({
       </div>
 
       {open && (
-        <div className="mt-2 rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <div className="card mt-2 p-4">
           {/* Amount range */}
           <div className="mb-4">
-            <label className="mb-2 block text-xs font-medium text-slate-500 uppercase dark:text-slate-400">
+            <label className="mb-2 block text-xs font-medium uppercase" style={{ color: 'var(--text-tertiary)' }}>
               Amount Range
             </label>
             <div className="flex items-center gap-2">
               <div className="relative flex-1">
-                <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-slate-400">{symbol}</span>
+                <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs" style={{ color: 'var(--text-tertiary)' }}>{symbol}</span>
                 <input
                   type="number"
                   min="0"
                   placeholder="Min"
                   value={amountMin}
                   onChange={(e) => onAmountMinChange(e.target.value)}
-                  className="w-full rounded border border-slate-200 bg-white py-2 pl-6 pr-2 text-xs text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                  className="w-full rounded-xl py-2.5 pl-6 pr-2 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                  style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
                 />
               </div>
-              <span className="text-xs text-slate-400">to</span>
+              <span className="text-xs" style={{ color: 'var(--text-tertiary)' }}>to</span>
               <div className="relative flex-1">
-                <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-slate-400">{symbol}</span>
+                <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs" style={{ color: 'var(--text-tertiary)' }}>{symbol}</span>
                 <input
                   type="number"
                   min="0"
                   placeholder="Max"
                   value={amountMax}
                   onChange={(e) => onAmountMaxChange(e.target.value)}
-                  className="w-full rounded border border-slate-200 bg-white py-2 pl-6 pr-2 text-xs text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                  className="w-full rounded-xl py-2.5 pl-6 pr-2 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                  style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
                 />
               </div>
             </div>
@@ -147,7 +151,7 @@ export function FilterPanel({
 
           {/* Day range */}
           <div className="mb-4">
-            <label className="mb-2 block text-xs font-medium text-slate-500 uppercase dark:text-slate-400">
+            <label className="mb-2 block text-xs font-medium uppercase" style={{ color: 'var(--text-tertiary)' }}>
               Day Range
             </label>
             <div className="flex items-center gap-2">
@@ -158,9 +162,10 @@ export function FilterPanel({
                 placeholder="From"
                 value={dayMin}
                 onChange={(e) => onDayMinChange(e.target.value)}
-                className="w-full flex-1 rounded border border-slate-200 bg-white py-2 px-2 text-xs text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                className="w-full flex-1 rounded-xl py-2.5 px-2 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
               />
-              <span className="text-xs text-slate-400">to</span>
+              <span className="text-xs" style={{ color: 'var(--text-tertiary)' }}>to</span>
               <input
                 type="number"
                 min="1"
@@ -168,7 +173,8 @@ export function FilterPanel({
                 placeholder="To"
                 value={dayMax}
                 onChange={(e) => onDayMaxChange(e.target.value)}
-                className="w-full flex-1 rounded border border-slate-200 bg-white py-2 px-2 text-xs text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                className="w-full flex-1 rounded-xl py-2.5 px-2 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
               />
             </div>
           </div>

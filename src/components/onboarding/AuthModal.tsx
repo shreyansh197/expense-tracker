@@ -281,8 +281,8 @@ function MobileAuthPage({ children }: { children: React.ReactNode }) {
       {/* Card — theme-aware (white / dark:slate-900) */}
       <div style={{ position: "relative", zIndex: 1, flex: 1, display: "flex", flexDirection: "column", marginTop: "auto" }}>
         <div
-          className="flex-1 flex flex-col rounded-t-3xl bg-white px-6 pt-7 pb-8 shadow-2xl shadow-black/30 dark:bg-slate-900"
-          style={{ paddingBottom: "calc(32px + env(safe-area-inset-bottom, 0px))" }}
+          className="flex-1 flex flex-col rounded-t-3xl px-6 pt-7 pb-8 shadow-2xl shadow-black/30"
+          style={{ background: 'var(--surface)', paddingBottom: 'calc(32px + env(safe-area-inset-bottom, 0px))' }}
         >
           <div className="flex-1 flex flex-col justify-center">
             {children}
@@ -304,7 +304,7 @@ function DesktopAuthPage({ children }: { children: React.ReactNode }) {
         <DesktopHeroPanel />
       </div>
 
-      <div className="relative flex flex-1 items-center justify-center bg-slate-50 px-16 py-10 dark:bg-slate-950">
+      <div className="relative flex flex-1 items-center justify-center px-16 py-10" style={{ background: 'var(--background)' }}>
         {/* Subtle decorative orbs — use Tailwind so they follow theme */}
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
           <div className="absolute -top-24 right-10 h-60 w-60 rounded-full bg-indigo-100/60 blur-3xl dark:bg-indigo-900/10" />
@@ -312,10 +312,10 @@ function DesktopAuthPage({ children }: { children: React.ReactNode }) {
         </div>
 
         <div className="relative z-10 w-full max-w-sm" style={{ animation: "sp-form-in 0.45s ease both" }}>
-          <div className="rounded-2xl border border-slate-200/80 bg-white p-8 shadow-xl shadow-slate-200/60 dark:border-slate-800/60 dark:bg-slate-900 dark:shadow-none">
+          <div className="rounded-2xl p-8 shadow-xl" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
             {children}
           </div>
-          <p className="mt-4 text-center text-[11px] text-slate-400 dark:text-slate-600">
+          <p className="mt-4 text-center text-[11px]" style={{ color: 'var(--text-tertiary)' }}>
             By continuing, you agree to our Terms of Service.
           </p>
         </div>

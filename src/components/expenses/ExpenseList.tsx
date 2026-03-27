@@ -151,13 +151,13 @@ export function ExpenseList({
 
   if (grouped.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center gap-3 py-16 text-slate-400">
-        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800">
-          <Receipt size={28} className="text-slate-300 dark:text-slate-600" />
+      <div className="flex flex-col items-center justify-center gap-3 py-20">
+        <div className="flex h-16 w-16 items-center justify-center rounded-2xl" style={{ background: 'var(--surface-secondary)' }}>
+          <Receipt size={28} style={{ color: 'var(--text-muted)' }} />
         </div>
         <div className="text-center">
-          <p className="text-sm font-medium text-slate-500 dark:text-slate-400">No expenses found</p>
-          <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">
+          <p className="text-sm font-semibold" style={{ color: 'var(--text-secondary)' }}>No expenses found</p>
+          <p className="mt-1 text-xs" style={{ color: 'var(--text-tertiary)' }}>
             {searchQuery || activeCategories.length > 0
               ? "Try adjusting your filters"
               : "Add your first expense to get started"}
@@ -166,7 +166,7 @@ export function ExpenseList({
         {!searchQuery && activeCategories.length === 0 && (
           <button
             onClick={openAddForm}
-            className="mt-1 flex items-center gap-1.5 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700"
+            className="mt-2 flex items-center gap-1.5 rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-indigo-600/20 transition-all hover:bg-indigo-700 active:scale-[0.97]"
           >
             <PlusCircle size={14} />
             Add Expense
@@ -206,11 +206,12 @@ export function ExpenseList({
       {paginatedGroups.map((group) => (
         <div key={group.day}>
           {/* Day header */}
-          <div className="mb-2 flex items-center justify-between">
+          <div className="sticky top-0 z-[5] mb-2 flex items-center justify-between rounded-lg px-1 py-1.5 backdrop-blur-sm" style={{ background: 'color-mix(in srgb, var(--background) 90%, transparent)' }}>
             <div className="flex items-center gap-2">
               <button
                 onClick={() => toggleSelectDay(group.expenses)}
-                className="rounded p-0.5 text-slate-300 hover:text-slate-500 dark:text-slate-600 dark:hover:text-slate-400"
+                className="rounded p-0.5 transition-colors"
+                style={{ color: 'var(--text-muted)' }}
                 aria-label={`Select all day ${group.day}`}
               >
                 {group.expenses.every((e) => selectedIds.has(e.id)) ? (
@@ -219,11 +220,11 @@ export function ExpenseList({
                   <Square size={14} />
                 )}
               </button>
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+              <span className="text-[11px] font-bold uppercase tracking-wide" style={{ color: 'var(--text-tertiary)' }}>
                 Day {group.day}
               </span>
             </div>
-            <span className="tabular-nums text-xs font-medium text-slate-500 dark:text-slate-400">
+            <span className="tabular-nums text-xs font-semibold" style={{ color: 'var(--text-secondary)' }}>
               {formatCurrency(group.total)}
             </span>
           </div>
@@ -242,12 +243,12 @@ export function ExpenseList({
                 className={`group flex items-center gap-3 rounded-2xl border px-4 py-3.5 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500/40 ${
                   selectedIds.has(expense.id)
                     ? "border-indigo-300 bg-indigo-50 dark:border-indigo-700 dark:bg-indigo-950/30"
-                    : "border-slate-100 bg-white hover:border-slate-200 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-slate-700"
+                    : "border-gray-100 bg-white hover:border-gray-200 dark:border-gray-800 dark:bg-gray-900 dark:hover:border-gray-700"
                 }`}
               >
                 <button
                   onClick={() => toggleSelect(expense.id)}
-                  className="shrink-0 rounded p-0.5 text-slate-300 hover:text-slate-500 dark:text-slate-600 dark:hover:text-slate-400"
+                  className="shrink-0 rounded p-0.5 text-gray-300 hover:text-gray-500 dark:text-gray-600 dark:hover:text-gray-400"
                   aria-label="Select expense"
                 >
                   {selectedIds.has(expense.id) ? (
@@ -265,26 +266,26 @@ export function ExpenseList({
                       </span>
                     )}
                     {expense.remark && (
-                      <span className="truncate text-xs text-slate-400">
+                      <span className="truncate text-xs text-gray-400">
                         {expense.remark}
                       </span>
                     )}
                   </div>
                 </div>
-                  <span className="tabular-nums text-sm font-bold text-slate-900 dark:text-white">
+                  <span className="tabular-nums text-base font-bold" style={{ color: 'var(--text-primary)' }}>
                   {formatCurrency(expense.amount)}
                 </span>
                 <div className="flex items-center gap-1 opacity-100 lg:opacity-0 lg:transition-opacity lg:group-hover:opacity-100">
                   <button
                     onClick={() => openEditForm(expense.id)}
-                    className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-300"
+                    className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800 dark:hover:text-gray-300"
                     aria-label="Edit expense"
                   >
                     <Edit3 size={14} />
                   </button>
                   <button
                     onClick={() => handleDelete(expense.id)}
-                    className="rounded-lg p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/30 dark:hover:text-red-400"
+                    className="rounded-lg p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/30 dark:hover:text-red-400"
                     aria-label="Delete expense"
                   >
                     <Trash2 size={14} />
@@ -298,10 +299,13 @@ export function ExpenseList({
 
       {/* Pagination */}
       {hasMore && (
-        <div className="flex justify-center pt-2">
+        <div className="flex justify-center pt-4">
           <button
             onClick={() => setVisibleCount((v) => v + PAGE_SIZE)}
-            className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800"
+            className="rounded-xl px-5 py-2.5 text-xs font-semibold transition-all"
+            style={{ background: 'var(--surface-secondary)', color: 'var(--text-secondary)' }}
+            onMouseEnter={(e) => e.currentTarget.style.background = 'var(--surface-hover)'}
+            onMouseLeave={(e) => e.currentTarget.style.background = 'var(--surface-secondary)'}
           >
             Show more ({totalCount - visibleCount} remaining)
           </button>

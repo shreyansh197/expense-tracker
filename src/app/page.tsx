@@ -21,7 +21,7 @@ import { useUIStore } from "@/stores/uiStore";
 import { getMonthName } from "@/lib/utils";
 import { useCurrency } from "@/hooks/useCurrency";
 import { CategoryDot } from "@/components/expenses/CategoryChips";
-import { Repeat, Receipt } from "lucide-react";
+import { Repeat, Receipt, PlusCircle } from "lucide-react";
 
 export default function DashboardPage() {
   const { formatCurrency } = useCurrency();
@@ -74,7 +74,7 @@ export default function DashboardPage() {
 
   return (
     <AppShell>
-        <div className="mx-auto max-w-4xl xl:max-w-6xl space-y-6 p-4 lg:p-6">
+        <div className="mx-auto max-w-4xl xl:max-w-6xl space-y-5 p-4 lg:p-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <MonthSwitcher />
@@ -134,8 +134,8 @@ export default function DashboardPage() {
           </div>
         ) : (
         <div className="grid gap-4 lg:grid-cols-2">
-          <div className="rounded-2xl border border-slate-100 bg-white p-4 lg:p-5 dark:border-slate-800 dark:bg-slate-900 card-interactive">
-            <h3 className="mb-4 text-[0.8125rem] font-semibold text-slate-700 dark:text-slate-300">
+          <div className="card p-5">
+            <h3 className="text-section-title mb-4">
               Category Breakdown
             </h3>
             <CategoryChart
@@ -144,16 +144,16 @@ export default function DashboardPage() {
               categoryBudgets={settings.categoryBudgets}
               expenses={expenses}
             />
-            <div className="mt-3">
+            <div className="mt-4">
               <CategoryLegend categoryTotals={categoryTotals} onCategoryClick={handleCategoryClick} categoryBudgets={settings.categoryBudgets} />
             </div>
           </div>
 
-          <div className="flex flex-col rounded-2xl border border-slate-100 bg-white p-4 lg:p-5 dark:border-slate-800 dark:bg-slate-900 card-interactive">
-            <h3 className="mb-4 text-[0.8125rem] font-semibold text-slate-700 dark:text-slate-300">
+          <div className="card flex flex-col p-5">
+            <h3 className="text-section-title mb-4">
               Daily Spending Trend
             </h3>
-            <div className="flex-1 min-h-0">
+            <div className="flex-1 min-h-[280px]">
             <DailyTrendChart
               dailyTotals={dailyTotals}
               stackedDailyTotals={stackedDailyTotals}
@@ -165,30 +165,39 @@ export default function DashboardPage() {
         )}
 
         {/* Recent Expenses */}
-        <div className="rounded-2xl border border-slate-100 bg-white p-4 lg:p-5 dark:border-slate-800 dark:bg-slate-900 card-interactive">
+        <div className="card p-5">
           <div className="mb-4 flex items-center justify-between">
-            <h3 className="text-[0.8125rem] font-semibold text-slate-700 dark:text-slate-300">
+            <h3 className="text-section-title">
               Recent Expenses
             </h3>
             <a
               href="/expenses"
-              className="text-xs font-medium text-indigo-600 hover:text-indigo-700 dark:text-indigo-400"
+              className="text-xs font-semibold text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 transition-colors"
             >
               View All →
             </a>
           </div>
           {recentExpenses.length === 0 ? (
-            <div className="flex flex-col items-center gap-2.5 py-10 text-slate-400">
-              <Receipt className="h-9 w-9 text-slate-300 dark:text-slate-600" />
+            <div className="flex flex-col items-center gap-3 py-12" style={{ color: 'var(--text-tertiary)' }}>
+              <Receipt className="h-10 w-10" />
               <p className="text-sm font-medium">No expenses this month</p>
-              <p className="text-xs text-slate-400 dark:text-slate-500">Tap + to add your first one</p>
+              <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Start tracking to see your spending here</p>
+              <button
+                onClick={() => router.push("/expenses")}
+                className="mt-2 flex items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 text-xs font-semibold text-white hover:bg-indigo-700 transition-colors"
+              >
+                <PlusCircle className="h-3.5 w-3.5" /> Add Expense
+              </button>
             </div>
           ) : (
-            <div className="divide-y divide-slate-50 dark:divide-slate-800/60">
+            <div className="space-y-0.5">
               {recentExpenses.map((e) => (
                 <div
                   key={e.id}
-                  className="flex items-center justify-between rounded-lg px-2 py-2.5 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/30"
+                  className="flex items-center justify-between rounded-xl px-3 py-3 transition-colors"
+                  style={{ ['--tw-bg-opacity' as string]: 1 }}
+                  onMouseEnter={(ev) => ev.currentTarget.style.background = 'var(--surface-secondary)'}
+                  onMouseLeave={(ev) => ev.currentTarget.style.background = 'transparent'}
                 >
                   <div className="grid min-w-0 flex-1" style={{ gridTemplateColumns: "5.5rem 1fr", gap: "0.75rem", alignItems: "center" }}>
                     <div className="w-[5.5rem] flex justify-start">
@@ -197,18 +206,18 @@ export default function DashboardPage() {
                     <div className="min-w-0">
                       <div className="flex items-center gap-1.5">
                         {e.isRecurring && <Repeat className="shrink-0 h-3 w-3 text-blue-500" />}
-                        <p className="text-xs text-slate-400">
+                        <p className="text-meta">
                           {e.day} {getMonthName(currentMonth).slice(0, 3)}
                         </p>
                       </div>
                       {e.remark && (
-                        <p className="truncate text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                        <p className="truncate text-xs mt-0.5" style={{ color: 'var(--text-secondary)' }}>
                           {e.remark}
                         </p>
                       )}
                     </div>
                   </div>
-                  <span className="tabular-nums ml-3 shrink-0 text-sm font-semibold text-slate-900 dark:text-white">
+                  <span className="tabular-nums ml-3 shrink-0 text-base font-bold" style={{ color: 'var(--text-primary)' }}>
                     {formatCurrency(e.amount)}
                   </span>
                 </div>

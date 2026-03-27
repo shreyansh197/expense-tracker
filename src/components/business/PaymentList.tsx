@@ -75,23 +75,24 @@ function PaymentDetailModal({
 
       {/* Sheet — slides up from bottom on mobile, centered on desktop */}
       <div
-        className="fixed bottom-0 left-0 right-0 z-50 rounded-t-2xl bg-white shadow-2xl dark:bg-slate-900
+        className="fixed bottom-0 left-0 right-0 z-50 rounded-t-2xl shadow-2xl
                     sm:bottom-auto sm:left-1/2 sm:top-1/2 sm:w-full sm:max-w-sm sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-2xl"
-        style={{ animation: "et-screen-in 0.22s ease both" }}
+        style={{ background: 'var(--surface)', animation: 'et-screen-in 0.22s ease both' }}
       >
         {/* Handle bar (mobile) */}
         <div className="flex justify-center pt-3 sm:hidden">
-          <div className="h-1 w-10 rounded-full bg-slate-200 dark:bg-slate-700" />
+          <div className="h-1 w-10 rounded-full" style={{ background: 'var(--border)' }} />
         </div>
 
         {/* Header */}
         <div className="flex items-center justify-between px-5 pb-3 pt-4">
-          <h3 className="text-base font-semibold text-slate-900 dark:text-white">
+          <h3 className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>
             Payment Details
           </h3>
           <button
             onClick={onClose}
-            className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800"
+            className="rounded-lg p-1.5 transition-colors"
+            style={{ color: 'var(--text-tertiary)' }}
           >
             <X size={18} />
           </button>
@@ -115,7 +116,7 @@ function PaymentDetailModal({
         </div>
 
         {/* Detail rows */}
-        <div className="space-y-0 divide-y divide-slate-100 px-5 dark:divide-slate-800">
+        <div className="space-y-0 divide-y px-5" style={{ borderColor: 'var(--border)' }}>
           <DetailRow icon={<Calendar size={14} />} label="Date" value={formatDate(payment.date)} />
           {payment.method && (
             <DetailRow
@@ -177,11 +178,12 @@ function DetailRow({
 }) {
   return (
     <div className="flex items-start gap-3 py-3">
-      <span className="mt-0.5 shrink-0 text-slate-400">{icon}</span>
+      <span className="mt-0.5 shrink-0" style={{ color: 'var(--text-tertiary)' }}>{icon}</span>
       <div className="flex-1 min-w-0">
-        <p className="text-[10px] font-medium uppercase tracking-wide text-slate-400">{label}</p>
+        <p className="text-[10px] font-medium uppercase tracking-wide" style={{ color: 'var(--text-tertiary)' }}>{label}</p>
         <p
-          className={`mt-0.5 text-sm text-slate-800 dark:text-slate-200 ${mono ? "font-mono" : ""} ${multiline ? "whitespace-pre-wrap" : "break-all"}`}
+          className={`mt-0.5 text-sm ${mono ? "font-mono" : ""} ${multiline ? "whitespace-pre-wrap" : "break-all"}`}
+          style={{ color: 'var(--text-secondary)' }}
         >
           {value}
         </p>
@@ -209,7 +211,7 @@ export function PaymentList({ payments, onDelete }: PaymentListProps) {
 
   if (payments.length === 0) {
     return (
-      <p className="py-6 text-center text-xs text-slate-400">
+      <p className="py-6 text-center text-xs" style={{ color: 'var(--text-tertiary)' }}>
         No payments logged yet
       </p>
     );
@@ -230,8 +232,8 @@ export function PaymentList({ payments, onDelete }: PaymentListProps) {
               onClick={() => setSelected(p)}
               onKeyDown={(e) => e.key === "Enter" && setSelected(p)}
               className="flex cursor-pointer items-start gap-3 rounded-xl px-3 py-3 transition
-                         hover:bg-slate-50 active:bg-slate-100
-                         dark:hover:bg-slate-800/50 dark:active:bg-slate-800"
+                         hover:opacity-80 active:opacity-70"
+              style={{ ['--hover-bg' as string]: 'var(--surface-secondary)' }}
             >
               {/* Method icon */}
               <div className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${iconColor}`}>
@@ -241,7 +243,7 @@ export function PaymentList({ payments, onDelete }: PaymentListProps) {
               {/* Info block */}
               <div className="min-w-0 flex-1">
                 {/* Amount */}
-                <p className="text-sm font-semibold text-slate-900 dark:text-white">
+                <p className="text-sm font-bold tabular-nums" style={{ color: 'var(--text-primary)' }}>
                   {formatCurrency(p.amount)}
                 </p>
 
@@ -253,21 +255,21 @@ export function PaymentList({ payments, onDelete }: PaymentListProps) {
                 )}
 
                 {/* Date */}
-                <p className="mt-1 text-[11px] text-slate-400">
+                <p className="mt-1 text-[11px]" style={{ color: 'var(--text-tertiary)' }}>
                   {formatDate(p.date)}
                 </p>
 
                 {/* Reference */}
                 {p.reference && (
-                  <p className="mt-0.5 truncate text-[11px] text-slate-400">
-                    <span className="font-medium text-slate-500 dark:text-slate-400">Ref:</span>{" "}
+                  <p className="mt-0.5 truncate text-[11px]" style={{ color: 'var(--text-tertiary)' }}>
+                    <span className="font-medium" style={{ color: 'var(--text-secondary)' }}>Ref:</span>{" "}
                     {p.reference}
                   </p>
                 )}
 
                 {/* Notes preview */}
                 {p.notes && (
-                  <p className="mt-0.5 truncate text-[11px] italic text-slate-400">
+                  <p className="mt-0.5 truncate text-[11px] italic" style={{ color: 'var(--text-tertiary)' }}>
                     {p.notes}
                   </p>
                 )}
@@ -275,8 +277,8 @@ export function PaymentList({ payments, onDelete }: PaymentListProps) {
 
               {/* Running total */}
               <div className="shrink-0 text-right">
-                <p className="text-[10px] text-slate-400">Running</p>
-                <p className="text-[11px] font-medium text-slate-600 dark:text-slate-300">
+                <p className="text-[10px]" style={{ color: 'var(--text-tertiary)' }}>Running</p>
+                <p className="text-[11px] font-medium tabular-nums" style={{ color: 'var(--text-secondary)' }}>
                   {formatCurrency(p.runningTotal)}
                 </p>
               </div>

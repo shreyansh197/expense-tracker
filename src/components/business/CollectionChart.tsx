@@ -15,14 +15,14 @@ function CollectionTooltip({ active, payload, label }: {
   const { formatCurrency } = useCurrency();
   if (!active || !payload?.length) return null;
   return (
-    <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 shadow-lg text-xs dark:border-slate-700 dark:bg-slate-900">
-      <p className="font-semibold text-slate-900 dark:text-white mb-1">{label}</p>
+    <div className="rounded-xl px-3 py-2 text-xs shadow-lg" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
+      <p className="mb-1 font-semibold" style={{ color: 'var(--text-primary)' }}>{label}</p>
       {payload.map((p) => (
         <div key={p.dataKey} className="flex justify-between gap-4">
-          <span className={p.dataKey === "received" ? "text-emerald-600 dark:text-emerald-400" : "text-slate-500 dark:text-slate-300"}>
+          <span className={p.dataKey === "received" ? "text-emerald-600 dark:text-emerald-400" : ""} style={p.dataKey !== "received" ? { color: 'var(--text-secondary)' } : undefined}>
             {p.dataKey === "received" ? "Received" : "Expected"}
           </span>
-          <span className="font-medium text-slate-900 dark:text-white">
+          <span className="font-medium" style={{ color: 'var(--text-primary)' }}>
             {formatCurrency(p.value)}
           </span>
         </div>
@@ -42,12 +42,12 @@ export function CollectionChart({ data }: CollectionChartProps) {
   }));
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-      <h3 className="mb-3 text-sm font-semibold text-slate-700 dark:text-slate-300">
+    <div className="card p-5">
+      <h3 className="text-card-title mb-3">
         Monthly Collections
       </h3>
       {!hasAnyReceived && (
-        <p className="mb-2 text-xs text-slate-400">No payments received yet — grey bars show expected amounts.</p>
+        <p className="text-meta mb-2">No payments received yet — grey bars show expected amounts.</p>
       )}
       <ResponsiveContainer width="100%" height={220}>
         <BarChart data={formatted} margin={{ top: 5, right: 5, left: -10, bottom: 5 }}>

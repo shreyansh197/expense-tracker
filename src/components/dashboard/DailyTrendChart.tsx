@@ -36,20 +36,20 @@ function StackedTooltip({ active, payload, label, catMap }: {
   const nonZero = payload.filter((p) => p.value > 0);
 
   return (
-    <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 shadow-lg text-xs dark:border-slate-700 dark:bg-slate-900">
-      <p className="font-semibold text-slate-900 dark:text-white mb-1">Day {label}</p>
+    <div className="rounded-xl px-3 py-2 shadow-lg text-xs" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
+      <p className="font-semibold mb-1" style={{ color: 'var(--text-primary)' }}>Day {label}</p>
       {nonZero.map((p) => (
         <div key={p.dataKey} className="flex justify-between gap-4">
-          <span className="text-slate-600 dark:text-slate-400" style={{ color: p.color }}>
+          <span style={{ color: p.color }}>
             {catMap[p.dataKey]?.label || p.dataKey}
           </span>
-          <span className="font-medium text-slate-900 dark:text-white">{formatCurrency(p.value)}</span>
+          <span className="font-medium" style={{ color: 'var(--text-primary)' }}>{formatCurrency(p.value)}</span>
         </div>
       ))}
       {nonZero.length > 1 && (
-        <div className="border-t border-slate-100 dark:border-slate-800 mt-1 pt-1 flex justify-between gap-4 font-semibold">
-          <span className="text-slate-700 dark:text-slate-300">Total</span>
-          <span className="text-slate-900 dark:text-white">{formatCurrency(total)}</span>
+        <div className="mt-1 pt-1 flex justify-between gap-4 font-semibold" style={{ borderTop: '1px solid var(--border)' }}>
+          <span style={{ color: 'var(--text-secondary)' }}>Total</span>
+          <span style={{ color: 'var(--text-primary)' }}>{formatCurrency(total)}</span>
         </div>
       )}
     </div>
@@ -119,15 +119,16 @@ export function DailyTrendChart({ dailyTotals, stackedDailyTotals, activeCategor
             Stacked
           </button>
         )}
-        <div className="inline-flex rounded-lg bg-slate-100 p-0.5 dark:bg-slate-800">
+        <div className="segmented-control">
           <button
             onClick={() => setShowTable(false)}
             className={cn(
               "flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-medium transition-colors",
               !showTable
                 ? "bg-white text-slate-900 shadow-sm dark:bg-slate-700 dark:text-white"
-                : "text-slate-500 dark:text-slate-400"
+                : ""
             )}
+            style={showTable ? { color: 'var(--text-secondary)' } : undefined}
           >
             <BarChart3 size={13} />
             Chart
@@ -138,8 +139,9 @@ export function DailyTrendChart({ dailyTotals, stackedDailyTotals, activeCategor
               "flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-medium transition-colors",
               showTable
                 ? "bg-white text-slate-900 shadow-sm dark:bg-slate-700 dark:text-white"
-                : "text-slate-500 dark:text-slate-400"
+                : ""
             )}
+            style={!showTable ? { color: 'var(--text-secondary)' } : undefined}
           >
             <Table2 size={13} />
             Table

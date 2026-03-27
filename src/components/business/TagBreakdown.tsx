@@ -11,8 +11,8 @@ export function TagBreakdown({ data }: TagBreakdownProps) {
   if (data.length === 0) return null;
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-      <h3 className="mb-3 text-sm font-semibold text-slate-700 dark:text-slate-300">
+    <div className="card p-5">
+      <h3 className="text-card-title mb-3">
         By Tag
       </h3>
       <div className="space-y-2">
@@ -25,15 +25,15 @@ export function TagBreakdown({ data }: TagBreakdownProps) {
                   <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-medium text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
                     {item.tag}
                   </span>
-                  <span className="text-[10px] text-slate-400">{item.count} ledger{item.count !== 1 ? "s" : ""}</span>
+                  <span className="text-[10px]" style={{ color: 'var(--text-tertiary)' }}>{item.count} ledger{item.count !== 1 ? "s" : ""}</span>
                 </div>
-                <span className="text-xs font-medium text-slate-600 dark:text-slate-400">
+                <span className="text-xs font-medium tabular-nums" style={{ color: 'var(--text-secondary)' }}>
                   {formatCurrency(item.received)} / {formatCurrency(item.expected)}
                 </span>
               </div>
-              <div className="h-1.5 w-full rounded-full bg-slate-100 dark:bg-slate-800">
+              <div className="h-2 w-full rounded-full" style={{ background: 'var(--surface-secondary)' }}>
                 <div
-                  className="h-1.5 rounded-full bg-emerald-500 transition-all"
+                  className="h-2 rounded-full bg-emerald-500 transition-all duration-500"
                   style={{ width: `${Math.min(percent, 100)}%` }}
                 />
               </div>

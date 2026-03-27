@@ -63,11 +63,11 @@ export function BottomNav() {
         onClick={handleFabClick}
         aria-label={isBusiness && isBusinessRoute ? "Add ledger" : "Add expense"}
         className={cn(
-          "fixed left-1/2 z-40 flex h-[52px] w-[52px] -translate-x-1/2 items-center justify-center rounded-full text-white shadow-lg ring-2 ring-white/60 transition-transform duration-200 active:scale-95 lg:hidden dark:ring-slate-900/60",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-50 dark:focus-visible:ring-offset-slate-900",
+          "fixed left-1/2 z-40 flex h-[54px] w-[54px] -translate-x-1/2 items-center justify-center rounded-full text-white shadow-lg shadow-black/15 ring-[3px] ring-white/70 transition-all duration-200 active:scale-90 lg:hidden dark:ring-gray-900/70",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-50 dark:focus-visible:ring-offset-gray-900",
           accentColor === "emerald"
-            ? "bg-emerald-600 shadow-emerald-600/25 focus-visible:ring-emerald-500"
-            : "bg-indigo-600 shadow-indigo-600/25 focus-visible:ring-indigo-500"
+            ? "bg-emerald-600 hover:bg-emerald-700 focus-visible:ring-emerald-500"
+            : "bg-indigo-600 hover:bg-indigo-700 focus-visible:ring-indigo-500"
         )}
         style={{
           bottom: `calc(${NAV_HEIGHT}px + env(safe-area-inset-bottom, 0px) + 12px)`,
@@ -79,8 +79,12 @@ export function BottomNav() {
 
       {/* ─── Nav bar (z-30, below FAB) ─── */}
       <nav
-        className="fixed bottom-0 left-0 right-0 z-30 border-t border-slate-100/80 bg-white/95 backdrop-blur-xl dark:border-slate-800/60 dark:bg-slate-900/95 lg:hidden"
-        style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+        className="fixed bottom-0 left-0 right-0 z-30 border-t backdrop-blur-2xl lg:hidden"
+        style={{
+          paddingBottom: "env(safe-area-inset-bottom)",
+          background: 'color-mix(in srgb, var(--surface) 85%, transparent)',
+          borderColor: 'var(--border)',
+        }}
       >
         <div
           className="mx-auto grid w-full max-w-lg py-2"
@@ -97,23 +101,23 @@ export function BottomNav() {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "relative flex flex-col items-center justify-center gap-1 py-1 transition-colors",
+                  "relative flex flex-col items-center justify-center gap-0.5 py-1.5 transition-colors",
                   isActive
                     ? cn(
                         isBiz
                           ? "text-emerald-600 dark:text-emerald-400"
                           : "text-indigo-600 dark:text-indigo-400"
                       )
-                    : "text-slate-500 dark:text-slate-400"
+                    : "text-gray-400 dark:text-gray-500"
                 )}
               >
                 {isActive && (
                   <span className={cn(
-                    "absolute -top-2 h-1 w-5 rounded-full",
+                    "absolute -top-2 h-[3px] w-6 rounded-full",
                     isBiz ? "bg-emerald-600 dark:bg-emerald-400" : "bg-indigo-600 dark:bg-indigo-400"
                   )} />
                 )}
-                <Icon size={20} />
+                <Icon size={22} />
                 <span className="text-[10px] font-medium">{item.label}</span>
               </Link>
             );

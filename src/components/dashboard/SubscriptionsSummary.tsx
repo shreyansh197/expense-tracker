@@ -29,31 +29,31 @@ export function SubscriptionsSummary() {
   if (recurring.length === 0) return null;
 
   return (
-    <div className="rounded-2xl border border-slate-100 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
-      <div className="mb-3 flex items-center gap-2">
-        <Repeat size={14} className="text-indigo-500" />
-        <h3 className="text-[0.8125rem] font-semibold text-slate-700 dark:text-slate-300">
+    <div className="card p-5">
+      <div className="mb-4 flex items-center gap-2">
+        <Repeat size={14} className="text-indigo-500 dark:text-indigo-400" />
+        <h3 className="text-section-title">
           Recurring Summary
         </h3>
       </div>
 
       {/* Stats row */}
-      <div className="mb-3 grid grid-cols-3 gap-2">
-        <div className="rounded-xl bg-slate-50 px-3 py-2.5 dark:bg-slate-800">
-          <p className="text-[10px] font-medium uppercase tracking-wide text-slate-400">Monthly</p>
-          <p className="text-sm font-bold text-slate-900 dark:text-white">
+      <div className="mb-4 grid grid-cols-3 gap-2">
+        <div className="rounded-xl px-3 py-2.5" style={{ background: 'var(--surface-secondary)' }}>
+          <p className="text-[10px] font-medium" style={{ color: 'var(--text-tertiary)' }}>Monthly</p>
+          <p className="text-sm font-bold tabular-nums" style={{ color: 'var(--text-primary)' }}>
             {formatCurrency(stats.totalMonthly)}
           </p>
         </div>
-        <div className="rounded-xl bg-slate-50 px-3 py-2.5 dark:bg-slate-800">
-          <p className="text-[10px] font-medium uppercase tracking-wide text-slate-400">% of Budget</p>
-          <p className="text-sm font-bold text-slate-900 dark:text-white">
+        <div className="rounded-xl px-3 py-2.5" style={{ background: 'var(--surface-secondary)' }}>
+          <p className="text-[10px] font-medium" style={{ color: 'var(--text-tertiary)' }}>% of Budget</p>
+          <p className="text-sm font-bold tabular-nums" style={{ color: 'var(--text-primary)' }}>
             {stats.pctOfBudget}%
           </p>
         </div>
-        <div className="rounded-xl bg-slate-50 px-3 py-2.5 dark:bg-slate-800">
-          <p className="text-[10px] font-medium uppercase tracking-wide text-slate-400">Active / Paused</p>
-          <p className="text-sm font-bold text-slate-900 dark:text-white">
+        <div className="rounded-xl px-3 py-2.5" style={{ background: 'var(--surface-secondary)' }}>
+          <p className="text-[10px] font-medium" style={{ color: 'var(--text-tertiary)' }}>Active / Paused</p>
+          <p className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>
             {stats.active.length} / {stats.paused.length}
           </p>
         </div>
@@ -62,25 +62,25 @@ export function SubscriptionsSummary() {
       {/* Upcoming */}
       {stats.upcoming.length > 0 && (
         <div>
-          <p className="mb-1.5 text-[10px] font-medium uppercase text-slate-400">
+          <p className="mb-1.5 text-[10px] font-medium uppercase text-gray-400">
             Upcoming This Month
           </p>
           <div className="space-y-1">
             {stats.upcoming.slice(0, 3).map((r) => (
               <div
                 key={r.id}
-                className="flex items-center justify-between rounded-lg px-2 py-1.5 hover:bg-slate-50 dark:hover:bg-slate-800/50"
+                className="flex items-center justify-between rounded-lg px-2 py-1.5 hover:bg-gray-50 dark:hover:bg-gray-800/50"
               >
                 <div className="flex items-center gap-2">
-                  <Calendar size={11} className="text-slate-400" />
-                  <span className="text-xs text-slate-600 dark:text-slate-300">
+                  <Calendar size={11} className="text-gray-400" />
+                  <span className="text-xs text-gray-600 dark:text-gray-300">
                     Day {r.day}
                   </span>
-                  <span className="text-xs text-slate-400">
+                  <span className="text-xs text-gray-400">
                     {catMap[r.category]?.label || r.category}
                   </span>
                 </div>
-                <span className="text-xs font-medium text-slate-900 dark:text-white">
+                <span className="text-xs font-medium text-gray-900 dark:text-white">
                   {formatCurrency(r.amount)}
                 </span>
               </div>
@@ -104,20 +104,20 @@ export function SubscriptionsSummary() {
                 {r.active ? (
                   <Play size={10} className="text-emerald-500" />
                 ) : (
-                  <Pause size={10} className="text-slate-400" />
+                  <Pause size={10} className="text-gray-400" />
                 )}
                 <span
                   className={
                     r.active
-                      ? "text-slate-600 dark:text-slate-300"
-                      : "text-slate-400 line-through"
+                      ? "text-gray-600 dark:text-gray-300"
+                      : "text-gray-400 line-through"
                   }
                 >
                   {r.remark || catMap[r.category]?.label || r.category}
                 </span>
-                <span className="text-slate-400">Day {r.day}</span>
+                <span className="text-gray-400">Day {r.day}</span>
               </div>
-              <span className="font-medium text-slate-900 dark:text-white">
+              <span className="font-medium text-gray-900 dark:text-white">
                 {formatCurrency(r.amount)}
               </span>
             </div>

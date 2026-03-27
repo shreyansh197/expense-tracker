@@ -37,9 +37,9 @@ function CustomTooltip({ active, payload, total, budgets, expenseCountMap }: {
   const count = expenseCountMap[item.payload.slug] || 0;
 
   return (
-    <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 shadow-lg text-xs dark:border-slate-700 dark:bg-slate-900">
-      <p className="font-semibold text-slate-900 dark:text-white">{item.name}</p>
-      <p className="text-slate-600 dark:text-slate-400">
+    <div className="rounded-xl px-3 py-2 shadow-lg text-xs" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
+      <p className="font-semibold" style={{ color: 'var(--text-primary)' }}>{item.name}</p>
+      <p style={{ color: 'var(--text-secondary)' }}>
         {formatCurrency(item.value)} · {pct}% · {count} txn{count !== 1 ? "s" : ""}
       </p>
       {budget && (
@@ -91,15 +91,16 @@ export function CategoryChart({ categoryTotals, onCategoryClick, categoryBudgets
   return (
     <div role="img" aria-label="Category breakdown chart">
       <div className="mb-2 flex justify-end">
-        <div className="inline-flex rounded-lg bg-slate-100 p-0.5 dark:bg-slate-800">
+        <div className="segmented-control">
           <button
             onClick={() => setShowTable(false)}
             className={cn(
               "flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-medium transition-colors",
               !showTable
                 ? "bg-white text-slate-900 shadow-sm dark:bg-slate-700 dark:text-white"
-                : "text-slate-500 dark:text-slate-400"
+                : ""
             )}
+            style={showTable ? { color: 'var(--text-secondary)' } : undefined}
           >
             <PieChartIcon size={13} />
             Chart
@@ -110,8 +111,9 @@ export function CategoryChart({ categoryTotals, onCategoryClick, categoryBudgets
               "flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-medium transition-colors",
               showTable
                 ? "bg-white text-slate-900 shadow-sm dark:bg-slate-700 dark:text-white"
-                : "text-slate-500 dark:text-slate-400"
+                : ""
             )}
+            style={!showTable ? { color: 'var(--text-secondary)' } : undefined}
           >
             <Table2 size={13} />
             Table
