@@ -82,20 +82,20 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // Create device + session (dedup: reuse existing device by user-agent)
+  // Create device + session (dedup: reuse existing device by client device ID)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const result = await prisma.$transaction(async (tx: any) => {
     const ua = (req.headers.get("user-agent") ?? "").slice(0, 512);
+    const clientId = (req.headers.get("x-device-id") ?? "").slice(0, 64) || null;
 
-    // Try to find an existing device with the same user-agent
-    let device = await tx.device.findFirst({
-      where: {
-        userId: user.id,
-        workspaceId: membership.workspaceId,
-        userAgent: ua,
-        revokedAt: null,
-      },
-    });
+    // Match by clientId first (stable per-browser), fallback to UA only if no clientId
+    let device = clientId
+      ? await tx.device.findFirst({
+          where: { userId: user.id, workspaceId: membership.workspaceId, clientId, revokedAt: null },
+        })
+      : await tx.device.findFirst({
+          where: { userId: user.id, workspaceId: membership.workspaceId, userAgent: ua, revokedAt: null },
+        });
 
     if (device) {
       // Revoke all existing sessions on this device
@@ -113,6 +113,7 @@ export async function POST(req: NextRequest) {
         data: {
           userId: user.id,
           workspaceId: membership.workspaceId,
+          clientId,
           name: parseDeviceName(req.headers.get("user-agent") ?? ""),
           platform: "web",
           userAgent: ua,

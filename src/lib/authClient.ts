@@ -1,5 +1,15 @@
 const AUTH_STORAGE_KEY = "expense-tracker-auth";
 
+function getClientDeviceId(): string {
+  if (typeof window === "undefined") return "server";
+  let id = localStorage.getItem("expense-device-id");
+  if (!id) {
+    id = crypto.randomUUID();
+    localStorage.setItem("expense-device-id", id);
+  }
+  return id;
+}
+
 export interface AuthTokens {
   accessToken: string;
   refreshToken: string;
@@ -139,6 +149,7 @@ export async function authFetch(
   if (token) {
     headers.set("Authorization", `Bearer ${token}`);
   }
+  headers.set("X-Device-Id", getClientDeviceId());
 
   let res = await fetch(input, { ...init, headers });
 

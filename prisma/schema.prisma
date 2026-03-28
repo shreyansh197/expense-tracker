@@ -117,6 +117,7 @@ model Device {
   id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   userId       String    @map("user_id") @db.Uuid
   workspaceId  String    @map("workspace_id") @db.Uuid
+  clientId     String?   @map("client_id") @db.VarChar(64)
   name         String    @default("Unknown Device") @db.VarChar(120)
   platform     String    @default("web") @db.VarChar(40)
   userAgent    String?   @map("user_agent") @db.VarChar(512)

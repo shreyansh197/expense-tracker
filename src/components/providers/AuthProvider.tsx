@@ -20,6 +20,7 @@ import {
   type AuthWorkspace,
 } from "@/lib/authClient";
 import { switchSettingsUser, clearSettingsForCurrentUser } from "@/hooks/useSettings";
+import { getDeviceId } from "@/lib/utils";
 
 // ── Context ──────────────────────────────────────────────────
 
@@ -48,7 +49,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     async (email: string, password: string) => {
       const res = await fetch("/api/auth/login", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "X-Device-Id": getDeviceId() },
         body: JSON.stringify({ email, password }),
       });
 
@@ -80,7 +81,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     async (userId: string, code: string) => {
       const res = await fetch("/api/auth/login/verify-2fa", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "X-Device-Id": getDeviceId() },
         body: JSON.stringify({ userId, code }),
       });
 
