@@ -54,8 +54,8 @@ export function AccountCard() {
       toast("Please select an image file", "error");
       return;
     }
-    if (file.size > 2 * 1024 * 1024) {
-      toast("Image must be under 2 MB", "error");
+    if (file.size > 5 * 1024 * 1024) {
+      toast("Image must be under 5 MB", "error");
       return;
     }
 

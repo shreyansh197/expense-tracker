@@ -24,8 +24,8 @@ export async function PATCH(req: NextRequest) {
       data.avatarUrl = null;
     } else if (typeof avatarUrl === "string") {
       if (avatarUrl.startsWith("data:image/")) {
-        // Data URI — allow up to ~2 MB base64 payload (~2.75 MB string)
-        if (avatarUrl.length > 3_000_000) {
+        // Data URI — allow up to ~5 MB base64 payload (~7 MB string)
+        if (avatarUrl.length > 7_000_000) {
           return jsonError("Avatar too large", 400);
         }
         data.avatarUrl = avatarUrl;
