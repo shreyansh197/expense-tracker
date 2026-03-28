@@ -81,10 +81,18 @@ export function usePayments(ledgerId: string | null) {
     };
     document.addEventListener("visibilitychange", onVisibility);
 
+    const pollId = setInterval(() => {
+      if (document.visibilityState === "visible") {
+        invalidateSyncCache();
+        fetchPayments();
+      }
+    }, 30_000);
+
     return () => {
       paymentListeners.delete(fetchPayments);
       if (channel) supabase.removeChannel(channel);
       document.removeEventListener("visibilitychange", onVisibility);
+      clearInterval(pollId);
     };
   }, [ledgerId, fetchPayments]);
 

@@ -67,9 +67,17 @@ export function useAllPayments() {
     };
     document.addEventListener("visibilitychange", onVisibility);
 
+    const pollId = setInterval(() => {
+      if (document.visibilityState === "visible") {
+        invalidateSyncCache();
+        fetchAll();
+      }
+    }, 30_000);
+
     return () => {
       if (channel) supabase.removeChannel(channel);
       document.removeEventListener("visibilitychange", onVisibility);
+      clearInterval(pollId);
     };
   }, [fetchAll]);
 

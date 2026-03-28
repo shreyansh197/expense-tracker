@@ -131,9 +131,17 @@ export function useLedgers() {
     };
     document.addEventListener("visibilitychange", onVisibility);
 
+    const pollId = setInterval(() => {
+      if (document.visibilityState === "visible") {
+        invalidateSyncCache();
+        fetchLedgers();
+      }
+    }, 30_000);
+
     return () => {
       if (channel) supabase.removeChannel(channel);
       document.removeEventListener("visibilitychange", onVisibility);
+      clearInterval(pollId);
     };
   }, [fetchLedgers]);
 

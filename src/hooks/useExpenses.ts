@@ -135,10 +135,19 @@ export function useExpenses(month: number, year: number) {
     };
     document.addEventListener("visibilitychange", onVisibility);
 
+    // Poll every 30s for cross-device sync (deduped by syncFetch)
+    const pollId = setInterval(() => {
+      if (document.visibilityState === "visible") {
+        invalidateSyncCache();
+        fetchExpenses();
+      }
+    }, 30_000);
+
     return () => {
       expenseListeners.delete(fetchExpenses);
       if (channel) supabase.removeChannel(channel);
       document.removeEventListener("visibilitychange", onVisibility);
+      clearInterval(pollId);
     };
   }, [month, year, fetchExpenses]);
 

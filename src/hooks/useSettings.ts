@@ -260,9 +260,22 @@ export function useSettings() {
     };
     document.addEventListener("visibilitychange", onVisibility);
 
+    const pollId = setInterval(() => {
+      if (document.visibilityState === "visible") {
+        invalidateSyncCache();
+        fetchSettingsFromApi().then((remote) => {
+          if (remote && remote.updatedAt > _settings.updatedAt) {
+            saveLocal(remote);
+            _setShared(remote);
+          }
+        });
+      }
+    }, 30_000);
+
     return () => {
       supabase.removeChannel(channel);
       document.removeEventListener("visibilitychange", onVisibility);
+      clearInterval(pollId);
     };
   }, []);
 
