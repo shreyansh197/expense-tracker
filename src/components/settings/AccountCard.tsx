@@ -40,21 +40,22 @@ export function AccountCard() {
 
   // Avatar state
   const [avatarUploading, setAvatarUploading] = useState(false);
-  const [showAvatarEditor, setShowAvatarEditor] = useState(false);
+  const [showAvatarPopup, setShowAvatarPopup] = useState(false);
+  const [showFullPhoto, setShowFullPhoto] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
-  const editorRef = useRef<HTMLDivElement>(null);
+  const popupRef = useRef<HTMLDivElement>(null);
 
-  // Close editor on outside click
+  // Close popup on outside click
   useEffect(() => {
-    if (!showAvatarEditor) return;
+    if (!showAvatarPopup) return;
     const handler = (e: MouseEvent) => {
-      if (editorRef.current && !editorRef.current.contains(e.target as Node)) {
-        setShowAvatarEditor(false);
+      if (popupRef.current && !popupRef.current.contains(e.target as Node)) {
+        setShowAvatarPopup(false);
       }
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
-  }, [showAvatarEditor]);
+  }, [showAvatarPopup]);
 
   if (!user) return null;
 
@@ -92,7 +93,7 @@ export function AccountCard() {
         const data = await res.json();
         setAuthState({ user: { ...getAuthState().user!, avatarUrl: data.user.avatarUrl } });
         toast("Profile picture updated");
-        setShowAvatarEditor(false);
+        setShowAvatarPopup(false);
       } else {
         toast("Failed to update picture", "error");
       }
@@ -114,7 +115,7 @@ export function AccountCard() {
       if (res.ok) {
         setAuthState({ user: { ...getAuthState().user!, avatarUrl: null } });
         toast("Profile picture removed");
-        setShowAvatarEditor(false);
+        setShowAvatarPopup(false);
       } else {
         toast("Failed to remove picture", "error");
       }
@@ -155,27 +156,79 @@ export function AccountCard() {
     <div className="space-y-4">
       {/* Account Info with Avatar */}
       <div className="flex items-center gap-3 rounded-lg px-4 py-3" style={{ background: 'var(--surface-secondary)' }}>
-        <div className="relative">
-          {avatarSrc ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={avatarSrc}
-              alt={user.name}
-              className="h-10 w-10 rounded-full object-cover"
-            />
-          ) : (
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900/30">
-              <User size={18} className="text-indigo-600 dark:text-indigo-400" />
-            </div>
-          )}
+        <div className="relative" ref={popupRef}>
+          {/* Avatar — click to view full photo */}
           <button
-            onClick={() => setShowAvatarEditor(true)}
+            type="button"
+            onClick={() => avatarSrc ? setShowFullPhoto(true) : setShowAvatarPopup(true)}
+            className="block rounded-full transition-opacity hover:opacity-80"
+          >
+            {avatarSrc ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={avatarSrc}
+                alt={user.name}
+                className="h-10 w-10 rounded-full object-cover"
+              />
+            ) : (
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900/30">
+                <User size={18} className="text-indigo-600 dark:text-indigo-400" />
+              </div>
+            )}
+          </button>
+          {/* Edit badge */}
+          <button
+            onClick={() => setShowAvatarPopup(!showAvatarPopup)}
             disabled={avatarUploading}
             className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-indigo-600 text-white shadow-sm transition-colors hover:bg-indigo-700"
           >
             {avatarUploading ? <Loader2 size={10} className="animate-spin" /> : <Camera size={10} />}
           </button>
           <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarChange} />
+
+          {/* Floating popup */}
+          {showAvatarPopup && (
+            <div
+              className="absolute left-0 top-full z-50 mt-2 w-40 animate-in fade-in slide-in-from-top-1 rounded-xl py-1.5 shadow-lg"
+              style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
+            >
+              {avatarSrc && (
+                <button
+                  onClick={() => { setShowAvatarPopup(false); setShowFullPhoto(true); }}
+                  className="flex w-full items-center gap-2.5 px-3 py-2 text-xs font-medium transition-colors"
+                  style={{ color: 'var(--text-primary)' }}
+                  onMouseEnter={e => { e.currentTarget.style.background = 'var(--surface-secondary)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = ''; }}
+                >
+                  <Eye size={14} style={{ color: 'var(--text-tertiary)' }} />
+                  View Photo
+                </button>
+              )}
+              <button
+                onClick={() => fileRef.current?.click()}
+                disabled={avatarUploading}
+                className="flex w-full items-center gap-2.5 px-3 py-2 text-xs font-medium transition-colors disabled:opacity-50"
+                style={{ color: 'var(--text-primary)' }}
+                onMouseEnter={e => { if (!avatarUploading) e.currentTarget.style.background = 'var(--surface-secondary)'; }}
+                onMouseLeave={e => { e.currentTarget.style.background = ''; }}
+              >
+                <ImagePlus size={14} style={{ color: 'var(--text-tertiary)' }} />
+                {avatarUploading ? "Uploading..." : avatarSrc ? "Change Photo" : "Upload Photo"}
+              </button>
+              {avatarSrc && (
+                <button
+                  onClick={handleAvatarRemove}
+                  disabled={avatarUploading}
+                  className="flex w-full items-center gap-2.5 px-3 py-2 text-xs font-medium text-red-600 transition-colors dark:text-red-400 disabled:opacity-50"
+                  onMouseEnter={e => { if (!avatarUploading) e.currentTarget.style.background = 'var(--surface-secondary)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = ''; }}
+                >
+                  <Trash2 size={14} />
+                  Remove Photo
+                </button>
+              )}
+            </div>
+          )}
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>{user.name}</p>
@@ -183,61 +236,25 @@ export function AccountCard() {
         </div>
       </div>
 
-      {/* Avatar Editor Card */}
-      {showAvatarEditor && (
-        <div ref={editorRef} className="rounded-xl p-4 space-y-4" style={{ background: 'var(--surface-secondary)', border: '1px solid var(--border)' }}>
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold" style={{ color: 'var(--text-primary)' }}>Profile Picture</span>
-            <button
-              onClick={() => setShowAvatarEditor(false)}
-              className="rounded-md p-1 transition-colors"
-              style={{ color: 'var(--text-muted)' }}
-              onMouseEnter={e => { e.currentTarget.style.background = 'var(--surface-hover)'; }}
-              onMouseLeave={e => { e.currentTarget.style.background = ''; }}
-            >
-              <X size={14} />
-            </button>
-          </div>
-
-          {/* Large preview */}
-          <div className="flex justify-center">
-            {avatarSrc ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={avatarSrc}
-                alt={user.name}
-                className="h-28 w-28 rounded-full object-cover shadow-sm"
-                style={{ border: '3px solid var(--border)' }}
-              />
-            ) : (
-              <div className="flex h-28 w-28 items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900/30 shadow-sm" style={{ border: '3px solid var(--border)' }}>
-                <User size={40} className="text-indigo-600 dark:text-indigo-400" />
-              </div>
-            )}
-          </div>
-
-          {/* Actions */}
-          <div className="flex flex-col gap-2">
-            <button
-              onClick={() => fileRef.current?.click()}
-              disabled={avatarUploading}
-              className="flex items-center justify-center gap-2 rounded-lg px-3 py-2.5 text-xs font-medium text-white transition-colors bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50"
-            >
-              {avatarUploading ? <Loader2 size={14} className="animate-spin" /> : <ImagePlus size={14} />}
-              {avatarUploading ? "Uploading..." : avatarSrc ? "Change Photo" : "Upload Photo"}
-            </button>
-            {avatarSrc && (
-              <button
-                onClick={handleAvatarRemove}
-                disabled={avatarUploading}
-                className="flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-xs font-medium text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20 disabled:opacity-50"
-                style={{ border: '1px solid var(--border)' }}
-              >
-                <Trash2 size={14} />
-                Remove Photo
-              </button>
-            )}
-          </div>
+      {/* Fullscreen photo viewer */}
+      {showFullPhoto && avatarSrc && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm animate-in fade-in"
+          onClick={() => setShowFullPhoto(false)}
+        >
+          <button
+            onClick={() => setShowFullPhoto(false)}
+            className="absolute right-4 top-4 rounded-full bg-black/40 p-2 text-white transition-colors hover:bg-black/60"
+          >
+            <X size={20} />
+          </button>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={avatarSrc}
+            alt={user.name}
+            className="max-h-[80vh] max-w-[90vw] rounded-2xl object-contain shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          />
         </div>
       )}
 
