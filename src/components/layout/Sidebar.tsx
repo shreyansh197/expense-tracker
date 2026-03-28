@@ -3,7 +3,8 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, List, Settings, PlusCircle, Briefcase, HelpCircle, User } from "lucide-react";
+import { LayoutDashboard, List, Settings, PlusCircle, Briefcase, User } from "lucide-react";
+import { QuickHelpButton } from "@/components/ui/QuickHelpButton";
 import { cn } from "@/lib/utils";
 import { useUIStore } from "@/stores/uiStore";
 import { useSettings } from "@/hooks/useSettings";
@@ -153,18 +154,15 @@ export function Sidebar() {
 
       {/* User Info + Help */}
       <div className="px-3 pb-4 pt-2 space-y-2" style={{ borderTop: '1px solid var(--border-subtle)' }}>
-        <Link
-          href="/settings"
-          className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-xs transition-colors"
-          style={{ color: 'var(--text-secondary)' }}
-          onMouseEnter={e => { e.currentTarget.style.background = 'var(--surface-secondary)'; }}
-          onMouseLeave={e => { e.currentTarget.style.background = ''; }}
-        >
-          <HelpCircle size={14} />
-          Help & Tips
-        </Link>
+        <QuickHelpButton variant="sidebar" />
         {user && (
-          <div className="flex items-center gap-2 px-2">
+          <Link
+            href="/settings#account"
+            className="flex items-center gap-2 rounded-lg px-2 py-1.5 transition-colors"
+            style={{ color: 'var(--text-secondary)' }}
+            onMouseEnter={e => { e.currentTarget.style.background = 'var(--surface-secondary)'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = ''; }}
+          >
             {user.avatarUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={user.avatarUrl} alt="" className="h-6 w-6 rounded-full object-cover" />
@@ -176,7 +174,7 @@ export function Sidebar() {
             <span className="truncate text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>
               {user.name}
             </span>
-          </div>
+          </Link>
         )}
       </div>
     </aside>

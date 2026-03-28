@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { HelpCircle, X } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { SHORTCUTS } from "@/hooks/useKeyboardShortcuts";
 
 const TIPS = [
@@ -11,7 +12,7 @@ const TIPS = [
   "Tap the + button to add expenses quickly",
 ];
 
-export function QuickHelpButton() {
+export function QuickHelpButton({ variant = "icon" }: { variant?: "icon" | "sidebar" }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -35,16 +36,27 @@ export function QuickHelpButton() {
     <div className="relative" ref={ref}>
       <button
         onClick={() => setOpen((v) => !v)}
-        className="flex h-8 w-8 items-center justify-center rounded-lg transition-colors"
-        style={{ color: "var(--text-muted)" }}
+        className={cn(
+          "flex items-center transition-colors",
+          variant === "sidebar"
+            ? "gap-2 rounded-lg px-2 py-1.5 text-xs w-full"
+            : "h-8 w-8 justify-center rounded-lg"
+        )}
+        style={{ color: "var(--text-secondary)" }}
+        onMouseEnter={variant === "sidebar" ? (e) => { e.currentTarget.style.background = 'var(--surface-secondary)'; } : undefined}
+        onMouseLeave={variant === "sidebar" ? (e) => { e.currentTarget.style.background = ''; } : undefined}
         aria-label="Quick help"
       >
-        <HelpCircle size={18} />
+        <HelpCircle size={variant === "sidebar" ? 14 : 18} />
+        {variant === "sidebar" && "Help & Tips"}
       </button>
 
       {open && (
         <div
-          className="absolute right-0 top-full z-50 mt-2 w-72 rounded-xl border p-4 shadow-xl"
+          className={cn(
+            "absolute z-50 w-72 rounded-xl border p-4 shadow-xl",
+            variant === "sidebar" ? "bottom-full left-0 mb-2" : "right-0 top-full mt-2"
+          )}
           style={{ background: "var(--surface)", borderColor: "var(--border)" }}
         >
           <div className="mb-3 flex items-center justify-between">

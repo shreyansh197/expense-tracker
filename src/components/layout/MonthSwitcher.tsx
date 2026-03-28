@@ -72,7 +72,7 @@ export function MonthSwitcher() {
         <ChevronRight size={18} />
       </button>
 
-      <style jsx>{`
+      <style>{`
         @keyframes month-slide-left {
           0% { opacity: 0; transform: translateX(40px) scale(0.92); }
           100% { opacity: 1; transform: translateX(0) scale(1); }

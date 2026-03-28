@@ -81,7 +81,9 @@ export default function DashboardPage() {
           <MonthSwitcher />
           <div className="flex items-center gap-2">
             <SyncIndicator syncStatus={syncStatus} />
-            <QuickHelpButton />
+            <div className="lg:hidden">
+              <QuickHelpButton />
+            </div>
           </div>
         </div>
 
