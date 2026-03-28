@@ -30,7 +30,7 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
     touchStart.current = null;
     // Only trigger if horizontal swipe is dominant and >80px
     if (Math.abs(dx) > 80 && Math.abs(dx) > Math.abs(dy) * 1.5) {
-      if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate(10);
+      if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate(50);
       if (dx > 0) prevMonth();
       else nextMonth();
     }

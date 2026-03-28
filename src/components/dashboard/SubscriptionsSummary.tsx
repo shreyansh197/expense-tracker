@@ -1,11 +1,10 @@
 "use client";
 
 import { useMemo } from "react";
-import { Repeat, Calendar, Pause, Play, CalendarClock } from "lucide-react";
+import { Repeat, Calendar, Pause, Play } from "lucide-react";
 import { useCurrency } from "@/hooks/useCurrency";
 import { buildCategoryMap } from "@/lib/categories";
 import { useSettings } from "@/hooks/useSettings";
-import { EmptyState } from "@/components/ui/EmptyState";
 
 export function SubscriptionsSummary() {
   const { settings } = useSettings();
@@ -27,16 +26,7 @@ export function SubscriptionsSummary() {
     return { active, paused, totalMonthly, pctOfBudget, upcoming };
   }, [recurring, settings.salary]);
 
-  if (recurring.length === 0) return (
-    <div className="card p-5">
-      <EmptyState
-        icon={Repeat}
-        secondaryIcon={CalendarClock}
-        title="No recurring expenses"
-        description="Set up recurring expenses in Settings to track your subscriptions."
-      />
-    </div>
-  );
+  if (recurring.length === 0) return null;
 
   return (
     <div className="card p-5">

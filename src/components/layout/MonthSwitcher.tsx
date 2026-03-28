@@ -26,12 +26,12 @@ export function MonthSwitcher() {
   }, [currentMonth, currentYear]);
 
   const handlePrev = useCallback(() => {
-    if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate(10);
+    if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate(50);
     prevMonth();
   }, [prevMonth]);
 
   const handleNext = useCallback(() => {
-    if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate(10);
+    if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate(50);
     nextMonth();
   }, [nextMonth]);
 

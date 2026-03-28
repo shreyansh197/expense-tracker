@@ -1,12 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { PiggyBank, TrendingUp, Minus, ChevronRight, X, Target } from "lucide-react";
+import { PiggyBank, TrendingUp, Minus, ChevronRight, X } from "lucide-react";
 import Link from "next/link";
 import { useSettings } from "@/hooks/useSettings";
 import { useToast } from "@/components/ui/Toast";
 import { useCurrency } from "@/hooks/useCurrency";
-import { EmptyState } from "@/components/ui/EmptyState";
 
 export function SavingsGoalsWidget() {
   const { settings, updateSettings } = useSettings();
@@ -18,16 +17,7 @@ export function SavingsGoalsWidget() {
   const [fundAmount, setFundAmount] = useState("");
   const [fundMode, setFundMode] = useState<"add" | "subtract">("add");
 
-  if (goals.length === 0) return (
-    <div className="card p-5">
-      <EmptyState
-        icon={Target}
-        secondaryIcon={PiggyBank}
-        title="No savings goals"
-        description="Create goals in Settings to track your progress toward saving targets."
-      />
-    </div>
-  );
+  if (goals.length === 0) return null;
 
   const handleFund = () => {
     if (!activeGoalId) return;
