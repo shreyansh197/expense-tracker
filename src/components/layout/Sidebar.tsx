@@ -103,7 +103,7 @@ export function Sidebar() {
             <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: 'var(--text-tertiary)' }}>
               Budget
             </span>
-            <span className="text-[10px] font-medium" style={{ color: 'var(--text-muted)' }}>
+            <span className="text-[10px] font-medium" style={{ color: 'var(--text-secondary)' }}>
               {Math.round(budgetUsedPercent)}%
             </span>
           </div>
