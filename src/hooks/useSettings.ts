@@ -247,7 +247,23 @@ export function useSettings() {
       )
       .subscribe();
 
-    return () => { supabase.removeChannel(channel); };
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") {
+        invalidateSyncCache();
+        fetchSettingsFromApi().then((remote) => {
+          if (remote && remote.updatedAt > _settings.updatedAt) {
+            saveLocal(remote);
+            _setShared(remote);
+          }
+        });
+      }
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+
+    return () => {
+      supabase.removeChannel(channel);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
   }, []);
 
   const updateSettings = useCallback(

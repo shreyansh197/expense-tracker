@@ -73,9 +73,18 @@ export function usePayments(ledgerId: string | null) {
           .subscribe()
       : null;
 
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") {
+        invalidateSyncCache();
+        fetchPayments();
+      }
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+
     return () => {
       paymentListeners.delete(fetchPayments);
       if (channel) supabase.removeChannel(channel);
+      document.removeEventListener("visibilitychange", onVisibility);
     };
   }, [ledgerId, fetchPayments]);
 

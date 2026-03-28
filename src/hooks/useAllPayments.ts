@@ -59,7 +59,18 @@ export function useAllPayments() {
           .subscribe()
       : null;
 
-    return () => { if (channel) supabase.removeChannel(channel); };
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") {
+        invalidateSyncCache();
+        fetchAll();
+      }
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+
+    return () => {
+      if (channel) supabase.removeChannel(channel);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
   }, [fetchAll]);
 
   return { payments, loading };

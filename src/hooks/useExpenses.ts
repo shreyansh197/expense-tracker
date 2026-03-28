@@ -126,9 +126,19 @@ export function useExpenses(month: number, year: number) {
           .subscribe()
       : null;
 
+    // Refresh when tab/app becomes visible (handles Realtime disconnects)
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") {
+        invalidateSyncCache();
+        fetchExpenses();
+      }
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+
     return () => {
       expenseListeners.delete(fetchExpenses);
       if (channel) supabase.removeChannel(channel);
+      document.removeEventListener("visibilitychange", onVisibility);
     };
   }, [month, year, fetchExpenses]);
 

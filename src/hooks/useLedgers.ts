@@ -123,8 +123,17 @@ export function useLedgers() {
           .subscribe()
       : null;
 
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") {
+        invalidateSyncCache();
+        fetchLedgers();
+      }
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+
     return () => {
       if (channel) supabase.removeChannel(channel);
+      document.removeEventListener("visibilitychange", onVisibility);
     };
   }, [fetchLedgers]);
 
