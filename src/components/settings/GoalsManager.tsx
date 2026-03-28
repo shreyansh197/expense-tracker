@@ -164,36 +164,45 @@ export function GoalsManager() {
             </button>
           </div>
           <div className="space-y-3">
-            <input
-              type="text"
-              placeholder="Goal name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              maxLength={40}
-              className="form-input text-sm"
-            />
+            <div>
+              <label className="form-label">Goal Name</label>
+              <input
+                type="text"
+                placeholder="e.g. Emergency Fund"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                maxLength={40}
+                className="form-input text-sm"
+              />
+            </div>
             <div className="grid grid-cols-2 gap-2">
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs" style={{ color: 'var(--text-muted)' }}>{symbol}</span>
-                <input
-                  type="number"
-                  placeholder="Target amount"
-                  value={targetAmount}
-                  onChange={(e) => setTargetAmount(e.target.value)}
-                  min="1"
-                  className="form-input py-2 pl-9 pr-3 text-sm"
-                />
+              <div>
+                <label className="form-label">Target ({symbol})</label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs" style={{ color: 'var(--text-tertiary)' }}>{symbol}</span>
+                  <input
+                    type="number"
+                    placeholder="e.g. 50,000"
+                    value={targetAmount}
+                    onChange={(e) => setTargetAmount(e.target.value)}
+                    min="1"
+                    className="form-input py-2 pl-9 pr-3 text-sm"
+                  />
+                </div>
               </div>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs" style={{ color: 'var(--text-muted)' }}>{symbol}</span>
-                <input
-                  type="number"
-                  placeholder="Monthly contrib."
-                  value={monthlyContribution}
-                  onChange={(e) => setMonthlyContribution(e.target.value)}
-                  min="0"
-                  className="form-input py-2 pl-9 pr-3 text-sm"
-                />
+              <div>
+                <label className="form-label">Monthly ({symbol})</label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs" style={{ color: 'var(--text-tertiary)' }}>{symbol}</span>
+                  <input
+                    type="number"
+                    placeholder="e.g. 5,000"
+                    value={monthlyContribution}
+                    onChange={(e) => setMonthlyContribution(e.target.value)}
+                    min="0"
+                    className="form-input py-2 pl-9 pr-3 text-sm"
+                  />
+                </div>
               </div>
             </div>
             <input
@@ -317,7 +326,7 @@ export function GoalsManager() {
                       </button>
                     </div>
                     <div className="relative flex-1">
-                      <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs" style={{ color: 'var(--text-muted)' }}>{symbol}</span>
+                      <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs" style={{ color: 'var(--text-tertiary)' }}>{symbol}</span>
                       <input
                         type="number"
                         min="1"
@@ -326,7 +335,7 @@ export function GoalsManager() {
                         onKeyDown={(e) => { if (e.key === "Enter") handleFundSave(); if (e.key === "Escape") setFundGoalId(null); }}
                         autoFocus
                         placeholder="Amount"
-                        className="form-input py-1 pl-5 pr-2 text-xs"
+                        className="form-input py-1 pl-6 pr-2 text-xs"
                       />
                     </div>
                     <button

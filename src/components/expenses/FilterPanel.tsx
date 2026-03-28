@@ -122,27 +122,27 @@ export function FilterPanel({
             </label>
             <div className="flex items-center gap-2">
               <div className="relative flex-1">
-                <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs" style={{ color: 'var(--text-tertiary)' }}>{symbol}</span>
+                <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs" style={{ color: 'var(--text-tertiary)' }}>{symbol}</span>
                 <input
                   type="number"
                   min="0"
                   placeholder="Min"
                   value={amountMin}
                   onChange={(e) => onAmountMinChange(e.target.value)}
-                  className="w-full rounded-xl py-2.5 pl-6 pr-2 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                  className="w-full rounded-xl py-2.5 pl-7 pr-2 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
                   style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
                 />
               </div>
               <span className="text-xs" style={{ color: 'var(--text-tertiary)' }}>to</span>
               <div className="relative flex-1">
-                <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs" style={{ color: 'var(--text-tertiary)' }}>{symbol}</span>
+                <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs" style={{ color: 'var(--text-tertiary)' }}>{symbol}</span>
                 <input
                   type="number"
                   min="0"
                   placeholder="Max"
                   value={amountMax}
                   onChange={(e) => onAmountMaxChange(e.target.value)}
-                  className="w-full rounded-xl py-2.5 pl-6 pr-2 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                  className="w-full rounded-xl py-2.5 pl-7 pr-2 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
                   style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
                 />
               </div>

@@ -257,7 +257,7 @@ export function RecurringManager() {
             type="text"
             value={remark}
             onChange={(e) => setRemark(e.target.value)}
-            placeholder="Remark (e.g., SIP - Mutual Fund)"
+            placeholder="e.g. SIP - Mutual Fund"
             maxLength={100}
             className="form-input text-sm"
           />

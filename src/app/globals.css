@@ -213,7 +213,7 @@ button, a {
   box-shadow: 0 0 0 3px var(--accent-soft);
 }
 .form-input::placeholder {
-  color: var(--text-muted);
+  color: var(--text-tertiary);
 }
 .form-input:disabled {
   opacity: 0.5;

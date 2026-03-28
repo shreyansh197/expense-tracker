@@ -77,7 +77,7 @@ export function LedgerForm({ initial, onSubmit, onCancel, submitLabel = "Create 
       <div>
         <label className="form-label">Expected Amount</label>
         <div className="relative">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm" style={{ color: 'var(--text-muted)' }}>{symbol}</span>
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm" style={{ color: 'var(--text-tertiary)' }}>{symbol}</span>
           <input
             type="number"
             min="1"
@@ -85,7 +85,7 @@ export function LedgerForm({ initial, onSubmit, onCancel, submitLabel = "Create 
             value={expectedAmount}
             onChange={(e) => setExpectedAmount(e.target.value)}
             onBlur={() => setAmountTouched(true)}
-            placeholder="0"
+            placeholder="e.g. 25,000"
             className={cn("form-input w-full pl-9", amountInvalid && "!border-red-400 !ring-red-400/20")}
             required
             aria-invalid={amountInvalid || undefined}
