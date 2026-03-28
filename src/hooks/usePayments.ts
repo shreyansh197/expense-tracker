@@ -86,7 +86,7 @@ export function usePayments(ledgerId: string | null) {
         invalidateSyncCache();
         fetchPayments();
       }
-    }, 30_000);
+    }, 10_000);
 
     return () => {
       paymentListeners.delete(fetchPayments);

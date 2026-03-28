@@ -270,7 +270,7 @@ export function useSettings() {
           }
         });
       }
-    }, 30_000);
+    }, 10_000);
 
     return () => {
       supabase.removeChannel(channel);

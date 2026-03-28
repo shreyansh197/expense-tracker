@@ -135,13 +135,13 @@ export function useExpenses(month: number, year: number) {
     };
     document.addEventListener("visibilitychange", onVisibility);
 
-    // Poll every 30s for cross-device sync (deduped by syncFetch)
+    // Poll every 10s for cross-device sync (deduped by syncFetch)
     const pollId = setInterval(() => {
       if (document.visibilityState === "visible") {
         invalidateSyncCache();
         fetchExpenses();
       }
-    }, 30_000);
+    }, 10_000);
 
     return () => {
       expenseListeners.delete(fetchExpenses);

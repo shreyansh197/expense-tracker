@@ -136,7 +136,7 @@ export function useLedgers() {
         invalidateSyncCache();
         fetchLedgers();
       }
-    }, 30_000);
+    }, 10_000);
 
     return () => {
       if (channel) supabase.removeChannel(channel);

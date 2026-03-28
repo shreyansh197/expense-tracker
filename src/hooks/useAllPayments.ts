@@ -72,7 +72,7 @@ export function useAllPayments() {
         invalidateSyncCache();
         fetchAll();
       }
-    }, 30_000);
+    }, 10_000);
 
     return () => {
       if (channel) supabase.removeChannel(channel);
