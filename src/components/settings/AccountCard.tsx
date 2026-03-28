@@ -9,6 +9,21 @@ import { authFetch, clearAuthState, setAuthState, getAuthState } from "@/lib/aut
 import { User, Trash2, Camera, Eye, EyeOff, Loader2, X, ImagePlus } from "lucide-react";
 
 const ALL_LOCAL_STORAGE_KEYS = [
+  // Current keys
+  "expenstream-auth",
+  "expenstream-sync-cursor",
+  "expenstream-offline-mutations",
+  "expenstream-offline-queue",
+  "expenstream-recurring-applied",
+  "expenstream-app-mode",
+  "expenstream-auto-rules",
+  "expenstream-settings",
+  "expenstream-kpi-expanded",
+  "expenstream-last-category",
+  "expenstream-expenses-sort",
+  "expenstream-tutorial-seen",
+  "expenstream-migrated",
+  // Legacy keys (clear on logout)
   "expense-tracker-auth",
   "expense-tracker-sync-cursor",
   "expense-tracker-offline-mutations",
@@ -16,12 +31,13 @@ const ALL_LOCAL_STORAGE_KEYS = [
   "expense-tracker-recurring-applied",
   "expense-tracker-app-mode",
   "expense-tracker-auto-rules",
-  "expense-device-id",
-  "theme",
   "spendly-kpi-expanded",
   "spendly-last-category",
   "spendly-expenses-sort",
   "spendly-tutorial-seen",
+  // Non-branded keys
+  "expense-device-id",
+  "theme",
   "settings:v2:lastOpen",
 ];
 
@@ -376,7 +392,7 @@ export function AccountCard() {
               // Also remove per-user settings keys
               for (let i = localStorage.length - 1; i >= 0; i--) {
                 const key = localStorage.key(i);
-                if (key?.startsWith("expense-tracker-settings")) localStorage.removeItem(key);
+                if (key?.startsWith("expenstream-settings") || key?.startsWith("expense-tracker-settings")) localStorage.removeItem(key);
               }
               clearAuthState();
               window.location.replace("/");

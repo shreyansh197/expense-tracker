@@ -1,4 +1,4 @@
-const CACHE_NAME = "expense-tracker-icons-a1bc5e50";
+const CACHE_NAME = "expenstream-icons-56cd32b3";
 
 const PRECACHE_URLS = [
   "/icons/icon-192.png",

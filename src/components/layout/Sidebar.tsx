@@ -58,13 +58,13 @@ export function Sidebar() {
       <div className="flex items-center gap-2.5 px-5 py-5" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
         <Image
           src="/icons/icon-192.png"
-          alt="Spendly"
+          alt="ExpenStream"
           width={32}
           height={32}
           className="rounded-lg"
         />
         <span className="text-lg font-bold tracking-tight" style={{ color: 'var(--text-primary)' }}>
-          Spendly
+          ExpenStream
         </span>
       </div>
 

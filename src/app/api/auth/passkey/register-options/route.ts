@@ -3,7 +3,7 @@ import { generateRegistrationOptions } from "@simplewebauthn/server";
 import { prisma } from "@/lib/server/prisma";
 import { requireAuth, jsonError } from "@/lib/server/guards";
 
-const RP_NAME = "Expense Tracker";
+const RP_NAME = "ExpenStream";
 const RP_ID = process.env.WEBAUTHN_RP_ID ?? "localhost";
 
 export async function POST(req: NextRequest) {

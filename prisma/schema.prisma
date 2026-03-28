@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────────────────────
-// Expense Tracker — Prisma Schema
+// ExpenStream — Prisma Schema
 // Account-Based Auth + Workspace Model
 // PostgreSQL · soft-delete · JSONB · composite indexes
 // ─────────────────────────────────────────────────────────────

@@ -9,7 +9,7 @@ import { fetchSyncData, invalidateSyncCache } from "@/lib/syncFetch";
 import { supabase } from "@/lib/supabase";
 import type { UserSettings, CategoryMeta } from "@/types";
 
-const STORAGE_KEY_BASE = "expense-tracker-settings";
+const STORAGE_KEY_BASE = "expenstream-settings";
 function storageKeyForUser(userId: string | null): string {
   return userId ? `${STORAGE_KEY_BASE}-${userId}` : STORAGE_KEY_BASE;
 }

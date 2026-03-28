@@ -35,7 +35,7 @@ const now = new Date();
 
 function loadAppMode(): AppMode {
   if (typeof window === "undefined") return "personal";
-  return (localStorage.getItem("expense-tracker-app-mode") as AppMode) || "personal";
+  return (localStorage.getItem("expenstream-app-mode") as AppMode) || "personal";
 }
 
 export const useUIStore = create<UIState>((set) => ({
@@ -90,7 +90,7 @@ export const useUIStore = create<UIState>((set) => ({
   openLedgerForm: () => set({ showLedgerForm: true }),
   closeLedgerForm: () => set({ showLedgerForm: false }),
   setAppMode: (mode) => {
-    localStorage.setItem("expense-tracker-app-mode", mode);
+    localStorage.setItem("expenstream-app-mode", mode);
     set({ appMode: mode });
   },
   setActiveLedger: (id) => set({ activeLedgerId: id }),

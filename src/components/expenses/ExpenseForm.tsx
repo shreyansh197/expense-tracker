@@ -35,7 +35,7 @@ export function ExpenseForm({
   const [category, setCategory] = useState<CategoryId>(() => {
     if (editExpense?.category) return editExpense.category;
     if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("spendly-last-category") as CategoryId | null;
+      const saved = localStorage.getItem("expenstream-last-category") as CategoryId | null;
       if (saved && allCategories.some((c) => c.id === saved)) return saved;
     }
     return "groceries";
@@ -107,7 +107,7 @@ export function ExpenseForm({
           });
         }
         closeForm();
-        localStorage.setItem("spendly-last-category", category);
+        localStorage.setItem("expenstream-last-category", category);
         toast(editExpense ? "Expense updated" : "Expense added");
       } catch {
         setError("Failed to save expense. Please try again.");

@@ -1,5 +1,5 @@
 -- ═══════════════════════════════════════════════════════════════
--- Expense Tracker — Full Schema Migration (v2 — clean slate)
+-- ExpenStream — Full Schema Migration (v2 — clean slate)
 -- Run this in Supabase SQL Editor (Dashboard > SQL Editor > New query)
 -- Drops old 001 tables + creates all new auth/domain tables
 -- ═══════════════════════════════════════════════════════════════

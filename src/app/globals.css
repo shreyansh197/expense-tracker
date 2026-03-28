@@ -418,7 +418,7 @@ input[type="password"]::-ms-clear {
   filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3));
 }
 
-/* ── Spendly Fixed-Theme Splash / Hero Animations ─────────── */
+/* ── ExpenStream Fixed-Theme Splash / Hero Animations ───── */
 
 /* Slow animated gradient mesh background */
 @keyframes sp-gradient-shift {

@@ -4,7 +4,7 @@ interface QueuedOperation {
   timestamp: number;
 }
 
-const QUEUE_KEY = "expense-tracker-offline-queue";
+const QUEUE_KEY = "expenstream-offline-queue";
 
 function readQueue(): QueuedOperation[] {
   if (typeof window === "undefined") return [];

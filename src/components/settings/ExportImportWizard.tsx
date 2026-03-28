@@ -76,7 +76,7 @@ export function ExportImportWizard() {
         remark: e.remark,
       })),
     };
-    downloadFile(JSON.stringify(payload, null, 2), `expense-tracker-backup-${currentYear}-${currentMonth}.json`, "application/json");
+    downloadFile(JSON.stringify(payload, null, 2), `expenstream-backup-${currentYear}-${currentMonth}.json`, "application/json");
     toast("Full backup exported");
   };
 

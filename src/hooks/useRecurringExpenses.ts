@@ -5,7 +5,7 @@ import { useSettings } from "@/hooks/useSettings";
 import { useExpenses } from "@/hooks/useExpenses";
 import type { RecurringExpense } from "@/types";
 
-const APPLIED_KEY = "expense-tracker-recurring-applied";
+const APPLIED_KEY = "expenstream-recurring-applied";
 
 function getAppliedKey(recurringId: string, month: number, year: number): string {
   return `${recurringId}:${month}:${year}`;

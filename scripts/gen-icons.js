@@ -5,7 +5,7 @@ const fs = require("fs");
 const path = require("path");
 const iconsDir = "public/icons";
 
-const svgBuf = fs.readFileSync(path.join(iconsDir, "spendly-icon.svg"));
+const svgBuf = fs.readFileSync(path.join(iconsDir, "expenstream-icon.svg"));
 const iconHash = crypto
   .createHash("md5")
   .update(svgBuf)
@@ -116,7 +116,7 @@ async function gen() {
   let sw = fs.readFileSync(swPath, "utf-8");
   sw = sw.replace(
     /const CACHE_NAME = "[^"]+";/,
-    `const CACHE_NAME = "expense-tracker-icons-${iconHash}";`,
+    `const CACHE_NAME = "expenstream-icons-${iconHash}";`,
   );
   fs.writeFileSync(swPath, sw);
   console.log("Updated sw.js CACHE_NAME");

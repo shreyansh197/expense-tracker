@@ -1,5 +1,5 @@
 -- ═══════════════════════════════════════════════════════════════
--- Expense Tracker — Critical-Table Migration
+-- ExpenStream — Critical-Table Migration
 -- PostgreSQL 15+  ·  Idempotent (IF NOT EXISTS everywhere)
 -- ═══════════════════════════════════════════════════════════════
 

@@ -24,7 +24,7 @@ export interface AutoRule {
   createdAt: number;
 }
 
-const STORAGE_KEY = "expense-tracker-auto-rules";
+const STORAGE_KEY = "expenstream-auto-rules";
 
 function loadRules(): AutoRule[] {
   if (typeof window === "undefined") return [];

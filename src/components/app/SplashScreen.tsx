@@ -127,7 +127,7 @@ export function SplashScreen() {
             boxShadow: `0 8px 40px rgba(99,102,241,0.5), 0 2px 12px rgba(99,102,241,0.3)`,
             animation: "et-icon-scale 0.55s cubic-bezier(0.34,1.56,0.64,1) both",
           }}>
-            <Image src="/icons/icon-192.png" alt="Spendly" width={96} height={96} style={{ display: "block", width: "100%", height: "100%" }} />
+            <Image src="/icons/icon-192.png" alt="ExpenStream" width={96} height={96} style={{ display: "block", width: "100%", height: "100%" }} />
             {/* Shimmer beam */}
             <div style={{
               position: "absolute", top: 0, left: 0, width: "40%", height: "100%",
@@ -149,7 +149,7 @@ export function SplashScreen() {
           marginBottom: 10,
           textShadow: `0 0 40px rgba(99,102,241,0.6)`,
         }}>
-          Spendly
+          ExpenStream
         </div>
 
         {/* Tagline — animated gradient text */}

@@ -1,7 +1,7 @@
 import { authFetch } from "./authClient";
 import { getActiveWorkspaceId } from "./authClient";
 
-const SYNC_CURSOR_KEY = "expense-tracker-sync-cursor";
+const SYNC_CURSOR_KEY = "expenstream-sync-cursor";
 
 // ── Cursor persistence ───────────────────────────────────────
 
@@ -87,7 +87,7 @@ export function makeIdempotencyKey(): string {
 
 // ── Offline mutation queue ───────────────────────────────────
 
-const OFFLINE_QUEUE_KEY = "expense-tracker-offline-mutations";
+const OFFLINE_QUEUE_KEY = "expenstream-offline-mutations";
 
 export function enqueueOfflineMutation(mutation: SyncMutation) {
   if (typeof window === "undefined") return;

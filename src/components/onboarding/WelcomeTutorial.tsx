@@ -20,7 +20,7 @@ const STEPS: Step[] = [
     selector: '[data-tour="fab"]',
     selectorDesktop: '[data-tour="fab-desktop"]',
     title: "Add your first expense",
-    body: "Tap this button to log what you spend. Every entry helps Spendly track your habits.",
+    body: "Tap this button to log what you spend. Every entry helps ExpenStream track your habits.",
   },
   {
     selector: '[data-tour="dashboard"]',

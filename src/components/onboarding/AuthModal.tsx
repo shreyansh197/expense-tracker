@@ -147,11 +147,11 @@ function DesktopHeroPanel() {
               overflow: "hidden",
               boxShadow: `0 4px 20px rgba(99,102,241,0.4)`,
             }}>
-              <Image src="/icons/icon-192.png" alt="Spendly" width={44} height={44} style={{ display: "block", width: "100%", height: "100%" }} />
+              <Image src="/icons/icon-192.png" alt="ExpenStream" width={44} height={44} style={{ display: "block", width: "100%", height: "100%" }} />
             </div>
           </div>
           <span style={{ fontSize: "1.25rem", fontWeight: 800, letterSpacing: "-0.03em" }}>
-            Spendly
+            ExpenStream
           </span>
         </div>
 
@@ -258,14 +258,14 @@ function MobileAuthPage({ children }: { children: React.ReactNode }) {
             overflow: "hidden",
             boxShadow: `0 6px 24px rgba(99,102,241,0.5)`,
           }}>
-            <Image src="/icons/icon-192.png" alt="Spendly" width={56} height={56} style={{ display: "block", width: "100%", height: "100%" }} />
+            <Image src="/icons/icon-192.png" alt="ExpenStream" width={56} height={56} style={{ display: "block", width: "100%", height: "100%" }} />
           </div>
         </div>
         <h1 style={{
           fontSize: "1.375rem", fontWeight: 800,
           letterSpacing: "-0.03em", color: "white",
         }}>
-          Spendly
+          ExpenStream
         </h1>
         <p style={{
           marginTop: 4, fontSize: "0.7rem", letterSpacing: "0.05em",
@@ -544,7 +544,7 @@ export function AuthModal({
       <AuthPage>
         <div className="mb-1">
           <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
-            Welcome to Spendly
+            Welcome to ExpenStream
           </h2>
           <p className="mt-1.5 text-sm text-slate-500 dark:text-slate-400">
             Track expenses, set budgets, and take control.
@@ -638,7 +638,7 @@ export function AuthModal({
       </h2>
       <p className="mt-1.5 text-sm text-slate-500 dark:text-slate-400 mb-7">
         {isRegister
-          ? "Set up your Spendly account in seconds"
+          ? "Set up your ExpenStream account in seconds"
           : "Sign in to continue tracking your finances"}
       </p>
 

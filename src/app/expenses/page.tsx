@@ -46,7 +46,7 @@ export default function ExpensesPage() {
   const [dayMax, setDayMax] = useState("");
   const [sortBy, setSortBy] = useState<SortOption>(() => {
     if (typeof window === "undefined") return "day-desc";
-    return (localStorage.getItem("spendly-expenses-sort") as SortOption) || "day-desc";
+    return (localStorage.getItem("expenstream-expenses-sort") as SortOption) || "day-desc";
   });
   const [localSearch, setLocalSearch] = useState(searchQuery);
 
@@ -118,7 +118,7 @@ export default function ExpensesPage() {
           </div>
           <select
             value={sortBy}
-            onChange={(e) => { const v = e.target.value as SortOption; setSortBy(v); localStorage.setItem("spendly-expenses-sort", v); }}
+            onChange={(e) => { const v = e.target.value as SortOption; setSortBy(v); localStorage.setItem("expenstream-expenses-sort", v); }}
             className="rounded-xl px-3 py-3 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
             style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-secondary)' }}
           >

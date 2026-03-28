@@ -73,12 +73,43 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     setHydrated(true);
+    // One-time migration: copy old spendly-* and expense-tracker-* localStorage keys to expenstream-*
+    if (!localStorage.getItem("expenstream-migrated")) {
+      const keyMap: Record<string, string> = {
+        "spendly-kpi-expanded": "expenstream-kpi-expanded",
+        "spendly-last-category": "expenstream-last-category",
+        "spendly-expenses-sort": "expenstream-expenses-sort",
+        "spendly-tutorial-seen": "expenstream-tutorial-seen",
+        "expense-tracker-auth": "expenstream-auth",
+        "expense-tracker-sync-cursor": "expenstream-sync-cursor",
+        "expense-tracker-offline-mutations": "expenstream-offline-mutations",
+        "expense-tracker-offline-queue": "expenstream-offline-queue",
+        "expense-tracker-recurring-applied": "expenstream-recurring-applied",
+        "expense-tracker-app-mode": "expenstream-app-mode",
+        "expense-tracker-auto-rules": "expenstream-auto-rules",
+      };
+      // Migrate expense-tracker-settings and per-user variants
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key?.startsWith("expense-tracker-settings")) {
+          const newKey = key.replace("expense-tracker-settings", "expenstream-settings");
+          keyMap[key] = newKey;
+        }
+      }
+      for (const [oldKey, newKey] of Object.entries(keyMap)) {
+        const val = localStorage.getItem(oldKey);
+        if (val !== null && localStorage.getItem(newKey) === null) {
+          localStorage.setItem(newKey, val);
+        }
+      }
+      localStorage.setItem("expenstream-migrated", "1");
+    }
   }, []);
 
   // Show tutorial for first-time authenticated users
   useEffect(() => {
     if (hydrated && isAuthenticated && isFirstVisit) {
-      const seen = localStorage.getItem("spendly-tutorial-seen");
+      const seen = localStorage.getItem("expenstream-tutorial-seen");
       if (!seen) setShowTutorial(true);
     }
   }, [hydrated, isAuthenticated, isFirstVisit]);
@@ -112,7 +143,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <WelcomeTutorial
           onComplete={() => {
             setShowTutorial(false);
-            localStorage.setItem("spendly-tutorial-seen", "1");
+            localStorage.setItem("expenstream-tutorial-seen", "1");
           }}
         />
       )}

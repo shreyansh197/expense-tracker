@@ -36,7 +36,7 @@ export async function signAccessToken(payload: {
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime(ACCESS_TOKEN_TTL)
-    .setIssuer("expense-tracker")
+    .setIssuer("expenstream")
     .sign(getSecret());
 }
 
@@ -44,7 +44,7 @@ export async function verifyAccessToken(
   token: string,
 ): Promise<AccessTokenPayload> {
   const { payload } = await jwtVerify(token, getSecret(), {
-    issuer: "expense-tracker",
+    issuer: "expenstream",
   });
   return payload as AccessTokenPayload;
 }
@@ -70,6 +70,6 @@ export function generateSecureToken(): string {
 // ── IP hashing (privacy-preserving) ──────────────────────────
 
 export function hashIp(ip: string): string {
-  const salt = process.env.IP_HASH_SALT ?? "expense-tracker-ip";
+  const salt = process.env.IP_HASH_SALT ?? "expenstream-ip";
   return createHash("sha256").update(`${salt}:${ip}`).digest("hex").slice(0, 16);
 }

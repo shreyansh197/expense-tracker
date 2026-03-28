@@ -11,8 +11,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Spendly",
-  description: "Spend smarter. Live better. Track expenses, set budgets, and sync across all your devices.",
+  title: "ExpenStream",
+  description: "Stream your expenses. Track smarter. Live better.",
   manifest: "/manifest.json",
   icons: {
     icon: [
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Spendly",
+    title: "ExpenStream",
   },
 };
 

@@ -1,4 +1,4 @@
-const AUTH_STORAGE_KEY = "expense-tracker-auth";
+const AUTH_STORAGE_KEY = "expenstream-auth";
 
 function getClientDeviceId(): string {
   if (typeof window === "undefined") return "server";

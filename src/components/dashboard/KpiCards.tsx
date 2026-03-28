@@ -42,12 +42,12 @@ export function KpiCards({
   const { formatCurrency } = useCurrency();
   const [expanded, setExpanded] = useState(() => {
     if (typeof window === "undefined") return false;
-    return localStorage.getItem("spendly-kpi-expanded") === "true";
+    return localStorage.getItem("expenstream-kpi-expanded") === "true";
   });
 
   const toggleExpanded = () => {
     setExpanded((prev) => {
-      localStorage.setItem("spendly-kpi-expanded", String(!prev));
+      localStorage.setItem("expenstream-kpi-expanded", String(!prev));
       return !prev;
     });
   };
