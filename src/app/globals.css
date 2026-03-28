@@ -197,6 +197,7 @@ button, a {
 }
 
 /* ── Form utility classes ──────────────────────────────────── */
+@layer base {
 .form-input {
   width: 100%;
   background: var(--surface);
@@ -263,6 +264,7 @@ button, a {
 .btn-ghost:hover {
   color: var(--text-primary);
   background: var(--surface-secondary);
+}
 }
 
 input[type="number"]::-webkit-inner-spin-button,
