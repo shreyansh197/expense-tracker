@@ -19,15 +19,23 @@ export async function PATCH(req: NextRequest) {
     data.name = name.trim().slice(0, 100);
   }
   if (avatarUrl !== undefined) {
-    // Allow null to clear, or a valid URL string
+    // Allow null to clear, or a valid URL string / data URI
     if (avatarUrl === null) {
       data.avatarUrl = null;
-    } else if (typeof avatarUrl === "string" && avatarUrl.length < 2048) {
-      try {
-        new URL(avatarUrl);
+    } else if (typeof avatarUrl === "string") {
+      if (avatarUrl.startsWith("data:image/")) {
+        // Data URI — allow up to ~2 MB base64 payload (~2.75 MB string)
+        if (avatarUrl.length > 3_000_000) {
+          return jsonError("Avatar too large", 400);
+        }
         data.avatarUrl = avatarUrl;
-      } catch {
-        return jsonError("Invalid avatar URL", 400);
+      } else if (avatarUrl.length < 2048) {
+        try {
+          new URL(avatarUrl);
+          data.avatarUrl = avatarUrl;
+        } catch {
+          return jsonError("Invalid avatar URL", 400);
+        }
       }
     }
   }
