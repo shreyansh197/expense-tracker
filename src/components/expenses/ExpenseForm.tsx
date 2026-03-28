@@ -47,7 +47,7 @@ export function ExpenseForm({
   const [remark, setRemark] = useState(editExpense?.remark || "");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
-  const [amountTouched, setAmountTouched] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
   const submittingRef = useRef(false);
 
   const amountRef = useRef<HTMLInputElement>(null);
@@ -69,6 +69,7 @@ export function ExpenseForm({
     async (e: React.FormEvent) => {
       e.preventDefault();
       if (submittingRef.current) return;
+      setSubmitted(true);
       setError("");
 
       const parsedAmount = parseFloat(amount);
@@ -127,7 +128,7 @@ export function ExpenseForm({
     [closeForm]
   );
 
-  const amountInvalid = amountTouched && (amount === "" || isNaN(parseFloat(amount)) || parseFloat(amount) <= 0);
+  const amountInvalid = submitted && (amount === "" || isNaN(parseFloat(amount)) || parseFloat(amount) <= 0);
 
   return (
     <form
@@ -195,8 +196,7 @@ export function ExpenseForm({
           min="1"
           step="1"
           value={amount}
-          onChange={(e) => { setAmount(e.target.value); if (amountTouched) setAmountTouched(true); }}
-          onBlur={() => setAmountTouched(true)}
+          onChange={(e) => { setAmount(e.target.value); if (submitted) setSubmitted(false); }}
           placeholder="0"
           className={cn("form-input w-full text-lg font-semibold", amountInvalid && "!border-red-400 !ring-red-400/20")}
           required

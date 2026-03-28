@@ -74,7 +74,7 @@ export default function SettingsPage() {
           <AccordionSection
             id="account"
             icon={<LinkIcon size={18} />}
-            title="Account & Workspace"
+            title="Account"
             description="Manage your account and workspaces"
           >
             <AccountCard />

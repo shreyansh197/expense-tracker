@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
     });
 
     const data = payload.data as {
-      user: { id: string; email: string; name: string };
+      user: { id: string; email: string; name: string; avatarUrl?: string | null };
       accessToken: string;
       refreshToken: string;
       workspaces: Array<{ id: string; name: string; role: string }>;

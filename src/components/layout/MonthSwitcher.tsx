@@ -25,8 +25,15 @@ export function MonthSwitcher() {
     return () => cancelAnimationFrame(frame);
   }, [currentMonth, currentYear]);
 
-  const handlePrev = useCallback(() => prevMonth(), [prevMonth]);
-  const handleNext = useCallback(() => nextMonth(), [nextMonth]);
+  const handlePrev = useCallback(() => {
+    if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate(10);
+    prevMonth();
+  }, [prevMonth]);
+
+  const handleNext = useCallback(() => {
+    if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate(10);
+    nextMonth();
+  }, [nextMonth]);
 
   const label = `${getMonthName(display.month)} ${display.year}`;
 
@@ -48,7 +55,7 @@ export function MonthSwitcher() {
           className="text-center text-sm font-bold tracking-tight"
           style={{
             color: 'var(--text-primary)',
-            animation: dir ? `month-slide-${dir} 0.3s cubic-bezier(0.4, 0, 0.2, 1) both` : undefined,
+            animation: dir ? `month-slide-${dir} 0.3s cubic-bezier(0.22, 1, 0.36, 1) both` : undefined,
           }}
         >
           {label}
@@ -67,12 +74,12 @@ export function MonthSwitcher() {
 
       <style jsx>{`
         @keyframes month-slide-left {
-          0% { opacity: 0; transform: translateX(24px); }
-          100% { opacity: 1; transform: translateX(0); }
+          0% { opacity: 0; transform: translateX(40px) scale(0.92); }
+          100% { opacity: 1; transform: translateX(0) scale(1); }
         }
         @keyframes month-slide-right {
-          0% { opacity: 0; transform: translateX(-24px); }
-          100% { opacity: 1; transform: translateX(0); }
+          0% { opacity: 0; transform: translateX(-40px) scale(0.92); }
+          100% { opacity: 1; transform: translateX(0) scale(1); }
         }
       `}</style>
     </div>

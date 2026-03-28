@@ -58,8 +58,8 @@ export function QuickHelpButton() {
 
           <ul className="space-y-1.5">
             {TIPS.map((tip, i) => (
-              <li key={i} className="flex items-start gap-2 text-xs leading-relaxed" style={{ color: "var(--text-secondary)" }}>
-                <span className="mt-0.5 h-1 w-1 shrink-0 rounded-full bg-indigo-500" />
+              <li key={i} className="flex items-center gap-2 text-xs leading-relaxed" style={{ color: "var(--text-secondary)" }}>
+                <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-indigo-500" />
                 {tip}
               </li>
             ))}
@@ -81,8 +81,8 @@ export function QuickHelpButton() {
             </div>
           </div>
 
-          <p className="mt-3 text-center text-[10px]" style={{ color: "var(--text-muted)" }}>
-            Press <kbd className="rounded border px-1 py-0.5 font-mono" style={{ borderColor: "var(--border)", background: "var(--surface-secondary)" }}>Shift + ?</kbd> for full shortcuts panel
+          <p className="mt-3 text-center text-[10px]" style={{ color: "var(--text-secondary)" }}>
+            Press <kbd className="rounded border px-1 py-0.5 font-mono" style={{ borderColor: "var(--border)", background: "var(--surface-secondary)", color: "var(--text-primary)" }}>Shift + ?</kbd> for full shortcuts panel
           </p>
         </div>
       )}

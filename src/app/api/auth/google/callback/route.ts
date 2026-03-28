@@ -27,6 +27,7 @@ interface GoogleUserInfo {
   email: string;
   name?: string;
   verified_email?: boolean;
+  picture?: string;
 }
 
 /**
@@ -102,19 +103,22 @@ export async function GET(req: NextRequest) {
       // 1. Try to find existing user by googleId
       let dbUser = await tx.user.findUnique({
         where: { googleId: googleUser.id },
-        select: { id: true, email: true, name: true, deletedAt: true },
+        select: { id: true, email: true, name: true, avatarUrl: true, deletedAt: true },
       });
 
       // 2. Fallback: find by email (link existing email/password account)
       if (!dbUser) {
         const byEmail = await tx.user.findUnique({
           where: { email: googleUser.email.toLowerCase() },
-          select: { id: true, email: true, name: true, deletedAt: true },
+          select: { id: true, email: true, name: true, avatarUrl: true, deletedAt: true },
         });
         if (byEmail && !byEmail.deletedAt) {
           await tx.user.update({
             where: { id: byEmail.id },
-            data: { googleId: googleUser.id },
+            data: {
+              googleId: googleUser.id,
+              ...(googleUser.picture && !byEmail.avatarUrl ? { avatarUrl: googleUser.picture } : {}),
+            },
           });
           dbUser = byEmail;
         }
@@ -130,8 +134,9 @@ export async function GET(req: NextRequest) {
             name: googleUser.name || "",
             googleId: googleUser.id,
             emailVerifiedAt: new Date(),
+            avatarUrl: googleUser.picture || null,
           },
-          select: { id: true, email: true, name: true },
+          select: { id: true, email: true, name: true, avatarUrl: true },
         });
         dbUser = { ...created, deletedAt: null };
 
@@ -235,6 +240,7 @@ export async function GET(req: NextRequest) {
         id: result.dbUser.id,
         email: result.dbUser.email,
         name: result.dbUser.name,
+        avatarUrl: (result.dbUser as Record<string, unknown>).avatarUrl ?? null,
       },
       accessToken,
       refreshToken: result.refreshTokenRaw,

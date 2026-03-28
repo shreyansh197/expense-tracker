@@ -9,9 +9,6 @@ import { useConfirm } from "@/components/ui/ConfirmDialog";
 
 const COPY = {
   dataMgmtTitle: "Workspace Removal",
-  exportBackupTitle: "Export / Backup",
-  exportBackupHelp:
-    "Download your data or import from a backup before making significant changes.",
   deleteWorkspaceTitle: "Workspace Removal",
   deleteWorkspaceHelp:
     "Permanently remove all expenses, ledgers, and attachments in this workspace. This action cannot be undone.",
@@ -37,7 +34,6 @@ export function DataAccountManagement({ onScrollToExport }: DataAccountManagemen
     if (onScrollToExport) {
       onScrollToExport();
     } else {
-      // Scroll to export section via hash
       const el = document.getElementById("section-export-import");
       el?.scrollIntoView({ behavior: "smooth", block: "start" });
     }
@@ -78,26 +74,6 @@ export function DataAccountManagement({ onScrollToExport }: DataAccountManagemen
 
   return (
     <div className="space-y-5">
-      {/* ─── Export / Backup ─── */}
-      <div>
-        <h3 className="text-sm font-semibold mb-1" style={{ color: 'var(--text-primary)' }}>
-          {COPY.exportBackupTitle}
-        </h3>
-        <p className="text-xs mb-3" style={{ color: 'var(--text-secondary)' }}>
-          {COPY.exportBackupHelp}
-        </p>
-        <button
-          onClick={handleExportFirst}
-          className="flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors"
-          style={{ color: 'var(--text-primary)', border: '1px solid var(--border)' }}
-          onMouseEnter={e => { e.currentTarget.style.background = 'var(--surface-secondary)'; }}
-          onMouseLeave={e => { e.currentTarget.style.background = ''; }}
-        >
-          <Download size={16} />
-          Go to Export &amp; Import
-        </button>
-      </div>
-
       {/* ─── Delete Workspace Data ─── */}
       {isOwner && (
         <div className="border-t border-red-100 pt-5 dark:border-red-900/30">
