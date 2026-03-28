@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useConfirm } from "@/components/ui/ConfirmDialog";
 import { useToast } from "@/components/ui/Toast";
@@ -236,8 +237,8 @@ export function AccountCard() {
         </div>
       </div>
 
-      {/* Fullscreen photo viewer */}
-      {showFullPhoto && avatarSrc && (
+      {/* Fullscreen photo viewer — portaled to body to avoid scroll/overflow issues */}
+      {showFullPhoto && avatarSrc && createPortal(
         <div
           className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm animate-in fade-in"
           onClick={() => setShowFullPhoto(false)}
@@ -255,7 +256,8 @@ export function AccountCard() {
             className="max-h-[80vh] max-w-[90vw] rounded-2xl object-contain shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           />
-        </div>
+        </div>,
+        document.body,
       )}
 
       {/* Password Change */}
