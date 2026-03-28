@@ -86,7 +86,7 @@ export function LedgerForm({ initial, onSubmit, onCancel, submitLabel = "Create 
             onChange={(e) => setExpectedAmount(e.target.value)}
             onBlur={() => setAmountTouched(true)}
             placeholder="0"
-            className={cn("form-input w-full pl-7", amountInvalid && "!border-red-400 !ring-red-400/20")}
+            className={cn("form-input w-full pl-8", amountInvalid && "!border-red-400 !ring-red-400/20")}
             required
             aria-invalid={amountInvalid || undefined}
           />

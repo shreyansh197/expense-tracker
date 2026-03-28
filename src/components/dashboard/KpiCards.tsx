@@ -176,11 +176,13 @@ export function KpiCards({
           <p className="text-meta font-medium">Spend Target</p>
           <p className={cn(
             "tabular-nums mt-1.5 text-lg font-bold",
-            paceExceeded
-              ? "text-amber-600 dark:text-amber-400"
-              : ""
-          )} style={!paceExceeded ? { color: 'var(--text-primary)' } : undefined}>
-            {paceToStayUnder > 0 ? `${formatCurrency(paceToStayUnder)}/d` : "—"}
+            paceToStayUnder <= 0
+              ? "text-red-600 dark:text-red-400"
+              : paceExceeded
+                ? "text-amber-600 dark:text-amber-400"
+                : ""
+          )} style={paceToStayUnder > 0 && !paceExceeded ? { color: 'var(--text-primary)' } : undefined}>
+            {paceToStayUnder > 0 ? `${formatCurrency(paceToStayUnder)}/d` : "Over budget"}
           </p>
           <p className="tabular-nums mt-1 text-meta">
             Now {formatCurrency(avgDaily)}/day
