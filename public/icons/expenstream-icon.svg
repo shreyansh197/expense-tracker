@@ -72,28 +72,28 @@
     <path
       d="M40,185 C130,160 200,210 290,185 S420,145 480,180"
       stroke="#22d3ee"
-      stroke-width="18"
+      stroke-width="8"
       stroke-linecap="round"
       fill="none"
     />
     <path
       d="M30,248 C120,225 190,275 280,248 S400,215 480,245"
       stroke="#818cf8"
-      stroke-width="15"
+      stroke-width="6"
       stroke-linecap="round"
       fill="none"
     />
     <path
       d="M40,315 C130,290 210,335 300,310 S425,278 480,308"
       stroke="#6366f1"
-      stroke-width="12"
+      stroke-width="5"
       stroke-linecap="round"
       fill="none"
     />
     <path
       d="M50,378 C140,358 215,395 305,372 S430,342 475,368"
       stroke="#22d3ee"
-      stroke-width="10"
+      stroke-width="4"
       stroke-linecap="round"
       fill="none"
     />
@@ -104,11 +104,31 @@
     Smooth rounded paths for a contemporary app feel.
     Gold coin accent at top-right.
   -->
-  <g filter="url(#glow)" transform="translate(256, 256)">
+  <g filter="url(#glow)" transform="translate(218, 256)">
 
     <!-- Shadow / depth layer -->
     <g transform="translate(3, 5)" opacity="0.35">
-      <path d="M-80,-115 C-80,-115 -90,-110 -90,-95 L-90,95 C-90,110 -80,115 -68,115 L65,115 C75,115 80,108 80,100 C80,92 75,85 65,85 L-48,85 L-48,22 L45,22 C55,22 60,15 60,7 C60,-1 55,-8 45,-8 L-48,-8 L-48,-80 L65,-80 C75,-80 80,-87 80,-95 C80,-103 75,-110 65,-110 L-68,-110 C-80,-110 -80,-115 -80,-115 Z" fill="black"/>
+      <path d="
+        M-68,-110 C-82,-110 -90,-100 -90,-88 L-90,88 C-90,100 -82,110 -68,110
+        L65,110 C78,110 82,100 82,94 C82,88 78,80 65,80 L-48,80 L-48,20
+        L10,20 C23,20 27,10 27,4 C27,-2 23,-12 10,-12 L-48,-12 L-48,-78
+        L65,-78 C78,-78 82,-88 82,-94 C82,-100 78,-110 65,-110 Z
+      " fill="black"/>
+      <path d="
+        M65,110
+        C90,110 120,100 120,72
+        C120,44 96,34 72,26
+        C48,18 32,8 32,-14
+        C32,-36 50,-48 72,-48
+        C88,-48 100,-40 108,-32
+        L120,-46
+        C110,-56 94,-64 72,-64
+        C42,-64 16,-48 16,-18
+        C16,10 38,22 62,30
+        C86,38 104,48 104,74
+        C104,94 88,96 65,96 L-48,96 L-48,80 L65,80
+        C78,80 82,88 82,94 C82,100 78,110 65,110 Z
+      " fill="black"/>
     </g>
 
     <!-- Main E — modern curvy with rounded terminals -->
@@ -122,9 +142,9 @@
       C82,88 78,80 65,80
       L-48,80
       L-48,20
-      L45,20
-      C58,20 62,10 62,4
-      C62,-2 58,-12 45,-12
+      L10,20
+      C23,20 27,10 27,4
+      C27,-2 23,-12 10,-12
       L-48,-12
       L-48,-78
       L65,-78
@@ -133,112 +153,58 @@
       Z
     " fill="url(#accent)"/>
 
-    <!-- Inner highlight stroke for premium depth -->
-    <path d="
-      M-68,-110
-      C-82,-110 -90,-100 -90,-88
-      L-90,88
-      C-90,100 -82,110 -68,110
-      L65,110
-      C78,110 82,100 82,94
-      C82,88 78,80 65,80
-      L-48,80
-      L-48,20
-      L45,20
-      C58,20 62,10 62,4
-      C62,-2 58,-12 45,-12
-      L-48,-12
-      L-48,-78
-      L65,-78
-      C78,-78 82,-88 82,-94
-      C82,-100 78,-110 65,-110
-      Z
-    " fill="none" stroke="white" stroke-width="1.5" opacity="0.12"/>
+    <!--
+      S flows from E's bottom bar — the bottom bar extends right
+      and smoothly curves up into S's lower bulge, then snakes
+      into the upper bulge. One seamless stroke-based S.
+    -->
 
+    <!-- S lower curve: continues from E bottom bar end -->
+    <path d="
+      M65,95
+      C105,95 150,81 150,54
+      C150,28 122,18 96,10
+      C70,2 55,-8 55,-28
+      C55,-46 74,-56 98,-56
+      C116,-56 130,-48 140,-38
+    " fill="none" stroke="url(#accent)" stroke-width="30" stroke-linecap="round"/>
+
+    <!-- S glass highlight on top curve -->
+    <path d="
+      M140,-38 C130,-48 116,-56 98,-56 C74,-56 55,-46 55,-28
+    " fill="none" stroke="white" stroke-width="28" stroke-linecap="round" opacity="0.06"/>
+
+
+    <!-- S edge highlight -->
+    
 
   </g>
 
-  <!-- "S" beside the E — filled block letter matching E's curvy style -->
-  <g filter="url(#glow)" transform="translate(370, 305)">
-    <!-- S shadow / depth layer -->
-    <g transform="translate(3, 5)" opacity="0.35">
-      <path d="
-        M24,-52
-        C10,-58 -10,-56 -22,-46
-        C-36,-34 -36,-14 -18,-4
-        C-4,4 16,10 28,22
-        C40,34 38,52 22,58
-        C8,64 -12,60 -24,50
-        L-16,38
-        C-6,44 8,48 18,44
-        C30,38 30,26 18,18
-        C6,10 -16,4 -26,-10
-        C-36,-24 -32,-42 -18,-50
-        C-4,-56 14,-54 24,-46
-        Z
-      " fill="black"/>
-    </g>
+  <!-- Finance icons scattered randomly across the canvas -->
+  <g opacity="0.45" clip-path="url(#roundedSquare)">
 
-    <!-- S main filled body — curvy block letter -->
-    <path d="
-      M24,-52
-      C10,-58 -10,-56 -22,-46
-      C-36,-34 -36,-14 -18,-4
-      C-4,4 16,10 28,22
-      C40,34 38,52 22,58
-      C8,64 -12,60 -24,50
-      L-16,38
-      C-6,44 8,48 18,44
-      C30,38 30,26 18,18
-      C6,10 -16,4 -26,-10
-      C-36,-24 -32,-42 -18,-50
-      C-4,-56 14,-54 24,-46
-      Z
-    " fill="url(#accent)"/>
-
-    <!-- Inner highlight stroke for premium depth (matching E) -->
-    <path d="
-      M24,-52
-      C10,-58 -10,-56 -22,-46
-      C-36,-34 -36,-14 -18,-4
-      C-4,4 16,10 28,22
-      C40,34 38,52 22,58
-      C8,64 -12,60 -24,50
-      L-16,38
-      C-6,44 8,48 18,44
-      C30,38 30,26 18,18
-      C6,10 -16,4 -26,-10
-      C-36,-24 -32,-42 -18,-50
-      C-4,-56 14,-54 24,-46
-      Z
-    " fill="none" stroke="white" stroke-width="1.5" opacity="0.12"/>
-  </g>
-
-  <!-- Small finance icons scattered across the canvas -->
-  <g opacity="0.55" clip-path="url(#roundedSquare)">
-
-    <!-- Mini bar chart — bottom-left corner -->
-    <g transform="translate(62, 442)">
+    <!-- Bar chart -->
+    <g transform="translate(78, 102)">
       <rect x="0" y="8" width="5" height="12" rx="1.5" fill="#818cf8"/>
       <rect x="7" y="3" width="5" height="17" rx="1.5" fill="#a5b4fc"/>
       <rect x="14" y="-2" width="5" height="22" rx="1.5" fill="#6366f1"/>
     </g>
 
-    <!-- Mini pie/donut — top-left corner -->
-    <g transform="translate(58, 90)">
+    <!-- Pie/donut -->
+    <g transform="translate(427, 88)">
       <circle cx="0" cy="0" r="10" fill="none" stroke="#818cf8" stroke-width="3.5" stroke-dasharray="20 43" stroke-linecap="round"/>
       <circle cx="0" cy="0" r="10" fill="none" stroke="#22d3ee" stroke-width="3.5" stroke-dasharray="14 49" stroke-dashoffset="-20" stroke-linecap="round"/>
     </g>
 
-    <!-- Mini wallet outline — bottom-right corner -->
-    <g transform="translate(452, 442)">
+    <!-- Wallet -->
+    <g transform="translate(438, 420)">
       <rect x="-12" y="-8" width="24" height="16" rx="3" fill="none" stroke="#a5b4fc" stroke-width="2.5"/>
       <circle cx="8" cy="0" r="2.5" fill="#22d3ee"/>
       <line x1="-12" y1="-3" x2="-4" y2="-3" stroke="#a5b4fc" stroke-width="2" stroke-linecap="round"/>
     </g>
 
-    <!-- Mini bank building — far right upper -->
-    <g transform="translate(456, 175)">
+    <!-- Bank building -->
+    <g transform="translate(72, 412)">
       <polygon points="0,-11 12,-4 -12,-4" fill="none" stroke="#22d3ee" stroke-width="2" stroke-linejoin="round"/>
       <line x1="-10" y1="9" x2="10" y2="9" stroke="#22d3ee" stroke-width="2.5" stroke-linecap="round"/>
       <line x1="-6" y1="-3" x2="-6" y2="8" stroke="#22d3ee" stroke-width="1.8" stroke-linecap="round"/>
@@ -246,15 +212,15 @@
       <line x1="6" y1="-3" x2="6" y2="8" stroke="#22d3ee" stroke-width="1.8" stroke-linecap="round"/>
     </g>
 
-    <!-- Mini percentage badge — far left center -->
-    <g transform="translate(50, 250)">
+    <!-- Percentage -->
+    <g transform="translate(182, 78)">
       <circle cx="-4" cy="-4" r="2" fill="#818cf8"/>
       <circle cx="4" cy="4" r="2" fill="#818cf8"/>
       <line x1="-5" y1="5" x2="5" y2="-5" stroke="#818cf8" stroke-width="2" stroke-linecap="round"/>
     </g>
 
-    <!-- Mini calculator — top center-right -->
-    <g transform="translate(310, 48)">
+    <!-- Calculator -->
+    <g transform="translate(345, 435)">
       <rect x="-9" y="-11" width="18" height="22" rx="2.5" fill="none" stroke="#a5b4fc" stroke-width="2"/>
       <line x1="-5" y1="-5" x2="5" y2="-5" stroke="#818cf8" stroke-width="2" stroke-linecap="round"/>
       <circle cx="-4" cy="1" r="1.5" fill="#22d3ee"/>
@@ -265,63 +231,159 @@
       <circle cx="4" cy="6" r="1.5" fill="#818cf8"/>
     </g>
 
-    <!-- Mini credit card — bottom center -->
-    <g transform="translate(256, 462)">
+    <!-- Credit card -->
+    <g transform="translate(93, 298)">
       <rect x="-14" y="-9" width="28" height="18" rx="3" fill="none" stroke="#6366f1" stroke-width="2"/>
       <line x1="-14" y1="-3" x2="14" y2="-3" stroke="#818cf8" stroke-width="2.5"/>
       <line x1="-10" y1="3" x2="-2" y2="3" stroke="#22d3ee" stroke-width="2" stroke-linecap="round"/>
       <circle cx="10" cy="3" r="2" fill="#a5b4fc"/>
     </g>
 
-    <!-- Mini line chart — top left area -->
-    <g transform="translate(155, 48)">
+    <!-- Line chart -->
+    <g transform="translate(420, 310)">
       <polyline points="-12,6 -4,0 4,4 12,-6" fill="none" stroke="#22d3ee" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
       <circle cx="12" cy="-6" r="2.5" fill="#22d3ee"/>
     </g>
 
-    <!-- Mini money bag — left side below center -->
-    <g transform="translate(55, 365)">
+    <!-- Money bag -->
+    <g transform="translate(55, 195)">
       <path d="M-7,2 C-7,-4 -3,-7 0,-7 C3,-7 7,-4 7,2 C7,8 3,10 0,10 C-3,10 -7,8 -7,2 Z" fill="none" stroke="#a5b4fc" stroke-width="2"/>
       <path d="M-3,-7 C-2,-10 2,-10 3,-7" fill="none" stroke="#a5b4fc" stroke-width="1.8" stroke-linecap="round"/>
       <text x="0" y="5" text-anchor="middle" font-family="serif" font-size="10" font-weight="bold" fill="#a5b4fc">$</text>
     </g>
 
-    <!-- Mini receipt — right side center -->
-    <g transform="translate(458, 310)">
+    <!-- Receipt -->
+    <g transform="translate(456, 248)">
       <path d="M-8,-11 L8,-11 L8,11 L5,9 L2,11 L-1,9 L-4,11 L-8,9 Z" fill="none" stroke="#818cf8" stroke-width="2" stroke-linejoin="round"/>
       <line x1="-4" y1="-6" x2="4" y2="-6" stroke="#a5b4fc" stroke-width="1.5" stroke-linecap="round"/>
       <line x1="-4" y1="-2" x2="4" y2="-2" stroke="#a5b4fc" stroke-width="1.5" stroke-linecap="round"/>
       <line x1="-4" y1="2" x2="2" y2="2" stroke="#a5b4fc" stroke-width="1.5" stroke-linecap="round"/>
     </g>
 
-    <!-- Mini exchange arrows — top right area -->
-    <g transform="translate(435, 70)">
+    <!-- Exchange arrows -->
+    <g transform="translate(52, 340)">
       <line x1="-8" y1="-3" x2="8" y2="-3" stroke="#22d3ee" stroke-width="2" stroke-linecap="round"/>
       <polyline points="4,-7 8,-3 4,1" fill="none" stroke="#22d3ee" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
       <line x1="8" y1="3" x2="-8" y2="3" stroke="#22d3ee" stroke-width="2" stroke-linecap="round"/>
       <polyline points="-4,-1 -8,3 -4,7" fill="none" stroke="#22d3ee" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
     </g>
 
-    <!-- Mini target / bullseye — left side upper -->
-    <g transform="translate(52, 170)">
+    <!-- Target / bullseye -->
+    <g transform="translate(448, 168)">
       <circle cx="0" cy="0" r="9" fill="none" stroke="#6366f1" stroke-width="2"/>
       <circle cx="0" cy="0" r="5" fill="none" stroke="#818cf8" stroke-width="1.5"/>
       <circle cx="0" cy="0" r="2" fill="#22d3ee"/>
     </g>
 
-    <!-- Mini stack of coins — bottom left mid -->
-    <g transform="translate(115, 462)">
+    <!-- Stack of coins -->
+    <g transform="translate(160, 435)">
       <ellipse cx="0" cy="5" rx="8" ry="3" fill="none" stroke="#fbbf24" stroke-width="1.8" opacity="0.7"/>
       <ellipse cx="0" cy="1" rx="8" ry="3" fill="none" stroke="#fbbf24" stroke-width="1.8" opacity="0.7"/>
       <ellipse cx="0" cy="-3" rx="8" ry="3" fill="none" stroke="#fbbf24" stroke-width="1.8"/>
     </g>
 
-    <!-- Mini clock — top center -->
-    <g transform="translate(210, 52)">
+    <!-- Clock -->
+    <g transform="translate(290, 58)">
       <circle cx="0" cy="0" r="10" fill="none" stroke="#818cf8" stroke-width="2"/>
       <line x1="0" y1="0" x2="0" y2="-6" stroke="#a5b4fc" stroke-width="2" stroke-linecap="round"/>
       <line x1="0" y1="0" x2="4" y2="2" stroke="#a5b4fc" stroke-width="1.5" stroke-linecap="round"/>
       <circle cx="0" cy="0" r="1" fill="#22d3ee"/>
     </g>
+
+    <!-- Diamond / gem -->
+    <g transform="translate(395, 152)">
+      <polygon points="0,-8 10,-2 6,8 -6,8 -10,-2" fill="none" stroke="#a78bfa" stroke-width="2" stroke-linejoin="round"/>
+      <line x1="-10" y1="-2" x2="10" y2="-2" stroke="#a78bfa" stroke-width="1.5"/>
+      <line x1="0" y1="-8" x2="-3" y2="-2" stroke="#a78bfa" stroke-width="1.2"/>
+      <line x1="0" y1="-8" x2="3" y2="-2" stroke="#a78bfa" stroke-width="1.2"/>
+    </g>
+
+    <!-- Upward arrow -->
+    <g transform="translate(73, 158)">
+      <polyline points="-6,6 0,-6 6,6" fill="none" stroke="#22d3ee" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <line x1="0" y1="-6" x2="0" y2="10" stroke="#22d3ee" stroke-width="2.5" stroke-linecap="round"/>
+    </g>
+
+    <!-- Piggy bank -->
+    <g transform="translate(437, 355)">
+      <ellipse cx="0" cy="0" rx="11" ry="9" fill="none" stroke="#a5b4fc" stroke-width="2"/>
+      <circle cx="-5" cy="-3" r="1.5" fill="#818cf8"/>
+      <line x1="5" y1="-6" x2="8" y2="-10" stroke="#a5b4fc" stroke-width="2" stroke-linecap="round"/>
+      <line x1="-4" y1="9" x2="-4" y2="13" stroke="#818cf8" stroke-width="2" stroke-linecap="round"/>
+      <line x1="4" y1="9" x2="4" y2="13" stroke="#818cf8" stroke-width="2" stroke-linecap="round"/>
+    </g>
+
+    <!-- Shield / security -->
+    <g transform="translate(60, 452)">
+      <path d="M0,-10 L8,-6 L8,3 C8,8 0,12 0,12 C0,12 -8,8 -8,3 L-8,-6 Z" fill="none" stroke="#6366f1" stroke-width="2" stroke-linejoin="round"/>
+      <circle cx="0" cy="1" r="2.5" fill="#818cf8"/>
+      <line x1="0" y1="3" x2="0" y2="6" stroke="#818cf8" stroke-width="2" stroke-linecap="round"/>
+    </g>
+
+    <!-- Dollar sign -->
+    <g transform="translate(330, 78)">
+      <text x="0" y="6" text-anchor="middle" font-family="Arial,sans-serif" font-size="20" font-weight="700" fill="#22d3ee">$</text>
+    </g>
+
+    <!-- Candlestick chart -->
+    <g transform="translate(455, 452)">
+      <line x1="-6" y1="-8" x2="-6" y2="8" stroke="#818cf8" stroke-width="1.5" stroke-linecap="round"/>
+      <rect x="-9" y="-4" width="6" height="8" rx="1" fill="#818cf8"/>
+      <line x1="6" y1="-10" x2="6" y2="6" stroke="#22d3ee" stroke-width="1.5" stroke-linecap="round"/>
+      <rect x="3" y="-6" width="6" height="8" rx="1" fill="#22d3ee"/>
+    </g>
+
+    <!-- Hourglass -->
+    <g transform="translate(115, 72)">
+      <line x1="-6" y1="-9" x2="6" y2="-9" stroke="#a5b4fc" stroke-width="2" stroke-linecap="round"/>
+      <line x1="-6" y1="9" x2="6" y2="9" stroke="#a5b4fc" stroke-width="2" stroke-linecap="round"/>
+      <path d="M-5,-9 L0,0 L5,-9" fill="none" stroke="#a5b4fc" stroke-width="1.8" stroke-linejoin="round"/>
+      <path d="M-5,9 L0,0 L5,9" fill="none" stroke="#a5b4fc" stroke-width="1.8" stroke-linejoin="round"/>
+    </g>
+
+    <!-- Tag / label -->
+    <g transform="translate(92, 370)">
+      <path d="M-8,-7 L4,-7 L10,0 L4,7 L-8,7 Z" fill="none" stroke="#818cf8" stroke-width="2" stroke-linejoin="round"/>
+      <circle cx="-3" cy="0" r="2" fill="#22d3ee"/>
+    </g>
+
+    <!-- Trend line up -->
+    <g transform="translate(245, 448)">
+      <polyline points="-12,8 -4,2 4,5 12,-8" fill="none" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <polyline points="6,-8 12,-8 12,-2" fill="none" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+
+    <!-- Coin -->
+    <g transform="translate(162, 152)">
+      <circle cx="0" cy="0" r="8" fill="url(#coinGold)" stroke="#fbbf24" stroke-width="2"/>
+      <circle cx="0" cy="0" r="5" fill="none" stroke="#fde68a" stroke-width="1.2" opacity="0.6"/>
+    </g>
+
+    <!-- Graph bars small -->
+    <g transform="translate(415, 68)">
+      <rect x="-8" y="4" width="4" height="8" rx="1" fill="#6366f1"/>
+      <rect x="-2" y="-2" width="4" height="14" rx="1" fill="#818cf8"/>
+      <rect x="4" y="-6" width="4" height="18" rx="1" fill="#22d3ee"/>
+    </g>
+
+    <!-- Lightning bolt -->
+    <g transform="translate(53, 265)">
+      <polyline points="2,-10 -4,0 2,0 -2,10" fill="none" stroke="#fbbf24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+
+    <!-- Briefcase -->
+    <g transform="translate(430, 440)">
+      <rect x="-10" y="-6" width="20" height="14" rx="2" fill="none" stroke="#818cf8" stroke-width="2"/>
+      <path d="M-4,-6 L-4,-9 C-4,-10 -3,-11 -2,-11 L2,-11 C3,-11 4,-10 4,-9 L4,-6" fill="none" stroke="#818cf8" stroke-width="1.8"/>
+    </g>
+
+    <!-- Savings jar -->
+    <g transform="translate(267, 452)">
+      <rect x="-7" y="-4" width="14" height="12" rx="3" fill="none" stroke="#a5b4fc" stroke-width="2"/>
+      <line x1="-4" y1="-4" x2="-4" y2="-7" stroke="#a5b4fc" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="4" y1="-4" x2="4" y2="-7" stroke="#a5b4fc" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="-4" y1="-7" x2="4" y2="-7" stroke="#a5b4fc" stroke-width="1.5" stroke-linecap="round"/>
+    </g>
+
   </g>
 </svg>

@@ -1,4 +1,4 @@
-const CACHE_NAME = "expenstream-icons-56cd32b3";
+const CACHE_NAME = "expenstream-icons-1530e2f9";
 
 const PRECACHE_URLS = [
   "/icons/icon-192.png",
