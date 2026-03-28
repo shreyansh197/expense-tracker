@@ -44,6 +44,9 @@ export function SecurityCard() {
   const [verifying2FA, setVerifying2FA] = useState(false);
   const [recoveryCodes, setRecoveryCodes] = useState<string[] | null>(null);
   const [copiedSecret, setCopiedSecret] = useState(false);
+  const [showDisableConfirm, setShowDisableConfirm] = useState(false);
+  const [disableCode, setDisableCode] = useState("");
+  const [disabling2FA, setDisabling2FA] = useState(false);
 
   const fetchSessions = useCallback(async () => {
     startTransition(() => setLoadingSessions(true));
@@ -151,21 +154,45 @@ export function SecurityCard() {
     setVerifying2FA(false);
   };
 
+  const check2FAStatus = useCallback(async () => {
+    try {
+      const res = await authFetch("/api/auth/2fa?status=1");
+      if (res.ok) {
+        const data = await res.json();
+        if (data.enabled) startTransition(() => setTwoFAEnabled(true));
+      }
+    } catch { /* ignore */ }
+  }, []);
+
   const disable2FA = async () => {
-    const res = await authFetch("/api/auth/2fa", { method: "DELETE" });
-    if (res.ok) {
-      setTwoFAEnabled(false);
-      setRecoveryCodes(null);
-      toast("2FA disabled");
-    }
+    if (disableCode.length !== 6) return;
+    setDisabling2FA(true);
+    try {
+      const res = await authFetch("/api/auth/2fa", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: disableCode }),
+      });
+      if (res.ok) {
+        setTwoFAEnabled(false);
+        setRecoveryCodes(null);
+        setShowDisableConfirm(false);
+        setDisableCode("");
+        toast("2FA disabled");
+      } else {
+        toast("Invalid code, try again");
+      }
+    } catch { /* ignore */ }
+    setDisabling2FA(false);
   };
 
-  // Load sessions and devices on mount
+  // Load sessions, devices, and 2FA status on mount
   useEffect(() => {
     if (!isAuthenticated) return;
     fetchSessions();
     fetchDevices();
-  }, [isAuthenticated, fetchSessions, fetchDevices]);
+    check2FAStatus();
+  }, [isAuthenticated, fetchSessions, fetchDevices, check2FAStatus]);
 
   if (!isAuthenticated) return null;
 
@@ -211,12 +238,44 @@ export function SecurityCard() {
               </div>
             )}
 
-            <button
-              onClick={disable2FA}
-              className="text-xs text-red-500 hover:text-red-600 dark:text-red-400"
-            >
-              Disable 2FA
-            </button>
+            {showDisableConfirm ? (
+              <div className="space-y-2 rounded-lg p-3" style={{ background: 'var(--surface-secondary)', border: '1px solid var(--border)' }}>
+                <p className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>
+                  Enter your authenticator code to confirm:
+                </p>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={6}
+                    placeholder="000000"
+                    value={disableCode}
+                    onChange={(e) => setDisableCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                    className="form-input w-32 text-center font-mono text-sm tracking-[0.3em]"
+                  />
+                  <button
+                    onClick={disable2FA}
+                    disabled={disableCode.length !== 6 || disabling2FA}
+                    className="rounded-lg bg-red-600 px-3 py-2 text-xs font-medium text-white hover:bg-red-700 disabled:opacity-50"
+                  >
+                    {disabling2FA ? "Disabling..." : "Confirm"}
+                  </button>
+                </div>
+                <button
+                  onClick={() => { setShowDisableConfirm(false); setDisableCode(""); }}
+                  className="text-xs transition-colors" style={{ color: 'var(--text-muted)' }}
+                >
+                  Cancel
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => setShowDisableConfirm(true)}
+                className="text-xs text-red-500 hover:text-red-600 dark:text-red-400"
+              >
+                Disable 2FA
+              </button>
+            )}
           </div>
         ) : totpUri ? (
           <div className="space-y-4">
