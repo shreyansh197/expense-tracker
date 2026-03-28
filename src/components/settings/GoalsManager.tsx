@@ -181,7 +181,7 @@ export function GoalsManager() {
                   value={targetAmount}
                   onChange={(e) => setTargetAmount(e.target.value)}
                   min="1"
-                  className="form-input py-2 pl-8 pr-3 text-sm"
+                  className="form-input py-2 pl-9 pr-3 text-sm"
                 />
               </div>
               <div className="relative">
@@ -192,7 +192,7 @@ export function GoalsManager() {
                   value={monthlyContribution}
                   onChange={(e) => setMonthlyContribution(e.target.value)}
                   min="0"
-                  className="form-input py-2 pl-8 pr-3 text-sm"
+                  className="form-input py-2 pl-9 pr-3 text-sm"
                 />
               </div>
             </div>
