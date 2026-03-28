@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useConfirm } from "@/components/ui/ConfirmDialog";
 import { useToast } from "@/components/ui/Toast";
 import { authFetch, clearAuthState, setAuthState, getAuthState } from "@/lib/authClient";
-import { User, Trash2, Camera, Eye, EyeOff, Loader2 } from "lucide-react";
+import { User, Trash2, Camera, Eye, EyeOff, Loader2, X, ImagePlus } from "lucide-react";
 
 const ALL_LOCAL_STORAGE_KEYS = [
   "expense-tracker-auth",
@@ -40,7 +40,21 @@ export function AccountCard() {
 
   // Avatar state
   const [avatarUploading, setAvatarUploading] = useState(false);
+  const [showAvatarEditor, setShowAvatarEditor] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const editorRef = useRef<HTMLDivElement>(null);
+
+  // Close editor on outside click
+  useEffect(() => {
+    if (!showAvatarEditor) return;
+    const handler = (e: MouseEvent) => {
+      if (editorRef.current && !editorRef.current.contains(e.target as Node)) {
+        setShowAvatarEditor(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [showAvatarEditor]);
 
   if (!user) return null;
 
@@ -61,7 +75,6 @@ export function AccountCard() {
 
     setAvatarUploading(true);
     try {
-      // Convert to data URL for simplicity (could use a storage service)
       const reader = new FileReader();
       const dataUrl = await new Promise<string>((resolve, reject) => {
         reader.onload = () => resolve(reader.result as string);
@@ -79,6 +92,7 @@ export function AccountCard() {
         const data = await res.json();
         setAuthState({ user: { ...getAuthState().user!, avatarUrl: data.user.avatarUrl } });
         toast("Profile picture updated");
+        setShowAvatarEditor(false);
       } else {
         toast("Failed to update picture", "error");
       }
@@ -87,6 +101,27 @@ export function AccountCard() {
     }
     setAvatarUploading(false);
     if (fileRef.current) fileRef.current.value = "";
+  };
+
+  const handleAvatarRemove = async () => {
+    setAvatarUploading(true);
+    try {
+      const res = await authFetch("/api/auth/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ avatarUrl: null }),
+      });
+      if (res.ok) {
+        setAuthState({ user: { ...getAuthState().user!, avatarUrl: null } });
+        toast("Profile picture removed");
+        setShowAvatarEditor(false);
+      } else {
+        toast("Failed to remove picture", "error");
+      }
+    } catch {
+      toast("Failed to remove picture", "error");
+    }
+    setAvatarUploading(false);
   };
 
   const handlePasswordChange = async () => {
@@ -134,7 +169,7 @@ export function AccountCard() {
             </div>
           )}
           <button
-            onClick={() => fileRef.current?.click()}
+            onClick={() => setShowAvatarEditor(true)}
             disabled={avatarUploading}
             className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-indigo-600 text-white shadow-sm transition-colors hover:bg-indigo-700"
           >
@@ -147,6 +182,64 @@ export function AccountCard() {
           <p className="text-xs truncate" style={{ color: 'var(--text-secondary)' }}>{user.email}</p>
         </div>
       </div>
+
+      {/* Avatar Editor Card */}
+      {showAvatarEditor && (
+        <div ref={editorRef} className="rounded-xl p-4 space-y-4" style={{ background: 'var(--surface-secondary)', border: '1px solid var(--border)' }}>
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold" style={{ color: 'var(--text-primary)' }}>Profile Picture</span>
+            <button
+              onClick={() => setShowAvatarEditor(false)}
+              className="rounded-md p-1 transition-colors"
+              style={{ color: 'var(--text-muted)' }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'var(--surface-hover)'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = ''; }}
+            >
+              <X size={14} />
+            </button>
+          </div>
+
+          {/* Large preview */}
+          <div className="flex justify-center">
+            {avatarSrc ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={avatarSrc}
+                alt={user.name}
+                className="h-28 w-28 rounded-full object-cover shadow-sm"
+                style={{ border: '3px solid var(--border)' }}
+              />
+            ) : (
+              <div className="flex h-28 w-28 items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900/30 shadow-sm" style={{ border: '3px solid var(--border)' }}>
+                <User size={40} className="text-indigo-600 dark:text-indigo-400" />
+              </div>
+            )}
+          </div>
+
+          {/* Actions */}
+          <div className="flex flex-col gap-2">
+            <button
+              onClick={() => fileRef.current?.click()}
+              disabled={avatarUploading}
+              className="flex items-center justify-center gap-2 rounded-lg px-3 py-2.5 text-xs font-medium text-white transition-colors bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50"
+            >
+              {avatarUploading ? <Loader2 size={14} className="animate-spin" /> : <ImagePlus size={14} />}
+              {avatarUploading ? "Uploading..." : avatarSrc ? "Change Photo" : "Upload Photo"}
+            </button>
+            {avatarSrc && (
+              <button
+                onClick={handleAvatarRemove}
+                disabled={avatarUploading}
+                className="flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-xs font-medium text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20 disabled:opacity-50"
+                style={{ border: '1px solid var(--border)' }}
+              >
+                <Trash2 size={14} />
+                Remove Photo
+              </button>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Password Change */}
       <div>

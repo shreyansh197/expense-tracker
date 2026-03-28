@@ -179,6 +179,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           // Session was revoked — force logout
           clearAuthState();
           setAuthState({ user: null, tokens: null, workspaces: [], activeWorkspaceId: null });
+        } else if (res.ok) {
+          // Sync user profile (avatar, name) from server
+          const data = await res.json().catch(() => null);
+          if (data?.user) {
+            const current = getAuthState().user;
+            if (current && (current.avatarUrl !== data.user.avatarUrl || current.name !== data.user.name)) {
+              setAuthState({ user: { ...current, name: data.user.name, avatarUrl: data.user.avatarUrl } });
+            }
+          }
         }
       } catch {
         // Network error — ignore, retry on next tick

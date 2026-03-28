@@ -19,5 +19,11 @@ export async function GET(req: NextRequest) {
     return jsonError("Session revoked", 401);
   }
 
-  return NextResponse.json({ ok: true });
+  // Return fresh user profile so clients can sync changes (avatar, name)
+  const user = await prisma.user.findUnique({
+    where: { id: auth.userId },
+    select: { id: true, email: true, name: true, avatarUrl: true },
+  });
+
+  return NextResponse.json({ ok: true, user: user ?? undefined });
 }
