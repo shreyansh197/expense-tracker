@@ -59,6 +59,20 @@ export function DataAccountManagement({ onScrollToExport }: DataAccountManagemen
         method: "DELETE",
       });
       if (res.ok) {
+        // Clear local storage keys for settings, goals, recurring, smart rules
+        const keysToRemove = [
+          "expenstream-auto-rules",
+          "expenstream-recurring-applied",
+          "expenstream-last-category",
+          "expenstream-kpi-expanded",
+          "expenstream-expenses-sort",
+        ];
+        keysToRemove.forEach((k) => localStorage.removeItem(k));
+        // Settings keys are user-scoped (expenstream-settings or expenstream-settings-{userId})
+        for (let i = localStorage.length - 1; i >= 0; i--) {
+          const key = localStorage.key(i);
+          if (key?.startsWith("expenstream-settings")) localStorage.removeItem(key);
+        }
         toast("All workspace data has been deleted.");
         // Force a full page reload to reset all client state
         window.location.reload();
