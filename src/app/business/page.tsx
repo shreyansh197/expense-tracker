@@ -21,6 +21,8 @@ import { SyncIndicator } from "@/components/sync/SyncIndicator";
 import { BusinessExport } from "@/components/business/BusinessExport";
 import { SkeletonBusinessKpi, SkeletonLedgerList } from "@/components/ui/Skeleton";
 import { PageTransition } from "@/components/ui/PageTransition";
+import { DecoGraphic } from "@/components/ui/DecoGraphic";
+import { WalletIllustration } from "@/components/ui/illustrations";
 import { m, AnimatePresence } from "framer-motion";
 import type { LedgerInput, Ledger } from "@/types";
 
@@ -125,7 +127,8 @@ export default function BusinessPage() {
 
   return (
     <AppShell>
-      <PageTransition className="mx-auto min-h-[80vh] max-w-5xl xl:max-w-7xl space-y-6 p-4 lg:p-6">
+      <PageTransition className="relative mx-auto min-h-[80vh] max-w-5xl xl:max-w-7xl space-y-6 p-4 lg:p-6">
+        <DecoGraphic variant="chart" />
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
@@ -218,6 +221,7 @@ export default function BusinessPage() {
           <EmptyState
             icon={Briefcase}
             secondaryIcon={ArrowRightLeft}
+            illustration={<WalletIllustration />}
             title="Ready to track payments"
             description="Track client payments, freelance projects, or business receivables. Create your first ledger to get started."
             action={{ label: "Create Your First Ledger", onClick: () => setShowForm(true), color: "emerald" }}

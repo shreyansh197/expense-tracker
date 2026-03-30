@@ -2,11 +2,14 @@
 
 import { m } from "framer-motion";
 import type { LucideIcon } from "lucide-react";
+import type { ReactNode } from "react";
 import { AmbientBackground } from "./AmbientBackground";
 
 interface EmptyStateProps {
   icon: LucideIcon;
   secondaryIcon?: LucideIcon;
+  /** Optional SVG illustration — rendered instead of the icon container when provided */
+  illustration?: ReactNode;
   title: string;
   description: string;
   action?: {
@@ -24,7 +27,7 @@ const fadeUp = {
   animate: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] as const } },
 };
 
-export function EmptyState({ icon: Icon, secondaryIcon: SecondaryIcon, title, description, action }: EmptyStateProps) {
+export function EmptyState({ icon: Icon, secondaryIcon: SecondaryIcon, illustration, title, description, action }: EmptyStateProps) {
   const btnColor = action?.color === "emerald"
     ? "bg-emerald-600 hover:bg-emerald-700"
     : "bg-indigo-600 hover:bg-indigo-700";
@@ -38,21 +41,27 @@ export function EmptyState({ icon: Icon, secondaryIcon: SecondaryIcon, title, de
     >
       <AmbientBackground />
 
-      <m.div
-        className="relative flex h-16 w-16 items-center justify-center rounded-2xl"
-        style={{ background: 'var(--surface-secondary)', animation: 'glow-ring 3s ease-in-out infinite' }}
-        variants={fadeUp}
-      >
-        <Icon size={28} style={{ color: 'var(--text-muted)' }} />
-        {SecondaryIcon && (
-          <div
-            className="absolute -bottom-1 -right-1 flex h-7 w-7 items-center justify-center rounded-lg"
-            style={{ background: 'var(--surface)', border: '1px solid var(--border)', boxShadow: 'var(--card-shadow)' }}
-          >
-            <SecondaryIcon size={14} style={{ color: 'var(--text-tertiary)' }} />
-          </div>
-        )}
-      </m.div>
+      {illustration ? (
+        <m.div variants={fadeUp}>
+          {illustration}
+        </m.div>
+      ) : (
+        <m.div
+          className="relative flex h-16 w-16 items-center justify-center rounded-2xl"
+          style={{ background: 'var(--surface-secondary)', animation: 'glow-ring 3s ease-in-out infinite' }}
+          variants={fadeUp}
+        >
+          <Icon size={28} style={{ color: 'var(--text-muted)' }} />
+          {SecondaryIcon && (
+            <div
+              className="absolute -bottom-1 -right-1 flex h-7 w-7 items-center justify-center rounded-lg"
+              style={{ background: 'var(--surface)', border: '1px solid var(--border)', boxShadow: 'var(--card-shadow)' }}
+            >
+              <SecondaryIcon size={14} style={{ color: 'var(--text-tertiary)' }} />
+            </div>
+          )}
+        </m.div>
+      )}
       <m.p className="text-sm font-semibold" style={{ color: 'var(--text-secondary)' }} variants={fadeUp}>{title}</m.p>
       <m.p className="max-w-xs text-center text-xs" style={{ color: 'var(--text-tertiary)' }} variants={fadeUp}>{description}</m.p>
       {action && (

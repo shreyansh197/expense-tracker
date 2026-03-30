@@ -17,6 +17,9 @@ import { SavingsGoalsWidget } from "@/components/dashboard/SavingsGoalsWidget";
 import { SkeletonKpiCards, SkeletonChart } from "@/components/ui/Skeleton";
 import { PageTransition } from "@/components/ui/PageTransition";
 import { AmbientBackground } from "@/components/ui/AmbientBackground";
+import { ChartIllustration } from "@/components/ui/illustrations";
+import { WalletIllustration } from "@/components/ui/illustrations";
+import { DecoGraphic } from "@/components/ui/DecoGraphic";
 import { useExpenses } from "@/hooks/useExpenses";
 import { useSettings } from "@/hooks/useSettings";
 import { useCalculations } from "@/hooks/useCalculations";
@@ -26,7 +29,7 @@ import { getMonthName } from "@/lib/utils";
 import { useCurrency } from "@/hooks/useCurrency";
 import { CategoryDot } from "@/components/expenses/CategoryChips";
 import { QuickHelpButton } from "@/components/ui/QuickHelpButton";
-import { Repeat, Receipt, PlusCircle, Target, BarChart3, Sparkles, ChevronDown, Check, ArrowRight } from "lucide-react";
+import { Repeat, PlusCircle, Target, BarChart3, Sparkles, ChevronDown, Check, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /* ── Collapsible section for mobile dashboard ───────────────── */
@@ -256,7 +259,8 @@ export default function DashboardPage() {
 
   return (
     <AppShell>
-        <PageTransition className="mx-auto min-h-[80vh] max-w-4xl xl:max-w-6xl space-y-6 p-4 lg:p-6">
+        <PageTransition className="relative mx-auto min-h-[80vh] max-w-4xl xl:max-w-6xl space-y-6 p-4 lg:p-6">
+        <DecoGraphic variant="finance" />
         {/* Header */}
         <div data-tour="dashboard" className="dash-section flex items-center justify-between">
           <MonthSwitcher />
@@ -348,24 +352,9 @@ export default function DashboardPage() {
               <AmbientBackground />
               <h3 className="relative text-section-title mb-4">Category Breakdown</h3>
               <div className="relative flex h-[220px] items-center justify-center">
-                <div className="text-center">
-                  {/* Animated donut preview */}
-                  <svg width="96" height="96" viewBox="0 0 96 96" className="mx-auto mb-3">
-                    <circle cx="48" cy="48" r="40" fill="none" stroke="var(--border)" strokeWidth="6" opacity="0.15" />
-                    <circle
-                      cx="48" cy="48" r="40" fill="none" strokeWidth="6" opacity="0.25"
-                      stroke="var(--accent)"
-                      strokeDasharray="251.3"
-                      strokeLinecap="round"
-                      style={{
-                        animation: 'donut-sweep 1.2s cubic-bezier(0.22, 1, 0.36, 1) 0.3s both',
-                        transformOrigin: 'center',
-                        transform: 'rotate(-90deg)',
-                        ['--target-offset' as string]: '100',
-                      }}
-                    />
-                  </svg>
-                  <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Preview</p>
+                <div className="flex flex-col items-center text-center">
+                  <ChartIllustration size={120} />
+                  <p className="mt-2 text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Preview</p>
                   <p className="mt-1 text-xs" style={{ color: 'var(--text-muted)' }}>Your spending breakdown will appear here</p>
                 </div>
               </div>
@@ -373,23 +362,13 @@ export default function DashboardPage() {
             <div className="card relative overflow-hidden p-5">
               <AmbientBackground />
               <h3 className="relative text-section-title mb-4">Daily Spending Trend</h3>
-              <div className="relative flex h-[220px] items-end justify-center gap-1.5 px-4 pb-4">
-                {[30, 55, 20, 70, 45, 35, 60, 25, 50, 40, 65, 30].map((h, i) => (
-                  <div
-                    key={i}
-                    className="flex-1 rounded-t origin-bottom"
-                    style={{
-                      height: `${h}%`,
-                      background: 'var(--accent)',
-                      opacity: 0.12,
-                      animation: `bar-grow 0.5s cubic-bezier(0.22, 1, 0.36, 1) ${0.3 + i * 0.06}s both`,
-                      transformOrigin: 'bottom',
-                    }}
-                  />
-                ))}
+              <div className="relative flex h-[220px] items-center justify-center">
+                <div className="flex flex-col items-center text-center">
+                  <ChartIllustration size={120} />
+                  <p className="mt-2 text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Preview</p>
+                  <p className="mt-1 text-xs" style={{ color: 'var(--text-muted)' }}>Your daily trend will appear here</p>
+                </div>
               </div>
-              <p className="relative text-center text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Preview</p>
-              <p className="relative mt-1 text-center text-xs" style={{ color: 'var(--text-muted)' }}>Your daily trend will appear here</p>
             </div>
           </div>
         ) : (
@@ -442,9 +421,9 @@ export default function DashboardPage() {
             )}
           </div>
           {recentExpenses.length === 0 ? (
-            <div className="flex flex-col items-center gap-3 py-8" style={{ color: 'var(--text-tertiary)' }}>
-              <Receipt className="h-8 w-8" style={{ color: 'var(--text-muted)' }} />
-              <p className="text-sm font-medium">No expenses this month</p>
+            <div className="flex flex-col items-center gap-2 py-6">
+              <WalletIllustration size={100} />
+              <p className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>No expenses this month</p>
               <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Your recent spending will show up here</p>
             </div>
           ) : (

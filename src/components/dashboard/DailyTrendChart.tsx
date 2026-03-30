@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils";
 import { useCurrency } from "@/hooks/useCurrency";
 import { useSettings } from "@/hooks/useSettings";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { ChartIllustration } from "@/components/ui/illustrations";
 import type { DailyTotal, StackedDailyTotal, CategoryId } from "@/types";
 
 interface DailyTrendChartProps {
@@ -71,6 +72,7 @@ export function DailyTrendChart({ dailyTotals, stackedDailyTotals, activeCategor
       <EmptyState
         icon={TrendingUp}
         secondaryIcon={BarChart3}
+        illustration={<ChartIllustration />}
         title="No spending recorded yet"
         description="Your daily spending patterns will appear here as you add expenses."
       />

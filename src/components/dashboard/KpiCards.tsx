@@ -71,9 +71,15 @@ export function KpiCards({
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         {/* Spent / Budget */}
         <m.div
-          className="card p-5"
+          className="card relative overflow-hidden p-5"
           variants={{ hidden: { opacity: 0, y: 12 }, visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] } } }}
         >
+          {/* Faint background icon */}
+          <PiggyBank
+            size={80}
+            className="pointer-events-none absolute -right-2 -top-2"
+            style={{ color: 'var(--accent)', opacity: 0.04 }}
+          />
           <p className="text-section-title">Spent</p>
           <div className="mt-2 flex items-baseline gap-1.5">
             <p className="tabular-nums text-3xl font-bold" style={{ color: 'var(--text-primary)' }}>
@@ -114,7 +120,7 @@ export function KpiCards({
         {/* Remaining + Days Left */}
         <m.div
           className={cn(
-            "rounded-2xl border p-5 card-interactive",
+            "relative overflow-hidden rounded-2xl border p-5 card-interactive",
             isOverspent
               ? "border-red-200 bg-red-50 dark:border-red-900/40 dark:bg-red-950/30"
               : isWarning
@@ -122,6 +128,12 @@ export function KpiCards({
                 : "border-emerald-200 bg-emerald-50 dark:border-emerald-900/40 dark:bg-emerald-950/30"
           )}
         >
+          {/* Faint background icon */}
+          <Clock
+            size={72}
+            className="pointer-events-none absolute -right-1 -top-1"
+            style={{ color: 'var(--text-muted)', opacity: 0.05 }}
+          />
           <div
             className={cn(
               "flex items-center gap-2 text-sm font-medium",

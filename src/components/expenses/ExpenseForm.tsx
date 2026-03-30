@@ -184,6 +184,13 @@ export function ExpenseForm({
         <button
           type="button"
           onClick={closeForm}
+          onPointerDown={() => {
+            // Blur any focused input BEFORE click fires — prevents
+            // mobile keyboard from opening when tapping close button
+            if (document.activeElement instanceof HTMLElement) {
+              document.activeElement.blur();
+            }
+          }}
           className="rounded-lg p-1.5 transition-colors"
           style={{ color: 'var(--text-muted)' }}
           onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--surface-secondary)'; }}

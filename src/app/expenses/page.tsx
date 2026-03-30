@@ -5,6 +5,7 @@ export const dynamic = "force-dynamic";
 import { useState, useCallback } from "react";
 import { AppShell } from "@/components/layout/AppShell";
 import { PageTransition } from "@/components/ui/PageTransition";
+import { DecoGraphic } from "@/components/ui/DecoGraphic";
 import { MonthSwitcher } from "@/components/layout/MonthSwitcher";
 import { SyncIndicator } from "@/components/sync/SyncIndicator";
 import { ExpenseList } from "@/components/expenses/ExpenseList";
@@ -74,7 +75,8 @@ export default function ExpensesPage() {
 
   return (
     <AppShell>
-      <PageTransition className="mx-auto min-h-[80vh] max-w-4xl xl:max-w-6xl space-y-4 p-4 lg:p-6">
+      <PageTransition className="relative mx-auto min-h-[80vh] max-w-4xl xl:max-w-6xl space-y-4 p-4 lg:p-6">
+        <DecoGraphic variant="finance" />
         {/* Header */}
         <div className="flex items-center justify-between">
           <MonthSwitcher />

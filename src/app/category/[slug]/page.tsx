@@ -14,6 +14,7 @@ import { useCurrency } from "@/hooks/useCurrency";
 import { getCategoryTotal } from "@/lib/calculations";
 import { authFetch, getActiveWorkspaceId } from "@/lib/authClient";
 import { SkeletonCategoryDetail } from "@/components/ui/Skeleton";
+import { TargetIllustration } from "@/components/ui/illustrations";
 import { ArrowLeft } from "lucide-react";
 import {
   BarChart,
@@ -250,7 +251,10 @@ export default function CategoryPage({ params }: { params: Promise<{ slug: strin
               </ResponsiveContainer>
             </div>
           ) : (
-            <p className="py-8 text-center text-sm" style={{ color: 'var(--text-muted)' }}>No trend data yet — keep logging expenses to see monthly patterns.</p>
+            <div className="flex flex-col items-center gap-2 py-6">
+              <TargetIllustration size={100} />
+              <p className="text-xs" style={{ color: 'var(--text-muted)' }}>No trend data yet — keep logging expenses to see monthly patterns.</p>
+            </div>
           )}
         </div>
 
@@ -260,9 +264,12 @@ export default function CategoryPage({ params }: { params: Promise<{ slug: strin
             Expenses in {categoryLabel}
           </h3>
           {categoryExpenses.length === 0 ? (
-            <p className="py-6 text-center text-sm" style={{ color: 'var(--text-muted)' }}>
-              No expenses in {categoryLabel} this month.
-            </p>
+            <div className="flex flex-col items-center gap-2 py-6">
+              <TargetIllustration size={90} />
+              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+                No expenses in {categoryLabel} this month.
+              </p>
+            </div>
           ) : (
             <div className="space-y-1">
               {categoryExpenses.map((e) => (

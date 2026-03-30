@@ -1,12 +1,16 @@
 "use client";
 
 import { useMemo, useState, useCallback, useRef } from "react";
-import { Trash2, Edit3, Repeat, Receipt, PlusCircle, CheckSquare, Square, X, Wallet } from "lucide-react";
+import { m } from "framer-motion";
+import { Trash2, Edit3, Repeat, Receipt, CheckSquare, Square, X, Wallet } from "lucide-react";
 import { useCurrency } from "@/hooks/useCurrency";
 import { CategoryBadge } from "./CategoryChips";
 import { useUIStore } from "@/stores/uiStore";
 import { useToast } from "@/components/ui/Toast";
 import { useConfirm } from "@/components/ui/ConfirmDialog";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { WalletIllustration } from "@/components/ui/illustrations";
+import { ReceiptIllustration } from "@/components/ui/illustrations";
 import { filterExpenses, groupByDay } from "@/lib/filters";
 import type { Expense, CategoryId } from "@/types";
 
@@ -167,35 +171,18 @@ export function ExpenseList({
   };
 
   if (grouped.length === 0) {
+    const hasFilters = !!(searchQuery || activeCategories.length > 0);
     return (
-      <div className="fade-in flex flex-col items-center justify-center gap-3 py-20">
-        <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl" style={{ background: 'var(--surface-secondary)' }}>
-          <Receipt size={28} style={{ color: 'var(--text-muted)' }} />
-          <div
-            className="absolute -bottom-1 -right-1 flex h-7 w-7 items-center justify-center rounded-lg"
-            style={{ background: 'var(--surface)', border: '1px solid var(--border)', boxShadow: 'var(--card-shadow)' }}
-          >
-            <Wallet size={14} style={{ color: 'var(--text-tertiary)' }} />
-          </div>
-        </div>
-        <div className="text-center">
-          <p className="text-sm font-semibold" style={{ color: 'var(--text-secondary)' }}>No expenses found</p>
-          <p className="mt-1 max-w-xs text-xs" style={{ color: 'var(--text-tertiary)' }}>
-            {searchQuery || activeCategories.length > 0
-              ? "Try adjusting your filters or search terms."
-              : "Track where your money goes \u2014 add your first expense to see insights here."}
-          </p>
-        </div>
-        {!searchQuery && activeCategories.length === 0 && (
-          <button
-            onClick={openAddForm}
-            className="mt-2 flex items-center gap-1.5 rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-indigo-600/20 transition-all hover:bg-indigo-700 active:scale-[0.97]"
-          >
-            <PlusCircle size={14} />
-            Add an Expense
-          </button>
-        )}
-      </div>
+      <EmptyState
+        icon={hasFilters ? Receipt : Wallet}
+        illustration={hasFilters ? <ReceiptIllustration /> : <WalletIllustration />}
+        title={hasFilters ? "No expenses found" : "No expenses yet"}
+        description={hasFilters
+          ? "Try adjusting your filters or search terms."
+          : "Track where your money goes \u2014 add your first expense to see insights here."
+        }
+        action={!hasFilters ? { label: "Add an Expense", onClick: openAddForm } : undefined}
+      />
     );
   }
 
@@ -254,9 +241,12 @@ export function ExpenseList({
 
           {/* Expense items */}
           <div className="space-y-1.5">
-            {group.expenses.map((expense) => (
-              <div
+            {group.expenses.map((expense, idx) => (
+              <m.div
                 key={expense.id}
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: idx * 0.03, duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
                 tabIndex={0}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") openEditForm(expense.id);
@@ -322,7 +312,7 @@ export function ExpenseList({
                     <Trash2 size={14} />
                   </button>
                 </div>
-              </div>
+              </m.div>
             ))}
           </div>
         </div>

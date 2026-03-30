@@ -86,7 +86,7 @@ export function ExpenseFormModal() {
         initial={{ backgroundColor: 'rgba(0,0,0,0)' }}
         animate={{ backgroundColor: 'rgba(0,0,0,0.4)' }}
         exit={{ backgroundColor: 'rgba(0,0,0,0)' }}
-        transition={{ duration: 0.25 }}
+        transition={{ duration: 0.15 }}
       >
         <m.div
           className="expense-form-modal w-full max-w-md max-h-[90vh] overflow-y-auto rounded-t-2xl p-6 shadow-lg lg:max-h-none lg:overflow-visible lg:rounded-2xl"
@@ -97,9 +97,8 @@ export function ExpenseFormModal() {
             opacity: dragY > 0 ? Math.max(1 - dragY / 300, 0.5) : 1,
           }}
           initial={{ opacity: 0, y: 40, scale: 0.97 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: 20, scale: 0.97 }}
-          transition={{ type: "spring", stiffness: 400, damping: 30 }}
+          animate={{ opacity: 1, y: 0, scale: 1, transition: { type: "spring", stiffness: 400, damping: 30 } }}
+          exit={{ opacity: 0, y: 20, scale: 0.97, transition: { duration: 0.15, ease: "easeIn" } }}
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}

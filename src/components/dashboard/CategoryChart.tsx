@@ -14,6 +14,7 @@ import { buildCategoryMap } from "@/lib/categories";
 import { useCurrency } from "@/hooks/useCurrency";
 import { useSettings } from "@/hooks/useSettings";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { ChartIllustration } from "@/components/ui/illustrations";
 import type { CategoryTotal, Expense } from "@/types";
 
 interface CategoryChartProps {
@@ -86,6 +87,7 @@ export function CategoryChart({ categoryTotals, onCategoryClick, categoryBudgets
       <EmptyState
         icon={PieChartIcon}
         secondaryIcon={BarChart3}
+        illustration={<ChartIllustration />}
         title="No spending yet"
         description="Your category breakdown will appear here as you add expenses."
       />
