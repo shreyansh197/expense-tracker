@@ -65,7 +65,7 @@ export function InfoTooltip({ title, children, className }: InfoTooltipProps) {
     <span className={cn("relative inline-flex", className)} ref={btnRef}>
       <button
         onClick={() => setOpen((v) => !v)}
-        className="rounded-full p-0.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:text-slate-300 dark:hover:bg-slate-800 transition-colors"
+        className="rounded-full p-0.5 text-[var(--text-muted)] hover:text-[var(--text-secondary)] hover:bg-[var(--surface-secondary)] dark:hover:text-[var(--text-secondary)] dark:hover:bg-[var(--surface-secondary)] transition-colors"
         aria-label={`Info: ${title}`}
         type="button"
       >
@@ -75,7 +75,7 @@ export function InfoTooltip({ title, children, className }: InfoTooltipProps) {
         createPortal(
           <div
             ref={panelRef}
-            className="fixed z-[9999] rounded-lg border border-slate-200 bg-white p-3 shadow-lg dark:border-slate-700 dark:bg-slate-900"
+            className="fixed z-[9999] rounded-lg border border-[var(--border)] bg-[var(--surface)] p-3 shadow-lg dark:border-[var(--border)] dark:bg-[var(--surface)]"
             style={{
               width: pos.width,
               left: pos.left,
@@ -83,16 +83,16 @@ export function InfoTooltip({ title, children, className }: InfoTooltipProps) {
             }}
           >
             <div className="flex items-start justify-between gap-2">
-              <h4 className="text-xs font-semibold text-slate-900 dark:text-white">{title}</h4>
+              <h4 className="text-xs font-semibold text-[var(--text-primary)] dark:text-white">{title}</h4>
               <button
                 onClick={() => setOpen(false)}
-                className="shrink-0 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                className="shrink-0 text-[var(--text-muted)] hover:text-[var(--text-secondary)] dark:hover:text-[var(--text-secondary)]"
                 aria-label="Close tooltip"
               >
                 <X size={12} />
               </button>
             </div>
-            <div className="mt-1.5 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
+            <div className="mt-1.5 text-xs leading-relaxed text-[var(--text-secondary)] dark:text-[var(--text-muted)]">
               {children}
             </div>
           </div>,

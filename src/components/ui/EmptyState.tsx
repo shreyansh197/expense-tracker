@@ -30,7 +30,7 @@ const fadeUp = {
 export function EmptyState({ icon: Icon, secondaryIcon: SecondaryIcon, illustration, title, description, action }: EmptyStateProps) {
   const btnColor = action?.color === "emerald"
     ? "bg-emerald-600 hover:bg-emerald-700"
-    : "bg-indigo-600 hover:bg-indigo-700";
+    : "bg-[#FF8A65] hover:bg-[#FF7043]";
 
   return (
     <m.div

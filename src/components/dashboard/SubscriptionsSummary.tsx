@@ -31,7 +31,7 @@ export function SubscriptionsSummary() {
   return (
     <div className="card p-5">
       <div className="mb-4 flex items-center gap-2">
-        <Repeat size={14} className="text-indigo-500 dark:text-indigo-400" />
+        <Repeat size={14} className="text-[#4C5CFF] dark:text-[#7B87FF]" />
         <h3 className="text-section-title">
           Recurring Summary
         </h3>
@@ -94,7 +94,7 @@ export function SubscriptionsSummary() {
 
       {/* All recurring items */}
       <details className="mt-2">
-        <summary className="cursor-pointer text-[10px] font-medium text-indigo-600 hover:text-indigo-700 dark:text-indigo-400">
+        <summary className="cursor-pointer text-[10px] font-medium text-[#4C5CFF] hover:text-[#3d4de6] dark:text-[#7B87FF]">
           View all ({recurring.length})
         </summary>
         <div className="mt-2 space-y-1">
@@ -105,7 +105,7 @@ export function SubscriptionsSummary() {
             >
               <div className="flex items-center gap-2">
                 {r.active ? (
-                  <Play size={10} className="text-emerald-500" />
+                  <Play size={10} className="text-[#4CAF50]" />
                 ) : (
                   <Pause size={10} style={{ color: 'var(--text-muted)' }} />
                 )}

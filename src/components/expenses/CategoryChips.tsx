@@ -89,7 +89,7 @@ export function CategoryDot({ category }: { category: CategoryId }) {
   if (!meta) return null;
 
   return (
-    <span className="inline-flex items-center gap-1.5 text-xs text-slate-600 dark:text-slate-400 max-w-full truncate">
+    <span className="inline-flex items-center gap-1.5 text-xs max-w-full truncate" style={{ color: 'var(--text-secondary)' }}>
       <span
         className="h-2 w-2 shrink-0 rounded-full"
         style={{ backgroundColor: meta.color }}

@@ -84,9 +84,9 @@ function OnboardingStep({
   color: string;
 }) {
   const colorMap: Record<string, { bg: string; text: string; ring: string }> = {
-    indigo: { bg: "bg-indigo-50 dark:bg-indigo-900/30", text: "text-indigo-600 dark:text-indigo-400", ring: "ring-indigo-200 dark:ring-indigo-800" },
-    emerald: { bg: "bg-emerald-50 dark:bg-emerald-900/30", text: "text-emerald-600 dark:text-emerald-400", ring: "ring-emerald-200 dark:ring-emerald-800" },
-    amber: { bg: "bg-amber-50 dark:bg-amber-900/30", text: "text-amber-600 dark:text-amber-400", ring: "ring-amber-200 dark:ring-amber-800" },
+    indigo: { bg: "bg-[#eef0ff] dark:bg-[rgba(123,135,255,0.12)]", text: "text-[#4C5CFF] dark:text-[#7B87FF]", ring: "ring-[#c7cbff] dark:ring-[#4C5CFF]/30" },
+    emerald: { bg: "bg-[#e6f9f7] dark:bg-[rgba(94,221,210,0.12)]", text: "text-[#2EC4B6] dark:text-[#5EDDD2]", ring: "ring-[#b2ece6] dark:ring-[#2EC4B6]/30" },
+    amber: { bg: "bg-[#fff3ee] dark:bg-[rgba(255,138,101,0.12)]", text: "text-[#FF8A65] dark:text-[#FFAB91]", ring: "ring-[#ffd4c2] dark:ring-[#FF8A65]/30" },
   };
   const c = colorMap[color] ?? colorMap.indigo;
 
@@ -266,7 +266,7 @@ export default function DashboardPage() {
           <MonthSwitcher />
           <div className="flex items-center gap-2">
             <SyncIndicator syncStatus={syncStatus} />
-            <div className="lg:hidden">
+            <div className="relative z-20 lg:hidden">
               <QuickHelpButton />
             </div>
           </div>

@@ -131,7 +131,7 @@ export default function SettingsPage() {
                       onClick={() => updateSettings({ currency: c.code })}
                       className={`flex items-center gap-1.5 rounded-xl border px-3 py-2.5 text-sm font-medium transition-colors ${
                         settings.currency === c.code
-                          ? "border-indigo-500 bg-indigo-50 text-indigo-700 dark:border-indigo-500 dark:bg-indigo-900/30 dark:text-indigo-300"
+                          ? "border-[#4C5CFF] bg-[#eef0ff] text-[#4C5CFF] dark:border-[#7B87FF] dark:bg-[rgba(123,135,255,0.12)] dark:text-[#7B87FF]"
                           : "hover:opacity-80"
                       }`}
                       style={settings.currency !== c.code ? { border: '1px solid var(--border)', color: 'var(--text-secondary)' } : undefined}
@@ -152,14 +152,14 @@ export default function SettingsPage() {
                     value={salary}
                     onChange={(e) => setSalary(e.target.value)}
                     onKeyDown={(e) => { if (e.key === "Enter") handleSalaryUpdate(); }}
-                    className="w-full rounded-xl py-2.5 pl-7 pr-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                    className="w-full rounded-xl py-2.5 pl-7 pr-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#2EC4B6]/20"
                     style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
                   />
                 </div>
                 <button
                   onClick={handleSalaryUpdate}
                   disabled={saving}
-                  className="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-indigo-600/20 hover:bg-indigo-700 active:scale-[0.97] disabled:opacity-50"
+                  className="rounded-xl bg-[#FF8A65] px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-[#FF8A65]/20 hover:bg-[#FF7043] active:scale-[0.97] disabled:opacity-50"
                 >
                   {saving ? "Saving..." : "Update"}
                 </button>
@@ -219,7 +219,7 @@ export default function SettingsPage() {
                 aria-checked={settings.rolloverEnabled ?? false}
                 onClick={() => updateSettings({ rolloverEnabled: !settings.rolloverEnabled })}
                 className={`relative h-6 w-11 rounded-full transition-colors ${
-                  settings.rolloverEnabled ? "bg-indigo-600" : "bg-slate-300 dark:bg-slate-600"
+                  settings.rolloverEnabled ? "bg-[#2EC4B6]" : "bg-slate-300 dark:bg-slate-600"
                 }`}
               >
                 <span
@@ -363,7 +363,7 @@ export default function SettingsPage() {
                       onClick={() => setTheme(opt.value)}
                       className={`flex flex-1 items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
                         active
-                          ? "bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400"
+                          ? "bg-[#e6f9f7] text-[#2EC4B6] dark:bg-[rgba(94,221,210,0.12)] dark:text-[#5EDDD2]"
                           : ""
                       }`}
                       style={!active ? { color: 'var(--text-secondary)' } : undefined}

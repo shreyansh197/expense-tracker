@@ -4,95 +4,99 @@
 
 :root {
   /* ── Surfaces ── */
-  --background: #f5f6f8;
-  --foreground: #111827;
+  --background: #F5F9F9;
+  --foreground: #1a2332;
   --surface: #ffffff;
-  --surface-secondary: #eef0f5;
-  --surface-hover: #e8eaf0;
-  --surface-tertiary: #dfe2ea;
+  --surface-secondary: #ECF3F2;
+  --surface-hover: #e2edec;
+  --surface-tertiary: #d6e4e3;
   /* ── Borders ── */
-  --border: #dfe2ea;
-  --border-subtle: #ebedf3;
-  --border-card: #d8dbe5;
+  --border: #E0EBEA;
+  --border-subtle: #EDF5F4;
+  --border-card: #d4e2e1;
   /* ── Text ── */
-  --text-primary: #111827;
-  --text-secondary: #4b5563;
-  --text-tertiary: #9ca3af;
-  --text-muted: #d1d5db;
-  /* ── Primary (Brand — Indigo) ── */
-  --primary: #6366f1;
-  --primary-soft: #eef0ff;
-  --primary-gradient: linear-gradient(135deg, #6366f1, #8b5cf6);
-  /* ── Secondary (Data — Teal) ── */
-  --secondary: #0891b2;
-  --secondary-soft: #ecfeff;
-  --secondary-gradient: linear-gradient(135deg, #06b6d4, #0891b2);
-  /* ── Tertiary (Info — Violet) ── */
-  --tertiary: #7c3aed;
-  --tertiary-soft: #f5f3ff;
-  /* ── Legacy (accent → primary alias) ── */
-  --accent: var(--primary);
-  --accent-soft: var(--primary-soft);
-  --accent-gradient: var(--primary-gradient);
+  --text-primary: #1a2332;
+  --text-secondary: #4b5e6d;
+  --text-tertiary: #8a9bab;
+  --text-muted: #c2ced6;
+  /* ── Primary (Brand — Teal) ── */
+  --primary: #2EC4B6;
+  --primary-soft: #e6f9f7;
+  --primary-gradient: linear-gradient(135deg, #2EC4B6, #26a69a);
+  /* ── Secondary (Structure — Indigo) ── */
+  --secondary: #4C5CFF;
+  --secondary-soft: #eef0ff;
+  --secondary-gradient: linear-gradient(135deg, #4C5CFF, #6366f1);
+  /* ── Accent (CTA — Coral) ── */
+  --accent: #FF8A65;
+  --accent-soft: #fff3ee;
+  --accent-gradient: linear-gradient(135deg, #FF8A65, #FF7043);
+  /* ── Info (Neutral Accent — Blue) ── */
+  --info: #42A5F5;
+  --info-soft: #e8f4fd;
   /* ── Semantic ── */
-  --success: #059669;
-  --success-soft: #ecfdf5;
-  --warning: #d97706;
-  --warning-soft: #fffbeb;
-  --danger: #dc2626;
-  --danger-soft: #fef2f2;
+  --success: #4CAF50;
+  --success-soft: #edf7ee;
+  --warning: #FFA726;
+  --warning-soft: #fff8ee;
+  --danger: #EF5350;
+  --danger-soft: #fdeeed;
   /* ── Effects ── */
   --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.03);
-  --card-shadow-hover: 0 4px 16px rgba(99, 102, 241, 0.12), 0 2px 4px rgba(0, 0, 0, 0.04);
+  --card-shadow-hover: 0 4px 16px rgba(46, 196, 182, 0.14), 0 2px 4px rgba(0, 0, 0, 0.04);
   --section-gap: 1.5rem;
   /* ── Charts ── */
   --chart-tooltip-bg: #ffffff;
-  --chart-tooltip-fg: #111827;
-  --chart-tooltip-border: #dfe2ea;
+  --chart-tooltip-fg: #1a2332;
+  --chart-tooltip-border: #E0EBEA;
 }
 
 .dark {
-  /* ── Surfaces (deep navy-charcoal with depth) ── */
-  --background: #0c0d14;
-  --foreground: #eef0f6;
-  --surface: #161823;
-  --surface-secondary: #1e2033;
-  --surface-hover: #252840;
-  --surface-tertiary: #2e3050;
+  /* ── Surfaces (deep navy with layered depth) ── */
+  --background: #0F172A;
+  --foreground: #e8ecf4;
+  --surface: #1E293B;
+  --surface-secondary: #243447;
+  --surface-hover: #2c3e52;
+  --surface-tertiary: #334761;
   /* ── Borders ── */
-  --border: #2a2d42;
-  --border-subtle: #1a1c2c;
-  --border-card: #30334a;
+  --border: #2E3A4A;
+  --border-subtle: #1c2838;
+  --border-card: #364758;
   /* ── Text ── */
-  --text-primary: #eef0f6;
-  --text-secondary: #9298ad;
-  --text-tertiary: #5c6380;
-  --text-muted: #3d4358;
-  /* ── Primary ── */
-  --primary: #818cf8;
-  --primary-soft: rgba(129, 140, 248, 0.14);
-  --primary-gradient: linear-gradient(135deg, #818cf8, #a78bfa);
-  /* ── Secondary ── */
-  --secondary: #22d3ee;
-  --secondary-soft: rgba(34, 211, 238, 0.10);
-  --secondary-gradient: linear-gradient(135deg, #22d3ee, #06b6d4);
-  /* ── Tertiary ── */
-  --tertiary: #a78bfa;
-  --tertiary-soft: rgba(167, 139, 250, 0.10);
+  --text-primary: #e8ecf4;
+  --text-secondary: #94a3b8;
+  --text-tertiary: #5a6e82;
+  --text-muted: #3a4a5c;
+  /* ── Primary (Teal) ── */
+  --primary: #5EDDD2;
+  --primary-soft: rgba(94, 221, 210, 0.12);
+  --primary-gradient: linear-gradient(135deg, #5EDDD2, #2EC4B6);
+  /* ── Secondary (Indigo) ── */
+  --secondary: #7B87FF;
+  --secondary-soft: rgba(123, 135, 255, 0.12);
+  --secondary-gradient: linear-gradient(135deg, #7B87FF, #4C5CFF);
+  /* ── Accent (Coral) ── */
+  --accent: #FFAB91;
+  --accent-soft: rgba(255, 171, 145, 0.12);
+  --accent-gradient: linear-gradient(135deg, #FFAB91, #FF8A65);
+  /* ── Info (Blue) ── */
+  --info: #90CAF9;
+  --info-soft: rgba(144, 202, 249, 0.12);
   /* ── Semantic ── */
-  --success: #34d399;
-  --success-soft: rgba(52, 211, 153, 0.10);
-  --warning: #fbbf24;
-  --warning-soft: rgba(251, 191, 36, 0.10);
-  --danger: #f87171;
-  --danger-soft: rgba(248, 113, 113, 0.10);
+  --success: #66BB6A;
+  --success-soft: rgba(102, 187, 106, 0.12);
+  --warning: #FFB74D;
+  --warning-soft: rgba(255, 183, 77, 0.12);
+  --danger: #EF5350;
+  --danger-soft: rgba(239, 83, 80, 0.12);
   /* ── Effects ── */
   --card-shadow: 0 1px 4px rgba(0, 0, 0, 0.35), 0 1px 2px rgba(0, 0, 0, 0.2);
-  --card-shadow-hover: 0 4px 20px rgba(99, 102, 241, 0.2), 0 4px 12px rgba(0, 0, 0, 0.3);
+  --card-shadow-hover: 0 4px 20px rgba(46, 196, 182, 0.18), 0 4px 12px rgba(0, 0, 0, 0.3);
   /* ── Charts ── */
-  --chart-tooltip-bg: #161823;
-  --chart-tooltip-fg: #eef0f6;
-  --chart-tooltip-border: #2a2d42;
+  --chart-tooltip-bg: #1E293B;
+  --chart-tooltip-fg: #e8ecf4;
+  --chart-tooltip-border: #2E3A4A;
 }
 
 @theme inline {
@@ -104,16 +108,18 @@
   --color-brand-soft: var(--primary-soft);
   --color-data: var(--secondary);
   --color-data-soft: var(--secondary-soft);
-  --color-info: var(--tertiary);
-  --color-info-soft: var(--tertiary-soft);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
 }
 
 body {
   background: var(--background);
   background-image:
-    radial-gradient(ellipse at 15% 5%, rgba(99, 102, 241, 0.06), transparent 50%),
-    radial-gradient(ellipse at 85% 95%, rgba(6, 182, 212, 0.04), transparent 50%),
-    radial-gradient(ellipse at 50% 50%, rgba(124, 58, 237, 0.025), transparent 55%);
+    radial-gradient(ellipse at 15% 5%, rgba(46, 196, 182, 0.06), transparent 50%),
+    radial-gradient(ellipse at 85% 95%, rgba(76, 92, 255, 0.04), transparent 50%),
+    radial-gradient(ellipse at 50% 50%, rgba(255, 138, 101, 0.03), transparent 55%);
   color: var(--foreground);
   font-family: var(--font-inter, Inter), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     sans-serif;
@@ -124,9 +130,9 @@ body {
 
 .dark body {
   background-image:
-    radial-gradient(ellipse at 15% 5%, rgba(129, 140, 248, 0.08), transparent 50%),
-    radial-gradient(ellipse at 85% 90%, rgba(34, 211, 238, 0.05), transparent 50%),
-    radial-gradient(ellipse at 50% 40%, rgba(167, 139, 250, 0.04), transparent 55%);
+    radial-gradient(ellipse at 15% 5%, rgba(94, 221, 210, 0.07), transparent 50%),
+    radial-gradient(ellipse at 85% 90%, rgba(123, 135, 255, 0.05), transparent 50%),
+    radial-gradient(ellipse at 50% 40%, rgba(255, 171, 145, 0.035), transparent 55%);
 }
 
 @media (display-mode: standalone) {
@@ -677,8 +683,8 @@ input[type="password"]::-ms-clear {
 
 /* Breathing glow for logo outer ring */
 @keyframes sp-glow-pulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(99,102,241,0), 0 0 32px rgba(99,102,241,0.35), 0 0 80px rgba(34,211,238,0.15); }
-  50%       { box-shadow: 0 0 0 8px rgba(99,102,241,0.12), 0 0 48px rgba(99,102,241,0.55), 0 0 120px rgba(34,211,238,0.25); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(46,196,182,0), 0 0 32px rgba(46,196,182,0.35), 0 0 80px rgba(76,92,255,0.15); }
+  50%       { box-shadow: 0 0 0 8px rgba(46,196,182,0.12), 0 0 48px rgba(46,196,182,0.55), 0 0 120px rgba(76,92,255,0.25); }
 }
 
 /* Diagonal shimmer sweep across logo circle */

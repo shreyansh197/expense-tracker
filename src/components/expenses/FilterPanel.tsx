@@ -94,7 +94,7 @@ export function FilterPanel({
           onClick={() => setOpen(!open)}
           className={`flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium transition-colors ${
             hasActiveFilters
-              ? "bg-cyan-50 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400"
+              ? "bg-[#e6f9f7] text-[#2EC4B6] dark:bg-[rgba(94,221,210,0.12)] dark:text-[#5EDDD2]"
               : ""
           }`}
           style={!hasActiveFilters ? { color: 'var(--text-secondary)' } : undefined}
@@ -102,7 +102,7 @@ export function FilterPanel({
           <SlidersHorizontal size={14} />
           Filters
           {hasActiveFilters && (
-            <span className="ml-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-cyan-600 px-1 text-[10px] font-bold text-white">
+            <span className="ml-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#2EC4B6] px-1 text-[10px] font-bold text-white">
               {activeFilterCount}
             </span>
           )}
@@ -135,7 +135,7 @@ export function FilterPanel({
                   placeholder="Min"
                   value={amountMin}
                   onChange={(e) => onAmountMinChange(e.target.value)}
-                  className="w-full rounded-xl py-2.5 pl-7 pr-2 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                  className="w-full rounded-xl py-2.5 pl-7 pr-2 text-xs focus:outline-none focus:ring-2 focus:ring-[#2EC4B6]/20"
                   style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
                 />
               </div>
@@ -148,7 +148,7 @@ export function FilterPanel({
                   placeholder="Max"
                   value={amountMax}
                   onChange={(e) => onAmountMaxChange(e.target.value)}
-                  className="w-full rounded-xl py-2.5 pl-7 pr-2 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                  className="w-full rounded-xl py-2.5 pl-7 pr-2 text-xs focus:outline-none focus:ring-2 focus:ring-[#2EC4B6]/20"
                   style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
                 />
               </div>
@@ -168,7 +168,7 @@ export function FilterPanel({
                 placeholder="From"
                 value={dayMin}
                 onChange={(e) => onDayMinChange(e.target.value)}
-                className="w-full flex-1 rounded-xl py-2.5 px-2 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                className="w-full flex-1 rounded-xl py-2.5 px-2 text-xs focus:outline-none focus:ring-2 focus:ring-[#2EC4B6]/20"
                 style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
               />
               <span className="text-xs" style={{ color: 'var(--text-tertiary)' }}>to</span>
@@ -179,14 +179,14 @@ export function FilterPanel({
                 placeholder="To"
                 value={dayMax}
                 onChange={(e) => onDayMaxChange(e.target.value)}
-                className="w-full flex-1 rounded-xl py-2.5 px-2 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                className="w-full flex-1 rounded-xl py-2.5 px-2 text-xs focus:outline-none focus:ring-2 focus:ring-[#2EC4B6]/20"
                 style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
               />
             </div>
           </div>
 
           {/* Save current filter */}
-          <div className="border-t border-slate-100 pt-3 dark:border-slate-800">
+          <div className="border-t pt-3" style={{ borderColor: 'var(--border)' }}>
             {showSaveInput ? (
               <div className="flex items-center gap-2">
                 <input
@@ -197,18 +197,20 @@ export function FilterPanel({
                   onKeyDown={(e) => e.key === "Enter" && handleSaveFilter()}
                   autoFocus
                   maxLength={30}
-                  className="flex-1 rounded border border-slate-200 bg-white px-2.5 py-1.5 text-xs text-slate-900 focus:border-cyan-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                  className="flex-1 rounded px-2.5 py-1.5 text-xs focus:outline-none" style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
                 />
                 <button
                   onClick={handleSaveFilter}
                   disabled={!saveName.trim()}
-                  className="rounded px-2.5 py-1.5 text-xs font-medium text-cyan-600 hover:bg-cyan-50 disabled:opacity-40 dark:text-cyan-400"
+                  className="rounded px-2.5 py-1.5 text-xs font-medium text-[#2EC4B6] hover:bg-[#e6f9f7] disabled:opacity-40 dark:text-[#5EDDD2]"
                 >
                   Save
                 </button>
                 <button
                   onClick={() => setShowSaveInput(false)}
-                  className="rounded p-1 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+                  className="rounded p-1 transition-colors" style={{ color: 'var(--text-muted)' }}
+                  onMouseEnter={e => { e.currentTarget.style.background = 'var(--surface-secondary)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = ''; }}
                 >
                   <X size={14} />
                 </button>
@@ -217,7 +219,7 @@ export function FilterPanel({
               <button
                 onClick={() => setShowSaveInput(true)}
                 disabled={!hasActiveFilters}
-                className="flex items-center gap-1.5 text-xs font-medium text-cyan-600 hover:text-cyan-700 disabled:opacity-40 dark:text-cyan-400"
+                className="flex items-center gap-1.5 text-xs font-medium text-[#2EC4B6] hover:text-[#26a69a] disabled:opacity-40 dark:text-[#5EDDD2]"
               >
                 <Bookmark size={12} />
                 Save Current Filter
@@ -227,26 +229,33 @@ export function FilterPanel({
 
           {/* Saved filters */}
           {savedFilters.length > 0 && (
-            <div className="mt-3 border-t border-slate-100 pt-3 dark:border-slate-800">
-              <p className="mb-2 text-xs font-medium text-slate-500 dark:text-slate-400">
+            <div className="mt-3 border-t pt-3" style={{ borderColor: 'var(--border)' }}>
+              <p className="mb-2 text-xs font-medium" style={{ color: 'var(--text-tertiary)' }}>
                 Saved Filters
               </p>
               <div className="space-y-1">
                 {savedFilters.map((f) => (
                   <div
                     key={f.id}
-                    className="flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-slate-50 dark:hover:bg-slate-800/50"
+                    className="flex items-center gap-2 rounded-lg px-2 py-1.5 transition-colors"
+                    onMouseEnter={e => { e.currentTarget.style.background = 'var(--surface-secondary)'; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = ''; }}
                   >
-                    <BookmarkCheck size={12} className="shrink-0 text-cyan-500" />
+                    <BookmarkCheck size={12} className="shrink-0 text-[#2EC4B6]" />
                     <button
                       onClick={() => handleApplyFilter(f)}
-                      className="flex-1 text-left text-xs font-medium text-slate-700 hover:text-indigo-600 dark:text-slate-300"
+                      className="flex-1 text-left text-xs font-medium transition-colors"
+                      style={{ color: 'var(--text-secondary)' }}
+                      onMouseEnter={e => { e.currentTarget.style.color = 'var(--primary)'; }}
+                      onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-secondary)'; }}
                     >
                       {f.name}
                     </button>
                     <button
                       onClick={() => handleDeleteFilter(f.id)}
-                      className="rounded p-0.5 text-slate-400 hover:text-red-500"
+                      className="rounded p-0.5 transition-colors" style={{ color: 'var(--text-muted)' }}
+                      onMouseEnter={e => { e.currentTarget.style.color = 'var(--danger)'; }}
+                      onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-muted)'; }}
                     >
                       <Trash2 size={12} />
                     </button>

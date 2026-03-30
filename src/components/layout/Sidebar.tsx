@@ -85,7 +85,7 @@ export function Sidebar() {
                 isActive
                   ? isBiz
                     ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400 border-l-[3px] border-emerald-600 dark:border-emerald-400"
-                    : "bg-indigo-50 text-indigo-700 dark:bg-indigo-900/15 dark:text-indigo-400 border-l-[3px] border-indigo-600 dark:border-indigo-400"
+                    : "bg-[#eef0ff] text-[#4C5CFF] dark:bg-[rgba(123,135,255,0.12)] dark:text-[#7B87FF] border-l-[3px] border-[#4C5CFF] dark:border-[#7B87FF]"
                   : "border-l-[3px] border-transparent hover:bg-[var(--surface-secondary)]"
               )}
               style={!isActive ? { color: 'var(--text-secondary)' } : undefined}
@@ -115,7 +115,7 @@ export function Sidebar() {
             <m.div
               className={cn(
                 "h-full rounded-full",
-                overBudget ? "bg-red-500" : pct > 80 ? "bg-amber-500" : "bg-indigo-500"
+                overBudget ? "bg-red-500" : pct > 80 ? "bg-amber-500" : "bg-[#2EC4B6]"
               )}
               initial={{ width: 0 }}
               animate={{ width: `${pct}%` }}
@@ -149,7 +149,7 @@ export function Sidebar() {
             "flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all",
             isBusinessRoute
               ? "bg-gradient-to-r from-emerald-600 to-teal-600 text-white hover:from-emerald-700 hover:to-teal-700 shadow-sm shadow-emerald-600/20"
-              : "bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-700 hover:to-purple-700 shadow-sm shadow-indigo-600/20"
+              : "bg-gradient-to-r from-[#FF8A65] to-[#FF7043] text-white hover:from-[#FF7043] hover:to-[#E64A19] shadow-sm shadow-[#FF8A65]/20"
           )}
           whileTap={{ scale: 0.96 }}
         >

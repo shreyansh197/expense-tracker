@@ -42,7 +42,7 @@ export function QuickHelpButton({ variant = "icon" }: { variant?: "icon" | "side
             ? "gap-2 rounded-lg px-2 py-1.5 text-xs w-full"
             : "h-8 w-8 justify-center rounded-lg"
         )}
-        style={{ color: "var(--text-secondary)" }}
+        style={{ color: "var(--text-primary)", background: "var(--surface-secondary)" }}
         onMouseEnter={variant === "sidebar" ? (e) => { e.currentTarget.style.background = 'var(--surface-secondary)'; } : undefined}
         onMouseLeave={variant === "sidebar" ? (e) => { e.currentTarget.style.background = ''; } : undefined}
         aria-label="Quick help"
@@ -54,7 +54,7 @@ export function QuickHelpButton({ variant = "icon" }: { variant?: "icon" | "side
       {open && (
         <div
           className={cn(
-            "absolute z-50 w-72 rounded-xl border p-4 shadow-xl",
+            "absolute z-[100] w-72 rounded-xl border p-4 shadow-xl",
             variant === "sidebar" ? "bottom-full left-0 mb-2" : "right-0 top-full mt-2"
           )}
           style={{ background: "var(--surface)", borderColor: "var(--border)" }}

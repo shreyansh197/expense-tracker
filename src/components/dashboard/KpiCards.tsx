@@ -100,7 +100,7 @@ export function KpiCards({
                   ? "bg-red-500"
                   : isWarning
                     ? "bg-amber-500"
-                    : "bg-indigo-500 dark:bg-indigo-400"
+                    : "bg-[#2EC4B6]"
               )}
               initial={{ width: 0 }}
               animate={{ width: `${Math.min(budgetUsedPercent, 100)}%` }}
@@ -112,7 +112,7 @@ export function KpiCards({
               {budgetUsedPercent}% of budget · {expenseCount} txns
             </p>
             {rolloverAmount > 0 && (
-              <p className="text-[10px] font-medium text-indigo-500 dark:text-indigo-400">
+              <p className="text-[10px] font-medium text-[#2EC4B6] dark:text-[#5EDDD2]">
                 +{formatCurrency(rolloverAmount)} rollover
               </p>
             )}
@@ -251,15 +251,15 @@ export function KpiCards({
               : "card-sm"
         )}>
           <div className={cn(
-            "flex items-center gap-1.5 text-meta font-medium",
+            "flex items-start gap-1 text-meta font-medium",
             forecastOverBudget
               ? "text-red-600 dark:text-red-400"
               : forecastWarning
                 ? "text-amber-600 dark:text-amber-400"
                 : ""
           )}>
-            <span>Month-end Projection</span>
-            <InfoTooltip title="End-of-Month Forecast">
+            <span className="leading-snug">Month-end Projection</span>
+            <InfoTooltip title="End-of-Month Forecast" className="mt-px shrink-0">
               <p>Projects your total spend by month end using your average daily spending.</p>
               <p className="mt-1"><strong>Confidence:</strong></p>
               <ul className="ml-3 list-disc mt-0.5">

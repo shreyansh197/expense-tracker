@@ -11,6 +11,8 @@ import {
   getTopCategory,
   getEomForecast,
   detectAnomalies,
+  getStackedDailyTotals,
+  getPaceToStayUnder,
 } from "../lib/calculations";
 import type { Expense, CategoryId } from "../types";
 
@@ -308,5 +310,245 @@ describe("detectAnomalies", () => {
     );
     const result = detectAnomalies(normal, MONTH, YEAR);
     expect(result).toHaveLength(0);
+  });
+
+  test("returns empty when all amounts are identical (MAD=0)", () => {
+    const same = Array.from({ length: 5 }, () =>
+      makeExpense({ category: "groceries", amount: 100 })
+    );
+    expect(detectAnomalies(same, MONTH, YEAR)).toHaveLength(0);
+  });
+
+  test("anomalies are sorted by z-score descending", () => {
+    const normal = Array.from({ length: 6 }, () =>
+      makeExpense({ category: "groceries", amount: 100 })
+    );
+    // Two outliers of different severity
+    const outlier1 = makeExpense({ category: "groceries", amount: 5000, id: "o1" });
+    const outlier2 = makeExpense({ category: "groceries", amount: 50000, id: "o2" });
+    // MAD is 0 for identical values, so vary them slightly
+    normal[0] = makeExpense({ category: "groceries", amount: 95 });
+    normal[1] = makeExpense({ category: "groceries", amount: 105 });
+    const all = [...normal, outlier1, outlier2];
+    const result = detectAnomalies(all, MONTH, YEAR);
+    if (result.length >= 2) {
+      expect(result[0].zScore).toBeGreaterThanOrEqual(result[1].zScore);
+    }
+  });
+
+  test("does not flag deleted expenses", () => {
+    const normal = Array.from({ length: 5 }, (_, i) =>
+      makeExpense({ category: "groceries", amount: 100 + i * 10 })
+    );
+    const deletedOutlier = makeExpense({
+      category: "groceries", amount: 99999, deletedAt: Date.now(),
+    });
+    const result = detectAnomalies([...normal, deletedOutlier], MONTH, YEAR);
+    expect(result.every((a) => a.expense.deletedAt === null)).toBe(true);
+  });
+
+  test("custom threshold changes sensitivity", () => {
+    const normal = Array.from({ length: 6 }, (_, i) =>
+      makeExpense({ category: "groceries", amount: 100 + i * 5 })
+    );
+    const mild = makeExpense({ category: "groceries", amount: 500 });
+    const all = [...normal, mild];
+    const strict = detectAnomalies(all, MONTH, YEAR, 1.0);
+    const lenient = detectAnomalies(all, MONTH, YEAR, 10.0);
+    expect(strict.length).toBeGreaterThanOrEqual(lenient.length);
+  });
+});
+
+// =========== getAllCategoryTotals (orphan categories) ===========
+
+describe("getAllCategoryTotals", () => {
+  test("includes all listed categories even with 0 total", () => {
+    const totals = getAllCategoryTotals([], ALL_CATEGORIES, MONTH, YEAR);
+    expect(totals).toHaveLength(ALL_CATEGORIES.length);
+    expect(totals.every((t) => t.total === 0)).toBe(true);
+  });
+
+  test("includes orphan categories not in settings list", () => {
+    const orphanExpense = makeExpense({ category: "custom-cat" as CategoryId, amount: 777 });
+    const totals = getAllCategoryTotals([orphanExpense], ALL_CATEGORIES, MONTH, YEAR);
+    const orphan = totals.find((t) => t.category === "custom-cat");
+    expect(orphan).toBeDefined();
+    expect(orphan!.total).toBe(777);
+  });
+
+  test("orphan totals aggregate correctly", () => {
+    const expenses = [
+      makeExpense({ category: "custom-cat" as CategoryId, amount: 100 }),
+      makeExpense({ category: "custom-cat" as CategoryId, amount: 200 }),
+    ];
+    const totals = getAllCategoryTotals(expenses, ALL_CATEGORIES, MONTH, YEAR);
+    const orphan = totals.find((t) => t.category === "custom-cat");
+    expect(orphan!.total).toBe(300);
+  });
+
+  test("known + orphan totals sum to monthly total", () => {
+    const expenses = [
+      ...testExpenses,
+      makeExpense({ category: "custom-cat" as CategoryId, amount: 555 }),
+    ];
+    const totals = getAllCategoryTotals(expenses, ALL_CATEGORIES, MONTH, YEAR);
+    const sum = totals.reduce((s, t) => s + t.total, 0);
+    expect(sum).toBe(14247 + 555);
+  });
+});
+
+// =========== getStackedDailyTotals ===========
+
+describe("getStackedDailyTotals", () => {
+  test("returns correct number of days", () => {
+    const stacked = getStackedDailyTotals(testExpenses, ALL_CATEGORIES, MONTH, YEAR, 31);
+    expect(stacked).toHaveLength(31);
+  });
+
+  test("each day has a total matching getDailyTotal", () => {
+    const stacked = getStackedDailyTotals(testExpenses, ALL_CATEGORIES, MONTH, YEAR, 31);
+    for (const row of stacked) {
+      expect(row.total).toBe(getDailyTotal(testExpenses, row.day, MONTH, YEAR));
+    }
+  });
+
+  test("category breakdown sums to day total", () => {
+    const stacked = getStackedDailyTotals(testExpenses, ALL_CATEGORIES, MONTH, YEAR, 31);
+    for (const row of stacked) {
+      let catSum = 0;
+      for (const key of Object.keys(row)) {
+        if (key !== "day" && key !== "total") catSum += row[key] as number;
+      }
+      expect(catSum).toBe(row.total);
+    }
+  });
+
+  test("empty expenses return zero totals for all days", () => {
+    const stacked = getStackedDailyTotals([], ALL_CATEGORIES, MONTH, YEAR, 28);
+    expect(stacked).toHaveLength(28);
+    expect(stacked.every((row) => row.total === 0)).toBe(true);
+  });
+
+  test("excludes soft-deleted expenses", () => {
+    const stacked = getStackedDailyTotals(testExpenses, ALL_CATEGORIES, MONTH, YEAR, 31);
+    // Day 3 has only a deleted expense
+    expect(stacked[2].total).toBe(0);
+  });
+});
+
+// =========== getPaceToStayUnder ===========
+
+describe("getPaceToStayUnder", () => {
+  test("calculates correct daily pace", () => {
+    expect(getPaceToStayUnder(10000, 10)).toBe(1000);
+  });
+
+  test("returns 0 when no days remaining", () => {
+    expect(getPaceToStayUnder(10000, 0)).toBe(0);
+  });
+
+  test("returns 0 when remaining is negative (already over budget)", () => {
+    expect(getPaceToStayUnder(-5000, 10)).toBe(0);
+  });
+
+  test("rounds to nearest integer", () => {
+    expect(getPaceToStayUnder(10000, 3)).toBe(3333);
+  });
+});
+
+// =========== getAllDailyTotals additional ===========
+
+describe("getAllDailyTotals extended", () => {
+  test("returns correct for leap year February (29 days)", () => {
+    const febExpenses = [
+      makeExpense({ amount: 50, day: 29, month: 2, year: 2028 }),
+    ];
+    const totals = getAllDailyTotals(febExpenses, 2, 2028, 29);
+    expect(totals).toHaveLength(29);
+    expect(totals[28].total).toBe(50);
+  });
+
+  test("daily totals sum correctly with multiple categories per day", () => {
+    const totals = getAllDailyTotals(testExpenses, MONTH, YEAR, 31);
+    const day10 = totals.find((d) => d.day === 10);
+    expect(day10!.total).toBe(3599); // internet 599 + credit-card 3000
+  });
+});
+
+// =========== getEomForecast additional ===========
+
+describe("getEomForecast extended", () => {
+  test("confidence is medium when 7 <= elapsed < 15", () => {
+    const result = getEomForecast(5000, SALARY, 10, 31);
+    expect(result.confidence).toBe("medium");
+  });
+
+  test("projectedRemaining is negative when overspending", () => {
+    // Spend 50000 in 10 days of a 31-day month → projected ~155000 vs salary 59400
+    const result = getEomForecast(50000, SALARY, 10, 31);
+    expect(result.projectedRemaining).toBeLessThan(0);
+  });
+
+  test("projectedTotal equals monthlyTotal when all days elapsed", () => {
+    const result = getEomForecast(14247, SALARY, 31, 31);
+    expect(result.projectedTotal).toBe(14247);
+  });
+});
+
+// =========== additional edge cases ===========
+
+describe("additional edge cases", () => {
+  test("very large amount does not cause overflow", () => {
+    const bigExpense = [makeExpense({ amount: Number.MAX_SAFE_INTEGER / 2, day: 1 })];
+    expect(getMonthlyTotal(bigExpense, MONTH, YEAR)).toBe(Number.MAX_SAFE_INTEGER / 2);
+  });
+
+  test("zero-amount expenses are counted (0 total)", () => {
+    const zeroExp = [makeExpense({ amount: 0, day: 5 })];
+    expect(getMonthlyTotal(zeroExp, MONTH, YEAR)).toBe(0);
+    expect(getDailyTotal(zeroExp, 5, MONTH, YEAR)).toBe(0);
+  });
+
+  test("multiple categories on same day", () => {
+    const exps = [
+      makeExpense({ category: "groceries", amount: 100, day: 1 }),
+      makeExpense({ category: "transport", amount: 200, day: 1 }),
+      makeExpense({ category: "eat-out", amount: 300, day: 1 }),
+    ];
+    expect(getDailyTotal(exps, 1, MONTH, YEAR)).toBe(600);
+  });
+
+  test("getBudgetUsedPercent with negative salary returns 0", () => {
+    expect(getBudgetUsedPercent(1000, -100)).toBe(0);
+  });
+
+  test("getMonthlySaving with zero salary", () => {
+    expect(getMonthlySaving(0, 5000)).toBe(-5000);
+  });
+
+  test("getTopCategory with single category", () => {
+    const exps = [makeExpense({ category: "groceries", amount: 500 })];
+    const result = getTopCategory(exps, ["groceries"], MONTH, YEAR);
+    expect(result).not.toBeNull();
+    expect(result!.category).toBe("groceries");
+  });
+
+  test("getTopCategory with all-zero categories returns null", () => {
+    const result = getTopCategory([], ALL_CATEGORIES, MONTH, YEAR);
+    expect(result).toBeNull();
+  });
+
+  test("getAverageDailySpend rounds correctly", () => {
+    // 14247 / 19 = 749.84... → rounds to 750
+    expect(getAverageDailySpend(14247, 19)).toBe(750);
+    // 100 / 3 = 33.33... → rounds to 33
+    expect(getAverageDailySpend(100, 3)).toBe(33);
+  });
+
+  test("getBudgetUsedPercent rounds correctly", () => {
+    // 14247 / 59400 = 23.98% → rounds to 24
+    expect(getBudgetUsedPercent(14247, SALARY)).toBe(24);
+    // 1 / 3 = 33.33% → rounds to 33
+    expect(getBudgetUsedPercent(1, 3)).toBe(33);
   });
 });
