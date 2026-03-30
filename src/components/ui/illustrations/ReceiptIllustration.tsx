@@ -16,7 +16,7 @@ export function ReceiptIllustration({ size = 140 }: { size?: number }) {
       className="animate-float"
     >
       {/* Background circle */}
-      <circle cx="70" cy="70" r="64" fill="var(--surface-secondary)" opacity="0.5" />
+      <circle cx="70" cy="70" r="64" fill="var(--surface-secondary)" opacity="0.6" />
 
       {/* Receipt body */}
       <path
@@ -24,36 +24,36 @@ export function ReceiptIllustration({ size = 140 }: { size?: number }) {
         fill="var(--surface)"
         stroke="var(--accent)"
         strokeWidth="1.5"
-        opacity="0.4"
+        opacity="0.55"
       />
 
       {/* Receipt lines */}
-      <rect x="54" y="42" width="32" height="3" rx="1.5" fill="var(--accent)" opacity="0.15" />
-      <rect x="54" y="52" width="24" height="2" rx="1" fill="var(--border)" opacity="0.5" />
-      <rect x="54" y="60" width="28" height="2" rx="1" fill="var(--border)" opacity="0.5" />
-      <rect x="54" y="68" width="20" height="2" rx="1" fill="var(--border)" opacity="0.5" />
+      <rect x="54" y="42" width="32" height="3" rx="1.5" fill="var(--accent)" opacity="0.3" />
+      <rect x="54" y="52" width="24" height="2" rx="1" fill="var(--border)" opacity="0.65" />
+      <rect x="54" y="60" width="28" height="2" rx="1" fill="var(--border)" opacity="0.65" />
+      <rect x="54" y="68" width="20" height="2" rx="1" fill="var(--border)" opacity="0.65" />
 
       {/* Separator dashed line */}
-      <line x1="54" y1="78" x2="86" y2="78" stroke="var(--border)" strokeWidth="1" strokeDasharray="3 2" opacity="0.4" />
+      <line x1="54" y1="78" x2="86" y2="78" stroke="var(--border)" strokeWidth="1" strokeDasharray="3 2" opacity="0.55" />
 
       {/* Total amount */}
-      <rect x="54" y="84" width="14" height="3" rx="1.5" fill="var(--accent)" opacity="0.2" />
-      <rect x="74" y="84" width="12" height="3" rx="1.5" fill="var(--accent)" opacity="0.3" />
+      <rect x="54" y="84" width="14" height="3" rx="1.5" fill="var(--accent)" opacity="0.35" />
+      <rect x="74" y="84" width="12" height="3" rx="1.5" fill="var(--accent)" opacity="0.45" />
 
       {/* Magnifying glass */}
       <g style={{ animation: 'float-gentle 5s ease-in-out 0.3s infinite' }}>
-        <circle cx="98" cy="50" r="16" fill="var(--surface-secondary)" stroke="var(--accent)" strokeWidth="2" opacity="0.4" />
-        <circle cx="98" cy="50" r="10" fill="none" stroke="var(--accent)" strokeWidth="1.5" opacity="0.3" />
-        <line x1="109" y1="61" x2="118" y2="70" stroke="var(--accent)" strokeWidth="3" strokeLinecap="round" opacity="0.4" />
-        <text x="98" y="54" textAnchor="middle" fontSize="10" fill="var(--accent)" opacity="0.4">?</text>
+        <circle cx="98" cy="50" r="16" fill="var(--surface-secondary)" stroke="var(--accent)" strokeWidth="2" opacity="0.55" />
+        <circle cx="98" cy="50" r="10" fill="none" stroke="var(--accent)" strokeWidth="1.5" opacity="0.45" />
+        <line x1="109" y1="61" x2="118" y2="70" stroke="var(--accent)" strokeWidth="3" strokeLinecap="round" opacity="0.55" />
+        <text x="98" y="54" textAnchor="middle" fontSize="10" fill="var(--accent)" opacity="0.55">?</text>
       </g>
 
       {/* Scattered dots */}
-      <circle cx="35" cy="55" r="2" fill="var(--accent)" opacity="0.1" />
-      <circle cx="28" cy="75" r="1.5" fill="var(--accent)" opacity="0.08" />
+      <circle cx="35" cy="55" r="2" fill="var(--accent)" opacity="0.2" />
+      <circle cx="28" cy="75" r="1.5" fill="var(--accent)" opacity="0.16" />
 
       {/* Sparkle */}
-      <path d="M115 85L117 81L119 85L117 89Z" fill="var(--accent)" opacity="0.15" />
+      <path d="M115 85L117 81L119 85L117 89Z" fill="var(--accent)" opacity="0.3" />
     </svg>
   );
 }

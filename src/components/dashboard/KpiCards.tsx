@@ -78,7 +78,7 @@ export function KpiCards({
           <PiggyBank
             size={80}
             className="pointer-events-none absolute -right-2 -top-2"
-            style={{ color: 'var(--accent)', opacity: 0.04 }}
+            style={{ color: 'var(--accent)', opacity: 0.08 }}
           />
           <p className="text-section-title">Spent</p>
           <div className="mt-2 flex items-baseline gap-1.5">
@@ -132,7 +132,7 @@ export function KpiCards({
           <Clock
             size={72}
             className="pointer-events-none absolute -right-1 -top-1"
-            style={{ color: 'var(--text-muted)', opacity: 0.05 }}
+            style={{ color: 'var(--text-muted)', opacity: 0.1 }}
           />
           <div
             className={cn(
