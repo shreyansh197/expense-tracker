@@ -9,6 +9,7 @@ import { useToast } from "@/components/ui/Toast";
 import { DatePicker } from "@/components/ui/DatePicker";
 import { useSettings } from "@/hooks/useSettings";
 import { useCurrency } from "@/hooks/useCurrency";
+import { useAutoRules } from "@/components/settings/AutoRulesManager";
 import type { CategoryId, ExpenseInput, Expense } from "@/types";
 
 interface ExpenseFormProps {
@@ -32,14 +33,12 @@ export function ExpenseForm({
   const { symbol } = useCurrency();
   const allCategories = getAllCategories(settings.customCategories, settings.hiddenDefaults);
 
+  const { rules: autoRules } = useAutoRules();
   const [category, setCategory] = useState<CategoryId>(() => {
     if (editExpense?.category) return editExpense.category;
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("expenstream-last-category") as CategoryId | null;
-      if (saved && allCategories.some((c) => c.id === saved)) return saved;
-    }
-    return "groceries";
+    return "";
   });
+  const [autoApplied, setAutoApplied] = useState(false);
   const [amount, setAmount] = useState(editExpense?.amount?.toString() || "");
   const [day, setDay] = useState(editExpense?.day || new Date().getDate());
   const [selectedMonth, setSelectedMonth] = useState(month);
@@ -65,6 +64,40 @@ export function ExpenseForm({
     }
   }, [editExpense]);
 
+  // Apply auto-rules when remark or amount changes (only for new expenses)
+  useEffect(() => {
+    if (editExpense) return;
+    const enabledRules = autoRules.filter((r) => r.enabled && r.action.type === "set_category");
+    for (const rule of enabledRules) {
+      const { field, operator, value } = rule.condition;
+      let match = false;
+      if (field === "remark" && remark.trim()) {
+        const rv = remark.toLowerCase();
+        const cv = value.toLowerCase();
+        if (operator === "contains") match = rv.includes(cv);
+        else if (operator === "equals") match = rv === cv;
+      } else if (field === "amount" && amount) {
+        const num = parseFloat(amount);
+        if (!isNaN(num)) {
+          const target = parseFloat(value);
+          if (operator === "greater_than") match = num > target;
+          else if (operator === "less_than") match = num < target;
+          else if (operator === "equals") match = num === target;
+        }
+      }
+      if (match && allCategories.some((c) => c.id === rule.action.value)) {
+        setCategory(rule.action.value as CategoryId);
+        setAutoApplied(true);
+        return;
+      }
+    }
+    // If no rule matched and category was auto-applied before, clear it
+    if (autoApplied) {
+      setCategory("");
+      setAutoApplied(false);
+    }
+  }, [remark, amount, autoRules, editExpense, allCategories, autoApplied]);
+
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
@@ -75,6 +108,11 @@ export function ExpenseForm({
       const parsedAmount = parseFloat(amount);
       if (!amount || isNaN(parsedAmount) || parsedAmount <= 0) {
         setError("Enter a valid positive amount");
+        return;
+      }
+
+      if (!category) {
+        setError("Select a category");
         return;
       }
 
@@ -158,7 +196,7 @@ export function ExpenseForm({
       {/* Category Selector */}
       <div>
         <label className="form-label mb-2 uppercase">
-          Category
+          Category {!category && submitted && <span className="text-red-500 normal-case">— please select</span>}
         </label>
         <div className="flex flex-wrap gap-2">
           {allCategories.map((cat) => (
