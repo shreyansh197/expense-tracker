@@ -69,7 +69,7 @@ export function BottomNav() {
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
           accentColor === "emerald"
             ? "bg-gradient-to-br from-emerald-500 to-emerald-700 hover:from-emerald-600 hover:to-emerald-800 focus-visible:ring-emerald-500"
-            : "bg-gradient-to-br from-[#FF8A65] to-[#FF7043] hover:from-[#FF7043] hover:to-[#E64A19] focus-visible:ring-[#FF8A65]"
+            : "bg-gradient-to-br from-[#FF8A65] to-[#FF7043] hover:from-[#FF7043] hover:to-[#E64A19] focus-visible:ring-[#FF8A65] dark:from-[#3B82F6] dark:to-[#2563EB] dark:hover:from-[#2563EB] dark:hover:to-[#1D4ED8] dark:focus-visible:ring-[#3B82F6] dark:shadow-blue-900/20"
         )}
         style={{
           bottom: `calc(${NAV_HEIGHT}px + env(safe-area-inset-bottom, 0px) + 12px)`,

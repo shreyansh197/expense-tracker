@@ -131,7 +131,7 @@ export function KpiCards({
           <span>{expenseCount} transaction{expenseCount !== 1 ? "s" : ""}</span>
         </div>
         {rolloverAmount > 0 && (
-          <p className="mt-1 text-[10px] font-medium text-[#2EC4B6] dark:text-[#5EDDD2]">
+          <p className="mt-1 text-[10px] font-medium text-[#2EC4B6] dark:text-[#60A5FA]">
             Includes +{formatCurrency(rolloverAmount)} rollover from last month
           </p>
         )}

@@ -162,7 +162,7 @@ export default function SettingsPage() {
                 <button
                   onClick={handleSalaryUpdate}
                   disabled={saving}
-                  className="rounded-xl bg-[#FF8A65] px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-[#FF8A65]/20 hover:bg-[#FF7043] active:scale-[0.97] disabled:opacity-50"
+                  className="rounded-xl bg-[#FF8A65] px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-[#FF8A65]/20 hover:bg-[#FF7043] active:scale-[0.97] disabled:opacity-50 dark:bg-[#3B82F6] dark:hover:bg-[#2563EB] dark:shadow-blue-900/20"
                 >
                   {saving ? "Saving..." : "Update"}
                 </button>

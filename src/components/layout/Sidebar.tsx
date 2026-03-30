@@ -115,7 +115,7 @@ export function Sidebar() {
             <m.div
               className={cn(
                 "h-full rounded-full",
-                overBudget ? "bg-red-500" : pct > 80 ? "bg-amber-500" : "bg-[#2EC4B6]"
+                overBudget ? "bg-red-500" : pct > 80 ? "bg-amber-500" : "bg-[#2EC4B6] dark:bg-[#60A5FA]"
               )}
               initial={{ width: 0 }}
               animate={{ width: `${pct}%` }}
@@ -149,7 +149,7 @@ export function Sidebar() {
             "flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all",
             isBusinessRoute
               ? "bg-gradient-to-r from-emerald-600 to-teal-600 text-white hover:from-emerald-700 hover:to-teal-700 shadow-sm shadow-emerald-600/20"
-              : "bg-gradient-to-r from-[#FF8A65] to-[#FF7043] text-white hover:from-[#FF7043] hover:to-[#E64A19] shadow-sm shadow-[#FF8A65]/20"
+              : "bg-gradient-to-r from-[#FF8A65] to-[#FF7043] text-white hover:from-[#FF7043] hover:to-[#E64A19] shadow-sm shadow-[#FF8A65]/20 dark:from-[#3B82F6] dark:to-[#2563EB] dark:hover:from-[#2563EB] dark:hover:to-[#1D4ED8] dark:shadow-blue-900/20"
           )}
           whileTap={{ scale: 0.96 }}
         >
@@ -172,8 +172,8 @@ export function Sidebar() {
               // eslint-disable-next-line @next/next/no-img-element
               <img src={user.avatarUrl} alt="" className="h-6 w-6 rounded-full object-cover" />
             ) : (
-              <div className="flex h-6 w-6 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/30">
-                <User size={12} className="text-amber-600 dark:text-amber-400" />
+              <div className="flex h-6 w-6 items-center justify-center rounded-full bg-amber-100 dark:bg-blue-900/30">
+                <User size={12} className="text-amber-600 dark:text-blue-400" />
               </div>
             )}
             <span className="truncate text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>

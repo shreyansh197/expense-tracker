@@ -63,62 +63,62 @@
 }
 
 .dark {
-  /* ── Surfaces (deep navy with layered depth) ── */
-  --background: #111827;
-  --foreground: #e8ecf4;
-  --surface: #1F2937;
-  --surface-secondary: #283344;
-  --surface-hover: #303d50;
-  --surface-tertiary: #374a5e;
+  /* ── Surfaces (blue-black with layered depth) ── */
+  --background: #0B1120;
+  --foreground: #E2E8F0;
+  --surface: #131B2E;
+  --surface-secondary: #1A2440;
+  --surface-hover: #223052;
+  --surface-tertiary: #2A3A60;
   /* ── Borders ── */
-  --border: #2E3A4A;
-  --border-subtle: #1c2838;
-  --border-card: #364758;
+  --border: #1E2D4A;
+  --border-subtle: #141E36;
+  --border-card: #243352;
   /* ── Text ── */
-  --text-primary: #e8ecf4;
-  --text-secondary: #94a3b8;
-  --text-tertiary: #5a6e82;
-  --text-muted: #3a4a5c;
-  /* ── Primary (Teal) ── */
-  --primary: #5EDDD2;
-  --primary-soft: rgba(94, 221, 210, 0.12);
-  --primary-gradient: linear-gradient(135deg, #5EDDD2, #2EC4B6);
+  --text-primary: #E2E8F0;
+  --text-secondary: #94A3B8;
+  --text-tertiary: #64748B;
+  --text-muted: #475569;
+  /* ── Primary (Blue) ── */
+  --primary: #60A5FA;
+  --primary-soft: rgba(96, 165, 250, 0.12);
+  --primary-gradient: linear-gradient(135deg, #60A5FA, #3B82F6);
   /* ── Secondary (Indigo) ── */
-  --secondary: #7B87FF;
-  --secondary-soft: rgba(123, 135, 255, 0.12);
-  --secondary-gradient: linear-gradient(135deg, #7B87FF, #4C5CFF);
-  /* ── Accent (Coral) ── */
-  --accent: #FFAB91;
-  --accent-soft: rgba(255, 171, 145, 0.12);
-  --accent-gradient: linear-gradient(135deg, #FFAB91, #FF8A65);
-  /* ── Info (Blue) ── */
-  --info: #90CAF9;
-  --info-soft: rgba(144, 202, 249, 0.12);
+  --secondary: #818CF8;
+  --secondary-soft: rgba(129, 140, 248, 0.12);
+  --secondary-gradient: linear-gradient(135deg, #818CF8, #6366F1);
+  /* ── Accent (Blue) ── */
+  --accent: #60A5FA;
+  --accent-soft: rgba(96, 165, 250, 0.12);
+  --accent-gradient: linear-gradient(135deg, #60A5FA, #3B82F6);
+  /* ── Info (Cyan) ── */
+  --info: #67E8F9;
+  --info-soft: rgba(103, 232, 249, 0.12);
   /* ── Semantic ── */
-  --success: #66BB6A;
-  --success-soft: rgba(102, 187, 106, 0.12);
-  --warning: #FFB74D;
-  --warning-soft: rgba(255, 183, 77, 0.12);
-  --danger: #EF5350;
-  --danger-soft: rgba(239, 83, 80, 0.12);
+  --success: #4ADE80;
+  --success-soft: rgba(74, 222, 128, 0.12);
+  --warning: #FBBF24;
+  --warning-soft: rgba(251, 191, 36, 0.12);
+  --danger: #F87171;
+  --danger-soft: rgba(248, 113, 113, 0.12);
   /* ── Section zone washes ── */
-  --section-teal: rgba(94, 221, 210, 0.16);
-  --section-indigo: rgba(123, 135, 255, 0.14);
-  --section-coral: rgba(255, 171, 145, 0.13);
-  --section-emerald: rgba(52, 211, 153, 0.14);
+  --section-teal: rgba(96, 165, 250, 0.10);
+  --section-indigo: rgba(129, 140, 248, 0.10);
+  --section-coral: rgba(96, 165, 250, 0.08);
+  --section-emerald: rgba(74, 222, 128, 0.10);
   /* ── Accent card surfaces ── */
-  --surface-accent-teal: rgba(94, 221, 210, 0.14);
-  --surface-accent-indigo: rgba(123, 135, 255, 0.14);
-  --surface-accent-coral: rgba(255, 171, 145, 0.14);
+  --surface-accent-teal: rgba(96, 165, 250, 0.10);
+  --surface-accent-indigo: rgba(129, 140, 248, 0.10);
+  --surface-accent-coral: rgba(96, 165, 250, 0.08);
   /* ── Hero gradient ── */
-  --gradient-hero: linear-gradient(135deg, rgba(94, 221, 210, 0.18) 0%, rgba(123, 135, 255, 0.14) 100%);
+  --gradient-hero: linear-gradient(135deg, rgba(96, 165, 250, 0.14) 0%, rgba(129, 140, 248, 0.10) 100%);
   /* ── Effects ── */
-  --card-shadow: 0 1px 4px rgba(0, 0, 0, 0.35), 0 1px 2px rgba(0, 0, 0, 0.2);
-  --card-shadow-hover: 0 4px 20px rgba(46, 196, 182, 0.18), 0 4px 12px rgba(0, 0, 0, 0.3);
+  --card-shadow: 0 1px 4px rgba(0, 0, 0, 0.45), 0 1px 2px rgba(0, 0, 0, 0.25);
+  --card-shadow-hover: 0 4px 20px rgba(96, 165, 250, 0.15), 0 4px 12px rgba(0, 0, 0, 0.35);
   /* ── Charts ── */
-  --chart-tooltip-bg: #1E293B;
-  --chart-tooltip-fg: #e8ecf4;
-  --chart-tooltip-border: #2E3A4A;
+  --chart-tooltip-bg: #131B2E;
+  --chart-tooltip-fg: #E2E8F0;
+  --chart-tooltip-border: #1E2D4A;
 }
 
 @theme inline {
@@ -156,9 +156,9 @@ body {
 
 .dark body {
   background-image:
-    radial-gradient(ellipse at 15% 5%, rgba(94, 221, 210, 0.18), transparent 50%),
-    radial-gradient(ellipse at 85% 90%, rgba(123, 135, 255, 0.14), transparent 50%),
-    radial-gradient(ellipse at 50% 40%, rgba(255, 171, 145, 0.10), transparent 55%);
+    radial-gradient(ellipse at 15% 5%, rgba(96, 165, 250, 0.12), transparent 50%),
+    radial-gradient(ellipse at 85% 90%, rgba(129, 140, 248, 0.10), transparent 50%),
+    radial-gradient(ellipse at 50% 40%, rgba(96, 165, 250, 0.06), transparent 55%);
 }
 
 @media (display-mode: standalone) {
@@ -275,13 +275,13 @@ button, a {
   transition: box-shadow 0.25s ease, border-color 0.25s ease;
 }
 .dark .card-accent-teal {
-  border-color: rgba(94, 221, 210, 0.18);
+  border-color: rgba(96, 165, 250, 0.16);
 }
 .dark .card-accent-indigo {
-  border-color: rgba(123, 135, 255, 0.16);
+  border-color: rgba(129, 140, 248, 0.14);
 }
 .dark .card-accent-coral {
-  border-color: rgba(255, 171, 145, 0.16);
+  border-color: rgba(96, 165, 250, 0.12);
 }
 
 .card {
