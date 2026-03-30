@@ -1,5 +1,6 @@
 "use client";
 
+import { LazyMotion, domAnimation } from "framer-motion";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { AuthProvider } from "@/components/providers/AuthProvider";
 import { ToastProvider } from "@/components/ui/Toast";
@@ -9,14 +10,16 @@ import { OfflineScreen } from "@/components/app/OfflineScreen";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <ThemeProvider>
-      <AuthProvider>
-        <ToastProvider>
-          <ConfirmProvider>{children}</ConfirmProvider>
-        </ToastProvider>
-      </AuthProvider>
-      <SplashScreen />
-      <OfflineScreen />
-    </ThemeProvider>
+    <LazyMotion features={domAnimation} strict>
+      <ThemeProvider>
+        <AuthProvider>
+          <ToastProvider>
+            <ConfirmProvider>{children}</ConfirmProvider>
+          </ToastProvider>
+        </AuthProvider>
+        <SplashScreen />
+        <OfflineScreen />
+      </ThemeProvider>
+    </LazyMotion>
   );
 }

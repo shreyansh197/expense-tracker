@@ -48,7 +48,7 @@ export function CategoryChips() {
             onKeyDown={(e) => handleKeyDown(e, i)}
             aria-pressed={activeCategories.length > 0 && activeCategories.includes(cat.id)}
             className={cn(
-              "shrink-0 rounded-full px-3 py-1 text-xs font-medium transition-all",
+              "shrink-0 rounded-full px-3 py-1 text-xs font-medium transition-all active:scale-95",
               isActive
                 ? "text-white"
                 : ""

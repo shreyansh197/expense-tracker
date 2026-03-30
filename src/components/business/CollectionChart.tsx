@@ -62,8 +62,8 @@ export function CollectionChart({ data }: CollectionChartProps) {
             }}
             wrapperStyle={{ fontSize: 11 }}
           />
-          <Bar dataKey="expected" fill="var(--surface-tertiary)" radius={[4, 4, 0, 0]} />
-          <Bar dataKey="received" fill="#10b981" radius={[4, 4, 0, 0]} />
+          <Bar dataKey="expected" fill="var(--surface-tertiary)" radius={[4, 4, 0, 0]} isAnimationActive={true} animationBegin={100} animationDuration={600} animationEasing="ease-out" />
+          <Bar dataKey="received" fill="#10b981" radius={[4, 4, 0, 0]} isAnimationActive={true} animationBegin={200} animationDuration={600} animationEasing="ease-out" />
         </BarChart>
       </ResponsiveContainer>
     </div>

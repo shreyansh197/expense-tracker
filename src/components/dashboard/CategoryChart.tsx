@@ -186,6 +186,10 @@ export function CategoryChart({ categoryTotals, onCategoryClick, categoryBudgets
                 paddingAngle={3}
                 dataKey="value"
                 stroke="none"
+                isAnimationActive={true}
+                animationBegin={200}
+                animationDuration={800}
+                animationEasing="ease-out"
                 activeShape={(props: unknown) => {
                   const p = props as Record<string, number>;
                   return (

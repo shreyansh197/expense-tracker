@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, createContext, useContext, useRef, useEffect } from "react";
+import { m, AnimatePresence } from "framer-motion";
 import { AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -80,18 +81,28 @@ export function ConfirmProvider({ children }: { children: React.ReactNode }) {
   return (
     <ConfirmContext.Provider value={{ confirm }}>
       {children}
+      <AnimatePresence>
       {pending && (
-        <div
-          className="fixed inset-0 z-[200] flex items-center justify-center bg-black/50 p-4"
+        <m.div
+          className="fixed inset-0 z-[200] flex items-center justify-center p-4"
           onClick={(e) => { if (e.target === e.currentTarget) handleCancel(); }}
           role="dialog"
           aria-modal="true"
           aria-label={pending.options.title}
+          initial={{ backgroundColor: 'rgba(0,0,0,0)' }}
+          animate={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
+          exit={{ backgroundColor: 'rgba(0,0,0,0)' }}
+          transition={{ duration: 0.2 }}
         >
-          <div className={cn(
+          <m.div className={cn(
             "w-full max-w-sm rounded-xl border p-5 shadow-xl",
             variantColors[pending.options.variant || "default"].border
-          )} style={{ background: 'var(--surface)' }}>
+          )} style={{ background: 'var(--surface)' }}
+            initial={{ opacity: 0, scale: 0.92, y: 10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 8 }}
+            transition={{ type: "spring", stiffness: 400, damping: 28 }}
+          >
             <div className="flex items-start gap-3">
               <AlertTriangle
                 size={20}
@@ -148,9 +159,10 @@ export function ConfirmProvider({ children }: { children: React.ReactNode }) {
                 {pending.options.confirmLabel || "Confirm"}
               </button>
             </div>
-          </div>
-        </div>
+          </m.div>
+        </m.div>
       )}
+      </AnimatePresence>
     </ConfirmContext.Provider>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { m, AnimatePresence } from "framer-motion";
 import {
   PiggyBank,
   AlertTriangle,
@@ -60,11 +61,19 @@ export function KpiCards({
   const forecastWarning = !forecastOverBudget && salary > 0 && forecast.projectedTotal > salary * 0.8;
 
   return (
-    <div className="space-y-3">
+    <m.div
+      className="space-y-3"
+      initial="hidden"
+      animate="visible"
+      variants={{ visible: { transition: { staggerChildren: 0.08 } } }}
+    >
       {/* ── Hero Row: Spent + Remaining ── */}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         {/* Spent / Budget */}
-        <div className="card p-5">
+        <m.div
+          className="card p-5"
+          variants={{ hidden: { opacity: 0, y: 12 }, visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] } } }}
+        >
           <p className="text-section-title">Spent</p>
           <div className="mt-2 flex items-baseline gap-1.5">
             <p className="tabular-nums text-3xl font-bold" style={{ color: 'var(--text-primary)' }}>
@@ -76,16 +85,18 @@ export function KpiCards({
             </span>
           </div>
           <div className="mt-3 h-2.5 w-full overflow-hidden rounded-full" style={{ background: 'var(--surface-secondary)' }}>
-            <div
+            <m.div
               className={cn(
-                "h-full rounded-full transition-all duration-500",
+                "h-full rounded-full",
                 isOverspent
                   ? "bg-red-500"
                   : isWarning
                     ? "bg-amber-500"
                     : "bg-indigo-500 dark:bg-indigo-400"
               )}
-              style={{ width: `${Math.min(budgetUsedPercent, 100)}%` }}
+              initial={{ width: 0 }}
+              animate={{ width: `${Math.min(budgetUsedPercent, 100)}%` }}
+              transition={{ delay: 0.3, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
             />
           </div>
           <div className="mt-2.5 flex items-center justify-between">
@@ -98,10 +109,10 @@ export function KpiCards({
               </p>
             )}
           </div>
-        </div>
+        </m.div>
 
         {/* Remaining + Days Left */}
-        <div
+        <m.div
           className={cn(
             "rounded-2xl border p-5 card-interactive",
             isOverspent
@@ -147,7 +158,7 @@ export function KpiCards({
               {daysRemaining === 0 ? "Month ended" : `${daysRemaining} day${daysRemaining !== 1 ? "s" : ""} left`}
             </span>
           </div>
-        </div>
+        </m.div>
       </div>
 
       {/* ── Toggle + Metrics Row ── */}
@@ -161,15 +172,17 @@ export function KpiCards({
           aria-expanded={expanded}
         >
           {expanded ? "Hide details" : "More details"}
-          <ChevronDown size={14} className={cn("transition-transform duration-200", expanded && "rotate-180")} />
+          <ChevronDown size={14} className={cn("transition-transform duration-300", expanded && "rotate-180")} />
         </button>
-        <div
-          className={cn(
-            "grid transition-all duration-300 ease-in-out",
-            expanded ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
-          )}
-        >
-          <div className="overflow-hidden">
+        <AnimatePresence initial={false}>
+          {expanded && (
+            <m.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+              className="overflow-hidden"
+            >
       <div className="grid grid-cols-3 gap-3 pt-1">
         {/* Spend Target */}
         <div className="card-sm p-3.5">
@@ -252,9 +265,10 @@ export function KpiCards({
           </p>
         </div>
       </div>
-          </div>
-        </div>
+            </m.div>
+          )}
+        </AnimatePresence>
       </div>
-    </div>
+    </m.div>
   );
 }

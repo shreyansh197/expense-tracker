@@ -20,6 +20,8 @@ import { TagBreakdown } from "@/components/business/TagBreakdown";
 import { SyncIndicator } from "@/components/sync/SyncIndicator";
 import { BusinessExport } from "@/components/business/BusinessExport";
 import { SkeletonBusinessKpi, SkeletonLedgerList } from "@/components/ui/Skeleton";
+import { PageTransition } from "@/components/ui/PageTransition";
+import { m, AnimatePresence } from "framer-motion";
 import type { LedgerInput, Ledger } from "@/types";
 
 // Helper to compute received per ledger — we fetch all payments for all ledgers
@@ -123,7 +125,7 @@ export default function BusinessPage() {
 
   return (
     <AppShell>
-      <div className="fade-in mx-auto min-h-[80vh] max-w-5xl xl:max-w-7xl space-y-6 p-4 lg:p-6">
+      <PageTransition className="mx-auto min-h-[80vh] max-w-5xl xl:max-w-7xl space-y-6 p-4 lg:p-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
@@ -153,9 +155,12 @@ export default function BusinessPage() {
         )}
 
         {/* KPI Cards */}
-        {loading ? (
-          <SkeletonBusinessKpi />
-        ) : ledgers.length > 0 ? (
+        <AnimatePresence mode="wait">
+          {loading ? (
+            <m.div key="biz-kpi-skeleton" initial={{ opacity: 0.6 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
+              <SkeletonBusinessKpi />
+            </m.div>
+          ) : ledgers.length > 0 ? (
           <BusinessKpiCards
             totalExpected={stats.totalExpected}
             totalReceived={stats.totalReceived}
@@ -165,6 +170,7 @@ export default function BusinessPage() {
             completedCount={stats.completedCount}
           />
         ) : null}
+        </AnimatePresence>
 
         {/* Analytics */}
         {!loading && ledgers.length > 0 && (
@@ -203,9 +209,12 @@ export default function BusinessPage() {
         )}
 
         {/* Ledger List */}
-        {loading ? (
-          <SkeletonLedgerList />
-        ) : ledgers.length === 0 && !showForm ? (
+        <AnimatePresence mode="wait">
+          {loading ? (
+            <m.div key="ledger-skeleton" initial={{ opacity: 0.6 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
+              <SkeletonLedgerList />
+            </m.div>
+          ) : ledgers.length === 0 && !showForm ? (
           <EmptyState
             icon={Briefcase}
             secondaryIcon={ArrowRightLeft}
@@ -220,7 +229,8 @@ export default function BusinessPage() {
             searchQuery={searchQuery}
           />
         )}
-      </div>
+        </AnimatePresence>
+      </PageTransition>
     </AppShell>
   );
 }

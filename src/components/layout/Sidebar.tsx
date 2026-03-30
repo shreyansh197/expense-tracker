@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { m } from "framer-motion";
 import { LayoutDashboard, List, Settings, PlusCircle, Briefcase, User } from "lucide-react";
 import { QuickHelpButton } from "@/components/ui/QuickHelpButton";
 import { cn } from "@/lib/utils";
@@ -111,12 +112,14 @@ export function Sidebar() {
             </span>
           </div>
           <div className="h-1.5 w-full rounded-full overflow-hidden" style={{ background: 'var(--border)' }}>
-            <div
+            <m.div
               className={cn(
-                "h-full rounded-full transition-all duration-500",
+                "h-full rounded-full",
                 overBudget ? "bg-red-500" : pct > 80 ? "bg-amber-500" : "bg-indigo-500"
               )}
-              style={{ width: `${pct}%` }}
+              initial={{ width: 0 }}
+              animate={{ width: `${pct}%` }}
+              transition={{ delay: 0.2, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
             />
           </div>
           <div className="mt-2 flex justify-between text-[11px]">
@@ -133,7 +136,7 @@ export function Sidebar() {
       {/* Add button */}
       {!shouldHideFAB && (
       <div className="p-3" style={{ borderTop: '1px solid var(--border-subtle)' }}>
-        <button
+        <m.button
           data-tour="fab-desktop"
           onClick={() => {
             if (isBusinessRoute) {
@@ -143,15 +146,16 @@ export function Sidebar() {
             }
           }}
           className={cn(
-            "flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all active:scale-[0.97]",
+            "flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all",
             isBusinessRoute
               ? "bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm shadow-emerald-600/20"
               : "bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm shadow-indigo-600/20"
           )}
+          whileTap={{ scale: 0.96 }}
         >
           <PlusCircle size={18} />
           {isBusinessRoute ? "Add Ledger" : "Add Expense"}
-        </button>
+        </m.button>
       </div>
       )}
 
@@ -161,10 +165,8 @@ export function Sidebar() {
         {user && (
           <Link
             href="/settings#account"
-            className="flex items-center gap-2 rounded-lg px-2 py-1.5 transition-colors"
+            className="flex items-center gap-2 rounded-lg px-2 py-1.5 transition-colors hover:bg-[var(--surface-secondary)]"
             style={{ color: 'var(--text-secondary)' }}
-            onMouseEnter={e => { e.currentTarget.style.background = 'var(--surface-secondary)'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = ''; }}
           >
             {user.avatarUrl ? (
               // eslint-disable-next-line @next/next/no-img-element

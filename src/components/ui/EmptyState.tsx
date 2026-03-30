@@ -1,6 +1,8 @@
 "use client";
 
+import { m } from "framer-motion";
 import type { LucideIcon } from "lucide-react";
+import { AmbientBackground } from "./AmbientBackground";
 
 interface EmptyStateProps {
   icon: LucideIcon;
@@ -14,14 +16,33 @@ interface EmptyStateProps {
   };
 }
 
+const stagger = {
+  animate: { transition: { staggerChildren: 0.08 } },
+};
+const fadeUp = {
+  initial: { opacity: 0, y: 10 },
+  animate: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] as const } },
+};
+
 export function EmptyState({ icon: Icon, secondaryIcon: SecondaryIcon, title, description, action }: EmptyStateProps) {
   const btnColor = action?.color === "emerald"
-    ? "bg-emerald-600 hover:bg-emerald-700 active:scale-[0.97]"
-    : "bg-indigo-600 hover:bg-indigo-700 active:scale-[0.97]";
+    ? "bg-emerald-600 hover:bg-emerald-700"
+    : "bg-indigo-600 hover:bg-indigo-700";
 
   return (
-    <div className="fade-in flex flex-col items-center justify-center gap-3 py-16">
-      <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl" style={{ background: 'var(--surface-secondary)' }}>
+    <m.div
+      className="relative flex flex-col items-center justify-center gap-3 py-16"
+      variants={stagger}
+      initial="initial"
+      animate="animate"
+    >
+      <AmbientBackground />
+
+      <m.div
+        className="relative flex h-16 w-16 items-center justify-center rounded-2xl"
+        style={{ background: 'var(--surface-secondary)', animation: 'glow-ring 3s ease-in-out infinite' }}
+        variants={fadeUp}
+      >
         <Icon size={28} style={{ color: 'var(--text-muted)' }} />
         {SecondaryIcon && (
           <div
@@ -31,17 +52,19 @@ export function EmptyState({ icon: Icon, secondaryIcon: SecondaryIcon, title, de
             <SecondaryIcon size={14} style={{ color: 'var(--text-tertiary)' }} />
           </div>
         )}
-      </div>
-      <p className="text-sm font-semibold" style={{ color: 'var(--text-secondary)' }}>{title}</p>
-      <p className="max-w-xs text-center text-xs" style={{ color: 'var(--text-tertiary)' }}>{description}</p>
+      </m.div>
+      <m.p className="text-sm font-semibold" style={{ color: 'var(--text-secondary)' }} variants={fadeUp}>{title}</m.p>
+      <m.p className="max-w-xs text-center text-xs" style={{ color: 'var(--text-tertiary)' }} variants={fadeUp}>{description}</m.p>
       {action && (
-        <button
+        <m.button
           onClick={action.onClick}
-          className={`mt-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all ${btnColor}`}
+          className={`btn-pulse mt-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all press-scale ${btnColor}`}
+          variants={fadeUp}
+          whileTap={{ scale: 0.96 }}
         >
           {action.label}
-        </button>
+        </m.button>
       )}
-    </div>
+    </m.div>
   );
 }

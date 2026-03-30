@@ -4,6 +4,7 @@ export const dynamic = "force-dynamic";
 
 import { useRouter } from "next/navigation";
 import { useState, useCallback } from "react";
+import { m, AnimatePresence } from "framer-motion";
 import { AppShell } from "@/components/layout/AppShell";
 import { MonthSwitcher } from "@/components/layout/MonthSwitcher";
 import { SyncIndicator } from "@/components/sync/SyncIndicator";
@@ -14,6 +15,8 @@ import { AlertsPanel } from "@/components/dashboard/AlertsPanel";
 import { SubscriptionsSummary } from "@/components/dashboard/SubscriptionsSummary";
 import { SavingsGoalsWidget } from "@/components/dashboard/SavingsGoalsWidget";
 import { SkeletonKpiCards, SkeletonChart } from "@/components/ui/Skeleton";
+import { PageTransition } from "@/components/ui/PageTransition";
+import { AmbientBackground } from "@/components/ui/AmbientBackground";
 import { useExpenses } from "@/hooks/useExpenses";
 import { useSettings } from "@/hooks/useSettings";
 import { useCalculations } from "@/hooks/useCalculations";
@@ -117,14 +120,26 @@ function WelcomeCard({ onAddExpense, hasBudget }: { onAddExpense: () => void; ha
   const totalSteps = 3;
 
   return (
-    <div className="dash-section relative overflow-hidden rounded-2xl" style={{ background: 'var(--surface)', border: '1px solid var(--border-card)', boxShadow: 'var(--card-shadow)' }}>
+    <m.div
+      className="dash-section relative overflow-hidden rounded-2xl"
+      style={{ background: 'var(--surface)', border: '1px solid var(--border-card)', boxShadow: 'var(--card-shadow)' }}
+      initial={{ opacity: 0, y: 16, scale: 0.98 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+    >
+      <AmbientBackground />
       {/* Gradient accent bar */}
       <div className="h-1" style={{ background: 'var(--accent-gradient)' }} />
 
-      <div className="p-5 sm:p-7">
+      <div className="relative p-5 sm:p-7">
         {/* Header */}
-        <div className="flex items-start gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl" style={{ background: 'var(--accent-soft)' }}>
+        <m.div
+          className="flex items-start gap-3"
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+        >
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl" style={{ background: 'var(--accent-soft)', animation: 'glow-ring 3s ease-in-out infinite' }}>
             <Sparkles size={18} style={{ color: 'var(--accent)' }} />
           </div>
           <div>
@@ -135,14 +150,17 @@ function WelcomeCard({ onAddExpense, hasBudget }: { onAddExpense: () => void; ha
               Get set up in a few quick steps.
             </p>
           </div>
-        </div>
+        </m.div>
 
         {/* Progress indicator */}
         <div className="mt-5 flex items-center gap-3">
           <div className="h-1.5 flex-1 overflow-hidden rounded-full" style={{ background: 'var(--surface-secondary)' }}>
-            <div
-              className="h-full rounded-full transition-all duration-700 ease-out"
-              style={{ width: `${(stepsCompleted / totalSteps) * 100}%`, background: 'var(--accent-gradient)' }}
+            <m.div
+              className="h-full rounded-full"
+              style={{ background: 'var(--accent-gradient)' }}
+              initial={{ width: 0 }}
+              animate={{ width: `${(stepsCompleted / totalSteps) * 100}%` }}
+              transition={{ delay: 0.4, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
             />
           </div>
           <span className="text-[11px] font-bold tabular-nums" style={{ color: 'var(--text-tertiary)' }}>
@@ -151,36 +169,39 @@ function WelcomeCard({ onAddExpense, hasBudget }: { onAddExpense: () => void; ha
         </div>
 
         {/* Steps */}
-        <div className="mt-4 grid gap-2 sm:grid-cols-3">
-          <OnboardingStep
-            done={hasBudget} icon={Target} color="indigo"
-            title="Set your budget"
-            subtitle="Settings → Monthly Budget"
-          />
-          <OnboardingStep
-            done={false} icon={PlusCircle} color="emerald"
-            title="Add first expense"
-            subtitle="Track where your money goes"
-          />
-          <OnboardingStep
-            done={false} icon={BarChart3} color="amber"
-            title="Explore insights"
-            subtitle="Charts & alerts appear automatically"
-          />
-        </div>
+        <m.div
+          className="mt-4 grid gap-2 sm:grid-cols-3"
+          initial="hidden"
+          animate="visible"
+          variants={{ visible: { transition: { staggerChildren: 0.1, delayChildren: 0.3 } } }}
+        >
+          {[
+            { done: hasBudget, icon: Target, color: "indigo" as const, title: "Set your budget", subtitle: "Settings → Monthly Budget" },
+            { done: false, icon: PlusCircle, color: "emerald" as const, title: "Add first expense", subtitle: "Track where your money goes" },
+            { done: false, icon: BarChart3, color: "amber" as const, title: "Explore insights", subtitle: "Charts & alerts appear automatically" },
+          ].map((step) => (
+            <m.div key={step.title} variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] } } }}>
+              <OnboardingStep {...step} />
+            </m.div>
+          ))}
+        </m.div>
 
         {/* CTA */}
-        <button
+        <m.button
           onClick={onAddExpense}
-          className="group mt-5 flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold text-white shadow-lg transition-all duration-200 hover:shadow-xl active:scale-[0.98] sm:w-auto sm:px-8"
+          className="btn-pulse group mt-5 flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold text-white shadow-lg transition-all duration-200 hover:shadow-xl sm:w-auto sm:px-8"
           style={{ background: 'var(--accent-gradient)' }}
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+          whileTap={{ scale: 0.97 }}
         >
           <PlusCircle size={16} strokeWidth={2.5} />
           Add Your First Expense
           <ArrowRight size={14} className="transition-transform duration-200 group-hover:translate-x-0.5" />
-        </button>
+        </m.button>
       </div>
-    </div>
+    </m.div>
   );
 }
 
@@ -235,7 +256,7 @@ export default function DashboardPage() {
 
   return (
     <AppShell>
-        <div className="fade-in mx-auto min-h-[80vh] max-w-4xl xl:max-w-6xl space-y-6 p-4 lg:p-6">
+        <PageTransition className="mx-auto min-h-[80vh] max-w-4xl xl:max-w-6xl space-y-6 p-4 lg:p-6">
         {/* Header */}
         <div data-tour="dashboard" className="dash-section flex items-center justify-between">
           <MonthSwitcher />
@@ -256,11 +277,14 @@ export default function DashboardPage() {
         )}
 
         {/* KPI Cards */}
-        {loading ? (
-          <div className="dash-section"><SkeletonKpiCards /></div>
-        ) : expenses.length === 0 ? null : (
-          <div className="dash-section">
-          <KpiCards
+        <AnimatePresence mode="wait">
+          {loading ? (
+            <m.div key="kpi-skeleton" className="dash-section" initial={{ opacity: 0.6 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
+              <SkeletonKpiCards />
+            </m.div>
+          ) : expenses.length === 0 ? null : (
+            <m.div key="kpi-content" className="dash-section" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
+            <KpiCards
             monthlyTotal={monthlyTotal}
             remaining={remaining}
             salary={effectiveBudget}
@@ -281,8 +305,9 @@ export default function DashboardPage() {
                 : 0
             }
           />
-          </div>
+          </m.div>
         )}
+        </AnimatePresence>
 
         {expenses.length === 0 ? null : (
         <>
@@ -311,30 +336,60 @@ export default function DashboardPage() {
         </CollapsibleSection>
 
         {/* Charts Row */}
-        {loading ? (
-          <div className="dash-section grid gap-4 lg:grid-cols-2">
-            <SkeletonChart />
-            <SkeletonChart />
-          </div>
-        ) : expenses.length === 0 ? (
-          <div className="dash-section grid gap-4 lg:grid-cols-2">
-            <div className="card p-5">
-              <h3 className="text-section-title mb-4">Category Breakdown</h3>
-              <div className="flex h-[220px] items-center justify-center">
+        <AnimatePresence mode="wait">
+          {loading ? (
+            <m.div key="chart-skeleton" className="dash-section grid gap-4 lg:grid-cols-2" initial={{ opacity: 0.6 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
+              <SkeletonChart />
+              <SkeletonChart />
+            </m.div>
+          ) : expenses.length === 0 ? (
+          <div className="dash-section relative grid gap-4 lg:grid-cols-2">
+            <div className="card relative overflow-hidden p-5">
+              <AmbientBackground />
+              <h3 className="relative text-section-title mb-4">Category Breakdown</h3>
+              <div className="relative flex h-[220px] items-center justify-center">
                 <div className="text-center">
-                  <div className="mx-auto mb-3 h-24 w-24 rounded-full border-[6px] opacity-15" style={{ borderColor: 'var(--border)' }} />
-                  <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Your spending breakdown will appear here</p>
+                  {/* Animated donut preview */}
+                  <svg width="96" height="96" viewBox="0 0 96 96" className="mx-auto mb-3">
+                    <circle cx="48" cy="48" r="40" fill="none" stroke="var(--border)" strokeWidth="6" opacity="0.15" />
+                    <circle
+                      cx="48" cy="48" r="40" fill="none" strokeWidth="6" opacity="0.25"
+                      stroke="var(--accent)"
+                      strokeDasharray="251.3"
+                      strokeLinecap="round"
+                      style={{
+                        animation: 'donut-sweep 1.2s cubic-bezier(0.22, 1, 0.36, 1) 0.3s both',
+                        transformOrigin: 'center',
+                        transform: 'rotate(-90deg)',
+                        ['--target-offset' as string]: '100',
+                      }}
+                    />
+                  </svg>
+                  <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Preview</p>
+                  <p className="mt-1 text-xs" style={{ color: 'var(--text-muted)' }}>Your spending breakdown will appear here</p>
                 </div>
               </div>
             </div>
-            <div className="card p-5">
-              <h3 className="text-section-title mb-4">Daily Spending Trend</h3>
-              <div className="flex h-[220px] items-end justify-center gap-1.5 px-4 pb-4">
+            <div className="card relative overflow-hidden p-5">
+              <AmbientBackground />
+              <h3 className="relative text-section-title mb-4">Daily Spending Trend</h3>
+              <div className="relative flex h-[220px] items-end justify-center gap-1.5 px-4 pb-4">
                 {[30, 55, 20, 70, 45, 35, 60, 25, 50, 40, 65, 30].map((h, i) => (
-                  <div key={i} className="flex-1 rounded-t opacity-10" style={{ height: `${h}%`, background: 'var(--text-muted)' }} />
+                  <div
+                    key={i}
+                    className="flex-1 rounded-t origin-bottom"
+                    style={{
+                      height: `${h}%`,
+                      background: 'var(--accent)',
+                      opacity: 0.12,
+                      animation: `bar-grow 0.5s cubic-bezier(0.22, 1, 0.36, 1) ${0.3 + i * 0.06}s both`,
+                      transformOrigin: 'bottom',
+                    }}
+                  />
                 ))}
               </div>
-              <p className="text-center text-xs" style={{ color: 'var(--text-muted)' }}>Your daily trend will appear here</p>
+              <p className="relative text-center text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Preview</p>
+              <p className="relative mt-1 text-center text-xs" style={{ color: 'var(--text-muted)' }}>Your daily trend will appear here</p>
             </div>
           </div>
         ) : (
@@ -368,6 +423,7 @@ export default function DashboardPage() {
           </div>
         </div>
         )}
+        </AnimatePresence>
 
         {/* Recent Expenses */}
         <div className="dash-section card p-5">
@@ -393,11 +449,13 @@ export default function DashboardPage() {
             </div>
           ) : (
             <div className="space-y-0.5">
-              {recentExpenses.map((e) => (
-                <div
+              {recentExpenses.map((e, idx) => (
+                <m.div
                   key={e.id}
                   className="flex items-center justify-between rounded-xl px-3 py-3 transition-colors"
-                  style={{ ['--tw-bg-opacity' as string]: 1 }}
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: idx * 0.04, duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
                   onMouseEnter={(ev) => ev.currentTarget.style.background = 'var(--surface-secondary)'}
                   onMouseLeave={(ev) => ev.currentTarget.style.background = 'transparent'}
                 >
@@ -422,14 +480,14 @@ export default function DashboardPage() {
                   <span className="tabular-nums ml-3 shrink-0 text-base font-bold" style={{ color: 'var(--text-primary)' }}>
                     {formatCurrency(e.amount)}
                   </span>
-                </div>
+                </m.div>
               ))}
             </div>
           )}
         </div>
         </>
         )}
-      </div>
+      </PageTransition>
     </AppShell>
   );
 }

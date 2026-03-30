@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { m } from "framer-motion";
 import {
   LayoutDashboard,
   List,
@@ -59,12 +60,12 @@ export function BottomNav() {
     <>
       {/* ─── FAB (own fixed layer, ABOVE nav) ─── */}
       {!shouldHideFAB && (
-      <button
+      <m.button
         data-tour="fab"
         onClick={handleFabClick}
         aria-label={isBusiness && isBusinessRoute ? "Add ledger" : "Add expense"}
         className={cn(
-          "fixed left-1/2 z-40 flex h-[54px] w-[54px] -translate-x-1/2 items-center justify-center rounded-full text-white shadow-lg shadow-black/15 ring-[3px] ring-white/70 transition-all duration-200 active:scale-90 lg:hidden",
+          "fixed left-1/2 z-40 flex h-[54px] w-[54px] -translate-x-1/2 items-center justify-center rounded-full text-white shadow-lg shadow-black/15 ring-[3px] ring-white/70 transition-colors lg:hidden",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
           accentColor === "emerald"
             ? "bg-emerald-600 hover:bg-emerald-700 focus-visible:ring-emerald-500"
@@ -73,9 +74,13 @@ export function BottomNav() {
         style={{
           bottom: `calc(${NAV_HEIGHT}px + env(safe-area-inset-bottom, 0px) + 12px)`,
         }}
+        initial={{ scale: 0, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ type: "spring", stiffness: 400, damping: 20, delay: 0.15 }}
+        whileTap={{ scale: 0.88 }}
       >
         <Plus size={24} strokeWidth={2.5} />
-      </button>
+      </m.button>
       )}
 
       {/* ─── Nav bar (z-30, below FAB) ─── */}
@@ -115,10 +120,14 @@ export function BottomNav() {
                 style={!isActive ? { color: 'var(--text-muted)' } : undefined}
               >
                 {isActive && (
-                  <span className={cn(
-                    "absolute -top-2 h-[3px] w-6 rounded-full",
-                    isBiz ? "bg-emerald-600 dark:bg-emerald-400" : "bg-indigo-600 dark:bg-indigo-400"
-                  )} />
+                  <m.span
+                    layoutId="nav-active-indicator"
+                    className={cn(
+                      "absolute -top-2 h-[3px] w-6 rounded-full",
+                      isBiz ? "bg-emerald-600 dark:bg-emerald-400" : "bg-indigo-600 dark:bg-indigo-400"
+                    )}
+                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                  />
                 )}
                 <Icon size={22} />
                 <span className="text-[11px] font-medium">{item.label}</span>

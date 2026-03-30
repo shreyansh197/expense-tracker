@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { m } from "framer-motion";
 import { DatePicker } from "@/components/ui/DatePicker";
 import { useCurrency } from "@/hooks/useCurrency";
 import type { PaymentInput, PaymentMethod } from "@/types";
@@ -138,13 +139,14 @@ export function PaymentForm({ ledgerId, onSubmit, onCancel }: PaymentFormProps) 
 
       {/* Buttons */}
       <div className="flex gap-2">
-        <button
+        <m.button
           type="submit"
           disabled={submitting || !amount}
           className="flex-1 rounded-xl bg-emerald-600 px-3 py-2.5 text-xs font-semibold text-white shadow-sm shadow-emerald-600/20 hover:bg-emerald-700 active:scale-[0.97] disabled:opacity-50"
+          whileTap={{ scale: 0.95 }}
         >
           {submitting ? "Saving..." : "Log Payment"}
-        </button>
+        </m.button>
         <button
           type="button"
           onClick={onCancel}

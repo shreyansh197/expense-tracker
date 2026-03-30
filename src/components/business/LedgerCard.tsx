@@ -36,7 +36,7 @@ export function LedgerCard({ ledger, totalReceived }: LedgerCardProps) {
   return (
     <Link
       href={`/business/${ledger.id}`}
-      className="card block p-4 transition-all"
+      className="card block p-4 transition-all active:scale-[0.98]"
     >
       <div className="flex items-start gap-3">
         <LedgerProgressRing received={totalReceived} expected={ledger.expectedAmount} />

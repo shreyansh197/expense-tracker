@@ -53,6 +53,7 @@ export function LedgerProgressRing({
           strokeDashoffset={offset}
           strokeLinecap="round"
           className={color || undefined}
+          style={{ transition: "stroke-dashoffset 0.8s cubic-bezier(0.22, 1, 0.36, 1)" }}
         />
       </svg>
       <span className="absolute text-[10px] font-bold" style={{ color: 'var(--text-primary)' }}>

@@ -212,6 +212,10 @@ export function DailyTrendChart({ dailyTotals, stackedDailyTotals, activeCategor
                   stackId="stack"
                   fill={catMap[cat]?.color || "#6B7280"}
                   radius={[0, 0, 0, 0]}
+                  isAnimationActive={true}
+                  animationBegin={100}
+                  animationDuration={600}
+                  animationEasing="ease-out"
                 />
               ))}
             </BarChart>
@@ -262,6 +266,10 @@ export function DailyTrendChart({ dailyTotals, stackedDailyTotals, activeCategor
                 dataKey="total"
                 fill="#3B82F6"
                 radius={[4, 4, 0, 0]}
+                isAnimationActive={true}
+                animationBegin={100}
+                animationDuration={600}
+                animationEasing="ease-out"
               />
             </BarChart>
           </ResponsiveContainer>

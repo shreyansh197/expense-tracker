@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
+import { m, AnimatePresence } from "framer-motion";
 import { X, Loader2 } from "lucide-react";
 import { getAllCategories } from "@/lib/categories";
 import { cn, getDaysInMonth } from "@/lib/utils";
@@ -200,7 +201,7 @@ export function ExpenseForm({
         </label>
         <div className="flex flex-wrap gap-2">
           {allCategories.map((cat) => (
-            <button
+            <m.button
               key={cat.id}
               type="button"
               onClick={() => setCategory(cat.id)}
@@ -215,11 +216,14 @@ export function ExpenseForm({
                   ? { backgroundColor: cat.color }
                   : { background: 'var(--surface-secondary)', color: 'var(--text-secondary)' }
               }
-              onMouseEnter={category !== cat.id ? (e) => { e.currentTarget.style.background = 'var(--surface-tertiary)'; } : undefined}
-              onMouseLeave={category !== cat.id ? (e) => { e.currentTarget.style.background = 'var(--surface-secondary)'; } : undefined}
+              onMouseEnter={category !== cat.id ? (e: React.MouseEvent<HTMLButtonElement>) => { e.currentTarget.style.background = 'var(--surface-tertiary)'; } : undefined}
+              onMouseLeave={category !== cat.id ? (e: React.MouseEvent<HTMLButtonElement>) => { e.currentTarget.style.background = 'var(--surface-secondary)'; } : undefined}
+              whileTap={{ scale: 0.92 }}
+              animate={category === cat.id ? { scale: [1, 1.08, 1] } : {}}
+              transition={{ duration: 0.2 }}
             >
               {cat.label}
-            </button>
+            </m.button>
           ))}
         </div>
       </div>
@@ -241,9 +245,19 @@ export function ExpenseForm({
           required
           aria-invalid={amountInvalid || undefined}
         />
-        {amountInvalid && (
-          <p className="mt-1 text-xs font-medium text-red-500">Enter a valid positive amount</p>
-        )}
+        <AnimatePresence>
+          {amountInvalid && (
+            <m.p
+              initial={{ opacity: 0, height: 0, marginTop: 0 }}
+              animate={{ opacity: 1, height: "auto", marginTop: 4 }}
+              exit={{ opacity: 0, height: 0, marginTop: 0 }}
+              transition={{ duration: 0.2 }}
+              className="text-xs font-medium text-red-500 overflow-hidden"
+            >
+              Enter a valid positive amount
+            </m.p>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* Date */}
@@ -279,15 +293,26 @@ export function ExpenseForm({
       </div>
 
       {/* Error */}
-      {error && (
-        <p className="text-xs font-medium text-red-500">{error}</p>
-      )}
+      <AnimatePresence>
+        {error && (
+          <m.p
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.2 }}
+            className="text-xs font-medium text-red-500 overflow-hidden"
+          >
+            {error}
+          </m.p>
+        )}
+      </AnimatePresence>
 
       {/* Submit */}
-      <button
+      <m.button
         type="submit"
         disabled={submitting}
         className="flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-indigo-700 disabled:opacity-50"
+        whileTap={{ scale: 0.97 }}
       >
         {submitting && <Loader2 size={16} className="animate-spin" />}
         {submitting
@@ -295,7 +320,7 @@ export function ExpenseForm({
           : editExpense
             ? "Update Expense"
             : "Add Expense"}
-      </button>
+      </m.button>
     </form>
   );
 }

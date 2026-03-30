@@ -130,11 +130,12 @@ button, a {
 
 /* Interactive card hover effect (desktop only) */
 .card-interactive {
-  transition: box-shadow 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+  transition: box-shadow 0.25s ease, border-color 0.25s ease, transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
 }
 @media (hover: hover) {
   .card-interactive:hover {
     box-shadow: var(--card-shadow-hover);
+    transform: translateY(-2px);
   }
 }
 
@@ -144,11 +145,12 @@ button, a {
   border: 1px solid var(--border-card);
   border-radius: 1rem;
   box-shadow: var(--card-shadow);
-  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+  transition: box-shadow 0.25s ease, border-color 0.25s ease, transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
 }
 @media (hover: hover) {
   .card:hover {
     box-shadow: var(--card-shadow-hover);
+    transform: translateY(-1px);
   }
 }
 .card-sm {
@@ -228,11 +230,12 @@ button, a {
   font-size: 0.875rem;
   color: var(--text-primary);
   outline: none;
-  transition: border-color 0.15s, box-shadow 0.15s;
+  transition: border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1), transform 0.2s ease;
 }
 .form-input:focus {
   border-color: var(--accent);
   box-shadow: 0 0 0 3px var(--accent-soft);
+  transform: scale(1.003);
 }
 .form-input::placeholder {
   color: var(--text-tertiary);
@@ -299,13 +302,17 @@ button, a {
   border: none;
   border-radius: 0.75rem;
   cursor: pointer;
-  transition: background-color 0.15s, transform 0.1s;
+  transition: background-color 0.15s, transform 0.15s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.2s ease, filter 0.15s;
 }
-.btn-primary:hover {
-  filter: brightness(1.1);
+@media (hover: hover) {
+  .btn-primary:hover {
+    filter: brightness(1.08);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px var(--accent-soft);
+  }
 }
 .btn-primary:active {
-  transform: scale(0.97);
+  transform: scale(0.97) translateY(0);
 }
 .btn-primary:disabled {
   opacity: 0.5;
@@ -427,6 +434,95 @@ input[type="password"]::-ms-clear {
 .dash-section:nth-child(7) { animation-delay: 0.24s; }
 .dash-section:nth-child(8) { animation-delay: 0.28s; }
 .dash-section:nth-child(9) { animation-delay: 0.32s; }
+
+/* ── Premium motion & depth utilities ─────────────────────── */
+
+/* Gentle float for empty-state decorative elements */
+@keyframes float-gentle {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-8px); }
+}
+
+/* Slow ambient gradient drift for empty-state backgrounds */
+@keyframes gradient-drift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Soft pulse for primary CTA breathing */
+@keyframes pulse-soft {
+  0%, 100% { box-shadow: 0 0 0 0 var(--accent-soft); }
+  50%       { box-shadow: 0 0 0 6px transparent; }
+}
+
+/* Skeleton shimmer sweep (premium replacement for pulse) */
+@keyframes shimmer {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* Subtle glow ring expansion for icons */
+@keyframes glow-ring {
+  0%, 100% { box-shadow: 0 0 0 0 var(--accent-soft), 0 0 12px var(--accent-soft); }
+  50%       { box-shadow: 0 0 0 5px transparent, 0 0 20px var(--accent-soft); }
+}
+
+/* Preview bar grow from baseline */
+@keyframes bar-grow {
+  from { transform: scaleY(0); }
+  to   { transform: scaleY(1); }
+}
+
+/* Preview donut sweep */
+@keyframes donut-sweep {
+  from { stroke-dashoffset: 251.3; }
+  to   { stroke-dashoffset: var(--target-offset, 62.8); }
+}
+
+/* Floating particle drift */
+@keyframes particle-drift {
+  0%   { transform: translate(0, 0) scale(1);    opacity: 0.4; }
+  25%  { transform: translate(8px, -12px) scale(1.1); opacity: 0.6; }
+  50%  { transform: translate(-4px, -20px) scale(0.9); opacity: 0.35; }
+  75%  { transform: translate(6px, -10px) scale(1.05); opacity: 0.55; }
+  100% { transform: translate(0, 0) scale(1);    opacity: 0.4; }
+}
+
+/* Utility: hover lift for cards (desktop only) */
+@media (hover: hover) {
+  .hover-lift {
+    transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.25s ease;
+  }
+  .hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--card-shadow-hover);
+  }
+}
+
+/* Utility: press feedback */
+.press-scale {
+  transition: transform 0.15s ease;
+}
+.press-scale:active {
+  transform: scale(0.97);
+}
+
+/* Utility: breathing CTA */
+.btn-pulse {
+  animation: pulse-soft 2.8s ease-in-out infinite;
+}
+
+/* Utility: ambient float */
+.animate-float {
+  animation: float-gentle 6s ease-in-out infinite;
+}
+
+/* Utility: ambient gradient */
+.animate-gradient-drift {
+  background-size: 200% 200%;
+  animation: gradient-drift 8s ease infinite;
+}
 
 /* Toast countdown progress bar */
 @keyframes toast-countdown {

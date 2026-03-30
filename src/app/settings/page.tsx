@@ -26,6 +26,7 @@ import { ExportImportWizard } from "@/components/settings/ExportImportWizard";
 import { AutoRulesManager } from "@/components/settings/AutoRulesManager";
 import { DataAccountManagement } from "@/components/settings/DataAccountManagement";
 import { SettingsFooterLogout } from "@/components/settings/SettingsFooterLogout";
+import { PageTransition } from "@/components/ui/PageTransition";
 
 export default function SettingsPage() {
   const { settings, updateSettings } = useSettings();
@@ -60,7 +61,7 @@ export default function SettingsPage() {
 
   return (
     <AppShell>
-        <div className="fade-in mx-auto max-w-3xl space-y-2 p-4 lg:p-6">
+        <PageTransition className="mx-auto max-w-3xl space-y-2 p-4 lg:p-6">
         <h1 className="text-page-title mb-4">Settings</h1>
 
         <SettingsAccordion>
@@ -377,7 +378,7 @@ export default function SettingsPage() {
 
         {/* ─── 12. Log Out Footer ─── */}
         <SettingsFooterLogout />
-      </div>
+      </PageTransition>
     </AppShell>
   );
 }

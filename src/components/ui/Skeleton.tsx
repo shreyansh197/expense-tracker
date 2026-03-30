@@ -11,11 +11,19 @@ export function Skeleton({ className, style }: SkeletonProps) {
   return (
     <div
       className={cn(
-        "animate-pulse rounded-lg",
+        "relative overflow-hidden rounded-lg",
         className
       )}
       style={{ background: 'var(--surface-secondary)', ...style }}
-    />
+    >
+      <div
+        className="absolute inset-0"
+        style={{
+          background: 'linear-gradient(90deg, transparent 0%, var(--surface-hover) 50%, transparent 100%)',
+          animation: 'shimmer 1.8s ease-in-out infinite',
+        }}
+      />
+    </div>
   );
 }
 

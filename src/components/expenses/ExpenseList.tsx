@@ -263,7 +263,7 @@ export function ExpenseList({
                   if (e.key === "Delete" || e.key === "Backspace") handleDelete(expense.id);
                   if (e.key === " ") { e.preventDefault(); toggleSelect(expense.id); }
                 }}
-                className={`group flex items-center gap-3 rounded-2xl border px-4 py-3.5 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500/40 ${
+                className={`group flex items-center gap-3 rounded-2xl border px-4 py-3.5 transition-all active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-indigo-500/40 ${
                   selectedIds.has(expense.id)
                     ? "border-indigo-300 bg-indigo-50 dark:border-indigo-700 dark:bg-indigo-950/30"
                     : ""
