@@ -71,7 +71,7 @@ export function KpiCards({
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         {/* Spent / Budget */}
         <m.div
-          className="card relative overflow-hidden p-5"
+          className="card-accent-indigo relative overflow-hidden p-5"
           variants={{ hidden: { opacity: 0, y: 12 }, visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] } } }}
         >
           {/* Gradient accent bar */}
@@ -206,7 +206,7 @@ export function KpiCards({
             >
       <div className="grid grid-cols-3 gap-3 pt-1">
         {/* Spend Target */}
-        <div className="card-sm p-3.5">
+        <div className="card-accent-teal p-3.5">
           <p className="text-meta font-medium">Daily Budget</p>
           <p className={cn(
             "tabular-nums mt-1.5 text-lg font-bold",
@@ -224,7 +224,7 @@ export function KpiCards({
         </div>
 
         {/* Saved */}
-        <div className="card-sm p-3.5">
+        <div className="card-accent-coral p-3.5">
           <p className="text-meta font-medium">Saved</p>
           <p className={cn(
             "tabular-nums mt-1.5 text-lg font-bold",

@@ -54,7 +54,7 @@ export function Sidebar() {
   const overBudget = budgetUsedPercent > 100;
 
   return (
-    <aside className="hidden lg:flex lg:w-[15rem] lg:flex-col" style={{ background: 'linear-gradient(to bottom, var(--surface), color-mix(in srgb, var(--surface-secondary) 40%, var(--surface)))', borderRight: '1px solid var(--border)' }}>
+    <aside className="hidden lg:flex lg:w-[15rem] lg:flex-col" style={{ background: 'linear-gradient(to bottom, color-mix(in srgb, var(--surface) 94%, #2EC4B6), var(--surface), color-mix(in srgb, var(--surface-secondary) 40%, var(--surface)))', borderRight: '1px solid var(--border)' }}>
       {/* Logo */}
       <div className="flex items-center gap-2.5 px-5 py-5" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
         <Image

@@ -277,13 +277,15 @@ export default function DashboardPage() {
     <AppShell>
         <PageTransition className="relative mx-auto min-h-[80vh] max-w-4xl xl:max-w-6xl space-y-6 p-4 lg:p-6">
         <DecoGraphic variant="finance" />
-        {/* Header */}
-        <div data-tour="dashboard" className="dash-section flex items-center justify-between">
-          <MonthSwitcher />
-          <div className="flex items-center gap-2">
-            <SyncIndicator syncStatus={syncStatus} />
-            <div className="relative z-[9999] lg:hidden">
-              <QuickHelpButton />
+        {/* Header — hero zone */}
+        <div className="zone-header dash-section">
+          <div data-tour="dashboard" className="flex items-center justify-between">
+            <MonthSwitcher />
+            <div className="flex items-center gap-2">
+              <SyncIndicator syncStatus={syncStatus} />
+              <div className="relative z-[9999] lg:hidden">
+                <QuickHelpButton />
+              </div>
             </div>
           </div>
         </div>
@@ -335,7 +337,8 @@ export default function DashboardPage() {
 
         {expenses.length === 0 ? null : (
         <>
-        {/* Alerts */}
+        {/* Alerts / Subscriptions / Goals — indigo zone */}
+        <div className="section-zone section-indigo space-y-4">
         <CollapsibleSection id="alerts" title="Alerts">
         <AlertsPanel
           categoryTotals={categoryTotals}
@@ -349,17 +352,17 @@ export default function DashboardPage() {
         />
         </CollapsibleSection>
 
-        {/* Recurring Expenses Summary */}
         <CollapsibleSection id="subscriptions" title="Recurring Expenses">
         <SubscriptionsSummary />
         </CollapsibleSection>
 
-        {/* Savings Goals */}
         <CollapsibleSection id="goals" title="Savings Goals">
         <SavingsGoalsWidget />
         </CollapsibleSection>
+        </div>
 
-        {/* Charts Row */}
+        {/* Charts Row — teal zone */}
+        <div className="section-zone section-teal">
         <AnimatePresence mode="wait">
           {loading ? (
             <m.div key="chart-skeleton" className="dash-section grid gap-4 lg:grid-cols-2" initial={{ opacity: 0.6 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
@@ -423,8 +426,10 @@ export default function DashboardPage() {
         </div>
         )}
         </AnimatePresence>
+        </div>
 
-        {/* Recent Expenses */}
+        {/* Recent Expenses — coral zone */}
+        <div className="section-zone section-coral">
         <div className="dash-section card p-5">
           <div className="mb-4 flex items-center justify-between">
             <h3 className="text-section-title">
@@ -483,6 +488,7 @@ export default function DashboardPage() {
               ))}
             </div>
           )}
+        </div>
         </div>
         </>
         )}

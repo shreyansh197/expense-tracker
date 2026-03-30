@@ -68,7 +68,8 @@ export default function SettingsPage() {
 
         <SettingsAccordion>
 
-          {/* ━━━ YOUR ACCOUNT ━━━ */}
+          {/* ━━━ YOUR ACCOUNT — indigo zone ━━━ */}
+          <div className="section-zone section-indigo space-y-2">
           <h3 className="text-[11px] font-bold uppercase tracking-wider pb-1 px-1" style={{ color: 'var(--text-tertiary)' }}>
             Your Account
           </h3>
@@ -105,9 +106,11 @@ export default function SettingsPage() {
           >
             <WorkspaceMembersCard />
           </AccordionSection>
+          </div>
 
-          {/* ━━━ FINANCES ━━━ */}
-          <h3 className="text-[11px] font-bold uppercase tracking-wider pt-6 pb-1 px-1" style={{ color: 'var(--text-tertiary)' }}>
+          {/* ━━━ FINANCES — teal zone ━━━ */}
+          <div className="section-zone section-teal space-y-2">
+          <h3 className="text-[11px] font-bold uppercase tracking-wider pt-2 pb-1 px-1" style={{ color: 'var(--text-tertiary)' }}>
             Finances
           </h3>
 
@@ -256,9 +259,11 @@ export default function SettingsPage() {
               )}
             </div>
           </AccordionSection>
+          </div>
 
-          {/* ━━━ AUTOMATION & DATA ━━━ */}
-          <h3 className="text-[11px] font-bold uppercase tracking-wider pt-6 pb-1 px-1" style={{ color: 'var(--text-tertiary)' }}>
+          {/* ━━━ AUTOMATION & DATA — coral zone ━━━ */}
+          <div className="section-zone section-coral space-y-2">
+          <h3 className="text-[11px] font-bold uppercase tracking-wider pt-2 pb-1 px-1" style={{ color: 'var(--text-tertiary)' }}>
             Automation & Data
           </h3>
 
@@ -294,9 +299,11 @@ export default function SettingsPage() {
           >
             <DataAccountManagement />
           </AccordionSection>
+          </div>
 
-          {/* ━━━ PREFERENCES ━━━ */}
-          <h3 className="text-[11px] font-bold uppercase tracking-wider pt-6 pb-1 px-1" style={{ color: 'var(--text-tertiary)' }}>
+          {/* ━━━ PREFERENCES — indigo zone ━━━ */}
+          <div className="section-zone section-indigo space-y-2">
+          <h3 className="text-[11px] font-bold uppercase tracking-wider pt-2 pb-1 px-1" style={{ color: 'var(--text-tertiary)' }}>
             Preferences
           </h3>
 
@@ -388,6 +395,7 @@ export default function SettingsPage() {
               </div>
             </div>
           </AccordionSection>
+          </div>
 
         </SettingsAccordion>
 

@@ -219,8 +219,8 @@ export function ExpenseForm({
         </button>
       </div>
 
-      {/* Category Selector */}
-      <div>
+      {/* Category Selector — teal zone */}
+      <div className="-mx-1 rounded-xl p-3" style={{ background: 'var(--section-teal)' }}>
         <label className="form-label mb-2 uppercase">
           Category {!category && submitted && <span className="text-red-500 normal-case">— please select</span>}
         </label>

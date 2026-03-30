@@ -100,7 +100,7 @@ export function ExpenseFormModal() {
         transition={{ duration: 0.15 }}
       >
         <m.div
-          className="expense-form-modal w-full max-w-md max-h-[90vh] overflow-y-auto rounded-t-2xl p-6 shadow-lg lg:max-h-none lg:overflow-visible lg:rounded-2xl"
+          className="expense-form-modal w-full max-w-md max-h-[90vh] overflow-y-auto rounded-t-2xl shadow-lg lg:max-h-none lg:overflow-visible lg:rounded-2xl"
           style={{
             background: 'var(--surface)',
             border: '1px solid var(--border)',
@@ -114,10 +114,14 @@ export function ExpenseFormModal() {
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
         >
-        {/* Drag handle — mobile only */}
-        <div className="mb-3 flex justify-center lg:hidden">
-          <div className="h-1 w-10 rounded-full" style={{ background: 'var(--border)' }} />
+        {/* Accent header band */}
+        <div className="rounded-t-2xl px-6 pt-5 pb-3 lg:rounded-t-2xl" style={{ background: 'var(--section-coral)' }}>
+          {/* Drag handle — mobile only */}
+          <div className="mb-3 flex justify-center lg:hidden">
+            <div className="h-1 w-10 rounded-full" style={{ background: 'var(--border)' }} />
+          </div>
         </div>
+        <div className="px-6 pb-6">
         <ExpenseForm
           onSubmit={addExpense}
           onUpdate={updateExpense}
@@ -127,6 +131,7 @@ export function ExpenseFormModal() {
           onClose={handleClose}
           closingRef={closingRef}
         />
+        </div>
         </m.div>
       </m.div>
       )}

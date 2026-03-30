@@ -11,7 +11,7 @@ export function AmbientBackground() {
     <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
       {/* Gradient mesh */}
       <div
-        className="absolute inset-0 opacity-30 animate-gradient-drift"
+        className="absolute inset-0 opacity-45 animate-gradient-drift"
         style={{
           background: 'radial-gradient(ellipse at 20% 50%, var(--accent-soft) 0%, transparent 50%), radial-gradient(ellipse at 80% 20%, var(--success-soft) 0%, transparent 50%), radial-gradient(ellipse at 50% 80%, var(--warning-soft) 0%, transparent 50%)',
           backgroundSize: '200% 200%',
@@ -34,7 +34,7 @@ export function AmbientBackground() {
             left: p.x,
             top: p.y,
             background: 'var(--accent)',
-            opacity: 0.15,
+            opacity: 0.25,
             animation: `particle-drift ${p.dur} ease-in-out ${p.delay} infinite`,
           }}
         />

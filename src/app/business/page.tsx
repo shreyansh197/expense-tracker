@@ -129,7 +129,8 @@ export default function BusinessPage() {
     <AppShell>
       <PageTransition className="relative mx-auto min-h-[80vh] max-w-5xl xl:max-w-7xl space-y-6 p-4 lg:p-6">
         <DecoGraphic variant="chart" />
-        {/* Header */}
+        {/* Header + KPIs — emerald zone */}
+        <div className="section-zone section-emerald space-y-6">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-page-title">Business</h1>
@@ -174,12 +175,15 @@ export default function BusinessPage() {
           />
         ) : null}
         </AnimatePresence>
+        </div>
 
-        {/* Analytics */}
+        {/* Analytics — teal zone */}
         {!loading && ledgers.length > 0 && (
+          <div className="section-zone section-teal">
           <div className="grid gap-4 lg:grid-cols-2">
             <CollectionChart data={stats.monthlyCollections} />
             <TagBreakdown data={stats.tagBreakdown} />
+          </div>
           </div>
         )}
 

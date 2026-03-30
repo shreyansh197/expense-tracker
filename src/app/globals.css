@@ -41,6 +41,17 @@
   --warning-soft: #fff8ee;
   --danger: #EF5350;
   --danger-soft: #fdeeed;
+  /* ── Section zone washes (subtle tinted backgrounds) ── */
+  --section-teal: rgba(46, 196, 182, 0.06);
+  --section-indigo: rgba(76, 92, 255, 0.05);
+  --section-coral: rgba(255, 138, 101, 0.045);
+  --section-emerald: rgba(16, 185, 129, 0.05);
+  /* ── Accent card surfaces (stronger tints for individual cards) ── */
+  --surface-accent-teal: #e6f9f7;
+  --surface-accent-indigo: #eef0ff;
+  --surface-accent-coral: #fff3ee;
+  /* ── Hero gradient ── */
+  --gradient-hero: linear-gradient(135deg, rgba(46, 196, 182, 0.08) 0%, rgba(76, 92, 255, 0.06) 100%);
   /* ── Effects ── */
   --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.03);
   --card-shadow-hover: 0 4px 16px rgba(46, 196, 182, 0.14), 0 2px 4px rgba(0, 0, 0, 0.04);
@@ -90,6 +101,17 @@
   --warning-soft: rgba(255, 183, 77, 0.12);
   --danger: #EF5350;
   --danger-soft: rgba(239, 83, 80, 0.12);
+  /* ── Section zone washes ── */
+  --section-teal: rgba(94, 221, 210, 0.06);
+  --section-indigo: rgba(123, 135, 255, 0.06);
+  --section-coral: rgba(255, 171, 145, 0.05);
+  --section-emerald: rgba(52, 211, 153, 0.06);
+  /* ── Accent card surfaces ── */
+  --surface-accent-teal: rgba(94, 221, 210, 0.08);
+  --surface-accent-indigo: rgba(123, 135, 255, 0.08);
+  --surface-accent-coral: rgba(255, 171, 145, 0.08);
+  /* ── Hero gradient ── */
+  --gradient-hero: linear-gradient(135deg, rgba(94, 221, 210, 0.10) 0%, rgba(123, 135, 255, 0.08) 100%);
   /* ── Effects ── */
   --card-shadow: 0 1px 4px rgba(0, 0, 0, 0.35), 0 1px 2px rgba(0, 0, 0, 0.2);
   --card-shadow-hover: 0 4px 20px rgba(46, 196, 182, 0.18), 0 4px 12px rgba(0, 0, 0, 0.3);
@@ -112,14 +134,18 @@
   --color-accent-soft: var(--accent-soft);
   --color-info: var(--info);
   --color-info-soft: var(--info-soft);
+  --color-section-teal: var(--section-teal);
+  --color-section-indigo: var(--section-indigo);
+  --color-section-coral: var(--section-coral);
+  --color-section-emerald: var(--section-emerald);
 }
 
 body {
   background: var(--background);
   background-image:
-    radial-gradient(ellipse at 15% 5%, rgba(46, 196, 182, 0.06), transparent 50%),
-    radial-gradient(ellipse at 85% 95%, rgba(76, 92, 255, 0.04), transparent 50%),
-    radial-gradient(ellipse at 50% 50%, rgba(255, 138, 101, 0.03), transparent 55%);
+    radial-gradient(ellipse at 15% 5%, rgba(46, 196, 182, 0.10), transparent 50%),
+    radial-gradient(ellipse at 85% 95%, rgba(76, 92, 255, 0.08), transparent 50%),
+    radial-gradient(ellipse at 50% 50%, rgba(255, 138, 101, 0.06), transparent 55%);
   color: var(--foreground);
   font-family: var(--font-inter, Inter), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     sans-serif;
@@ -130,9 +156,9 @@ body {
 
 .dark body {
   background-image:
-    radial-gradient(ellipse at 15% 5%, rgba(94, 221, 210, 0.07), transparent 50%),
-    radial-gradient(ellipse at 85% 90%, rgba(123, 135, 255, 0.05), transparent 50%),
-    radial-gradient(ellipse at 50% 40%, rgba(255, 171, 145, 0.035), transparent 55%);
+    radial-gradient(ellipse at 15% 5%, rgba(94, 221, 210, 0.12), transparent 50%),
+    radial-gradient(ellipse at 85% 90%, rgba(123, 135, 255, 0.09), transparent 50%),
+    radial-gradient(ellipse at 50% 40%, rgba(255, 171, 145, 0.06), transparent 55%);
 }
 
 @media (display-mode: standalone) {
@@ -195,7 +221,57 @@ button, a {
   }
 }
 
+/* ── Section zone containers (visual zoning) ──────────────── */
+.section-zone {
+  border-radius: 1rem;
+  padding: 1rem;
+}
+@media (min-width: 1024px) {
+  .section-zone { padding: 1.25rem; }
+}
+.section-teal  { background: var(--section-teal); }
+.section-indigo { background: var(--section-indigo); }
+.section-coral  { background: var(--section-coral); }
+.section-emerald { background: var(--section-emerald); }
+
+.zone-header {
+  background: var(--gradient-hero);
+  border-radius: 1rem;
+  padding: 1.25rem;
+}
+
 /* ── Card utility classes ──────────────────────────────────── */
+.card-accent-teal {
+  background: var(--surface-accent-teal);
+  border: 1px solid rgba(46, 196, 182, 0.15);
+  border-radius: 1rem;
+  box-shadow: var(--card-shadow);
+  transition: box-shadow 0.25s ease, border-color 0.25s ease;
+}
+.card-accent-indigo {
+  background: var(--surface-accent-indigo);
+  border: 1px solid rgba(76, 92, 255, 0.12);
+  border-radius: 1rem;
+  box-shadow: var(--card-shadow);
+  transition: box-shadow 0.25s ease, border-color 0.25s ease;
+}
+.card-accent-coral {
+  background: var(--surface-accent-coral);
+  border: 1px solid rgba(255, 138, 101, 0.12);
+  border-radius: 1rem;
+  box-shadow: var(--card-shadow);
+  transition: box-shadow 0.25s ease, border-color 0.25s ease;
+}
+.dark .card-accent-teal {
+  border-color: rgba(94, 221, 210, 0.12);
+}
+.dark .card-accent-indigo {
+  border-color: rgba(123, 135, 255, 0.10);
+}
+.dark .card-accent-coral {
+  border-color: rgba(255, 171, 145, 0.10);
+}
+
 .card {
   background: var(--surface);
   border: 1px solid var(--border-card);
