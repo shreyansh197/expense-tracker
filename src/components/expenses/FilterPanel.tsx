@@ -94,7 +94,7 @@ export function FilterPanel({
           onClick={() => setOpen(!open)}
           className={`flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium transition-colors ${
             hasActiveFilters
-              ? "bg-indigo-50 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400"
+              ? "bg-cyan-50 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400"
               : ""
           }`}
           style={!hasActiveFilters ? { color: 'var(--text-secondary)' } : undefined}
@@ -102,7 +102,7 @@ export function FilterPanel({
           <SlidersHorizontal size={14} />
           Filters
           {hasActiveFilters && (
-            <span className="ml-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-indigo-600 px-1 text-[10px] font-bold text-white">
+            <span className="ml-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-cyan-600 px-1 text-[10px] font-bold text-white">
               {activeFilterCount}
             </span>
           )}
@@ -197,12 +197,12 @@ export function FilterPanel({
                   onKeyDown={(e) => e.key === "Enter" && handleSaveFilter()}
                   autoFocus
                   maxLength={30}
-                  className="flex-1 rounded border border-slate-200 bg-white px-2.5 py-1.5 text-xs text-slate-900 focus:border-indigo-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                  className="flex-1 rounded border border-slate-200 bg-white px-2.5 py-1.5 text-xs text-slate-900 focus:border-cyan-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                 />
                 <button
                   onClick={handleSaveFilter}
                   disabled={!saveName.trim()}
-                  className="rounded px-2.5 py-1.5 text-xs font-medium text-indigo-600 hover:bg-indigo-50 disabled:opacity-40 dark:text-indigo-400"
+                  className="rounded px-2.5 py-1.5 text-xs font-medium text-cyan-600 hover:bg-cyan-50 disabled:opacity-40 dark:text-cyan-400"
                 >
                   Save
                 </button>
@@ -217,7 +217,7 @@ export function FilterPanel({
               <button
                 onClick={() => setShowSaveInput(true)}
                 disabled={!hasActiveFilters}
-                className="flex items-center gap-1.5 text-xs font-medium text-indigo-600 hover:text-indigo-700 disabled:opacity-40 dark:text-indigo-400"
+                className="flex items-center gap-1.5 text-xs font-medium text-cyan-600 hover:text-cyan-700 disabled:opacity-40 dark:text-cyan-400"
               >
                 <Bookmark size={12} />
                 Save Current Filter
@@ -237,7 +237,7 @@ export function FilterPanel({
                     key={f.id}
                     className="flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-slate-50 dark:hover:bg-slate-800/50"
                   >
-                    <BookmarkCheck size={12} className="shrink-0 text-indigo-500" />
+                    <BookmarkCheck size={12} className="shrink-0 text-cyan-500" />
                     <button
                       onClick={() => handleApplyFilter(f)}
                       className="flex-1 text-left text-xs font-medium text-slate-700 hover:text-indigo-600 dark:text-slate-300"

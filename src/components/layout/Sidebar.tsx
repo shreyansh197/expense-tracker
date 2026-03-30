@@ -172,8 +172,8 @@ export function Sidebar() {
               // eslint-disable-next-line @next/next/no-img-element
               <img src={user.avatarUrl} alt="" className="h-6 w-6 rounded-full object-cover" />
             ) : (
-              <div className="flex h-6 w-6 items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900/30">
-                <User size={12} className="text-indigo-600 dark:text-indigo-400" />
+              <div className="flex h-6 w-6 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/30">
+                <User size={12} className="text-amber-600 dark:text-amber-400" />
               </div>
             )}
             <span className="truncate text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>

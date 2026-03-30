@@ -19,6 +19,8 @@ interface ExpenseFormProps {
   editExpense?: Expense | null;
   month: number;
   year: number;
+  onClose?: () => void;
+  closingRef?: React.RefObject<boolean>;
 }
 
 export function ExpenseForm({
@@ -27,8 +29,11 @@ export function ExpenseForm({
   editExpense,
   month,
   year,
+  onClose,
+  closingRef,
 }: ExpenseFormProps) {
-  const closeForm = useUIStore((s) => s.closeForm);
+  const storeCloseForm = useUIStore((s) => s.closeForm);
+  const closeForm = onClose ?? storeCloseForm;
   const { toast } = useToast();
   const { settings } = useSettings();
   const { symbol } = useCurrency();
@@ -51,10 +56,18 @@ export function ExpenseForm({
   const submittingRef = useRef(false);
 
   const amountRef = useRef<HTMLInputElement>(null);
+  const closeBtnRef = useRef<HTMLButtonElement>(null);
 
+  // Auto-focus amount input on mount — guarded against closing state
   useEffect(() => {
-    amountRef.current?.focus();
-  }, []);
+    // Small delay to let the modal entrance animation start first,
+    // and check closing flag to prevent focus during exit
+    const id = setTimeout(() => {
+      if (closingRef?.current) return;
+      amountRef.current?.focus();
+    }, 50);
+    return () => clearTimeout(id);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (editExpense) {
@@ -162,6 +175,7 @@ export function ExpenseForm({
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
       if (e.key === "Escape") {
+        e.preventDefault();
         closeForm();
       }
     },
@@ -182,14 +196,18 @@ export function ExpenseForm({
           {editExpense ? "Edit Expense" : "Add an Expense"}
         </h3>
         <button
+          ref={closeBtnRef}
           type="button"
-          onClick={closeForm}
-          onPointerDown={() => {
-            // Blur any focused input BEFORE click fires — prevents
-            // mobile keyboard from opening when tapping close button
-            if (document.activeElement instanceof HTMLElement) {
-              document.activeElement.blur();
-            }
+          onClick={(e) => {
+            e.preventDefault();
+            closeForm();
+          }}
+          onTouchStart={(e) => {
+            // On mobile: fire close IMMEDIATELY on touch start,
+            // before the browser can process focus on any nearby input.
+            // This is the earliest possible moment in the touch event chain.
+            e.preventDefault();
+            closeForm();
           }}
           className="rounded-lg p-1.5 transition-colors"
           style={{ color: 'var(--text-muted)' }}

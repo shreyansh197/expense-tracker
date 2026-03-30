@@ -190,8 +190,8 @@ export function ExpenseList({
     <div className="space-y-4">
       {/* Batch action bar */}
       {selectedIds.size > 0 && (
-        <div className="sticky top-0 z-10 flex items-center justify-between rounded-xl border border-indigo-200 bg-indigo-50 px-4 py-2.5 dark:border-indigo-800 dark:bg-indigo-950/50">
-          <span className="text-sm font-medium text-indigo-700 dark:text-indigo-300">
+        <div className="sticky top-0 z-10 flex items-center justify-between rounded-xl border border-cyan-200 bg-cyan-50 px-4 py-2.5 dark:border-cyan-800 dark:bg-cyan-950/50">
+          <span className="text-sm font-medium text-cyan-700 dark:text-cyan-300">
             {selectedIds.size} selected
           </span>
           <div className="flex items-center gap-2">
@@ -204,7 +204,7 @@ export function ExpenseList({
             </button>
             <button
               onClick={() => setSelectedIds(new Set())}
-              className="rounded-lg p-1.5 text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/30"
+              className="rounded-lg p-1.5 text-cyan-400 hover:bg-cyan-100 dark:hover:bg-cyan-900/30"
               aria-label="Clear selection"
             >
               <X size={14} />
@@ -253,9 +253,9 @@ export function ExpenseList({
                   if (e.key === "Delete" || e.key === "Backspace") handleDelete(expense.id);
                   if (e.key === " ") { e.preventDefault(); toggleSelect(expense.id); }
                 }}
-                className={`group flex items-center gap-3 rounded-2xl border px-4 py-3.5 transition-all active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-indigo-500/40 ${
+                className={`group flex items-center gap-3 rounded-2xl border px-4 py-3.5 transition-all active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-cyan-500/40 ${
                   selectedIds.has(expense.id)
-                    ? "border-indigo-300 bg-indigo-50 dark:border-indigo-700 dark:bg-indigo-950/30"
+                    ? "border-cyan-300 bg-cyan-50 dark:border-cyan-700 dark:bg-cyan-950/30"
                     : ""
                 }`}
                 style={!selectedIds.has(expense.id) ? { background: 'var(--surface)', borderColor: 'var(--border)' } : undefined}
@@ -269,7 +269,7 @@ export function ExpenseList({
                   aria-label="Select expense"
                 >
                   {selectedIds.has(expense.id) ? (
-                    <CheckSquare size={14} className="text-indigo-500" />
+                    <CheckSquare size={14} className="text-cyan-500" />
                   ) : (
                     <Square size={14} />
                   )}
@@ -278,7 +278,7 @@ export function ExpenseList({
                   <div className="flex items-center gap-2">
                     <CategoryBadge category={expense.category} />
                     {expense.isRecurring && (
-                      <span className="text-indigo-400" aria-label="Recurring">
+                      <span className="text-violet-400" aria-label="Recurring">
                         <Repeat size={10} />
                       </span>
                     )}

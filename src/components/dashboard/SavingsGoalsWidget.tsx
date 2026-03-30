@@ -70,7 +70,7 @@ export function SavingsGoalsWidget() {
         </div>
         <Link
           href="/settings#goals"
-          className="flex items-center gap-0.5 text-xs font-semibold text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 transition-colors"
+          className="flex items-center gap-0.5 text-xs font-semibold text-cyan-600 hover:text-cyan-700 dark:text-cyan-400 dark:hover:text-cyan-300 transition-colors"
         >
           Manage
           <ChevronRight size={12} />

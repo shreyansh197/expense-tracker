@@ -12,31 +12,42 @@ export function ExpenseFormModal() {
   const { showExpenseForm, editingExpenseId, closeForm, currentMonth, currentYear } =
     useUIStore();
   const { expenses, addExpense, updateExpense } = useExpenses(currentMonth, currentYear);
-  const previousFocusRef = useRef<HTMLElement | null>(null);
   const [dragY, setDragY] = useState(0);
   const dragStartRef = useRef<number | null>(null);
+  const closingRef = useRef(false);
 
   const editExpense = editingExpenseId
     ? expenses.find((e) => e.id === editingExpenseId) ?? null
     : null;
 
-  // Save and restore focus
+  // Reset closing flag when form opens
   useEffect(() => {
     if (showExpenseForm) {
-      previousFocusRef.current = document.activeElement as HTMLElement;
+      closingRef.current = false;
       dragStartRef.current = null;
-      // Focus first input after render
-      requestAnimationFrame(() => {
-        const firstInput = document.querySelector<HTMLElement>(
-          ".expense-form-modal input, .expense-form-modal button"
-        );
-        firstInput?.focus();
-      });
-    } else if (previousFocusRef.current) {
-      previousFocusRef.current.focus();
-      previousFocusRef.current = null;
     }
   }, [showExpenseForm]);
+
+  // Robust close: blur everything, freeze inputs, then close
+  const handleClose = useCallback(() => {
+    if (closingRef.current) return;
+    closingRef.current = true;
+    // 1. Blur any focused element to immediately dismiss keyboard
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
+    // 2. Make all form inputs unfocusable during exit animation
+    const modal = document.querySelector('.expense-form-modal');
+    if (modal) {
+      modal.querySelectorAll<HTMLElement>('input, textarea, select').forEach(el => {
+        el.setAttribute('tabindex', '-1');
+        el.setAttribute('readonly', '');
+        (el as HTMLInputElement).disabled = true;
+      });
+    }
+    // 3. Close the form
+    closeForm();
+  }, [closeForm]);
 
   // Swipe-to-dismiss handlers (mobile only)
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
@@ -51,18 +62,18 @@ export function ExpenseFormModal() {
 
   const handleTouchEnd = useCallback(() => {
     if (dragY > DISMISS_THRESHOLD) {
-      closeForm();
+      handleClose();
     }
     setDragY(0);
     dragStartRef.current = null;
-  }, [dragY, closeForm]);
+  }, [dragY, handleClose]);
 
   // Close on backdrop click or Escape
   const handleBackdropClick = useCallback(
     (e: React.MouseEvent) => {
-      if (e.target === e.currentTarget) closeForm();
+      if (e.target === e.currentTarget) handleClose();
     },
-    [closeForm]
+    [handleClose]
   );
 
   // Keyboard shortcut: Ctrl/Cmd+N to open add form
@@ -113,6 +124,8 @@ export function ExpenseFormModal() {
           editExpense={editExpense}
           month={currentMonth}
           year={currentYear}
+          onClose={handleClose}
+          closingRef={closingRef}
         />
         </m.div>
       </m.div>

@@ -3,20 +3,20 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --background: #f8fafc;
-  --foreground: #0f172a;
+  --background: #faf9f7;
+  --foreground: #1c1917;
   --surface: #ffffff;
-  --surface-secondary: #eef1f5;
-  --surface-hover: #f8fafc;
-  --border: #e2e8f0;
-  --border-subtle: #f1f5f9;
-  --border-card: #dde3eb;
-  --text-primary: #0f172a;
-  --text-secondary: #64748b;
-  --text-tertiary: #8896ab;
-  --text-muted: #cbd5e1;
-  --accent: #4f46e5;
-  --accent-soft: #eef2ff;
+  --surface-secondary: #f5f3f0;
+  --surface-hover: #f0ede8;
+  --border: #e8e4de;
+  --border-subtle: #f0ede8;
+  --border-card: #e0dbd4;
+  --text-primary: #1c1917;
+  --text-secondary: #6b6560;
+  --text-tertiary: #9a9590;
+  --text-muted: #ccc8c2;
+  --accent: #6366f1;
+  --accent-soft: #eef0ff;
   --accent-gradient: linear-gradient(135deg, #6366f1, #8b5cf6);
   --success: #059669;
   --success-soft: #ecfdf5;
@@ -24,30 +24,30 @@
   --warning-soft: #fffbeb;
   --danger: #dc2626;
   --danger-soft: #fef2f2;
-  --surface-tertiary: #e2e8f0;
-  --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
-  --card-shadow-hover: 0 4px 16px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.04);
+  --surface-tertiary: #e0dbd4;
+  --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
+  --card-shadow-hover: 0 4px 16px rgba(99, 102, 241, 0.10), 0 2px 4px rgba(0, 0, 0, 0.04);
   --section-gap: 1.5rem;
   --chart-tooltip-bg: #ffffff;
-  --chart-tooltip-fg: #0f172a;
-  --chart-tooltip-border: #e2e8f0;
+  --chart-tooltip-fg: #1c1917;
+  --chart-tooltip-border: #e8e4de;
 }
 
 .dark {
-  --background: #0f172a;
-  --foreground: #f1f5f9;
-  --surface: #1e293b;
-  --surface-secondary: #334155;
-  --surface-hover: #283548;
-  --border: #334155;
-  --border-subtle: #1e293b;
-  --border-card: #334155;
-  --text-primary: #f1f5f9;
-  --text-secondary: #94a3b8;
-  --text-tertiary: #64748b;
-  --text-muted: #475569;
+  --background: #121110;
+  --foreground: #f5f4f2;
+  --surface: #1c1a18;
+  --surface-secondary: #2a2725;
+  --surface-hover: #242120;
+  --border: #302d2a;
+  --border-subtle: #1c1a18;
+  --border-card: #353230;
+  --text-primary: #f5f4f2;
+  --text-secondary: #a39e98;
+  --text-tertiary: #706b65;
+  --text-muted: #4a4640;
   --accent: #818cf8;
-  --accent-soft: rgba(129, 140, 248, 0.12);
+  --accent-soft: rgba(129, 140, 248, 0.14);
   --accent-gradient: linear-gradient(135deg, #818cf8, #a78bfa);
   --success: #34d399;
   --success-soft: rgba(52, 211, 153, 0.12);
@@ -55,12 +55,12 @@
   --warning-soft: rgba(251, 191, 36, 0.12);
   --danger: #f87171;
   --danger-soft: rgba(248, 113, 113, 0.12);
-  --surface-tertiary: #475569;
-  --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.25), 0 1px 2px rgba(0, 0, 0, 0.15);
-  --card-shadow-hover: 0 4px 16px rgba(99, 102, 241, 0.15), 0 4px 12px rgba(0, 0, 0, 0.3);
-  --chart-tooltip-bg: #1e293b;
-  --chart-tooltip-fg: #f1f5f9;
-  --chart-tooltip-border: #334155;
+  --surface-tertiary: #3a3735;
+  --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
+  --card-shadow-hover: 0 4px 16px rgba(129, 140, 248, 0.15), 0 4px 12px rgba(0, 0, 0, 0.3);
+  --chart-tooltip-bg: #1c1a18;
+  --chart-tooltip-fg: #f5f4f2;
+  --chart-tooltip-border: #302d2a;
 }
 
 @theme inline {
@@ -73,9 +73,9 @@
 body {
   background: var(--background);
   background-image:
-    radial-gradient(circle at 10% 10%, rgba(79, 70, 229, 0.05), transparent 55%),
-    radial-gradient(circle at 90% 90%, rgba(168, 85, 247, 0.03), transparent 50%),
-    radial-gradient(circle at 50% 50%, rgba(236, 72, 153, 0.015), transparent 70%);
+    radial-gradient(circle at 10% 10%, rgba(99, 102, 241, 0.04), transparent 55%),
+    radial-gradient(circle at 90% 90%, rgba(245, 158, 11, 0.03), transparent 50%),
+    radial-gradient(circle at 50% 50%, rgba(34, 211, 238, 0.015), transparent 70%);
   color: var(--foreground);
   font-family: var(--font-inter, Inter), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     sans-serif;
@@ -86,9 +86,9 @@ body {
 
 .dark body {
   background-image:
-    radial-gradient(circle at 85% 15%, rgba(129, 140, 248, 0.07), transparent 55%),
-    radial-gradient(circle at 15% 85%, rgba(168, 85, 247, 0.05), transparent 50%),
-    radial-gradient(circle at 50% 40%, rgba(52, 211, 153, 0.025), transparent 65%);
+    radial-gradient(circle at 85% 15%, rgba(129, 140, 248, 0.06), transparent 55%),
+    radial-gradient(circle at 15% 85%, rgba(245, 158, 11, 0.04), transparent 50%),
+    radial-gradient(circle at 50% 40%, rgba(34, 211, 238, 0.02), transparent 65%);
 }
 
 @media (display-mode: standalone) {

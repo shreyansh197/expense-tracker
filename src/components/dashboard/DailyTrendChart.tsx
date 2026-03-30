@@ -115,7 +115,7 @@ export function DailyTrendChart({ dailyTotals, stackedDailyTotals, activeCategor
             className={cn(
               "flex items-center gap-1 rounded-md px-2 py-1 text-xs transition-colors",
               stacked
-                ? "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300"
+                ? "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/50 dark:text-cyan-300"
                 : ""
             )}
             style={!stacked ? { color: 'var(--text-secondary)' } : undefined}
