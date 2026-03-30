@@ -71,7 +71,7 @@ export function KpiCards({
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         {/* Spent / Budget */}
         <m.div
-          className="card-accent-indigo relative overflow-hidden p-5"
+          className="card-accent-indigo relative overflow-hidden p-4 sm:p-5"
           variants={{ hidden: { opacity: 0, y: 12 }, visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] } } }}
         >
           {/* Gradient accent bar */}
@@ -84,7 +84,7 @@ export function KpiCards({
           />
           <p className="text-section-title">Spent</p>
           <div className="mt-2 flex items-baseline gap-1.5">
-            <p className="tabular-nums text-3xl font-bold" style={{ color: 'var(--text-primary)' }}>
+            <p className="tabular-nums text-2xl sm:text-3xl font-bold" style={{ color: 'var(--text-primary)' }}>
               {formatCurrency(monthlyTotal)}
             </p>
             <span style={{ color: 'var(--text-muted)' }}>/</span>
@@ -122,7 +122,7 @@ export function KpiCards({
         {/* Remaining + Days Left */}
         <m.div
           className={cn(
-            "relative overflow-hidden rounded-2xl border p-5 card-interactive",
+            "relative overflow-hidden rounded-2xl border p-4 sm:p-5 card-interactive",
             isOverspent
               ? "border-red-200 bg-red-50 dark:border-red-900/40 dark:bg-red-950/30"
               : isWarning
@@ -158,7 +158,7 @@ export function KpiCards({
           </div>
           <p
             className={cn(
-              "tabular-nums mt-2 text-3xl font-bold",
+              "tabular-nums mt-2 text-2xl sm:text-3xl font-bold",
               isOverspent
                 ? "text-red-700 dark:text-red-400"
                 : isWarning
@@ -206,10 +206,10 @@ export function KpiCards({
             >
       <div className="grid grid-cols-3 gap-3 pt-1">
         {/* Spend Target */}
-        <div className="card-accent-teal p-3.5">
+        <div className="card-accent-teal p-3 sm:p-3.5">
           <p className="text-meta font-medium">Daily Budget</p>
           <p className={cn(
-            "tabular-nums mt-1.5 text-lg font-bold",
+            "tabular-nums mt-1 text-base sm:text-lg font-bold",
             paceToStayUnder <= 0
               ? "text-red-600 dark:text-red-400"
               : paceExceeded
@@ -224,10 +224,10 @@ export function KpiCards({
         </div>
 
         {/* Saved */}
-        <div className="card-accent-coral p-3.5">
+        <div className="card-accent-coral p-3 sm:p-3.5">
           <p className="text-meta font-medium">Saved</p>
           <p className={cn(
-            "tabular-nums mt-1.5 text-lg font-bold",
+            "tabular-nums mt-1 text-base sm:text-lg font-bold",
             savingsRate < 0
               ? "text-red-600 dark:text-red-400"
               : savingsRate < 20
@@ -243,7 +243,7 @@ export function KpiCards({
 
         {/* Month-End Forecast */}
         <div className={cn(
-          "rounded-[0.875rem] border p-3.5",
+          "rounded-[0.875rem] border p-3 sm:p-3.5",
           forecastOverBudget
             ? "border-red-200 bg-red-50 dark:border-red-900/40 dark:bg-red-950/30"
             : forecastWarning
@@ -270,7 +270,7 @@ export function KpiCards({
             </InfoTooltip>
           </div>
           <p className={cn(
-            "tabular-nums mt-1.5 text-lg font-bold",
+            "tabular-nums mt-1 text-base sm:text-lg font-bold",
             forecastOverBudget
               ? "text-red-700 dark:text-red-400"
               : forecastWarning

@@ -114,12 +114,9 @@ export function ExpenseFormModal() {
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
         >
-        {/* Accent header band */}
-        <div className="rounded-t-2xl px-6 pt-5 pb-3 lg:rounded-t-2xl" style={{ background: 'var(--section-coral)' }}>
-          {/* Drag handle — mobile only */}
-          <div className="mb-3 flex justify-center lg:hidden">
-            <div className="h-1 w-10 rounded-full" style={{ background: 'var(--border)' }} />
-          </div>
+        {/* Drag handle — mobile only */}
+        <div className="flex justify-center pt-3 pb-1 lg:hidden">
+          <div className="h-1 w-10 rounded-full" style={{ background: 'var(--border)' }} />
         </div>
         <div className="px-6 pb-6">
         <ExpenseForm

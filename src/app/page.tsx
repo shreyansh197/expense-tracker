@@ -274,7 +274,7 @@ export default function DashboardPage() {
 
   return (
     <AppShell>
-        <PageTransition className="relative mx-auto min-h-[80vh] max-w-4xl xl:max-w-6xl space-y-6 p-4 lg:p-6">
+        <PageTransition className="relative mx-auto min-h-[80vh] max-w-4xl xl:max-w-6xl space-y-4 sm:space-y-6 p-3 sm:p-4 lg:p-6">
         <DecoGraphic variant="finance" />
         {/* Header — hero zone */}
         <div className="zone-header dash-section relative z-20">

@@ -74,9 +74,7 @@ export function BottomNav() {
         style={{
           bottom: `calc(${NAV_HEIGHT}px + env(safe-area-inset-bottom, 0px) + 12px)`,
         }}
-        initial={{ scale: 0, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ type: "spring", stiffness: 400, damping: 20, delay: 0.15 }}
+        initial={false}
         whileTap={{ scale: 0.88 }}
       >
         <Plus size={24} strokeWidth={2.5} />
