@@ -23,17 +23,20 @@ export function KeyboardShortcutsHelp({ open, onClose }: KeyboardShortcutsHelpPr
       className="fixed inset-0 z-[250] flex items-center justify-center bg-black/40 backdrop-blur-sm"
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
-      <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl dark:bg-slate-900">
+      <div className="w-full max-w-sm rounded-2xl p-6 shadow-xl" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
         <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Keyboard size={18} className="text-indigo-600" />
-            <h2 className="text-base font-semibold text-slate-900 dark:text-white">
+            <Keyboard size={18} className="text-indigo-600 dark:text-indigo-400" />
+            <h2 className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>
               Keyboard Shortcuts
             </h2>
           </div>
           <button
             onClick={onClose}
-            className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+            className="rounded-lg p-1.5 transition-colors"
+            style={{ color: 'var(--text-muted)' }}
+            onMouseEnter={e => { e.currentTarget.style.background = 'var(--surface-secondary)'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = ''; }}
             aria-label="Close keyboard shortcuts"
           >
             <X size={16} />
@@ -43,12 +46,14 @@ export function KeyboardShortcutsHelp({ open, onClose }: KeyboardShortcutsHelpPr
           {filtered.map((s, i) => (
             <div
               key={i}
-              className="flex items-center justify-between rounded-lg px-3 py-2 hover:bg-slate-50 dark:hover:bg-slate-800/50"
+              className="flex items-center justify-between rounded-lg px-3 py-2 transition-colors"
+              onMouseEnter={e => { e.currentTarget.style.background = 'var(--surface-secondary)'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = ''; }}
             >
-              <span className="text-sm text-slate-600 dark:text-slate-300">
+              <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>
                 {s.description}
               </span>
-              <kbd className="rounded-md border border-slate-200 bg-slate-50 px-2 py-0.5 text-xs font-mono text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
+              <kbd className="rounded-md px-2 py-0.5 text-xs font-mono" style={{ background: 'var(--surface-secondary)', border: '1px solid var(--border)', color: 'var(--text-secondary)' }}>
                 {s.label}
               </kbd>
             </div>

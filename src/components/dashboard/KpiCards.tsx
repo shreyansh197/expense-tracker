@@ -173,7 +173,7 @@ export function KpiCards({
       <div className="grid grid-cols-3 gap-3 pt-1">
         {/* Spend Target */}
         <div className="card-sm p-3.5">
-          <p className="text-meta font-medium">Spend Target</p>
+          <p className="text-meta font-medium">Daily Budget</p>
           <p className={cn(
             "tabular-nums mt-1.5 text-lg font-bold",
             paceToStayUnder <= 0
@@ -185,7 +185,7 @@ export function KpiCards({
             {paceToStayUnder > 0 ? `${formatCurrency(paceToStayUnder)}/d` : "Over budget"}
           </p>
           <p className="tabular-nums mt-1 text-meta">
-            Now {formatCurrency(avgDaily)}/day
+            Averaging {formatCurrency(avgDaily)}/day
           </p>
         </div>
 
@@ -224,7 +224,7 @@ export function KpiCards({
                 ? "text-amber-600 dark:text-amber-400"
                 : ""
           )}>
-            <span>Forecast</span>
+            <span>Month-end Projection</span>
             <InfoTooltip title="End-of-Month Forecast">
               <p>Projects your total spend by month end using your average daily spending.</p>
               <p className="mt-1"><strong>Confidence:</strong></p>

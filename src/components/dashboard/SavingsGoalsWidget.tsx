@@ -154,7 +154,7 @@ export function SavingsGoalsWidget() {
                 {g.deadline && (
                   <span>
                     Target:{" "}
-                    {new Date(g.deadline + "-01").toLocaleDateString("en-IN", {
+                    {new Date(g.deadline + "-01").toLocaleDateString(undefined, {
                       month: "short",
                       year: "numeric",
                     })}

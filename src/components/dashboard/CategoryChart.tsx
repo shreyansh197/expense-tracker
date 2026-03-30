@@ -87,7 +87,7 @@ export function CategoryChart({ categoryTotals, onCategoryClick, categoryBudgets
         icon={PieChartIcon}
         secondaryIcon={BarChart3}
         title="No spending yet"
-        description="Add your first expense to see where your money goes."
+        description="Your category breakdown will appear here as you add expenses."
       />
     );
   }

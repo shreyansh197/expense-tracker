@@ -118,8 +118,8 @@ export function AlertsPanel({
       alerts.push({
         id: `anomaly-${a.expense.id}`,
         severity: "info",
-        message: `Unusual: ${formatCurrency(a.expense.amount)} in ${label}${a.expense.remark ? ` — "${a.expense.remark}"` : ""}`,
-        detail: `${a.zScore}× above typical (median ${formatCurrency(a.categoryMedian)})`,
+        message: `Unusual spending: ${formatCurrency(a.expense.amount)} on ${label}${a.expense.remark ? ` — "${a.expense.remark}"` : ""}`,
+        detail: `${a.zScore}× above your typical ${label} spend (median ${formatCurrency(a.categoryMedian)})`,
         action: () => onCategoryClick?.(a.expense.category),
       });
     }

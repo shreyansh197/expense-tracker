@@ -39,7 +39,7 @@ interface PaymentListProps {
 }
 
 function formatDate(dateStr: string) {
-  return new Date(dateStr).toLocaleDateString("en-IN", {
+  return new Date(dateStr).toLocaleDateString(undefined, {
     day: "numeric",
     month: "short",
     year: "numeric",

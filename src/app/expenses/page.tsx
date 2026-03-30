@@ -109,16 +109,18 @@ export default function ExpensesPage() {
             />
             <input
               type="text"
-              placeholder="Search expenses..."
+              placeholder="Search expenses... (try day:15)"
               value={localSearch}
               onChange={(e) => handleSearchChange(e.target.value)}
               className="w-full rounded-xl py-3 pl-10 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
               style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
+              aria-label="Search expenses"
             />
           </div>
           <select
             value={sortBy}
             onChange={(e) => { const v = e.target.value as SortOption; setSortBy(v); localStorage.setItem("expenstream-expenses-sort", v); }}
+            aria-label="Sort order"
             className="rounded-xl px-3 py-3 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
             style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-secondary)' }}
           >

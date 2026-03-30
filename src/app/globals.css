@@ -25,8 +25,8 @@
   --danger: #dc2626;
   --danger-soft: #fef2f2;
   --surface-tertiary: #e2e8f0;
-  --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
-  --card-shadow-hover: 0 4px 16px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.03);
+  --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --card-shadow-hover: 0 4px 16px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.04);
   --section-gap: 1.5rem;
   --chart-tooltip-bg: #ffffff;
   --chart-tooltip-fg: #0f172a;
@@ -285,6 +285,76 @@ button, a {
   color: var(--text-primary);
   background: var(--surface-secondary);
 }
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #ffffff;
+  background: var(--accent);
+  border: none;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: background-color 0.15s, transform 0.1s;
+}
+.btn-primary:hover {
+  filter: brightness(1.1);
+}
+.btn-primary:active {
+  transform: scale(0.97);
+}
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s, background-color 0.15s;
+}
+.btn-secondary:hover {
+  color: var(--text-primary);
+  border-color: var(--text-muted);
+  background: var(--surface-secondary);
+}
+
+.btn-danger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #ffffff;
+  background: var(--danger);
+  border: none;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: background-color 0.15s, transform 0.1s;
+}
+.btn-danger:hover {
+  filter: brightness(1.1);
+}
+.btn-danger:active {
+  transform: scale(0.97);
+}
+.btn-danger:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 }
 
 input[type="number"]::-webkit-inner-spin-button,
@@ -338,6 +408,12 @@ input[type="password"]::-ms-clear {
 }
 .fade-in {
   animation: fadeIn 0.25s ease both;
+}
+
+/* Toast countdown progress bar */
+@keyframes toast-countdown {
+  from { width: 100%; }
+  to   { width: 0%; }
 }
 
 /* ── Splash Screen Animations ──────────────────────────────── */

@@ -23,6 +23,7 @@ import { PaymentList } from "@/components/business/PaymentList";
 import { LedgerForm } from "@/components/business/LedgerForm";
 import { useCurrency } from "@/hooks/useCurrency";
 import { cn } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/Skeleton";
 import type { PaymentInput, LedgerInput } from "@/types";
 
 export default function LedgerDetailPage() {
@@ -138,7 +139,7 @@ export default function LedgerDetailPage() {
                 )}
                 {ledger.dueDate && (
                   <span className="text-xs" style={{ color: 'var(--text-tertiary)' }}>
-                    Due {new Date(ledger.dueDate).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+                    Due {new Date(ledger.dueDate).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" })}
                   </span>
                 )}
               </div>
@@ -271,8 +272,12 @@ export default function LedgerDetailPage() {
 
           {loading ? (
             <div className="space-y-2">
-              {[1, 2].map((i) => (
-                <div key={i} className="h-12 animate-pulse rounded-lg" style={{ background: 'var(--surface-secondary)' }} />
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="flex items-center gap-3 py-2">
+                  <Skeleton className="h-4 w-20" />
+                  <Skeleton className="h-3 w-32 flex-1" />
+                  <Skeleton className="h-4 w-16" />
+                </div>
               ))}
             </div>
           ) : (
@@ -297,7 +302,8 @@ export default function LedgerDetailPage() {
                 </button>
                 <button
                   onClick={() => setShowDeleteConfirm(false)}
-                  className="rounded-lg bg-slate-100 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300"
+                  className="rounded-lg px-4 py-2 text-sm font-medium transition-colors"
+                  style={{ background: 'var(--surface-secondary)', color: 'var(--text-secondary)' }}
                 >
                   Cancel
                 </button>

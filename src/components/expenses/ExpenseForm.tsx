@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { X, Loader2 } from "lucide-react";
 import { getAllCategories } from "@/lib/categories";
-import { cn } from "@/lib/utils";
+import { cn, getDaysInMonth } from "@/lib/utils";
 import { useUIStore } from "@/stores/uiStore";
 import { useToast } from "@/components/ui/Toast";
 import { DatePicker } from "@/components/ui/DatePicker";
@@ -79,8 +79,9 @@ export function ExpenseForm({
       }
 
       const parsedDay = day;
-      if (parsedDay < 1 || parsedDay > 31) {
-        setError("Enter a valid day (1-31)");
+      const maxDay = getDaysInMonth(selectedMonth, selectedYear);
+      if (parsedDay < 1 || parsedDay > maxDay) {
+        setError(`Enter a valid day (1-${maxDay} for this month)`);
         return;
       }
 
@@ -197,7 +198,7 @@ export function ExpenseForm({
           step="1"
           value={amount}
           onChange={(e) => { setAmount(e.target.value); if (submitted) setSubmitted(false); }}
-          placeholder="0"
+          placeholder="e.g. 500"
           className={cn("form-input w-full text-lg font-semibold", amountInvalid && "!border-red-400 !ring-red-400/20")}
           required
           aria-invalid={amountInvalid || undefined}

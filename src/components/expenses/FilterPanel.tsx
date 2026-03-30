@@ -46,11 +46,17 @@ export function FilterPanel({
   const [showSaveInput, setShowSaveInput] = useState(false);
 
   const savedFilters = settings.savedFilters || [];
-  const hasActiveFilters = amountMin !== "" || amountMax !== "" || dayMin !== "" || dayMax !== "" || activeCategories.length > 0 || searchQuery.trim() !== "";
+  const activeFilterCount = [amountMin !== "", amountMax !== "", dayMin !== "", dayMax !== "", activeCategories.length > 0, searchQuery.trim() !== ""].filter(Boolean).length;
+
+  const hasActiveFilters = activeFilterCount > 0;
 
   const handleSaveFilter = () => {
     const name = saveName.trim();
     if (!name) return;
+    if (savedFilters.some((f) => f.name.toLowerCase() === name.toLowerCase())) {
+      toast("A filter with that name already exists", "error");
+      return;
+    }
     const filter: SavedFilter = {
       id: `filter-${Date.now()}`,
       name,
@@ -96,8 +102,8 @@ export function FilterPanel({
           <SlidersHorizontal size={14} />
           Filters
           {hasActiveFilters && (
-            <span className="ml-1 flex h-4 w-4 items-center justify-center rounded-full bg-indigo-600 text-[10px] text-white">
-              !
+            <span className="ml-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-indigo-600 px-1 text-[10px] font-bold text-white">
+              {activeFilterCount}
             </span>
           )}
         </button>
@@ -108,7 +114,7 @@ export function FilterPanel({
             style={{ color: 'var(--text-tertiary)' }}
           >
             <X size={12} />
-            Clear
+            Clear all filters
           </button>
         )}
       </div>
@@ -117,7 +123,7 @@ export function FilterPanel({
         <div className="card mt-2 p-4">
           {/* Amount range */}
           <div className="mb-4">
-            <label className="mb-2 block text-xs font-medium uppercase" style={{ color: 'var(--text-tertiary)' }}>
+            <label className="mb-2 block text-xs font-medium uppercase" style={{ color: 'var(--text-secondary)' }}>
               Amount Range
             </label>
             <div className="flex items-center gap-2">
@@ -151,7 +157,7 @@ export function FilterPanel({
 
           {/* Day range */}
           <div className="mb-4">
-            <label className="mb-2 block text-xs font-medium uppercase" style={{ color: 'var(--text-tertiary)' }}>
+            <label className="mb-2 block text-xs font-medium uppercase" style={{ color: 'var(--text-secondary)' }}>
               Day Range
             </label>
             <div className="flex items-center gap-2">

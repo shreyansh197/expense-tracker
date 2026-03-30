@@ -19,6 +19,7 @@ import { CollectionChart } from "@/components/business/CollectionChart";
 import { TagBreakdown } from "@/components/business/TagBreakdown";
 import { SyncIndicator } from "@/components/sync/SyncIndicator";
 import { BusinessExport } from "@/components/business/BusinessExport";
+import { SkeletonBusinessKpi, SkeletonLedgerList } from "@/components/ui/Skeleton";
 import type { LedgerInput, Ledger } from "@/types";
 
 // Helper to compute received per ledger — we fetch all payments for all ledgers
@@ -152,7 +153,9 @@ export default function BusinessPage() {
         )}
 
         {/* KPI Cards */}
-        {!loading && ledgers.length > 0 && (
+        {loading ? (
+          <SkeletonBusinessKpi />
+        ) : ledgers.length > 0 ? (
           <BusinessKpiCards
             totalExpected={stats.totalExpected}
             totalReceived={stats.totalReceived}
@@ -161,7 +164,7 @@ export default function BusinessPage() {
             overdueCount={stats.overdueCount}
             completedCount={stats.completedCount}
           />
-        )}
+        ) : null}
 
         {/* Analytics */}
         {!loading && ledgers.length > 0 && (
@@ -201,17 +204,13 @@ export default function BusinessPage() {
 
         {/* Ledger List */}
         {loading ? (
-          <div className="space-y-3">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="h-24 animate-pulse rounded-xl bg-slate-100 dark:bg-slate-800" />
-            ))}
-          </div>
+          <SkeletonLedgerList />
         ) : ledgers.length === 0 && !showForm ? (
           <EmptyState
             icon={Briefcase}
             secondaryIcon={ArrowRightLeft}
             title="Ready to track payments"
-            description="Create your first ledger to start managing clients and collections."
+            description="Track client payments, freelance projects, or business receivables. Create your first ledger to get started."
             action={{ label: "Create Your First Ledger", onClick: () => setShowForm(true), color: "emerald" }}
           />
         ) : (

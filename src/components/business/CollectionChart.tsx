@@ -38,7 +38,7 @@ export function CollectionChart({ data }: CollectionChartProps) {
   const hasAnyReceived = data.some((d) => d.received > 0);
   const formatted = data.map((d) => ({
     ...d,
-    label: new Date(d.month + "-01").toLocaleDateString("en-IN", { month: "short" }),
+    label: new Date(d.month + "-01").toLocaleDateString(undefined, { month: "short" }),
   }));
 
   return (

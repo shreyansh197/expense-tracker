@@ -57,6 +57,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
 
 function ToastItem({ toast, onClose }: { toast: Toast; onClose: () => void }) {
   const [show, setShow] = useState(false);
+  const duration = toast.action ? 6000 : 3000;
 
   useEffect(() => {
     requestAnimationFrame(() => setShow(true));
@@ -73,10 +74,15 @@ function ToastItem({ toast, onClose }: { toast: Toast; onClose: () => void }) {
       ? "border-red-200 bg-red-50 text-red-800 dark:border-red-800 dark:bg-red-900/40 dark:text-red-300"
       : "border-blue-200 bg-blue-50 text-blue-800 dark:border-blue-800 dark:bg-blue-900/40 dark:text-blue-300";
 
+  const progressColor =
+    toast.type === "success" ? "bg-emerald-400 dark:bg-emerald-500"
+    : toast.type === "error" ? "bg-red-400 dark:bg-red-500"
+    : "bg-blue-400 dark:bg-blue-500";
+
   return (
     <div
       className={cn(
-        "flex items-center gap-3 rounded-xl border px-4 py-3 shadow-lg transition-all duration-200 ease-out",
+        "relative flex items-center gap-3 rounded-xl border px-4 py-3 shadow-lg transition-all duration-200 ease-out overflow-hidden",
         colors,
         show ? "translate-y-0 scale-100 opacity-100" : "translate-y-5 scale-95 opacity-0"
       )}
@@ -97,6 +103,14 @@ function ToastItem({ toast, onClose }: { toast: Toast; onClose: () => void }) {
       <button onClick={onClose} className="shrink-0 opacity-60 hover:opacity-100" aria-label="Dismiss">
         <X size={14} />
       </button>
+      {toast.action && (
+        <div className="absolute bottom-0 left-0 right-0 h-[2px] opacity-40">
+          <div
+            className={cn("h-full rounded-full", progressColor)}
+            style={{ animation: `toast-countdown ${duration}ms linear forwards` }}
+          />
+        </div>
+      )}
     </div>
   );
 }

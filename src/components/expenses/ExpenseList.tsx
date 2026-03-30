@@ -274,6 +274,8 @@ export function ExpenseList({
                   onClick={() => toggleSelect(expense.id)}
                   className="shrink-0 rounded p-0.5 transition-colors"
                   style={{ color: 'var(--text-muted)' }}
+                  role="checkbox"
+                  aria-checked={selectedIds.has(expense.id)}
                   aria-label="Select expense"
                 >
                   {selectedIds.has(expense.id) ? (

@@ -20,6 +20,9 @@ export function LedgerCard({ ledger, totalReceived }: LedgerCardProps) {
     ledger.dueDate &&
     new Date(ledger.dueDate) < new Date() &&
     totalReceived < ledger.expectedAmount;
+  const overdueDays = isOverdue && ledger.dueDate
+    ? Math.max(1, Math.floor((new Date().getTime() - new Date(ledger.dueDate).getTime()) / 86400000))
+    : 0;
 
   const statusConfig = {
     active: { icon: Clock, label: "Payment Pending", color: "text-blue-600 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-400" },
@@ -45,7 +48,7 @@ export function LedgerCard({ ledger, totalReceived }: LedgerCardProps) {
             {isOverdue && (
               <span className="flex items-center gap-0.5 rounded-full bg-red-50 px-1.5 py-0.5 text-[10px] font-semibold text-red-600 dark:bg-red-900/30 dark:text-red-400">
                 <AlertTriangle size={10} />
-                Overdue
+                {overdueDays}d overdue
               </span>
             )}
           </div>
@@ -54,14 +57,9 @@ export function LedgerCard({ ledger, totalReceived }: LedgerCardProps) {
               <StatusIcon size={10} />
               {status.label}
             </span>
-            {isOverdue && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-red-50 px-1.5 py-0.5 text-[10px] font-medium text-red-600 dark:bg-red-900/30 dark:text-red-400">
-                Past Due
-              </span>
-            )}
             {ledger.dueDate && (
               <span className="text-[10px]" style={{ color: 'var(--text-muted)' }}>
-                Due {new Date(ledger.dueDate).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+                Due {new Date(ledger.dueDate).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" })}
               </span>
             )}
           </div>
@@ -71,7 +69,7 @@ export function LedgerCard({ ledger, totalReceived }: LedgerCardProps) {
             {formatCurrency(totalReceived)}
           </p>
           <p className="text-[10px]" style={{ color: 'var(--text-muted)' }}>
-            of {formatCurrency(ledger.expectedAmount)}
+            {ledger.expectedAmount > 0 ? `of ${formatCurrency(ledger.expectedAmount)}` : 'No target set'}
           </p>
         </div>
       </div>

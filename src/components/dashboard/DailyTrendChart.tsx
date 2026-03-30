@@ -71,8 +71,8 @@ export function DailyTrendChart({ dailyTotals, stackedDailyTotals, activeCategor
       <EmptyState
         icon={TrendingUp}
         secondaryIcon={BarChart3}
-        title="No daily data"
-        description="Your spending patterns will appear here as you log expenses."
+        title="No spending recorded yet"
+        description="Your daily spending patterns will appear here as you add expenses."
       />
     );
   }

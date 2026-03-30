@@ -80,12 +80,12 @@ export function Sidebar() {
               href={item.href}
               {...(item.label === "Settings" ? { "data-tour": "nav-settings-desktop" } : {})}
               className={cn(
-                "flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-all",
+                "flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-all duration-200",
                 isActive
                   ? isBiz
                     ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400 border-l-[3px] border-emerald-600 dark:border-emerald-400"
                     : "bg-indigo-50 text-indigo-700 dark:bg-indigo-900/15 dark:text-indigo-400 border-l-[3px] border-indigo-600 dark:border-indigo-400"
-                  : "border-l-[3px] border-transparent"
+                  : "border-l-[3px] border-transparent hover:bg-[var(--surface-secondary)]"
               )}
               style={!isActive ? { color: 'var(--text-secondary)' } : undefined}
             >
@@ -98,8 +98,11 @@ export function Sidebar() {
 
       {/* Budget Widget */}
       {hasBudget && (
-        <div className="mx-3 mb-3 rounded-xl p-3" style={{ background: 'var(--surface-secondary)' }}>
-          <div className="flex items-center justify-between mb-2">
+        <div
+          className="mx-3 mb-3 rounded-xl p-3"
+          style={{ background: 'var(--surface-secondary)' }}
+          title={`${formatCurrency(monthlyTotal)} of ${formatCurrency(settings.salary)} used`}
+        >          <div className="flex items-center justify-between mb-2">
             <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: 'var(--text-tertiary)' }}>
               Budget
             </span>
