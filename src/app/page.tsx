@@ -277,7 +277,7 @@ export default function DashboardPage() {
         <PageTransition className="relative mx-auto min-h-[80vh] max-w-4xl xl:max-w-6xl space-y-6 p-4 lg:p-6">
         <DecoGraphic variant="finance" />
         {/* Header — hero zone */}
-        <div className="zone-header dash-section">
+        <div className="zone-header dash-section relative z-20">
           <div data-tour="dashboard" className="flex items-center justify-between">
             <MonthSwitcher />
             <div className="flex items-center gap-2">
@@ -334,11 +334,10 @@ export default function DashboardPage() {
         )}
         </AnimatePresence>
 
-        {expenses.length === 0 ? null : (
-        <>
-        {/* Alerts / Subscriptions / Goals — indigo zone */}
+        {/* Alerts / Subscriptions / Goals — indigo zone (subs & goals persist across months) */}
         {((settings.recurringExpenses ?? []).length > 0 || (settings.goals ?? []).length > 0 || (effectiveBudget > 0 && expenses.length > 0)) && (
         <div className="section-zone section-indigo space-y-4">
+        {expenses.length > 0 && effectiveBudget > 0 && (
         <CollapsibleSection id="alerts" title="Alerts">
         <AlertsPanel
           categoryTotals={categoryTotals}
@@ -351,6 +350,7 @@ export default function DashboardPage() {
           onCategoryClick={handleCategoryClick}
         />
         </CollapsibleSection>
+        )}
 
         <CollapsibleSection id="subscriptions" title="Recurring Expenses">
         <SubscriptionsSummary />
@@ -491,8 +491,6 @@ export default function DashboardPage() {
           )}
         </div>
         </div>
-        </>
-        )}
       </PageTransition>
     </AppShell>
   );
