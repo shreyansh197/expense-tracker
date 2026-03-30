@@ -5,6 +5,7 @@ import { m, AnimatePresence } from "framer-motion";
 import {
   PiggyBank,
   AlertTriangle,
+  TrendingUp,
   Clock,
   ChevronDown,
 } from "lucide-react";
@@ -26,6 +27,22 @@ interface KpiCardsProps {
   expenseCount: number;
   forecast: Forecast;
   rolloverAmount?: number;
+}
+
+function getStatusCopy(
+  isOverspent: boolean,
+  isWarning: boolean,
+  daysRemaining: number,
+  paceToStayUnder: number,
+  forecastOverBudget: boolean,
+  formatCurrency: (n: number) => string,
+): string {
+  if (isOverspent) return "You\u2019ve gone over budget this month";
+  if (daysRemaining === 0) return "This month has ended";
+  if (forecastOverBudget) return "At this pace, you may overspend before month end";
+  if (isWarning) return `Spend \u2264 ${formatCurrency(paceToStayUnder)}/day to stay on track`;
+  if (daysRemaining <= 3) return `Only ${daysRemaining} day${daysRemaining !== 1 ? "s" : ""} left this month`;
+  return `You\u2019re on track \u2014 ${daysRemaining} days to go`;
 }
 
 export function KpiCards({
@@ -60,6 +77,16 @@ export function KpiCards({
   const forecastOverBudget = forecast.projectedRemaining < 0;
   const forecastWarning = !forecastOverBudget && salary > 0 && forecast.projectedTotal > salary * 0.8;
 
+  const status: "safe" | "caution" | "danger" =
+    isOverspent ? "danger" : (isWarning || forecastOverBudget) ? "caution" : "safe";
+
+  const statusColors = {
+    safe: { text: "text-emerald-700 dark:text-emerald-400", bg: "border-emerald-200 bg-emerald-50 dark:border-emerald-900/40 dark:bg-emerald-950/30", bar: "bg-gradient-to-r from-emerald-500 to-teal-400" },
+    caution: { text: "text-amber-700 dark:text-amber-400", bg: "border-amber-200 bg-amber-50 dark:border-amber-900/40 dark:bg-amber-950/30", bar: "bg-gradient-to-r from-amber-500 to-orange-400" },
+    danger: { text: "text-red-700 dark:text-red-400", bg: "border-red-200 bg-red-50 dark:border-red-900/40 dark:bg-red-950/30", bar: "bg-gradient-to-r from-red-500 to-rose-400" },
+  };
+  const sc = statusColors[status];
+
   return (
     <m.div
       className="space-y-3"
@@ -67,122 +94,111 @@ export function KpiCards({
       animate="visible"
       variants={{ visible: { transition: { staggerChildren: 0.08 } } }}
     >
-      {/* ── Hero Row: Spent + Remaining ── */}
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        {/* Spent / Budget */}
-        <m.div
-          className="card-accent-indigo relative overflow-hidden p-4 sm:p-5"
-          variants={{ hidden: { opacity: 0, y: 12 }, visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] } } }}
-        >
-          {/* Gradient accent bar */}
-          <div className="absolute inset-x-0 top-0 h-1 rounded-t-2xl" style={{ background: 'var(--secondary-gradient)' }} />
-          {/* Faint background icon */}
-          <PiggyBank
-            size={80}
-            className="pointer-events-none absolute -right-2 -top-2"
-            style={{ color: 'var(--secondary)', opacity: 0.08 }}
-          />
-          <p className="text-section-title">Spent</p>
-          <div className="mt-2 flex items-baseline gap-1.5">
-            <p className="tabular-nums text-2xl sm:text-3xl font-bold" style={{ color: 'var(--text-primary)' }}>
-              {formatCurrency(monthlyTotal)}
-            </p>
-            <span style={{ color: 'var(--text-muted)' }}>/</span>
-            <span className="tabular-nums text-sm font-medium" style={{ color: 'var(--text-tertiary)' }}>
-              {formatCurrency(salary)}
-            </span>
-          </div>
-          <div className="mt-3 h-2.5 w-full overflow-hidden rounded-full" style={{ background: 'var(--surface-secondary)' }}>
-            <m.div
-              className={cn(
-                "h-full rounded-full",
-                isOverspent
-                  ? "bg-red-500"
-                  : isWarning
-                    ? "bg-amber-500"
-                    : "bg-[#2EC4B6]"
-              )}
-              initial={{ width: 0 }}
-              animate={{ width: `${Math.min(budgetUsedPercent, 100)}%` }}
-              transition={{ delay: 0.3, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-            />
-          </div>
-          <div className="mt-2.5 flex items-center justify-between">
-            <p className="text-meta">
-              {budgetUsedPercent}% of budget · {expenseCount} txns
-            </p>
-            {rolloverAmount > 0 && (
-              <p className="text-[10px] font-medium text-[#2EC4B6] dark:text-[#5EDDD2]">
-                +{formatCurrency(rolloverAmount)} rollover
-              </p>
-            )}
-          </div>
-        </m.div>
-
-        {/* Remaining + Days Left */}
-        <m.div
-          className={cn(
-            "relative overflow-hidden rounded-2xl border p-4 sm:p-5 card-interactive",
-            isOverspent
-              ? "border-red-200 bg-red-50 dark:border-red-900/40 dark:bg-red-950/30"
-              : isWarning
-                ? "border-amber-200 bg-amber-50 dark:border-amber-900/40 dark:bg-amber-950/30"
-                : "border-emerald-200 bg-emerald-50 dark:border-emerald-900/40 dark:bg-emerald-950/30"
-          )}
-        >
-          {/* Gradient accent bar */}
-          <div className={cn(
-            "absolute inset-x-0 top-0 h-1 rounded-t-2xl",
-            isOverspent ? "bg-gradient-to-r from-red-500 to-rose-400"
-              : isWarning ? "bg-gradient-to-r from-amber-500 to-orange-400"
-              : "bg-gradient-to-r from-emerald-500 to-teal-400"
-          )} />
-          {/* Faint background icon */}
-          <Clock
-            size={72}
-            className="pointer-events-none absolute -right-1 -top-1"
-            style={{ color: 'var(--text-muted)', opacity: 0.1 }}
-          />
-          <div
-            className={cn(
-              "flex items-center gap-2 text-sm font-medium",
-              isOverspent
-                ? "text-red-600 dark:text-red-400"
-                : isWarning
-                  ? "text-amber-600 dark:text-amber-400"
-                  : "text-emerald-600 dark:text-emerald-400"
-            )}
-          >
+      {/* ── PRIMARY: Budget Status Hero ── */}
+      <m.div
+        className={cn("relative overflow-hidden rounded-2xl border p-4 sm:p-5", sc.bg)}
+        variants={{ hidden: { opacity: 0, y: 12 }, visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] } } }}
+      >
+        <div className={cn("absolute inset-x-0 top-0 h-1 rounded-t-2xl", sc.bar)} />
+        <div className="flex items-center justify-between">
+          <div className={cn("flex items-center gap-2 text-sm font-semibold", sc.text)}>
             {isOverspent ? <AlertTriangle size={15} /> : <PiggyBank size={15} />}
-            <span>{isOverspent ? "Overspent" : "Remaining"}</span>
+            <span>{isOverspent ? "Over Budget" : "You still have"}</span>
           </div>
-          <p
-            className={cn(
-              "tabular-nums mt-2 text-2xl sm:text-3xl font-bold",
-              isOverspent
-                ? "text-red-700 dark:text-red-400"
-                : isWarning
-                  ? "text-amber-700 dark:text-amber-400"
-                  : "text-emerald-700 dark:text-emerald-400"
-            )}
-          >
-            {formatCurrency(Math.abs(remaining))}
-          </p>
-          <div className="mt-2.5 flex items-center gap-1.5">
-            <Clock size={12} style={{ color: 'var(--text-tertiary)' }} />
-            <span className={cn(
-              "text-xs font-medium",
-              isOverspent ? "text-red-500 dark:text-red-400"
-                : isWarning ? "text-amber-600 dark:text-amber-400"
-                : "text-emerald-600 dark:text-emerald-400"
-            )}>
-              {daysRemaining === 0 ? "Month ended" : `${daysRemaining} day${daysRemaining !== 1 ? "s" : ""} left`}
+          {daysRemaining > 0 && (
+            <span className="flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium" style={{ background: 'var(--surface-secondary)', color: 'var(--text-secondary)' }}>
+              <Clock size={11} />
+              {daysRemaining}d left
             </span>
-          </div>
-        </m.div>
-      </div>
+          )}
+        </div>
+        <p className={cn("tabular-nums mt-1.5 text-3xl sm:text-4xl font-extrabold tracking-tight", sc.text)}>
+          {formatCurrency(Math.abs(remaining))}
+        </p>
+        <p className="mt-2 text-[13px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+          {getStatusCopy(isOverspent, isWarning, daysRemaining, paceToStayUnder, forecastOverBudget, formatCurrency)}
+        </p>
+        <div className="mt-3 h-2 w-full overflow-hidden rounded-full" style={{ background: 'var(--surface-secondary)' }}>
+          <m.div
+            className={cn("h-full rounded-full", isOverspent ? "bg-red-500" : isWarning ? "bg-amber-500" : "bg-[#2EC4B6]")}
+            initial={{ width: 0 }}
+            animate={{ width: `${Math.min(budgetUsedPercent, 100)}%` }}
+            transition={{ delay: 0.3, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+          />
+        </div>
+        <div className="mt-2 flex items-center justify-between text-xs" style={{ color: 'var(--text-tertiary)' }}>
+          <span className="tabular-nums">{formatCurrency(monthlyTotal)} of {formatCurrency(salary)} spent</span>
+          <span>{expenseCount} transaction{expenseCount !== 1 ? "s" : ""}</span>
+        </div>
+        {rolloverAmount > 0 && (
+          <p className="mt-1 text-[10px] font-medium text-[#2EC4B6] dark:text-[#5EDDD2]">
+            Includes +{formatCurrency(rolloverAmount)} rollover from last month
+          </p>
+        )}
+      </m.div>
 
-      {/* ── Toggle + Metrics Row ── */}
+      {/* ── SECONDARY: Supporting Metrics ── */}
+      <m.div
+        className="grid grid-cols-3 gap-2 sm:gap-3"
+        variants={{ hidden: { opacity: 0, y: 8 }, visible: { opacity: 1, y: 0, transition: { duration: 0.4, delay: 0.1, ease: [0.22, 1, 0.36, 1] } } }}
+      >
+        <div className="card-accent-teal p-3 sm:p-3.5">
+          <p className="text-meta font-medium">Daily Pace</p>
+          <p className={cn(
+            "tabular-nums mt-1 text-base sm:text-lg font-bold",
+            paceToStayUnder <= 0 ? "text-red-600 dark:text-red-400"
+              : paceExceeded ? "text-amber-600 dark:text-amber-400" : ""
+          )} style={paceToStayUnder > 0 && !paceExceeded ? { color: 'var(--text-primary)' } : undefined}>
+            {formatCurrency(avgDaily)}/d
+          </p>
+          <p className="mt-0.5 text-[11px]" style={{ color: 'var(--text-tertiary)' }}>
+            {paceToStayUnder > 0 ? `Target \u2264 ${formatCurrency(paceToStayUnder)}/d` : "No budget left"}
+          </p>
+        </div>
+
+        <div className="card-accent-coral p-3 sm:p-3.5">
+          <p className="text-meta font-medium">Saving</p>
+          <p className={cn(
+            "tabular-nums mt-1 text-base sm:text-lg font-bold",
+            savingsRate < 0 ? "text-red-600 dark:text-red-400"
+              : savingsRate < 20 ? "text-amber-600 dark:text-amber-400"
+              : "text-emerald-600 dark:text-emerald-400"
+          )}>
+            {savingsRate}%
+          </p>
+          <p className="mt-0.5 text-[11px]" style={{ color: 'var(--text-tertiary)' }}>
+            {remaining >= 0 ? `${formatCurrency(remaining)} saved` : `${formatCurrency(Math.abs(remaining))} over`}
+          </p>
+        </div>
+
+        <div className={cn(
+          "rounded-[0.875rem] border p-3 sm:p-3.5",
+          forecastOverBudget ? "border-red-200 bg-red-50 dark:border-red-900/40 dark:bg-red-950/30"
+            : forecastWarning ? "border-amber-200 bg-amber-50 dark:border-amber-900/40 dark:bg-amber-950/30"
+            : "card-sm"
+        )}>
+          <div className="flex items-center gap-1 text-meta font-medium">
+            <TrendingUp size={12} />
+            <span>Forecast</span>
+          </div>
+          <p className={cn(
+            "tabular-nums mt-1 text-base sm:text-lg font-bold",
+            forecastOverBudget ? "text-red-700 dark:text-red-400"
+              : forecastWarning ? "text-amber-700 dark:text-amber-400" : ""
+          )} style={!forecastOverBudget && !forecastWarning ? { color: 'var(--text-primary)' } : undefined}>
+            {forecast.projectedTotal > 0 ? formatCurrency(forecast.projectedTotal) : "\u2014"}
+          </p>
+          <p className="mt-0.5 text-[11px]" style={{ color: 'var(--text-tertiary)' }}>
+            {forecast.projectedTotal > 0 && forecast.confidence !== "low"
+              ? (forecastOverBudget
+                  ? `Over by ${formatCurrency(Math.abs(forecast.projectedRemaining))}`
+                  : `${formatCurrency(forecast.projectedRemaining)} under budget`)
+              : forecast.confidence === "low" ? "Not enough data yet" : "\u00A0"}
+          </p>
+        </div>
+      </m.div>
+
+      {/* ── Toggle: Extra Details ── */}
       <div>
         <button
           onClick={toggleExpanded}
@@ -204,88 +220,37 @@ export function KpiCards({
               transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
               className="overflow-hidden"
             >
-      <div className="grid grid-cols-3 gap-3 pt-1">
-        {/* Spend Target */}
-        <div className="card-accent-teal p-3 sm:p-3.5">
-          <p className="text-meta font-medium">Daily Budget</p>
-          <p className={cn(
-            "tabular-nums mt-1 text-base sm:text-lg font-bold",
-            paceToStayUnder <= 0
-              ? "text-red-600 dark:text-red-400"
-              : paceExceeded
-                ? "text-amber-600 dark:text-amber-400"
-                : ""
-          )} style={paceToStayUnder > 0 && !paceExceeded ? { color: 'var(--text-primary)' } : undefined}>
-            {paceToStayUnder > 0 ? `${formatCurrency(paceToStayUnder)}/d` : "Over budget"}
-          </p>
-          <p className="tabular-nums mt-1 text-meta">
-            Averaging {formatCurrency(avgDaily)}/day
-          </p>
-        </div>
-
-        {/* Saved */}
-        <div className="card-accent-coral p-3 sm:p-3.5">
-          <p className="text-meta font-medium">Saved</p>
-          <p className={cn(
-            "tabular-nums mt-1 text-base sm:text-lg font-bold",
-            savingsRate < 0
-              ? "text-red-600 dark:text-red-400"
-              : savingsRate < 20
-                ? "text-amber-600 dark:text-amber-400"
-                : "text-emerald-600 dark:text-emerald-400"
-          )}>
-            {savingsRate}%
-          </p>
-          <p className="tabular-nums mt-1 text-meta">
-            {remaining >= 0 ? formatCurrency(remaining) : `−${formatCurrency(Math.abs(remaining))}`}
-          </p>
-        </div>
-
-        {/* Month-End Forecast */}
-        <div className={cn(
-          "rounded-[0.875rem] border p-3 sm:p-3.5",
-          forecastOverBudget
-            ? "border-red-200 bg-red-50 dark:border-red-900/40 dark:bg-red-950/30"
-            : forecastWarning
-              ? "border-amber-200 bg-amber-50 dark:border-amber-900/40 dark:bg-amber-950/30"
-              : "card-sm"
-        )}>
-          <div className={cn(
-            "flex items-start gap-1 text-meta font-medium",
-            forecastOverBudget
-              ? "text-red-600 dark:text-red-400"
-              : forecastWarning
-                ? "text-amber-600 dark:text-amber-400"
-                : ""
-          )}>
-            <span className="leading-snug">Month-end Projection</span>
-            <InfoTooltip title="End-of-Month Forecast" className="mt-px shrink-0">
-              <p>Projects your total spend by month end using your average daily spending.</p>
-              <p className="mt-1"><strong>Confidence:</strong></p>
-              <ul className="ml-3 list-disc mt-0.5">
-                <li><strong>Low</strong> — less than 7 days of data</li>
-                <li><strong>Medium</strong> — 7–14 days of data</li>
-                <li><strong>High</strong> — 15+ days of data</li>
-              </ul>
-            </InfoTooltip>
-          </div>
-          <p className={cn(
-            "tabular-nums mt-1 text-base sm:text-lg font-bold",
-            forecastOverBudget
-              ? "text-red-700 dark:text-red-400"
-              : forecastWarning
-                ? "text-amber-700 dark:text-amber-400"
-                : ""
-          )} style={!forecastOverBudget && !forecastWarning ? { color: 'var(--text-primary)' } : undefined}>
-            {forecast.projectedTotal > 0 ? formatCurrency(forecast.projectedTotal) : "—"}
-          </p>
-          <p className="tabular-nums mt-1 text-meta">
-            {forecast.projectedTotal > 0 && salary > 0
-              ? `${Math.round((forecast.projectedTotal / salary) * 100)}% of budget`
-              : "\u00A0"}
-          </p>
-        </div>
-      </div>
+              <div className="grid grid-cols-2 gap-2 sm:gap-3 pt-1">
+                <div className="rounded-xl p-3" style={{ background: 'var(--surface-secondary)' }}>
+                  <p className="text-meta font-medium">Budget Used</p>
+                  <p className="tabular-nums mt-1 text-base font-bold" style={{ color: 'var(--text-primary)' }}>
+                    {budgetUsedPercent}%
+                  </p>
+                  <p className="mt-0.5 text-[11px]" style={{ color: 'var(--text-tertiary)' }}>
+                    {formatCurrency(monthlyTotal)} of {formatCurrency(salary)}
+                  </p>
+                </div>
+                <div className="rounded-xl p-3" style={{ background: 'var(--surface-secondary)' }}>
+                  <div className="flex items-center gap-1">
+                    <p className="text-meta font-medium">Projection Detail</p>
+                    <InfoTooltip title="End-of-Month Forecast" className="mt-px shrink-0">
+                      <p>Projects your total spend by month end using your average daily spending.</p>
+                      <p className="mt-1"><strong>Confidence:</strong></p>
+                      <ul className="ml-3 list-disc mt-0.5">
+                        <li><strong>Low</strong> — less than 7 days of data</li>
+                        <li><strong>Medium</strong> — 7–14 days of data</li>
+                        <li><strong>High</strong> — 15+ days of data</li>
+                      </ul>
+                    </InfoTooltip>
+                  </div>
+                  <p className="tabular-nums mt-1 text-base font-bold" style={{ color: 'var(--text-primary)' }}>
+                    {forecast.projectedTotal > 0 ? formatCurrency(forecast.projectedTotal) : "\u2014"}
+                  </p>
+                  <p className="mt-0.5 text-[11px]" style={{ color: 'var(--text-tertiary)' }}>
+                    {forecast.confidence ? `${forecast.confidence[0].toUpperCase()}${forecast.confidence.slice(1)} confidence` : "\u00A0"}
+                  </p>
+                </div>
+              </div>
             </m.div>
           )}
         </AnimatePresence>

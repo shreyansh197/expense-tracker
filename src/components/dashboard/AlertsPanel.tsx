@@ -52,15 +52,15 @@ export function AlertsPanel({
     alerts.push({
       id: "budget-over",
       severity: "critical",
-      message: "You've exceeded your monthly budget!",
-      detail: `${budgetUsedPercent}% spent`,
+      message: "You\u2019ve gone over your monthly budget",
+      detail: `${budgetUsedPercent - 100}% over \u2014 consider pausing non-essential spending`,
     });
   } else if (budgetUsedPercent >= 80) {
     alerts.push({
       id: "budget-warning",
       severity: "warning",
-      message: `Budget ${budgetUsedPercent}% used — slow down spending`,
-      detail: `${100 - budgetUsedPercent}% remaining`,
+      message: `You\u2019ve used ${budgetUsedPercent}% of your budget`,
+      detail: `${100 - budgetUsedPercent}% left \u2014 try to spread it across the remaining days`,
     });
   }
 
@@ -69,7 +69,8 @@ export function AlertsPanel({
     alerts.push({
       id: "pace",
       severity: "warning",
-      message: `Spending ${formatCurrency(avgDaily)}/day — need ${formatCurrency(paceToStayUnder)}/day to stay on track`,
+      message: `You\u2019re averaging ${formatCurrency(avgDaily)}/day`,
+      detail: `To stay within budget, aim for \u2264 ${formatCurrency(paceToStayUnder)}/day`,
     });
   }
 
@@ -105,8 +106,8 @@ export function AlertsPanel({
       alerts.push({
         id: "forecast-over",
         severity: "warning",
-        message: `On track to overspend by ${formatCurrency(Math.abs(forecast.projectedRemaining))} this month`,
-        detail: `Projected: ${formatCurrency(forecast.projectedTotal)} · ${forecast.confidence} confidence`,
+        message: `At this pace, you may overspend by ${formatCurrency(Math.abs(forecast.projectedRemaining))}`,
+        detail: `Projected total: ${formatCurrency(forecast.projectedTotal)} (${forecast.confidence} confidence)`,
       });
     }
   }
@@ -118,8 +119,8 @@ export function AlertsPanel({
       alerts.push({
         id: `anomaly-${a.expense.id}`,
         severity: "info",
-        message: `Unusual spending: ${formatCurrency(a.expense.amount)} on ${label}${a.expense.remark ? ` — "${a.expense.remark}"` : ""}`,
-        detail: `${a.zScore}× above your typical ${label} spend (median ${formatCurrency(a.categoryMedian)})`,
+        message: `This looks unusual \u2014 ${formatCurrency(a.expense.amount)} on ${label}${a.expense.remark ? ` ("${a.expense.remark}")` : ""}`,
+        detail: `Your typical ${label} spend is around ${formatCurrency(a.categoryMedian)} \u2014 this is ${a.zScore}\u00d7 higher`,
         action: () => onCategoryClick?.(a.expense.category),
       });
     }

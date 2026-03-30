@@ -29,6 +29,7 @@ import { getMonthName } from "@/lib/utils";
 import { useCurrency } from "@/hooks/useCurrency";
 import { CategoryDot } from "@/components/expenses/CategoryChips";
 import { QuickHelpButton } from "@/components/ui/QuickHelpButton";
+import { useAuth } from "@/components/providers/AuthProvider";
 import { Repeat, PlusCircle, Target, BarChart3, Sparkles, ChevronDown, Check, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -214,6 +215,7 @@ export default function DashboardPage() {
   const { currentMonth, currentYear } = useUIStore();
   const { expenses, loading, syncStatus } = useExpenses(currentMonth, currentYear);
   const { settings } = useSettings();
+  const { user } = useAuth();
 
   // Auto-apply recurring expenses for current month
   useRecurringExpenses(currentMonth, currentYear);
@@ -278,6 +280,11 @@ export default function DashboardPage() {
         <DecoGraphic variant="finance" />
         {/* Header — hero zone */}
         <div className="zone-header dash-section relative z-20">
+          {user?.name && (
+            <p className="mb-2 text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
+              {new Date().getHours() < 12 ? "Good morning" : new Date().getHours() < 17 ? "Good afternoon" : "Good evening"}, {user.name.split(" ")[0]}
+            </p>
+          )}
           <div data-tour="dashboard" className="flex items-center justify-between">
             <MonthSwitcher />
             <div className="flex items-center gap-2">
