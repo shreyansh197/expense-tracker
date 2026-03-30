@@ -4,16 +4,16 @@
 
 :root {
   /* ── Surfaces ── */
-  --background: #F5F9F9;
+  --background: #F0F4F8;
   --foreground: #1a2332;
   --surface: #ffffff;
-  --surface-secondary: #ECF3F2;
-  --surface-hover: #e2edec;
-  --surface-tertiary: #d6e4e3;
+  --surface-secondary: #E8EFF5;
+  --surface-hover: #dde6ef;
+  --surface-tertiary: #d0dae5;
   /* ── Borders ── */
-  --border: #E0EBEA;
-  --border-subtle: #EDF5F4;
-  --border-card: #d4e2e1;
+  --border: #DBE3ED;
+  --border-subtle: #E8F0F8;
+  --border-card: #CFD9E5;
   /* ── Text ── */
   --text-primary: #1a2332;
   --text-secondary: #4b5e6d;
@@ -64,12 +64,12 @@
 
 .dark {
   /* ── Surfaces (deep navy with layered depth) ── */
-  --background: #0F172A;
+  --background: #111827;
   --foreground: #e8ecf4;
-  --surface: #1E293B;
-  --surface-secondary: #243447;
-  --surface-hover: #2c3e52;
-  --surface-tertiary: #334761;
+  --surface: #1F2937;
+  --surface-secondary: #283344;
+  --surface-hover: #303d50;
+  --surface-tertiary: #374a5e;
   /* ── Borders ── */
   --border: #2E3A4A;
   --border-subtle: #1c2838;

@@ -70,6 +70,13 @@ export function useExpenses(month: number, year: number) {
   const [loading, setLoading] = useState(() => !_cache.has(key));
   const [syncStatus, setSyncStatus] = useState<SyncStatus>(_syncStatus);
 
+  // Reset loading when the month/year key changes and cache is empty
+  useEffect(() => {
+    if (!_cache.has(key)) {
+      setLoading(true);
+    }
+  }, [key]);
+
   const fetchExpenses = useCallback(async () => {
     const wid = getActiveWorkspaceId();
     if (!wid) return;

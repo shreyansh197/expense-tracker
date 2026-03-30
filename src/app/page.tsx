@@ -3,7 +3,7 @@
 export const dynamic = "force-dynamic";
 
 import { useRouter } from "next/navigation";
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback } from "react";
 import { m, AnimatePresence } from "framer-motion";
 import { AppShell } from "@/components/layout/AppShell";
 import { MonthSwitcher } from "@/components/layout/MonthSwitcher";
@@ -253,12 +253,11 @@ export default function DashboardPage() {
     return localStorage.getItem(WELCOME_KEY) === "true";
   });
 
-  useEffect(() => {
-    if (!welcomeDismissed && expenses.length > 0) {
-      localStorage.setItem(WELCOME_KEY, "true");
-      setWelcomeDismissed(true);
-    }
-  }, [expenses.length, welcomeDismissed]);
+  // Persist dismissal when user adds their first expense (derived, no cascading setState)
+  if (!welcomeDismissed && expenses.length > 0) {
+    localStorage.setItem(WELCOME_KEY, "true");
+    setWelcomeDismissed(true);
+  }
 
   const showWelcome = !loading && !welcomeDismissed && expenses.length === 0;
 
@@ -283,7 +282,7 @@ export default function DashboardPage() {
             <MonthSwitcher />
             <div className="flex items-center gap-2">
               <SyncIndicator syncStatus={syncStatus} />
-              <div className="relative z-[9999] lg:hidden">
+              <div className="relative z-[60] lg:hidden">
                 <QuickHelpButton />
               </div>
             </div>
@@ -303,14 +302,13 @@ export default function DashboardPage() {
         )}
 
         {/* KPI Cards — coral zone */}
-        <div className="section-zone section-coral">
         <AnimatePresence mode="wait">
           {loading ? (
-            <m.div key="kpi-skeleton" className="dash-section" initial={{ opacity: 0.6 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
+            <m.div key="kpi-skeleton" className="section-zone section-coral dash-section" initial={{ opacity: 0.6 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
               <SkeletonKpiCards />
             </m.div>
           ) : expenses.length === 0 ? null : (
-            <m.div key="kpi-content" className="dash-section" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
+            <m.div key="kpi-content" className="section-zone section-coral dash-section" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
             <KpiCards
             monthlyTotal={monthlyTotal}
             remaining={remaining}
@@ -335,11 +333,11 @@ export default function DashboardPage() {
           </m.div>
         )}
         </AnimatePresence>
-        </div>
 
         {expenses.length === 0 ? null : (
         <>
         {/* Alerts / Subscriptions / Goals — indigo zone */}
+        {((settings.recurringExpenses ?? []).length > 0 || (settings.goals ?? []).length > 0 || (effectiveBudget > 0 && expenses.length > 0)) && (
         <div className="section-zone section-indigo space-y-4">
         <CollapsibleSection id="alerts" title="Alerts">
         <AlertsPanel
@@ -362,6 +360,7 @@ export default function DashboardPage() {
         <SavingsGoalsWidget />
         </CollapsibleSection>
         </div>
+        )}
 
         {/* Charts Row — teal zone */}
         <div className="section-zone section-teal">

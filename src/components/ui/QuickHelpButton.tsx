@@ -54,16 +54,14 @@ export function QuickHelpButton({ variant = "icon" }: { variant?: "icon" | "side
       {open && (
         <div
           className={cn(
-            "fixed z-[9999] w-72 rounded-xl border p-4 shadow-xl",
-            variant === "sidebar" ? "bottom-full left-0 mb-2" : "right-0 top-full mt-2"
+            "w-72 rounded-xl border p-4 shadow-xl",
+            variant === "sidebar"
+              ? "fixed z-[9999] bottom-full left-0 mb-2"
+              : "absolute z-[10000] right-0 top-full mt-2"
           )}
           style={{
             background: "var(--surface)",
             borderColor: "var(--border)",
-            ...(variant !== "sidebar" ? {
-              position: "absolute" as const,
-              zIndex: 9999,
-            } : {}),
           }}
         >
           <div className="mb-3 flex items-center justify-between">
