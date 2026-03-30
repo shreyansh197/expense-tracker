@@ -230,8 +230,8 @@ export default function DashboardPage() {
         />
         </CollapsibleSection>
 
-        {/* Subscriptions Summary */}
-        <CollapsibleSection id="subscriptions" title="Subscriptions">
+        {/* Recurring Expenses Summary */}
+        <CollapsibleSection id="subscriptions" title="Recurring Expenses">
         <SubscriptionsSummary />
         </CollapsibleSection>
 
