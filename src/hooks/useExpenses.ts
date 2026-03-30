@@ -70,11 +70,9 @@ export function useExpenses(month: number, year: number) {
   const [loading, setLoading] = useState(() => !_cache.has(key));
   const [syncStatus, setSyncStatus] = useState<SyncStatus>(_syncStatus);
 
-  // Reset loading when the month/year key changes and cache is empty
+  // Reset loading when the month/year key changes
   useEffect(() => {
-    if (!_cache.has(key)) {
-      setLoading(true);
-    }
+    setLoading(!_cache.has(key));
   }, [key]);
 
   const fetchExpenses = useCallback(async () => {
@@ -83,7 +81,7 @@ export function useExpenses(month: number, year: number) {
 
     // Dedup: if a fetch for this key is already in-flight, reuse it
     const existing = _inflight.get(key);
-    if (existing) { await existing; return; }
+    if (existing) { await existing; setLoading(false); return; }
 
     _syncStatus = "syncing";
     setSyncStatus("syncing");
