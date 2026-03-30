@@ -75,12 +75,12 @@ export function KpiCards({
           variants={{ hidden: { opacity: 0, y: 12 }, visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] } } }}
         >
           {/* Gradient accent bar */}
-          <div className="absolute inset-x-0 top-0 h-1 rounded-t-2xl" style={{ background: 'var(--accent-gradient)' }} />
+          <div className="absolute inset-x-0 top-0 h-1 rounded-t-2xl" style={{ background: 'var(--secondary-gradient)' }} />
           {/* Faint background icon */}
           <PiggyBank
             size={80}
             className="pointer-events-none absolute -right-2 -top-2"
-            style={{ color: 'var(--accent)', opacity: 0.08 }}
+            style={{ color: 'var(--secondary)', opacity: 0.08 }}
           />
           <p className="text-section-title">Spent</p>
           <div className="mt-2 flex items-baseline gap-1.5">

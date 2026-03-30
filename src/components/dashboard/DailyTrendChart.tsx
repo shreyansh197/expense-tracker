@@ -262,11 +262,11 @@ export function DailyTrendChart({ dailyTotals, stackedDailyTotals, activeCategor
                   color: "var(--chart-tooltip-fg, #111827)",
                 }}
                 labelStyle={{ color: "var(--chart-tooltip-fg, #111827)" }}
-                itemStyle={{ color: "#3B82F6" }}
+                itemStyle={{ color: "#0891b2" }}
               />
               <Bar
                 dataKey="total"
-                fill="#3B82F6"
+                fill="#0891b2"
                 radius={[4, 4, 0, 0]}
                 isAnimationActive={true}
                 animationBegin={100}
