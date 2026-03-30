@@ -170,6 +170,7 @@ button, a {
   font-size: 0.8125rem;
   font-weight: 600;
   line-height: 1.4;
+  letter-spacing: 0.01em;
   color: var(--text-secondary);
 }
 .text-card-title {
@@ -181,7 +182,7 @@ button, a {
 .text-body {
   font-size: 0.875rem;
   font-weight: 400;
-  line-height: 1.6;
+  line-height: 1.65;
   color: var(--text-primary);
 }
 .text-meta {
@@ -409,6 +410,23 @@ input[type="password"]::-ms-clear {
 .fade-in {
   animation: fadeIn 0.25s ease both;
 }
+
+/* Dashboard section stagger entrance */
+@keyframes dash-enter {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.dash-section {
+  animation: dash-enter 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.dash-section:nth-child(2) { animation-delay: 0.04s; }
+.dash-section:nth-child(3) { animation-delay: 0.08s; }
+.dash-section:nth-child(4) { animation-delay: 0.12s; }
+.dash-section:nth-child(5) { animation-delay: 0.16s; }
+.dash-section:nth-child(6) { animation-delay: 0.20s; }
+.dash-section:nth-child(7) { animation-delay: 0.24s; }
+.dash-section:nth-child(8) { animation-delay: 0.28s; }
+.dash-section:nth-child(9) { animation-delay: 0.32s; }
 
 /* Toast countdown progress bar */
 @keyframes toast-countdown {

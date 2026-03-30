@@ -23,7 +23,7 @@ import { getMonthName } from "@/lib/utils";
 import { useCurrency } from "@/hooks/useCurrency";
 import { CategoryDot } from "@/components/expenses/CategoryChips";
 import { QuickHelpButton } from "@/components/ui/QuickHelpButton";
-import { Repeat, Receipt, PlusCircle, Target, Settings, Sparkles, ChevronDown } from "lucide-react";
+import { Repeat, Receipt, PlusCircle, Target, BarChart3, Sparkles, ChevronDown, Check, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /* ── Collapsible section for mobile dashboard ───────────────── */
@@ -43,19 +43,19 @@ function CollapsibleSection({ id, title, children }: { id: string; title: string
   }, [storageKey]);
 
   return (
-    <div>
+    <div className="dash-section">
       <button
         onClick={toggle}
-        className="flex w-full items-center justify-between rounded-lg py-1 text-xs font-semibold lg:hidden"
+        className="flex w-full items-center justify-between rounded-lg px-1 py-2 text-[11px] font-semibold uppercase tracking-wider lg:hidden"
         style={{ color: 'var(--text-tertiary)' }}
         aria-expanded={open}
       >
         <span>{title}</span>
-        <ChevronDown size={14} className={cn("transition-transform duration-200", open && "rotate-180")} />
+        <ChevronDown size={14} className={cn("transition-transform duration-300", open && "rotate-180")} />
       </button>
       <div className={cn(
-        "lg:block",
-        open ? "block" : "hidden lg:block"
+        "transition-all duration-300 ease-in-out lg:block",
+        open ? "block opacity-100" : "hidden opacity-0 lg:block lg:opacity-100"
       )}>
         {children}
       </div>
@@ -63,55 +63,123 @@ function CollapsibleSection({ id, title, children }: { id: string; title: string
   );
 }
 
-function WelcomeCard({ onAddExpense, hasBudget }: { onAddExpense: () => void; hasBudget: boolean }) {
+/* ── Onboarding step ──────────────────────────────────────── */
+function OnboardingStep({
+  done,
+  icon: Icon,
+  title,
+  subtitle,
+  color,
+}: {
+  done: boolean;
+  icon: React.ElementType;
+  title: string;
+  subtitle: string;
+  color: string;
+}) {
+  const colorMap: Record<string, { bg: string; text: string; ring: string }> = {
+    indigo: { bg: "bg-indigo-50 dark:bg-indigo-900/30", text: "text-indigo-600 dark:text-indigo-400", ring: "ring-indigo-200 dark:ring-indigo-800" },
+    emerald: { bg: "bg-emerald-50 dark:bg-emerald-900/30", text: "text-emerald-600 dark:text-emerald-400", ring: "ring-emerald-200 dark:ring-emerald-800" },
+    amber: { bg: "bg-amber-50 dark:bg-amber-900/30", text: "text-amber-600 dark:text-amber-400", ring: "ring-amber-200 dark:ring-amber-800" },
+  };
+  const c = colorMap[color] ?? colorMap.indigo;
+
   return (
-    <div className="card p-6 sm:p-8">
-      <div className="flex items-center gap-2 mb-3">
-        <Sparkles size={20} className="text-indigo-500" />
-        <h2 className="text-lg font-bold" style={{ color: 'var(--text-primary)' }}>Welcome to ExpenStream!</h2>
+    <div className={cn(
+      "relative flex items-center gap-3.5 rounded-xl p-3.5 transition-all duration-200",
+      done ? "opacity-50" : ""
+    )} style={{ background: 'var(--surface-secondary)' }}>
+      {/* Step indicator */}
+      <div className={cn(
+        "flex h-9 w-9 shrink-0 items-center justify-center rounded-xl transition-all",
+        done ? "bg-emerald-50 dark:bg-emerald-900/30" : c.bg
+      )}>
+        {done ? (
+          <Check size={16} className="text-emerald-600 dark:text-emerald-400" strokeWidth={2.5} />
+        ) : (
+          <Icon size={16} className={c.text} />
+        )}
       </div>
-      <p className="text-sm mb-6" style={{ color: 'var(--text-secondary)' }}>
-        Get started in three simple steps:
-      </p>
-      <div className="grid gap-3 sm:grid-cols-3">
-        <div className={`flex items-start gap-3 rounded-xl p-3.5 ${hasBudget ? 'opacity-60' : ''}`} style={{ background: 'var(--surface-secondary)' }}>
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-indigo-100 dark:bg-indigo-900/40">
-            <Target size={16} className="text-indigo-600 dark:text-indigo-400" />
-          </div>
-          <div>
-            <p className="text-xs font-semibold" style={{ color: 'var(--text-primary)' }}>
-              {hasBudget ? '✓ Budget set' : '1. Set your budget'}
-            </p>
-            <p className="mt-0.5 text-[11px]" style={{ color: 'var(--text-tertiary)' }}>
-              {hasBudget ? 'You\'re all set' : 'Go to Settings → Monthly Budget'}
-            </p>
-          </div>
-        </div>
-        <div className="flex items-start gap-3 rounded-xl p-3.5" style={{ background: 'var(--surface-secondary)' }}>
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-emerald-100 dark:bg-emerald-900/40">
-            <PlusCircle size={16} className="text-emerald-600 dark:text-emerald-400" />
-          </div>
-          <div>
-            <p className="text-xs font-semibold" style={{ color: 'var(--text-primary)' }}>2. Add your first expense</p>
-            <p className="mt-0.5 text-[11px]" style={{ color: 'var(--text-tertiary)' }}>Track where your money goes</p>
-          </div>
-        </div>
-        <div className="flex items-start gap-3 rounded-xl p-3.5" style={{ background: 'var(--surface-secondary)' }}>
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-amber-100 dark:bg-amber-900/40">
-            <Settings size={16} className="text-amber-600 dark:text-amber-400" />
-          </div>
-          <div>
-            <p className="text-xs font-semibold" style={{ color: 'var(--text-primary)' }}>3. Explore insights</p>
-            <p className="mt-0.5 text-[11px]" style={{ color: 'var(--text-tertiary)' }}>Charts &amp; alerts appear automatically</p>
-          </div>
-        </div>
+      <div className="min-w-0 flex-1">
+        <p className={cn("text-[13px] font-semibold leading-tight", done && "line-through")} style={{ color: 'var(--text-primary)' }}>
+          {title}
+        </p>
+        <p className="mt-0.5 text-[11px] leading-relaxed" style={{ color: 'var(--text-tertiary)' }}>
+          {subtitle}
+        </p>
       </div>
-      <button
-        onClick={onAddExpense}
-        className="mt-5 flex items-center gap-1.5 rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-indigo-600/20 hover:bg-indigo-700 active:scale-[0.97] transition-all"
-      >
-        <PlusCircle size={15} /> Add Your First Expense
-      </button>
+    </div>
+  );
+}
+
+function WelcomeCard({ onAddExpense, hasBudget }: { onAddExpense: () => void; hasBudget: boolean }) {
+  const stepsCompleted = hasBudget ? 1 : 0;
+  const totalSteps = 3;
+
+  return (
+    <div className="dash-section relative overflow-hidden rounded-2xl" style={{ background: 'var(--surface)', border: '1px solid var(--border-card)', boxShadow: 'var(--card-shadow)' }}>
+      {/* Gradient accent bar */}
+      <div className="h-1" style={{ background: 'var(--accent-gradient)' }} />
+
+      <div className="p-5 sm:p-7">
+        {/* Header */}
+        <div className="flex items-start gap-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl" style={{ background: 'var(--accent-soft)' }}>
+            <Sparkles size={18} style={{ color: 'var(--accent)' }} />
+          </div>
+          <div>
+            <h2 className="text-lg font-bold tracking-tight sm:text-xl" style={{ color: 'var(--text-primary)' }}>
+              Welcome to ExpenStream
+            </h2>
+            <p className="mt-0.5 text-[13px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+              Get set up in a few quick steps.
+            </p>
+          </div>
+        </div>
+
+        {/* Progress indicator */}
+        <div className="mt-5 flex items-center gap-3">
+          <div className="h-1.5 flex-1 overflow-hidden rounded-full" style={{ background: 'var(--surface-secondary)' }}>
+            <div
+              className="h-full rounded-full transition-all duration-700 ease-out"
+              style={{ width: `${(stepsCompleted / totalSteps) * 100}%`, background: 'var(--accent-gradient)' }}
+            />
+          </div>
+          <span className="text-[11px] font-bold tabular-nums" style={{ color: 'var(--text-tertiary)' }}>
+            {stepsCompleted}/{totalSteps}
+          </span>
+        </div>
+
+        {/* Steps */}
+        <div className="mt-4 grid gap-2 sm:grid-cols-3">
+          <OnboardingStep
+            done={hasBudget} icon={Target} color="indigo"
+            title="Set your budget"
+            subtitle="Settings → Monthly Budget"
+          />
+          <OnboardingStep
+            done={false} icon={PlusCircle} color="emerald"
+            title="Add first expense"
+            subtitle="Track where your money goes"
+          />
+          <OnboardingStep
+            done={false} icon={BarChart3} color="amber"
+            title="Explore insights"
+            subtitle="Charts & alerts appear automatically"
+          />
+        </div>
+
+        {/* CTA */}
+        <button
+          onClick={onAddExpense}
+          className="group mt-5 flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold text-white shadow-lg transition-all duration-200 hover:shadow-xl active:scale-[0.98] sm:w-auto sm:px-8"
+          style={{ background: 'var(--accent-gradient)' }}
+        >
+          <PlusCircle size={16} strokeWidth={2.5} />
+          Add Your First Expense
+          <ArrowRight size={14} className="transition-transform duration-200 group-hover:translate-x-0.5" />
+        </button>
+      </div>
     </div>
   );
 }
@@ -167,9 +235,9 @@ export default function DashboardPage() {
 
   return (
     <AppShell>
-        <div className="fade-in mx-auto min-h-[80vh] max-w-4xl xl:max-w-6xl space-y-5 p-4 lg:p-6">
+        <div className="fade-in mx-auto min-h-[80vh] max-w-4xl xl:max-w-6xl space-y-6 p-4 lg:p-6">
         {/* Header */}
-        <div data-tour="dashboard" className="flex items-center justify-between">
+        <div data-tour="dashboard" className="dash-section flex items-center justify-between">
           <MonthSwitcher />
           <div className="flex items-center gap-2">
             <SyncIndicator syncStatus={syncStatus} />
@@ -189,8 +257,9 @@ export default function DashboardPage() {
 
         {/* KPI Cards */}
         {loading ? (
-          <SkeletonKpiCards />
+          <div className="dash-section"><SkeletonKpiCards /></div>
         ) : expenses.length === 0 ? null : (
+          <div className="dash-section">
           <KpiCards
             monthlyTotal={monthlyTotal}
             remaining={remaining}
@@ -212,6 +281,7 @@ export default function DashboardPage() {
                 : 0
             }
           />
+          </div>
         )}
 
         {expenses.length === 0 ? null : (
@@ -242,17 +312,17 @@ export default function DashboardPage() {
 
         {/* Charts Row */}
         {loading ? (
-          <div className="grid gap-4 lg:grid-cols-2">
+          <div className="dash-section grid gap-4 lg:grid-cols-2">
             <SkeletonChart />
             <SkeletonChart />
           </div>
         ) : expenses.length === 0 ? (
-          <div className="grid gap-4 lg:grid-cols-2">
+          <div className="dash-section grid gap-4 lg:grid-cols-2">
             <div className="card p-5">
               <h3 className="text-section-title mb-4">Category Breakdown</h3>
               <div className="flex h-[220px] items-center justify-center">
                 <div className="text-center">
-                  <div className="mx-auto mb-3 h-24 w-24 rounded-full border-[6px] opacity-20" style={{ borderColor: 'var(--border)' }} />
+                  <div className="mx-auto mb-3 h-24 w-24 rounded-full border-[6px] opacity-15" style={{ borderColor: 'var(--border)' }} />
                   <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Your spending breakdown will appear here</p>
                 </div>
               </div>
@@ -268,7 +338,7 @@ export default function DashboardPage() {
             </div>
           </div>
         ) : (
-        <div className="grid gap-4 lg:grid-cols-2">
+        <div className="dash-section grid gap-4 lg:grid-cols-2">
           <div className="card p-5">
             <h3 className="text-section-title mb-4">
               Category Breakdown
@@ -300,7 +370,7 @@ export default function DashboardPage() {
         )}
 
         {/* Recent Expenses */}
-        <div className="card p-5">
+        <div className="dash-section card p-5">
           <div className="mb-4 flex items-center justify-between">
             <h3 className="text-section-title">
               Recent Expenses
@@ -308,7 +378,8 @@ export default function DashboardPage() {
             {recentExpenses.length > 0 && (
               <a
                 href="/expenses"
-                className="text-xs font-semibold text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 transition-colors"
+                className="text-xs font-semibold transition-colors"
+                style={{ color: 'var(--accent)' }}
               >
                 View All →
               </a>
