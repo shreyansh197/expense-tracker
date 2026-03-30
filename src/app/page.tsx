@@ -302,7 +302,8 @@ export default function DashboardPage() {
           />
         )}
 
-        {/* KPI Cards */}
+        {/* KPI Cards — coral zone */}
+        <div className="section-zone section-coral">
         <AnimatePresence mode="wait">
           {loading ? (
             <m.div key="kpi-skeleton" className="dash-section" initial={{ opacity: 0.6 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
@@ -334,6 +335,7 @@ export default function DashboardPage() {
           </m.div>
         )}
         </AnimatePresence>
+        </div>
 
         {expenses.length === 0 ? null : (
         <>
