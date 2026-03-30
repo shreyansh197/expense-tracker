@@ -14,6 +14,7 @@ import { useCurrency } from "@/hooks/useCurrency";
 import { getCategoryTotal } from "@/lib/calculations";
 import { authFetch, getActiveWorkspaceId } from "@/lib/authClient";
 import { SkeletonCategoryDetail } from "@/components/ui/Skeleton";
+import { PageTransition } from "@/components/ui/PageTransition";
 import { TargetIllustration } from "@/components/ui/illustrations";
 import { ArrowLeft } from "lucide-react";
 import {
@@ -121,7 +122,7 @@ export default function CategoryPage({ params }: { params: Promise<{ slug: strin
 
   return (
     <AppShell>
-      <div className="mx-auto max-w-4xl xl:max-w-6xl space-y-6 p-4 lg:p-6">
+      <PageTransition className="mx-auto max-w-4xl xl:max-w-6xl space-y-6 p-4 lg:p-6">
         {/* Header */}
         <div className="flex items-center gap-3">
           <button
@@ -149,7 +150,8 @@ export default function CategoryPage({ params }: { params: Promise<{ slug: strin
         <>
         {/* KPI row */}
         <div className="grid grid-cols-3 gap-3">
-          <div className="card p-4">
+          <div className="card relative overflow-hidden p-4">
+            <div className="absolute inset-x-0 top-0 h-1 rounded-t-2xl" style={{ background: categoryColor }} />
             <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Spent</p>
             <p className={`mt-1 text-xl font-bold ${isOverBudget ? "text-red-500" : ""}`} style={!isOverBudget ? { color: 'var(--text-primary)' } : undefined}>
               {formatCurrency(categoryTotal)}
@@ -299,7 +301,7 @@ export default function CategoryPage({ params }: { params: Promise<{ slug: strin
         </div>
         </>
         )}
-      </div>
+      </PageTransition>
     </AppShell>
   );
 }

@@ -68,8 +68,8 @@ export function BottomNav() {
           "fixed left-1/2 z-40 flex h-[54px] w-[54px] -translate-x-1/2 items-center justify-center rounded-full text-white shadow-lg shadow-black/15 ring-[3px] ring-white/70 transition-colors lg:hidden",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
           accentColor === "emerald"
-            ? "bg-emerald-600 hover:bg-emerald-700 focus-visible:ring-emerald-500"
-            : "bg-indigo-600 hover:bg-indigo-700 focus-visible:ring-indigo-500"
+            ? "bg-gradient-to-br from-emerald-500 to-emerald-700 hover:from-emerald-600 hover:to-emerald-800 focus-visible:ring-emerald-500"
+            : "bg-gradient-to-br from-indigo-500 to-indigo-700 hover:from-indigo-600 hover:to-indigo-800 focus-visible:ring-indigo-500"
         )}
         style={{
           bottom: `calc(${NAV_HEIGHT}px + env(safe-area-inset-bottom, 0px) + 12px)`,
@@ -88,7 +88,7 @@ export function BottomNav() {
         className="fixed bottom-0 left-0 right-0 z-30 border-t backdrop-blur-2xl lg:hidden"
         style={{
           paddingBottom: "env(safe-area-inset-bottom)",
-          background: 'color-mix(in srgb, var(--surface) 85%, transparent)',
+          background: 'linear-gradient(to top, color-mix(in srgb, var(--surface) 92%, transparent), color-mix(in srgb, var(--surface) 80%, transparent))',
           borderColor: 'var(--border)',
         }}
       >

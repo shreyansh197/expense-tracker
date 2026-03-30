@@ -57,7 +57,7 @@
   --danger-soft: rgba(248, 113, 113, 0.12);
   --surface-tertiary: #475569;
   --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.25), 0 1px 2px rgba(0, 0, 0, 0.15);
-  --card-shadow-hover: 0 4px 16px rgba(0, 0, 0, 0.35), 0 2px 4px rgba(0, 0, 0, 0.2);
+  --card-shadow-hover: 0 4px 16px rgba(99, 102, 241, 0.15), 0 4px 12px rgba(0, 0, 0, 0.3);
   --chart-tooltip-bg: #1e293b;
   --chart-tooltip-fg: #f1f5f9;
   --chart-tooltip-border: #334155;
@@ -74,7 +74,8 @@ body {
   background: var(--background);
   background-image:
     radial-gradient(circle at 10% 10%, rgba(79, 70, 229, 0.05), transparent 55%),
-    radial-gradient(circle at 90% 90%, rgba(168, 85, 247, 0.03), transparent 50%);
+    radial-gradient(circle at 90% 90%, rgba(168, 85, 247, 0.03), transparent 50%),
+    radial-gradient(circle at 50% 50%, rgba(236, 72, 153, 0.015), transparent 70%);
   color: var(--foreground);
   font-family: var(--font-inter, Inter), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     sans-serif;
@@ -85,8 +86,9 @@ body {
 
 .dark body {
   background-image:
-    radial-gradient(circle at 85% 15%, rgba(129, 140, 248, 0.06), transparent 55%),
-    radial-gradient(circle at 15% 85%, rgba(168, 85, 247, 0.04), transparent 50%);
+    radial-gradient(circle at 85% 15%, rgba(129, 140, 248, 0.07), transparent 55%),
+    radial-gradient(circle at 15% 85%, rgba(168, 85, 247, 0.05), transparent 50%),
+    radial-gradient(circle at 50% 40%, rgba(52, 211, 153, 0.025), transparent 65%);
 }
 
 @media (display-mode: standalone) {
@@ -145,6 +147,7 @@ button, a {
   .card-interactive:hover {
     box-shadow: var(--card-shadow-hover);
     transform: translateY(-2px);
+    border-color: color-mix(in srgb, var(--accent) 20%, var(--border-card));
   }
 }
 
@@ -160,6 +163,7 @@ button, a {
   .card:hover {
     box-shadow: var(--card-shadow-hover);
     transform: translateY(-1px);
+    border-color: color-mix(in srgb, var(--accent) 15%, var(--border-card));
   }
 }
 .card-sm {
@@ -167,6 +171,13 @@ button, a {
   border: 1px solid var(--border-card);
   border-radius: 0.875rem;
   box-shadow: var(--card-shadow);
+  transition: box-shadow 0.25s ease, border-color 0.25s ease;
+}
+@media (hover: hover) {
+  .card-sm:hover {
+    box-shadow: var(--card-shadow-hover);
+    border-color: color-mix(in srgb, var(--accent) 12%, var(--border-card));
+  }
 }
 
 /* ── Typography scale ──────────────────────────────────────── */

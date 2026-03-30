@@ -100,6 +100,8 @@ interface AccordionSectionProps {
   /** Right-side header content (e.g. toggle switch) */
   headerRight?: ReactNode;
   className?: string;
+  /** Tailwind classes for icon background/text color */
+  iconColor?: string;
 }
 
 export function AccordionSection({
@@ -113,6 +115,7 @@ export function AccordionSection({
   alwaysOpen,
   headerRight,
   className,
+  iconColor,
 }: AccordionSectionProps) {
   const { openSections, toggle } = useContext(AccordionContext);
   const isOpen = alwaysOpen || openSections.has(id);
@@ -137,7 +140,7 @@ export function AccordionSection({
         aria-expanded={isOpen}
         aria-controls={`section-${id}`}
       >
-        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl transition-colors" style={{ background: 'var(--surface-secondary)', color: 'var(--text-secondary)' }}>
+        <span className={cn("flex h-8 w-8 shrink-0 items-center justify-center rounded-xl transition-colors", iconColor)} style={!iconColor ? { background: 'var(--surface-secondary)', color: 'var(--text-secondary)' } : undefined}>
           {icon}
         </span>
         <div className="flex-1 min-w-0">

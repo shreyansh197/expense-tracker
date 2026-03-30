@@ -54,7 +54,7 @@ export function Sidebar() {
   const overBudget = budgetUsedPercent > 100;
 
   return (
-    <aside className="hidden lg:flex lg:w-[15rem] lg:flex-col" style={{ background: 'var(--surface)', borderRight: '1px solid var(--border)' }}>
+    <aside className="hidden lg:flex lg:w-[15rem] lg:flex-col" style={{ background: 'linear-gradient(to bottom, var(--surface), color-mix(in srgb, var(--surface-secondary) 40%, var(--surface)))', borderRight: '1px solid var(--border)' }}>
       {/* Logo */}
       <div className="flex items-center gap-2.5 px-5 py-5" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
         <Image
@@ -148,8 +148,8 @@ export function Sidebar() {
           className={cn(
             "flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all",
             isBusinessRoute
-              ? "bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm shadow-emerald-600/20"
-              : "bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm shadow-indigo-600/20"
+              ? "bg-gradient-to-r from-emerald-600 to-teal-600 text-white hover:from-emerald-700 hover:to-teal-700 shadow-sm shadow-emerald-600/20"
+              : "bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-700 hover:to-purple-700 shadow-sm shadow-indigo-600/20"
           )}
           whileTap={{ scale: 0.96 }}
         >

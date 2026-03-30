@@ -79,6 +79,7 @@ export default function SettingsPage() {
             icon={<LinkIcon size={18} />}
             title="Account"
             description="Manage your account and workspaces"
+            iconColor="bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400"
           >
             <AccountCard />
           </AccordionSection>
@@ -89,6 +90,7 @@ export default function SettingsPage() {
             icon={<Shield size={18} />}
             title="Security"
             description="Two-factor auth, sessions, and devices"
+            iconColor="bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400"
           >
             <SecurityCard />
           </AccordionSection>
@@ -99,6 +101,7 @@ export default function SettingsPage() {
             icon={<Users size={18} />}
             title="Workspace Members"
             description="Invite people and manage access"
+            iconColor="bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400"
           >
             <WorkspaceMembersCard />
           </AccordionSection>
@@ -115,6 +118,7 @@ export default function SettingsPage() {
             title="Monthly Budget"
             description={`Currently ${formatCurrency(settings.salary)}`}
             alwaysOpen
+            iconColor="bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400"
           >
             <div className="space-y-3">
               {/* Currency selector */}
@@ -169,6 +173,7 @@ export default function SettingsPage() {
             icon={<Tag size={18} />}
             title="Categories & Budgets"
             description="Manage expense categories and per-category limits"
+            iconColor="bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400"
           >
             <CategoryManager />
           </AccordionSection>
@@ -184,6 +189,7 @@ export default function SettingsPage() {
                 : "Set up automatic monthly expenses"
             }
             badge={recurringCount > 0 ? recurringCount : undefined}
+            iconColor="bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400"
           >
             <RecurringManager />
           </AccordionSection>
@@ -195,6 +201,7 @@ export default function SettingsPage() {
             title="Savings Goals"
             description={goalsCount > 0 ? `${goalsCount} active goal${goalsCount > 1 ? "s" : ""}` : "Track your savings targets"}
             badge={goalsCount > 0 ? goalsCount : undefined}
+            iconColor="bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400"
           >
             <GoalsManager />
           </AccordionSection>
@@ -205,6 +212,7 @@ export default function SettingsPage() {
             icon={<TrendingUp size={18} />}
             title="Budget Rollover"
             description="Carry unspent budget to next month"
+            iconColor="bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400"
             headerRight={
               <button
                 role="switch"
@@ -260,6 +268,7 @@ export default function SettingsPage() {
             icon={<Zap size={18} />}
             title="Smart Rules"
             description="Auto-assign categories based on patterns"
+            iconColor="bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400"
           >
             <AutoRulesManager />
           </AccordionSection>
@@ -270,6 +279,7 @@ export default function SettingsPage() {
             icon={<Download size={18} />}
             title="Export & Import"
             description="Backup, export, or import data"
+            iconColor="bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400"
           >
             <ExportImportWizard />
           </AccordionSection>
@@ -280,6 +290,7 @@ export default function SettingsPage() {
             icon={<Database size={18} />}
             title="Workspace Removal"
             description="Remove or reset workspace data"
+            iconColor="bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400"
           >
             <DataAccountManagement />
           </AccordionSection>
@@ -295,6 +306,7 @@ export default function SettingsPage() {
             icon={<Briefcase size={18} />}
             title="App Mode"
             description={settings.businessMode ? "Business Owner Mode active" : "Personal expense tracking"}
+            iconColor="bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400"
             headerRight={
               <button
                 role="switch"
@@ -334,6 +346,7 @@ export default function SettingsPage() {
             icon={<Palette size={18} />}
             title="Appearance"
             description={`${theme.charAt(0).toUpperCase() + theme.slice(1)} mode`}
+            iconColor="bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400"
           >
             <div className="space-y-4">
               <div className="flex gap-2">

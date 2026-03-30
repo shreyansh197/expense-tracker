@@ -74,6 +74,8 @@ export function KpiCards({
           className="card relative overflow-hidden p-5"
           variants={{ hidden: { opacity: 0, y: 12 }, visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] } } }}
         >
+          {/* Gradient accent bar */}
+          <div className="absolute inset-x-0 top-0 h-1 rounded-t-2xl" style={{ background: 'var(--accent-gradient)' }} />
           {/* Faint background icon */}
           <PiggyBank
             size={80}
@@ -128,6 +130,13 @@ export function KpiCards({
                 : "border-emerald-200 bg-emerald-50 dark:border-emerald-900/40 dark:bg-emerald-950/30"
           )}
         >
+          {/* Gradient accent bar */}
+          <div className={cn(
+            "absolute inset-x-0 top-0 h-1 rounded-t-2xl",
+            isOverspent ? "bg-gradient-to-r from-red-500 to-rose-400"
+              : isWarning ? "bg-gradient-to-r from-amber-500 to-orange-400"
+              : "bg-gradient-to-r from-emerald-500 to-teal-400"
+          )} />
           {/* Faint background icon */}
           <Clock
             size={72}
