@@ -16,16 +16,16 @@ export function ChartIllustration({ size = 140 }: { size?: number }) {
       className="animate-float"
     >
       {/* Background circle */}
-      <circle cx="70" cy="70" r="64" fill="var(--surface-secondary)" opacity="0.6" />
+      <circle cx="70" cy="70" r="64" fill="var(--surface-secondary)" opacity="0.8" />
 
       {/* Grid lines */}
       {[55, 70, 85, 100].map((y) => (
-        <line key={y} x1="30" y1={y} x2="112" y2={y} stroke="var(--border)" strokeWidth="0.5" opacity="0.55" strokeDasharray="3 3" />
+        <line key={y} x1="30" y1={y} x2="112" y2={y} stroke="var(--border)" strokeWidth="0.5" opacity="0.7" strokeDasharray="3 3" />
       ))}
 
       {/* Baseline */}
-      <line x1="30" y1="105" x2="112" y2="105" stroke="var(--border)" strokeWidth="1" opacity="0.65" />
-      <line x1="30" y1="40" x2="30" y2="105" stroke="var(--border)" strokeWidth="1" opacity="0.65" />
+      <line x1="30" y1="105" x2="112" y2="105" stroke="var(--border)" strokeWidth="1" opacity="0.8" />
+      <line x1="30" y1="40" x2="30" y2="105" stroke="var(--border)" strokeWidth="1" opacity="0.8" />
 
       {/* Bars with grow animation */}
       {[
@@ -43,7 +43,7 @@ export function ChartIllustration({ size = 140 }: { size?: number }) {
           height={bar.h}
           rx="3"
           fill="var(--accent)"
-          opacity="0.4"
+          opacity="0.65"
           style={{
             animation: `bar-grow 0.6s cubic-bezier(0.22, 1, 0.36, 1) ${bar.delay} both`,
             transformOrigin: 'bottom',
@@ -58,7 +58,7 @@ export function ChartIllustration({ size = 140 }: { size?: number }) {
         strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
-        opacity="0.65"
+        opacity="0.85"
         fill="none"
         strokeDasharray="120"
         style={{
@@ -82,18 +82,18 @@ export function ChartIllustration({ size = 140 }: { size?: number }) {
           fill="var(--surface)"
           stroke="var(--accent)"
           strokeWidth="1.5"
-          opacity="0.75"
+          opacity="0.85"
         />
       ))}
 
       {/* Floating percentage badge */}
       <g style={{ animation: 'float-gentle 4s ease-in-out 0.5s infinite' }}>
-        <rect x="88" y="34" width="28" height="16" rx="8" fill="var(--success-soft)" stroke="var(--accent)" strokeWidth="1" opacity="0.6" />
-        <text x="102" y="45" textAnchor="middle" fontSize="8" fontWeight="bold" fill="var(--accent)" opacity="0.75">+12%</text>
+        <rect x="88" y="34" width="28" height="16" rx="8" fill="var(--success-soft)" stroke="var(--accent)" strokeWidth="1" opacity="0.75" />
+        <text x="102" y="45" textAnchor="middle" fontSize="8" fontWeight="bold" fill="var(--accent)" opacity="0.85">+12%</text>
       </g>
 
       {/* Sparkle */}
-      <path d="M24 60L26 56L28 60L26 64Z" fill="var(--accent)" opacity="0.35" />
+      <path d="M24 60L26 56L28 60L26 64Z" fill="var(--accent)" opacity="0.55" />
     </svg>
   );
 }

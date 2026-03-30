@@ -3,7 +3,7 @@
 export const dynamic = "force-dynamic";
 
 import { useRouter } from "next/navigation";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { m, AnimatePresence } from "framer-motion";
 import { AppShell } from "@/components/layout/AppShell";
 import { MonthSwitcher } from "@/components/layout/MonthSwitcher";
@@ -246,6 +246,22 @@ export default function DashboardPage() {
     .sort((a, b) => b.day - a.day || b.createdAt - a.createdAt)
     .slice(0, 5);
 
+  // Welcome card: only show for truly new users, dismiss permanently once any expense exists
+  const WELCOME_KEY = "expenstream-welcome-dismissed";
+  const [welcomeDismissed, setWelcomeDismissed] = useState(() => {
+    if (typeof window === "undefined") return true;
+    return localStorage.getItem(WELCOME_KEY) === "true";
+  });
+
+  useEffect(() => {
+    if (!welcomeDismissed && expenses.length > 0) {
+      localStorage.setItem(WELCOME_KEY, "true");
+      setWelcomeDismissed(true);
+    }
+  }, [expenses.length, welcomeDismissed]);
+
+  const showWelcome = !loading && !welcomeDismissed && expenses.length === 0;
+
   const handleCategoryClick = (categorySlug: string) => {
     router.push(`/category/${encodeURIComponent(categorySlug)}?month=${currentMonth}&year=${currentYear}`);
   };
@@ -266,16 +282,20 @@ export default function DashboardPage() {
           <MonthSwitcher />
           <div className="flex items-center gap-2">
             <SyncIndicator syncStatus={syncStatus} />
-            <div className="relative z-20 lg:hidden">
+            <div className="relative z-[9999] lg:hidden">
               <QuickHelpButton />
             </div>
           </div>
         </div>
 
         {/* Welcome Card for first-time users */}
-        {!loading && expenses.length === 0 && (
+        {showWelcome && (
           <WelcomeCard
-            onAddExpense={() => useUIStore.getState().openAddForm()}
+            onAddExpense={() => {
+              localStorage.setItem(WELCOME_KEY, "true");
+              setWelcomeDismissed(true);
+              useUIStore.getState().openAddForm();
+            }}
             hasBudget={settings.salary > 0}
           />
         )}
