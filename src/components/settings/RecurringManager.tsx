@@ -162,12 +162,15 @@ export function RecurringManager() {
               className="h-2.5 w-2.5 shrink-0 rounded-full"
               style={{ backgroundColor: cat?.color || "var(--category-fallback)" }}
             />
+            <div className="w-8 shrink-0 text-center">
+              <span className="text-xs font-semibold" style={{ color: 'var(--text-secondary)' }}>{r.day}</span>
+            </div>
             <div className="flex-1 min-w-0">
               <p className="truncate text-sm" style={{ color: 'var(--text-primary)' }}>
                 {r.remark}
               </p>
               <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                Day {r.day} · {cat?.label || r.category}
+                {cat?.label || r.category}
               </p>
             </div>
             <span className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>

@@ -109,13 +109,13 @@ export function SubscriptionsSummary() {
                 ) : (
                   <Pause size={10} style={{ color: 'var(--text-muted)' }} />
                 )}
+                <span className="w-5 shrink-0 text-center font-medium" style={{ color: 'var(--text-muted)' }}>{r.day}</span>
                 <span
                   className={r.active ? "" : "line-through"}
                   style={{ color: r.active ? 'var(--text-secondary)' : 'var(--text-muted)' }}
                 >
                   {r.remark || catMap[r.category]?.label || r.category}
                 </span>
-                <span className="text-xs" style={{ color: 'var(--text-muted)' }}>Day {r.day}</span>
               </div>
               <span className="font-medium" style={{ color: 'var(--text-primary)' }}>
                 {formatCurrency(r.amount)}
