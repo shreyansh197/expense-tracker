@@ -2,6 +2,7 @@
 
 import { useState, useRef, useCallback } from "react";
 import { Camera, Loader2, RotateCcw, Check, X, FileImage } from "lucide-react";
+import Image from "next/image";
 import { extractFromReceipt, terminateOcr, type OcrResult } from "@/lib/ocr";
 import { useSettings } from "@/hooks/useSettings";
 import { buildCategoryMap } from "@/lib/categories";
@@ -59,11 +60,17 @@ export function ReceiptCapture({ onExtracted, onClose }: ReceiptCaptureProps) {
       const ocrResult = await extractFromReceipt(file, categoryLabels);
       setResult(ocrResult);
       setStage("result");
-    } catch (err) {
+    } catch {
       setError("Failed to process receipt. Please try again.");
       setStage("preview");
     }
   }, [file, catMap]);
+
+  const cleanup = useCallback(() => {
+    if (preview) URL.revokeObjectURL(preview);
+    terminateOcr();
+    onClose();
+  }, [preview, onClose]);
 
   const handleUse = useCallback(() => {
     if (!result) return;
@@ -73,7 +80,7 @@ export function ReceiptCapture({ onExtracted, onClose }: ReceiptCaptureProps) {
       remark: result.remark,
     });
     cleanup();
-  }, [result, onExtracted]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [result, onExtracted, cleanup]);
 
   const handleRetry = useCallback(() => {
     setStage("idle");
@@ -83,12 +90,6 @@ export function ReceiptCapture({ onExtracted, onClose }: ReceiptCaptureProps) {
     setError(null);
     fileRef.current?.click();
   }, []);
-
-  const cleanup = useCallback(() => {
-    if (preview) URL.revokeObjectURL(preview);
-    terminateOcr();
-    onClose();
-  }, [preview, onClose]);
 
   return (
     <div className="space-y-4">
@@ -143,11 +144,14 @@ export function ReceiptCapture({ onExtracted, onClose }: ReceiptCaptureProps) {
       {stage === "preview" && preview && (
         <div className="space-y-3">
           <div className="relative overflow-hidden rounded-xl border" style={{ borderColor: "var(--border)" }}>
-            <img
+            <Image
               src={preview}
               alt="Receipt preview"
+              width={400}
+              height={192}
               className="h-48 w-full object-contain"
               style={{ background: "var(--surface-secondary)" }}
+              unoptimized
             />
           </div>
           <div className="flex gap-2">

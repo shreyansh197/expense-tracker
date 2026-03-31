@@ -77,9 +77,7 @@ function extractAmount(text: string): number | undefined {
   for (const pattern of AMOUNT_PATTERNS) {
     const matches = text.match(new RegExp(pattern, "gi"));
     if (matches) {
-      // If "total" pattern, take the first match
-      const raw = matches[0].replace(pattern, "$1") || "";
-      // Re-run to extract the group
+      // Re-run to extract the capture group
       const m = matches[0].match(pattern);
       if (m && m[1]) {
         const num = parseFloat(m[1].replace(/,/g, ""));

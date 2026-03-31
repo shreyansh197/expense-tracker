@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useCallback } from "react";
-import { Repeat, Plus, X, TrendingUp } from "lucide-react";
+import { Plus, X, TrendingUp } from "lucide-react";
 import { useCurrency } from "@/hooks/useCurrency";
 import { useSettings } from "@/hooks/useSettings";
 import { useExpenses } from "@/hooks/useExpenses";

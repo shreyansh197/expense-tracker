@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useSyncExternalStore } from "react";
 import { DEFAULT_SALARY } from "@/lib/constants";
 import { DEFAULT_CATEGORIES } from "@/lib/categories";
-import { authFetch, getActiveWorkspaceId, isAuthenticated } from "@/lib/authClient";
+import { getActiveWorkspaceId, isAuthenticated } from "@/lib/authClient";
 import { db } from "@/lib/db";
 import {
   makeIdempotencyKey,

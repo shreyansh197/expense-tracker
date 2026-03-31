@@ -1,7 +1,5 @@
-import { db } from "./db";
-
 /**
- * Exchange rate cache using IDB.
+ * Exchange rate cache using localStorage.
  * Fetches from open.er-api.com (free, no key required).
  * Rates cached for 24 hours.
  */
@@ -14,8 +12,6 @@ interface RateCache {
 
 const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
 let _memoryCache: RateCache | null = null;
-
-const IDB_STORE = "exchangeRates";
 
 async function loadFromIDB(base: string): Promise<RateCache | null> {
   try {

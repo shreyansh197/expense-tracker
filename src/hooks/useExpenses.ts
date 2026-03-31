@@ -7,7 +7,6 @@ import {
   makeIdempotencyKey,
   enqueueMutation,
   trySyncPush,
-  pullChanges,
 } from "@/lib/syncEngine";
 import { useDexieQuery } from "@/hooks/useDexieQuery";
 import type { Expense, ExpenseInput, CategoryId, SyncStatus } from "@/types";

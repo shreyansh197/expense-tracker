@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useMemo, useSyncExternalStore } from "react";
+import { useEffect, useRef, useMemo, useSyncExternalStore } from "react";
 import { liveQuery, type Observable } from "dexie";
 
 /**

@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback } from "react";
-import { authFetch, getActiveWorkspaceId } from "@/lib/authClient";
+import { getActiveWorkspaceId } from "@/lib/authClient";
 import { db } from "@/lib/db";
 import {
   makeIdempotencyKey,
