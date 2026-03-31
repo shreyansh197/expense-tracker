@@ -15,20 +15,24 @@ import { filterExpenses, groupByDay } from "@/lib/filters";
 import type { Expense, CategoryId } from "@/types";
 
 const SWIPE_THRESHOLD = 80;
+const FULL_DELETE_THRESHOLD = 200;
 
 function useSwipeToDelete(onDelete: () => void) {
   const touchStartX = useRef<number | null>(null);
   const touchStartY = useRef<number | null>(null);
   const [offsetX, setOffsetX] = useState(0);
+  const [deleting, setDeleting] = useState(false);
   const lockedAxis = useRef<"x" | "y" | null>(null);
 
   const onTouchStart = useCallback((e: React.TouchEvent) => {
+    if (deleting) return;
     touchStartX.current = e.touches[0].clientX;
     touchStartY.current = e.touches[0].clientY;
     lockedAxis.current = null;
-  }, []);
+  }, [deleting]);
 
   const onTouchMove = useCallback((e: React.TouchEvent) => {
+    if (deleting) return;
     if (touchStartX.current === null || touchStartY.current === null) return;
     const dx = e.touches[0].clientX - touchStartX.current;
     const dy = e.touches[0].clientY - touchStartY.current;
@@ -45,26 +49,54 @@ function useSwipeToDelete(onDelete: () => void) {
     // Stop propagation to prevent AppShell month-change swipe
     e.stopPropagation();
 
-    // Only allow swipe left (negative)
+    // Only allow swipe left — add rubber-band resistance past threshold
     if (dx < 0) {
-      setOffsetX(dx);
+      const absDx = Math.abs(dx);
+      if (absDx > FULL_DELETE_THRESHOLD) {
+        // Rubber-band: diminishing returns past full threshold
+        const over = absDx - FULL_DELETE_THRESHOLD;
+        setOffsetX(-(FULL_DELETE_THRESHOLD + over * 0.3));
+      } else {
+        setOffsetX(dx);
+      }
     }
-  }, []);
+  }, [deleting]);
 
   const onTouchEnd = useCallback((e: React.TouchEvent) => {
+    if (deleting) return;
     if (lockedAxis.current === "x") {
       e.stopPropagation();
     }
-    if (offsetX < -SWIPE_THRESHOLD) {
-      onDelete();
+    const absOffset = Math.abs(offsetX);
+
+    if (absOffset >= FULL_DELETE_THRESHOLD) {
+      // Full swipe — animate off-screen then delete
+      setDeleting(true);
+      setOffsetX(-9999);
+      setTimeout(() => onDelete(), 300);
+    } else if (absOffset >= SWIPE_THRESHOLD) {
+      // Partial swipe — snap to reveal delete button
+      setOffsetX(-SWIPE_THRESHOLD);
+    } else {
+      // Below threshold — snap back
+      setOffsetX(0);
     }
-    setOffsetX(0);
     touchStartX.current = null;
     touchStartY.current = null;
     lockedAxis.current = null;
-  }, [offsetX, onDelete]);
+  }, [offsetX, onDelete, deleting]);
 
-  return { offsetX, onTouchStart, onTouchMove, onTouchEnd };
+  const snapBack = useCallback(() => {
+    setOffsetX(0);
+  }, []);
+
+  const confirmDelete = useCallback(() => {
+    setDeleting(true);
+    setOffsetX(-9999);
+    setTimeout(() => onDelete(), 300);
+  }, [onDelete]);
+
+  return { offsetX, deleting, onTouchStart, onTouchMove, onTouchEnd, snapBack, confirmDelete };
 }
 
 interface ExpenseListProps {
@@ -349,25 +381,47 @@ function SwipeableExpenseItem({
   handleDelete: (id: string) => void;
 }) {
   const deleteCallback = useCallback(() => handleDelete(expense.id), [handleDelete, expense.id]);
-  const { offsetX, onTouchStart, onTouchMove, onTouchEnd } = useSwipeToDelete(deleteCallback);
+  const { offsetX, deleting, onTouchStart, onTouchMove, onTouchEnd, snapBack, confirmDelete } = useSwipeToDelete(deleteCallback);
   const isSelected = selectedIds.has(expense.id);
-  const swiping = offsetX < -10;
+  const absOffset = Math.abs(offsetX);
+  const isRevealing = absOffset > 10;
+  const isFullSwipe = absOffset >= FULL_DELETE_THRESHOLD;
+  // Delete button width grows with swipe, capped
+  const deleteWidth = Math.min(Math.max(absOffset, 0), 120);
+  const isDragging = absOffset > 0 && absOffset < 9000;
 
   return (
-    <div className="relative overflow-hidden rounded-2xl">
-      {/* Red delete background revealed on swipe */}
-      {swiping && (
-        <div
-          className="absolute inset-0 flex items-center justify-end rounded-2xl bg-red-500 pr-5"
-          aria-hidden
+    <m.div
+      initial={{ opacity: 0, y: 6 }}
+      animate={deleting ? { opacity: 0, height: 0, marginBottom: 0 } : { opacity: 1, y: 0 }}
+      transition={deleting ? { duration: 0.3, ease: [0.22, 1, 0.36, 1] } : { delay: idx * 0.03, duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+      className="relative overflow-hidden rounded-2xl"
+    >
+      {/* Red delete action — revealed behind the row */}
+      <div
+        className="absolute inset-y-0 right-0 flex items-center overflow-hidden rounded-r-2xl"
+        style={{
+          width: isFullSwipe ? '100%' : `${deleteWidth}px`,
+          background: isFullSwipe
+            ? '#EF4444'
+            : 'linear-gradient(90deg, #F87171 0%, #EF4444 100%)',
+          transition: isDragging ? 'none' : 'width 0.3s cubic-bezier(0.22, 1, 0.36, 1), background 0.2s',
+        }}
+        aria-hidden
+      >
+        <button
+          onClick={confirmDelete}
+          className="flex h-full w-full items-center justify-end gap-1.5 pr-4 text-white"
+          style={{ minWidth: '70px' }}
+          tabIndex={-1}
         >
-          <Trash2 size={18} className="text-white" />
-        </div>
-      )}
-      <m.div
-        initial={{ opacity: 0, y: 6 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: idx * 0.03, duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+          <Trash2 size={15} strokeWidth={2.2} />
+          <span className="text-xs font-bold tracking-wide">Delete</span>
+        </button>
+      </div>
+
+      {/* Foreground expense card */}
+      <div
         tabIndex={0}
         onKeyDown={(e) => {
           if (e.key === "Enter") openEditForm(expense.id);
@@ -377,6 +431,7 @@ function SwipeableExpenseItem({
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
+        onClick={() => { if (absOffset === SWIPE_THRESHOLD) snapBack(); }}
         className={`group relative flex items-center gap-3 rounded-2xl border px-4 py-3.5 focus:outline-none focus:ring-2 focus:ring-[#2EC4B6]/40 dark:focus:ring-[#60A5FA]/40 ${
           isSelected
             ? "border-[#b2ece6] bg-[#e6f9f7] dark:border-blue-900/40 dark:bg-[rgba(96,165,250,0.08)]"
@@ -384,8 +439,9 @@ function SwipeableExpenseItem({
         }`}
         style={{
           ...(isSelected ? {} : { background: 'var(--surface)', borderColor: 'var(--border)' }),
-          transform: offsetX < 0 ? `translateX(${offsetX}px)` : 'translateX(0)',
-          transition: offsetX === 0 ? 'transform 0.25s ease' : 'transform 0s',
+          transform: `translateX(${offsetX > -9000 ? offsetX : -window.innerWidth}px)`,
+          transition: isDragging ? 'none' : 'transform 0.3s cubic-bezier(0.22, 1, 0.36, 1)',
+          willChange: isRevealing ? 'transform' : undefined,
         }}
       >
         <button
@@ -440,7 +496,7 @@ function SwipeableExpenseItem({
             <Trash2 size={14} />
           </button>
         </div>
-      </m.div>
-    </div>
+      </div>
+    </m.div>
   );
 }
