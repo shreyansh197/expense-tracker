@@ -193,26 +193,23 @@ export function ExpenseForm({
     <form
       onSubmit={handleSubmit}
       onKeyDown={handleKeyDown}
-      className="space-y-5 relative"
+      className="space-y-5"
     >
-      {/* Success micro-animation overlay */}
+      {/* Success micro-animation — inline badge, not overlay */}
       <AnimatePresence>
         {showSuccess && (
           <m.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-            className="absolute inset-0 z-10 flex items-center justify-center rounded-2xl"
-            style={{ background: 'color-mix(in srgb, var(--surface) 92%, transparent)', backdropFilter: 'blur(4px)' }}
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+            className="flex items-center justify-center gap-2 rounded-xl py-2 px-3"
+            style={{ background: 'var(--success-soft)' }}
           >
-            <m.div
-              initial={{ scale: 0 }}
-              animate={{ scale: [0, 1.2, 1] }}
-              transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-            >
-              <CheckCircle size={48} className="text-emerald-500" strokeWidth={1.5} />
-            </m.div>
+            <CheckCircle size={16} className="text-emerald-500" strokeWidth={2} />
+            <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+              {editExpense ? "Updated!" : "Added!"}
+            </span>
           </m.div>
         )}
       </AnimatePresence>

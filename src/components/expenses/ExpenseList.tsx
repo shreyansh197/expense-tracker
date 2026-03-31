@@ -42,13 +42,19 @@ function useSwipeToDelete(onDelete: () => void) {
 
     if (lockedAxis.current === "y") return;
 
+    // Stop propagation to prevent AppShell month-change swipe
+    e.stopPropagation();
+
     // Only allow swipe left (negative)
     if (dx < 0) {
       setOffsetX(dx);
     }
   }, []);
 
-  const onTouchEnd = useCallback(() => {
+  const onTouchEnd = useCallback((e: React.TouchEvent) => {
+    if (lockedAxis.current === "x") {
+      e.stopPropagation();
+    }
     if (offsetX < -SWIPE_THRESHOLD) {
       onDelete();
     }
@@ -371,15 +377,15 @@ function SwipeableExpenseItem({
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
-        className={`group relative flex items-center gap-3 rounded-2xl border px-4 py-3.5 transition-all focus:outline-none focus:ring-2 focus:ring-[#2EC4B6]/40 dark:focus:ring-[#60A5FA]/40 ${
+        className={`group relative flex items-center gap-3 rounded-2xl border px-4 py-3.5 focus:outline-none focus:ring-2 focus:ring-[#2EC4B6]/40 dark:focus:ring-[#60A5FA]/40 ${
           isSelected
             ? "border-[#b2ece6] bg-[#e6f9f7] dark:border-blue-900/40 dark:bg-[rgba(96,165,250,0.08)]"
             : ""
         }`}
         style={{
           ...(isSelected ? {} : { background: 'var(--surface)', borderColor: 'var(--border)' }),
-          transform: offsetX < 0 ? `translateX(${offsetX}px)` : undefined,
-          transition: offsetX === 0 ? 'transform 0.25s ease' : 'none',
+          transform: offsetX < 0 ? `translateX(${offsetX}px)` : 'translateX(0)',
+          transition: offsetX === 0 ? 'transform 0.25s ease' : 'transform 0s',
         }}
       >
         <button
