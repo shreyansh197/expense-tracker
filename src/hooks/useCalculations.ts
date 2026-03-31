@@ -18,7 +18,7 @@ import {
   detectAnomalies,
 } from "@/lib/calculations";
 import { getDaysInMonth } from "@/lib/utils";
-import { fetchRates, convert } from "@/lib/exchangeRates";
+import { fetchRates, convert, getFallbackRates } from "@/lib/exchangeRates";
 import { db } from "@/lib/db";
 import { getActiveWorkspaceId } from "@/lib/authClient";
 import type { Expense, CategoryId, DailyTotal, CategoryTotal, StackedDailyTotal, Forecast, AnomalyResult } from "@/types";
@@ -46,12 +46,13 @@ export function useCalculations(
 
   // Normalize expenses: convert foreign-currency amounts to base currency
   const normalizedExpenses = useMemo(() => {
-    if (!multiCurrencyEnabled || !rates || !baseCurrency) return expenses;
+    if (!multiCurrencyEnabled || !baseCurrency) return expenses;
+    const effectiveRates = rates ?? getFallbackRates(baseCurrency);
     const hasForeign = expenses.some((e) => e.currency && e.currency !== baseCurrency);
     if (!hasForeign) return expenses;
     return expenses.map((e) => {
       if (!e.currency || e.currency === baseCurrency) return e;
-      return { ...e, amount: convert(e.amount, e.currency, baseCurrency, rates) };
+      return { ...e, amount: convert(e.amount, e.currency, baseCurrency, effectiveRates) };
     });
   }, [expenses, multiCurrencyEnabled, rates, baseCurrency]);
 

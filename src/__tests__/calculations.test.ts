@@ -661,3 +661,124 @@ describe("getWeightedForecast", () => {
     expect(result.confidence).toBe("medium");
   });
 });
+
+// =========== MULTI-CURRENCY CONVERSION ===========
+
+import { convert, getFallbackRates } from "../lib/exchangeRates";
+
+describe("convert()", () => {
+  const ratesBaseINR: Record<string, number> = {
+    INR: 1,
+    USD: 0.012,
+    EUR: 0.011,
+    GBP: 0.0095,
+  };
+
+  const ratesBaseUSD: Record<string, number> = {
+    USD: 1,
+    INR: 83.5,
+    EUR: 0.92,
+    GBP: 0.79,
+  };
+
+  test("same currency returns original amount", () => {
+    expect(convert(100, "USD", "USD", ratesBaseUSD)).toBe(100);
+    expect(convert(5000, "INR", "INR", ratesBaseINR)).toBe(5000);
+  });
+
+  test("USD→INR with INR-based rates", () => {
+    // 100 USD, rates relative to INR: USD=0.012, INR=1
+    // 100 * 1 / 0.012 = 8333.33
+    const result = convert(100, "USD", "INR", ratesBaseINR);
+    expect(result).toBeCloseTo(8333.33, 1);
+  });
+
+  test("INR→USD with INR-based rates", () => {
+    // 1000 INR, rates relative to INR: USD=0.012, INR=1
+    // 1000 * 0.012 / 1 = 12
+    const result = convert(1000, "INR", "USD", ratesBaseINR);
+    expect(result).toBe(12);
+  });
+
+  test("USD→INR with USD-based rates", () => {
+    // 100 USD, rates relative to USD: USD=1, INR=83.5
+    // 100 * 83.5 / 1 = 8350
+    const result = convert(100, "USD", "INR", ratesBaseUSD);
+    expect(result).toBe(8350);
+  });
+
+  test("INR→USD with USD-based rates", () => {
+    // 5000 INR, rates relative to USD: USD=1, INR=83.5
+    // 5000 * 1 / 83.5 ≈ 59.88
+    const result = convert(5000, "INR", "USD", ratesBaseUSD);
+    expect(result).toBeCloseTo(59.88, 1);
+  });
+
+  test("EUR→GBP cross-conversion", () => {
+    // 200 EUR → GBP, rates relative to INR: EUR=0.011, GBP=0.0095
+    // 200 * 0.0095 / 0.011 ≈ 172.73
+    const result = convert(200, "EUR", "GBP", ratesBaseINR);
+    expect(result).toBeCloseTo(172.73, 1);
+  });
+
+  test("unknown from-currency returns original", () => {
+    expect(convert(100, "AED", "INR", ratesBaseINR)).toBe(100);
+  });
+
+  test("unknown to-currency returns original", () => {
+    expect(convert(100, "INR", "AED", ratesBaseINR)).toBe(100);
+  });
+
+  test("rounds to 2 decimal places", () => {
+    const result = convert(333, "USD", "INR", ratesBaseINR);
+    const decimals = result.toString().split(".")[1]?.length ?? 0;
+    expect(decimals).toBeLessThanOrEqual(2);
+  });
+});
+
+describe("getFallbackRates()", () => {
+  test("returns rates for INR base", () => {
+    const rates = getFallbackRates("INR");
+    expect(rates.INR).toBe(1);
+    expect(rates.USD).toBeDefined();
+    expect(rates.EUR).toBeDefined();
+    expect(rates.GBP).toBeDefined();
+  });
+
+  test("returns rates for USD base", () => {
+    const rates = getFallbackRates("USD");
+    expect(rates.USD).toBe(1);
+    expect(rates.INR).toBeGreaterThan(1);
+  });
+
+  test("unknown base returns minimal fallback", () => {
+    const rates = getFallbackRates("XYZ");
+    expect(rates.XYZ).toBe(1);
+  });
+});
+
+describe("multi-currency in monthly totals", () => {
+  test("foreign expense converts to base currency in totals", () => {
+    const expenses = [
+      makeExpense({ amount: 5000, category: "groceries", day: 1 }),
+      makeExpense({ amount: 100, currency: "USD", category: "shopping", day: 2 }),
+    ];
+    const ratesINR = { INR: 1, USD: 0.012 };
+    const converted = expenses.map((e) => {
+      if (!e.currency || e.currency === "INR") return e;
+      return { ...e, amount: convert(e.amount, e.currency, "INR", ratesINR) };
+    });
+    const total = getMonthlyTotal(converted, 3, 2026);
+    // 5000 + (100 * 1/0.012) = 5000 + 8333.33 ≈ 13333.33
+    expect(total).toBeCloseTo(13333.33, 0);
+  });
+
+  test("expenses without currency field treated as base currency", () => {
+    const expenses = [
+      makeExpense({ amount: 1000, day: 1 }),            // no currency
+      makeExpense({ amount: 2000, currency: "INR", day: 2 }), // explicit base
+    ];
+    const total = getMonthlyTotal(expenses, 3, 2026);
+    expect(total).toBe(3000);
+  });
+});

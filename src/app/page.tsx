@@ -28,6 +28,8 @@ import { useCalculations } from "@/hooks/useCalculations";
 import { useRecurringExpenses } from "@/hooks/useRecurringExpenses";
 import { useUIStore } from "@/stores/uiStore";
 import { getMonthName } from "@/lib/utils";
+import { formatCurrency as fmtCurrency } from "@/lib/utils";
+import { convert, getFallbackRates } from "@/lib/exchangeRates";
 import { useCurrency } from "@/hooks/useCurrency";
 import { CategoryDot } from "@/components/expenses/CategoryChips";
 import { QuickHelpButton } from "@/components/ui/QuickHelpButton";
@@ -547,8 +549,15 @@ export default function DashboardPage() {
                           </div>
                         </div>
                         <span className="tabular-nums ml-3 shrink-0 text-base font-bold" style={{ color: 'var(--text-primary)' }}>
-                          {formatCurrency(e.amount)}
+                          {settings.multiCurrencyEnabled && e.currency && e.currency !== settings.currency
+                            ? fmtCurrency(e.amount, e.currency)
+                            : formatCurrency(e.amount)}
                         </span>
+                        {settings.multiCurrencyEnabled && e.currency && e.currency !== settings.currency && (
+                          <span className="tabular-nums ml-3 shrink-0 text-[10px]" style={{ color: 'var(--text-muted)' }}>
+                            ≈ {fmtCurrency(convert(e.amount, e.currency, settings.currency, getFallbackRates(settings.currency)), settings.currency)}
+                          </span>
+                        )}
                       </m.div>
                     ))}
                   </div>

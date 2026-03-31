@@ -14,7 +14,7 @@ import { WalletIllustration } from "@/components/ui/illustrations";
 import { ReceiptIllustration } from "@/components/ui/illustrations";
 import { filterExpenses, groupByDay } from "@/lib/filters";
 import { formatCurrency as fmtCurrency } from "@/lib/utils";
-import { fetchRates, convert } from "@/lib/exchangeRates";
+import { fetchRates, convert, getFallbackRates } from "@/lib/exchangeRates";
 import type { Expense, CategoryId } from "@/types";
 
 const SWIPE_THRESHOLD = 80;
@@ -187,6 +187,13 @@ export function ExpenseList({
     [expenses, activeCategories, searchQuery, amountMin, amountMax, dayMin, dayMax, pendingDeletes]
   );
 
+  // Helper: convert an expense amount to base currency if needed
+  const toBase = useCallback((e: Expense): number => {
+    if (!multiCurrency || !baseCurrency || !e.currency || e.currency === baseCurrency) return e.amount;
+    const effectiveRates = rates ?? getFallbackRates(baseCurrency);
+    return convert(e.amount, e.currency, baseCurrency, effectiveRates);
+  }, [multiCurrency, baseCurrency, rates]);
+
   const grouped = useMemo(() => groupByDay(filtered, sortBy), [filtered, sortBy]);
 
   // Flatten for pagination count
@@ -336,7 +343,7 @@ export function ExpenseList({
               </span>
             </div>
             <span className="tabular-nums text-xs font-semibold" style={{ color: 'var(--text-secondary)' }}>
-              {formatCurrency(group.total)}
+              {formatCurrency(group.expenses.reduce((s, e) => s + toBase(e), 0))}
             </span>
           </div>
 
@@ -498,9 +505,9 @@ function SwipeableExpenseItem({
               ? fmtCurrency(expense.amount, expense.currency)
               : formatCurrency(expense.amount)}
           </span>
-          {multiCurrency && expense.currency && expense.currency !== baseCurrency && rates && (
+          {multiCurrency && expense.currency && expense.currency !== baseCurrency && (
             <span className="text-[10px] tabular-nums" style={{ color: 'var(--text-muted)' }}>
-              ≈ {fmtCurrency(convert(expense.amount, expense.currency, baseCurrency, rates), baseCurrency)}
+              ≈ {fmtCurrency(convert(expense.amount, expense.currency, baseCurrency, rates ?? getFallbackRates(baseCurrency)), baseCurrency)}
             </span>
           )}
         </div>

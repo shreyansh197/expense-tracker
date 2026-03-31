@@ -67,7 +67,7 @@ export async function fetchRates(base: string): Promise<Record<string, number>> 
   }
 }
 
-function getFallbackRates(base: string): Record<string, number> {
+export function getFallbackRates(base: string): Record<string, number> {
   const table: Record<string, Record<string, number>> = {
     INR: { INR: 1, USD: 0.012, EUR: 0.011, GBP: 0.0095 },
     USD: { INR: 83.5, USD: 1, EUR: 0.92, GBP: 0.79 },
