@@ -174,7 +174,7 @@ export function AutoRulesManager() {
           </div>
           <input
             type="text"
-            placeholder="Rule name (e.g., Swiggy = Eat Out)"
+            placeholder="Rule name"
             value={name}
             onChange={(e) => setName(e.target.value)}
             maxLength={50}

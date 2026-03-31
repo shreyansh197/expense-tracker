@@ -168,7 +168,7 @@ export function GoalsManager() {
               <label className="form-label">Goal Name</label>
               <input
                 type="text"
-                placeholder="e.g. Emergency Fund"
+                placeholder="Goal name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 maxLength={40}
@@ -207,7 +207,7 @@ export function GoalsManager() {
             </div>
             <input
               type="month"
-              placeholder="Deadline (optional)"
+              placeholder="Deadline"
               value={deadline}
               onChange={(e) => setDeadline(e.target.value)}
               className="min-w-0 max-w-full form-input px-3 py-2 text-sm"

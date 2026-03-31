@@ -293,7 +293,7 @@ export function AccountCard() {
                 type={showCurrentPw ? "text" : "password"}
                 value={currentPw}
                 onChange={(e) => setCurrentPw(e.target.value)}
-                placeholder="Current password (if set)"
+                placeholder="Current password"
                 className="form-input w-full pr-8 text-xs"
               />
               <button
@@ -310,7 +310,7 @@ export function AccountCard() {
                 type={showNewPw ? "text" : "password"}
                 value={newPw}
                 onChange={(e) => setNewPw(e.target.value)}
-                placeholder="New password (min 8 chars)"
+                placeholder="New password"
                 className="form-input w-full pr-8 text-xs"
               />
               <button

@@ -67,7 +67,7 @@ export function LedgerForm({ initial, onSubmit, onCancel, submitLabel = "Create 
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="e.g. Client: Acme Corp"
+          placeholder="Client name"
           className="form-input w-full"
           required
           autoFocus
@@ -212,7 +212,7 @@ export function LedgerForm({ initial, onSubmit, onCancel, submitLabel = "Create 
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           rows={3}
-          placeholder="Any details about this ledger..."
+          placeholder="Notes..."
           className="form-input w-full"
         />
       </div>

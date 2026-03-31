@@ -675,7 +675,7 @@ export function AuthModal({
           <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 dark:text-slate-500" />
           <input
             type={showPassword ? "text" : "password"}
-            placeholder={isRegister ? "Password (min 8 chars)" : "Password"}
+            placeholder={isRegister ? "Min 8 characters" : "Password"}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             autoComplete={isRegister ? "new-password" : "current-password"}

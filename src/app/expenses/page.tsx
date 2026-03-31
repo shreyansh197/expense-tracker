@@ -120,7 +120,7 @@ export default function ExpensesPage() {
             />
             <input
               type="text"
-              placeholder="Search expenses... (try day:15)"
+              placeholder="Search..."
               value={localSearch}
               onChange={(e) => handleSearchChange(e.target.value)}
               className="w-full rounded-xl py-3 pl-10 pr-3 text-sm focus:outline-none focus:ring-2"
