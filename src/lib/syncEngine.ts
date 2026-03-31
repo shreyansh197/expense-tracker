@@ -28,6 +28,8 @@ export function makeIdempotencyKey(): string {
 
 // ── UUID generation (crypto-based, valid UUIDv4) ──
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export function generateUUID(): string {
   if (typeof crypto !== "undefined" && crypto.randomUUID) {
     return crypto.randomUUID();
@@ -239,9 +241,22 @@ export async function pushMutations(workspaceId?: string): Promise<number> {
   const wid = workspaceId ?? getActiveWorkspaceId();
   if (!wid || !isAuthenticated()) return 0;
 
-  const mutations = await db.mutations
+  const allMutations = await db.mutations
     .where("workspaceId").equals(wid)
     .sortBy("localId");
+  if (allMutations.length === 0) return 0;
+
+  // Purge mutations with non-UUID ids — they will always fail Zod validation
+  // and block the entire batch (left over from before the UUID fix).
+  const invalidLocalIds = allMutations
+    .filter(m => m.id && !UUID_RE.test(m.id))
+    .map(m => m.localId!)
+    .filter(Boolean);
+  if (invalidLocalIds.length > 0) {
+    await db.mutations.bulkDelete(invalidLocalIds);
+  }
+
+  const mutations = allMutations.filter(m => !m.id || UUID_RE.test(m.id));
   if (mutations.length === 0) return 0;
 
   let applied = 0;
@@ -295,12 +310,12 @@ export function trySyncPush(workspaceId?: string) {
   if (!navigator.onLine) return;
   _lastMutationAt = Date.now();
   _schedulePoll(); // Switch to fast polling
-  pushMutations(workspaceId).then(async (n) => {
+  pushMutations(workspaceId).then(async () => {
     // Always pull after push to stay in sync
     await pullChanges(workspaceId);
     // Broadcast to other devices/tabs so they pull immediately
     const wid = workspaceId ?? getActiveWorkspaceId();
-    if (n > 0 && wid) _broadcastSyncEvent(wid);
+    if (wid) _broadcastSyncEvent(wid);
   }).catch(() => {});
 }
 
@@ -372,18 +387,126 @@ function _schedulePoll() {
   const elapsed = Date.now() - _lastMutationAt;
   const delay = elapsed < FAST_POLL_WINDOW ? FAST_POLL_MS : SLOW_POLL_MS;
   _syncTimeout = setTimeout(async () => {
-    if (document.visibilityState === "visible" && navigator.onLine) {
-      await _doSync();
+    try {
+      if (document.visibilityState === "visible" && navigator.onLine) {
+        await _doSync();
+      }
+    } finally {
+      // Always reschedule — even if _doSync throws, polling must continue
+      _schedulePoll();
     }
-    _schedulePoll();
   }, delay);
 }
 
 async function _doSync() {
   const wid = getActiveWorkspaceId();
   if (!wid || !isAuthenticated()) return;
-  await pushMutations(wid);
-  await pullChanges(wid);
+  try {
+    if (!_migrated) {
+      await _migrateStuckData();
+      _migrated = true;
+    }
+    await pushMutations(wid);
+    await pullChanges(wid);
+  } catch {
+    // Non-fatal — next poll cycle will retry
+  }
+}
+
+// ── One-time migration: rescue temp- records and purge invalid mutations ──
+
+let _migrated = false;
+
+async function _migrateStuckData() {
+  try {
+    // 1. Migrate temp- expenses to proper UUIDs and re-enqueue for sync
+    const tempExpenses = await db.expenses.filter(e => e.id.startsWith("temp-")).toArray();
+    for (const exp of tempExpenses) {
+      const newId = generateUUID();
+      await db.expenses.put({ ...exp, id: newId });
+      await db.expenses.delete(exp.id);
+      await db.mutations.add({
+        table: "expenses",
+        operation: "upsert",
+        id: newId,
+        data: {
+          category: exp.category,
+          amount: exp.amount,
+          currency: exp.currency || null,
+          day: exp.day,
+          month: exp.month,
+          year: exp.year,
+          remark: exp.remark || null,
+          isRecurring: exp.isRecurring ?? false,
+          recurringId: exp.recurringId || null,
+        },
+        idempotencyKey: makeIdempotencyKey(),
+        workspaceId: exp.workspaceId,
+        createdAt: Date.now(),
+      });
+    }
+
+    // 2. Migrate temp- ledgers
+    const tempLedgers = await db.ledgers.filter(l => l.id.startsWith("temp-")).toArray();
+    for (const led of tempLedgers) {
+      const newId = generateUUID();
+      await db.ledgers.put({ ...led, id: newId });
+      await db.ledgers.delete(led.id);
+      await db.mutations.add({
+        table: "business_ledgers",
+        operation: "upsert",
+        id: newId,
+        data: {
+          name: led.name,
+          expectedAmount: led.expectedAmount,
+          currency: led.currency,
+          status: led.status,
+          dueDate: led.dueDate || null,
+          tags: led.tags,
+          notes: led.notes,
+        },
+        idempotencyKey: makeIdempotencyKey(),
+        workspaceId: led.workspaceId,
+        createdAt: Date.now(),
+      });
+    }
+
+    // 3. Migrate temp- payments
+    const tempPayments = await db.payments.filter(p => p.id.startsWith("temp-")).toArray();
+    for (const pay of tempPayments) {
+      const newId = generateUUID();
+      await db.payments.put({ ...pay, id: newId });
+      await db.payments.delete(pay.id);
+      await db.mutations.add({
+        table: "business_payments",
+        operation: "upsert",
+        id: newId,
+        data: {
+          ledgerId: pay.ledgerId,
+          amount: pay.amount,
+          date: pay.date,
+          method: pay.method || null,
+          reference: pay.reference || null,
+          notes: pay.notes || null,
+        },
+        idempotencyKey: makeIdempotencyKey(),
+        workspaceId: pay.workspaceId,
+        createdAt: Date.now(),
+      });
+    }
+
+    // 4. Purge all remaining mutations with non-UUID ids (stale, will always fail)
+    const allMutations = await db.mutations.toArray();
+    const toDelete = allMutations
+      .filter(m => m.id && !UUID_RE.test(m.id))
+      .map(m => m.localId!)
+      .filter(Boolean);
+    if (toDelete.length > 0) {
+      await db.mutations.bulkDelete(toDelete);
+    }
+  } catch {
+    // Non-fatal — pushMutations also filters invalid mutations as defense in depth
+  }
 }
 
 export function startSyncEngine() {
@@ -441,4 +564,5 @@ export function stopSyncEngine() {
   if (_unsubAuth) { _unsubAuth(); _unsubAuth = null; }
   _started = false;
   _currentWid = null;
+  _migrated = false;
 }
