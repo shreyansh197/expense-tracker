@@ -291,13 +291,38 @@ export default function DashboardPage() {
         <PageTransition className="relative mx-auto min-h-[80vh] max-w-4xl xl:max-w-6xl space-y-4 sm:space-y-6 p-3 sm:p-4 lg:p-6">
         <DecoGraphic variant="finance" />
         {/* Header — hero zone */}
-        <div className="zone-header dash-section relative z-20 rounded-2xl p-4 sm:p-5" style={{ background: 'var(--surface)', border: '1px solid var(--border-card)', boxShadow: 'var(--card-shadow)' }}>
+        <m.div
+          className="zone-header dash-section relative z-20 rounded-2xl p-4 sm:p-5"
+          style={{
+            background: 'linear-gradient(135deg, var(--accent-soft) 0%, var(--surface) 50%, var(--primary-soft) 100%)',
+            border: '1px solid var(--border-card)',
+            boxShadow: 'var(--card-shadow)',
+          }}
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+        >
           {/* Gradient accent top bar */}
           <div className="absolute inset-x-0 top-0 h-1 rounded-t-2xl" style={{ background: 'var(--accent-gradient)' }} />
+          {/* Subtle decorative dots */}
+          <div className="pointer-events-none absolute right-4 top-3 opacity-[0.06]" aria-hidden>
+            <svg width="80" height="80" viewBox="0 0 80 80"><pattern id="hdr-dots" x="0" y="0" width="16" height="16" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1.5" fill="currentColor"/></pattern><rect width="80" height="80" fill="url(#hdr-dots)"/></svg>
+          </div>
+
           {user?.name && (
-            <p className="mb-3 text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
-              {new Date().getHours() < 12 ? "Good morning" : new Date().getHours() < 17 ? "Good afternoon" : "Good evening"}, <span style={{ color: 'var(--text-primary)' }}>{user.name.split(" ")[0]}</span>
-            </p>
+            <div className="mb-3 flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold text-white" style={{ background: 'var(--accent-gradient)' }}>
+                {user.name.charAt(0).toUpperCase()}
+              </div>
+              <div>
+                <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
+                  {new Date().getHours() < 12 ? "Good morning" : new Date().getHours() < 17 ? "Good afternoon" : "Good evening"}, {user.name.split(" ")[0]}
+                </p>
+                <p className="text-[11px]" style={{ color: 'var(--text-muted)' }}>
+                  {new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}
+                </p>
+              </div>
+            </div>
           )}
           <div data-tour="dashboard" className="flex items-center justify-between">
             <MonthSwitcher />
@@ -309,7 +334,7 @@ export default function DashboardPage() {
               </div>
             </div>
           </div>
-        </div>
+        </m.div>
 
         {/* Welcome Card for first-time users */}
         {showWelcome && (

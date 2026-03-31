@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import { createPortal } from "react-dom";
 import {
   DndContext,
   closestCenter,
@@ -163,7 +164,8 @@ export function DashboardCustomizer({ layout, onSave }: DashboardCustomizerProps
         <Settings2 size={18} />
       </button>
 
-      {/* Slide-over panel */}
+      {/* Slide-over panel — portalled to body to escape stacking contexts */}
+      {typeof document !== "undefined" && createPortal(
       <AnimatePresence>
         {open && (
           <>
@@ -253,7 +255,8 @@ export function DashboardCustomizer({ layout, onSave }: DashboardCustomizerProps
             </m.div>
           </>
         )}
-      </AnimatePresence>
+      </AnimatePresence>,
+      document.body)}
     </>
   );
 }
