@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/server/prisma";
 import { requireAuth, requireWorkspaceMember, jsonError } from "@/lib/server/guards";
 import { syncCommitSchema } from "@/lib/validators";
+import { ensureSyncColumns } from "@/lib/server/ensureSyncColumns";
 import type { Prisma } from "@prisma/client";
 
 type Json = Prisma.InputJsonValue;
@@ -38,6 +39,9 @@ export async function POST(req: NextRequest) {
   // Enforce membership
   const member = await requireWorkspaceMember(auth.userId, workspaceId);
   if (!member) return jsonError("Not a member of this workspace", 403);
+
+  // Ensure all required columns exist (idempotent, runs once per cold start)
+  await ensureSyncColumns();
 
   const results: { idempotencyKey: string; status: "applied" | "skipped" | "error"; id?: string; error?: string }[] = [];
 
