@@ -216,7 +216,7 @@ export function WelcomeTutorial({ onComplete }: WelcomeTutorialProps) {
           )}
           <button
             onClick={() => (isLast ? onComplete() : setStep((s) => s + 1))}
-            className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-[#FF8A65] px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#FF7043] active:scale-[0.97] dark:bg-[#3B82F6] dark:hover:bg-[#2563EB]"
+            className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-cta px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-cta-hover active:scale-[0.97]"
           >
             {isLast ? "Get Started" : "Next"}
             {!isLast && <ArrowRight size={14} />}

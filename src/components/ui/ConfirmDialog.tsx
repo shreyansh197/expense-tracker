@@ -72,8 +72,8 @@ export function ConfirmProvider({ children }: { children: React.ReactNode }) {
       border: "border-amber-200 dark:border-amber-800",
     },
     default: {
-    icon: "text-[#4C5CFF] dark:text-[#7B87FF]",
-    button: "bg-[#4C5CFF] hover:bg-[#3a4ae6] text-white",
+    icon: "text-data-text",
+    button: "bg-data hover:bg-data-hover text-white",
     border: "border-[var(--border)] dark:border-[var(--border)]",
     },
   };

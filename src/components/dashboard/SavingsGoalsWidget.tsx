@@ -60,17 +60,17 @@ export function SavingsGoalsWidget() {
       {/* Header */}
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <PiggyBank size={15} className="text-[#4CAF50]" />
+          <PiggyBank size={15} className="text-ok" />
           <h3 className="text-section-title">
             Savings Goals
           </h3>
-          <span className="tabular-nums rounded-full bg-[#edf7ee] px-2 py-0.5 text-[10px] font-bold text-[#388E3C] dark:bg-[rgba(102,187,106,0.15)] dark:text-[#66BB6A]">
+          <span className="tabular-nums rounded-full bg-ok-soft px-2 py-0.5 text-[10px] font-bold text-ok-text">
             {overallPct}%
           </span>
         </div>
         <Link
           href="/settings#goals"
-          className="flex items-center gap-0.5 text-xs font-semibold text-[#2EC4B6] hover:text-[#26a69a] dark:text-[#60A5FA] dark:hover:text-[#93C5FD] transition-colors"
+          className="flex items-center gap-0.5 text-xs font-semibold text-brand hover:text-brand-hover transition-colors"
         >
           Manage
           <ChevronRight size={12} />
@@ -80,7 +80,7 @@ export function SavingsGoalsWidget() {
       {/* Overall progress bar */}
       <div className="mb-4 h-2 w-full overflow-hidden rounded-full" style={{ background: 'var(--surface-secondary)' }}>
         <div
-          className="h-full rounded-full bg-[#4CAF50] transition-all duration-500"
+          className="h-full rounded-full bg-ok transition-all duration-500"
           style={{ width: `${Math.min(overallPct, 100)}%` }}
         />
       </div>
@@ -108,7 +108,7 @@ export function SavingsGoalsWidget() {
                     {g.name}
                   </span>
                   {isComplete && (
-                    <span className="shrink-0 rounded-full bg-[#edf7ee] px-1.5 py-0.5 text-[10px] font-semibold text-[#388E3C] dark:bg-[rgba(102,187,106,0.15)] dark:text-[#66BB6A]">
+                    <span className="shrink-0 rounded-full bg-ok-soft px-1.5 py-0.5 text-[10px] font-semibold text-ok-text">
                       Done!
                     </span>
                   )}
@@ -131,7 +131,7 @@ export function SavingsGoalsWidget() {
                           setFundMode("add");
                         }
                       }}
-                      className="rounded-md bg-[#edf7ee] px-2 py-0.5 text-[11px] font-medium text-[#388E3C] transition-colors hover:bg-[#ddefde] dark:bg-[rgba(102,187,106,0.12)] dark:text-[#66BB6A] dark:hover:bg-[rgba(102,187,106,0.2)]"
+                      className="rounded-md bg-ok-soft px-2 py-0.5 text-[11px] font-medium text-ok-text transition-colors hover:bg-ok-soft-hover"
                     >
                       {isActive ? "Cancel" : "+ Add"}
                     </button>
@@ -172,7 +172,7 @@ export function SavingsGoalsWidget() {
                       title="Add funds"
                       className={`px-2.5 py-1.5 text-xs font-medium transition-colors ${
                         fundMode === "add"
-                          ? "bg-[#edf7ee] text-[#388E3C] dark:bg-[rgba(102,187,106,0.15)] dark:text-[#66BB6A]"
+                          ? "bg-ok-soft text-ok-text"
                           : ""
                       }`}
                       style={fundMode !== "add" ? { color: 'var(--text-muted)' } : undefined}
@@ -218,7 +218,7 @@ export function SavingsGoalsWidget() {
                   <button
                     onClick={handleFund}
                     disabled={!fundAmount || parseFloat(fundAmount) <= 0}
-                    className="shrink-0 rounded-lg bg-[#4CAF50] px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-[#43A047] disabled:opacity-40"
+                    className="shrink-0 rounded-lg bg-ok px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-ok-hover disabled:opacity-40"
                   >
                     Save
                   </button>

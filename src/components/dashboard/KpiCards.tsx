@@ -120,7 +120,7 @@ export function KpiCards({
         </p>
         <div className="mt-3 h-2 w-full overflow-hidden rounded-full" style={{ background: 'var(--surface-secondary)' }}>
           <m.div
-            className={cn("h-full rounded-full", isOverspent ? "bg-red-500" : isWarning ? "bg-amber-500" : "bg-[#2EC4B6] dark:bg-[#60A5FA]")}
+            className={cn("h-full rounded-full", isOverspent ? "bg-red-500" : isWarning ? "bg-amber-500" : "bg-brand")}
             initial={{ width: 0 }}
             animate={{ width: `${Math.min(budgetUsedPercent, 100)}%` }}
             transition={{ delay: 0.3, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
@@ -131,7 +131,7 @@ export function KpiCards({
           <span>{expenseCount} transaction{expenseCount !== 1 ? "s" : ""}</span>
         </div>
         {rolloverAmount > 0 && (
-          <p className="mt-1 text-[10px] font-medium text-[#2EC4B6] dark:text-[#60A5FA]">
+          <p className="mt-1 text-[10px] font-medium text-brand">
             Includes +{formatCurrency(rolloverAmount)} rollover from last month
           </p>
         )}

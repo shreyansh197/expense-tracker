@@ -359,7 +359,7 @@ export function GoalsManager() {
                     className="h-full rounded-full transition-all"
                     style={{
                       width: `${Math.min(pct, 100)}%`,
-                      backgroundColor: isComplete ? "#10b981" : g.color,
+                      backgroundColor: isComplete ? "var(--success)" : g.color,
                     }}
                   />
                 </div>

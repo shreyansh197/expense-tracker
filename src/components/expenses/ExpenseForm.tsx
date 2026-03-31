@@ -360,7 +360,7 @@ export function ExpenseForm({
       <m.button
         type="submit"
         disabled={submitting}
-        className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#FF8A65] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#FF7043] disabled:opacity-50 dark:bg-[#3B82F6] dark:hover:bg-[#2563EB]"
+        className="flex w-full items-center justify-center gap-2 rounded-xl bg-cta px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-cta-hover disabled:opacity-50"
         whileTap={{ scale: 0.97 }}
       >
         {submitting && <Loader2 size={16} className="animate-spin" />}

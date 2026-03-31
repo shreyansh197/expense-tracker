@@ -157,7 +157,7 @@ export function AlertsPanel({
               ? "border-l-red-500 bg-red-50/70 text-red-800 dark:bg-red-950/20 dark:text-red-300"
               : alert.severity === "warning"
                 ? "border-l-amber-500 bg-amber-50/70 text-amber-800 dark:bg-amber-950/20 dark:text-amber-300"
-                : "border-l-[#42A5F5] bg-blue-50/70 text-blue-800 dark:bg-blue-950/20 dark:text-blue-300"
+                : "border-l-info bg-blue-50/70 text-blue-800 dark:bg-blue-950/20 dark:text-blue-300"
           )}
           style={{ borderTop: '1px solid var(--border-subtle)', borderRight: '1px solid var(--border-subtle)', borderBottom: '1px solid var(--border-subtle)' }}
         >

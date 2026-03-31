@@ -160,7 +160,7 @@ export function RecurringManager() {
           >
             <div
               className="h-2.5 w-2.5 shrink-0 rounded-full"
-              style={{ backgroundColor: cat?.color || "#6B7280" }}
+              style={{ backgroundColor: cat?.color || "var(--category-fallback)" }}
             />
             <div className="flex-1 min-w-0">
               <p className="truncate text-sm" style={{ color: 'var(--text-primary)' }}>

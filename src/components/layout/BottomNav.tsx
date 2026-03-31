@@ -69,7 +69,7 @@ export function BottomNav() {
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
           accentColor === "emerald"
             ? "bg-gradient-to-br from-emerald-500 to-emerald-700 hover:from-emerald-600 hover:to-emerald-800 focus-visible:ring-emerald-500"
-            : "bg-gradient-to-br from-[#FF8A65] to-[#FF7043] hover:from-[#FF7043] hover:to-[#E64A19] focus-visible:ring-[#FF8A65] dark:from-[#3B82F6] dark:to-[#2563EB] dark:hover:from-[#2563EB] dark:hover:to-[#1D4ED8] dark:focus-visible:ring-[#3B82F6] dark:shadow-blue-900/20"
+            : "bg-gradient-to-br from-cta to-cta-hover hover:from-cta-hover hover:to-cta-deep focus-visible:ring-cta shadow-cta/15"
         )}
         style={{
           bottom: `calc(${NAV_HEIGHT}px + env(safe-area-inset-bottom, 0px) + 12px)`,
@@ -112,7 +112,7 @@ export function BottomNav() {
                     ? cn(
                         isBiz
                           ? "text-emerald-600 dark:text-emerald-400"
-                          : "text-[#4C5CFF] dark:text-[#7B87FF]"
+                          : "text-data-text"
                       )
                     : ""
                 )}
@@ -123,7 +123,7 @@ export function BottomNav() {
                     layoutId="nav-active-indicator"
                     className={cn(
                       "absolute -top-2 h-[3px] w-6 rounded-full",
-                      isBiz ? "bg-emerald-600 dark:bg-emerald-400" : "bg-[#4C5CFF] dark:bg-[#7B87FF]"
+                      isBiz ? "bg-emerald-600 dark:bg-emerald-400" : "bg-data-text"
                     )}
                     transition={{ type: "spring", stiffness: 500, damping: 30 }}
                   />

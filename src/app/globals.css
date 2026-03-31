@@ -31,16 +31,38 @@
   --accent: #FF8A65;
   --accent-soft: #fff3ee;
   --accent-gradient: linear-gradient(135deg, #FF8A65, #FF7043);
+  /* ── CTA buttons (coral→blue in dark) ── */
+  --cta: #FF8A65;
+  --cta-hover: #FF7043;
+  --cta-deep: #E64A19;
+  /* ── Coral track (stays warm across themes) ── */
+  --coral: #FF8A65;
+  --coral-soft: #fff3ee;
+  --coral-border: #ffd4c2;
+  /* ── Primary derived ── */
+  --primary-hover: #26a69a;
+  --primary-border: #b2ece6;
+  --primary-text: #1a8a7f;
+  /* ── Secondary derived ── */
+  --secondary-text: #4C5CFF;
+  --secondary-hover: #3a4ae6;
+  --secondary-border: #c7cbff;
   /* ── Info (Neutral Accent — Blue) ── */
   --info: #42A5F5;
   --info-soft: #e8f4fd;
   /* ── Semantic ── */
   --success: #4CAF50;
   --success-soft: #edf7ee;
+  --success-text: #388E3C;
+  --success-hover: #43A047;
+  --success-soft-hover: #ddefde;
   --warning: #FFA726;
   --warning-soft: #fff8ee;
   --danger: #EF5350;
   --danger-soft: #fdeeed;
+  /* ── General ── */
+  --overlay: rgba(0, 0, 0, 0.4);
+  --category-fallback: #6B7280;
   /* ── Section zone washes (subtle tinted backgrounds) ── */
   --section-teal: rgba(46, 196, 182, 0.08);
   --section-indigo: rgba(76, 92, 255, 0.07);
@@ -91,16 +113,38 @@
   --accent: #60A5FA;
   --accent-soft: rgba(96, 165, 250, 0.12);
   --accent-gradient: linear-gradient(135deg, #60A5FA, #3B82F6);
+  /* ── CTA buttons ── */
+  --cta: #3B82F6;
+  --cta-hover: #2563EB;
+  --cta-deep: #1D4ED8;
+  /* ── Coral track (stays warm across themes) ── */
+  --coral: #FFAB91;
+  --coral-soft: rgba(255, 138, 101, 0.12);
+  --coral-border: rgba(255, 138, 101, 0.3);
+  /* ── Primary derived ── */
+  --primary-hover: #93C5FD;
+  --primary-border: rgba(96, 165, 250, 0.3);
+  --primary-text: #60A5FA;
+  /* ── Secondary derived ── */
+  --secondary-text: #7B87FF;
+  --secondary-hover: #6366F1;
+  --secondary-border: rgba(76, 92, 255, 0.3);
   /* ── Info (Cyan) ── */
   --info: #67E8F9;
   --info-soft: rgba(103, 232, 249, 0.12);
   /* ── Semantic ── */
   --success: #4ADE80;
   --success-soft: rgba(74, 222, 128, 0.12);
+  --success-text: #66BB6A;
+  --success-hover: #22C55E;
+  --success-soft-hover: rgba(102, 187, 106, 0.2);
   --warning: #FBBF24;
   --warning-soft: rgba(251, 191, 36, 0.12);
   --danger: #F87171;
   --danger-soft: rgba(248, 113, 113, 0.12);
+  /* ── General ── */
+  --overlay: rgba(0, 0, 0, 0.6);
+  --category-fallback: #6B7280;
   /* ── Section zone washes ── */
   --section-teal: rgba(96, 165, 250, 0.10);
   --section-indigo: rgba(129, 140, 248, 0.10);
@@ -126,14 +170,46 @@
   --color-foreground: var(--foreground);
   --color-surface: var(--surface);
   --color-border: var(--border);
+  /* Primary brand (teal → blue) */
   --color-brand: var(--primary);
   --color-brand-soft: var(--primary-soft);
+  --color-brand-hover: var(--primary-hover);
+  --color-brand-border: var(--primary-border);
+  --color-brand-text: var(--primary-text);
+  /* Secondary / data (indigo) */
   --color-data: var(--secondary);
   --color-data-soft: var(--secondary-soft);
+  --color-data-text: var(--secondary-text);
+  --color-data-hover: var(--secondary-hover);
+  --color-data-border: var(--secondary-border);
+  /* CTA buttons (coral → blue) */
+  --color-cta: var(--cta);
+  --color-cta-hover: var(--cta-hover);
+  --color-cta-deep: var(--cta-deep);
+  /* Accent (decorative — coral light, blue dark) */
   --color-accent: var(--accent);
   --color-accent-soft: var(--accent-soft);
+  /* Coral track (always warm) */
+  --color-coral: var(--coral);
+  --color-coral-soft: var(--coral-soft);
+  --color-coral-border: var(--coral-border);
+  /* Info */
   --color-info: var(--info);
   --color-info-soft: var(--info-soft);
+  /* Success */
+  --color-ok: var(--success);
+  --color-ok-soft: var(--success-soft);
+  --color-ok-text: var(--success-text);
+  --color-ok-hover: var(--success-hover);
+  --color-ok-soft-hover: var(--success-soft-hover);
+  /* Danger */
+  --color-err: var(--danger);
+  --color-err-soft: var(--danger-soft);
+  /* Overlay */
+  --color-overlay: var(--overlay);
+  /* Misc */
+  --color-cat-fb: var(--category-fallback);
+  /* Section zones */
   --color-section-teal: var(--section-teal);
   --color-section-indigo: var(--section-indigo);
   --color-section-coral: var(--section-coral);

@@ -57,13 +57,13 @@ export function CollectionChart({ data }: CollectionChartProps) {
           <Tooltip content={<CollectionTooltip />} />
           <Legend
             formatter={(value) => {
-              const color = value === "received" ? "#10b981" : "var(--text-tertiary)";
+              const color = value === "received" ? "var(--success)" : "var(--text-tertiary)";
               return <span style={{ color }}>{value === "received" ? "Received" : "Expected"}</span>;
             }}
             wrapperStyle={{ fontSize: 11 }}
           />
           <Bar dataKey="expected" fill="var(--surface-tertiary)" radius={[4, 4, 0, 0]} isAnimationActive={true} animationBegin={100} animationDuration={600} animationEasing="ease-out" />
-          <Bar dataKey="received" fill="#10b981" radius={[4, 4, 0, 0]} isAnimationActive={true} animationBegin={200} animationDuration={600} animationEasing="ease-out" />
+          <Bar dataKey="received" fill="var(--success)" radius={[4, 4, 0, 0]} isAnimationActive={true} animationBegin={200} animationDuration={600} animationEasing="ease-out" />
         </BarChart>
       </ResponsiveContainer>
     </div>

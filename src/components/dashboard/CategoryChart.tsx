@@ -78,7 +78,7 @@ export function CategoryChart({ categoryTotals, onCategoryClick, categoryBudgets
     .map((c) => ({
       name: catMap[c.category]?.label || c.category,
       value: c.total,
-      color: catMap[c.category]?.color || "#6B7280",
+      color: catMap[c.category]?.color || "var(--category-fallback)",
       slug: c.category,
     }));
 

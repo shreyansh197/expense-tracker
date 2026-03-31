@@ -41,7 +41,7 @@ export default function CategoryPage({ params }: { params: Promise<{ slug: strin
   const catMap = buildCategoryMap(settings.customCategories, settings.hiddenDefaults);
   const meta = catMap[slug];
   const categoryLabel = meta?.label || slug;
-  const categoryColor = meta?.color || "#6B7280";
+  const categoryColor = meta?.color || "var(--category-fallback)";
 
   const categoryExpenses = expenses
     .filter((e) => e.category === slug)

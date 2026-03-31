@@ -278,8 +278,8 @@ export function ExpenseList({
     <div className="space-y-4">
       {/* Batch action bar */}
       {selectedIds.size > 0 && (
-        <div className="sticky top-0 z-10 flex items-center justify-between rounded-xl border border-[#b2ece6] bg-[#e6f9f7] px-4 py-2.5 dark:border-blue-900/40 dark:bg-[rgba(96,165,250,0.08)]">
-          <span className="text-sm font-medium text-[#1a8a7f] dark:text-[#60A5FA]">
+        <div className="sticky top-0 z-10 flex items-center justify-between rounded-xl border border-brand-border bg-brand-soft px-4 py-2.5">
+          <span className="text-sm font-medium text-brand-text">
             {selectedIds.size} selected
           </span>
           <div className="flex items-center gap-2">
@@ -292,7 +292,7 @@ export function ExpenseList({
             </button>
             <button
               onClick={() => setSelectedIds(new Set())}
-              className="rounded-lg p-1.5 text-[#2EC4B6] hover:bg-[#e6f9f7] dark:text-[#60A5FA] dark:hover:bg-[rgba(96,165,250,0.1)]"
+              className="rounded-lg p-1.5 text-brand hover:bg-brand-soft"
               aria-label="Clear selection"
             >
               <X size={14} />
@@ -313,7 +313,7 @@ export function ExpenseList({
                 aria-label={`Select all day ${group.day}`}
               >
                 {group.expenses.every((e) => selectedIds.has(e.id)) ? (
-                  <CheckSquare size={14} className="text-[#4C5CFF]" />
+                  <CheckSquare size={14} className="text-data" />
                 ) : (
                   <Square size={14} />
                 )}
@@ -432,9 +432,9 @@ function SwipeableExpenseItem({
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
         onClick={() => { if (absOffset === SWIPE_THRESHOLD) snapBack(); }}
-        className={`group relative flex items-center gap-3 rounded-2xl border px-4 py-3.5 focus:outline-none focus:ring-2 focus:ring-[#2EC4B6]/40 dark:focus:ring-[#60A5FA]/40 ${
+        className={`group relative flex items-center gap-3 rounded-2xl border px-4 py-3.5 focus:outline-none focus:ring-2 focus:ring-brand/40 ${
           isSelected
-            ? "border-[#b2ece6] bg-[#e6f9f7] dark:border-blue-900/40 dark:bg-[rgba(96,165,250,0.08)]"
+            ? "border-brand-border bg-brand-soft"
             : ""
         }`}
         style={{
@@ -453,7 +453,7 @@ function SwipeableExpenseItem({
           aria-label="Select expense"
         >
           {isSelected ? (
-            <CheckSquare size={14} className="text-[#2EC4B6] dark:text-[#60A5FA]" />
+            <CheckSquare size={14} className="text-brand" />
           ) : (
             <Square size={14} />
           )}
@@ -462,7 +462,7 @@ function SwipeableExpenseItem({
           <div className="flex items-center gap-2">
             <CategoryBadge category={expense.category} />
             {expense.isRecurring && (
-              <span className="text-[#4C5CFF] dark:text-[#7B87FF]" aria-label="Recurring">
+              <span className="text-data-text" aria-label="Recurring">
                 <Repeat size={10} />
               </span>
             )}

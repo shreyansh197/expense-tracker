@@ -115,7 +115,7 @@ export function DailyTrendChart({ dailyTotals, stackedDailyTotals, activeCategor
             className={cn(
               "flex items-center gap-1 rounded-md px-2 py-1 text-xs transition-colors",
               stacked
-                ? "bg-[#e6f9f7] text-[#2EC4B6] dark:bg-[rgba(96,165,250,0.12)] dark:text-[#60A5FA]"
+                ? "bg-brand-soft text-brand"
                 : ""
             )}
             style={!stacked ? { color: 'var(--text-secondary)' } : undefined}
@@ -212,7 +212,7 @@ export function DailyTrendChart({ dailyTotals, stackedDailyTotals, activeCategor
                   key={cat}
                   dataKey={cat}
                   stackId="stack"
-                  fill={catMap[cat]?.color || "#6B7280"}
+                  fill={catMap[cat]?.color || "var(--category-fallback)"}
                   radius={[0, 0, 0, 0]}
                   isAnimationActive={true}
                   animationBegin={100}
@@ -262,11 +262,11 @@ export function DailyTrendChart({ dailyTotals, stackedDailyTotals, activeCategor
                   color: "var(--chart-tooltip-fg, #111827)",
                 }}
                 labelStyle={{ color: "var(--chart-tooltip-fg, #111827)" }}
-                itemStyle={{ color: "#2EC4B6" }}
+                itemStyle={{ color: "var(--primary)" }}
               />
               <Bar
                 dataKey="total"
-                fill="#2EC4B6"
+                fill="var(--primary)"
                 radius={[4, 4, 0, 0]}
                 isAnimationActive={true}
                 animationBegin={100}
