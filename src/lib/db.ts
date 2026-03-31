@@ -48,6 +48,7 @@ export interface IDBSettings {
   businessTags: string[];
   dashboardLayout?: DashboardLayout;
   multiCurrencyEnabled?: boolean;
+  dismissedRecurringSuggestions?: string[];
   updatedAt: number;
 }
 

@@ -34,6 +34,7 @@ export interface UserSettings {
   businessTags?: string[];
   dashboardLayout?: DashboardLayout;
   multiCurrencyEnabled?: boolean;
+  dismissedRecurringSuggestions?: string[];
   createdAt: number;
   updatedAt: number;
 }

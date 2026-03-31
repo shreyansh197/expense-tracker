@@ -13,6 +13,7 @@ import { CategoryChart, CategoryLegend } from "@/components/dashboard/CategoryCh
 import { DailyTrendChart } from "@/components/dashboard/DailyTrendChart";
 import { AlertsPanel } from "@/components/dashboard/AlertsPanel";
 import { SubscriptionsSummary } from "@/components/dashboard/SubscriptionsSummary";
+import { RecurringSuggestions } from "@/components/dashboard/RecurringSuggestions";
 import { SavingsGoalsWidget } from "@/components/dashboard/SavingsGoalsWidget";
 import { DashboardCustomizer, getVisibleSections } from "@/components/dashboard/DashboardCustomizer";
 import { SkeletonKpiCards, SkeletonChart } from "@/components/ui/Skeleton";
@@ -380,6 +381,11 @@ export default function DashboardPage() {
         <SubscriptionsSummary />
         </CollapsibleSection>
         </div>
+        )}
+
+        {/* Recurring Pattern Suggestions */}
+        {sectionVisible("subscriptions") && (
+        <RecurringSuggestions />
         )}
 
         {/* Savings Goals */}
