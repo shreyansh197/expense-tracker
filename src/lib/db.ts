@@ -18,6 +18,7 @@ export interface IDBExpense {
   workspaceId: string;
   category: CategoryId;
   amount: number;
+  currency?: string;
   day: number;
   month: number;
   year: number;
@@ -46,6 +47,7 @@ export interface IDBSettings {
   revenueExpectations: RevenueExpectation[];
   businessTags: string[];
   dashboardLayout?: DashboardLayout;
+  multiCurrencyEnabled?: boolean;
   updatedAt: number;
 }
 

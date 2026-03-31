@@ -1,9 +1,10 @@
 "use client";
 
-import { useMemo, useState, useCallback, useRef } from "react";
+import { useMemo, useState, useCallback, useRef, useEffect } from "react";
 import { m } from "framer-motion";
 import { Trash2, Edit3, Repeat, Receipt, CheckSquare, Square, X, Wallet } from "lucide-react";
 import { useCurrency } from "@/hooks/useCurrency";
+import { useSettings } from "@/hooks/useSettings";
 import { CategoryBadge } from "./CategoryChips";
 import { useUIStore } from "@/stores/uiStore";
 import { useToast } from "@/components/ui/Toast";
@@ -12,6 +13,8 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { WalletIllustration } from "@/components/ui/illustrations";
 import { ReceiptIllustration } from "@/components/ui/illustrations";
 import { filterExpenses, groupByDay } from "@/lib/filters";
+import { formatCurrency as fmtCurrency } from "@/lib/utils";
+import { fetchRates, convert } from "@/lib/exchangeRates";
 import type { Expense, CategoryId } from "@/types";
 
 const SWIPE_THRESHOLD = 80;
@@ -135,6 +138,16 @@ export function ExpenseList({
   const openEditForm = useUIStore((s) => s.openEditForm);
   const openAddForm = useUIStore((s) => s.openAddForm);
   const { formatCurrency } = useCurrency();
+  const { settings } = useSettings();
+  const baseCurrency = settings.currency || "INR";
+  const multiCurrency = settings.multiCurrencyEnabled ?? false;
+
+  // Pre-fetch exchange rates when multi-currency is on
+  const [rates, setRates] = useState<Record<string, number> | null>(null);
+  useEffect(() => {
+    if (!multiCurrency) return;
+    fetchRates(baseCurrency).then(setRates);
+  }, [multiCurrency, baseCurrency]);
   const { toast } = useToast();
   const { confirm } = useConfirm();
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -339,6 +352,9 @@ export function ExpenseList({
                 toggleSelect={toggleSelect}
                 openEditForm={openEditForm}
                 handleDelete={handleDelete}
+                baseCurrency={baseCurrency}
+                multiCurrency={multiCurrency}
+                rates={rates}
               />
             ))}
           </div>
@@ -371,6 +387,9 @@ function SwipeableExpenseItem({
   toggleSelect,
   openEditForm,
   handleDelete,
+  baseCurrency,
+  multiCurrency,
+  rates,
 }: {
   expense: Expense;
   idx: number;
@@ -379,6 +398,9 @@ function SwipeableExpenseItem({
   toggleSelect: (id: string) => void;
   openEditForm: (id: string) => void;
   handleDelete: (id: string) => void;
+  baseCurrency: string;
+  multiCurrency: boolean;
+  rates: Record<string, number> | null;
 }) {
   const deleteCallback = useCallback(() => handleDelete(expense.id), [handleDelete, expense.id]);
   const { offsetX, deleting, onTouchStart, onTouchMove, onTouchEnd, snapBack, confirmDelete } = useSwipeToDelete(deleteCallback);
@@ -473,9 +495,18 @@ function SwipeableExpenseItem({
             )}
           </div>
         </div>
+        <div className="flex flex-col items-end">
           <span className="tabular-nums text-base font-bold" style={{ color: 'var(--text-primary)' }}>
-          {formatCurrency(expense.amount)}
-        </span>
+            {multiCurrency && expense.currency && expense.currency !== baseCurrency
+              ? fmtCurrency(expense.amount, expense.currency)
+              : formatCurrency(expense.amount)}
+          </span>
+          {multiCurrency && expense.currency && expense.currency !== baseCurrency && rates && (
+            <span className="text-[10px] tabular-nums" style={{ color: 'var(--text-muted)' }}>
+              ≈ {fmtCurrency(convert(expense.amount, expense.currency, baseCurrency, rates), baseCurrency)}
+            </span>
+          )}
+        </div>
         <div className="flex items-center gap-1 opacity-100 lg:opacity-0 lg:transition-opacity lg:group-hover:opacity-100">
           <button
             onClick={() => openEditForm(expense.id)}

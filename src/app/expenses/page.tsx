@@ -39,7 +39,11 @@ export default function ExpensesPage() {
     settings.categories,
     settings.salary,
     currentMonth,
-    currentYear
+    currentYear,
+    undefined,
+    undefined,
+    settings.currency,
+    settings.multiCurrencyEnabled,
   );
 
   const [amountMin, setAmountMin] = useState("");

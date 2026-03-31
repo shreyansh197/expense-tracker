@@ -14,11 +14,12 @@ import type { Expense, ExpenseInput, CategoryId, SyncStatus } from "@/types";
 
 const EMPTY: Expense[] = [];
 
-function toExpense(row: { id: string; category: string; amount: number; day: number; month: number; year: number; remark?: string; isRecurring: boolean; recurringId?: string; createdAt: number; updatedAt: number; deletedAt: number | null }): Expense {
+function toExpense(row: { id: string; category: string; amount: number; currency?: string; day: number; month: number; year: number; remark?: string; isRecurring: boolean; recurringId?: string; createdAt: number; updatedAt: number; deletedAt: number | null }): Expense {
   return {
     id: row.id,
     category: row.category as CategoryId,
     amount: row.amount,
+    currency: row.currency,
     day: row.day,
     month: row.month,
     year: row.year,
@@ -67,6 +68,7 @@ export function useExpenses(month: number, year: number) {
       workspaceId: workspace,
       category: input.category,
       amount: input.amount,
+      currency: input.currency,
       day: input.day,
       month: input.month,
       year: input.year,
@@ -85,6 +87,7 @@ export function useExpenses(month: number, year: number) {
       data: {
         category: input.category,
         amount: input.amount,
+        currency: input.currency || null,
         day: input.day,
         month: input.month,
         year: input.year,

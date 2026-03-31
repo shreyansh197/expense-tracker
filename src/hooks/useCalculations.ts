@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
 import {
   getMonthlyTotal,
   getMonthlySaving,
@@ -17,6 +17,7 @@ import {
   detectAnomalies,
 } from "@/lib/calculations";
 import { getDaysInMonth } from "@/lib/utils";
+import { fetchRates, convert } from "@/lib/exchangeRates";
 import type { Expense, CategoryId, DailyTotal, CategoryTotal, StackedDailyTotal, Forecast, AnomalyResult } from "@/types";
 
 export function useCalculations(
@@ -26,10 +27,30 @@ export function useCalculations(
   month: number,
   year: number,
   rolloverEnabled?: boolean,
-  rolloverHistory?: Record<string, number>
+  rolloverHistory?: Record<string, number>,
+  baseCurrency?: string,
+  multiCurrencyEnabled?: boolean,
 ) {
   const daysInMonth = useMemo(() => getDaysInMonth(month, year), [month, year]);
   const elapsedDays = useMemo(() => getElapsedDays(month, year), [month, year]);
+
+  // Fetch exchange rates when multi-currency is active
+  const [rates, setRates] = useState<Record<string, number> | null>(null);
+  useEffect(() => {
+    if (!multiCurrencyEnabled || !baseCurrency) return;
+    fetchRates(baseCurrency).then(setRates);
+  }, [multiCurrencyEnabled, baseCurrency]);
+
+  // Normalize expenses: convert foreign-currency amounts to base currency
+  const normalizedExpenses = useMemo(() => {
+    if (!multiCurrencyEnabled || !rates || !baseCurrency) return expenses;
+    const hasForeign = expenses.some((e) => e.currency && e.currency !== baseCurrency);
+    if (!hasForeign) return expenses;
+    return expenses.map((e) => {
+      if (!e.currency || e.currency === baseCurrency) return e;
+      return { ...e, amount: convert(e.amount, e.currency, baseCurrency, rates) };
+    });
+  }, [expenses, multiCurrencyEnabled, rates, baseCurrency]);
 
   // Calculate effective budget with rollover
   const effectiveBudget = useMemo(() => {
@@ -43,8 +64,8 @@ export function useCalculations(
   }, [salary, rolloverEnabled, rolloverHistory, month, year]);
 
   const monthlyTotal = useMemo(
-    () => getMonthlyTotal(expenses, month, year),
-    [expenses, month, year]
+    () => getMonthlyTotal(normalizedExpenses, month, year),
+    [normalizedExpenses, month, year]
   );
 
   const remaining = useMemo(
@@ -63,23 +84,23 @@ export function useCalculations(
   );
 
   const categoryTotals: CategoryTotal[] = useMemo(
-    () => getAllCategoryTotals(expenses, categories, month, year),
-    [expenses, categories, month, year]
+    () => getAllCategoryTotals(normalizedExpenses, categories, month, year),
+    [normalizedExpenses, categories, month, year]
   );
 
   const dailyTotals: DailyTotal[] = useMemo(
-    () => getAllDailyTotals(expenses, month, year, daysInMonth),
-    [expenses, month, year, daysInMonth]
+    () => getAllDailyTotals(normalizedExpenses, month, year, daysInMonth),
+    [normalizedExpenses, month, year, daysInMonth]
   );
 
   const stackedDailyTotals: StackedDailyTotal[] = useMemo(
-    () => getStackedDailyTotals(expenses, categories, month, year, daysInMonth),
-    [expenses, categories, month, year, daysInMonth]
+    () => getStackedDailyTotals(normalizedExpenses, categories, month, year, daysInMonth),
+    [normalizedExpenses, categories, month, year, daysInMonth]
   );
 
   const topCategory = useMemo(
-    () => getTopCategory(expenses, categories, month, year),
-    [expenses, categories, month, year]
+    () => getTopCategory(normalizedExpenses, categories, month, year),
+    [normalizedExpenses, categories, month, year]
   );
 
   const daysRemaining = useMemo(() => getDaysRemaining(month, year), [month, year]);
@@ -95,8 +116,8 @@ export function useCalculations(
   );
 
   const anomalies: AnomalyResult[] = useMemo(
-    () => detectAnomalies(expenses, month, year),
-    [expenses, month, year]
+    () => detectAnomalies(normalizedExpenses, month, year),
+    [normalizedExpenses, month, year]
   );
 
   return {

@@ -11,7 +11,7 @@ import { SUPPORTED_CURRENCIES } from "@/lib/utils";
 import {
   Wallet, LinkIcon, Tag, Repeat, TrendingUp, Target, Palette,
   Download, Zap, Sun, Moon, Monitor, Smartphone, Briefcase,
-  Shield, Users, Database,
+  Shield, Users, Database, Globe,
 } from "lucide-react";
 import { InstallButton } from "@/components/pwa/InstallButton";
 import { useToast } from "@/components/ui/Toast";
@@ -390,6 +390,46 @@ export default function SettingsPage() {
                 <div className="rounded-lg bg-emerald-50 p-3 dark:bg-emerald-900/20">
                   <p className="text-xs font-medium text-emerald-700 dark:text-emerald-400">
                     A &quot;Business&quot; tab is now visible in your navigation. Manage ledgers and payments there.
+                  </p>
+                </div>
+              )}
+            </div>
+          </AccordionSection>
+
+          {/* ─── Multi-Currency ─── */}
+          <AccordionSection
+            id="multi-currency"
+            icon={<Globe size={18} />}
+            title="Multi-Currency"
+            description={settings.multiCurrencyEnabled ? "Per-expense currency active" : "All expenses in base currency"}
+            iconColor="bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400"
+            headerRight={
+              <button
+                role="switch"
+                aria-checked={settings.multiCurrencyEnabled ?? false}
+                onClick={() => updateSettings({ multiCurrencyEnabled: !settings.multiCurrencyEnabled })}
+                className={`relative h-6 w-11 rounded-full transition-colors ${
+                  settings.multiCurrencyEnabled ? "bg-brand" : "bg-slate-300 dark:bg-slate-600"
+                }`}
+              >
+                <span
+                  className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-transform ${
+                    settings.multiCurrencyEnabled ? "translate-x-5" : ""
+                  }`}
+                />
+              </button>
+            }
+          >
+            <div className="space-y-3">
+              <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+                {settings.multiCurrencyEnabled
+                  ? "You can now set a currency per expense. Foreign amounts are auto-converted to your base currency for totals."
+                  : "Enable to track expenses in multiple currencies. Rates are fetched automatically and cached for offline use."}
+              </p>
+              {settings.multiCurrencyEnabled && (
+                <div className="rounded-lg bg-blue-50 p-3 dark:bg-blue-900/20">
+                  <p className="text-xs font-medium text-blue-700 dark:text-blue-400">
+                    A currency picker now appears in the expense form. Conversions use your base currency ({settings.currency}) for all totals.
                   </p>
                 </div>
               )}

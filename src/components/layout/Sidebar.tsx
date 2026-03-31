@@ -43,6 +43,8 @@ export function Sidebar() {
     currentYear,
     settings.rolloverEnabled,
     settings.rolloverHistory,
+    settings.currency,
+    settings.multiCurrencyEnabled,
   );
 
   const navItems = settings.businessMode ? businessNav : personalNav;

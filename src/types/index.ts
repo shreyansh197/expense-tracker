@@ -2,6 +2,7 @@ export interface Expense {
   id: string;
   category: CategoryId;
   amount: number;
+  currency?: string;
   day: number;
   month: number;
   year: number;
@@ -32,6 +33,7 @@ export interface UserSettings {
   revenueExpectations?: RevenueExpectation[];
   businessTags?: string[];
   dashboardLayout?: DashboardLayout;
+  multiCurrencyEnabled?: boolean;
   createdAt: number;
   updatedAt: number;
 }

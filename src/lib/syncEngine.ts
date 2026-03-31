@@ -82,6 +82,7 @@ export async function pullChanges(workspaceId?: string): Promise<boolean> {
                   workspaceId: wid,
                   category: row.category,
                   amount: Number(row.amount),
+                  currency: row.currency ?? undefined,
                   day: row.day,
                   month: row.month,
                   year: row.year,
@@ -127,6 +128,7 @@ export async function pullChanges(workspaceId?: string): Promise<boolean> {
               revenueExpectations: s.revenueExpectations ?? [],
               businessTags: s.businessTags ?? [],
               dashboardLayout: s.dashboardLayout ?? undefined,
+              multiCurrencyEnabled: s.multiCurrencyEnabled ?? false,
               updatedAt: new Date(s.updatedAt as string).getTime(),
             });
           }

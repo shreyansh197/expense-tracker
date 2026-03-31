@@ -243,7 +243,9 @@ export default function DashboardPage() {
     currentMonth,
     currentYear,
     settings.rolloverEnabled,
-    settings.rolloverHistory
+    settings.rolloverHistory,
+    settings.currency,
+    settings.multiCurrencyEnabled,
   );
 
   const recentExpenses = [...expenses]

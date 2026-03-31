@@ -11,6 +11,7 @@ import { DatePicker } from "@/components/ui/DatePicker";
 import { useSettings } from "@/hooks/useSettings";
 import { useCurrency } from "@/hooks/useCurrency";
 import { useAutoRules } from "@/components/settings/AutoRulesManager";
+import { SUPPORTED_CURRENCIES } from "@/lib/utils";
 import type { CategoryId, ExpenseInput, Expense } from "@/types";
 
 interface ExpenseFormProps {
@@ -38,6 +39,7 @@ export function ExpenseForm({
   const { settings } = useSettings();
   const { symbol } = useCurrency();
   const allCategories = getAllCategories(settings.customCategories, settings.hiddenDefaults);
+  const multiCurrency = settings.multiCurrencyEnabled ?? false;
 
   const { rules: autoRules } = useAutoRules();
   const [category, setCategory] = useState<CategoryId>(() => {
@@ -50,6 +52,7 @@ export function ExpenseForm({
   const [selectedMonth, setSelectedMonth] = useState(month);
   const [selectedYear, setSelectedYear] = useState(year);
   const [remark, setRemark] = useState(editExpense?.remark || "");
+  const [expenseCurrency, setExpenseCurrency] = useState(editExpense?.currency || settings.currency || "INR");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [submitted, setSubmitted] = useState(false);
@@ -145,6 +148,7 @@ export function ExpenseForm({
           await onUpdate(editExpense.id, {
             category,
             amount: parsedAmount,
+            currency: multiCurrency ? expenseCurrency : undefined,
             day: parsedDay,
             month: selectedMonth,
             year: selectedYear,
@@ -154,6 +158,7 @@ export function ExpenseForm({
           await onSubmit({
             category,
             amount: parsedAmount,
+            currency: multiCurrency ? expenseCurrency : undefined,
             day: parsedDay,
             month: selectedMonth,
             year: selectedYear,
@@ -308,6 +313,31 @@ export function ExpenseForm({
           )}
         </AnimatePresence>
       </div>
+
+      {/* Currency selector (multi-currency mode only) */}
+      {multiCurrency && (
+        <div>
+          <label className="form-label mb-1.5 uppercase">Currency</label>
+          <div className="flex flex-wrap gap-1.5">
+            {SUPPORTED_CURRENCIES.map((c) => (
+              <button
+                key={c.code}
+                type="button"
+                onClick={() => setExpenseCurrency(c.code)}
+                className={cn(
+                  "rounded-lg px-3 py-1.5 text-xs font-semibold transition-all",
+                  expenseCurrency === c.code
+                    ? "bg-brand-soft text-brand ring-1 ring-brand-border"
+                    : "text-[var(--text-secondary)]"
+                )}
+                style={expenseCurrency !== c.code ? { background: "var(--surface-secondary)" } : undefined}
+              >
+                {c.symbol} {c.code}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Date */}
       <div>

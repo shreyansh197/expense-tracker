@@ -37,7 +37,7 @@ export default function CategoryPage({ params }: { params: Promise<{ slug: strin
 
   const { expenses, loading } = useExpenses(month, year);
   const { settings } = useSettings();
-  const { monthlyTotal } = useCalculations(expenses, settings.categories, settings.salary, month, year);
+  const { monthlyTotal } = useCalculations(expenses, settings.categories, settings.salary, month, year, undefined, undefined, settings.currency, settings.multiCurrencyEnabled);
   const catMap = buildCategoryMap(settings.customCategories, settings.hiddenDefaults);
   const meta = catMap[slug];
   const categoryLabel = meta?.label || slug;
