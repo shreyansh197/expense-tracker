@@ -84,7 +84,8 @@ export function convert(
   rates: Record<string, number>,
 ): number {
   if (from === to) return amount;
-  const rate = rates[to];
-  if (!rate) return amount; // unknown currency — return as-is
-  return Math.round(amount * rate * 100) / 100;
+  const fromRate = rates[from];
+  const toRate = rates[to];
+  if (!fromRate || !toRate) return amount; // unknown currency — return as-is
+  return Math.round((amount * toRate / fromRate) * 100) / 100;
 }

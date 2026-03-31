@@ -12,6 +12,31 @@ export function CategoryChips() {
   const { settings } = useSettings();
   const allCategories = getAllCategories(settings.customCategories, settings.hiddenDefaults);
   const containerRef = useRef<HTMLDivElement>(null);
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
+  const isHorizontalSwipe = useRef(false);
+
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    touchStartRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    isHorizontalSwipe.current = false;
+  }, []);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    if (!touchStartRef.current) return;
+    const dx = Math.abs(e.touches[0].clientX - touchStartRef.current.x);
+    const dy = Math.abs(e.touches[0].clientY - touchStartRef.current.y);
+    if (dx > 10 && dx > dy) {
+      isHorizontalSwipe.current = true;
+      e.stopPropagation();
+    }
+  }, []);
+
+  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+    if (isHorizontalSwipe.current) {
+      e.stopPropagation();
+    }
+    touchStartRef.current = null;
+    isHorizontalSwipe.current = false;
+  }, []);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent, index: number) => {
@@ -37,6 +62,9 @@ export function CategoryChips() {
       role="group"
       aria-label="Category filters"
       className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide lg:flex-wrap lg:overflow-visible"
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
     >
       {allCategories.map((cat, i) => {
         const isActive =
