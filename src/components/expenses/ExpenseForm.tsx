@@ -2,12 +2,13 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { m, AnimatePresence } from "framer-motion";
-import { X, Loader2, CheckCircle } from "lucide-react";
+import { X, Loader2, CheckCircle, Camera } from "lucide-react";
 import { getAllCategories } from "@/lib/categories";
 import { cn, getDaysInMonth } from "@/lib/utils";
 import { useUIStore } from "@/stores/uiStore";
 import { useToast } from "@/components/ui/Toast";
 import { DatePicker } from "@/components/ui/DatePicker";
+import { ReceiptCapture } from "@/components/expenses/ReceiptCapture";
 import { useSettings } from "@/hooks/useSettings";
 import { useCurrency } from "@/hooks/useCurrency";
 import { useAutoRules } from "@/components/settings/AutoRulesManager";
@@ -22,6 +23,7 @@ interface ExpenseFormProps {
   year: number;
   onClose?: () => void;
   closingRef?: React.RefObject<boolean>;
+  prefill?: { amount?: number; category?: string; remark?: string };
 }
 
 export function ExpenseForm({
@@ -32,6 +34,7 @@ export function ExpenseForm({
   year,
   onClose,
   closingRef,
+  prefill,
 }: ExpenseFormProps) {
   const storeCloseForm = useUIStore((s) => s.closeForm);
   const closeForm = onClose ?? storeCloseForm;
@@ -44,14 +47,15 @@ export function ExpenseForm({
   const { rules: autoRules } = useAutoRules();
   const [category, setCategory] = useState<CategoryId>(() => {
     if (editExpense?.category) return editExpense.category;
+    if (prefill?.category) return prefill.category;
     return "";
   });
   const [autoApplied, setAutoApplied] = useState(false);
-  const [amount, setAmount] = useState(editExpense?.amount?.toString() || "");
+  const [amount, setAmount] = useState(editExpense?.amount?.toString() || prefill?.amount?.toString() || "");
   const [day, setDay] = useState(editExpense?.day || new Date().getDate());
   const [selectedMonth, setSelectedMonth] = useState(month);
   const [selectedYear, setSelectedYear] = useState(year);
-  const [remark, setRemark] = useState(editExpense?.remark || "");
+  const [remark, setRemark] = useState(editExpense?.remark || prefill?.remark || "");
   const [expenseCurrency, setExpenseCurrency] = useState(editExpense?.currency || settings.currency || "INR");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -61,6 +65,7 @@ export function ExpenseForm({
 
   const amountRef = useRef<HTMLInputElement>(null);
   const closeBtnRef = useRef<HTMLButtonElement>(null);
+  const [showScanner, setShowScanner] = useState(false);
 
   // Auto-focus amount input on mount — guarded against closing state
   useEffect(() => {
@@ -224,7 +229,22 @@ export function ExpenseForm({
         <h3 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>
           {editExpense ? "Edit Expense" : "Add an Expense"}
         </h3>
-        <button
+        <div className="flex items-center gap-1">
+          {!editExpense && (
+            <button
+              type="button"
+              onClick={() => setShowScanner((v) => !v)}
+              className="rounded-lg p-1.5 transition-colors"
+              style={{ color: showScanner ? 'var(--brand)' : 'var(--text-muted)' }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--surface-secondary)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = ''; }}
+              aria-label="Scan receipt"
+              title="Scan receipt"
+            >
+              <Camera size={18} />
+            </button>
+          )}
+          <button
           ref={closeBtnRef}
           type="button"
           onClick={(e) => {
@@ -246,7 +266,34 @@ export function ExpenseForm({
         >
           <X size={18} />
         </button>
+        </div>
       </div>
+
+      {/* Receipt Scanner */}
+      <AnimatePresence>
+        {showScanner && (
+          <m.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.2 }}
+            className="overflow-hidden rounded-xl border"
+            style={{ borderColor: "var(--border)", background: "var(--surface-secondary)" }}
+          >
+            <div className="p-3">
+              <ReceiptCapture
+                onExtracted={(data) => {
+                  if (data.amount) setAmount(data.amount.toString());
+                  if (data.category) setCategory(data.category);
+                  if (data.remark) setRemark(data.remark);
+                  setShowScanner(false);
+                }}
+                onClose={() => setShowScanner(false)}
+              />
+            </div>
+          </m.div>
+        )}
+      </AnimatePresence>
 
       {/* Category Selector — teal zone */}
       <div className="-mx-1 rounded-xl p-3" style={{ background: 'var(--section-teal)' }}>
