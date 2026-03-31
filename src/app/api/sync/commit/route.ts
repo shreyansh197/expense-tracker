@@ -56,6 +56,7 @@ export async function POST(req: NextRequest) {
               workspaceId,
               category: data.category as string,
               amount: data.amount as number,
+              currency: (data.currency as string) ?? null,
               day: data.day as number,
               month: data.month as number,
               year: data.year as number,
@@ -67,6 +68,7 @@ export async function POST(req: NextRequest) {
             update: {
               category: data.category as string | undefined,
               amount: data.amount as number | undefined,
+              currency: data.currency !== undefined ? (data.currency as string | null) : undefined,
               day: data.day as number | undefined,
               month: data.month as number | undefined,
               year: data.year as number | undefined,

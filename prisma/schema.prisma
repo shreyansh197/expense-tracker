@@ -223,6 +223,7 @@ model Expense {
   workspaceId String    @map("workspace_id") @db.Uuid
   category    String    @db.VarChar(60)
   amount      Decimal   @db.Decimal(14, 2)
+  currency    String?   @db.VarChar(3)
   day         Int       @db.SmallInt
   month       Int       @db.SmallInt
   year        Int       @db.SmallInt

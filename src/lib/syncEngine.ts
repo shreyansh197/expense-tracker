@@ -96,14 +96,17 @@ export async function pullChanges(workspaceId?: string): Promise<boolean> {
                 });
               }
             }
-            // Remove temp records whose mutations have been flushed
+            // Remove temp records that have been replaced by server records.
+            // A temp record is safe to delete when:
+            // 1. A server record with the same data has arrived, OR
+            // 2. Its mutation has been applied (no pending mutation references it)
             const tempExpenses = await db.expenses
               .where("workspaceId").equals(wid)
               .filter(e => e.id.startsWith("temp-"))
               .toArray();
             for (const temp of tempExpenses) {
               const hasPending = pendingMutations.some(
-                m => m.table === "expenses" && m.operation === "upsert" && !m.id
+                m => m.table === "expenses" && m.operation === "upsert" && m.id === temp.id
               );
               if (!hasPending) await db.expenses.delete(temp.id);
             }
@@ -238,8 +241,18 @@ export async function pushMutations(workspaceId?: string): Promise<number> {
       });
       if (res.ok) {
         const body = await res.json();
-        const localIds = batch.map(m => m.localId!).filter(Boolean);
-        await db.mutations.bulkDelete(localIds);
+        // Only delete mutations that the server actually applied or skipped (idempotent).
+        // Keep mutations with "error" status so they can be retried.
+        const succeededKeys = new Set(
+          body.results
+            .filter((r: { status: string }) => r.status === "applied" || r.status === "skipped")
+            .map((r: { idempotencyKey: string }) => r.idempotencyKey)
+        );
+        const toDelete = batch
+          .filter(m => succeededKeys.has(m.idempotencyKey))
+          .map(m => m.localId!)
+          .filter(Boolean);
+        if (toDelete.length > 0) await db.mutations.bulkDelete(toDelete);
         applied += body.results.filter(
           (r: { status: string }) => r.status === "applied"
         ).length;

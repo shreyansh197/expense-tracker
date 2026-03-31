@@ -1,7 +1,9 @@
 /**
- * Exchange rate cache using localStorage.
- * Fetches from open.er-api.com (free, no key required).
- * Rates cached for 24 hours.
+ * Real-time exchange rate system.
+ *
+ * Primary:  frankfurter.dev — European Central Bank rates (free, no key, ~4PM CET daily)
+ * Fallback: cdn.jsdelivr.net/npm/@fawazahmed0/currency-api — community-maintained, updates more frequently
+ * Cache:    localStorage + in-memory, TTL 4 hours for fresher rates
  */
 
 interface RateCache {
@@ -10,7 +12,7 @@ interface RateCache {
   fetchedAt: number;
 }
 
-const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
+const CACHE_TTL = 4 * 60 * 60 * 1000; // 4 hours
 let _memoryCache: RateCache | null = null;
 
 async function loadFromStorage(base: string): Promise<RateCache | null> {
@@ -33,6 +35,39 @@ function saveToStorage(cache: RateCache) {
   }
 }
 
+/** Fetch from frankfurter.dev (ECB — European Central Bank) */
+async function fetchFrankfurter(base: string): Promise<Record<string, number> | null> {
+  try {
+    const res = await fetch(`https://api.frankfurter.dev/v1/latest?base=${base}`);
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (!data.rates) return null;
+    // frankfurter doesn't include the base currency in rates
+    return { [base]: 1, ...data.rates };
+  } catch {
+    return null;
+  }
+}
+
+/** Fetch from Fawaz Ahmed's open-source currency API (fallback) */
+async function fetchFawazAhmed(base: string): Promise<Record<string, number> | null> {
+  try {
+    const res = await fetch(`https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/${base.toLowerCase()}.json`);
+    if (!res.ok) return null;
+    const data = await res.json();
+    const raw = data[base.toLowerCase()];
+    if (!raw) return null;
+    // Normalize keys to uppercase
+    const rates: Record<string, number> = {};
+    for (const [k, v] of Object.entries(raw)) {
+      rates[k.toUpperCase()] = v as number;
+    }
+    return rates;
+  } catch {
+    return null;
+  }
+}
+
 export async function fetchRates(base: string): Promise<Record<string, number>> {
   // Memory cache
   if (_memoryCache && _memoryCache.base === base && Date.now() - _memoryCache.fetchedAt < CACHE_TTL) {
@@ -46,25 +81,23 @@ export async function fetchRates(base: string): Promise<Record<string, number>> 
     return stored.rates;
   }
 
-  // Fetch from API
-  try {
-    const res = await fetch(`https://open.er-api.com/v6/latest/${base}`);
-    if (!res.ok) throw new Error(`Rate API: ${res.status}`);
-    const data = await res.json();
-    if (data.result !== "success") throw new Error("Rate API error");
+  // Try primary API (frankfurter.dev — ECB rates)
+  let rates = await fetchFrankfurter(base);
 
-    const cache: RateCache = {
-      base,
-      rates: data.rates as Record<string, number>,
-      fetchedAt: Date.now(),
-    };
+  // Fallback to Fawaz Ahmed's API
+  if (!rates) {
+    rates = await fetchFawazAhmed(base);
+  }
+
+  if (rates) {
+    const cache: RateCache = { base, rates, fetchedAt: Date.now() };
     _memoryCache = cache;
     saveToStorage(cache);
-    return cache.rates;
-  } catch {
-    // Return fallback rates (1:1 for same currency, rough estimates for common pairs)
-    return getFallbackRates(base);
+    return rates;
   }
+
+  // Last resort: hardcoded fallback rates
+  return getFallbackRates(base);
 }
 
 export function getFallbackRates(base: string): Record<string, number> {

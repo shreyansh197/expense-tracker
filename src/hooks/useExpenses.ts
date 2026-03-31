@@ -83,6 +83,7 @@ export function useExpenses(month: number, year: number) {
     await enqueueMutation({
       table: "expenses",
       operation: "upsert",
+      id: tempId,
       data: {
         category: input.category,
         amount: input.amount,
