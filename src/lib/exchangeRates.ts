@@ -10,18 +10,21 @@ interface RateCache {
   base: string;
   rates: Record<string, number>;
   fetchedAt: number;
+  source: "frankfurter" | "fawazahmed" | "fallback";
 }
 
 const CACHE_TTL = 4 * 60 * 60 * 1000; // 4 hours
 let _memoryCache: RateCache | null = null;
+// Track in-flight fetches to avoid duplicate requests
+const _pendingFetches = new Map<string, Promise<Record<string, number>>>();
 
-async function loadFromStorage(base: string): Promise<RateCache | null> {
+function loadFromStorage(base: string): RateCache | null {
   try {
     const stored = localStorage.getItem(`expenstream-rates-${base}`);
     if (!stored) return null;
     const parsed: RateCache = JSON.parse(stored);
-    if (Date.now() - parsed.fetchedAt < CACHE_TTL) return parsed;
-    return null; // expired
+    if (Date.now() - parsed.fetchedAt < CACHE_TTL && parsed.source !== "fallback") return parsed;
+    return null; // expired or was a fallback (always re-fetch over fallback)
   } catch {
     return null;
   }
@@ -69,35 +72,50 @@ async function fetchFawazAhmed(base: string): Promise<Record<string, number> | n
 }
 
 export async function fetchRates(base: string): Promise<Record<string, number>> {
-  // Memory cache
-  if (_memoryCache && _memoryCache.base === base && Date.now() - _memoryCache.fetchedAt < CACHE_TTL) {
+  // Memory cache (only if from a real API source)
+  if (_memoryCache && _memoryCache.base === base && _memoryCache.source !== "fallback" && Date.now() - _memoryCache.fetchedAt < CACHE_TTL) {
     return _memoryCache.rates;
   }
 
-  // Storage cache
-  const stored = await loadFromStorage(base);
+  // Storage cache (rejects fallback-sourced entries)
+  const stored = loadFromStorage(base);
   if (stored) {
     _memoryCache = stored;
     return stored.rates;
   }
 
-  // Try primary API (frankfurter.dev — ECB rates)
-  let rates = await fetchFrankfurter(base);
+  // Deduplicate concurrent fetches for the same base currency
+  const pending = _pendingFetches.get(base);
+  if (pending) return pending;
 
-  // Fallback to Fawaz Ahmed's API
-  if (!rates) {
-    rates = await fetchFawazAhmed(base);
+  const promise = (async () => {
+    // Try primary API (frankfurter.dev — ECB rates)
+    let rates = await fetchFrankfurter(base);
+    let source: RateCache["source"] = "frankfurter";
+
+    // Fallback to Fawaz Ahmed's API
+    if (!rates) {
+      rates = await fetchFawazAhmed(base);
+      source = "fawazahmed";
+    }
+
+    if (rates) {
+      const cache: RateCache = { base, rates, fetchedAt: Date.now(), source };
+      _memoryCache = cache;
+      saveToStorage(cache);
+      return rates;
+    }
+
+    // Last resort: hardcoded fallback rates (not cached to storage)
+    return getFallbackRates(base);
+  })();
+
+  _pendingFetches.set(base, promise);
+  try {
+    return await promise;
+  } finally {
+    _pendingFetches.delete(base);
   }
-
-  if (rates) {
-    const cache: RateCache = { base, rates, fetchedAt: Date.now() };
-    _memoryCache = cache;
-    saveToStorage(cache);
-    return rates;
-  }
-
-  // Last resort: hardcoded fallback rates
-  return getFallbackRates(base);
 }
 
 export function getFallbackRates(base: string): Record<string, number> {
@@ -121,4 +139,27 @@ export function convert(
   const toRate = rates[to];
   if (!fromRate || !toRate) return amount; // unknown currency — return as-is
   return Math.round((amount * toRate / fromRate) * 100) / 100;
+}
+
+/** Get info about the currently cached rates (for debugging / settings display) */
+export function getRateInfo(): { source: string; fetchedAt: Date; base: string } | null {
+  if (!_memoryCache) return null;
+  return {
+    source: _memoryCache.source,
+    fetchedAt: new Date(_memoryCache.fetchedAt),
+    base: _memoryCache.base,
+  };
+}
+
+/** Force-clear all rate caches (useful if old format is stuck) */
+export function clearRateCache() {
+  _memoryCache = null;
+  if (typeof localStorage !== "undefined") {
+    const keysToRemove: string[] = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key?.startsWith("expenstream-rates-")) keysToRemove.push(key);
+    }
+    keysToRemove.forEach(k => localStorage.removeItem(k));
+  }
 }

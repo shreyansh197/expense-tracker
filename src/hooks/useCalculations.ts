@@ -41,8 +41,26 @@ export function useCalculations(
   const [rates, setRates] = useState<Record<string, number> | null>(null);
   useEffect(() => {
     if (!multiCurrencyEnabled || !baseCurrency) return;
-    fetchRates(baseCurrency).then(setRates);
+    let cancelled = false;
+    fetchRates(baseCurrency).then((r) => {
+      if (!cancelled) setRates(r);
+    });
+    return () => { cancelled = true; };
   }, [multiCurrencyEnabled, baseCurrency]);
+
+  // Also re-fetch when expenses with foreign currencies appear
+  const hasForeignExpenses = useMemo(
+    () => multiCurrencyEnabled && expenses.some((e) => e.currency && e.currency !== baseCurrency),
+    [expenses, multiCurrencyEnabled, baseCurrency],
+  );
+  useEffect(() => {
+    if (!hasForeignExpenses || !baseCurrency || rates) return;
+    let cancelled = false;
+    fetchRates(baseCurrency).then((r) => {
+      if (!cancelled) setRates(r);
+    });
+    return () => { cancelled = true; };
+  }, [hasForeignExpenses, baseCurrency, rates]);
 
   // Normalize expenses: convert foreign-currency amounts to base currency
   const normalizedExpenses = useMemo(() => {

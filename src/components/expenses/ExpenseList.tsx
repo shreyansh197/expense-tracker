@@ -146,7 +146,11 @@ export function ExpenseList({
   const [rates, setRates] = useState<Record<string, number> | null>(null);
   useEffect(() => {
     if (!multiCurrency) return;
-    fetchRates(baseCurrency).then(setRates);
+    let cancelled = false;
+    fetchRates(baseCurrency).then((r) => {
+      if (!cancelled) setRates(r);
+    });
+    return () => { cancelled = true; };
   }, [multiCurrency, baseCurrency]);
   const { toast } = useToast();
   const { confirm } = useConfirm();
