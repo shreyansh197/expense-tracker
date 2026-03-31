@@ -44,10 +44,15 @@ export async function POST(req: NextRequest) {
       if (mutation.table === "expenses") {
         if (mutation.operation === "upsert") {
           const data = mutation.data as Record<string, unknown>;
+          const expenseId = (mutation.id ?? data.id) as string | undefined;
+          if (!expenseId) {
+            results.push({ idempotencyKey: mutation.idempotencyKey, status: "error", error: "Missing expense id" });
+            continue;
+          }
           const record = await prisma.expense.upsert({
-            where: { id: (mutation.id ?? data.id) as string ?? "00000000-0000-0000-0000-000000000000" },
+            where: { id: expenseId },
             create: {
-              id: (mutation.id ?? data.id) as string | undefined,
+              id: expenseId,
               workspaceId,
               category: data.category as string,
               amount: data.amount as number,
@@ -186,6 +191,15 @@ export async function POST(req: NextRequest) {
               },
             });
           } else {
+            // Validate ledger belongs to this workspace
+            const ledger = await prisma.businessLedger.findFirst({
+              where: { id: data.ledgerId as string, workspaceId, deletedAt: null },
+              select: { id: true },
+            });
+            if (!ledger) {
+              results.push({ idempotencyKey: mutation.idempotencyKey, status: "error", error: "Ledger not found in workspace" });
+              continue;
+            }
             record = await prisma.businessPayment.create({
               data: {
                 workspaceId,

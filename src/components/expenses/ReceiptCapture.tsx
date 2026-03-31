@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { Camera, Loader2, RotateCcw, Check, X, FileImage } from "lucide-react";
 import Image from "next/image";
 import { extractFromReceipt, terminateOcr, type OcrResult } from "@/lib/ocr";
@@ -23,6 +23,13 @@ export function ReceiptCapture({ onExtracted, onClose }: ReceiptCaptureProps) {
   const [file, setFile] = useState<File | null>(null);
   const [result, setResult] = useState<OcrResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  // Revoke blob URL on unmount to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      if (preview) URL.revokeObjectURL(preview);
+    };
+  }, [preview]);
 
   const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];

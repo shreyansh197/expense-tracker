@@ -41,16 +41,17 @@ export async function enqueueMutation(
 
 // ── Pull changes from server into IDB ──
 
-let _pullInFlight: Promise<boolean> | null = null;
+const _pullInFlight = new Map<string, Promise<boolean>>();
 
 export async function pullChanges(workspaceId?: string): Promise<boolean> {
   const wid = workspaceId ?? getActiveWorkspaceId();
   if (!wid || !isAuthenticated()) return false;
 
-  // Dedup concurrent pulls
-  if (_pullInFlight) return _pullInFlight;
+  // Dedup concurrent pulls per workspace
+  const existing = _pullInFlight.get(wid);
+  if (existing) return existing;
 
-  _pullInFlight = (async () => {
+  const promise = (async () => {
     try {
       const params = new URLSearchParams({ workspaceId: wid });
       const res = await authFetch(`/api/sync/changes?${params}`);
@@ -197,10 +198,11 @@ export async function pullChanges(workspaceId?: string): Promise<boolean> {
     }
   })();
 
+  _pullInFlight.set(wid, promise);
   try {
-    return await _pullInFlight;
+    return await promise;
   } finally {
-    _pullInFlight = null;
+    _pullInFlight.delete(wid);
   }
 }
 

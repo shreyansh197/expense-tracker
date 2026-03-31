@@ -20,6 +20,7 @@ import {
 import { getDaysInMonth } from "@/lib/utils";
 import { fetchRates, convert } from "@/lib/exchangeRates";
 import { db } from "@/lib/db";
+import { getActiveWorkspaceId } from "@/lib/authClient";
 import type { Expense, CategoryId, DailyTotal, CategoryTotal, StackedDailyTotal, Forecast, AnomalyResult } from "@/types";
 
 export function useCalculations(
@@ -132,8 +133,11 @@ export function useCalculations(
 
         const totals: number[] = [];
         const allHist: Expense[] = [];
+        const wid = getActiveWorkspaceId();
         for (const { m, y } of months) {
-          const exps = await db.expenses.where({ month: m, year: y }).toArray();
+          const exps = wid
+            ? await db.expenses.where("[workspaceId+month+year]").equals([wid, m, y]).toArray()
+            : await db.expenses.where({ month: m, year: y }).toArray();
           const active = exps.filter((e) => !e.deletedAt);
           const total = active.reduce((s, e) => s + e.amount, 0);
           totals.push(total);

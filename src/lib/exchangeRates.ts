@@ -13,9 +13,8 @@ interface RateCache {
 const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
 let _memoryCache: RateCache | null = null;
 
-async function loadFromIDB(base: string): Promise<RateCache | null> {
+async function loadFromStorage(base: string): Promise<RateCache | null> {
   try {
-    // Use a generic get on the syncMeta table reusing workspaceId field
     const stored = localStorage.getItem(`expenstream-rates-${base}`);
     if (!stored) return null;
     const parsed: RateCache = JSON.parse(stored);
@@ -41,7 +40,7 @@ export async function fetchRates(base: string): Promise<Record<string, number>> 
   }
 
   // Storage cache
-  const stored = await loadFromIDB(base);
+  const stored = await loadFromStorage(base);
   if (stored) {
     _memoryCache = stored;
     return stored.rates;
