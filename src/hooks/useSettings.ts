@@ -109,6 +109,7 @@ async function pushToApi(s: UserSettings) {
     businessMode: s.businessMode ?? false,
     revenueExpectations: s.revenueExpectations || [],
     businessTags: s.businessTags || [],
+    dashboardLayout: s.dashboardLayout || undefined,
   };
 
   // Persist to IDB
@@ -153,6 +154,7 @@ async function loadSettingsFromIDB(): Promise<UserSettings | null> {
       businessMode: s.businessMode ?? false,
       revenueExpectations: s.revenueExpectations ?? [],
       businessTags: s.businessTags ?? [],
+      dashboardLayout: s.dashboardLayout,
       createdAt: Date.now(),
       updatedAt: s.updatedAt,
     };
@@ -232,7 +234,7 @@ export function useSettings() {
   }, []);
 
   const updateSettings = useCallback(
-    async (updates: Partial<Pick<UserSettings, "salary" | "currency" | "categories" | "customCategories" | "hiddenDefaults" | "categoryBudgets" | "recurringExpenses" | "savedFilters" | "goals" | "rolloverEnabled" | "rolloverHistory" | "businessMode" | "revenueExpectations" | "businessTags">>) => {
+    async (updates: Partial<Pick<UserSettings, "salary" | "currency" | "categories" | "customCategories" | "hiddenDefaults" | "categoryBudgets" | "recurringExpenses" | "savedFilters" | "goals" | "rolloverEnabled" | "rolloverHistory" | "businessMode" | "revenueExpectations" | "businessTags" | "dashboardLayout">>) => {
       const next = { ..._settings, ...updates, updatedAt: Date.now() };
       saveLocal(next);
       _setShared(next);

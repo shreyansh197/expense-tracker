@@ -126,6 +126,7 @@ export async function pullChanges(workspaceId?: string): Promise<boolean> {
               businessMode: s.businessMode ?? false,
               revenueExpectations: s.revenueExpectations ?? [],
               businessTags: s.businessTags ?? [],
+              dashboardLayout: s.dashboardLayout ?? undefined,
               updatedAt: new Date(s.updatedAt as string).getTime(),
             });
           }

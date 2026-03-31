@@ -8,6 +8,7 @@ import type {
   RevenueExpectation,
   LedgerStatus,
   PaymentMethod,
+  DashboardLayout,
 } from "@/types";
 
 // ── IDB record types ──
@@ -44,6 +45,7 @@ export interface IDBSettings {
   businessMode: boolean;
   revenueExpectations: RevenueExpectation[];
   businessTags: string[];
+  dashboardLayout?: DashboardLayout;
   updatedAt: number;
 }
 

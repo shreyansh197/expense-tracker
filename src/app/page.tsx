@@ -14,6 +14,7 @@ import { DailyTrendChart } from "@/components/dashboard/DailyTrendChart";
 import { AlertsPanel } from "@/components/dashboard/AlertsPanel";
 import { SubscriptionsSummary } from "@/components/dashboard/SubscriptionsSummary";
 import { SavingsGoalsWidget } from "@/components/dashboard/SavingsGoalsWidget";
+import { DashboardCustomizer, getVisibleSections } from "@/components/dashboard/DashboardCustomizer";
 import { SkeletonKpiCards, SkeletonChart } from "@/components/ui/Skeleton";
 import { PageTransition } from "@/components/ui/PageTransition";
 import { AmbientBackground } from "@/components/ui/AmbientBackground";
@@ -32,6 +33,7 @@ import { QuickHelpButton } from "@/components/ui/QuickHelpButton";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { Repeat, PlusCircle, Target, BarChart3, Sparkles, ChevronDown, Check, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import type { DashboardSectionId, DashboardLayout } from "@/types";
 
 /* ── Collapsible section for mobile dashboard ───────────────── */
 function CollapsibleSection({ id, title, children }: { id: string; title: string; children: React.ReactNode }) {
@@ -214,7 +216,7 @@ export default function DashboardPage() {
   const router = useRouter();
   const { currentMonth, currentYear } = useUIStore();
   const { expenses, loading, syncStatus } = useExpenses(currentMonth, currentYear);
-  const { settings } = useSettings();
+  const { settings, updateSettings } = useSettings();
   const { user } = useAuth();
 
   // Auto-apply recurring expenses for current month
@@ -263,6 +265,13 @@ export default function DashboardPage() {
 
   const showWelcome = !loading && !welcomeDismissed && expenses.length === 0;
 
+  const visibleSections = getVisibleSections(settings.dashboardLayout);
+  const sectionVisible = (id: DashboardSectionId) => visibleSections.includes(id);
+
+  const handleSaveLayout = useCallback((layout: DashboardLayout) => {
+    updateSettings({ dashboardLayout: layout });
+  }, [updateSettings]);
+
   const handleCategoryClick = (categorySlug: string) => {
     router.push(`/category/${encodeURIComponent(categorySlug)}?month=${currentMonth}&year=${currentYear}`);
   };
@@ -289,6 +298,7 @@ export default function DashboardPage() {
             <MonthSwitcher />
             <div className="flex items-center gap-2">
               <SyncIndicator syncStatus={syncStatus} />
+              <DashboardCustomizer layout={settings.dashboardLayout} onSave={handleSaveLayout} />
               <div className="relative z-[60] lg:hidden">
                 <QuickHelpButton />
               </div>
@@ -309,6 +319,7 @@ export default function DashboardPage() {
         )}
 
         {/* KPI Cards — coral zone */}
+        {sectionVisible("kpi") && (
         <AnimatePresence mode="wait">
           {loading ? (
             <m.div key="kpi-skeleton" className="section-zone section-coral dash-section" initial={{ opacity: 0.6 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
@@ -340,11 +351,11 @@ export default function DashboardPage() {
           </m.div>
         )}
         </AnimatePresence>
+        )}
 
-        {/* Alerts / Subscriptions / Goals — indigo zone (subs & goals persist across months) */}
-        {((settings.recurringExpenses ?? []).length > 0 || (settings.goals ?? []).length > 0 || (effectiveBudget > 0 && expenses.length > 0)) && (
-        <div className="section-zone section-indigo space-y-4">
-        {expenses.length > 0 && effectiveBudget > 0 && (
+        {/* Alerts — indigo zone */}
+        {sectionVisible("alerts") && expenses.length > 0 && effectiveBudget > 0 && (
+        <div className="section-zone section-indigo">
         <CollapsibleSection id="alerts" title="Alerts">
         <AlertsPanel
           categoryTotals={categoryTotals}
@@ -357,12 +368,21 @@ export default function DashboardPage() {
           onCategoryClick={handleCategoryClick}
         />
         </CollapsibleSection>
+        </div>
         )}
 
+        {/* Subscriptions */}
+        {sectionVisible("subscriptions") && (settings.recurringExpenses ?? []).length > 0 && (
+        <div className="section-zone section-indigo">
         <CollapsibleSection id="subscriptions" title="Recurring Expenses">
         <SubscriptionsSummary />
         </CollapsibleSection>
+        </div>
+        )}
 
+        {/* Savings Goals */}
+        {sectionVisible("goals") && (settings.goals ?? []).length > 0 && (
+        <div className="section-zone section-indigo">
         <CollapsibleSection id="goals" title="Savings Goals">
         <SavingsGoalsWidget />
         </CollapsibleSection>
@@ -370,6 +390,7 @@ export default function DashboardPage() {
         )}
 
         {/* Charts Row — teal zone */}
+        {sectionVisible("charts") && (
         <div className="section-zone section-teal">
         <AnimatePresence mode="wait">
           {loading ? (
@@ -435,8 +456,10 @@ export default function DashboardPage() {
         )}
         </AnimatePresence>
         </div>
+        )}
 
         {/* Recent Expenses — coral zone */}
+        {sectionVisible("recent") && (
         <div className="section-zone section-coral">
         <div className="dash-section card p-5">
           <div className="mb-4 flex items-center justify-between">
@@ -498,6 +521,7 @@ export default function DashboardPage() {
           )}
         </div>
         </div>
+        )}
       </PageTransition>
     </AppShell>
   );

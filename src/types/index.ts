@@ -31,6 +31,7 @@ export interface UserSettings {
   businessMode?: boolean;
   revenueExpectations?: RevenueExpectation[];
   businessTags?: string[];
+  dashboardLayout?: DashboardLayout;
   createdAt: number;
   updatedAt: number;
 }
@@ -155,4 +156,18 @@ export type PaymentInput = Omit<Payment, "id" | "createdAt" | "updatedAt" | "del
 export interface RevenueExpectation {
   month: string; // "YYYY-MM"
   expectedRevenue: number;
+}
+
+// ── Dashboard Customization ──
+
+export type DashboardSectionId = "kpi" | "alerts" | "subscriptions" | "goals" | "charts" | "recent";
+
+export interface DashboardSectionConfig {
+  id: DashboardSectionId;
+  visible: boolean;
+  order: number;
+}
+
+export interface DashboardLayout {
+  sections: DashboardSectionConfig[];
 }
