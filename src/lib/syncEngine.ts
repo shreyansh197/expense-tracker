@@ -131,6 +131,7 @@ export async function pullChanges(workspaceId?: string): Promise<boolean> {
               dashboardLayout: s.dashboardLayout ?? undefined,
               multiCurrencyEnabled: s.multiCurrencyEnabled ?? false,
               dismissedRecurringSuggestions: s.dismissedRecurringSuggestions ?? [],
+              autoRules: s.autoRules ?? [],
               updatedAt: new Date(s.updatedAt as string).getTime(),
             });
           }

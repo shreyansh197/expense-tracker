@@ -153,12 +153,14 @@ export function DashboardCustomizer({ layout, onSave }: DashboardCustomizerProps
       {/* Trigger button */}
       <button
         onClick={() => { setSections(getSections(layout)); setOpen(true); }}
-        className="rounded-lg p-1.5 transition-colors hover:bg-black/5 dark:hover:bg-white/10"
-        style={{ color: "var(--text-tertiary)" }}
+        className="rounded-lg p-2 transition-colors"
+        style={{ color: "var(--text-secondary)", background: "var(--surface-secondary)" }}
+        onMouseEnter={e => { e.currentTarget.style.background = 'var(--surface-hover)'; }}
+        onMouseLeave={e => { e.currentTarget.style.background = 'var(--surface-secondary)'; }}
         aria-label="Customize dashboard"
         title="Customize dashboard"
       >
-        <Settings2 size={16} />
+        <Settings2 size={18} />
       </button>
 
       {/* Slide-over panel */}

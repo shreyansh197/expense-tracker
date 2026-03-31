@@ -49,6 +49,8 @@ export interface IDBSettings {
   dashboardLayout?: DashboardLayout;
   multiCurrencyEnabled?: boolean;
   dismissedRecurringSuggestions?: string[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  autoRules?: any[];
   updatedAt: number;
 }
 

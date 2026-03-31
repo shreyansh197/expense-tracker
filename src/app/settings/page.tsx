@@ -99,6 +99,7 @@ export default function SettingsPage() {
             <button
               key={z.id}
               onClick={() => {
+                setActiveZone(z.id);
                 document.getElementById(z.id)?.scrollIntoView({ behavior: "smooth", block: "start" });
               }}
               className="rounded-lg px-3 py-1.5 text-xs font-semibold transition-all"

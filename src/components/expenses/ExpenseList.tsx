@@ -408,8 +408,6 @@ function SwipeableExpenseItem({
   const absOffset = Math.abs(offsetX);
   const isRevealing = absOffset > 10;
   const isFullSwipe = absOffset >= FULL_DELETE_THRESHOLD;
-  // Delete button width grows with swipe, capped
-  const deleteWidth = Math.min(Math.max(absOffset, 0), 120);
   const isDragging = absOffset > 0 && absOffset < 9000;
 
   return (
@@ -419,15 +417,14 @@ function SwipeableExpenseItem({
       transition={deleting ? { duration: 0.3, ease: [0.22, 1, 0.36, 1] } : { delay: idx * 0.03, duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
       className="relative overflow-hidden rounded-2xl"
     >
-      {/* Red delete action — revealed behind the row */}
+      {/* Red delete action — full-width behind the row, revealed by card translate */}
       <div
-        className="absolute inset-y-0 right-0 flex items-center overflow-hidden rounded-r-2xl"
+        className="absolute inset-0 flex items-center justify-end overflow-hidden rounded-2xl"
         style={{
-          width: isFullSwipe ? '100%' : `${deleteWidth}px`,
           background: isFullSwipe
             ? '#EF4444'
-            : 'linear-gradient(90deg, #F87171 0%, #EF4444 100%)',
-          transition: isDragging ? 'none' : 'width 0.3s cubic-bezier(0.22, 1, 0.36, 1), background 0.2s',
+            : 'linear-gradient(to left, #EF4444 0%, #F87171 40%, transparent 100%)',
+          transition: isDragging ? 'none' : 'background 0.2s',
         }}
         aria-hidden
       >

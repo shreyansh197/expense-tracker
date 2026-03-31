@@ -106,6 +106,10 @@ export async function POST(req: NextRequest) {
             businessMode: (data.businessMode as boolean) ?? false,
             revenueExpectations: data.revenueExpectations ?? [],
             businessTags: data.businessTags ?? [],
+            multiCurrencyEnabled: (data.multiCurrencyEnabled as boolean) ?? false,
+            dashboardLayout: data.dashboardLayout ?? undefined,
+            dismissedRecurringSuggestions: data.dismissedRecurringSuggestions ?? [],
+            autoRules: data.autoRules ?? [],
             version: 1,
           },
           update: {
@@ -123,6 +127,10 @@ export async function POST(req: NextRequest) {
             ...(data.businessMode !== undefined && { businessMode: data.businessMode as boolean }),
             ...(data.revenueExpectations !== undefined && { revenueExpectations: data.revenueExpectations as Json }),
             ...(data.businessTags !== undefined && { businessTags: data.businessTags as Json }),
+            ...(data.multiCurrencyEnabled !== undefined && { multiCurrencyEnabled: data.multiCurrencyEnabled as boolean }),
+            ...(data.dashboardLayout !== undefined && { dashboardLayout: data.dashboardLayout as Json }),
+            ...(data.dismissedRecurringSuggestions !== undefined && { dismissedRecurringSuggestions: data.dismissedRecurringSuggestions as Json }),
+            ...(data.autoRules !== undefined && { autoRules: data.autoRules as Json }),
             version: { increment: 1 },
           } as Prisma.WorkspaceSettingsUpdateInput,
         });

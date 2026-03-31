@@ -260,6 +260,10 @@ model WorkspaceSettings {
   businessMode        Boolean  @default(false) @map("business_mode")
   revenueExpectations Json     @default("[]") @map("revenue_expectations") @db.JsonB
   businessTags        Json     @default("[]") @map("business_tags") @db.JsonB
+  multiCurrencyEnabled Boolean @default(false) @map("multi_currency_enabled")
+  dashboardLayout     Json?    @map("dashboard_layout") @db.JsonB
+  dismissedRecurringSuggestions Json @default("[]") @map("dismissed_recurring_suggestions") @db.JsonB
+  autoRules           Json     @default("[]") @map("auto_rules") @db.JsonB
   version             Int      @default(1)
   updatedAt           DateTime @updatedAt @map("updated_at") @db.Timestamptz
 

@@ -1,47 +1,38 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Plus, Trash2, Zap, X } from "lucide-react";
 import { useSettings } from "@/hooks/useSettings";
 import { getAllCategories } from "@/lib/categories";
 import { useToast } from "@/components/ui/Toast";
 import { useConfirm } from "@/components/ui/ConfirmDialog";
 import { useCurrency } from "@/hooks/useCurrency";
+import type { AutoRule } from "@/types";
 
-export interface AutoRule {
-  id: string;
-  name: string;
-  condition: {
-    field: "remark" | "amount" | "category";
-    operator: "contains" | "equals" | "greater_than" | "less_than";
-    value: string;
-  };
-  action: {
-    type: "set_category" | "add_tag" | "flag";
-    value: string;
-  };
-  enabled: boolean;
-  createdAt: number;
-}
+export type { AutoRule };
 
-const STORAGE_KEY = "expenstream-auto-rules";
-
-function loadRules(): AutoRule[] {
-  if (typeof window === "undefined") return [];
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) return JSON.parse(raw);
-  } catch { /* ignore */ }
-  return [];
-}
-
-function saveRules(rules: AutoRule[]) {
-  if (typeof window === "undefined") return;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(rules));
-}
+const LEGACY_STORAGE_KEY = "expenstream-auto-rules";
 
 export function useAutoRules() {
-  const [rules, setRules] = useState<AutoRule[]>(loadRules);
+  const { settings, updateSettings } = useSettings();
+  const rules = (settings.autoRules ?? []) as AutoRule[];
+  const migrated = useRef(false);
+
+  // One-time migration from localStorage to synced settings
+  useEffect(() => {
+    if (migrated.current) return;
+    migrated.current = true;
+    try {
+      const raw = localStorage.getItem(LEGACY_STORAGE_KEY);
+      if (raw) {
+        const legacy: AutoRule[] = JSON.parse(raw);
+        if (legacy.length > 0 && rules.length === 0) {
+          updateSettings({ autoRules: legacy });
+        }
+        localStorage.removeItem(LEGACY_STORAGE_KEY);
+      }
+    } catch { /* ignore */ }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const addRule = (rule: Omit<AutoRule, "id" | "createdAt">) => {
     const newRule: AutoRule = {
@@ -49,29 +40,19 @@ export function useAutoRules() {
       id: `rule-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
       createdAt: Date.now(),
     };
-    setRules((prev) => {
-      const next = [...prev, newRule];
-      saveRules(next);
-      return next;
-    });
+    updateSettings({ autoRules: [...rules, newRule] });
     return newRule;
   };
 
   const removeRule = (id: string) => {
-    setRules((prev) => {
-      const next = prev.filter((r) => r.id !== id);
-      saveRules(next);
-      return next;
-    });
+    updateSettings({ autoRules: rules.filter((r) => r.id !== id) });
   };
 
   const toggleRule = (id: string) => {
-    setRules((prev) => {
-      const next = prev.map((r) =>
+    updateSettings({
+      autoRules: rules.map((r) =>
         r.id === id ? { ...r, enabled: !r.enabled } : r
-      );
-      saveRules(next);
-      return next;
+      ),
     });
   };
 

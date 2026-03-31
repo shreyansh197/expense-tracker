@@ -35,6 +35,7 @@ import { useAuth } from "@/components/providers/AuthProvider";
 import { Repeat, PlusCircle, Target, BarChart3, Sparkles, ChevronDown, Check, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { DashboardSectionId, DashboardLayout } from "@/types";
+import type { ReactNode } from "react";
 
 /* ── Collapsible section for mobile dashboard ───────────────── */
 function CollapsibleSection({ id, title, children }: { id: string; title: string; children: React.ReactNode }) {
@@ -269,7 +270,6 @@ export default function DashboardPage() {
   const showWelcome = !loading && !welcomeDismissed && expenses.length === 0;
 
   const visibleSections = getVisibleSections(settings.dashboardLayout);
-  const sectionVisible = (id: DashboardSectionId) => visibleSections.includes(id);
 
   const handleSaveLayout = useCallback((layout: DashboardLayout) => {
     updateSettings({ dashboardLayout: layout });
@@ -291,10 +291,12 @@ export default function DashboardPage() {
         <PageTransition className="relative mx-auto min-h-[80vh] max-w-4xl xl:max-w-6xl space-y-4 sm:space-y-6 p-3 sm:p-4 lg:p-6">
         <DecoGraphic variant="finance" />
         {/* Header — hero zone */}
-        <div className="zone-header dash-section relative z-20">
+        <div className="zone-header dash-section relative z-20 overflow-hidden rounded-2xl p-4 sm:p-5" style={{ background: 'var(--surface)', border: '1px solid var(--border-card)', boxShadow: 'var(--card-shadow)' }}>
+          {/* Gradient accent top bar */}
+          <div className="absolute inset-x-0 top-0 h-1" style={{ background: 'var(--accent-gradient)' }} />
           {user?.name && (
-            <p className="mb-2 text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
-              {new Date().getHours() < 12 ? "Good morning" : new Date().getHours() < 17 ? "Good afternoon" : "Good evening"}, {user.name.split(" ")[0]}
+            <p className="mb-3 text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
+              {new Date().getHours() < 12 ? "Good morning" : new Date().getHours() < 17 ? "Good afternoon" : "Good evening"}, <span style={{ color: 'var(--text-primary)' }}>{user.name.split(" ")[0]}</span>
             </p>
           )}
           <div data-tour="dashboard" className="flex items-center justify-between">
@@ -321,215 +323,220 @@ export default function DashboardPage() {
           />
         )}
 
-        {/* KPI Cards — coral zone */}
-        {sectionVisible("kpi") && (
-        <AnimatePresence mode="wait">
-          {loading ? (
-            <m.div key="kpi-skeleton" className="section-zone section-coral dash-section" initial={{ opacity: 0.6 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
-              <SkeletonKpiCards />
-            </m.div>
-          ) : expenses.length === 0 ? null : (
-            <m.div key="kpi-content" className="section-zone section-coral dash-section" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
-            <KpiCards
-            monthlyTotal={monthlyTotal}
-            remaining={remaining}
-            salary={effectiveBudget}
-            avgDaily={avgDaily}
-            budgetUsedPercent={budgetUsedPercent}
-            topCategory={topCategory}
-            daysRemaining={daysRemaining}
-            paceToStayUnder={paceToStayUnder}
-            expenseCount={expenses.length}
-            forecast={forecast}
-            rolloverAmount={
-              settings.rolloverEnabled && settings.rolloverHistory
-                ? (() => {
-                    let pm = currentMonth - 1, py = currentYear;
-                    if (pm <= 0) { pm = 12; py -= 1; }
-                    return settings.rolloverHistory[`${py}-${String(pm).padStart(2, "0")}`] ?? 0;
-                  })()
-                : 0
-            }
-          />
-          </m.div>
-        )}
-        </AnimatePresence>
-        )}
+        {/* ── Dashboard sections rendered in user-customized order ── */}
+        {visibleSections.map((sectionId) => {
+          const renderer: Record<DashboardSectionId, () => ReactNode> = {
+            kpi: () => (
+              <AnimatePresence mode="wait" key="kpi">
+                {loading ? (
+                  <m.div key="kpi-skeleton" className="section-zone section-coral dash-section" initial={{ opacity: 0.6 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
+                    <SkeletonKpiCards />
+                  </m.div>
+                ) : expenses.length === 0 ? null : (
+                  <m.div key="kpi-content" className="section-zone section-coral dash-section" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
+                  <KpiCards
+                  monthlyTotal={monthlyTotal}
+                  remaining={remaining}
+                  salary={effectiveBudget}
+                  avgDaily={avgDaily}
+                  budgetUsedPercent={budgetUsedPercent}
+                  topCategory={topCategory}
+                  daysRemaining={daysRemaining}
+                  paceToStayUnder={paceToStayUnder}
+                  expenseCount={expenses.length}
+                  forecast={forecast}
+                  rolloverAmount={
+                    settings.rolloverEnabled && settings.rolloverHistory
+                      ? (() => {
+                          let pm = currentMonth - 1, py = currentYear;
+                          if (pm <= 0) { pm = 12; py -= 1; }
+                          return settings.rolloverHistory[`${py}-${String(pm).padStart(2, "0")}`] ?? 0;
+                        })()
+                      : 0
+                  }
+                />
+                </m.div>
+              )}
+              </AnimatePresence>
+            ),
 
-        {/* Alerts — indigo zone */}
-        {sectionVisible("alerts") && expenses.length > 0 && effectiveBudget > 0 && (
-        <div className="section-zone section-indigo">
-        <CollapsibleSection id="alerts" title="Alerts">
-        <AlertsPanel
-          categoryTotals={categoryTotals}
-          categoryBudgets={settings.categoryBudgets}
-          budgetUsedPercent={budgetUsedPercent}
-          avgDaily={avgDaily}
-          paceToStayUnder={paceToStayUnder}
-          forecast={forecast}
-          anomalies={anomalies}
-          onCategoryClick={handleCategoryClick}
-        />
-        </CollapsibleSection>
-        </div>
-        )}
-
-        {/* Subscriptions */}
-        {sectionVisible("subscriptions") && (settings.recurringExpenses ?? []).length > 0 && (
-        <div className="section-zone section-indigo">
-        <CollapsibleSection id="subscriptions" title="Recurring Expenses">
-        <SubscriptionsSummary />
-        </CollapsibleSection>
-        </div>
-        )}
-
-        {/* Recurring Pattern Suggestions */}
-        {sectionVisible("subscriptions") && (
-        <RecurringSuggestions />
-        )}
-
-        {/* Savings Goals */}
-        {sectionVisible("goals") && (settings.goals ?? []).length > 0 && (
-        <div className="section-zone section-indigo">
-        <CollapsibleSection id="goals" title="Savings Goals">
-        <SavingsGoalsWidget />
-        </CollapsibleSection>
-        </div>
-        )}
-
-        {/* Charts Row — teal zone */}
-        {sectionVisible("charts") && (
-        <div className="section-zone section-teal">
-        <AnimatePresence mode="wait">
-          {loading ? (
-            <m.div key="chart-skeleton" className="dash-section grid gap-4 lg:grid-cols-2" initial={{ opacity: 0.6 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
-              <SkeletonChart />
-              <SkeletonChart />
-            </m.div>
-          ) : expenses.length === 0 ? (
-          <div className="dash-section relative grid gap-4 lg:grid-cols-2">
-            <div className="card relative overflow-hidden p-5">
-              <AmbientBackground />
-              <h3 className="relative text-section-title mb-4">Category Breakdown</h3>
-              <div className="relative flex h-[220px] items-center justify-center">
-                <div className="flex flex-col items-center text-center">
-                  <ChartIllustration size={120} />
-                  <p className="mt-2 text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Preview</p>
-                  <p className="mt-1 text-xs" style={{ color: 'var(--text-muted)' }}>Your spending breakdown will appear here</p>
+            alerts: () => (
+              expenses.length > 0 && effectiveBudget > 0 ? (
+                <div className="section-zone section-indigo" key="alerts">
+                <CollapsibleSection id="alerts" title="Alerts">
+                <AlertsPanel
+                  categoryTotals={categoryTotals}
+                  categoryBudgets={settings.categoryBudgets}
+                  budgetUsedPercent={budgetUsedPercent}
+                  avgDaily={avgDaily}
+                  paceToStayUnder={paceToStayUnder}
+                  forecast={forecast}
+                  anomalies={anomalies}
+                  onCategoryClick={handleCategoryClick}
+                />
+                </CollapsibleSection>
                 </div>
+              ) : null
+            ),
+
+            subscriptions: () => (
+              <div key="subscriptions">
+                {(settings.recurringExpenses ?? []).length > 0 && (
+                  <div className="section-zone section-indigo">
+                  <CollapsibleSection id="subscriptions" title="Recurring Expenses">
+                  <SubscriptionsSummary />
+                  </CollapsibleSection>
+                  </div>
+                )}
+                <RecurringSuggestions />
               </div>
-            </div>
-            <div className="card relative overflow-hidden p-5">
-              <AmbientBackground />
-              <h3 className="relative text-section-title mb-4">Daily Spending Trend</h3>
-              <div className="relative flex h-[220px] items-center justify-center">
-                <div className="flex flex-col items-center text-center">
-                  <ChartIllustration size={120} />
-                  <p className="mt-2 text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Preview</p>
-                  <p className="mt-1 text-xs" style={{ color: 'var(--text-muted)' }}>Your daily trend will appear here</p>
+            ),
+
+            goals: () => (
+              (settings.goals ?? []).length > 0 ? (
+                <div className="section-zone section-indigo" key="goals">
+                <CollapsibleSection id="goals" title="Savings Goals">
+                <SavingsGoalsWidget />
+                </CollapsibleSection>
                 </div>
-              </div>
-            </div>
-          </div>
-        ) : (
-        <div className="dash-section grid gap-4 lg:grid-cols-2">
-          <div className="card p-5">
-            <h3 className="text-section-title mb-4">
-              Category Breakdown
-            </h3>
-            <CategoryChart
-              categoryTotals={categoryTotals}
-              onCategoryClick={handleCategoryClick}
-              categoryBudgets={settings.categoryBudgets}
-              expenses={expenses}
-            />
-            <div className="mt-4">
-              <CategoryLegend categoryTotals={categoryTotals} onCategoryClick={handleCategoryClick} categoryBudgets={settings.categoryBudgets} />
-            </div>
-          </div>
+              ) : null
+            ),
 
-          <div className="card flex flex-col p-5">
-            <h3 className="text-section-title mb-4">
-              Daily Spending Trend
-            </h3>
-            <div className="flex-1 min-h-[280px]">
-            <DailyTrendChart
-              dailyTotals={dailyTotals}
-              stackedDailyTotals={stackedDailyTotals}
-              onBarClick={handleDayClick}
-            />
-            </div>
-          </div>
-        </div>
-        )}
-        </AnimatePresence>
-        </div>
-        )}
-
-        {/* Recent Expenses — coral zone */}
-        {sectionVisible("recent") && (
-        <div className="section-zone section-coral">
-        <div className="dash-section card p-5">
-          <div className="mb-4 flex items-center justify-between">
-            <h3 className="text-section-title">
-              Recent Expenses
-            </h3>
-            {recentExpenses.length > 0 && (
-              <a
-                href="/expenses"
-                className="text-xs font-semibold transition-colors"
-                style={{ color: 'var(--accent)' }}
-              >
-                View All →
-              </a>
-            )}
-          </div>
-          {recentExpenses.length === 0 ? (
-            <div className="flex flex-col items-center gap-2 py-6">
-              <WalletIllustration size={100} />
-              <p className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>No expenses this month</p>
-              <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Your recent spending will show up here</p>
-            </div>
-          ) : (
-            <div className="space-y-0.5">
-              {recentExpenses.map((e, idx) => (
-                <m.div
-                  key={e.id}
-                  className="flex items-center justify-between rounded-xl px-3 py-3 transition-colors"
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: idx * 0.04, duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-                  onMouseEnter={(ev) => ev.currentTarget.style.background = 'var(--surface-secondary)'}
-                  onMouseLeave={(ev) => ev.currentTarget.style.background = 'transparent'}
-                >
-                  <div className="grid min-w-0 flex-1" style={{ gridTemplateColumns: "5.5rem 1fr", gap: "0.75rem", alignItems: "center" }}>
-                    <div className="w-[5.5rem] flex justify-start">
-                      <CategoryDot category={e.category} />
-                    </div>
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-1.5">
-                        {e.isRecurring && <Repeat className="shrink-0 h-3 w-3 text-blue-500" />}
-                        <p className="text-meta">
-                          {e.day} {getMonthName(currentMonth).slice(0, 3)}
-                        </p>
+            charts: () => (
+              <div className="section-zone section-teal" key="charts">
+              <AnimatePresence mode="wait">
+                {loading ? (
+                  <m.div key="chart-skeleton" className="dash-section grid gap-4 lg:grid-cols-2" initial={{ opacity: 0.6 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
+                    <SkeletonChart />
+                    <SkeletonChart />
+                  </m.div>
+                ) : expenses.length === 0 ? (
+                <div className="dash-section relative grid gap-4 lg:grid-cols-2">
+                  <div className="card relative overflow-hidden p-5">
+                    <AmbientBackground />
+                    <h3 className="relative text-section-title mb-4">Category Breakdown</h3>
+                    <div className="relative flex h-[220px] items-center justify-center">
+                      <div className="flex flex-col items-center text-center">
+                        <ChartIllustration size={120} />
+                        <p className="mt-2 text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Preview</p>
+                        <p className="mt-1 text-xs" style={{ color: 'var(--text-muted)' }}>Your spending breakdown will appear here</p>
                       </div>
-                      {e.remark && (
-                        <p className="truncate text-xs mt-0.5" style={{ color: 'var(--text-secondary)' }}>
-                          {e.remark}
-                        </p>
-                      )}
                     </div>
                   </div>
-                  <span className="tabular-nums ml-3 shrink-0 text-base font-bold" style={{ color: 'var(--text-primary)' }}>
-                    {formatCurrency(e.amount)}
-                  </span>
-                </m.div>
-              ))}
-            </div>
-          )}
-        </div>
-        </div>
-        )}
+                  <div className="card relative overflow-hidden p-5">
+                    <AmbientBackground />
+                    <h3 className="relative text-section-title mb-4">Daily Spending Trend</h3>
+                    <div className="relative flex h-[220px] items-center justify-center">
+                      <div className="flex flex-col items-center text-center">
+                        <ChartIllustration size={120} />
+                        <p className="mt-2 text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Preview</p>
+                        <p className="mt-1 text-xs" style={{ color: 'var(--text-muted)' }}>Your daily trend will appear here</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+              <div className="dash-section grid gap-4 lg:grid-cols-2">
+                <div className="card p-5">
+                  <h3 className="text-section-title mb-4">
+                    Category Breakdown
+                  </h3>
+                  <CategoryChart
+                    categoryTotals={categoryTotals}
+                    onCategoryClick={handleCategoryClick}
+                    categoryBudgets={settings.categoryBudgets}
+                    expenses={expenses}
+                  />
+                  <div className="mt-4">
+                    <CategoryLegend categoryTotals={categoryTotals} onCategoryClick={handleCategoryClick} categoryBudgets={settings.categoryBudgets} />
+                  </div>
+                </div>
+
+                <div className="card flex flex-col p-5">
+                  <h3 className="text-section-title mb-4">
+                    Daily Spending Trend
+                  </h3>
+                  <div className="flex-1 min-h-[280px]">
+                  <DailyTrendChart
+                    dailyTotals={dailyTotals}
+                    stackedDailyTotals={stackedDailyTotals}
+                    onBarClick={handleDayClick}
+                  />
+                  </div>
+                </div>
+              </div>
+              )}
+              </AnimatePresence>
+              </div>
+            ),
+
+            recent: () => (
+              <div className="section-zone section-coral" key="recent">
+              <div className="dash-section card p-5">
+                <div className="mb-4 flex items-center justify-between">
+                  <h3 className="text-section-title">
+                    Recent Expenses
+                  </h3>
+                  {recentExpenses.length > 0 && (
+                    <a
+                      href="/expenses"
+                      className="text-xs font-semibold transition-colors"
+                      style={{ color: 'var(--accent)' }}
+                    >
+                      View All →
+                    </a>
+                  )}
+                </div>
+                {recentExpenses.length === 0 ? (
+                  <div className="flex flex-col items-center gap-2 py-6">
+                    <WalletIllustration size={100} />
+                    <p className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>No expenses this month</p>
+                    <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Your recent spending will show up here</p>
+                  </div>
+                ) : (
+                  <div className="space-y-0.5">
+                    {recentExpenses.map((e, idx) => (
+                      <m.div
+                        key={e.id}
+                        className="flex items-center justify-between rounded-xl px-3 py-3 transition-colors"
+                        initial={{ opacity: 0, y: 6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: idx * 0.04, duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                        onMouseEnter={(ev) => ev.currentTarget.style.background = 'var(--surface-secondary)'}
+                        onMouseLeave={(ev) => ev.currentTarget.style.background = 'transparent'}
+                      >
+                        <div className="grid min-w-0 flex-1" style={{ gridTemplateColumns: "5.5rem 1fr", gap: "0.75rem", alignItems: "center" }}>
+                          <div className="w-[5.5rem] flex justify-start">
+                            <CategoryDot category={e.category} />
+                          </div>
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-1.5">
+                              {e.isRecurring && <Repeat className="shrink-0 h-3 w-3 text-blue-500" />}
+                              <p className="text-meta">
+                                {e.day} {getMonthName(currentMonth).slice(0, 3)}
+                              </p>
+                            </div>
+                            {e.remark && (
+                              <p className="truncate text-xs mt-0.5" style={{ color: 'var(--text-secondary)' }}>
+                                {e.remark}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                        <span className="tabular-nums ml-3 shrink-0 text-base font-bold" style={{ color: 'var(--text-primary)' }}>
+                          {formatCurrency(e.amount)}
+                        </span>
+                      </m.div>
+                    ))}
+                  </div>
+                )}
+              </div>
+              </div>
+            ),
+          };
+
+          return <div key={sectionId}>{renderer[sectionId]()}</div>;
+        })}
       </PageTransition>
     </AppShell>
   );

@@ -412,7 +412,7 @@ export function ExpenseForm({
           type="text"
           value={remark}
           onChange={(e) => setRemark(e.target.value)}
-          placeholder="e.g., Dinner at restaurant"
+          placeholder="Add a note..."
           maxLength={200}
           className="form-input w-full"
         />

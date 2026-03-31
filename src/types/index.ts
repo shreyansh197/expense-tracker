@@ -35,8 +35,25 @@ export interface UserSettings {
   dashboardLayout?: DashboardLayout;
   multiCurrencyEnabled?: boolean;
   dismissedRecurringSuggestions?: string[];
+  autoRules?: AutoRule[];
   createdAt: number;
   updatedAt: number;
+}
+
+export interface AutoRule {
+  id: string;
+  name: string;
+  condition: {
+    field: "remark" | "amount" | "category";
+    operator: "contains" | "equals" | "greater_than" | "less_than";
+    value: string;
+  };
+  action: {
+    type: "set_category" | "add_tag" | "flag";
+    value: string;
+  };
+  enabled: boolean;
+  createdAt: number;
 }
 
 export type CategoryId = string;
