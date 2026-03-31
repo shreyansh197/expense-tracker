@@ -1,6 +1,6 @@
 import { db, migrateFromLocalStorage } from "./db";
 import type { IDBMutation } from "./db";
-import { authFetch, getActiveWorkspaceId, isAuthenticated } from "./authClient";
+import { authFetch, getActiveWorkspaceId, isAuthenticated, subscribeAuth } from "./authClient";
 import { supabase } from "./supabase";
 
 // ── Notification system for hooks to react to IDB changes ──
@@ -293,8 +293,14 @@ export async function pushMutations(workspaceId?: string): Promise<number> {
 
 export function trySyncPush(workspaceId?: string) {
   if (!navigator.onLine) return;
-  pushMutations(workspaceId).then((n) => {
-    if (n > 0) pullChanges(workspaceId);
+  _lastMutationAt = Date.now();
+  _schedulePoll(); // Switch to fast polling
+  pushMutations(workspaceId).then(async (n) => {
+    // Always pull after push to stay in sync
+    await pullChanges(workspaceId);
+    // Broadcast to other devices/tabs so they pull immediately
+    const wid = workspaceId ?? getActiveWorkspaceId();
+    if (n > 0 && wid) _broadcastSyncEvent(wid);
   }).catch(() => {});
 }
 
@@ -306,11 +312,72 @@ export async function getPendingMutationCount(): Promise<number> {
 
 // ── Sync engine lifecycle ──
 
-let _syncInterval: ReturnType<typeof setInterval> | null = null;
+let _syncTimeout: ReturnType<typeof setTimeout> | null = null;
 let _onlineHandler: (() => void) | null = null;
 let _visibilityHandler: (() => void) | null = null;
 let _realtimeChannel: ReturnType<typeof supabase.channel> | null = null;
+let _broadcastChannel: BroadcastChannel | null = null;
+let _unsubAuth: (() => void) | null = null;
 let _started = false;
+let _currentWid: string | null = null;
+let _lastMutationAt = 0;
+
+const FAST_POLL_MS = 3_000;    // 3s after recent mutations
+const SLOW_POLL_MS = 30_000;   // 30s when idle
+const FAST_POLL_WINDOW = 120_000; // fast-poll for 2 minutes after last mutation
+
+// ── Realtime channel setup (auth-aware, can be called multiple times) ──
+
+function _setupRealtimeChannel(wid: string | null) {
+  if (_realtimeChannel) {
+    supabase.removeChannel(_realtimeChannel);
+    _realtimeChannel = null;
+  }
+  if (!wid) return;
+
+  _realtimeChannel = supabase
+    .channel(`sync-${wid}`)
+    // Broadcast: pure pub/sub — works with just the anon key, no RLS needed.
+    // This is the primary cross-device notification mechanism.
+    .on("broadcast", { event: "sync" }, () => pullChanges(wid))
+    // postgres_changes: bonus — works only if Supabase Realtime is fully configured with RLS
+    .on("postgres_changes", { event: "*", schema: "public", table: "expenses", filter: `workspace_id=eq.${wid}` }, () => pullChanges(wid))
+    .on("postgres_changes", { event: "*", schema: "public", table: "workspace_settings", filter: `workspace_id=eq.${wid}` }, () => pullChanges(wid))
+    .on("postgres_changes", { event: "*", schema: "public", table: "business_ledgers", filter: `workspace_id=eq.${wid}` }, () => pullChanges(wid))
+    .on("postgres_changes", { event: "*", schema: "public", table: "business_payments", filter: `workspace_id=eq.${wid}` }, () => pullChanges(wid))
+    .subscribe();
+}
+
+// ── Broadcast to other devices/tabs after a successful push ──
+
+function _broadcastSyncEvent(wid: string) {
+  // Supabase Broadcast — cross-device notification
+  if (_realtimeChannel) {
+    _realtimeChannel.send({
+      type: "broadcast",
+      event: "sync",
+      payload: { workspaceId: wid },
+    });
+  }
+  // BroadcastChannel API — cross-tab notification (same browser)
+  if (_broadcastChannel) {
+    _broadcastChannel.postMessage({ type: "sync", workspaceId: wid });
+  }
+}
+
+// ── Adaptive polling (fast after mutations, slow when idle) ──
+
+function _schedulePoll() {
+  if (_syncTimeout) { clearTimeout(_syncTimeout); _syncTimeout = null; }
+  const elapsed = Date.now() - _lastMutationAt;
+  const delay = elapsed < FAST_POLL_WINDOW ? FAST_POLL_MS : SLOW_POLL_MS;
+  _syncTimeout = setTimeout(async () => {
+    if (document.visibilityState === "visible" && navigator.onLine) {
+      await _doSync();
+    }
+    _schedulePoll();
+  }, delay);
+}
 
 async function _doSync() {
   const wid = getActiveWorkspaceId();
@@ -336,33 +403,42 @@ export function startSyncEngine() {
   };
   document.addEventListener("visibilitychange", _visibilityHandler);
 
-  // Poll every 30s when active
-  _syncInterval = setInterval(() => {
-    if (document.visibilityState === "visible" && navigator.onLine) {
-      _doSync();
-    }
-  }, 30_000);
-
-  // Supabase Realtime — subscribe to all relevant tables for this workspace
-  const wid = getActiveWorkspaceId();
-  if (wid) {
-    _realtimeChannel = supabase
-      .channel(`sync-engine-${wid}`)
-      .on("postgres_changes", { event: "*", schema: "public", table: "expenses", filter: `workspace_id=eq.${wid}` }, () => pullChanges(wid))
-      .on("postgres_changes", { event: "*", schema: "public", table: "workspace_settings", filter: `workspace_id=eq.${wid}` }, () => pullChanges(wid))
-      .on("postgres_changes", { event: "*", schema: "public", table: "business_ledgers", filter: `workspace_id=eq.${wid}` }, () => pullChanges(wid))
-      .on("postgres_changes", { event: "*", schema: "public", table: "business_payments", filter: `workspace_id=eq.${wid}` }, () => pullChanges(wid))
-      .subscribe();
+  // BroadcastChannel for cross-tab sync (same browser, instant)
+  if (typeof BroadcastChannel !== "undefined") {
+    _broadcastChannel = new BroadcastChannel("expenstream-sync");
+    _broadcastChannel.onmessage = (event) => {
+      if (event.data?.type === "sync") pullChanges(event.data.workspaceId);
+    };
   }
+
+  // Auth-aware: re-subscribe Realtime when workspace changes
+  _currentWid = getActiveWorkspaceId();
+  _unsubAuth = subscribeAuth(() => {
+    const newWid = getActiveWorkspaceId();
+    if (newWid !== _currentWid) {
+      _currentWid = newWid;
+      _setupRealtimeChannel(newWid);
+      if (newWid) _doSync();
+    }
+  });
+
+  // Setup initial Realtime channel (if workspace already known)
+  _setupRealtimeChannel(_currentWid);
+
+  // Start adaptive polling
+  _schedulePoll();
 
   // Initial sync
   _doSync();
 }
 
 export function stopSyncEngine() {
-  if (_syncInterval) { clearInterval(_syncInterval); _syncInterval = null; }
+  if (_syncTimeout) { clearTimeout(_syncTimeout); _syncTimeout = null; }
   if (_onlineHandler) { window.removeEventListener("online", _onlineHandler); _onlineHandler = null; }
   if (_visibilityHandler) { document.removeEventListener("visibilitychange", _visibilityHandler); _visibilityHandler = null; }
   if (_realtimeChannel) { supabase.removeChannel(_realtimeChannel); _realtimeChannel = null; }
+  if (_broadcastChannel) { _broadcastChannel.close(); _broadcastChannel = null; }
+  if (_unsubAuth) { _unsubAuth(); _unsubAuth = null; }
   _started = false;
+  _currentWid = null;
 }
