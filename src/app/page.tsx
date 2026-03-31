@@ -291,9 +291,9 @@ export default function DashboardPage() {
         <PageTransition className="relative mx-auto min-h-[80vh] max-w-4xl xl:max-w-6xl space-y-4 sm:space-y-6 p-3 sm:p-4 lg:p-6">
         <DecoGraphic variant="finance" />
         {/* Header — hero zone */}
-        <div className="zone-header dash-section relative z-20 overflow-hidden rounded-2xl p-4 sm:p-5" style={{ background: 'var(--surface)', border: '1px solid var(--border-card)', boxShadow: 'var(--card-shadow)' }}>
+        <div className="zone-header dash-section relative z-20 rounded-2xl p-4 sm:p-5" style={{ background: 'var(--surface)', border: '1px solid var(--border-card)', boxShadow: 'var(--card-shadow)' }}>
           {/* Gradient accent top bar */}
-          <div className="absolute inset-x-0 top-0 h-1" style={{ background: 'var(--accent-gradient)' }} />
+          <div className="absolute inset-x-0 top-0 h-1 rounded-t-2xl" style={{ background: 'var(--accent-gradient)' }} />
           {user?.name && (
             <p className="mb-3 text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
               {new Date().getHours() < 12 ? "Good morning" : new Date().getHours() < 17 ? "Good afternoon" : "Good evening"}, <span style={{ color: 'var(--text-primary)' }}>{user.name.split(" ")[0]}</span>
