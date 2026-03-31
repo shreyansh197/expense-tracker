@@ -7,11 +7,11 @@ import { AppShell } from "@/components/layout/AppShell";
 import { useSettings } from "@/hooks/useSettings";
 import { useCurrency } from "@/hooks/useCurrency";
 import { useTheme } from "@/components/providers/ThemeProvider";
-import { SUPPORTED_CURRENCIES } from "@/lib/utils";
+import { SUPPORTED_CURRENCIES, getMonthName } from "@/lib/utils";
 import {
   Wallet, LinkIcon, Tag, Repeat, TrendingUp, Target, Palette,
   Download, Zap, Sun, Moon, Monitor, Smartphone, Briefcase,
-  Shield, Users, Database, Globe, RefreshCw,
+  Shield, Users, Database, Globe, RefreshCw, ChevronLeft, ChevronRight,
 } from "lucide-react";
 import { InstallButton } from "@/components/pwa/InstallButton";
 import { useToast } from "@/components/ui/Toast";
@@ -114,6 +114,23 @@ export default function SettingsPage() {
   const [salary, setSalary] = useState(settings.salary.toString());
   const [saving, setSaving] = useState(false);
 
+  // Per-month budget state
+  const now = new Date();
+  const [budgetMonth, setBudgetMonth] = useState(now.getMonth() + 1);
+  const [budgetYear, setBudgetYear] = useState(now.getFullYear());
+  const budgetKey = `${budgetYear}-${String(budgetMonth).padStart(2, "0")}`;
+  const monthlyBudgets = settings.monthlyBudgets ?? {};
+  const [monthBudget, setMonthBudget] = useState(
+    monthlyBudgets[budgetKey]?.toString() ?? ""
+  );
+
+  // Sync month budget input when month/year changes
+  useEffect(() => {
+    const key = `${budgetYear}-${String(budgetMonth).padStart(2, "0")}`;
+    const val = (settings.monthlyBudgets ?? {})[key];
+    setMonthBudget(val !== undefined ? val.toString() : "");
+  }, [budgetMonth, budgetYear, settings.monthlyBudgets]);
+
   useEffect(() => {
     setSalary(settings.salary.toString());
   }, [settings.salary]);
@@ -124,10 +141,38 @@ export default function SettingsPage() {
     setSaving(true);
     try {
       await updateSettings({ salary: val });
-      toast("Salary updated");
+      toast("Default budget updated");
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleMonthBudgetUpdate = async () => {
+    const val = parseFloat(monthBudget);
+    const key = `${budgetYear}-${String(budgetMonth).padStart(2, "0")}`;
+    const updated = { ...(settings.monthlyBudgets ?? {}) };
+    if (!monthBudget || isNaN(val)) {
+      // Clear the override — use default salary
+      delete updated[key];
+    } else {
+      updated[key] = val;
+    }
+    setSaving(true);
+    try {
+      await updateSettings({ monthlyBudgets: updated });
+      toast(!monthBudget || isNaN(val) ? "Month budget cleared (using default)" : `Budget set for ${getMonthName(budgetMonth)} ${budgetYear}`);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const prevBudgetMonth = () => {
+    if (budgetMonth === 1) { setBudgetMonth(12); setBudgetYear(budgetYear - 1); }
+    else setBudgetMonth(budgetMonth - 1);
+  };
+  const nextBudgetMonth = () => {
+    if (budgetMonth === 12) { setBudgetMonth(1); setBudgetYear(budgetYear + 1); }
+    else setBudgetMonth(budgetMonth + 1);
   };
 
   const recurringCount = settings.recurringExpenses?.length || 0;
@@ -271,8 +316,10 @@ export default function SettingsPage() {
                   ))}
                 </div>
               </div>
-              {/* Salary input */}
-              <div className="flex items-center gap-3">
+              {/* Salary input — default budget */}
+              <div>
+                <label className="mb-1.5 block text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>Default Monthly Budget</label>
+                <div className="flex items-center gap-3">
                 <div className="relative flex-1">
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm" style={{ color: 'var(--text-tertiary)' }}>{symbol}</span>
                   <input
@@ -292,6 +339,53 @@ export default function SettingsPage() {
                 >
                   {saving ? "Saving..." : "Update"}
                 </button>
+                </div>
+                <p className="mt-1 text-[11px]" style={{ color: 'var(--text-muted)' }}>
+                  Used for any month without a specific override below
+                </p>
+              </div>
+
+              {/* Per-month budget override */}
+              <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: '12px' }}>
+                <label className="mb-1.5 block text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>Month-Specific Budget</label>
+                <div className="flex items-center gap-2 mb-2">
+                  <button onClick={prevBudgetMonth} className="rounded-lg p-1.5 transition-colors hover:opacity-80" style={{ background: 'var(--surface-secondary)' }}>
+                    <ChevronLeft size={16} style={{ color: 'var(--text-secondary)' }} />
+                  </button>
+                  <span className="min-w-[120px] text-center text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
+                    {getMonthName(budgetMonth)} {budgetYear}
+                  </span>
+                  <button onClick={nextBudgetMonth} className="rounded-lg p-1.5 transition-colors hover:opacity-80" style={{ background: 'var(--surface-secondary)' }}>
+                    <ChevronRight size={16} style={{ color: 'var(--text-secondary)' }} />
+                  </button>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="relative flex-1">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm" style={{ color: 'var(--text-tertiary)' }}>{symbol}</span>
+                    <input
+                      type="number"
+                      min="0"
+                      placeholder={`Default: ${settings.salary}`}
+                      value={monthBudget}
+                      onChange={(e) => setMonthBudget(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === "Enter") handleMonthBudgetUpdate(); }}
+                      className="w-full rounded-xl py-2.5 pl-7 pr-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-brand/20"
+                      style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
+                    />
+                  </div>
+                  <button
+                    onClick={handleMonthBudgetUpdate}
+                    disabled={saving}
+                    className="rounded-xl bg-cta px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-cta/20 hover:bg-cta-hover active:scale-[0.97] disabled:opacity-50"
+                  >
+                    {saving ? "..." : "Set"}
+                  </button>
+                </div>
+                <p className="mt-1 text-[11px]" style={{ color: 'var(--text-muted)' }}>
+                  {monthlyBudgets[budgetKey] !== undefined
+                    ? `Override: ${formatCurrency(monthlyBudgets[budgetKey])} — clear input and click Set to remove`
+                    : "No override — using default budget"}
+                </p>
               </div>
             </div>
           </AccordionSection>

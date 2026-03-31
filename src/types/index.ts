@@ -29,6 +29,7 @@ export interface UserSettings {
   goals?: Goal[];
   rolloverEnabled?: boolean;
   rolloverHistory?: Record<string, number>; // key: "YYYY-MM", value: unspent amount
+  monthlyBudgets?: Record<string, number>; // key: "YYYY-MM", value: budget override for that month
   businessMode?: boolean;
   revenueExpectations?: RevenueExpectation[];
   businessTags?: string[];

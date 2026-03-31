@@ -52,9 +52,10 @@ export function ExpenseForm({
   });
   const [autoApplied, setAutoApplied] = useState(false);
   const [amount, setAmount] = useState(editExpense?.amount?.toString() || prefill?.amount?.toString() || "");
-  const [day, setDay] = useState(editExpense?.day || new Date().getDate());
-  const [selectedMonth, setSelectedMonth] = useState(month);
-  const [selectedYear, setSelectedYear] = useState(year);
+  const today = new Date();
+  const [day, setDay] = useState(editExpense?.day || today.getDate());
+  const [selectedMonth, setSelectedMonth] = useState(editExpense ? month : today.getMonth() + 1);
+  const [selectedYear, setSelectedYear] = useState(editExpense ? year : today.getFullYear());
   const [remark, setRemark] = useState(editExpense?.remark || prefill?.remark || "");
   const [expenseCurrency, setExpenseCurrency] = useState(editExpense?.currency || settings.currency || "INR");
   const [submitting, setSubmitting] = useState(false);

@@ -43,6 +43,7 @@ export interface IDBSettings {
   goals: Goal[];
   rolloverEnabled: boolean;
   rolloverHistory: Record<string, number>;
+  monthlyBudgets?: Record<string, number>;
   businessMode: boolean;
   revenueExpectations: RevenueExpectation[];
   businessTags: string[];

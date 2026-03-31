@@ -31,6 +31,7 @@ const DEFAULT_SETTINGS: UserSettings = {
   goals: [],
   rolloverEnabled: false,
   rolloverHistory: {},
+  monthlyBudgets: {},
   businessMode: false,
   revenueExpectations: [],
   businessTags: [],
@@ -109,6 +110,7 @@ async function pushToApi(s: UserSettings) {
     goals: s.goals || [],
     rolloverEnabled: s.rolloverEnabled ?? false,
     rolloverHistory: s.rolloverHistory || {},
+    monthlyBudgets: s.monthlyBudgets || {},
     businessMode: s.businessMode ?? false,
     revenueExpectations: s.revenueExpectations || [],
     businessTags: s.businessTags || [],
@@ -157,6 +159,7 @@ async function loadSettingsFromIDB(): Promise<UserSettings | null> {
       goals: s.goals ?? [],
       rolloverEnabled: s.rolloverEnabled ?? false,
       rolloverHistory: s.rolloverHistory ?? {},
+      monthlyBudgets: s.monthlyBudgets ?? {},
       businessMode: s.businessMode ?? false,
       revenueExpectations: s.revenueExpectations ?? [],
       businessTags: s.businessTags ?? [],
@@ -243,7 +246,7 @@ export function useSettings() {
   }, []);
 
   const updateSettings = useCallback(
-    async (updates: Partial<Pick<UserSettings, "salary" | "currency" | "categories" | "customCategories" | "hiddenDefaults" | "categoryBudgets" | "recurringExpenses" | "savedFilters" | "goals" | "rolloverEnabled" | "rolloverHistory" | "businessMode" | "revenueExpectations" | "businessTags" | "dashboardLayout" | "multiCurrencyEnabled" | "dismissedRecurringSuggestions" | "autoRules">>) => {
+    async (updates: Partial<Pick<UserSettings, "salary" | "currency" | "categories" | "customCategories" | "hiddenDefaults" | "categoryBudgets" | "recurringExpenses" | "savedFilters" | "goals" | "rolloverEnabled" | "rolloverHistory" | "monthlyBudgets" | "businessMode" | "revenueExpectations" | "businessTags" | "dashboardLayout" | "multiCurrencyEnabled" | "dismissedRecurringSuggestions" | "autoRules">>) => {
       const next = { ..._settings, ...updates, updatedAt: Date.now() };
       saveLocal(next);
       _setShared(next);

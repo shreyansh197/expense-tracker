@@ -33,6 +33,7 @@ export function useCalculations(
   rolloverHistory?: Record<string, number>,
   baseCurrency?: string,
   multiCurrencyEnabled?: boolean,
+  monthlyBudgets?: Record<string, number>,
 ) {
   const daysInMonth = useMemo(() => getDaysInMonth(month, year), [month, year]);
   const elapsedDays = useMemo(() => getElapsedDays(month, year), [month, year]);
@@ -74,16 +75,22 @@ export function useCalculations(
     });
   }, [expenses, multiCurrencyEnabled, rates, baseCurrency]);
 
-  // Calculate effective budget with rollover
+  // Calculate effective budget with per-month override and rollover
   const effectiveBudget = useMemo(() => {
-    if (!rolloverEnabled || !rolloverHistory) return salary;
+    // Per-month budget override takes priority over global salary
+    const monthKey = `${year}-${String(month).padStart(2, "0")}`;
+    const baseBudget = (monthlyBudgets && monthlyBudgets[monthKey] !== undefined)
+      ? monthlyBudgets[monthKey]
+      : salary;
+
+    if (!rolloverEnabled || !rolloverHistory) return baseBudget;
     let pm = month - 1;
     let py = year;
     if (pm <= 0) { pm = 12; py -= 1; }
     const key = `${py}-${String(pm).padStart(2, "0")}`;
     const rollover = rolloverHistory[key] ?? 0;
-    return salary + Math.max(0, rollover);
-  }, [salary, rolloverEnabled, rolloverHistory, month, year]);
+    return baseBudget + Math.max(0, rollover);
+  }, [salary, rolloverEnabled, rolloverHistory, month, year, monthlyBudgets]);
 
   const monthlyTotal = useMemo(
     () => getMonthlyTotal(normalizedExpenses, month, year),

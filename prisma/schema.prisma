@@ -258,6 +258,7 @@ model WorkspaceSettings {
   goals               Json     @default("[]") @db.JsonB
   rolloverEnabled     Boolean  @default(false) @map("rollover_enabled")
   rolloverHistory     Json     @default("{}") @map("rollover_history") @db.JsonB
+  monthlyBudgets      Json     @default("{}") @map("monthly_budgets") @db.JsonB
   businessMode        Boolean  @default(false) @map("business_mode")
   revenueExpectations Json     @default("[]") @map("revenue_expectations") @db.JsonB
   businessTags        Json     @default("[]") @map("business_tags") @db.JsonB

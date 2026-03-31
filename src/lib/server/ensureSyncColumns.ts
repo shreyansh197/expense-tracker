@@ -39,6 +39,10 @@ export async function ensureSyncColumns(): Promise<void> {
 
       -- Migration 007: Expense currency column
       ALTER TABLE expenses ADD COLUMN IF NOT EXISTS currency VARCHAR(3);
+
+      -- Migration 008: Monthly budgets
+      ALTER TABLE workspace_settings
+        ADD COLUMN IF NOT EXISTS monthly_budgets JSONB NOT NULL DEFAULT '{}'::jsonb;
     `);
     console.log("[ensureSyncColumns] Schema migration check complete");
   } catch (err) {

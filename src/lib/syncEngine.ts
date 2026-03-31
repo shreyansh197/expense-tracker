@@ -178,6 +178,7 @@ export async function pullChanges(workspaceId?: string): Promise<boolean> {
               goals: s.goals ?? [],
               rolloverEnabled: s.rolloverEnabled ?? false,
               rolloverHistory: s.rolloverHistory ?? {},
+              monthlyBudgets: s.monthlyBudgets ?? {},
               businessMode: s.businessMode ?? false,
               revenueExpectations: s.revenueExpectations ?? [],
               businessTags: s.businessTags ?? [],

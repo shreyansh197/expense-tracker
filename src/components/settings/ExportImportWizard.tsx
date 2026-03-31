@@ -92,6 +92,8 @@ export function ExportImportWizard() {
     amount: number;
     remark: string;
     error?: string;
+    _month?: number;
+    _year?: number;
   }
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -105,6 +107,29 @@ export function ExportImportWizard() {
       // Try JSON first
       try {
         const parsed = JSON.parse(text);
+
+        // Full backup format: { version: 2, settings, expenses, month, year }
+        if (parsed && typeof parsed === "object" && !Array.isArray(parsed) && parsed.version === 2) {
+          const backupExpenses: Record<string, unknown>[] = parsed.expenses || [];
+          const rows: ParsedRow[] = backupExpenses.map((item) => ({
+            day: Number(item.day) || 1,
+            category: resolveCategory(String(item.category || "")),
+            amount: Number(item.amount) || 0,
+            remark: String(item.remark || ""),
+            error: !Number(item.amount) ? "Invalid amount" : undefined,
+            _month: parsed.month,
+            _year: parsed.year,
+          }));
+          // Store backup metadata for import
+          (window as unknown as Record<string, unknown>).__importBackupMeta = {
+            month: parsed.month,
+            year: parsed.year,
+            settings: parsed.settings,
+          };
+          setPreview(rows);
+          return;
+        }
+
         if (Array.isArray(parsed)) {
           // Simple JSON array
           const rows: ParsedRow[] = parsed.map((item: Record<string, unknown>) => ({
@@ -157,8 +182,10 @@ export function ExportImportWizard() {
 
   const resolveCategory = (input: string): string => {
     const lower = input.toLowerCase().trim();
+    // Direct ID match (backup format uses IDs like "food", "transport")
+    if (allCategories.some((c) => c.id === input || c.id === lower)) return allCategories.find((c) => c.id === input || c.id === lower)!.id;
+    // Label match (simple JSON export uses labels like "Food & Dining")
     if (labelToId[lower]) return labelToId[lower];
-    if (allCategories.some((c) => c.id === lower)) return lower;
     return "miscellaneous";
   };
 
@@ -170,6 +197,10 @@ export function ExportImportWizard() {
       return;
     }
 
+    // Check for backup metadata (month/year from full backup)
+    const backupMeta = (window as unknown as Record<string, unknown>).__importBackupMeta as
+      { month?: number; year?: number; settings?: Record<string, unknown> } | undefined;
+
     setImporting(true);
     let success = 0;
     let failed = 0;
@@ -179,8 +210,8 @@ export function ExportImportWizard() {
           category: row.category,
           amount: row.amount,
           day: row.day,
-          month: currentMonth,
-          year: currentYear,
+          month: row._month ?? backupMeta?.month ?? currentMonth,
+          year: row._year ?? backupMeta?.year ?? currentYear,
           remark: row.remark,
         };
         await addExpense(input);
@@ -192,6 +223,8 @@ export function ExportImportWizard() {
     setImporting(false);
     setImportResult({ success, failed });
     setPreview(null);
+    // Clean up backup metadata
+    delete (window as unknown as Record<string, unknown>).__importBackupMeta;
     toast(`Imported ${success} expenses${failed > 0 ? `, ${failed} failed` : ""}`);
   };
 

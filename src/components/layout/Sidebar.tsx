@@ -45,6 +45,7 @@ export function Sidebar() {
     settings.rolloverHistory,
     settings.currency,
     settings.multiCurrencyEnabled,
+    settings.monthlyBudgets,
   );
 
   const navItems = settings.businessMode ? businessNav : personalNav;

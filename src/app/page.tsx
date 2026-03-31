@@ -3,7 +3,7 @@
 export const dynamic = "force-dynamic";
 
 import { useRouter } from "next/navigation";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { m, AnimatePresence } from "framer-motion";
 import { AppShell } from "@/components/layout/AppShell";
 import { MonthSwitcher } from "@/components/layout/MonthSwitcher";
@@ -223,6 +223,14 @@ export default function DashboardPage() {
   const { settings, updateSettings } = useSettings();
   const { user } = useAuth();
 
+  // Always reset to current month when dashboard mounts
+  useEffect(() => {
+    const now = new Date();
+    const m = now.getMonth() + 1;
+    const y = now.getFullYear();
+    useUIStore.getState().setMonth(m, y);
+  }, []);
+
   // Auto-apply recurring expenses for current month
   useRecurringExpenses(currentMonth, currentYear);
 
@@ -250,6 +258,7 @@ export default function DashboardPage() {
     settings.rolloverHistory,
     settings.currency,
     settings.multiCurrencyEnabled,
+    settings.monthlyBudgets,
   );
 
   const recentExpenses = [...expenses]
