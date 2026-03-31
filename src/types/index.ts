@@ -107,6 +107,8 @@ export interface Forecast {
   projectedTotal: number;    // EOM projected spend
   projectedRemaining: number; // salary - projectedTotal
   confidence: "low" | "medium" | "high"; // based on elapsed days
+  method: "linear" | "weighted";
+  historicalMonths: number;  // how many past months used (0 = linear only)
 }
 
 export interface AnomalyResult {

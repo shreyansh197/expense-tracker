@@ -14,10 +14,12 @@ import {
   getDaysRemaining,
   getPaceToStayUnder,
   getEomForecast,
+  getWeightedForecast,
   detectAnomalies,
 } from "@/lib/calculations";
 import { getDaysInMonth } from "@/lib/utils";
 import { fetchRates, convert } from "@/lib/exchangeRates";
+import { db } from "@/lib/db";
 import type { Expense, CategoryId, DailyTotal, CategoryTotal, StackedDailyTotal, Forecast, AnomalyResult } from "@/types";
 
 export function useCalculations(
@@ -110,10 +112,72 @@ export function useCalculations(
     [remaining, daysRemaining]
   );
 
-  const forecast: Forecast = useMemo(
-    () => getEomForecast(monthlyTotal, effectiveBudget, elapsedDays, daysInMonth),
-    [monthlyTotal, effectiveBudget, elapsedDays, daysInMonth]
-  );
+  // Fetch historical monthly totals from IDB for weighted forecast
+  const [historicalTotals, setHistoricalTotals] = useState<number[]>([]);
+  const [historicalExpenses, setHistoricalExpenses] = useState<Expense[]>([]);
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        // Look back 5 months before the current month
+        const months: Array<{ m: number; y: number }> = [];
+        let pm = month;
+        let py = year;
+        for (let i = 0; i < 5; i++) {
+          pm--;
+          if (pm <= 0) { pm = 12; py--; }
+          months.push({ m: pm, y: py });
+        }
+        months.reverse(); // oldest first
+
+        const totals: number[] = [];
+        const allHist: Expense[] = [];
+        for (const { m, y } of months) {
+          const exps = await db.expenses.where({ month: m, year: y }).toArray();
+          const active = exps.filter((e) => !e.deletedAt);
+          const total = active.reduce((s, e) => s + e.amount, 0);
+          totals.push(total);
+          for (const e of active) {
+            allHist.push({
+              id: e.id,
+              category: e.category,
+              amount: e.amount,
+              currency: e.currency,
+              day: e.day,
+              month: e.month,
+              year: e.year,
+              remark: e.remark ?? "",
+              isRecurring: false,
+              createdAt: 0,
+              updatedAt: 0,
+              deletedAt: null,
+              deviceId: "",
+            });
+          }
+        }
+        if (!cancelled) {
+          setHistoricalTotals(totals);
+          setHistoricalExpenses(allHist);
+        }
+      } catch {
+        // IDB not available — keep empty
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [month, year]);
+
+  const forecast: Forecast = useMemo(() => {
+    // Use weighted forecast if we have ≥2 months of non-zero history
+    const nonZeroHistory = historicalTotals.filter((t) => t > 0);
+    if (nonZeroHistory.length >= 2) {
+      const allExpenses = [...historicalExpenses, ...normalizedExpenses];
+      return getWeightedForecast(
+        monthlyTotal, effectiveBudget, elapsedDays, daysInMonth,
+        month, year, nonZeroHistory, allExpenses,
+      );
+    }
+    return getEomForecast(monthlyTotal, effectiveBudget, elapsedDays, daysInMonth);
+  }, [monthlyTotal, effectiveBudget, elapsedDays, daysInMonth, month, year, historicalTotals, historicalExpenses, normalizedExpenses]);
 
   const anomalies: AnomalyResult[] = useMemo(
     () => detectAnomalies(normalizedExpenses, month, year),

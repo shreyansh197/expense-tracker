@@ -180,6 +180,11 @@ export function KpiCards({
           <div className="flex items-center gap-1 text-meta font-medium">
             <TrendingUp size={12} />
             <span>Forecast</span>
+            {forecast.method === "weighted" && forecast.historicalMonths > 0 && (
+              <span className="ml-auto text-[9px] font-normal opacity-60">
+                {forecast.historicalMonths}mo avg
+              </span>
+            )}
           </div>
           <p className={cn(
             "tabular-nums mt-1 text-base sm:text-lg font-bold",

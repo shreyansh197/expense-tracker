@@ -13,6 +13,9 @@ import {
   detectAnomalies,
   getStackedDailyTotals,
   getPaceToStayUnder,
+  getExponentialWeightedAvg,
+  getDayOfWeekFactors,
+  getWeightedForecast,
 } from "../lib/calculations";
 import type { Expense, CategoryId } from "../types";
 
@@ -550,5 +553,111 @@ describe("additional edge cases", () => {
     expect(getBudgetUsedPercent(14247, SALARY)).toBe(24);
     // 1 / 3 = 33.33% → rounds to 33
     expect(getBudgetUsedPercent(1, 3)).toBe(33);
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════
+// WEIGHTED FORECAST TESTS
+// ═══════════════════════════════════════════════════════════════
+
+describe("getExponentialWeightedAvg", () => {
+  test("returns 0 for empty array", () => {
+    expect(getExponentialWeightedAvg([])).toBe(0);
+  });
+
+  test("returns the single value for length-1 array", () => {
+    expect(getExponentialWeightedAvg([5000])).toBe(5000);
+  });
+
+  test("weights recent values more heavily", () => {
+    // [10000, 20000, 30000] with alpha=0.3
+    // ema0 = 10000
+    // ema1 = 0.3*20000 + 0.7*10000 = 6000+7000 = 13000
+    // ema2 = 0.3*30000 + 0.7*13000 = 9000+9100 = 18100
+    expect(getExponentialWeightedAvg([10000, 20000, 30000], 0.3)).toBe(18100);
+  });
+
+  test("higher alpha gives more weight to recent", () => {
+    const totals = [10000, 50000];
+    const lowAlpha = getExponentialWeightedAvg(totals, 0.1);
+    const highAlpha = getExponentialWeightedAvg(totals, 0.9);
+    expect(highAlpha).toBeGreaterThan(lowAlpha);
+  });
+});
+
+describe("getDayOfWeekFactors", () => {
+  test("returns all 1.0 factors for empty expenses", () => {
+    const factors = getDayOfWeekFactors([]);
+    expect(Object.keys(factors)).toHaveLength(7);
+    for (let i = 0; i < 7; i++) {
+      expect(factors[i]).toBe(1);
+    }
+  });
+
+  test("produces higher factor for day with more spending", () => {
+    // Jan 6, 2025 is a Monday (dow=1), Jan 7 is Tuesday (dow=2)
+    const expenses = [
+      makeExpense({ amount: 1000, day: 6, month: 1, year: 2025 }), // Monday
+      makeExpense({ amount: 100, day: 7, month: 1, year: 2025 }),  // Tuesday
+    ];
+    const factors = getDayOfWeekFactors(expenses);
+    expect(factors[1]).toBeGreaterThan(factors[2]); // Monday > Tuesday
+  });
+
+  test("excludes soft-deleted expenses", () => {
+    const expenses = [
+      makeExpense({ amount: 1000, day: 6, month: 1, year: 2025, deletedAt: Date.now() }),
+    ];
+    const factors = getDayOfWeekFactors(expenses);
+    // All should be 1 since the only expense is deleted
+    for (let i = 0; i < 7; i++) {
+      expect(factors[i]).toBe(1);
+    }
+  });
+});
+
+describe("getWeightedForecast", () => {
+  test("falls back to linear with < 2 historical months", () => {
+    const result = getWeightedForecast(10000, 50000, 15, 31, 3, 2025, [5000], []);
+    expect(result.method).toBe("linear");
+    expect(result.historicalMonths).toBe(0);
+  });
+
+  test("uses weighted method with ≥ 2 historical months", () => {
+    const history = [40000, 45000, 42000]; // 3 months of data
+    const expenses = [
+      makeExpense({ amount: 200, day: 1, month: 1, year: 2025 }),
+      makeExpense({ amount: 200, day: 15, month: 2, year: 2025 }),
+    ];
+    const result = getWeightedForecast(10000, 50000, 10, 31, 3, 2025, history, expenses);
+    expect(result.method).toBe("weighted");
+    expect(result.historicalMonths).toBe(3);
+    expect(result.projectedTotal).toBeGreaterThan(0);
+  });
+
+  test("falls back to linear with 0 elapsed days", () => {
+    const result = getWeightedForecast(0, 50000, 0, 31, 3, 2025, [40000, 45000], []);
+    expect(result.method).toBe("linear");
+    expect(result.projectedTotal).toBe(0);
+  });
+
+  test("higher historical spending projects higher totals", () => {
+    const lowHistory = [20000, 22000];
+    const highHistory = [80000, 85000];
+    const lowResult = getWeightedForecast(10000, 100000, 10, 31, 3, 2025, lowHistory, []);
+    const highResult = getWeightedForecast(10000, 100000, 10, 31, 3, 2025, highHistory, []);
+    expect(highResult.projectedTotal).toBeGreaterThan(lowResult.projectedTotal);
+  });
+
+  test("confidence is high with ≥ 4 months and ≥ 10 elapsed days", () => {
+    const history = [40000, 42000, 45000, 43000];
+    const result = getWeightedForecast(15000, 50000, 15, 31, 3, 2025, history, []);
+    expect(result.confidence).toBe("high");
+  });
+
+  test("confidence is medium with 2 months and ≥ 5 elapsed days", () => {
+    const history = [40000, 42000];
+    const result = getWeightedForecast(15000, 50000, 7, 31, 3, 2025, history, []);
+    expect(result.confidence).toBe("medium");
   });
 });

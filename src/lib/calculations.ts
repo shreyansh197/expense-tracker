@@ -227,7 +227,7 @@ export function getEomForecast(
   daysInMonth: number
 ): Forecast {
   if (elapsedDays <= 0) {
-    return { projectedTotal: 0, projectedRemaining: salary, confidence: "low" };
+    return { projectedTotal: 0, projectedRemaining: salary, confidence: "low", method: "linear", historicalMonths: 0 };
   }
   const avgPerDay = monthlyTotal / elapsedDays;
   const projectedTotal = Math.round(avgPerDay * daysInMonth);
@@ -235,7 +235,7 @@ export function getEomForecast(
   const confidence: Forecast["confidence"] =
     elapsedDays < 7 ? "low" : elapsedDays < 15 ? "medium" : "high";
 
-  return { projectedTotal, projectedRemaining, confidence };
+  return { projectedTotal, projectedRemaining, confidence, method: "linear", historicalMonths: 0 };
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -307,4 +307,114 @@ export function detectAnomalies(
   // Highest z-score first
   anomalies.sort((a, b) => b.zScore - a.zScore);
   return anomalies;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// WEIGHTED FORECAST — Exponential moving average + day-of-week
+// ═══════════════════════════════════════════════════════════════
+
+/**
+ * Compute exponential weighted average over monthly totals.
+ * Most recent month gets highest weight.
+ * @param monthlyTotals - array ordered oldest → newest
+ * @param alpha - smoothing factor 0..1 (higher = more weight on recent)
+ */
+export function getExponentialWeightedAvg(monthlyTotals: number[], alpha = 0.3): number {
+  if (monthlyTotals.length === 0) return 0;
+  if (monthlyTotals.length === 1) return monthlyTotals[0];
+
+  let ema = monthlyTotals[0];
+  for (let i = 1; i < monthlyTotals.length; i++) {
+    ema = alpha * monthlyTotals[i] + (1 - alpha) * ema;
+  }
+  return Math.round(ema);
+}
+
+/**
+ * Compute day-of-week spending factors from expenses.
+ * Returns a map: dayOfWeek (0=Sun..6=Sat) → factor.
+ * Factor > 1 means that weekday has above-average spending.
+ */
+export function getDayOfWeekFactors(expenses: Expense[]): Record<number, number> {
+  const sums: number[] = [0, 0, 0, 0, 0, 0, 0];
+  const counts: number[] = [0, 0, 0, 0, 0, 0, 0];
+
+  for (const e of expenses) {
+    if (e.deletedAt) continue;
+    const d = new Date(e.year, e.month - 1, e.day);
+    const dow = d.getDay();
+    sums[dow] += e.amount;
+    counts[dow]++;
+  }
+
+  const avgPerDay: number[] = [];
+  for (let i = 0; i < 7; i++) {
+    avgPerDay[i] = counts[i] > 0 ? sums[i] / counts[i] : 0;
+  }
+
+  const overallAvg = avgPerDay.reduce((s, v) => s + v, 0) / 7;
+  if (overallAvg === 0) return { 0: 1, 1: 1, 2: 1, 3: 1, 4: 1, 5: 1, 6: 1 };
+
+  const factors: Record<number, number> = {};
+  for (let i = 0; i < 7; i++) {
+    factors[i] = avgPerDay[i] / overallAvg;
+  }
+  return factors;
+}
+
+/**
+ * Enhanced EOM forecast using weighted moving average + day-of-week patterns.
+ * Falls back to linear projection when < 2 months of history.
+ */
+export function getWeightedForecast(
+  monthlyTotal: number,
+  salary: number,
+  elapsedDays: number,
+  daysInMonth: number,
+  month: number,
+  year: number,
+  historicalTotals: number[], // oldest → newest, NOT including current month
+  allExpenses: Expense[],     // all historical + current expenses for day-of-week
+): Forecast {
+  // Too early in the month or no historical data → fall back to linear
+  if (elapsedDays <= 0 || historicalTotals.length < 2) {
+    return getEomForecast(monthlyTotal, salary, elapsedDays, daysInMonth);
+  }
+
+  // Weighted average of historical monthly totals
+  const weightedMonthlyAvg = getExponentialWeightedAvg(historicalTotals);
+
+  // Day-of-week factors from all available expenses
+  const dowFactors = getDayOfWeekFactors(allExpenses);
+
+  // Calculate weighted daily average based on historical
+  const avgDaysInMonth = 30.44;
+  const historicalDailyAvg = weightedMonthlyAvg / avgDaysInMonth;
+
+  // Project remaining days using day-of-week factors
+  let remainingProjection = 0;
+  for (let d = elapsedDays + 1; d <= daysInMonth; d++) {
+    const date = new Date(year, month - 1, d);
+    const dow = date.getDay();
+    const factor = dowFactors[dow] ?? 1;
+    remainingProjection += historicalDailyAvg * factor;
+  }
+
+  const projectedTotal = Math.round(monthlyTotal + remainingProjection);
+  const projectedRemaining = salary - projectedTotal;
+
+  const confidence: Forecast["confidence"] =
+    historicalTotals.length >= 4 && elapsedDays >= 10
+      ? "high"
+      : historicalTotals.length >= 2 && elapsedDays >= 5
+        ? "medium"
+        : "low";
+
+  return {
+    projectedTotal,
+    projectedRemaining,
+    confidence,
+    method: "weighted",
+    historicalMonths: historicalTotals.length,
+  };
 }
