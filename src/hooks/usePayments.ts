@@ -1,119 +1,83 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { authFetch, getActiveWorkspaceId } from "@/lib/authClient";
-import { makeIdempotencyKey, enqueueOfflineMutation } from "@/lib/syncClient";
-import { fetchSyncData, invalidateSyncCache } from "@/lib/syncFetch";
-import { supabase } from "@/lib/supabase";
+import { useCallback } from "react";
+import { getActiveWorkspaceId } from "@/lib/authClient";
+import { db } from "@/lib/db";
+import {
+  makeIdempotencyKey,
+  enqueueMutation,
+  trySyncPush,
+} from "@/lib/syncEngine";
+import { useDexieQuery } from "@/hooks/useDexieQuery";
 import type { Payment, PaymentInput, PaymentMethod, SyncStatus } from "@/types";
 
-// Global event to trigger re-fetch across all usePayments instances
+// Global event kept for backward compatibility (RecurringManager imports it)
 const paymentListeners = new Set<() => void>();
 export function notifyPaymentChange() {
   paymentListeners.forEach((fn) => fn());
 }
 
+function toPayment(row: { id: string; ledgerId: string; amount: number; date: string; method?: PaymentMethod; reference?: string; notes?: string; createdAt: number; updatedAt: number; deletedAt: number | null }): Payment {
+  return {
+    id: row.id,
+    ledgerId: row.ledgerId,
+    amount: row.amount,
+    date: row.date,
+    method: row.method,
+    reference: row.reference,
+    notes: row.notes,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+    deletedAt: row.deletedAt,
+    deviceId: "",
+  };
+}
+
 export function usePayments(ledgerId: string | null) {
-  const [payments, setPayments] = useState<Payment[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [syncStatus, setSyncStatus] = useState<SyncStatus>("synced");
+  const wid = getActiveWorkspaceId();
 
-  const fetchPayments = useCallback(async () => {
-    if (!ledgerId) { setPayments([]); setLoading(false); return; }
-    const wid = getActiveWorkspaceId();
-    if (!wid) return;
-    setSyncStatus("syncing");
+  const queryResult = useDexieQuery(
+    async () => {
+      if (!wid || !ledgerId) return [] as Payment[];
+      const rows = await db.payments
+        .where("ledgerId").equals(ledgerId)
+        .toArray();
+      return rows
+        .filter(r => !r.deletedAt && r.workspaceId === wid)
+        .map(toPayment)
+        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    },
+    [wid, ledgerId],
+    [] as Payment[],
+  );
 
-    try {
-      const data = await fetchSyncData(wid) as Record<string, unknown>;
-      const changes = data.changes as Record<string, unknown> | undefined;
-      const all: Payment[] = ((changes?.businessPayments ?? []) as Record<string, unknown>[])
-        .filter((p: Record<string, unknown>) => !p.deletedAt && p.ledgerId === ledgerId)
-        .map((row: Record<string, unknown>) => ({
-          id: row.id as string,
-          ledgerId: row.ledgerId as string,
-          amount: Number(row.amount),
-          date: row.date as string,
-          method: (row.method as PaymentMethod) || undefined,
-          reference: (row.reference as string) || undefined,
-          notes: (row.notes as string) || undefined,
-          createdAt: new Date(row.createdAt as string).getTime(),
-          updatedAt: new Date(row.updatedAt as string).getTime(),
-          deletedAt: null,
-          deviceId: "",
-        }));
-      // Sort by date descending
-      all.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-      setPayments(all);
-      setSyncStatus("synced");
-    } catch {
-      setSyncStatus("error");
-    }
-    setLoading(false);
-  }, [ledgerId]);
+  const payments = queryResult;
+  const loading = false;
+  const syncStatus: SyncStatus = "synced";
 
-  useEffect(() => {
-    fetchPayments();
-    paymentListeners.add(fetchPayments);
+  const addPayment = useCallback(async (input: PaymentInput) => {
+    const workspace = getActiveWorkspaceId();
+    if (!workspace) return;
 
-    const wid = getActiveWorkspaceId();
-    const channel = wid && ledgerId
-      ? supabase
-          .channel(`payments-${wid}-${ledgerId}`)
-          .on(
-            "postgres_changes",
-            {
-              event: "*",
-              schema: "public",
-              table: "business_payments",
-              filter: `workspace_id=eq.${wid}`,
-            },
-            () => { invalidateSyncCache(); fetchPayments(); }
-          )
-          .subscribe()
-      : null;
-
-    const onVisibility = () => {
-      if (document.visibilityState === "visible") {
-        invalidateSyncCache();
-        fetchPayments();
-      }
-    };
-    document.addEventListener("visibilitychange", onVisibility);
-
-    const pollId = setInterval(() => {
-      if (document.visibilityState === "visible") {
-        invalidateSyncCache();
-        fetchPayments();
-      }
-    }, 10_000);
-
-    return () => {
-      paymentListeners.delete(fetchPayments);
-      if (channel) supabase.removeChannel(channel);
-      document.removeEventListener("visibilitychange", onVisibility);
-      clearInterval(pollId);
-    };
-  }, [ledgerId, fetchPayments]);
-
-  const addPayment = async (input: PaymentInput) => {
     const tempId = `temp-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
-    const optimistic: Payment = {
+
+    await db.payments.put({
       id: tempId,
-      ...input,
+      workspaceId: workspace,
+      ledgerId: input.ledgerId,
+      amount: input.amount,
+      date: input.date,
+      method: input.method,
+      reference: input.reference,
+      notes: input.notes,
       createdAt: Date.now(),
       updatedAt: Date.now(),
       deletedAt: null,
-      deviceId: "",
-    };
-    setPayments((prev) => [optimistic, ...prev]);
+    });
 
-    const wid = getActiveWorkspaceId();
-    if (!wid) return;
-
-    const mutation = {
-      table: "business_payments" as const,
-      operation: "upsert" as const,
+    await enqueueMutation({
+      table: "business_payments",
+      operation: "upsert",
       data: {
         ledgerId: input.ledgerId,
         amount: input.amount,
@@ -123,92 +87,50 @@ export function usePayments(ledgerId: string | null) {
         notes: input.notes || null,
       },
       idempotencyKey: makeIdempotencyKey(),
-    };
+    }, workspace);
 
-    try {
-      const res = await authFetch("/api/sync/commit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ workspaceId: wid, mutations: [mutation] }),
-      });
-      if (!res.ok) {
-        setPayments((prev) => prev.filter((p) => p.id !== tempId));
-        throw new Error("Failed to add payment");
-      }
-    } catch (err) {
-      enqueueOfflineMutation(mutation);
-      setPayments((prev) => prev.filter((p) => p.id !== tempId));
-      throw err;
-    }
-    invalidateSyncCache();
+    trySyncPush(workspace);
     notifyPaymentChange();
-  };
+  }, []);
 
-  const updatePayment = async (id: string, updates: Partial<PaymentInput>) => {
-    setPayments((prev) =>
-      prev.map((p) => (p.id === id ? { ...p, ...updates, updatedAt: Date.now() } : p))
-    );
-    const wid = getActiveWorkspaceId();
-    if (!wid) return;
+  const updatePayment = useCallback(async (id: string, updates: Partial<PaymentInput>) => {
+    const workspace = getActiveWorkspaceId();
+    if (!workspace) return;
 
-    const mutation = {
-      table: "business_payments" as const,
-      operation: "upsert" as const,
+    const existing = await db.payments.get(id);
+    if (existing) {
+      await db.payments.put({ ...existing, ...updates, updatedAt: Date.now() });
+    }
+
+    await enqueueMutation({
+      table: "business_payments",
+      operation: "upsert",
       id,
       data: { ...updates },
       idempotencyKey: makeIdempotencyKey(),
-    };
+    }, workspace);
 
-    try {
-      const res = await authFetch("/api/sync/commit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ workspaceId: wid, mutations: [mutation] }),
-      });
-      if (!res.ok) {
-        fetchPayments();
-        throw new Error("Failed to update payment");
-      }
-    } catch (err) {
-      enqueueOfflineMutation(mutation);
-      fetchPayments();
-      throw err;
-    }
-    invalidateSyncCache();
+    trySyncPush(workspace);
     notifyPaymentChange();
-  };
+  }, []);
 
-  const deletePayment = async (id: string) => {
-    setPayments((prev) => prev.filter((p) => p.id !== id));
-    const wid = getActiveWorkspaceId();
-    if (!wid) return;
+  const deletePayment = useCallback(async (id: string) => {
+    const workspace = getActiveWorkspaceId();
+    if (!workspace) return;
 
-    const mutation = {
-      table: "business_payments" as const,
-      operation: "delete" as const,
+    await db.payments.delete(id);
+
+    await enqueueMutation({
+      table: "business_payments",
+      operation: "delete",
       id,
       data: {},
       idempotencyKey: makeIdempotencyKey(),
-    };
+    }, workspace);
 
-    try {
-      const res = await authFetch("/api/sync/commit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ workspaceId: wid, mutations: [mutation] }),
-      });
-      if (!res.ok) {
-        fetchPayments();
-        throw new Error("Failed to delete payment");
-      }
-    } catch (err) {
-      enqueueOfflineMutation(mutation);
-      fetchPayments();
-      throw err;
-    }
-    invalidateSyncCache();
+    trySyncPush(workspace);
     notifyPaymentChange();
-  };
+  }, []);
 
   const totalReceived = payments.reduce((sum, p) => sum + p.amount, 0);
 

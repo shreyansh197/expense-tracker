@@ -1,166 +1,71 @@
 "use client";
 
-import { useState, useEffect, useCallback, useSyncExternalStore } from "react";
-import { authFetch, getActiveWorkspaceId } from "@/lib/authClient";
-import { makeIdempotencyKey, enqueueOfflineMutation } from "@/lib/syncClient";
-import { fetchSyncData, invalidateSyncCache } from "@/lib/syncFetch";
-import { supabase } from "@/lib/supabase";
+import { useCallback } from "react";
+import { getActiveWorkspaceId } from "@/lib/authClient";
+import { db } from "@/lib/db";
+import {
+  makeIdempotencyKey,
+  enqueueMutation,
+  trySyncPush,
+  pullChanges,
+} from "@/lib/syncEngine";
+import { useDexieQuery } from "@/hooks/useDexieQuery";
 import type { Expense, ExpenseInput, CategoryId, SyncStatus } from "@/types";
 
-// ── Module-level cache keyed by "month:year" ──
-const _cache = new Map<string, Expense[]>();
-const _listeners = new Set<() => void>();
-let _syncStatus: SyncStatus = "synced";
 const EMPTY: Expense[] = [];
 
-function cacheKey(m: number, y: number) { return `${m}:${y}`; }
-
-function _notify() { _listeners.forEach((fn) => fn()); }
-
-function _getExpenses(m: number, y: number): Expense[] {
-  return _cache.get(cacheKey(m, y)) ?? EMPTY;
-}
-
-function _setExpenses(m: number, y: number, expenses: Expense[]) {
-  _cache.set(cacheKey(m, y), expenses);
-  _notify();
-}
-
-function _subscribe(cb: () => void): () => void {
-  _listeners.add(cb);
-  return () => { _listeners.delete(cb); };
-}
-
-// Global event to trigger re-fetch across all active useExpenses instances
-const expenseListeners = new Set<() => void>();
-function notifyExpenseChange() {
-  expenseListeners.forEach((fn) => fn());
-}
-
-// Dedup in-flight requests per key
-const _inflight = new Map<string, Promise<void>>();
-
-function parseExpenses(data: Record<string, unknown>, month: number, year: number): Expense[] {
-  const all: Expense[] = ((data.changes as Record<string, unknown>)?.expenses as Record<string, unknown>[] ?? [])
-    .filter((e: Record<string, unknown>) => !e.deletedAt)
-    .filter((e: Record<string, unknown>) => e.month === month && e.year === year)
-    .map((row: Record<string, unknown>) => ({
-      id: row.id as string,
-      category: row.category as CategoryId,
-      amount: Number(row.amount),
-      day: row.day as number,
-      month: row.month as number,
-      year: row.year as number,
-      remark: (row.remark as string) ?? undefined,
-      isRecurring: (row.isRecurring as boolean) ?? false,
-      recurringId: (row.recurringId as string) ?? undefined,
-      createdAt: new Date(row.createdAt as string).getTime(),
-      updatedAt: new Date(row.updatedAt as string).getTime(),
-      deletedAt: null,
-      deviceId: "",
-    }));
-  all.sort((a, b) => a.day - b.day);
-  return all;
+function toExpense(row: { id: string; category: string; amount: number; day: number; month: number; year: number; remark?: string; isRecurring: boolean; recurringId?: string; createdAt: number; updatedAt: number; deletedAt: number | null }): Expense {
+  return {
+    id: row.id,
+    category: row.category as CategoryId,
+    amount: row.amount,
+    day: row.day,
+    month: row.month,
+    year: row.year,
+    remark: row.remark,
+    isRecurring: row.isRecurring ?? false,
+    recurringId: row.recurringId,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+    deletedAt: row.deletedAt,
+    deviceId: "",
+  };
 }
 
 export function useExpenses(month: number, year: number) {
-  const key = cacheKey(month, year);
-  // Show cached data instantly; loading only when no cache exists
-  const expenses = useSyncExternalStore(_subscribe, () => _getExpenses(month, year), () => EMPTY);
-  const [loading, setLoading] = useState(() => !_cache.has(key));
-  const [syncStatus, setSyncStatus] = useState<SyncStatus>(_syncStatus);
+  const wid = getActiveWorkspaceId();
 
-  // Reset loading when the month/year key changes
-  useEffect(() => {
-    setLoading(!_cache.has(key));
-  }, [key]);
+  const queryResult = useDexieQuery(
+    async () => {
+      if (!wid) return EMPTY;
+      const rows = await db.expenses
+        .where("[workspaceId+month+year]")
+        .equals([wid, month, year])
+        .toArray();
+      return rows
+        .filter(r => !r.deletedAt)
+        .map(toExpense)
+        .sort((a, b) => a.day - b.day);
+    },
+    [wid, month, year],
+    EMPTY,
+  );
 
-  const fetchExpenses = useCallback(async () => {
-    const wid = getActiveWorkspaceId();
-    if (!wid) return;
+  const expenses = queryResult;
+  const loading = queryResult === EMPTY && wid !== null;
+  const syncStatus: SyncStatus = "synced";
 
-    // Dedup: if a fetch for this key is already in-flight, reuse it
-    const existing = _inflight.get(key);
-    if (existing) { await existing; setLoading(false); return; }
+  const addExpense = useCallback(async (input: ExpenseInput) => {
+    const workspace = getActiveWorkspaceId();
+    if (!workspace) return;
 
-    _syncStatus = "syncing";
-    setSyncStatus("syncing");
-
-    const promise = (async () => {
-      try {
-        const data = await fetchSyncData(wid) as Record<string, unknown>;
-        const all = parseExpenses(data, month, year);
-        _setExpenses(month, year, all);
-        _syncStatus = "synced";
-        setSyncStatus("synced");
-      } catch {
-        _syncStatus = "error";
-        setSyncStatus("error");
-      }
-      setLoading(false);
-    })();
-
-    _inflight.set(key, promise);
-    await promise;
-    _inflight.delete(key);
-  }, [month, year, key]);
-
-  // Initial fetch + realtime subscription + global change listener
-  useEffect(() => {
-    fetchExpenses();
-
-    expenseListeners.add(fetchExpenses);
-
-    const wid = getActiveWorkspaceId();
-    const channel = wid
-      ? supabase
-          .channel(`expenses-${wid}-${month}-${year}`)
-          .on(
-            "postgres_changes",
-            {
-              event: "*",
-              schema: "public",
-              table: "expenses",
-              filter: `workspace_id=eq.${wid}`,
-            },
-            () => {
-              invalidateSyncCache();
-              fetchExpenses();
-            }
-          )
-          .subscribe()
-      : null;
-
-    // Refresh when tab/app becomes visible (handles Realtime disconnects)
-    const onVisibility = () => {
-      if (document.visibilityState === "visible") {
-        invalidateSyncCache();
-        fetchExpenses();
-      }
-    };
-    document.addEventListener("visibilitychange", onVisibility);
-
-    // Poll every 10s for cross-device sync (deduped by syncFetch)
-    const pollId = setInterval(() => {
-      if (document.visibilityState === "visible") {
-        invalidateSyncCache();
-        fetchExpenses();
-      }
-    }, 10_000);
-
-    return () => {
-      expenseListeners.delete(fetchExpenses);
-      if (channel) supabase.removeChannel(channel);
-      document.removeEventListener("visibilitychange", onVisibility);
-      clearInterval(pollId);
-    };
-  }, [month, year, fetchExpenses]);
-
-  const addExpense = async (input: ExpenseInput) => {
     const tempId = `temp-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
-    const optimistic: Expense = {
+
+    // Write directly to IDB — useDexieQuery auto-updates
+    await db.expenses.put({
       id: tempId,
-      category: input.category as CategoryId,
+      workspaceId: workspace,
+      category: input.category,
       amount: input.amount,
       day: input.day,
       month: input.month,
@@ -171,16 +76,12 @@ export function useExpenses(month: number, year: number) {
       createdAt: Date.now(),
       updatedAt: Date.now(),
       deletedAt: null,
-      deviceId: "",
-    };
-    _setExpenses(month, year, [..._getExpenses(month, year), optimistic]);
+    });
 
-    const wid = getActiveWorkspaceId();
-    if (!wid) return;
-
-    const mutation = {
-      table: "expenses" as const,
-      operation: "upsert" as const,
+    // Enqueue mutation for server sync
+    await enqueueMutation({
+      table: "expenses",
+      operation: "upsert",
       data: {
         category: input.category,
         amount: input.amount,
@@ -192,123 +93,69 @@ export function useExpenses(month: number, year: number) {
         recurringId: input.recurringId || null,
       },
       idempotencyKey: makeIdempotencyKey(),
-    };
+    }, workspace);
 
-    try {
-      const res = await authFetch("/api/sync/commit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ workspaceId: wid, mutations: [mutation] }),
-      });
-      if (!res.ok) {
-        _setExpenses(month, year, _getExpenses(month, year).filter((e) => e.id !== tempId));
-        throw new Error("Failed to add expense");
-      }
-    } catch (err) {
-      enqueueOfflineMutation(mutation);
-      _setExpenses(month, year, _getExpenses(month, year).filter((e) => e.id !== tempId));
-      throw err;
+    trySyncPush(workspace);
+  }, []);
+
+  const updateExpense = useCallback(async (id: string, updates: Partial<ExpenseInput>) => {
+    const workspace = getActiveWorkspaceId();
+    if (!workspace) return;
+
+    // Optimistic IDB update
+    const existing = await db.expenses.get(id);
+    if (existing) {
+      await db.expenses.put({ ...existing, ...updates, updatedAt: Date.now() });
     }
-    invalidateSyncCache();
-    notifyExpenseChange();
-  };
 
-  const updateExpense = async (id: string, updates: Partial<ExpenseInput>) => {
-    _setExpenses(month, year, _getExpenses(month, year).map((e) => (e.id === id ? { ...e, ...updates } : e)));
-    const wid = getActiveWorkspaceId();
-    if (!wid) return;
-
-    const mutation = {
-      table: "expenses" as const,
-      operation: "upsert" as const,
+    await enqueueMutation({
+      table: "expenses",
+      operation: "upsert",
       id,
       data: { ...updates },
       idempotencyKey: makeIdempotencyKey(),
-    };
+    }, workspace);
 
-    try {
-      const res = await authFetch("/api/sync/commit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ workspaceId: wid, mutations: [mutation] }),
-      });
-      if (!res.ok) {
-        fetchExpenses();
-        throw new Error("Failed to update expense");
-      }
-    } catch (err) {
-      enqueueOfflineMutation(mutation);
-      fetchExpenses();
-      throw err;
-    }
-    invalidateSyncCache();
-    notifyExpenseChange();
-  };
+    trySyncPush(workspace);
+  }, []);
 
-  const deleteExpense = async (id: string) => {
-    _setExpenses(month, year, _getExpenses(month, year).filter((e) => e.id !== id));
-    const wid = getActiveWorkspaceId();
-    if (!wid) return;
+  const deleteExpense = useCallback(async (id: string) => {
+    const workspace = getActiveWorkspaceId();
+    if (!workspace) return;
 
-    const mutation = {
-      table: "expenses" as const,
-      operation: "delete" as const,
+    // Optimistic IDB delete
+    await db.expenses.delete(id);
+
+    await enqueueMutation({
+      table: "expenses",
+      operation: "delete",
       id,
       data: {},
       idempotencyKey: makeIdempotencyKey(),
-    };
+    }, workspace);
 
-    try {
-      const res = await authFetch("/api/sync/commit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ workspaceId: wid, mutations: [mutation] }),
-      });
-      if (!res.ok) {
-        fetchExpenses();
-        throw new Error("Failed to delete expense");
-      }
-    } catch (err) {
-      enqueueOfflineMutation(mutation);
-      fetchExpenses();
-      throw err;
+    trySyncPush(workspace);
+  }, []);
+
+  const deleteExpenses = useCallback(async (ids: string[]) => {
+    const workspace = getActiveWorkspaceId();
+    if (!workspace) return;
+
+    // Optimistic IDB delete
+    await db.expenses.bulkDelete(ids);
+
+    for (const id of ids) {
+      await enqueueMutation({
+        table: "expenses",
+        operation: "delete",
+        id,
+        data: {},
+        idempotencyKey: makeIdempotencyKey(),
+      }, workspace);
     }
-    invalidateSyncCache();
-    notifyExpenseChange();
-  };
 
-  const deleteExpenses = async (ids: string[]) => {
-    const idSet = new Set(ids);
-    _setExpenses(month, year, _getExpenses(month, year).filter((e) => !idSet.has(e.id)));
-    const wid = getActiveWorkspaceId();
-    if (!wid) return;
-
-    const mutations = ids.map((id) => ({
-      table: "expenses" as const,
-      operation: "delete" as const,
-      id,
-      data: {},
-      idempotencyKey: makeIdempotencyKey(),
-    }));
-
-    try {
-      const res = await authFetch("/api/sync/commit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ workspaceId: wid, mutations }),
-      });
-      if (!res.ok) {
-        fetchExpenses();
-        throw new Error("Failed to delete expenses");
-      }
-    } catch (err) {
-      mutations.forEach((m) => enqueueOfflineMutation(m));
-      fetchExpenses();
-      throw err;
-    }
-    invalidateSyncCache();
-    notifyExpenseChange();
-  };
+    trySyncPush(workspace);
+  }, []);
 
   return {
     expenses,

@@ -1,85 +1,50 @@
 "use client";
 
-import { useState, useEffect, useCallback, startTransition } from "react";
 import { getActiveWorkspaceId } from "@/lib/authClient";
-import { fetchSyncData, invalidateSyncCache } from "@/lib/syncFetch";
-import { supabase } from "@/lib/supabase";
+import { db } from "@/lib/db";
+import { useDexieQuery } from "@/hooks/useDexieQuery";
 import type { Payment, PaymentMethod } from "@/types";
+
+function toPayment(row: { id: string; ledgerId: string; amount: number; date: string; method?: PaymentMethod; reference?: string; notes?: string; createdAt: number; updatedAt: number; deletedAt: number | null }): Payment {
+  return {
+    id: row.id,
+    ledgerId: row.ledgerId,
+    amount: row.amount,
+    date: row.date,
+    method: row.method,
+    reference: row.reference,
+    notes: row.notes,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+    deletedAt: row.deletedAt,
+    deviceId: "",
+  };
+}
 
 /**
  * Fetch all payments for all ledgers belonging to this workspace.
  * Used for aggregate analytics on the business dashboard.
  */
 export function useAllPayments() {
-  const [payments, setPayments] = useState<Payment[]>([]);
-  const [loading, setLoading] = useState(true);
+  const wid = getActiveWorkspaceId();
 
-  const fetchAll = useCallback(async () => {
-    const wid = getActiveWorkspaceId();
-    if (!wid) { startTransition(() => setLoading(false)); return; }
+  const queryResult = useDexieQuery(
+    async () => {
+      if (!wid) return [] as Payment[];
+      const rows = await db.payments
+        .where("workspaceId").equals(wid)
+        .toArray();
+      return rows
+        .filter(r => !r.deletedAt)
+        .map(toPayment)
+        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    },
+    [wid],
+    [] as Payment[],
+  );
 
-    try {
-      const data = await fetchSyncData(wid) as Record<string, unknown>;
-      const changes = data.changes as Record<string, unknown> | undefined;
-
-      const all: Payment[] = ((changes?.businessPayments ?? []) as Record<string, unknown>[])
-        .filter((p: Record<string, unknown>) => !p.deletedAt)
-        .map((row: Record<string, unknown>) => ({
-          id: row.id as string,
-          ledgerId: row.ledgerId as string,
-          amount: Number(row.amount),
-          date: row.date as string,
-          method: (row.method as PaymentMethod) || undefined,
-          reference: (row.reference as string) || undefined,
-          notes: (row.notes as string) || undefined,
-          createdAt: new Date(row.createdAt as string).getTime(),
-          updatedAt: new Date(row.updatedAt as string).getTime(),
-          deletedAt: null,
-          deviceId: "",
-        }));
-      // Sort by date descending
-      all.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-      startTransition(() => setPayments(all));
-    } catch { /* ignore */ }
-    startTransition(() => setLoading(false));
-  }, []);
-
-  useEffect(() => {
-    fetchAll();
-
-    const wid = getActiveWorkspaceId();
-    const channel = wid
-      ? supabase
-          .channel(`all-payments-${wid}`)
-          .on(
-            "postgres_changes",
-            { event: "*", schema: "public", table: "business_payments", filter: `workspace_id=eq.${wid}` },
-            () => { invalidateSyncCache(); fetchAll(); }
-          )
-          .subscribe()
-      : null;
-
-    const onVisibility = () => {
-      if (document.visibilityState === "visible") {
-        invalidateSyncCache();
-        fetchAll();
-      }
-    };
-    document.addEventListener("visibilitychange", onVisibility);
-
-    const pollId = setInterval(() => {
-      if (document.visibilityState === "visible") {
-        invalidateSyncCache();
-        fetchAll();
-      }
-    }, 10_000);
-
-    return () => {
-      if (channel) supabase.removeChannel(channel);
-      document.removeEventListener("visibilitychange", onVisibility);
-      clearInterval(pollId);
-    };
-  }, [fetchAll]);
+  const payments = queryResult;
+  const loading = false;
 
   return { payments, loading };
 }

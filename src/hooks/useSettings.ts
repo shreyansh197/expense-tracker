@@ -4,9 +4,13 @@ import { useState, useEffect, useCallback, useSyncExternalStore } from "react";
 import { DEFAULT_SALARY } from "@/lib/constants";
 import { DEFAULT_CATEGORIES } from "@/lib/categories";
 import { authFetch, getActiveWorkspaceId, isAuthenticated } from "@/lib/authClient";
-import { makeIdempotencyKey } from "@/lib/syncClient";
-import { fetchSyncData, invalidateSyncCache } from "@/lib/syncFetch";
-import { supabase } from "@/lib/supabase";
+import { db } from "@/lib/db";
+import {
+  makeIdempotencyKey,
+  enqueueMutation,
+  trySyncPush,
+  onSyncPull,
+} from "@/lib/syncEngine";
 import type { UserSettings, CategoryMeta } from "@/types";
 
 const STORAGE_KEY_BASE = "expenstream-settings";
@@ -90,64 +94,67 @@ async function pushToApi(s: UserSettings) {
   const wid = getActiveWorkspaceId();
   if (!wid || !isAuthenticated()) return;
 
-  await authFetch("/api/sync/commit", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      workspaceId: wid,
-      mutations: [{
-        table: "workspace_settings",
-        operation: "upsert",
-        data: {
-          salary: s.salary,
-          currency: s.currency,
-          categories: s.categories,
-          customCategories: s.customCategories,
-          hiddenDefaults: s.hiddenDefaults,
-          categoryBudgets: s.categoryBudgets || {},
-          recurringExpenses: s.recurringExpenses || [],
-          savedFilters: s.savedFilters || [],
-          goals: s.goals || [],
-          rolloverEnabled: s.rolloverEnabled ?? false,
-          rolloverHistory: s.rolloverHistory || {},
-          businessMode: s.businessMode ?? false,
-          revenueExpectations: s.revenueExpectations || [],
-          businessTags: s.businessTags || [],
-        },
-        idempotencyKey: makeIdempotencyKey(),
-      }],
-    }),
+  const settingsData = {
+    salary: s.salary,
+    currency: s.currency,
+    categories: s.categories,
+    customCategories: s.customCategories,
+    hiddenDefaults: s.hiddenDefaults,
+    categoryBudgets: s.categoryBudgets || {},
+    recurringExpenses: s.recurringExpenses || [],
+    savedFilters: s.savedFilters || [],
+    goals: s.goals || [],
+    rolloverEnabled: s.rolloverEnabled ?? false,
+    rolloverHistory: s.rolloverHistory || {},
+    businessMode: s.businessMode ?? false,
+    revenueExpectations: s.revenueExpectations || [],
+    businessTags: s.businessTags || [],
+  };
+
+  // Persist to IDB
+  await db.settings.put({
+    workspaceId: wid,
+    ...settingsData,
+    updatedAt: s.updatedAt,
   });
+
+  // Enqueue mutation and push
+  await enqueueMutation({
+    table: "workspace_settings",
+    operation: "upsert",
+    data: settingsData,
+    idempotencyKey: makeIdempotencyKey(),
+  }, wid);
+
+  trySyncPush(wid);
 }
 
-/** Fetch settings from API */
-async function fetchSettingsFromApi(): Promise<UserSettings | null> {
+/** Load settings from IDB (populated by sync engine pulls) */
+async function loadSettingsFromIDB(): Promise<UserSettings | null> {
   const wid = getActiveWorkspaceId();
-  if (!wid || !isAuthenticated()) return null;
+  if (!wid) return null;
 
   try {
-    const data = await fetchSyncData(wid) as Record<string, unknown>;
-    const changes = data.changes as Record<string, unknown> | undefined;
-    const s = changes?.settings as Record<string, unknown> | null;
+    const s = await db.settings.get(wid);
     if (!s) return null;
 
     return {
-      salary: Number(s.salary),
-      currency: s.currency as string,
-      categories: (s.categories as string[]) || DEFAULT_CATEGORIES,
-      customCategories: (s.customCategories as CategoryMeta[]) || [],
-      hiddenDefaults: (s.hiddenDefaults as string[]) || [],
-      categoryBudgets: (s.categoryBudgets as Record<string, number>) ?? {},
-      recurringExpenses: (s.recurringExpenses as UserSettings["recurringExpenses"]) ?? [],
-      savedFilters: (s.savedFilters as UserSettings["savedFilters"]) ?? [],
-      goals: (s.goals as UserSettings["goals"]) ?? [],
-      rolloverEnabled: (s.rolloverEnabled as boolean) ?? false,
-      rolloverHistory: (s.rolloverHistory as Record<string, number>) ?? {},
-      businessMode: (s.businessMode as boolean) ?? false,
-      revenueExpectations: (s.revenueExpectations as UserSettings["revenueExpectations"]) ?? [],
-      businessTags: (s.businessTags as string[]) ?? [],
+      salary: s.salary,
+      currency: s.currency,
+      categories: s.categories || DEFAULT_CATEGORIES,
+      customCategories: s.customCategories || [],
+      hiddenDefaults: s.hiddenDefaults || [],
+      categoryBudgets: s.categoryBudgets ?? {},
+      recurringExpenses: s.recurringExpenses ?? [],
+      savedFilters: s.savedFilters ?? [],
+      goals: s.goals ?? [],
+      rolloverEnabled: s.rolloverEnabled ?? false,
+      rolloverHistory: s.rolloverHistory ?? {},
+      businessMode: s.businessMode ?? false,
+      revenueExpectations: s.revenueExpectations ?? [],
+      businessTags: s.businessTags ?? [],
       createdAt: Date.now(),
-      updatedAt: new Date(s.updatedAt as string).getTime(),
+      updatedAt: s.updatedAt,
     };
   } catch {
     return null;
@@ -160,50 +167,37 @@ if (typeof window !== "undefined") {
   _setShared(local);
 }
 
-/** Fetch from API and merge — always called with _currentUserId already set. */
-function _syncFromApi() {
-  // Capture userId at call time so the async callback uses the right key
-  // even if _currentUserId changes (e.g. logout) before the fetch resolves.
+/** Sync settings from IDB (populated by sync engine). */
+function _syncFromIDB() {
   const userIdAtCallTime = _currentUserId;
-  if (!userIdAtCallTime) return; // Not logged in — skip
+  if (!userIdAtCallTime) return;
 
-  fetchSettingsFromApi().then((remote) => {
-    // Bail out if user has logged out or switched accounts while fetch was in-flight
+  loadSettingsFromIDB().then((remote) => {
     if (_currentUserId !== userIdAtCallTime) return;
 
-    if (!remote) {
-      // No remote row yet — do NOT push here; we might push stale default state.
-      // The DB row will be created when the user explicitly sets settings.
-      return;
-    }
+    if (!remote) return;
+
     const localTs = _settings.updatedAt || 0;
     const remoteTs = remote.updatedAt || 0;
     if (remoteTs >= localTs) {
-      // Prefer remote — but never overwrite a valid local salary with remote salary=0.
-      // This guards against a bad DB state (e.g. from markOnboarded pushing defaults).
       if (remote.salary === 0 && _settings.salary > 0) {
-        // Remote has been reset but local is intact — restore DB from local.
         if (localTs > 0) pushToApi(_settings);
         return;
       }
       localStorage.setItem(storageKeyForUser(userIdAtCallTime), JSON.stringify(remote));
       _setShared(remote);
     } else {
-      // Local is newer — push to remote to keep DB in sync.
       if (localTs > 0) pushToApi(_settings);
     }
-  }).catch(() => { /* ignore network errors */ });
+  }).catch(() => {});
 }
 
 export function switchSettingsUser(userId: string) {
-  // Skip if already set to this user — prevents double API sync from
-  // AuthProvider's useEffect firing after explicit login already handled it.
   if (_currentUserId === userId) return;
   _currentUserId = userId;
   const local = loadSettings(userId);
   _setShared(local);
-  // Sync from API — _currentUserId is captured inside _syncFromApi so it's safe.
-  _syncFromApi();
+  _syncFromIDB();
 }
 
 export function clearSettingsForCurrentUser() {
@@ -222,61 +216,19 @@ export function useSettings() {
     return localStorage.getItem(storageKeyForUser(_currentUserId)) === null;
   });
 
-  // On mount: subscribe to realtime workspace settings changes only.
-  // API sync is handled by switchSettingsUser (called from AuthProvider) which
-  // guarantees _currentUserId is set before the fetch resolves — no race condition.
+  // On mount: subscribe to sync engine pull notifications.
+  // When the sync engine pulls new data into IDB, we check if settings changed.
   useEffect(() => {
-    const wid = getActiveWorkspaceId();
-    if (!wid) return;
-
-    const channel = supabase
-      .channel("settings-sync")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "workspace_settings", filter: `workspace_id=eq.${wid}` },
-        () => {
-          // On realtime change, re-fetch from API
-          invalidateSyncCache();
-          fetchSettingsFromApi().then((remote) => {
-            if (remote && remote.updatedAt > _settings.updatedAt) {
-              saveLocal(remote);
-              _setShared(remote);
-            }
-          });
+    const unsubscribe = onSyncPull(() => {
+      loadSettingsFromIDB().then((remote) => {
+        if (remote && remote.updatedAt > _settings.updatedAt) {
+          saveLocal(remote);
+          _setShared(remote);
         }
-      )
-      .subscribe();
+      });
+    });
 
-    const onVisibility = () => {
-      if (document.visibilityState === "visible") {
-        invalidateSyncCache();
-        fetchSettingsFromApi().then((remote) => {
-          if (remote && remote.updatedAt > _settings.updatedAt) {
-            saveLocal(remote);
-            _setShared(remote);
-          }
-        });
-      }
-    };
-    document.addEventListener("visibilitychange", onVisibility);
-
-    const pollId = setInterval(() => {
-      if (document.visibilityState === "visible") {
-        invalidateSyncCache();
-        fetchSettingsFromApi().then((remote) => {
-          if (remote && remote.updatedAt > _settings.updatedAt) {
-            saveLocal(remote);
-            _setShared(remote);
-          }
-        });
-      }
-    }, 10_000);
-
-    return () => {
-      supabase.removeChannel(channel);
-      document.removeEventListener("visibilitychange", onVisibility);
-      clearInterval(pollId);
-    };
+    return () => { unsubscribe(); };
   }, []);
 
   const updateSettings = useCallback(
