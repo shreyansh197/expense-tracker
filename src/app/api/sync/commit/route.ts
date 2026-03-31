@@ -143,10 +143,21 @@ export async function POST(req: NextRequest) {
           const ledgerId = (mutation.id ?? data.id) as string | undefined;
           let record: { id: string };
           if (ledgerId) {
-            // Existing record — use update to avoid requiring all create-only fields
-            record = await prisma.businessLedger.update({
+            record = await prisma.businessLedger.upsert({
               where: { id: ledgerId },
-              data: {
+              create: {
+                id: ledgerId,
+                workspaceId,
+                name: data.name as string,
+                expectedAmount: data.expectedAmount as number,
+                currency: (data.currency as string) ?? "INR",
+                status: (data.status as string) ?? "active",
+                dueDate: data.dueDate ? new Date(data.dueDate as string) : null,
+                tags: data.tags ?? [],
+                notes: (data.notes as string) ?? "",
+                version: 1,
+              },
+              update: {
                 name: data.name as string | undefined,
                 expectedAmount: data.expectedAmount as number | undefined,
                 currency: data.currency as string | undefined,
@@ -188,9 +199,32 @@ export async function POST(req: NextRequest) {
           const paymentId = (mutation.id ?? data.id) as string | undefined;
           let record: { id: string };
           if (paymentId) {
-            record = await prisma.businessPayment.update({
+            // Validate ledger belongs to this workspace (for new records)
+            const existingPayment = await prisma.businessPayment.findUnique({ where: { id: paymentId }, select: { id: true } });
+            if (!existingPayment && data.ledgerId) {
+              const ledger = await prisma.businessLedger.findFirst({
+                where: { id: data.ledgerId as string, workspaceId, deletedAt: null },
+                select: { id: true },
+              });
+              if (!ledger) {
+                results.push({ idempotencyKey: mutation.idempotencyKey, status: "error", error: "Ledger not found in workspace" });
+                continue;
+              }
+            }
+            record = await prisma.businessPayment.upsert({
               where: { id: paymentId },
-              data: {
+              create: {
+                id: paymentId,
+                workspaceId,
+                ledgerId: data.ledgerId as string,
+                amount: data.amount as number,
+                date: new Date(data.date as string),
+                method: (data.method as string) ?? null,
+                reference: (data.reference as string) ?? null,
+                notes: (data.notes as string) ?? null,
+                version: 1,
+              },
+              update: {
                 amount: data.amount as number | undefined,
                 date: data.date ? new Date(data.date as string) : undefined,
                 method: data.method as string | undefined,

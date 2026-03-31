@@ -7,6 +7,7 @@ import {
   makeIdempotencyKey,
   enqueueMutation,
   trySyncPush,
+  generateUUID,
 } from "@/lib/syncEngine";
 import { useDexieQuery } from "@/hooks/useDexieQuery";
 import type { Payment, PaymentInput, PaymentMethod, SyncStatus } from "@/types";
@@ -59,10 +60,10 @@ export function usePayments(ledgerId: string | null) {
     const workspace = getActiveWorkspaceId();
     if (!workspace) return;
 
-    const tempId = `temp-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+    const id = generateUUID();
 
     await db.payments.put({
-      id: tempId,
+      id,
       workspaceId: workspace,
       ledgerId: input.ledgerId,
       amount: input.amount,
@@ -78,6 +79,7 @@ export function usePayments(ledgerId: string | null) {
     await enqueueMutation({
       table: "business_payments",
       operation: "upsert",
+      id,
       data: {
         ledgerId: input.ledgerId,
         amount: input.amount,

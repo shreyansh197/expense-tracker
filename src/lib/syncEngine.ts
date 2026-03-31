@@ -26,6 +26,21 @@ export function makeIdempotencyKey(): string {
   return `${Date.now()}-${_counter}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
+// ── UUID generation (crypto-based, valid UUIDv4) ──
+
+export function generateUUID(): string {
+  if (typeof crypto !== "undefined" && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  // Fallback for older environments
+  const bytes = new Uint8Array(16);
+  crypto.getRandomValues(bytes);
+  bytes[6] = (bytes[6] & 0x0f) | 0x40; // version 4
+  bytes[8] = (bytes[8] & 0x3f) | 0x80; // variant 1
+  const hex = Array.from(bytes, b => b.toString(16).padStart(2, "0")).join("");
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+}
+
 // ── Enqueue a mutation to IDB ──
 
 export async function enqueueMutation(
@@ -53,7 +68,12 @@ export async function pullChanges(workspaceId?: string): Promise<boolean> {
 
   const promise = (async () => {
     try {
+      // Read the last sync cursor so we only fetch changes since then
+      const syncMeta = await db.syncMeta.get(wid);
       const params = new URLSearchParams({ workspaceId: wid });
+      if (syncMeta?.cursor) {
+        params.set("since", syncMeta.cursor);
+      }
       const res = await authFetch(`/api/sync/changes?${params}`);
       if (!res.ok) return false;
 
@@ -96,19 +116,14 @@ export async function pullChanges(workspaceId?: string): Promise<boolean> {
                 });
               }
             }
-            // Remove temp records that have been replaced by server records.
-            // A temp record is safe to delete when:
-            // 1. A server record with the same data has arrived, OR
-            // 2. Its mutation has been applied (no pending mutation references it)
+
+            // Clean up any legacy temp- prefixed records that may be orphaned
             const tempExpenses = await db.expenses
               .where("workspaceId").equals(wid)
               .filter(e => e.id.startsWith("temp-"))
               .toArray();
-            for (const temp of tempExpenses) {
-              const hasPending = pendingMutations.some(
-                m => m.table === "expenses" && m.operation === "upsert" && m.id === temp.id
-              );
-              if (!hasPending) await db.expenses.delete(temp.id);
+            if (tempExpenses.length > 0) {
+              await db.expenses.bulkDelete(tempExpenses.map(e => e.id));
             }
           }
 
@@ -196,6 +211,14 @@ export async function pullChanges(workspaceId?: string): Promise<boolean> {
       );
 
       _notifySyncPull();
+
+      // If server indicated more data is available, pull again
+      if (data.hasMore) {
+        // Release the inflight lock first so the recursive call can proceed
+        _pullInFlight.delete(wid);
+        await pullChanges(wid);
+      }
+
       return true;
     } catch {
       return false;

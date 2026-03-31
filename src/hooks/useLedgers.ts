@@ -7,6 +7,7 @@ import {
   makeIdempotencyKey,
   enqueueMutation,
   trySyncPush,
+  generateUUID,
 } from "@/lib/syncEngine";
 import { useDexieQuery } from "@/hooks/useDexieQuery";
 import type { Ledger, LedgerInput, LedgerStatus, SyncStatus } from "@/types";
@@ -56,10 +57,10 @@ export function useLedgers() {
     const workspace = getActiveWorkspaceId();
     if (!workspace) return;
 
-    const tempId = `temp-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+    const id = generateUUID();
 
     await db.ledgers.put({
-      id: tempId,
+      id,
       workspaceId: workspace,
       name: input.name,
       expectedAmount: input.expectedAmount,
@@ -76,6 +77,7 @@ export function useLedgers() {
     await enqueueMutation({
       table: "business_ledgers",
       operation: "upsert",
+      id,
       data: {
         name: input.name,
         expectedAmount: input.expectedAmount,

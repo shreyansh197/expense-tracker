@@ -7,6 +7,7 @@ import {
   makeIdempotencyKey,
   enqueueMutation,
   trySyncPush,
+  generateUUID,
 } from "@/lib/syncEngine";
 import { useDexieQuery } from "@/hooks/useDexieQuery";
 import type { Expense, ExpenseInput, CategoryId, SyncStatus } from "@/types";
@@ -59,11 +60,11 @@ export function useExpenses(month: number, year: number) {
     const workspace = getActiveWorkspaceId();
     if (!workspace) return;
 
-    const tempId = `temp-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+    const id = generateUUID();
 
     // Write directly to IDB — useDexieQuery auto-updates
     await db.expenses.put({
-      id: tempId,
+      id,
       workspaceId: workspace,
       category: input.category,
       amount: input.amount,
@@ -83,7 +84,7 @@ export function useExpenses(month: number, year: number) {
     await enqueueMutation({
       table: "expenses",
       operation: "upsert",
-      id: tempId,
+      id,
       data: {
         category: input.category,
         amount: input.amount,
