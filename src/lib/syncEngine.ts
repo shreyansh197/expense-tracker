@@ -58,11 +58,19 @@ export async function enqueueMutation(
 
 // ── Pull changes from server into IDB ──
 
+let _migrated = false;
 const _pullInFlight = new Map<string, Promise<boolean>>();
 
 export async function pullChanges(workspaceId?: string): Promise<boolean> {
   const wid = workspaceId ?? getActiveWorkspaceId();
   if (!wid || !isAuthenticated()) return false;
+
+  // Ensure migration has completed before pulling — prevents race where a
+  // realtime/broadcast-triggered pull deletes temp- records before migration
+  // can rescue them.
+  if (!_migrated) {
+    try { await _migrateStuckData(); _migrated = true; } catch { /* non-fatal */ }
+  }
 
   // Dedup concurrent pulls per workspace
   const existing = _pullInFlight.get(wid);
@@ -117,15 +125,6 @@ export async function pullChanges(workspaceId?: string): Promise<boolean> {
                   deletedAt: null,
                 });
               }
-            }
-
-            // Clean up any legacy temp- prefixed records that may be orphaned
-            const tempExpenses = await db.expenses
-              .where("workspaceId").equals(wid)
-              .filter(e => e.id.startsWith("temp-"))
-              .toArray();
-            if (tempExpenses.length > 0) {
-              await db.expenses.bulkDelete(tempExpenses.map(e => e.id));
             }
           }
 
@@ -414,8 +413,6 @@ async function _doSync() {
 }
 
 // ── One-time migration: rescue temp- records and purge invalid mutations ──
-
-let _migrated = false;
 
 async function _migrateStuckData() {
   try {
