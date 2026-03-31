@@ -81,10 +81,10 @@ export async function POST(req: NextRequest) {
           });
           results.push({ idempotencyKey: mutation.idempotencyKey, status: "applied", id: record.id });
         } else {
-          // Soft delete
-          await prisma.expense.update({
-            where: { id: mutation.id! },
-            data: { deletedAt: new Date(), version: { increment: 1 } },
+          // Soft delete — use updateMany to avoid P2025 if record doesn't exist
+          await prisma.expense.updateMany({
+            where: { id: mutation.id!, workspaceId },
+            data: { deletedAt: new Date() },
           });
           results.push({ idempotencyKey: mutation.idempotencyKey, status: "applied", id: mutation.id! });
         }
@@ -187,9 +187,9 @@ export async function POST(req: NextRequest) {
           }
           results.push({ idempotencyKey: mutation.idempotencyKey, status: "applied", id: record.id });
         } else {
-          await prisma.businessLedger.update({
-            where: { id: mutation.id! },
-            data: { deletedAt: new Date(), version: { increment: 1 } },
+          await prisma.businessLedger.updateMany({
+            where: { id: mutation.id!, workspaceId },
+            data: { deletedAt: new Date() },
           });
           results.push({ idempotencyKey: mutation.idempotencyKey, status: "applied", id: mutation.id! });
         }
@@ -259,9 +259,9 @@ export async function POST(req: NextRequest) {
           }
           results.push({ idempotencyKey: mutation.idempotencyKey, status: "applied", id: record.id });
         } else {
-          await prisma.businessPayment.update({
-            where: { id: mutation.id! },
-            data: { deletedAt: new Date(), version: { increment: 1 } },
+          await prisma.businessPayment.updateMany({
+            where: { id: mutation.id!, workspaceId },
+            data: { deletedAt: new Date() },
           });
           results.push({ idempotencyKey: mutation.idempotencyKey, status: "applied", id: mutation.id! });
         }

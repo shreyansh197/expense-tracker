@@ -236,71 +236,98 @@ export async function pullChanges(workspaceId?: string): Promise<boolean> {
 
 // ── Push pending mutations to server ──
 
+let _pushInFlight = false;
+
 export async function pushMutations(workspaceId?: string): Promise<number> {
   const wid = workspaceId ?? getActiveWorkspaceId();
   if (!wid || !isAuthenticated()) return 0;
 
-  const allMutations = await db.mutations
-    .where("workspaceId").equals(wid)
-    .sortBy("localId");
-  if (allMutations.length === 0) return 0;
+  // Mutex: prevent concurrent pushes (dedup from trySyncPush + _doSync overlap)
+  if (_pushInFlight) return 0;
+  _pushInFlight = true;
 
-  // Purge mutations with non-UUID ids — they will always fail Zod validation
-  // and block the entire batch (left over from before the UUID fix).
-  const invalidLocalIds = allMutations
-    .filter(m => m.id && !UUID_RE.test(m.id))
-    .map(m => m.localId!)
-    .filter(Boolean);
-  if (invalidLocalIds.length > 0) {
-    await db.mutations.bulkDelete(invalidLocalIds);
-  }
+  try {
+    const allMutations = await db.mutations
+      .where("workspaceId").equals(wid)
+      .sortBy("localId");
+    if (allMutations.length === 0) return 0;
 
-  const mutations = allMutations.filter(m => !m.id || UUID_RE.test(m.id));
-  if (mutations.length === 0) return 0;
-
-  let applied = 0;
-  for (let i = 0; i < mutations.length; i += 100) {
-    const batch = mutations.slice(i, i + 100);
-    try {
-      const res = await authFetch("/api/sync/commit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          workspaceId: wid,
-          mutations: batch.map(m => ({
-            table: m.table,
-            operation: m.operation,
-            id: m.id,
-            data: m.data,
-            idempotencyKey: m.idempotencyKey,
-          })),
-        }),
-      });
-      if (res.ok) {
-        const body = await res.json();
-        // Only delete mutations that the server actually applied or skipped (idempotent).
-        // Keep mutations with "error" status so they can be retried.
-        const succeededKeys = new Set(
-          body.results
-            .filter((r: { status: string }) => r.status === "applied" || r.status === "skipped")
-            .map((r: { idempotencyKey: string }) => r.idempotencyKey)
-        );
-        const toDelete = batch
-          .filter(m => succeededKeys.has(m.idempotencyKey))
-          .map(m => m.localId!)
-          .filter(Boolean);
-        if (toDelete.length > 0) await db.mutations.bulkDelete(toDelete);
-        applied += body.results.filter(
-          (r: { status: string }) => r.status === "applied"
-        ).length;
-      } else {
-        break; // Stop on HTTP error
-      }
-    } catch {
-      break; // Network error — stop, retry later
+    // Purge mutations with non-UUID ids — they will always fail Zod validation
+    // and block the entire batch (left over from before the UUID fix).
+    const invalidLocalIds = allMutations
+      .filter(m => m.id && !UUID_RE.test(m.id))
+      .map(m => m.localId!)
+      .filter(Boolean);
+    if (invalidLocalIds.length > 0) {
+      await db.mutations.bulkDelete(invalidLocalIds);
     }
+
+    // Also purge mutations older than 1 hour — they're permanently stuck
+    const ONE_HOUR = 60 * 60 * 1000;
+    const staleLocalIds = allMutations
+      .filter(m => Date.now() - m.createdAt > ONE_HOUR)
+      .map(m => m.localId!)
+      .filter(Boolean);
+    if (staleLocalIds.length > 0) {
+      await db.mutations.bulkDelete(staleLocalIds);
+    }
+
+    const mutations = allMutations.filter(
+      m => (!m.id || UUID_RE.test(m.id)) && Date.now() - m.createdAt <= ONE_HOUR
+    );
+    if (mutations.length === 0) return 0;
+
+    let applied = 0;
+    for (let i = 0; i < mutations.length; i += 100) {
+      const batch = mutations.slice(i, i + 100);
+      try {
+        const res = await authFetch("/api/sync/commit", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            workspaceId: wid,
+            mutations: batch.map(m => ({
+              table: m.table,
+              operation: m.operation,
+              id: m.id,
+              data: m.data,
+              idempotencyKey: m.idempotencyKey,
+            })),
+          }),
+        });
+        if (res.ok) {
+          const body = await res.json();
+          // Delete ALL processed mutations (applied, skipped, AND errored).
+          // Retrying permanent errors (e.g. "record not found" for deletes)
+          // blocks the queue and wastes resources.
+          const processedLocalIds = batch
+            .map(m => m.localId!)
+            .filter(Boolean);
+          if (processedLocalIds.length > 0) {
+            await db.mutations.bulkDelete(processedLocalIds);
+          }
+          applied += body.results.filter(
+            (r: { status: string }) => r.status === "applied"
+          ).length;
+        } else {
+          // HTTP error — delete this batch to prevent permanent blockage,
+          // UNLESS it's a 401 (auth issue that can be resolved by refresh)
+          if (res.status !== 401) {
+            const failedLocalIds = batch.map(m => m.localId!).filter(Boolean);
+            if (failedLocalIds.length > 0) {
+              await db.mutations.bulkDelete(failedLocalIds);
+            }
+          }
+          break;
+        }
+      } catch {
+        break; // Network error — stop, retry later (mutations stay in queue)
+      }
+    }
+    return applied;
+  } finally {
+    _pushInFlight = false;
   }
-  return applied;
 }
 
 // ── Immediate push attempt (non-blocking) ──
@@ -337,7 +364,7 @@ let _currentWid: string | null = null;
 let _lastMutationAt = 0;
 
 const FAST_POLL_MS = 3_000;    // 3s after recent mutations
-const SLOW_POLL_MS = 30_000;   // 30s when idle
+const SLOW_POLL_MS = 10_000;   // 10s when idle
 const FAST_POLL_WINDOW = 120_000; // fast-poll for 2 minutes after last mutation
 
 // ── Realtime channel setup (auth-aware, can be called multiple times) ──
@@ -513,6 +540,11 @@ export function startSyncEngine() {
   // Migrate legacy localStorage data to IDB
   migrateFromLocalStorage();
 
+  // Force full re-sync on startup: clear saved cursors so the first pull
+  // fetches ALL data from the server. This guarantees both devices converge
+  // even if the cursor was stale from previous failed syncs.
+  db.syncMeta.clear().catch(() => {});
+
   // Auto-sync on reconnect
   _onlineHandler = () => { _doSync(); };
   window.addEventListener("online", _onlineHandler);
@@ -562,4 +594,5 @@ export function stopSyncEngine() {
   _started = false;
   _currentWid = null;
   _migrated = false;
+  _pushInFlight = false;
 }
