@@ -2,7 +2,7 @@
 
 export const dynamic = "force-dynamic";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { AppShell } from "@/components/layout/AppShell";
 import { useSettings } from "@/hooks/useSettings";
 import { useCurrency } from "@/hooks/useCurrency";
@@ -60,16 +60,65 @@ export default function SettingsPage() {
     .reduce((sum, r) => sum + r.amount, 0);
   const goalsCount = settings.goals?.length || 0;
 
+  const zones = [
+    { id: "zone-account", label: "Account" },
+    { id: "zone-finances", label: "Finances" },
+    { id: "zone-automation", label: "Automation" },
+    { id: "zone-preferences", label: "Preferences" },
+  ];
+  const [activeZone, setActiveZone] = useState(zones[0].id);
+  const observerRef = useRef<IntersectionObserver | null>(null);
+
+  useEffect(() => {
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            setActiveZone(entry.target.id);
+          }
+        }
+      },
+      { rootMargin: "-20% 0px -60% 0px", threshold: 0 }
+    );
+    for (const z of zones) {
+      const el = document.getElementById(z.id);
+      if (el) observerRef.current.observe(el);
+    }
+    return () => observerRef.current?.disconnect();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   return (
     <AppShell>
         <PageTransition className="relative mx-auto max-w-3xl space-y-2 p-4 lg:p-6">
         <DecoGraphic variant="abstract" />
         <h1 className="text-page-title mb-4">Settings</h1>
 
+        {/* Quick-nav pills — desktop only */}
+        <div className="hidden lg:flex sticky top-0 z-10 gap-1.5 rounded-xl p-1.5 mb-4 backdrop-blur-md" style={{ background: 'color-mix(in srgb, var(--surface) 85%, transparent)', border: '1px solid var(--border-subtle)' }}>
+          {zones.map((z) => (
+            <button
+              key={z.id}
+              onClick={() => {
+                document.getElementById(z.id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+              }}
+              className="rounded-lg px-3 py-1.5 text-xs font-semibold transition-all"
+              style={
+                activeZone === z.id
+                  ? { background: 'var(--primary-soft)', color: 'var(--primary)' }
+                  : { color: 'var(--text-secondary)' }
+              }
+              onMouseEnter={activeZone !== z.id ? (e: React.MouseEvent<HTMLButtonElement>) => { e.currentTarget.style.background = 'var(--surface-secondary)'; } : undefined}
+              onMouseLeave={activeZone !== z.id ? (e: React.MouseEvent<HTMLButtonElement>) => { e.currentTarget.style.background = ''; } : undefined}
+            >
+              {z.label}
+            </button>
+          ))}
+        </div>
+
         <SettingsAccordion>
 
           {/* ━━━ YOUR ACCOUNT — indigo zone ━━━ */}
-          <div className="section-zone section-indigo space-y-2">
+          <div id="zone-account" className="section-zone section-indigo space-y-2 scroll-mt-16">
           <h3 className="text-[11px] font-bold uppercase tracking-wider pb-1 px-1" style={{ color: 'var(--text-tertiary)' }}>
             Your Account
           </h3>
@@ -109,7 +158,7 @@ export default function SettingsPage() {
           </div>
 
           {/* ━━━ FINANCES — teal zone ━━━ */}
-          <div className="section-zone section-teal space-y-2">
+          <div id="zone-finances" className="section-zone section-teal space-y-2 scroll-mt-16">
           <h3 className="text-[11px] font-bold uppercase tracking-wider pt-2 pb-1 px-1" style={{ color: 'var(--text-tertiary)' }}>
             Finances
           </h3>
@@ -262,7 +311,7 @@ export default function SettingsPage() {
           </div>
 
           {/* ━━━ AUTOMATION & DATA — coral zone ━━━ */}
-          <div className="section-zone section-coral space-y-2">
+          <div id="zone-automation" className="section-zone section-coral space-y-2 scroll-mt-16">
           <h3 className="text-[11px] font-bold uppercase tracking-wider pt-2 pb-1 px-1" style={{ color: 'var(--text-tertiary)' }}>
             Automation & Data
           </h3>
@@ -302,7 +351,7 @@ export default function SettingsPage() {
           </div>
 
           {/* ━━━ PREFERENCES — indigo zone ━━━ */}
-          <div className="section-zone section-indigo space-y-2">
+          <div id="zone-preferences" className="section-zone section-indigo space-y-2 scroll-mt-16">
           <h3 className="text-[11px] font-bold uppercase tracking-wider pt-2 pb-1 px-1" style={{ color: 'var(--text-tertiary)' }}>
             Preferences
           </h3>

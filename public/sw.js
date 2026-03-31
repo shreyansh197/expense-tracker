@@ -1,4 +1,5 @@
 const CACHE_NAME = "expenstream-icons-1530e2f9";
+const SHELL_CACHE = "expenstream-shell-v1";
 
 const PRECACHE_URLS = [
   "/icons/icon-192.png",
@@ -8,21 +9,28 @@ const PRECACHE_URLS = [
   "/manifest.json",
 ];
 
+// App shell: HTML entry point for offline navigation
+const SHELL_URLS = ["/"];
+
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE_URLS)),
+    Promise.all([
+      caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE_URLS)),
+      caches.open(SHELL_CACHE).then((cache) => cache.addAll(SHELL_URLS)),
+    ]),
   );
   self.skipWaiting();
 });
 
 self.addEventListener("activate", (event) => {
+  const keepCaches = new Set([CACHE_NAME, SHELL_CACHE]);
   event.waitUntil(
     caches
       .keys()
       .then((keys) =>
         Promise.all(
           keys
-            .filter((key) => key !== CACHE_NAME)
+            .filter((key) => !keepCaches.has(key))
             .map((key) => caches.delete(key)),
         ),
       ),
@@ -55,10 +63,43 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
+  // Navigation requests: network-first with app shell fallback
+  if (request.mode === "navigate") {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          if (response.ok) {
+            const clone = response.clone();
+            caches.open(SHELL_CACHE).then((cache) => cache.put(request, clone));
+          }
+          return response;
+        })
+        .catch(() => caches.match(request).then((r) => r || caches.match("/"))),
+    );
+    return;
+  }
+
+  // Static assets (_next/static): cache-first for immutable hashed files
+  if (url.pathname.startsWith("/_next/static/")) {
+    event.respondWith(
+      caches.match(request).then((cached) => {
+        if (cached) return cached;
+        return fetch(request).then((response) => {
+          if (response.ok) {
+            const clone = response.clone();
+            caches.open(SHELL_CACHE).then((cache) => cache.put(request, clone));
+          }
+          return response;
+        });
+      }),
+    );
+    return;
+  }
+
   event.respondWith(
     fetch(request)
       .then((response) => {
-        // Cache successful responses for static assets
+        // Cache successful responses for same-origin assets
         if (response.ok && request.url.startsWith(self.location.origin)) {
           const clone = response.clone();
           caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));

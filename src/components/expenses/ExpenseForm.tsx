@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { m, AnimatePresence } from "framer-motion";
-import { X, Loader2 } from "lucide-react";
+import { X, Loader2, CheckCircle } from "lucide-react";
 import { getAllCategories } from "@/lib/categories";
 import { cn, getDaysInMonth } from "@/lib/utils";
 import { useUIStore } from "@/stores/uiStore";
@@ -53,6 +53,7 @@ export function ExpenseForm({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
   const submittingRef = useRef(false);
 
   const amountRef = useRef<HTMLInputElement>(null);
@@ -159,9 +160,13 @@ export function ExpenseForm({
             remark: remark.trim() || undefined,
           });
         }
-        closeForm();
         localStorage.setItem("expenstream-last-category", category);
         toast(editExpense ? "Expense updated" : "Expense added");
+        // Brief success flash before closing
+        setShowSuccess(true);
+        setTimeout(() => {
+          closeForm();
+        }, 600);
       } catch {
         setError("Failed to save expense. Please try again.");
       } finally {
@@ -188,8 +193,30 @@ export function ExpenseForm({
     <form
       onSubmit={handleSubmit}
       onKeyDown={handleKeyDown}
-      className="space-y-5"
+      className="space-y-5 relative"
     >
+      {/* Success micro-animation overlay */}
+      <AnimatePresence>
+        {showSuccess && (
+          <m.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+            className="absolute inset-0 z-10 flex items-center justify-center rounded-2xl"
+            style={{ background: 'color-mix(in srgb, var(--surface) 92%, transparent)', backdropFilter: 'blur(4px)' }}
+          >
+            <m.div
+              initial={{ scale: 0 }}
+              animate={{ scale: [0, 1.2, 1] }}
+              transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <CheckCircle size={48} className="text-emerald-500" strokeWidth={1.5} />
+            </m.div>
+          </m.div>
+        )}
+      </AnimatePresence>
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>

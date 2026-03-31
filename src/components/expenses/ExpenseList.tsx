@@ -14,6 +14,53 @@ import { ReceiptIllustration } from "@/components/ui/illustrations";
 import { filterExpenses, groupByDay } from "@/lib/filters";
 import type { Expense, CategoryId } from "@/types";
 
+const SWIPE_THRESHOLD = 80;
+
+function useSwipeToDelete(onDelete: () => void) {
+  const touchStartX = useRef<number | null>(null);
+  const touchStartY = useRef<number | null>(null);
+  const [offsetX, setOffsetX] = useState(0);
+  const lockedAxis = useRef<"x" | "y" | null>(null);
+
+  const onTouchStart = useCallback((e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+    lockedAxis.current = null;
+  }, []);
+
+  const onTouchMove = useCallback((e: React.TouchEvent) => {
+    if (touchStartX.current === null || touchStartY.current === null) return;
+    const dx = e.touches[0].clientX - touchStartX.current;
+    const dy = e.touches[0].clientY - touchStartY.current;
+
+    if (!lockedAxis.current) {
+      if (Math.abs(dx) > 8 || Math.abs(dy) > 8) {
+        lockedAxis.current = Math.abs(dx) > Math.abs(dy) ? "x" : "y";
+      }
+      return;
+    }
+
+    if (lockedAxis.current === "y") return;
+
+    // Only allow swipe left (negative)
+    if (dx < 0) {
+      setOffsetX(dx);
+    }
+  }, []);
+
+  const onTouchEnd = useCallback(() => {
+    if (offsetX < -SWIPE_THRESHOLD) {
+      onDelete();
+    }
+    setOffsetX(0);
+    touchStartX.current = null;
+    touchStartY.current = null;
+    lockedAxis.current = null;
+  }, [offsetX, onDelete]);
+
+  return { offsetX, onTouchStart, onTouchMove, onTouchEnd };
+}
+
 interface ExpenseListProps {
   expenses: Expense[];
   onDelete: (id: string) => void;
@@ -177,9 +224,12 @@ export function ExpenseList({
         icon={hasFilters ? Receipt : Wallet}
         illustration={hasFilters ? <ReceiptIllustration /> : <WalletIllustration />}
         title={hasFilters ? "No expenses found" : "No expenses yet"}
-        description={hasFilters
-          ? "Try adjusting your filters or search terms."
-          : "Track where your money goes \u2014 add your first expense to see insights here."
+        description={
+          hasFilters
+            ? searchQuery
+              ? `No results for "${searchQuery}". Try a different search term or adjust filters.`
+              : "Try adjusting your filters or search terms."
+            : "Track where your money goes \u2014 add your first expense to see insights here."
         }
         action={!hasFilters ? { label: "Add an Expense", onClick: openAddForm } : undefined}
       />
@@ -242,77 +292,16 @@ export function ExpenseList({
           {/* Expense items */}
           <div className="space-y-1.5">
             {group.expenses.map((expense, idx) => (
-              <m.div
+              <SwipeableExpenseItem
                 key={expense.id}
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: idx * 0.03, duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-                tabIndex={0}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") openEditForm(expense.id);
-                  if (e.key === "Delete" || e.key === "Backspace") handleDelete(expense.id);
-                  if (e.key === " ") { e.preventDefault(); toggleSelect(expense.id); }
-                }}
-                className={`group flex items-center gap-3 rounded-2xl border px-4 py-3.5 transition-all active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-[#2EC4B6]/40 dark:focus:ring-[#60A5FA]/40 ${
-                  selectedIds.has(expense.id)
-                    ? "border-[#b2ece6] bg-[#e6f9f7] dark:border-blue-900/40 dark:bg-[rgba(96,165,250,0.08)]"
-                    : ""
-                }`}
-                style={!selectedIds.has(expense.id) ? { background: 'var(--surface)', borderColor: 'var(--border)' } : undefined}
-              >
-                <button
-                  onClick={() => toggleSelect(expense.id)}
-                  className="shrink-0 rounded p-0.5 transition-colors"
-                  style={{ color: 'var(--text-muted)' }}
-                  role="checkbox"
-                  aria-checked={selectedIds.has(expense.id)}
-                  aria-label="Select expense"
-                >
-                  {selectedIds.has(expense.id) ? (
-                    <CheckSquare size={14} className="text-[#2EC4B6] dark:text-[#60A5FA]" />
-                  ) : (
-                    <Square size={14} />
-                  )}
-                </button>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <CategoryBadge category={expense.category} />
-                    {expense.isRecurring && (
-                      <span className="text-[#4C5CFF] dark:text-[#7B87FF]" aria-label="Recurring">
-                        <Repeat size={10} />
-                      </span>
-                    )}
-                    {expense.remark && (
-                      <span className="truncate text-xs" style={{ color: 'var(--text-muted)' }}>
-                        {expense.remark}
-                      </span>
-                    )}
-                  </div>
-                </div>
-                  <span className="tabular-nums text-base font-bold" style={{ color: 'var(--text-primary)' }}>
-                  {formatCurrency(expense.amount)}
-                </span>
-                <div className="flex items-center gap-1 opacity-100 lg:opacity-0 lg:transition-opacity lg:group-hover:opacity-100">
-                  <button
-                    onClick={() => openEditForm(expense.id)}
-                    className="rounded-lg p-1.5 transition-colors"
-                    style={{ color: 'var(--text-muted)' }}
-                    onMouseEnter={e => { e.currentTarget.style.background = 'var(--surface-secondary)'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
-                    onMouseLeave={e => { e.currentTarget.style.background = ''; e.currentTarget.style.color = 'var(--text-muted)'; }}
-                    aria-label="Edit expense"
-                  >
-                    <Edit3 size={14} />
-                  </button>
-                  <button
-                    onClick={() => handleDelete(expense.id)}
-                    className="rounded-lg p-1.5 transition-colors hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/30 dark:hover:text-red-400"
-                    style={{ color: 'var(--text-muted)' }}
-                    aria-label="Delete expense"
-                  >
-                    <Trash2 size={14} />
-                  </button>
-                </div>
-              </m.div>
+                expense={expense}
+                idx={idx}
+                selectedIds={selectedIds}
+                formatCurrency={formatCurrency}
+                toggleSelect={toggleSelect}
+                openEditForm={openEditForm}
+                handleDelete={handleDelete}
+              />
             ))}
           </div>
         </div>
@@ -332,6 +321,120 @@ export function ExpenseList({
           </button>
         </div>
       )}
+    </div>
+  );
+}
+
+function SwipeableExpenseItem({
+  expense,
+  idx,
+  selectedIds,
+  formatCurrency,
+  toggleSelect,
+  openEditForm,
+  handleDelete,
+}: {
+  expense: Expense;
+  idx: number;
+  selectedIds: Set<string>;
+  formatCurrency: (n: number) => string;
+  toggleSelect: (id: string) => void;
+  openEditForm: (id: string) => void;
+  handleDelete: (id: string) => void;
+}) {
+  const deleteCallback = useCallback(() => handleDelete(expense.id), [handleDelete, expense.id]);
+  const { offsetX, onTouchStart, onTouchMove, onTouchEnd } = useSwipeToDelete(deleteCallback);
+  const isSelected = selectedIds.has(expense.id);
+  const swiping = offsetX < -10;
+
+  return (
+    <div className="relative overflow-hidden rounded-2xl">
+      {/* Red delete background revealed on swipe */}
+      {swiping && (
+        <div
+          className="absolute inset-0 flex items-center justify-end rounded-2xl bg-red-500 pr-5"
+          aria-hidden
+        >
+          <Trash2 size={18} className="text-white" />
+        </div>
+      )}
+      <m.div
+        initial={{ opacity: 0, y: 6 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: idx * 0.03, duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") openEditForm(expense.id);
+          if (e.key === "Delete" || e.key === "Backspace") handleDelete(expense.id);
+          if (e.key === " ") { e.preventDefault(); toggleSelect(expense.id); }
+        }}
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+        className={`group relative flex items-center gap-3 rounded-2xl border px-4 py-3.5 transition-all focus:outline-none focus:ring-2 focus:ring-[#2EC4B6]/40 dark:focus:ring-[#60A5FA]/40 ${
+          isSelected
+            ? "border-[#b2ece6] bg-[#e6f9f7] dark:border-blue-900/40 dark:bg-[rgba(96,165,250,0.08)]"
+            : ""
+        }`}
+        style={{
+          ...(isSelected ? {} : { background: 'var(--surface)', borderColor: 'var(--border)' }),
+          transform: offsetX < 0 ? `translateX(${offsetX}px)` : undefined,
+          transition: offsetX === 0 ? 'transform 0.25s ease' : 'none',
+        }}
+      >
+        <button
+          onClick={() => toggleSelect(expense.id)}
+          className="shrink-0 rounded p-0.5 transition-colors"
+          style={{ color: 'var(--text-muted)' }}
+          role="checkbox"
+          aria-checked={isSelected}
+          aria-label="Select expense"
+        >
+          {isSelected ? (
+            <CheckSquare size={14} className="text-[#2EC4B6] dark:text-[#60A5FA]" />
+          ) : (
+            <Square size={14} />
+          )}
+        </button>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            <CategoryBadge category={expense.category} />
+            {expense.isRecurring && (
+              <span className="text-[#4C5CFF] dark:text-[#7B87FF]" aria-label="Recurring">
+                <Repeat size={10} />
+              </span>
+            )}
+            {expense.remark && (
+              <span className="truncate text-xs" style={{ color: 'var(--text-muted)' }}>
+                {expense.remark}
+              </span>
+            )}
+          </div>
+        </div>
+          <span className="tabular-nums text-base font-bold" style={{ color: 'var(--text-primary)' }}>
+          {formatCurrency(expense.amount)}
+        </span>
+        <div className="flex items-center gap-1 opacity-100 lg:opacity-0 lg:transition-opacity lg:group-hover:opacity-100">
+          <button
+            onClick={() => openEditForm(expense.id)}
+            className="rounded-lg p-1.5 transition-colors"
+            style={{ color: 'var(--text-muted)' }}
+            onMouseEnter={e => { e.currentTarget.style.background = 'var(--surface-secondary)'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = ''; e.currentTarget.style.color = 'var(--text-muted)'; }}
+            aria-label="Edit expense"
+          >
+            <Edit3 size={14} />
+          </button>
+          <button
+            onClick={() => handleDelete(expense.id)}
+            className="rounded-lg p-1.5 transition-colors hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/30 dark:hover:text-red-400"
+            style={{ color: 'var(--text-muted)' }}
+            aria-label="Delete expense"
+          >
+            <Trash2 size={14} />
+          </button>
+        </div>
+      </m.div>
     </div>
   );
 }
