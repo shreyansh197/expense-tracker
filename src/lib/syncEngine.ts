@@ -3,6 +3,19 @@ import type { IDBMutation } from "./db";
 import { authFetch, getActiveWorkspaceId, isAuthenticated, subscribeAuth } from "./authClient";
 import { supabase } from "./supabase";
 
+// ── Sync logging — visible in browser console for debugging ──
+
+const SYNC_LOG = true; // Set false in production
+function syncLog(tag: string, ...args: unknown[]) {
+  if (SYNC_LOG) console.log(`[sync:${tag}]`, ...args);
+}
+function syncWarn(tag: string, ...args: unknown[]) {
+  console.warn(`[sync:${tag}]`, ...args);
+}
+function syncErr(tag: string, ...args: unknown[]) {
+  console.error(`[sync:${tag}]`, ...args);
+}
+
 // ── Notification system for hooks to react to IDB changes ──
 
 type SyncListener = () => void;
@@ -49,6 +62,7 @@ export async function enqueueMutation(
   mutation: Omit<IDBMutation, "localId" | "createdAt" | "workspaceId">,
   workspaceId: string,
 ): Promise<void> {
+  syncLog("enqueue", `${mutation.table}:${mutation.operation} id=${mutation.id?.slice(0,8)}… key=${mutation.idempotencyKey}`);
   await db.mutations.add({
     ...mutation,
     workspaceId,
@@ -84,11 +98,31 @@ export async function pullChanges(workspaceId?: string): Promise<boolean> {
       if (syncMeta?.cursor) {
         params.set("since", syncMeta.cursor);
       }
+      syncLog("pull", `Fetching changes for workspace=${wid.slice(0,8)}… since=${syncMeta?.cursor ?? "NONE (full sync)"}`);
       const res = await authFetch(`/api/sync/changes?${params}`);
-      if (!res.ok) return false;
+      if (!res.ok) {
+        syncErr("pull", `HTTP ${res.status} from /api/sync/changes`);
+        try { syncErr("pull", await res.text()); } catch {}
+        return false;
+      }
 
       const data = await res.json();
       const { cursor, changes } = data;
+
+      const expCount = changes.expenses?.length ?? 0;
+      const settCount = changes.settings ? 1 : 0;
+      const ledCount = changes.businessLedgers?.length ?? 0;
+      const payCount = changes.businessPayments?.length ?? 0;
+      syncLog("pull", `Received: ${expCount} expenses, ${settCount} settings, ${ledCount} ledgers, ${payCount} payments, cursor=${cursor}, hasMore=${data.hasMore}`);
+
+      // Skip if nothing changed
+      if (expCount === 0 && settCount === 0 && ledCount === 0 && payCount === 0) {
+        // Still update cursor if server sent one
+        if (cursor && cursor !== syncMeta?.cursor) {
+          await db.syncMeta.put({ workspaceId: wid, cursor, lastSyncAt: Date.now() });
+        }
+        return true;
+      }
 
       // Get pending mutation IDs to avoid overwriting optimistic changes
       const pendingMutations = await db.mutations
@@ -221,7 +255,8 @@ export async function pullChanges(workspaceId?: string): Promise<boolean> {
       }
 
       return true;
-    } catch {
+    } catch (err) {
+      syncErr("pull", "Exception in pullChanges:", err);
       return false;
     }
   })();
@@ -253,56 +288,42 @@ export async function pushMutations(workspaceId?: string): Promise<number> {
     if (allMutations.length === 0) return 0;
 
     // Purge mutations with non-UUID ids — they will always fail Zod validation
-    // and block the entire batch (left over from before the UUID fix).
-    const invalidLocalIds = allMutations
-      .filter(m => m.id && !UUID_RE.test(m.id))
-      .map(m => m.localId!)
-      .filter(Boolean);
-    if (invalidLocalIds.length > 0) {
-      await db.mutations.bulkDelete(invalidLocalIds);
+    const invalidMutations = allMutations.filter(m => m.id && !UUID_RE.test(m.id));
+    if (invalidMutations.length > 0) {
+      syncWarn("push", `Purging ${invalidMutations.length} mutations with non-UUID ids`);
+      await db.mutations.bulkDelete(invalidMutations.map(m => m.localId!).filter(Boolean));
     }
 
-    // Also purge mutations older than 1 hour — they're permanently stuck
-    const ONE_HOUR = 60 * 60 * 1000;
-    const staleLocalIds = allMutations
-      .filter(m => Date.now() - m.createdAt > ONE_HOUR)
-      .map(m => m.localId!)
-      .filter(Boolean);
-    if (staleLocalIds.length > 0) {
-      await db.mutations.bulkDelete(staleLocalIds);
-    }
-
-    const mutations = allMutations.filter(
-      m => (!m.id || UUID_RE.test(m.id)) && Date.now() - m.createdAt <= ONE_HOUR
-    );
+    const mutations = allMutations.filter(m => !m.id || UUID_RE.test(m.id));
     if (mutations.length === 0) return 0;
+
+    syncLog("push", `Pushing ${mutations.length} mutations for workspace=${wid.slice(0,8)}…`);
 
     let applied = 0;
     for (let i = 0; i < mutations.length; i += 100) {
       const batch = mutations.slice(i, i + 100);
       try {
+        const payload = {
+          workspaceId: wid,
+          mutations: batch.map(m => ({
+            table: m.table,
+            operation: m.operation,
+            id: m.id,
+            data: m.data,
+            idempotencyKey: m.idempotencyKey,
+          })),
+        };
+        syncLog("push", `Sending batch ${i/100 + 1}: ${batch.length} mutations`, batch.map(m => `${m.table}:${m.operation}:${m.id?.slice(0,8)}`));
         const res = await authFetch("/api/sync/commit", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            workspaceId: wid,
-            mutations: batch.map(m => ({
-              table: m.table,
-              operation: m.operation,
-              id: m.id,
-              data: m.data,
-              idempotencyKey: m.idempotencyKey,
-            })),
-          }),
+          body: JSON.stringify(payload),
         });
         if (res.ok) {
           const body = await res.json();
-          // Delete ALL processed mutations (applied, skipped, AND errored).
-          // Retrying permanent errors (e.g. "record not found" for deletes)
-          // blocks the queue and wastes resources.
-          const processedLocalIds = batch
-            .map(m => m.localId!)
-            .filter(Boolean);
+          syncLog("push", `Server response:`, body.results.map((r: { status: string; id?: string; error?: string }) => `${r.status}${r.error ? ':'+r.error : ''}`));
+          // Delete ALL processed mutations from queue
+          const processedLocalIds = batch.map(m => m.localId!).filter(Boolean);
           if (processedLocalIds.length > 0) {
             await db.mutations.bulkDelete(processedLocalIds);
           }
@@ -310,20 +331,21 @@ export async function pushMutations(workspaceId?: string): Promise<number> {
             (r: { status: string }) => r.status === "applied"
           ).length;
         } else {
-          // HTTP error — delete this batch to prevent permanent blockage,
-          // UNLESS it's a 401 (auth issue that can be resolved by refresh)
-          if (res.status !== 401) {
-            const failedLocalIds = batch.map(m => m.localId!).filter(Boolean);
-            if (failedLocalIds.length > 0) {
-              await db.mutations.bulkDelete(failedLocalIds);
-            }
-          }
+          const bodyText = await res.text().catch(() => "");
+          syncErr("push", `HTTP ${res.status} from /api/sync/commit:`, bodyText);
+          // 400 = bad request (validation failure) — log details but DON'T delete,
+          // these mutations have valid UUIDs so the issue may be transient (schema mismatch etc.)
+          // 401 = needs token refresh — authFetch already retried, so give up for this cycle
+          // 403 = not a workspace member — skip for now, don't delete user data
+          // Other = server error, retry later
           break;
         }
-      } catch {
+      } catch (err) {
+        syncErr("push", "Network error during push:", err);
         break; // Network error — stop, retry later (mutations stay in queue)
       }
     }
+    syncLog("push", `Push complete: ${applied} applied, ${mutations.length - applied} remaining`);
     return applied;
   } finally {
     _pushInFlight = false;
@@ -333,16 +355,14 @@ export async function pushMutations(workspaceId?: string): Promise<number> {
 // ── Immediate push attempt (non-blocking) ──
 
 export function trySyncPush(workspaceId?: string) {
-  if (!navigator.onLine) return;
+  if (!navigator.onLine) { syncWarn("push", "Offline, skipping push"); return; }
   _lastMutationAt = Date.now();
   _schedulePoll(); // Switch to fast polling
   pushMutations(workspaceId).then(async () => {
-    // Always pull after push to stay in sync
     await pullChanges(workspaceId);
-    // Broadcast to other devices/tabs so they pull immediately
     const wid = workspaceId ?? getActiveWorkspaceId();
     if (wid) _broadcastSyncEvent(wid);
-  }).catch(() => {});
+  }).catch((err) => { syncErr("push", "trySyncPush error:", err); });
 }
 
 // ── Pending mutation count ──
@@ -376,17 +396,23 @@ function _setupRealtimeChannel(wid: string | null) {
   }
   if (!wid) return;
 
+  syncLog("realtime", `Setting up Supabase channel for workspace=${wid.slice(0,8)}…`);
   _realtimeChannel = supabase
     .channel(`sync-${wid}`)
-    // Broadcast: pure pub/sub — works with just the anon key, no RLS needed.
-    // This is the primary cross-device notification mechanism.
-    .on("broadcast", { event: "sync" }, () => pullChanges(wid))
-    // postgres_changes: bonus — works only if Supabase Realtime is fully configured with RLS
-    .on("postgres_changes", { event: "*", schema: "public", table: "expenses", filter: `workspace_id=eq.${wid}` }, () => pullChanges(wid))
+    .on("broadcast", { event: "sync" }, () => {
+      syncLog("realtime", "Received broadcast sync event → pulling");
+      pullChanges(wid);
+    })
+    .on("postgres_changes", { event: "*", schema: "public", table: "expenses", filter: `workspace_id=eq.${wid}` }, () => {
+      syncLog("realtime", "postgres_changes on expenses → pulling");
+      pullChanges(wid);
+    })
     .on("postgres_changes", { event: "*", schema: "public", table: "workspace_settings", filter: `workspace_id=eq.${wid}` }, () => pullChanges(wid))
     .on("postgres_changes", { event: "*", schema: "public", table: "business_ledgers", filter: `workspace_id=eq.${wid}` }, () => pullChanges(wid))
     .on("postgres_changes", { event: "*", schema: "public", table: "business_payments", filter: `workspace_id=eq.${wid}` }, () => pullChanges(wid))
-    .subscribe();
+    .subscribe((status) => {
+      syncLog("realtime", `Supabase channel status: ${status}`);
+    });
 }
 
 // ── Broadcast to other devices/tabs after a successful push ──
@@ -394,11 +420,13 @@ function _setupRealtimeChannel(wid: string | null) {
 function _broadcastSyncEvent(wid: string) {
   // Supabase Broadcast — cross-device notification
   if (_realtimeChannel) {
+    syncLog("broadcast", `Sending Supabase broadcast for workspace=${wid.slice(0,8)}…`);
     _realtimeChannel.send({
       type: "broadcast",
       event: "sync",
       payload: { workspaceId: wid },
-    });
+    }).then(() => syncLog("broadcast", "Supabase broadcast sent OK"))
+      .catch((err: unknown) => syncErr("broadcast", "Supabase broadcast failed:", err));
   }
   // BroadcastChannel API — cross-tab notification (same browser)
   if (_broadcastChannel) {
@@ -426,16 +454,21 @@ function _schedulePoll() {
 
 async function _doSync() {
   const wid = getActiveWorkspaceId();
-  if (!wid || !isAuthenticated()) return;
+  if (!wid || !isAuthenticated()) {
+    syncLog("doSync", `Skipped: wid=${wid ? wid.slice(0,8)+'…' : 'null'} authenticated=${isAuthenticated()}`);
+    return;
+  }
   try {
     if (!_migrated) {
+      syncLog("migrate", "Running one-time migration…");
       await _migrateStuckData();
       _migrated = true;
+      syncLog("migrate", "Migration complete");
     }
     await pushMutations(wid);
     await pullChanges(wid);
-  } catch {
-    // Non-fatal — next poll cycle will retry
+  } catch (err) {
+    syncErr("doSync", "Exception:", err);
   }
 }
 
@@ -537,13 +570,15 @@ export function startSyncEngine() {
   if (typeof window === "undefined" || _started) return;
   _started = true;
 
+  syncLog("init", "Starting sync engine…");
+
   // Migrate legacy localStorage data to IDB
   migrateFromLocalStorage();
 
   // Force full re-sync on startup: clear saved cursors so the first pull
-  // fetches ALL data from the server. This guarantees both devices converge
-  // even if the cursor was stale from previous failed syncs.
-  db.syncMeta.clear().catch(() => {});
+  // fetches ALL data from the server.
+  db.syncMeta.clear().then(() => syncLog("init", "Cleared sync cursors for full re-sync"))
+    .catch(() => {});
 
   // Auto-sync on reconnect
   _onlineHandler = () => { _doSync(); };

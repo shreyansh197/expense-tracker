@@ -25,6 +25,7 @@ export async function POST(req: NextRequest) {
 
   const parsed = syncCommitSchema.safeParse(body);
   if (!parsed.success) {
+    console.error("[sync/commit] Validation failed:", JSON.stringify(parsed.error.flatten()));
     return NextResponse.json(
       { error: "Validation failed", details: parsed.error.flatten() },
       { status: 400 },
@@ -32,6 +33,7 @@ export async function POST(req: NextRequest) {
   }
 
   const { workspaceId, mutations } = parsed.data;
+  console.log(`[sync/commit] Processing ${mutations.length} mutations for workspace=${workspaceId.slice(0,8)}…`);
 
   // Enforce membership
   const member = await requireWorkspaceMember(auth.userId, workspaceId);
@@ -267,6 +269,7 @@ export async function POST(req: NextRequest) {
         }
       }
     } catch (err) {
+      console.error(`[sync/commit] Error processing mutation ${mutation.table}:${mutation.operation}:`, err);
       results.push({
         idempotencyKey: mutation.idempotencyKey,
         status: "error",
@@ -275,5 +278,6 @@ export async function POST(req: NextRequest) {
     }
   }
 
+  console.log(`[sync/commit] Results:`, results.map(r => `${r.status}${r.error ? ':'+r.error : ''}`).join(', '));
   return NextResponse.json({ results });
 }

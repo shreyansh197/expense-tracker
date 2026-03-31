@@ -64,6 +64,8 @@ export async function GET(req: NextRequest) {
     ledgers.length === 200 ||
     payments.length === 500;
 
+  console.log(`[sync/changes] workspace=${workspaceId.slice(0,8)}… since=${since.toISOString()} → ${expenses.length} expenses, ${settings ? 1 : 0} settings, ${ledgers.length} ledgers, ${payments.length} payments, cursor=${cursor}`);
+
   return NextResponse.json({
     cursor,
     hasMore,
