@@ -310,18 +310,16 @@ export default function DashboardPage() {
           </div>
 
           {user?.name && (
-            <div className="mb-3 flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold text-white" style={{ background: 'var(--accent-gradient)' }}>
-                {user.name.charAt(0).toUpperCase()}
-              </div>
-              <div>
-                <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
-                  {new Date().getHours() < 12 ? "Good morning" : new Date().getHours() < 17 ? "Good afternoon" : "Good evening"}, {user.name.split(" ")[0]}
-                </p>
-                <p className="text-[11px]" style={{ color: 'var(--text-muted)' }}>
-                  {new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}
-                </p>
-              </div>
+            <div className="mb-3">
+              <p className="text-[13px] font-medium tracking-wide" style={{ color: 'var(--text-muted)' }}>
+                {new Date().getHours() < 12 ? "Good morning" : new Date().getHours() < 17 ? "Good afternoon" : "Good evening"}
+              </p>
+              <p className="text-lg sm:text-xl font-bold tracking-tight" style={{ color: 'var(--text-primary)' }}>
+                {user.name.split(" ")[0]}
+              </p>
+              <p className="mt-0.5 text-[11px] tracking-wide" style={{ color: 'var(--text-tertiary)' }}>
+                {new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}
+              </p>
             </div>
           )}
           <div data-tour="dashboard" className="flex items-center justify-between">
