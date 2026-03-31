@@ -105,6 +105,7 @@ export function BottomNav() {
                 key={item.href}
                 href={item.href}
                 {...(item.label === "Settings" ? { "data-tour": "nav-settings" } : {})}
+                aria-current={isActive ? "page" : undefined}
                 className={cn(
                   "relative flex flex-col items-center justify-center gap-0.5 py-1.5 transition-colors",
                   isActive

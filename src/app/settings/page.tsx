@@ -222,7 +222,7 @@ export default function SettingsPage() {
                 aria-checked={settings.rolloverEnabled ?? false}
                 onClick={() => updateSettings({ rolloverEnabled: !settings.rolloverEnabled })}
                 className={`relative h-6 w-11 rounded-full transition-colors ${
-                  settings.rolloverEnabled ? "bg-[#2EC4B6]" : "bg-slate-300 dark:bg-slate-600"
+                  settings.rolloverEnabled ? "bg-[#2EC4B6] dark:bg-[#3B82F6]" : "bg-slate-300 dark:bg-slate-600"
                 }`}
               >
                 <span
@@ -370,7 +370,7 @@ export default function SettingsPage() {
                       onClick={() => setTheme(opt.value)}
                       className={`flex flex-1 items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
                         active
-                          ? "bg-[#e6f9f7] text-[#2EC4B6] dark:bg-[rgba(94,221,210,0.12)] dark:text-[#5EDDD2]"
+                          ? "bg-[#e6f9f7] text-[#2EC4B6] dark:bg-[rgba(96,165,250,0.12)] dark:text-[#60A5FA]"
                           : ""
                       }`}
                       style={!active ? { color: 'var(--text-secondary)' } : undefined}

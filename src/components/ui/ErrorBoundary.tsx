@@ -36,20 +36,21 @@ export class ErrorBoundary extends Component<Props, State> {
       if (this.props.fallback) return this.props.fallback;
       return (
         <div className="flex flex-col items-center justify-center gap-4 py-20 text-center">
-          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-red-50 dark:bg-red-900/30">
-            <AlertTriangle size={28} className="text-red-500" />
+          <div className="flex h-14 w-14 items-center justify-center rounded-full" style={{ background: 'var(--danger-soft)' }}>
+            <AlertTriangle size={28} style={{ color: 'var(--danger)' }} />
           </div>
           <div>
-            <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
+            <h2 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>
               Something went wrong
             </h2>
-            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+            <p className="mt-1 text-sm" style={{ color: 'var(--text-secondary)' }}>
               An unexpected error occurred. Please try again.
             </p>
           </div>
           <button
             onClick={this.handleReset}
-            className="flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700"
+            className="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors"
+            style={{ background: 'var(--secondary)' }}
           >
             <RefreshCw size={14} />
             Try Again

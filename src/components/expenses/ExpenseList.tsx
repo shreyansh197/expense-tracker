@@ -190,8 +190,8 @@ export function ExpenseList({
     <div className="space-y-4">
       {/* Batch action bar */}
       {selectedIds.size > 0 && (
-        <div className="sticky top-0 z-10 flex items-center justify-between rounded-xl border border-[#b2ece6] bg-[#e6f9f7] px-4 py-2.5 dark:border-[#1a5c55] dark:bg-[rgba(94,221,210,0.08)]">
-          <span className="text-sm font-medium text-[#1a8a7f] dark:text-[#5EDDD2]">
+        <div className="sticky top-0 z-10 flex items-center justify-between rounded-xl border border-[#b2ece6] bg-[#e6f9f7] px-4 py-2.5 dark:border-blue-900/40 dark:bg-[rgba(96,165,250,0.08)]">
+          <span className="text-sm font-medium text-[#1a8a7f] dark:text-[#60A5FA]">
             {selectedIds.size} selected
           </span>
           <div className="flex items-center gap-2">
@@ -204,7 +204,7 @@ export function ExpenseList({
             </button>
             <button
               onClick={() => setSelectedIds(new Set())}
-              className="rounded-lg p-1.5 text-[#5EDDD2] hover:bg-[#e6f9f7] dark:hover:bg-[rgba(94,221,210,0.1)]"
+              className="rounded-lg p-1.5 text-[#2EC4B6] hover:bg-[#e6f9f7] dark:text-[#60A5FA] dark:hover:bg-[rgba(96,165,250,0.1)]"
               aria-label="Clear selection"
             >
               <X size={14} />
@@ -253,9 +253,9 @@ export function ExpenseList({
                   if (e.key === "Delete" || e.key === "Backspace") handleDelete(expense.id);
                   if (e.key === " ") { e.preventDefault(); toggleSelect(expense.id); }
                 }}
-                className={`group flex items-center gap-3 rounded-2xl border px-4 py-3.5 transition-all active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-[#2EC4B6]/40 ${
+                className={`group flex items-center gap-3 rounded-2xl border px-4 py-3.5 transition-all active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-[#2EC4B6]/40 dark:focus:ring-[#60A5FA]/40 ${
                   selectedIds.has(expense.id)
-                    ? "border-[#b2ece6] bg-[#e6f9f7] dark:border-[#1a5c55] dark:bg-[rgba(94,221,210,0.08)]"
+                    ? "border-[#b2ece6] bg-[#e6f9f7] dark:border-blue-900/40 dark:bg-[rgba(96,165,250,0.08)]"
                     : ""
                 }`}
                 style={!selectedIds.has(expense.id) ? { background: 'var(--surface)', borderColor: 'var(--border)' } : undefined}
@@ -269,7 +269,7 @@ export function ExpenseList({
                   aria-label="Select expense"
                 >
                   {selectedIds.has(expense.id) ? (
-                    <CheckSquare size={14} className="text-[#2EC4B6]" />
+                    <CheckSquare size={14} className="text-[#2EC4B6] dark:text-[#60A5FA]" />
                   ) : (
                     <Square size={14} />
                   )}

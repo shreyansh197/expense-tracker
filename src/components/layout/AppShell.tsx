@@ -40,7 +40,7 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
     <>
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[300] focus:rounded-lg focus:bg-[#2EC4B6] focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-white focus:shadow-lg"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[300] focus:rounded-lg focus:bg-[#2EC4B6] dark:focus:bg-[#3B82F6] focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-white focus:shadow-lg"
       >
         Skip to main content
       </a>
@@ -119,7 +119,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   if (!hydrated) {
     return (
       <div className="flex h-screen items-center justify-center" style={{ background: 'var(--background)' }}>
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#2EC4B6] border-t-transparent" />
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#2EC4B6] dark:border-[#60A5FA] border-t-transparent" />
       </div>
     );
   }

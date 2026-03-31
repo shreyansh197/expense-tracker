@@ -94,7 +94,7 @@ export function FilterPanel({
           onClick={() => setOpen(!open)}
           className={`flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium transition-colors ${
             hasActiveFilters
-              ? "bg-[#e6f9f7] text-[#2EC4B6] dark:bg-[rgba(94,221,210,0.12)] dark:text-[#5EDDD2]"
+              ? "bg-[#e6f9f7] text-[#2EC4B6] dark:bg-[rgba(96,165,250,0.12)] dark:text-[#60A5FA]"
               : ""
           }`}
           style={!hasActiveFilters ? { color: 'var(--text-secondary)' } : undefined}
@@ -102,7 +102,7 @@ export function FilterPanel({
           <SlidersHorizontal size={14} />
           Filters
           {hasActiveFilters && (
-            <span className="ml-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#2EC4B6] px-1 text-[10px] font-bold text-white">
+            <span className="ml-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#2EC4B6] dark:bg-[#3B82F6] px-1 text-[10px] font-bold text-white">
               {activeFilterCount}
             </span>
           )}
@@ -202,7 +202,7 @@ export function FilterPanel({
                 <button
                   onClick={handleSaveFilter}
                   disabled={!saveName.trim()}
-                  className="rounded px-2.5 py-1.5 text-xs font-medium text-[#2EC4B6] hover:bg-[#e6f9f7] disabled:opacity-40 dark:text-[#5EDDD2]"
+                  className="rounded px-2.5 py-1.5 text-xs font-medium text-[#2EC4B6] hover:bg-[#e6f9f7] disabled:opacity-40 dark:text-[#60A5FA] dark:hover:bg-[rgba(96,165,250,0.1)]"
                 >
                   Save
                 </button>
@@ -219,7 +219,7 @@ export function FilterPanel({
               <button
                 onClick={() => setShowSaveInput(true)}
                 disabled={!hasActiveFilters}
-                className="flex items-center gap-1.5 text-xs font-medium text-[#2EC4B6] hover:text-[#26a69a] disabled:opacity-40 dark:text-[#5EDDD2]"
+                className="flex items-center gap-1.5 text-xs font-medium text-[#2EC4B6] hover:text-[#26a69a] disabled:opacity-40 dark:text-[#60A5FA] dark:hover:text-[#93C5FD]"
               >
                 <Bookmark size={12} />
                 Save Current Filter
@@ -241,7 +241,7 @@ export function FilterPanel({
                     onMouseEnter={e => { e.currentTarget.style.background = 'var(--surface-secondary)'; }}
                     onMouseLeave={e => { e.currentTarget.style.background = ''; }}
                   >
-                    <BookmarkCheck size={12} className="shrink-0 text-[#2EC4B6]" />
+                    <BookmarkCheck size={12} className="shrink-0 text-[#2EC4B6] dark:text-[#60A5FA]" />
                     <button
                       onClick={() => handleApplyFilter(f)}
                       className="flex-1 text-left text-xs font-medium transition-colors"

@@ -86,7 +86,7 @@ function OnboardingStep({
 }) {
   const colorMap: Record<string, { bg: string; text: string; ring: string }> = {
     indigo: { bg: "bg-[#eef0ff] dark:bg-[rgba(123,135,255,0.12)]", text: "text-[#4C5CFF] dark:text-[#7B87FF]", ring: "ring-[#c7cbff] dark:ring-[#4C5CFF]/30" },
-    emerald: { bg: "bg-[#e6f9f7] dark:bg-[rgba(94,221,210,0.12)]", text: "text-[#2EC4B6] dark:text-[#5EDDD2]", ring: "ring-[#b2ece6] dark:ring-[#2EC4B6]/30" },
+    emerald: { bg: "bg-[#e6f9f7] dark:bg-[rgba(96,165,250,0.12)]", text: "text-[#2EC4B6] dark:text-[#60A5FA]", ring: "ring-[#b2ece6] dark:ring-[#3B82F6]/30" },
     amber: { bg: "bg-[#fff3ee] dark:bg-[rgba(255,138,101,0.12)]", text: "text-[#FF8A65] dark:text-[#FFAB91]", ring: "ring-[#ffd4c2] dark:ring-[#FF8A65]/30" },
   };
   const c = colorMap[color] ?? colorMap.indigo;

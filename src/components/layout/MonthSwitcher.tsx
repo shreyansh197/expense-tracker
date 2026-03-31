@@ -35,7 +35,11 @@ export function MonthSwitcher() {
     nextMonth();
   }, [nextMonth]);
 
-  const label = `${getMonthName(display.month)} ${display.year}`;
+  const now = new Date();
+  const isCurrentYear = display.year === now.getFullYear();
+  const label = isCurrentYear
+    ? getMonthName(display.month)
+    : `${getMonthName(display.month)} ${display.year}`;
 
   return (
     <div className="flex items-center gap-1">
