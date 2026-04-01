@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 import { useCurrency } from "@/hooks/useCurrency";
 import { BUDGET_WARNING_THRESHOLD } from "@/lib/constants";
 import { InfoTooltip } from "@/components/ui/InfoTooltip";
-import type { CategoryTotal, Forecast } from "@/types";
+import type { Forecast } from "@/types";
 
 interface KpiCardsProps {
   monthlyTotal: number;
@@ -21,7 +21,6 @@ interface KpiCardsProps {
   salary: number;
   avgDaily: number;
   budgetUsedPercent: number;
-  topCategory: CategoryTotal | null;
   daysRemaining: number;
   paceToStayUnder: number;
   expenseCount: number;

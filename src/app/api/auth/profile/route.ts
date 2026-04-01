@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/server/prisma";
 import { requireAuth, jsonError } from "@/lib/server/guards";
+import { profileUpdateSchema } from "@/lib/validators";
 
 export async function PATCH(req: NextRequest) {
   const auth = await requireAuth(req);
@@ -9,25 +10,22 @@ export async function PATCH(req: NextRequest) {
   const body = await req.json().catch(() => null);
   if (!body) return jsonError("Invalid request body", 400);
 
-  const { name, avatarUrl } = body as {
-    name?: string;
-    avatarUrl?: string | null;
-  };
+  const parsed = profileUpdateSchema.safeParse(body);
+  if (!parsed.success) {
+    return jsonError("Invalid profile data", 400);
+  }
+
+  const { name, avatarUrl } = parsed.data;
 
   const data: Record<string, unknown> = {};
   if (typeof name === "string" && name.trim()) {
-    data.name = name.trim().slice(0, 100);
+    data.name = name.trim().slice(0, 120);
   }
   if (avatarUrl !== undefined) {
-    // Allow null to clear, or a valid URL string / data URI
     if (avatarUrl === null) {
       data.avatarUrl = null;
     } else if (typeof avatarUrl === "string") {
       if (avatarUrl.startsWith("data:image/")) {
-        // Data URI — allow up to ~5 MB base64 payload (~7 MB string)
-        if (avatarUrl.length > 7_000_000) {
-          return jsonError("Avatar too large", 400);
-        }
         data.avatarUrl = avatarUrl;
       } else if (avatarUrl.length < 2048) {
         try {

@@ -2,13 +2,12 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useCallback, useEffect } from "react";
+import dynamic from "next/dynamic";
 import { m, AnimatePresence } from "framer-motion";
 import { AppShell } from "@/components/layout/AppShell";
 import { MonthSwitcher } from "@/components/layout/MonthSwitcher";
 import { SyncIndicator } from "@/components/sync/SyncIndicator";
 import { KpiCards } from "@/components/dashboard/KpiCards";
-import { CategoryChart, CategoryLegend } from "@/components/dashboard/CategoryChart";
-import { DailyTrendChart } from "@/components/dashboard/DailyTrendChart";
 import { AlertsPanel } from "@/components/dashboard/AlertsPanel";
 import { SubscriptionsSummary } from "@/components/dashboard/SubscriptionsSummary";
 import { RecurringSuggestions } from "@/components/dashboard/RecurringSuggestions";
@@ -20,6 +19,21 @@ import { AmbientBackground } from "@/components/ui/AmbientBackground";
 import { ChartIllustration } from "@/components/ui/illustrations";
 import { WalletIllustration } from "@/components/ui/illustrations";
 import { DecoGraphic } from "@/components/ui/DecoGraphic";
+
+// Lazy-load heavy chart components (recharts ~200KB)
+const CategoryChart = dynamic(
+  () => import("@/components/dashboard/CategoryChart").then((m) => m.CategoryChart),
+  { ssr: false },
+);
+const CategoryLegend = dynamic(
+  () => import("@/components/dashboard/CategoryChart").then((m) => m.CategoryLegend),
+  { ssr: false },
+);
+const DailyTrendChart = dynamic(
+  () => import("@/components/dashboard/DailyTrendChart").then((m) => m.DailyTrendChart),
+  { ssr: false },
+);
+
 import { useExpenses } from "@/hooks/useExpenses";
 import { useSettings } from "@/hooks/useSettings";
 import { useCalculations } from "@/hooks/useCalculations";
@@ -250,7 +264,6 @@ export default function DashboardPage() {
     categoryTotals,
     dailyTotals,
     stackedDailyTotals,
-    topCategory,
     daysRemaining,
     paceToStayUnder,
     forecast,
@@ -382,7 +395,6 @@ export default function DashboardPage() {
                   salary={effectiveBudget}
                   avgDaily={avgDaily}
                   budgetUsedPercent={budgetUsedPercent}
-                  topCategory={topCategory}
                   daysRemaining={daysRemaining}
                   paceToStayUnder={paceToStayUnder}
                   expenseCount={expenses.length}

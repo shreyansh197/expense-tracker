@@ -3,6 +3,7 @@ import { prisma } from "@/lib/server/prisma";
 import { requireAuth, requireWorkspaceMember, requireWorkspaceAdmin, jsonError } from "@/lib/server/guards";
 import { audit } from "@/lib/server/audit";
 import { hashIp } from "@/lib/server/tokens";
+import { createWorkspaceSchema } from "@/lib/validators";
 
 interface Params {
   params: Promise<{ id: string }>;
@@ -63,13 +64,14 @@ export async function PATCH(req: NextRequest, { params }: Params) {
   }
 
   const { name } = body as { name?: string };
-  if (!name || name.length > 120) {
+  const parsed = createWorkspaceSchema.safeParse({ name });
+  if (!parsed.success) {
     return jsonError("Name is required (max 120 chars)", 400);
   }
 
   const updated = await prisma.workspace.update({
     where: { id },
-    data: { name },
+    data: { name: parsed.data.name },
     select: { id: true, name: true },
   });
 

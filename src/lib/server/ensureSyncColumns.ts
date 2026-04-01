@@ -43,6 +43,14 @@ export async function ensureSyncColumns(): Promise<void> {
       -- Migration 008: Monthly budgets
       ALTER TABLE workspace_settings
         ADD COLUMN IF NOT EXISTS monthly_budgets JSONB NOT NULL DEFAULT '{}'::jsonb;
+
+      -- Migration 009: Idempotency key tracking
+      CREATE TABLE IF NOT EXISTS processed_idempotency_keys (
+        idempotency_key VARCHAR(64) NOT NULL,
+        workspace_id UUID NOT NULL REFERENCES workspaces(id) ON DELETE CASCADE,
+        processed_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+        PRIMARY KEY (workspace_id, idempotency_key)
+      );
     `);
     console.log("[ensureSyncColumns] Schema migration check complete");
   } catch (err) {

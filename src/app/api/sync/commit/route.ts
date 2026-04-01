@@ -43,9 +43,30 @@ export async function POST(req: NextRequest) {
   // Ensure all required columns exist (idempotent, runs once per cold start)
   await ensureSyncColumns();
 
+  // Check which idempotency keys have already been processed
+  const allKeys = mutations.map((m) => m.idempotencyKey);
+  let processedKeys = new Set<string>();
+  try {
+    const rows = await prisma.$queryRawUnsafe<{ idempotency_key: string }[]>(
+      `SELECT idempotency_key FROM processed_idempotency_keys
+       WHERE workspace_id = $1::uuid AND idempotency_key = ANY($2::varchar[])`,
+      workspaceId,
+      allKeys,
+    );
+    processedKeys = new Set(rows.map((r) => r.idempotency_key));
+  } catch {
+    // Table may not exist yet on first deploy — proceed without dedup
+  }
+
   const results: { idempotencyKey: string; status: "applied" | "skipped" | "error"; id?: string; error?: string }[] = [];
 
   for (const mutation of mutations) {
+    // Skip already-processed mutations
+    if (processedKeys.has(mutation.idempotencyKey)) {
+      results.push({ idempotencyKey: mutation.idempotencyKey, status: "skipped" });
+      continue;
+    }
+
     try {
       if (mutation.table === "expenses") {
         if (mutation.operation === "upsert") {
@@ -297,6 +318,24 @@ export async function POST(req: NextRequest) {
         status: "error",
         error: "Failed to process mutation",
       });
+    }
+  }
+
+  // Record successfully processed idempotency keys
+  const appliedKeys = results
+    .filter((r) => r.status === "applied")
+    .map((r) => r.idempotencyKey);
+  if (appliedKeys.length > 0) {
+    try {
+      await prisma.$executeRawUnsafe(
+        `INSERT INTO processed_idempotency_keys (workspace_id, idempotency_key)
+         SELECT $1::uuid, unnest($2::varchar[])
+         ON CONFLICT DO NOTHING`,
+        workspaceId,
+        appliedKeys,
+      );
+    } catch {
+      // Non-fatal — dedup is best-effort
     }
   }
 

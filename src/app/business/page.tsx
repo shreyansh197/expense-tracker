@@ -1,8 +1,7 @@
 "use client";
 
-export const dynamic = "force-dynamic";
-
 import { useState, useEffect, startTransition, useMemo } from "react";
+import dynamic from "next/dynamic";
 import { AppShell } from "@/components/layout/AppShell";
 import { PlusCircle, Search, Briefcase, ArrowRightLeft } from "lucide-react";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -15,8 +14,12 @@ import { useUIStore } from "@/stores/uiStore";
 import { LedgerCard } from "@/components/business/LedgerCard";
 import { LedgerForm } from "@/components/business/LedgerForm";
 import { BusinessKpiCards } from "@/components/business/BusinessKpiCards";
-import { CollectionChart } from "@/components/business/CollectionChart";
 import { TagBreakdown } from "@/components/business/TagBreakdown";
+
+const CollectionChart = dynamic(
+  () => import("@/components/business/CollectionChart").then((m) => m.CollectionChart),
+  { ssr: false },
+);
 import { SyncIndicator } from "@/components/sync/SyncIndicator";
 import { BusinessExport } from "@/components/business/BusinessExport";
 import { SkeletonBusinessKpi, SkeletonLedgerList } from "@/components/ui/Skeleton";
