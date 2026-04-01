@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 import { useCurrency } from "@/hooks/useCurrency";
 import { BUDGET_WARNING_THRESHOLD } from "@/lib/constants";
 import { InfoTooltip } from "@/components/ui/InfoTooltip";
+import { AnimatedNumber } from "@/components/ui/AnimatedNumber";
 import type { Forecast } from "@/types";
 
 interface KpiCardsProps {
@@ -111,8 +112,8 @@ export function KpiCards({
             </span>
           )}
         </div>
-        <p className={cn("tabular-nums mt-1.5 text-3xl sm:text-4xl font-extrabold tracking-tight", sc.text)}>
-          {formatCurrency(Math.abs(remaining))}
+        <p className={cn("tabular-nums mt-1.5 text-4xl sm:text-5xl font-extrabold tracking-tight", sc.text)}>
+          <AnimatedNumber value={Math.abs(remaining)} format={formatCurrency} />
         </p>
         <p className="mt-2 text-[13px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
           {getStatusCopy(isOverspent, isWarning, daysRemaining, paceToStayUnder, forecastOverBudget, formatCurrency)}
@@ -136,12 +137,12 @@ export function KpiCards({
         )}
       </m.div>
 
-      {/* ── SECONDARY: Supporting Metrics ── */}
+      {/* ── SECONDARY: Supporting Metrics (compact inline) ── */}
       <m.div
         className="grid grid-cols-3 gap-2 sm:gap-3"
         variants={{ hidden: { opacity: 0, y: 8 }, visible: { opacity: 1, y: 0, transition: { duration: 0.4, delay: 0.1, ease: [0.22, 1, 0.36, 1] } } }}
       >
-        <div className="card-accent-teal p-3 sm:p-3.5">
+        <div className="rounded-xl border p-3 sm:p-3.5" style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>
           <p className="text-meta font-medium">Daily Pace</p>
           <p className={cn(
             "tabular-nums mt-1 text-base sm:text-lg font-bold",
@@ -155,7 +156,7 @@ export function KpiCards({
           </p>
         </div>
 
-        <div className="card-accent-coral p-3 sm:p-3.5">
+        <div className="rounded-xl border p-3 sm:p-3.5" style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>
           <p className="text-meta font-medium">Saving</p>
           <p className={cn(
             "tabular-nums mt-1 text-base sm:text-lg font-bold",

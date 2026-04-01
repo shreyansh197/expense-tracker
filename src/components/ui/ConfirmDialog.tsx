@@ -63,17 +63,17 @@ export function ConfirmProvider({ children }: { children: React.ReactNode }) {
   const variantColors = {
     danger: {
       icon: "text-red-500",
-      button: "bg-red-600 hover:bg-red-700 text-white",
+      button: "btn-danger",
       border: "border-red-200 dark:border-red-800",
     },
     warning: {
       icon: "text-amber-500",
-      button: "bg-amber-600 hover:bg-amber-700 text-white",
+      button: "btn-primary",
       border: "border-amber-200 dark:border-amber-800",
     },
     default: {
     icon: "text-data-text",
-    button: "bg-data hover:bg-data-hover text-white",
+    button: "btn-primary",
     border: "border-[var(--border)] dark:border-[var(--border)]",
     },
   };

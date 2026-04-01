@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { m, AnimatePresence } from "framer-motion";
-import { X, Loader2, CheckCircle, Camera } from "lucide-react";
+import { X, Loader2, CheckCircle, Camera, ChevronDown } from "lucide-react";
 import { getAllCategories } from "@/lib/categories";
 import { cn, getDaysInMonth } from "@/lib/utils";
 import { useUIStore } from "@/stores/uiStore";
@@ -67,6 +67,7 @@ export function ExpenseForm({
   const amountRef = useRef<HTMLInputElement>(null);
   const closeBtnRef = useRef<HTMLButtonElement>(null);
   const [showScanner, setShowScanner] = useState(false);
+  const [showMore, setShowMore] = useState(!!editExpense);
 
   // Auto-focus amount input on mount — guarded against closing state
   useEffect(() => {
@@ -288,6 +289,7 @@ export function ExpenseForm({
                   if (data.category) setCategory(data.category);
                   if (data.remark) setRemark(data.remark);
                   setShowScanner(false);
+                  setShowMore(true);
                 }}
                 onClose={() => setShowScanner(false)}
               />
@@ -362,6 +364,33 @@ export function ExpenseForm({
         </AnimatePresence>
       </div>
 
+      {/* More options toggle */}
+      <button
+        type="button"
+        onClick={() => setShowMore((v) => !v)}
+        className="flex w-full items-center justify-center gap-1 rounded-lg py-1.5 text-xs font-medium transition-colors"
+        style={{ color: 'var(--text-tertiary)' }}
+      >
+        {showMore ? "Less options" : "More options (date, note, currency)"}
+        <m.span
+          animate={{ rotate: showMore ? 180 : 0 }}
+          transition={{ duration: 0.2 }}
+          style={{ display: 'inline-flex' }}
+        >
+          <ChevronDown size={12} />
+        </m.span>
+      </button>
+
+      <AnimatePresence initial={false}>
+        {showMore && (
+          <m.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+            className="overflow-hidden space-y-5"
+          >
+
       {/* Currency selector (multi-currency mode only) */}
       {multiCurrency && (
         <div>
@@ -419,6 +448,10 @@ export function ExpenseForm({
         />
       </div>
 
+          </m.div>
+        )}
+      </AnimatePresence>
+
       {/* Error */}
       <AnimatePresence>
         {error && (
@@ -438,7 +471,7 @@ export function ExpenseForm({
       <m.button
         type="submit"
         disabled={submitting}
-        className="flex w-full items-center justify-center gap-2 rounded-xl bg-cta px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-cta-hover disabled:opacity-50"
+        className="btn-primary w-full justify-center gap-2 rounded-xl py-2.5"
         whileTap={{ scale: 0.97 }}
       >
         {submitting && <Loader2 size={16} className="animate-spin" />}

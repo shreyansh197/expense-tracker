@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { AlertTriangle, ArrowRight, Zap, ChevronDown } from "lucide-react";
+import { m } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useCurrency } from "@/hooks/useCurrency";
 import { buildCategoryMap } from "@/lib/categories";
@@ -148,9 +149,12 @@ export function AlertsPanel({
           <span className="text-[10px] text-gray-400">Anomaly detection active</span>
         </div>
       )}
-      {visibleAlerts.map((alert) => (
-        <div
+      {visibleAlerts.map((alert, i) => (
+        <m.div
           key={alert.id}
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.2, delay: i * 0.05, ease: [0.22, 1, 0.36, 1] }}
           className={cn(
             "flex items-start gap-3 rounded-xl border-l-[3px] px-4 py-3 text-sm",
             alert.severity === "critical"
@@ -183,7 +187,7 @@ export function AlertsPanel({
               <ArrowRight size={14} />
             </button>
           )}
-        </div>
+        </m.div>
       ))}
       {!expanded && hiddenCount > 0 && (
         <button

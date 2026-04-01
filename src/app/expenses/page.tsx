@@ -3,7 +3,6 @@
 import { useState, useCallback } from "react";
 import { AppShell } from "@/components/layout/AppShell";
 import { PageTransition } from "@/components/ui/PageTransition";
-import { DecoGraphic } from "@/components/ui/DecoGraphic";
 import { MonthSwitcher } from "@/components/layout/MonthSwitcher";
 import { SyncIndicator } from "@/components/sync/SyncIndicator";
 import { ExpenseList } from "@/components/expenses/ExpenseList";
@@ -78,7 +77,6 @@ export default function ExpensesPage() {
   return (
     <AppShell>
       <PageTransition className="relative mx-auto min-h-[80vh] max-w-4xl xl:max-w-6xl space-y-4 p-4 lg:p-6">
-        <DecoGraphic variant="finance" />
         {/* Header — hero zone */}
         <div className="zone-header">
           <div className="flex items-center justify-between">
@@ -154,6 +152,13 @@ export default function ExpensesPage() {
 
         <CategoryChips />
         </div>
+
+        {/* Filtered count indicator */}
+        {(searchQuery || activeCategories.length > 0 || amountMin || amountMax || dayMin || dayMax) && (
+          <p className="px-1 text-xs font-medium" style={{ color: 'var(--text-tertiary)' }}>
+            Filtered results &middot; some expenses may be hidden
+          </p>
+        )}
 
         {/* Expense List */}
         <ExpenseList

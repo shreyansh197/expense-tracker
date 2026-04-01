@@ -63,15 +63,15 @@
   /* ── General ── */
   --overlay: rgba(0, 0, 0, 0.4);
   --category-fallback: #6B7280;
-  /* ── Section zone washes (subtle tinted backgrounds) ── */
-  --section-teal: rgba(46, 196, 182, 0.08);
-  --section-indigo: rgba(76, 92, 255, 0.07);
-  --section-coral: rgba(255, 138, 101, 0.06);
-  --section-emerald: rgba(16, 185, 129, 0.07);
-  /* ── Accent card surfaces (stronger tints for individual cards) ── */
+  /* ── Section zone washes (unified neutral wash) ── */
+  --section-teal: rgba(46, 196, 182, 0.05);
+  --section-indigo: rgba(46, 196, 182, 0.05);
+  --section-coral: rgba(46, 196, 182, 0.05);
+  --section-emerald: rgba(46, 196, 182, 0.05);
+  /* ── Accent card surfaces (unified primary tint) ── */
   --surface-accent-teal: #e6f9f7;
-  --surface-accent-indigo: #eef0ff;
-  --surface-accent-coral: #fff3ee;
+  --surface-accent-indigo: #e6f9f7;
+  --surface-accent-coral: #e6f9f7;
   /* ── Hero gradient ── */
   --gradient-hero: linear-gradient(135deg, rgba(46, 196, 182, 0.12) 0%, rgba(76, 92, 255, 0.09) 100%);
   /* ── Effects ── */
@@ -145,15 +145,15 @@
   /* ── General ── */
   --overlay: rgba(0, 0, 0, 0.6);
   --category-fallback: #6B7280;
-  /* ── Section zone washes ── */
-  --section-teal: rgba(96, 165, 250, 0.10);
-  --section-indigo: rgba(129, 140, 248, 0.10);
-  --section-coral: rgba(96, 165, 250, 0.08);
-  --section-emerald: rgba(74, 222, 128, 0.10);
-  /* ── Accent card surfaces ── */
+  /* ── Section zone washes (unified neutral wash) ── */
+  --section-teal: rgba(96, 165, 250, 0.06);
+  --section-indigo: rgba(96, 165, 250, 0.06);
+  --section-coral: rgba(96, 165, 250, 0.06);
+  --section-emerald: rgba(96, 165, 250, 0.06);
+  /* ── Accent card surfaces (unified primary tint) ── */
   --surface-accent-teal: rgba(96, 165, 250, 0.10);
-  --surface-accent-indigo: rgba(129, 140, 248, 0.10);
-  --surface-accent-coral: rgba(96, 165, 250, 0.08);
+  --surface-accent-indigo: rgba(96, 165, 250, 0.10);
+  --surface-accent-coral: rgba(96, 165, 250, 0.10);
   /* ── Hero gradient ── */
   --gradient-hero: linear-gradient(135deg, rgba(96, 165, 250, 0.14) 0%, rgba(129, 140, 248, 0.10) 100%);
   /* ── Effects ── */
@@ -219,9 +219,8 @@
 body {
   background: var(--background);
   background-image:
-    radial-gradient(ellipse at 15% 5%, rgba(46, 196, 182, 0.14), transparent 50%),
-    radial-gradient(ellipse at 85% 95%, rgba(76, 92, 255, 0.10), transparent 50%),
-    radial-gradient(ellipse at 50% 50%, rgba(255, 138, 101, 0.08), transparent 55%);
+    radial-gradient(ellipse at 15% 5%, rgba(46, 196, 182, 0.08), transparent 50%),
+    radial-gradient(ellipse at 85% 95%, rgba(46, 196, 182, 0.05), transparent 50%);
   color: var(--foreground);
   font-family: var(--font-inter, Inter), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     sans-serif;
@@ -232,9 +231,8 @@ body {
 
 .dark body {
   background-image:
-    radial-gradient(ellipse at 15% 5%, rgba(96, 165, 250, 0.12), transparent 50%),
-    radial-gradient(ellipse at 85% 90%, rgba(129, 140, 248, 0.10), transparent 50%),
-    radial-gradient(ellipse at 50% 40%, rgba(96, 165, 250, 0.06), transparent 55%);
+    radial-gradient(ellipse at 15% 5%, rgba(96, 165, 250, 0.08), transparent 50%),
+    radial-gradient(ellipse at 85% 90%, rgba(96, 165, 250, 0.05), transparent 50%);
 }
 
 @media (display-mode: standalone) {
@@ -287,7 +285,7 @@ button, a {
 
 /* Interactive card hover effect (desktop only) */
 .card-interactive {
-  transition: box-shadow 0.25s ease, border-color 0.25s ease, transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: box-shadow 0.25s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.25s cubic-bezier(0.22, 1, 0.36, 1), transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
 }
 @media (hover: hover) {
   .card-interactive:hover {
@@ -334,30 +332,30 @@ button, a {
   border: 1px solid rgba(46, 196, 182, 0.15);
   border-radius: 1rem;
   box-shadow: var(--card-shadow);
-  transition: box-shadow 0.25s ease, border-color 0.25s ease;
+  transition: box-shadow 0.25s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.25s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .card-accent-indigo {
   background: var(--surface-accent-indigo);
   border: 1px solid rgba(76, 92, 255, 0.12);
   border-radius: 1rem;
   box-shadow: var(--card-shadow);
-  transition: box-shadow 0.25s ease, border-color 0.25s ease;
+  transition: box-shadow 0.25s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.25s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .card-accent-coral {
   background: var(--surface-accent-coral);
   border: 1px solid rgba(255, 138, 101, 0.12);
   border-radius: 1rem;
   box-shadow: var(--card-shadow);
-  transition: box-shadow 0.25s ease, border-color 0.25s ease;
+  transition: box-shadow 0.25s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.25s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .dark .card-accent-teal {
-  border-color: rgba(96, 165, 250, 0.16);
+  border-color: rgba(96, 165, 250, 0.14);
 }
 .dark .card-accent-indigo {
-  border-color: rgba(129, 140, 248, 0.14);
+  border-color: rgba(96, 165, 250, 0.14);
 }
 .dark .card-accent-coral {
-  border-color: rgba(96, 165, 250, 0.12);
+  border-color: rgba(96, 165, 250, 0.14);
 }
 
 .card {
@@ -365,13 +363,12 @@ button, a {
   border: 1px solid var(--border-card);
   border-radius: 1rem;
   box-shadow: var(--card-shadow);
-  transition: box-shadow 0.25s ease, border-color 0.25s ease, transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: box-shadow 0.25s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.25s cubic-bezier(0.22, 1, 0.36, 1), transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
 }
 @media (hover: hover) {
   .card:hover {
     box-shadow: var(--card-shadow-hover);
-    transform: translateY(-1px);
-    border-color: color-mix(in srgb, var(--accent) 15%, var(--border-card));
+    border-color: color-mix(in srgb, var(--primary) 15%, var(--border-card));
   }
 }
 .card-sm {
@@ -379,12 +376,12 @@ button, a {
   border: 1px solid var(--border-card);
   border-radius: 0.875rem;
   box-shadow: var(--card-shadow);
-  transition: box-shadow 0.25s ease, border-color 0.25s ease;
+  transition: box-shadow 0.25s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.25s cubic-bezier(0.22, 1, 0.36, 1);
 }
 @media (hover: hover) {
   .card-sm:hover {
     box-shadow: var(--card-shadow-hover);
-    border-color: color-mix(in srgb, var(--accent) 12%, var(--border-card));
+    border-color: color-mix(in srgb, var(--primary) 12%, var(--border-card));
   }
 }
 
@@ -440,7 +437,7 @@ button, a {
   font-weight: 500;
   border-radius: 0.5rem;
   color: var(--text-tertiary);
-  transition: all 0.15s ease;
+  transition: all 0.15s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .segmented-control button[data-active="true"] {
   background: var(--surface);
@@ -462,7 +459,7 @@ button, a {
   font-size: 0.875rem;
   color: var(--text-primary);
   outline: none;
-  transition: border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1), transform 0.2s ease;
+  transition: border-color 0.2s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.25s cubic-bezier(0.22, 1, 0.36, 1), transform 0.2s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .form-input:focus {
   border-color: var(--accent);
@@ -534,7 +531,7 @@ button, a {
   border: none;
   border-radius: 0.75rem;
   cursor: pointer;
-  transition: background-color 0.15s, transform 0.15s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.2s ease, filter 0.15s;
+  transition: background-color 0.15s, transform 0.15s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.2s cubic-bezier(0.22, 1, 0.36, 1), filter 0.15s;
 }
 @media (hover: hover) {
   .btn-primary:hover {
@@ -648,7 +645,7 @@ input[type="password"]::-ms-clear {
   to   { opacity: 1; transform: translateY(0); }
 }
 .fade-in {
-  animation: fadeIn 0.25s ease both;
+  animation: fadeIn 0.25s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 /* Dashboard section stagger entrance */
@@ -774,16 +771,6 @@ input[type="password"]::-ms-clear {
   to   { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes et-float {
-  0%, 100% { transform: translateY(0px); }
-  50%       { transform: translateY(-10px); }
-}
-
-@keyframes et-dot-bounce {
-  0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
-  40%            { transform: translateY(-6px); opacity: 1; }
-}
-
 /* ── Offline Banner Animation ──────────────────────────────── */
 @keyframes et-banner-in {
   from { opacity: 0; transform: translateY(-100%); }
@@ -847,28 +834,7 @@ input[type="password"]::-ms-clear {
   filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3));
 }
 
-/* ── ExpenStream Fixed-Theme Splash / Hero Animations ───── */
-
-/* Slow animated gradient mesh background */
-@keyframes sp-gradient-shift {
-  0%   { background-position: 0% 50%; }
-  50%  { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
-/* Breathing glow for logo outer ring */
-@keyframes sp-glow-pulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(46,196,182,0), 0 0 32px rgba(46,196,182,0.35), 0 0 80px rgba(76,92,255,0.15); }
-  50%       { box-shadow: 0 0 0 8px rgba(46,196,182,0.12), 0 0 48px rgba(46,196,182,0.55), 0 0 120px rgba(76,92,255,0.25); }
-}
-
-/* Diagonal shimmer sweep across logo circle */
-@keyframes sp-beam {
-  0%   { transform: translateX(-120%) skewX(-20deg); opacity: 0; }
-  30%  { opacity: 0.6; }
-  70%  { opacity: 0.4; }
-  100% { transform: translateX(220%) skewX(-20deg); opacity: 0; }
-}
+/* ── ExpenStream Auth Animations ────────────────────────── */
 
 /* Stagger entrance for auth option cards */
 @keyframes sp-card-in {
@@ -882,21 +848,10 @@ input[type="password"]::-ms-clear {
   to   { opacity: 1; transform: translateX(0); }
 }
 
-/* Float for decorative icons on splash */
-@keyframes sp-float {
-  0%, 100% { transform: translateY(0px) rotate(0deg); }
-  33%       { transform: translateY(-12px) rotate(1.5deg); }
-  66%       { transform: translateY(-6px) rotate(-1deg); }
-}
-
 /* Orb pulse for hero background orbs */
 @keyframes sp-orb {
   0%, 100% { transform: scale(1);   opacity: 0.6; }
   50%       { transform: scale(1.15); opacity: 1; }
 }
 
-/* Tagline gradient shimmer */
-@keyframes sp-text-shimmer {
-  0%   { background-position: -200% center; }
-  100% { background-position:  200% center; }
-}
+

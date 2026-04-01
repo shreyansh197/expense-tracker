@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState, useCallback, useRef, useEffect } from "react";
-import { m } from "framer-motion";
+import { m, AnimatePresence } from "framer-motion";
 import { Trash2, Edit3, Repeat, Receipt, CheckSquare, Square, X, Wallet } from "lucide-react";
 import { useCurrency } from "@/hooks/useCurrency";
 import { useSettings } from "@/hooks/useSettings";
@@ -309,7 +309,7 @@ export function ExpenseList({
           <div className="flex items-center gap-2">
             <button
               onClick={handleBulkDelete}
-              className="flex items-center gap-1.5 rounded-lg bg-red-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-red-700"
+              className="btn-danger gap-1.5 rounded-lg px-3 py-1.5 text-xs"
             >
               <Trash2 size={12} />
               Delete
@@ -353,6 +353,7 @@ export function ExpenseList({
 
           {/* Expense items */}
           <div className="space-y-1.5">
+            <AnimatePresence initial={false}>
             {group.expenses.map((expense, idx) => (
               <SwipeableExpenseItem
                 key={expense.id}
@@ -368,6 +369,7 @@ export function ExpenseList({
                 rates={rates}
               />
             ))}
+            </AnimatePresence>
           </div>
         </div>
       ))}
@@ -423,8 +425,10 @@ function SwipeableExpenseItem({
 
   return (
     <m.div
+      layout
       initial={{ opacity: 0, y: 6 }}
       animate={deleting ? { opacity: 0, height: 0, marginBottom: 0 } : { opacity: 1, y: 0 }}
+      exit={{ opacity: 0, height: 0, marginBottom: 0 }}
       transition={deleting ? { duration: 0.3, ease: [0.22, 1, 0.36, 1] } : { delay: idx * 0.03, duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
       className="relative overflow-hidden rounded-2xl"
     >

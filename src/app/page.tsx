@@ -18,7 +18,6 @@ import { PageTransition } from "@/components/ui/PageTransition";
 import { AmbientBackground } from "@/components/ui/AmbientBackground";
 import { ChartIllustration } from "@/components/ui/illustrations";
 import { WalletIllustration } from "@/components/ui/illustrations";
-import { DecoGraphic } from "@/components/ui/DecoGraphic";
 
 // Lazy-load heavy chart components (recharts ~200KB)
 const CategoryChart = dynamic(
@@ -321,7 +320,6 @@ export default function DashboardPage() {
   return (
     <AppShell>
         <PageTransition className="relative mx-auto min-h-[80vh] max-w-4xl xl:max-w-6xl space-y-4 sm:space-y-6 p-3 sm:p-4 lg:p-6">
-        <DecoGraphic variant="finance" />
         {/* Header — hero zone */}
         <m.div
           className="zone-header dash-section relative z-20 rounded-2xl p-4 sm:p-5"

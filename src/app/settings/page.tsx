@@ -25,7 +25,6 @@ import { AutoRulesManager } from "@/components/settings/AutoRulesManager";
 import { DataAccountManagement } from "@/components/settings/DataAccountManagement";
 import { SettingsFooterLogout } from "@/components/settings/SettingsFooterLogout";
 import { PageTransition } from "@/components/ui/PageTransition";
-import { DecoGraphic } from "@/components/ui/DecoGraphic";
 import { fetchRates, getRateInfo, clearRateCache, convert } from "@/lib/exchangeRates";
 
 /** Shows live rate source, sample conversions, and a refresh button */
@@ -209,7 +208,6 @@ export default function SettingsPage() {
   return (
     <AppShell>
         <PageTransition className="relative mx-auto max-w-3xl space-y-2 p-4 lg:p-6">
-        <DecoGraphic variant="abstract" />
         <h1 className="text-page-title mb-4">Settings</h1>
 
         {/* Quick-nav pills — desktop only */}
