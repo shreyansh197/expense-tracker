@@ -69,7 +69,7 @@ export function BottomNav() {
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
           accentColor === "emerald"
             ? "bg-gradient-to-br from-emerald-500 to-emerald-700 hover:from-emerald-600 hover:to-emerald-800 focus-visible:ring-emerald-500"
-            : "bg-gradient-to-br from-cta to-cta-hover hover:from-cta-hover hover:to-cta-deep focus-visible:ring-cta shadow-cta/15"
+            : "bg-gradient-to-br from-accent to-accent/85 hover:from-accent/90 hover:to-accent/75 focus-visible:ring-accent shadow-accent/15"
         )}
         style={{
           bottom: `calc(${NAV_HEIGHT}px + env(safe-area-inset-bottom, 0px) + 12px)`,

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { m, AnimatePresence } from "framer-motion";
-import { X, Loader2, CheckCircle, Camera, ChevronDown } from "lucide-react";
+import { X, Loader2, CheckCircle, Camera, ChevronDown, CalendarDays } from "lucide-react";
 import { getAllCategories } from "@/lib/categories";
 import { cn, getDaysInMonth } from "@/lib/utils";
 import { useUIStore } from "@/stores/uiStore";
@@ -363,6 +363,19 @@ export function ExpenseForm({
           )}
         </AnimatePresence>
       </div>
+
+      {/* Date chip — visible when "More options" is collapsed */}
+      {!showMore && (
+        <button
+          type="button"
+          onClick={() => setShowMore(true)}
+          className="flex items-center gap-1.5 self-start rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors"
+          style={{ background: 'var(--surface-secondary)', color: 'var(--text-secondary)' }}
+        >
+          <CalendarDays size={12} />
+          Day {day}{selectedMonth !== (today.getMonth() + 1) || selectedYear !== today.getFullYear() ? ` · ${selectedMonth}/${selectedYear}` : day === today.getDate() ? " (today)" : ""}
+        </button>
+      )}
 
       {/* More options toggle */}
       <button

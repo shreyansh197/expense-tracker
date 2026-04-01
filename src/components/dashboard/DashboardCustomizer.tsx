@@ -247,7 +247,7 @@ export function DashboardCustomizer({ layout, onSave }: DashboardCustomizerProps
                 </button>
                 <button
                   onClick={handleSave}
-                  className="rounded-xl px-5 py-2 text-sm font-semibold text-white transition-colors bg-cta hover:bg-cta-hover"
+                  className="btn-primary rounded-xl px-5 py-2"
                 >
                   Save Layout
                 </button>

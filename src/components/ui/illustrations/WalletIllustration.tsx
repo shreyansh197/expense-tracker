@@ -30,33 +30,33 @@ export function WalletIllustration({ size = 140 }: { size?: number }) {
       />
 
       {/* Wallet clasp */}
-      <rect x="84" y="72" width="24" height="16" rx="4" fill="var(--surface)" stroke="var(--accent)" strokeWidth="1.5" opacity="0.85" />
+      <rect x="84" y="72" width="24" height="16" rx="4" fill="var(--surface)" stroke="var(--text-tertiary)" strokeWidth="1.5" opacity="0.85" />
       <circle cx="96" cy="80" r="3" fill="var(--accent)" opacity="0.8" />
 
       {/* Card peeking out */}
-      <rect x="40" y="46" width="40" height="24" rx="4" fill="var(--success-soft)" stroke="var(--accent)" strokeWidth="1" opacity="0.65" />
-      <rect x="44" y="50" width="16" height="3" rx="1.5" fill="var(--accent)" opacity="0.55" />
+      <rect x="40" y="46" width="40" height="24" rx="4" fill="var(--success-soft)" stroke="var(--text-tertiary)" strokeWidth="1" opacity="0.65" />
+      <rect x="44" y="50" width="16" height="3" rx="1.5" fill="var(--text-tertiary)" opacity="0.55" />
 
       {/* Floating coin 1 — top right */}
-      <g style={{ animation: 'float-gentle 4s ease-in-out 0s infinite' }}>
-        <circle cx="105" cy="35" r="10" fill="var(--warning-soft)" stroke="var(--accent)" strokeWidth="1.5" opacity="0.8" />
+      <g style={{ animation: 'float-gentle 4s ease-in-out 0s' }}>
+        <circle cx="105" cy="35" r="10" fill="var(--warning-soft)" stroke="var(--text-tertiary)" strokeWidth="1.5" opacity="0.8" />
         <text x="105" y="39" textAnchor="middle" fontSize="10" fontWeight="bold" fill="var(--accent)" opacity="0.85">$</text>
       </g>
 
       {/* Floating coin 2 — top left */}
-      <g style={{ animation: 'float-gentle 5s ease-in-out 1.2s infinite' }}>
-        <circle cx="45" cy="30" r="8" fill="var(--warning-soft)" stroke="var(--accent)" strokeWidth="1.5" opacity="0.7" />
+      <g style={{ animation: 'float-gentle 5s ease-in-out 1.2s' }}>
+        <circle cx="45" cy="30" r="8" fill="var(--warning-soft)" stroke="var(--text-tertiary)" strokeWidth="1.5" opacity="0.7" />
         <text x="45" y="34" textAnchor="middle" fontSize="8" fontWeight="bold" fill="var(--accent)" opacity="0.8">$</text>
       </g>
 
       {/* Floating coin 3 — right side */}
-      <g style={{ animation: 'float-gentle 4.5s ease-in-out 0.6s infinite' }}>
-        <circle cx="115" cy="58" r="6" fill="var(--warning-soft)" stroke="var(--accent)" strokeWidth="1" opacity="0.65" />
+      <g style={{ animation: 'float-gentle 4.5s ease-in-out 0.6s' }}>
+        <circle cx="115" cy="58" r="6" fill="var(--warning-soft)" stroke="var(--text-tertiary)" strokeWidth="1" opacity="0.65" />
       </g>
 
       {/* Sparkle accents */}
-      <path d="M22 45L24 41L26 45L24 49Z" fill="var(--accent)" opacity="0.55" />
-      <path d="M118 90L119.5 87L121 90L119.5 93Z" fill="var(--accent)" opacity="0.5" />
+      <path d="M22 45L24 41L26 45L24 49Z" fill="var(--text-tertiary)" opacity="0.55" />
+      <path d="M118 90L119.5 87L121 90L119.5 93Z" fill="var(--text-tertiary)" opacity="0.5" />
     </svg>
   );
 }

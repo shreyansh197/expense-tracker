@@ -41,19 +41,19 @@ export function ReceiptIllustration({ size = 140 }: { size?: number }) {
       <rect x="74" y="84" width="12" height="3" rx="1.5" fill="var(--accent)" opacity="0.65" />
 
       {/* Magnifying glass */}
-      <g style={{ animation: 'float-gentle 5s ease-in-out 0.3s infinite' }}>
+      <g style={{ animation: 'float-gentle 5s ease-in-out 0.3s' }}>
         <circle cx="98" cy="50" r="16" fill="var(--surface-secondary)" stroke="var(--accent)" strokeWidth="2" opacity="0.75" />
-        <circle cx="98" cy="50" r="10" fill="none" stroke="var(--accent)" strokeWidth="1.5" opacity="0.65" />
+        <circle cx="98" cy="50" r="10" fill="none" stroke="var(--text-tertiary)" strokeWidth="1.5" opacity="0.65" />
         <line x1="109" y1="61" x2="118" y2="70" stroke="var(--accent)" strokeWidth="3" strokeLinecap="round" opacity="0.75" />
         <text x="98" y="54" textAnchor="middle" fontSize="10" fill="var(--accent)" opacity="0.7">?</text>
       </g>
 
       {/* Scattered dots */}
-      <circle cx="35" cy="55" r="2" fill="var(--accent)" opacity="0.35" />
-      <circle cx="28" cy="75" r="1.5" fill="var(--accent)" opacity="0.28" />
+      <circle cx="35" cy="55" r="2" fill="var(--text-tertiary)" opacity="0.35" />
+      <circle cx="28" cy="75" r="1.5" fill="var(--text-tertiary)" opacity="0.28" />
 
       {/* Sparkle */}
-      <path d="M115 85L117 81L119 85L117 89Z" fill="var(--accent)" opacity="0.5" />
+      <path d="M115 85L117 81L119 85L117 89Z" fill="var(--text-tertiary)" opacity="0.5" />
     </svg>
   );
 }

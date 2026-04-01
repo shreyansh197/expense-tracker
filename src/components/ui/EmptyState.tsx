@@ -30,7 +30,7 @@ const fadeUp = {
 export function EmptyState({ icon: Icon, secondaryIcon: SecondaryIcon, illustration, title, description, action }: EmptyStateProps) {
   const btnColor = action?.color === "emerald"
     ? "bg-emerald-600 hover:bg-emerald-700"
-    : "bg-cta hover:bg-cta-hover";
+    : "bg-accent hover:brightness-110";
 
   return (
     <m.div
@@ -67,7 +67,7 @@ export function EmptyState({ icon: Icon, secondaryIcon: SecondaryIcon, illustrat
       {action && (
         <m.button
           onClick={action.onClick}
-          className={`btn-pulse mt-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all press-scale ${btnColor}`}
+          className={`mt-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all press-scale ${btnColor}`}
           variants={fadeUp}
           whileTap={{ scale: 0.96 }}
         >

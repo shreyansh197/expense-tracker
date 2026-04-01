@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, createContext, useContext } from "react";
+import { m, AnimatePresence } from "framer-motion";
 import { CheckCircle, XCircle, AlertCircle, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -47,21 +48,18 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     <ToastContext.Provider value={{ toast: addToast }}>
       {children}
       <div className="fixed bottom-24 left-1/2 z-[100] flex w-full max-w-sm -translate-x-1/2 flex-col gap-2 px-4 lg:bottom-6 lg:left-auto lg:right-6 lg:translate-x-0 lg:px-0">
-        {toasts.map((t) => (
-          <ToastItem key={t.id} toast={t} onClose={() => removeToast(t.id)} />
-        ))}
+        <AnimatePresence initial={false}>
+          {toasts.map((t) => (
+            <ToastItem key={t.id} toast={t} onClose={() => removeToast(t.id)} />
+          ))}
+        </AnimatePresence>
       </div>
     </ToastContext.Provider>
   );
 }
 
 function ToastItem({ toast, onClose }: { toast: Toast; onClose: () => void }) {
-  const [show, setShow] = useState(false);
   const duration = toast.action ? 6000 : 3000;
-
-  useEffect(() => {
-    requestAnimationFrame(() => setShow(true));
-  }, []);
 
   const Icon =
     toast.type === "success" ? CheckCircle :
@@ -80,13 +78,17 @@ function ToastItem({ toast, onClose }: { toast: Toast; onClose: () => void }) {
     : "bg-blue-400 dark:bg-blue-500";
 
   return (
-    <div
+    <m.div
+      layout
+      initial={{ opacity: 0, y: 16, scale: 0.95 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.15 } }}
+      transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
       role={toast.type === "error" ? "alert" : "status"}
       aria-live={toast.type === "error" ? "assertive" : "polite"}
       className={cn(
-        "relative flex items-center gap-3 rounded-xl border px-4 py-3 shadow-lg transition-all duration-200 ease-out overflow-hidden",
+        "relative flex items-center gap-3 rounded-xl border px-4 py-3 shadow-lg overflow-hidden",
         colors,
-        show ? "translate-y-0 scale-100 opacity-100" : "translate-y-5 scale-95 opacity-0"
       )}
     >
       <Icon size={18} className="shrink-0" />
@@ -113,6 +115,6 @@ function ToastItem({ toast, onClose }: { toast: Toast; onClose: () => void }) {
           />
         </div>
       )}
-    </div>
+    </m.div>
   );
 }

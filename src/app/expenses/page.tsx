@@ -3,6 +3,7 @@
 import { useState, useCallback } from "react";
 import { AppShell } from "@/components/layout/AppShell";
 import { PageTransition } from "@/components/ui/PageTransition";
+import { SkeletonExpenseList } from "@/components/ui/Skeleton";
 import { MonthSwitcher } from "@/components/layout/MonthSwitcher";
 import { SyncIndicator } from "@/components/sync/SyncIndicator";
 import { ExpenseList } from "@/components/expenses/ExpenseList";
@@ -29,7 +30,7 @@ export default function ExpensesPage() {
     setActiveCategories,
     openAddForm,
   } = useUIStore();
-  const { expenses, syncStatus, deleteExpense, deleteExpenses } = useExpenses(currentMonth, currentYear);
+  const { expenses, loading, syncStatus, deleteExpense, deleteExpenses } = useExpenses(currentMonth, currentYear);
   const { settings } = useSettings();
   const { monthlyTotal } = useCalculations(
     expenses,
@@ -161,6 +162,9 @@ export default function ExpensesPage() {
         )}
 
         {/* Expense List */}
+        {loading ? (
+          <SkeletonExpenseList />
+        ) : (
         <ExpenseList
           expenses={expenses}
           onDelete={deleteExpense}
@@ -173,6 +177,7 @@ export default function ExpensesPage() {
           dayMax={dayMax ? parseInt(dayMax, 10) : undefined}
           sortBy={sortBy}
         />
+        )}
       </PageTransition>
     </AppShell>
   );

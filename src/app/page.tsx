@@ -220,7 +220,7 @@ function WelcomeCard({ onAddExpense, hasBudget }: { onAddExpense: () => void; ha
         {/* CTA */}
         <m.button
           onClick={onAddExpense}
-          className="btn-pulse group mt-5 flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold text-white shadow-lg transition-all duration-200 hover:shadow-xl sm:w-auto sm:px-8"
+          className="group mt-5 flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold text-white shadow-lg transition-all duration-200 hover:shadow-xl sm:w-auto sm:px-8"
           style={{ background: 'var(--accent-gradient)' }}
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
@@ -332,6 +332,7 @@ export default function DashboardPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
         >
+          <h1 className="sr-only">Dashboard</h1>
           {/* Gradient accent top bar */}
           <div className="absolute inset-x-0 top-0 h-1 rounded-t-2xl" style={{ background: 'var(--accent-gradient)' }} />
           {/* Subtle decorative dots */}

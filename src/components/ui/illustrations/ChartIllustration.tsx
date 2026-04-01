@@ -80,20 +80,20 @@ export function ChartIllustration({ size = 140 }: { size?: number }) {
           cy={d.y}
           r="3"
           fill="var(--surface)"
-          stroke="var(--accent)"
+          stroke="var(--text-tertiary)"
           strokeWidth="1.5"
           opacity="0.85"
         />
       ))}
 
       {/* Floating percentage badge */}
-      <g style={{ animation: 'float-gentle 4s ease-in-out 0.5s infinite' }}>
-        <rect x="88" y="34" width="28" height="16" rx="8" fill="var(--success-soft)" stroke="var(--accent)" strokeWidth="1" opacity="0.75" />
+      <g style={{ animation: 'float-gentle 4s ease-in-out 0.5s' }}>
+        <rect x="88" y="34" width="28" height="16" rx="8" fill="var(--success-soft)" stroke="var(--text-tertiary)" strokeWidth="1" opacity="0.75" />
         <text x="102" y="45" textAnchor="middle" fontSize="8" fontWeight="bold" fill="var(--accent)" opacity="0.85">+12%</text>
       </g>
 
       {/* Sparkle */}
-      <path d="M24 60L26 56L28 60L26 64Z" fill="var(--accent)" opacity="0.55" />
+      <path d="M24 60L26 56L28 60L26 64Z" fill="var(--text-tertiary)" opacity="0.55" />
     </svg>
   );
 }

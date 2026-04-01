@@ -155,7 +155,7 @@ export function Sidebar() {
             "flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all",
             isBusinessRoute
               ? "bg-gradient-to-r from-emerald-600 to-teal-600 text-white hover:from-emerald-700 hover:to-teal-700 shadow-sm shadow-emerald-600/20"
-              : "bg-gradient-to-r from-cta to-cta-hover text-white hover:from-cta-hover hover:to-cta-deep shadow-sm shadow-cta/20"
+              : "bg-gradient-to-r from-accent to-accent/85 text-white hover:from-accent/90 hover:to-accent/75 shadow-sm shadow-accent/20"
           )}
           whileTap={{ scale: 0.96 }}
         >
