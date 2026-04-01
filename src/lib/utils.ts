@@ -20,11 +20,12 @@ function getCurrencyMeta(code: string) {
 
 export function formatCurrency(amount: number, currency = "INR"): string {
   const meta = getCurrencyMeta(currency);
+  const hasDecimals = amount % 1 !== 0;
   return new Intl.NumberFormat(meta.locale, {
     style: "currency",
     currency: meta.code,
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
+    minimumFractionDigits: hasDecimals ? 2 : 0,
+    maximumFractionDigits: 2,
   }).format(amount);
 }
 
@@ -36,7 +37,8 @@ export function formatCurrencyCompact(amount: number, currency = "INR"): string 
   if (amount >= 1000) {
     return `${meta.symbol}${(amount / 1000).toFixed(1)}K`;
   }
-  return `${meta.symbol}${amount}`;
+  const hasDecimals = amount % 1 !== 0;
+  return `${meta.symbol}${hasDecimals ? amount.toFixed(2) : amount}`;
 }
 
 export function getCurrencySymbol(currency = "INR"): string {
