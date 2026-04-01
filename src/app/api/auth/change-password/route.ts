@@ -5,8 +5,18 @@ import { hashPassword, verifyPassword } from "@/lib/server/password";
 import { audit } from "@/lib/server/audit";
 import { hashIp } from "@/lib/server/tokens";
 import { changePasswordSchema } from "@/lib/validators";
+import { rateLimit } from "@/lib/server/rateLimit";
 
 export async function PUT(req: NextRequest) {
+  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+  const rl = rateLimit(`chpw:${hashIp(ip)}`, 5, 60_000);
+  if (!rl.ok) {
+    return NextResponse.json(
+      { error: "Too many attempts. Try again later." },
+      { status: 429, headers: { "Retry-After": String(rl.retryAfter) } },
+    );
+  }
+
   const auth = await requireAuth(req);
   if (!auth) return jsonError("Unauthorized", 401);
 
