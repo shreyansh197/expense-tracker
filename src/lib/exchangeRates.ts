@@ -41,7 +41,7 @@ function saveToStorage(cache: RateCache) {
 /** Fetch from frankfurter.dev (ECB — European Central Bank) */
 async function fetchFrankfurter(base: string): Promise<Record<string, number> | null> {
   try {
-    const res = await fetch(`https://api.frankfurter.dev/v1/latest?base=${base}`);
+    const res = await fetch(`https://api.frankfurter.dev/v1/latest?base=${base}`, { signal: AbortSignal.timeout(5000) });
     if (!res.ok) return null;
     const data = await res.json();
     if (!data.rates) return null;
@@ -54,21 +54,30 @@ async function fetchFrankfurter(base: string): Promise<Record<string, number> | 
 
 /** Fetch from Fawaz Ahmed's open-source currency API (fallback) */
 async function fetchFawazAhmed(base: string): Promise<Record<string, number> | null> {
-  try {
-    const res = await fetch(`https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/${base.toLowerCase()}.json`);
-    if (!res.ok) return null;
-    const data = await res.json();
-    const raw = data[base.toLowerCase()];
-    if (!raw) return null;
-    // Normalize keys to uppercase
-    const rates: Record<string, number> = {};
-    for (const [k, v] of Object.entries(raw)) {
-      rates[k.toUpperCase()] = v as number;
+  // Try the live GitHub Pages endpoint first (always up-to-date),
+  // then fall back to the jsDelivr CDN mirror
+  const urls = [
+    `https://latest.currency-api.pages.dev/v1/currencies/${base.toLowerCase()}.json`,
+    `https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/${base.toLowerCase()}.json`,
+  ];
+  for (const url of urls) {
+    try {
+      const res = await fetch(url, { signal: AbortSignal.timeout(5000) });
+      if (!res.ok) continue;
+      const data = await res.json();
+      const raw = data[base.toLowerCase()];
+      if (!raw) continue;
+      // Normalize keys to uppercase
+      const rates: Record<string, number> = {};
+      for (const [k, v] of Object.entries(raw)) {
+        rates[k.toUpperCase()] = v as number;
+      }
+      return rates;
+    } catch {
+      continue;
     }
-    return rates;
-  } catch {
-    return null;
   }
+  return null;
 }
 
 export async function fetchRates(base: string): Promise<Record<string, number>> {
@@ -119,11 +128,12 @@ export async function fetchRates(base: string): Promise<Record<string, number>> 
 }
 
 export function getFallbackRates(base: string): Record<string, number> {
+  // Approximate rates as of April 2026 — last-resort only when all APIs fail
   const table: Record<string, Record<string, number>> = {
-    INR: { INR: 1, USD: 0.012, EUR: 0.011, GBP: 0.0095 },
-    USD: { INR: 83.5, USD: 1, EUR: 0.92, GBP: 0.79 },
-    EUR: { INR: 90.5, USD: 1.09, EUR: 1, GBP: 0.86 },
-    GBP: { INR: 105.5, USD: 1.27, EUR: 1.16, GBP: 1 },
+    INR: { INR: 1, USD: 0.0107, EUR: 0.0092, GBP: 0.008 },
+    USD: { INR: 93.43, USD: 1, EUR: 0.862, GBP: 0.751 },
+    EUR: { INR: 108.4, USD: 1.16, EUR: 1, GBP: 0.871 },
+    GBP: { INR: 124.5, USD: 1.33, EUR: 1.148, GBP: 1 },
   };
   return table[base] ?? { [base]: 1 };
 }
