@@ -433,26 +433,28 @@ function SwipeableExpenseItem({
       className="relative overflow-hidden rounded-2xl"
     >
       {/* Red delete action — full-width behind the row, revealed by card translate */}
-      <div
-        className="absolute inset-0 flex items-center justify-end overflow-hidden rounded-2xl"
-        style={{
-          background: isFullSwipe
-            ? '#EF4444'
-            : 'linear-gradient(to left, #EF4444 0%, #F87171 40%, transparent 100%)',
-          transition: isDragging ? 'none' : 'background 0.2s',
-        }}
-        aria-hidden
-      >
-        <button
-          onClick={confirmDelete}
-          className="flex h-full w-full items-center justify-end gap-1.5 pr-4 text-white"
-          style={{ minWidth: '70px' }}
-          tabIndex={-1}
+      {absOffset > 0 && (
+        <div
+          className="absolute inset-0 flex items-center justify-end overflow-hidden rounded-2xl"
+          style={{
+            background: isFullSwipe
+              ? '#EF4444'
+              : 'linear-gradient(to left, #EF4444 0%, #F87171 40%, transparent 100%)',
+            transition: isDragging ? 'none' : 'background 0.2s',
+          }}
+          aria-hidden
         >
-          <Trash2 size={15} strokeWidth={2.2} />
-          <span className="text-xs font-bold tracking-wide">Delete</span>
-        </button>
-      </div>
+          <button
+            onClick={confirmDelete}
+            className="flex h-full w-full items-center justify-end gap-1.5 pr-4 text-white"
+            style={{ minWidth: '70px' }}
+            tabIndex={-1}
+          >
+            <Trash2 size={15} strokeWidth={2.2} />
+            <span className="text-xs font-bold tracking-wide">Delete</span>
+          </button>
+        </div>
+      )}
 
       {/* Foreground expense card */}
       <div
