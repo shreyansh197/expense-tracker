@@ -185,7 +185,8 @@ export function GoalsManager() {
                     placeholder="e.g. 50,000"
                     value={targetAmount}
                     onChange={(e) => setTargetAmount(e.target.value)}
-                    min="1"
+                    min="0.01"
+                    step="0.01"
                     className="form-input py-2 pl-9 pr-3 text-sm"
                   />
                 </div>
@@ -200,6 +201,7 @@ export function GoalsManager() {
                     value={monthlyContribution}
                     onChange={(e) => setMonthlyContribution(e.target.value)}
                     min="0"
+                    step="0.01"
                     className="form-input py-2 pl-9 pr-3 text-sm"
                   />
                 </div>
@@ -329,7 +331,8 @@ export function GoalsManager() {
                       <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs" style={{ color: 'var(--text-tertiary)' }}>{symbol}</span>
                       <input
                         type="number"
-                        min="1"
+                        min="0.01"
+                        step="0.01"
                         value={fundAmount}
                         onChange={(e) => setFundAmount(e.target.value)}
                         onKeyDown={(e) => { if (e.key === "Enter") handleFundSave(); if (e.key === "Escape") setFundGoalId(null); }}

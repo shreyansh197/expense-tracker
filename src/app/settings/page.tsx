@@ -324,7 +324,8 @@ export default function SettingsPage() {
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm" style={{ color: 'var(--text-tertiary)' }}>{symbol}</span>
                   <input
                     type="number"
-                    min="1"
+                    min="0.01"
+                    step="0.01"
                     value={salary}
                     onChange={(e) => setSalary(e.target.value)}
                     onKeyDown={(e) => { if (e.key === "Enter") handleSalaryUpdate(); }}
@@ -365,6 +366,7 @@ export default function SettingsPage() {
                     <input
                       type="number"
                       min="0"
+                      step="0.01"
                       placeholder={`Default: ${settings.salary}`}
                       value={monthBudget}
                       onChange={(e) => setMonthBudget(e.target.value)}

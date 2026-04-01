@@ -338,8 +338,8 @@ export function ExpenseForm({
         <input
           ref={amountRef}
           type="number"
-          min="1"
-          step="1"
+          min="0.01"
+          step="0.01"
           value={amount}
           onChange={(e) => { setAmount(e.target.value); if (submitted) setSubmitted(false); }}
           placeholder="e.g. 500"

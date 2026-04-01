@@ -237,7 +237,8 @@ export function RecurringManager() {
               <label className="form-label">Amount ({symbol})</label>
               <input
                 type="number"
-                min="1"
+                min="0.01"
+                step="0.01"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 placeholder="0"
