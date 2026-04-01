@@ -55,6 +55,12 @@ export async function POST(req: NextRequest) {
             results.push({ idempotencyKey: mutation.idempotencyKey, status: "error", error: "Missing expense id" });
             continue;
           }
+          // Verify ownership: if expense exists, it must belong to this workspace
+          const existingExpense = await prisma.expense.findUnique({ where: { id: expenseId }, select: { workspaceId: true } });
+          if (existingExpense && existingExpense.workspaceId !== workspaceId) {
+            results.push({ idempotencyKey: mutation.idempotencyKey, status: "error", error: "Access denied" });
+            continue;
+          }
           const record = await prisma.expense.upsert({
             where: { id: expenseId },
             create: {
@@ -151,6 +157,12 @@ export async function POST(req: NextRequest) {
           const ledgerId = (mutation.id ?? data.id) as string | undefined;
           let record: { id: string };
           if (ledgerId) {
+            // Verify ownership: if ledger exists, it must belong to this workspace
+            const existingLedger = await prisma.businessLedger.findUnique({ where: { id: ledgerId }, select: { workspaceId: true } });
+            if (existingLedger && existingLedger.workspaceId !== workspaceId) {
+              results.push({ idempotencyKey: mutation.idempotencyKey, status: "error", error: "Access denied" });
+              continue;
+            }
             record = await prisma.businessLedger.upsert({
               where: { id: ledgerId },
               create: {
@@ -208,7 +220,11 @@ export async function POST(req: NextRequest) {
           let record: { id: string };
           if (paymentId) {
             // Validate ledger belongs to this workspace (for new records)
-            const existingPayment = await prisma.businessPayment.findUnique({ where: { id: paymentId }, select: { id: true } });
+            const existingPayment = await prisma.businessPayment.findUnique({ where: { id: paymentId }, select: { id: true, workspaceId: true } });
+            if (existingPayment && existingPayment.workspaceId !== workspaceId) {
+              results.push({ idempotencyKey: mutation.idempotencyKey, status: "error", error: "Access denied" });
+              continue;
+            }
             if (!existingPayment && data.ledgerId) {
               const ledger = await prisma.businessLedger.findFirst({
                 where: { id: data.ledgerId as string, workspaceId, deletedAt: null },
@@ -279,7 +295,7 @@ export async function POST(req: NextRequest) {
       results.push({
         idempotencyKey: mutation.idempotencyKey,
         status: "error",
-        error: err instanceof Error ? err.message : "Unknown error",
+        error: "Failed to process mutation",
       });
     }
   }

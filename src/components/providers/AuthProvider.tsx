@@ -26,8 +26,8 @@ import { getDeviceId } from "@/lib/utils";
 
 interface AuthContextValue extends AuthState {
   isAuthenticated: boolean;
-  login: (email: string, password: string) => Promise<{ requires2FA?: boolean; userId?: string; error?: string }>;
-  loginWith2FA: (userId: string, code: string) => Promise<{ error?: string }>;
+  login: (email: string, password: string) => Promise<{ requires2FA?: boolean; challengeToken?: string; error?: string }>;
+  loginWith2FA: (challengeToken: string, code: string) => Promise<{ error?: string }>;
   register: (email: string, password: string, name?: string) => Promise<{ error?: string }>;
   logout: () => Promise<void>;
   switchWorkspace: (workspaceId: string) => void;
@@ -58,7 +58,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!res.ok) return { error: data.error ?? "Login failed" };
 
       if (data.requires2FA) {
-        return { requires2FA: true, userId: data.userId };
+        return { requires2FA: true, challengeToken: data.challengeToken };
       }
 
       setAuthState({
@@ -78,11 +78,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   const loginWith2FA = useCallback(
-    async (userId: string, code: string) => {
+    async (challengeToken: string, code: string) => {
       const res = await fetch("/api/auth/login/verify-2fa", {
         method: "POST",
         headers: { "Content-Type": "application/json", "X-Device-Id": getDeviceId() },
-        body: JSON.stringify({ userId, code }),
+        body: JSON.stringify({ challengeToken, code }),
       });
 
       let data;

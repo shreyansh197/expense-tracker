@@ -4,17 +4,36 @@ import { z } from "zod";
 
 export const registerSchema = z.object({
   email: z.string().email("Enter a valid email address").max(255),
-  password: z.string().min(8, "Password must be at least 8 characters").max(128),
+  password: z.string().min(8, "Password must be at least 8 characters").max(72),
   name: z.string().max(120).optional(),
 });
 
 export const loginSchema = z.object({
   email: z.string().email("Enter a valid email address").max(255),
-  password: z.string().min(1, "Password is required").max(128),
+  password: z.string().min(1, "Password is required").max(72),
 });
 
 export const totpVerifySchema = z.object({
   code: z.string().length(6).regex(/^\d{6}$/),
+});
+
+export const verify2FASchema = z.object({
+  challengeToken: z.string().min(1),
+  code: z.string().min(6).max(8),
+});
+
+export const changePasswordSchema = z.object({
+  currentPassword: z.string().max(72).optional(),
+  newPassword: z.string().min(8, "Password must be at least 8 characters").max(72),
+});
+
+export const profileUpdateSchema = z.object({
+  name: z.string().max(120).optional(),
+  avatarUrl: z.string().max(500_000).nullable().optional(),
+});
+
+export const passkeyLoginOptionsSchema = z.object({
+  email: z.string().email().max(255).optional(),
 });
 
 export const refreshSchema = z.object({

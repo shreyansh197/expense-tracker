@@ -1,7 +1,5 @@
 "use client";
 
-export const dynamic = "force-dynamic";
-
 import { useRouter } from "next/navigation";
 import { useState, useCallback, useEffect } from "react";
 import { m, AnimatePresence } from "framer-motion";
@@ -38,6 +36,16 @@ import { Repeat, PlusCircle, Target, BarChart3, Sparkles, ChevronDown, Check, Ar
 import { cn } from "@/lib/utils";
 import type { DashboardSectionId, DashboardLayout } from "@/types";
 import type { ReactNode } from "react";
+import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
+
+/* ── Lightweight fallback for per-section ErrorBoundary ────── */
+function SectionFallback() {
+  return (
+    <div className="card flex items-center justify-center gap-2 py-8 text-xs" style={{ color: 'var(--text-muted)' }}>
+      <span>This section failed to load.</span>
+    </div>
+  );
+}
 
 /* ── Collapsible section for mobile dashboard ───────────────── */
 function CollapsibleSection({ id, title, children }: { id: string; title: string; children: React.ReactNode }) {
@@ -576,7 +584,7 @@ export default function DashboardPage() {
             ),
           };
 
-          return <div key={sectionId}>{renderer[sectionId]()}</div>;
+          return <ErrorBoundary key={sectionId} fallback={<SectionFallback />}>{renderer[sectionId]()}</ErrorBoundary>;
         })}
       </PageTransition>
     </AppShell>

@@ -7,6 +7,7 @@ import {
   hashIp,
   REFRESH_TOKEN_TTL_DAYS,
 } from "@/lib/server/tokens";
+import { refreshSchema } from "@/lib/validators";
 
 export async function POST(req: NextRequest) {
   let body: unknown;
@@ -16,15 +17,15 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  const { refreshToken } = body as { refreshToken?: string };
-  if (!refreshToken) {
+  const parsed = refreshSchema.safeParse(body);
+  if (!parsed.success) {
     return NextResponse.json(
       { error: "refreshToken is required" },
       { status: 400 },
     );
   }
 
-  const tokenHash = hashToken(refreshToken);
+  const tokenHash = hashToken(parsed.data.refreshToken);
 
   // Find the matching session
   const session = await prisma.session.findFirst({

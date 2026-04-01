@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { generateAuthenticationOptions } from "@simplewebauthn/server";
 import { prisma } from "@/lib/server/prisma";
+import { passkeyLoginOptionsSchema } from "@/lib/validators";
 
 const RP_ID = process.env.WEBAUTHN_RP_ID ?? "localhost";
 
@@ -12,7 +13,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  const { email } = body as { email?: string };
+  const parsed = passkeyLoginOptionsSchema.safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json({ error: "Invalid request" }, { status: 400 });
+  }
+
+  const { email } = parsed.data;
 
   // If email is provided, scope to that user's passkeys
   let allowCredentials: { id: string; transports?: AuthenticatorTransport[] }[] | undefined;

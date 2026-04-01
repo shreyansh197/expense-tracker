@@ -4,6 +4,7 @@ import { requireAuth, jsonError } from "@/lib/server/guards";
 import { hashPassword, verifyPassword } from "@/lib/server/password";
 import { audit } from "@/lib/server/audit";
 import { hashIp } from "@/lib/server/tokens";
+import { changePasswordSchema } from "@/lib/validators";
 
 export async function PUT(req: NextRequest) {
   const auth = await requireAuth(req);
@@ -12,14 +13,12 @@ export async function PUT(req: NextRequest) {
   const body = await req.json().catch(() => null);
   if (!body) return jsonError("Invalid request body", 400);
 
-  const { currentPassword, newPassword } = body as {
-    currentPassword?: string;
-    newPassword?: string;
-  };
-
-  if (!newPassword || newPassword.length < 8) {
-    return jsonError("New password must be at least 8 characters", 400);
+  const parsed = changePasswordSchema.safeParse(body);
+  if (!parsed.success) {
+    return jsonError("New password must be 8–72 characters", 400);
   }
+
+  const { currentPassword, newPassword } = parsed.data;
 
   const user = await prisma.user.findUnique({
     where: { id: auth.userId },

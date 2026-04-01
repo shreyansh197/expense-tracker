@@ -39,8 +39,9 @@ export async function POST(req: NextRequest) {
       expectedRPID: RP_ID,
     });
   } catch (err) {
+    console.error("[passkey/register-verify]", err);
     return jsonError(
-      `Passkey verification failed: ${err instanceof Error ? err.message : "unknown"}`,
+      "Passkey verification failed",
       400,
     );
   }

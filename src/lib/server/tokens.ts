@@ -67,6 +67,29 @@ export function generateSecureToken(): string {
   return randomBytes(16).toString("base64url");
 }
 
+// ── 2FA Challenge Token (short-lived, proves password was verified) ───
+
+const TWO_FA_CHALLENGE_TTL = "5m";
+
+export async function sign2FAChallenge(userId: string): Promise<string> {
+  return new SignJWT({ sub: userId, purpose: "2fa-challenge" })
+    .setProtectedHeader({ alg: "HS256" })
+    .setIssuedAt()
+    .setExpirationTime(TWO_FA_CHALLENGE_TTL)
+    .setIssuer("expenstream")
+    .sign(getSecret());
+}
+
+export async function verify2FAChallenge(token: string): Promise<string> {
+  const { payload } = await jwtVerify(token, getSecret(), {
+    issuer: "expenstream",
+  });
+  if (payload.purpose !== "2fa-challenge" || !payload.sub) {
+    throw new Error("Invalid 2FA challenge token");
+  }
+  return payload.sub;
+}
+
 // ── IP hashing (privacy-preserving) ──────────────────────────
 
 export function hashIp(ip: string): string {

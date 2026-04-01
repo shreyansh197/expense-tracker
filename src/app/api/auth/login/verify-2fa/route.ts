@@ -3,17 +3,19 @@ import { prisma } from "@/lib/server/prisma";
 import { verifyTotp } from "@/lib/server/totp";
 import {
   signAccessToken,
+  verify2FAChallenge,
   generateRefreshToken,
   hashToken,
   hashIp,
   REFRESH_TOKEN_TTL_DAYS,
 } from "@/lib/server/tokens";
 import { audit } from "@/lib/server/audit";
+import { verify2FASchema } from "@/lib/validators";
 
 /**
  * POST /api/auth/login/verify-2fa
  * Complete login after TOTP verification.
- * Body: { userId: string, code: string }
+ * Body: { challengeToken: string, code: string }
  */
 export async function POST(req: NextRequest) {
   let body: unknown;
@@ -23,11 +25,24 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  const { userId, code } = body as { userId?: string; code?: string };
-  if (!userId || !code || code.length !== 6) {
+  const parsed = verify2FASchema.safeParse(body);
+  if (!parsed.success) {
     return NextResponse.json(
-      { error: "userId and 6-digit code are required" },
+      { error: "challengeToken and valid code are required" },
       { status: 400 },
+    );
+  }
+
+  const { challengeToken, code } = parsed.data;
+
+  // Verify the signed challenge token to extract userId
+  let userId: string;
+  try {
+    userId = await verify2FAChallenge(challengeToken);
+  } catch {
+    return NextResponse.json(
+      { error: "Invalid or expired challenge. Please log in again." },
+      { status: 401 },
     );
   }
 

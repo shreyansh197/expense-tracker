@@ -3,6 +3,7 @@ import { prisma } from "@/lib/server/prisma";
 import { verifyPassword } from "@/lib/server/password";
 import {
   signAccessToken,
+  sign2FAChallenge,
   generateRefreshToken,
   hashToken,
   hashIp,
@@ -61,10 +62,10 @@ export async function POST(req: NextRequest) {
 
   // If 2FA is enabled, return a pending state
   if (user.totpEnabledAt) {
-    // Issue a short-lived 2FA challenge token (reuse JWT with a flag)
+    const challengeToken = await sign2FAChallenge(user.id);
     return NextResponse.json({
       requires2FA: true,
-      userId: user.id,
+      challengeToken,
     });
   }
 

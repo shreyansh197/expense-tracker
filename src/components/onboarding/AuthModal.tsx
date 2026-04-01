@@ -348,7 +348,7 @@ export function AuthModal({
   const [loading, setLoading] = useState(false);
   const [salary, setSalary] = useState("");
   const [showSalary, setShowSalary] = useState(false);
-  const [pendingUserId, setPendingUserId] = useState<string | null>(null);
+  const [pendingChallengeToken, setPendingChallengeToken] = useState<string | null>(null);
   const [totpCode, setTotpCode] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const { symbol } = useCurrency();
@@ -395,8 +395,8 @@ export function AuthModal({
       return;
     }
 
-    if (result.requires2FA && result.userId) {
-      setPendingUserId(result.userId);
+    if (result.requires2FA && result.challengeToken) {
+      setPendingChallengeToken(result.challengeToken);
       setTotpCode("");
       setError("");
       setMode("totp");
@@ -407,11 +407,11 @@ export function AuthModal({
   };
 
   const handleVerify2FA = async () => {
-    if (!pendingUserId || totpCode.length !== 6) return;
+    if (!pendingChallengeToken || totpCode.length !== 6) return;
 
     setError("");
     setLoading(true);
-    const result = await loginWith2FA(pendingUserId, totpCode);
+    const result = await loginWith2FA(pendingChallengeToken, totpCode);
     setLoading(false);
 
     if (result.error) {
@@ -433,7 +433,7 @@ export function AuthModal({
     return (
       <AuthPage>
         <button
-          onClick={() => { setMode("login"); setError(""); setPendingUserId(null); setTotpCode(""); }}
+          onClick={() => { setMode("login"); setError(""); setPendingChallengeToken(null); setTotpCode(""); }}
           className="mb-6 flex items-center gap-1.5 text-sm text-slate-400 hover:text-slate-700 dark:text-slate-500 dark:hover:text-slate-300 transition-colors"
         >
           <ArrowLeft className="h-4 w-4" /> Back

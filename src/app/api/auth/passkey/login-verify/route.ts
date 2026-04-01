@@ -60,8 +60,9 @@ export async function POST(req: NextRequest) {
       },
     });
   } catch (err) {
+    console.error("[passkey/login-verify]", err);
     return NextResponse.json(
-      { error: `Verification failed: ${err instanceof Error ? err.message : "unknown"}` },
+      { error: "Verification failed" },
       { status: 400 },
     );
   }

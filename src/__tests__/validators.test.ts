@@ -71,12 +71,20 @@ describe("registerSchema", () => {
     expect(result.success).toBe(true);
   });
 
-  test("accepts password exactly 128 chars", () => {
+  test("accepts password exactly 72 chars (bcrypt limit)", () => {
     const result = registerSchema.safeParse({
       email: "user@example.com",
-      password: "a".repeat(128),
+      password: "a".repeat(72),
     });
     expect(result.success).toBe(true);
+  });
+
+  test("rejects password > 72 chars", () => {
+    const result = registerSchema.safeParse({
+      email: "user@example.com",
+      password: "a".repeat(73),
+    });
+    expect(result.success).toBe(false);
   });
 
   test("rejects email > 255 chars", () => {
