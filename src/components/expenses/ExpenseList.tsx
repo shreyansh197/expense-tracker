@@ -468,11 +468,14 @@ function SwipeableExpenseItem({
         onClick={() => { if (absOffset === SWIPE_THRESHOLD) snapBack(); }}
         className={`group relative flex items-center gap-3 rounded-2xl border px-4 py-3.5 focus:outline-none focus:ring-2 focus:ring-brand/40 ${
           isSelected
-            ? "border-brand-border bg-brand-soft"
+            ? "border-brand-border"
             : ""
         }`}
         style={{
-          ...(isSelected ? {} : { background: 'var(--surface)', borderColor: 'var(--border)' }),
+          background: isSelected
+            ? 'color-mix(in srgb, var(--brand) 10%, var(--surface))'
+            : 'var(--surface)',
+          borderColor: isSelected ? undefined : 'var(--border)',
           transform: `translateX(${offsetX > -9000 ? offsetX : -window.innerWidth}px)`,
           transition: isDragging ? 'none' : 'transform 0.3s cubic-bezier(0.22, 1, 0.36, 1)',
           willChange: isRevealing ? 'transform' : undefined,
