@@ -11,8 +11,18 @@ import {
 } from "@/lib/server/tokens";
 import { audit } from "@/lib/server/audit";
 import { loginSchema } from "@/lib/validators";
+import { rateLimit } from "@/lib/server/rateLimit";
 
 export async function POST(req: NextRequest) {
+  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+  const rl = rateLimit(`login:${hashIp(ip)}`, 10, 60_000);
+  if (!rl.ok) {
+    return NextResponse.json(
+      { error: "Too many attempts. Try again later." },
+      { status: 429, headers: { "Retry-After": String(rl.retryAfter) } },
+    );
+  }
+
   let body: unknown;
   try {
     body = await req.json();

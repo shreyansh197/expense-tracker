@@ -100,6 +100,9 @@ export function ExpenseFormModal() {
         transition={{ duration: 0.15 }}
       >
         <m.div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Expense form"
           className="expense-form-modal w-full max-w-md max-h-[90vh] overflow-y-auto rounded-t-2xl shadow-lg lg:max-h-none lg:overflow-visible lg:rounded-2xl"
           style={{
             background: 'var(--surface)',

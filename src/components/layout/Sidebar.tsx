@@ -57,7 +57,7 @@ export function Sidebar() {
   const overBudget = budgetUsedPercent > 100;
 
   return (
-    <aside className="hidden lg:flex lg:w-[3.5rem] xl:w-[15rem] lg:flex-col transition-[width] duration-200" style={{ background: 'linear-gradient(to bottom, color-mix(in srgb, var(--surface) 94%, var(--primary)), var(--surface), color-mix(in srgb, var(--surface-secondary) 40%, var(--surface)))', borderRight: '1px solid var(--border)' }}>
+    <aside aria-label="Sidebar" className="hidden lg:flex lg:w-[3.5rem] xl:w-[15rem] lg:flex-col transition-[width] duration-200" style={{ background: 'linear-gradient(to bottom, color-mix(in srgb, var(--surface) 94%, var(--primary)), var(--surface), color-mix(in srgb, var(--surface-secondary) 40%, var(--surface)))', borderRight: '1px solid var(--border)' }}>
       {/* Logo */}
       <div className="flex items-center gap-2.5 px-3 xl:px-5 py-5 justify-center xl:justify-start" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
         <Image
@@ -73,7 +73,7 @@ export function Sidebar() {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 space-y-1 px-1.5 xl:px-3 py-4">
+      <nav aria-label="Sidebar navigation" className="flex-1 space-y-1 px-1.5 xl:px-3 py-4">
         {navItems.map((item) => {
           const isActive = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
           const Icon = item.icon;
@@ -178,8 +178,7 @@ export function Sidebar() {
             style={{ color: 'var(--text-secondary)' }}
           >
             {user.avatarUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={user.avatarUrl} alt="" className="h-6 w-6 rounded-full object-cover" />
+              <Image src={user.avatarUrl} alt="" width={24} height={24} className="h-6 w-6 rounded-full object-cover" unoptimized />
             ) : (
               <div className="flex h-6 w-6 items-center justify-center rounded-full bg-amber-100 dark:bg-blue-900/30">
                 <User size={12} className="text-amber-600 dark:text-blue-400" />

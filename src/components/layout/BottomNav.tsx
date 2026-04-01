@@ -83,6 +83,7 @@ export function BottomNav() {
 
       {/* ─── Nav bar (z-30, below FAB) ─── */}
       <nav
+        aria-label="Main navigation"
         className="fixed bottom-0 left-0 right-0 z-30 border-t backdrop-blur-2xl lg:hidden"
         style={{
           paddingBottom: "env(safe-area-inset-bottom)",

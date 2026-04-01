@@ -8,6 +8,7 @@ import { ToastProvider } from "@/components/ui/Toast";
 import { ConfirmProvider } from "@/components/ui/ConfirmDialog";
 import { SplashScreen } from "@/components/app/SplashScreen";
 import { OfflineScreen } from "@/components/app/OfflineScreen";
+import { SWUpdateListener } from "@/components/pwa/SWUpdateListener";
 import { startSyncEngine, stopSyncEngine } from "@/lib/syncEngine";
 
 function SyncProvider({ children }: { children: React.ReactNode }) {
@@ -25,6 +26,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
         <AuthProvider>
           <SyncProvider>
             <ToastProvider>
+              <SWUpdateListener />
               <ConfirmProvider>{children}</ConfirmProvider>
             </ToastProvider>
           </SyncProvider>

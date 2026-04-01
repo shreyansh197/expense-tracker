@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
+import Image from "next/image";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useConfirm } from "@/components/ui/ConfirmDialog";
 import { useToast } from "@/components/ui/Toast";
@@ -181,11 +182,13 @@ export function AccountCard() {
             className="block rounded-full transition-opacity hover:opacity-80"
           >
             {avatarSrc ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
+              <Image
                 src={avatarSrc}
                 alt={user.name}
+                width={40}
+                height={40}
                 className="h-10 w-10 rounded-full object-cover"
+                unoptimized
               />
             ) : (
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900/30">
@@ -265,12 +268,14 @@ export function AccountCard() {
           >
             <X size={20} />
           </button>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          <Image
             src={avatarSrc}
             alt={user.name}
+            width={800}
+            height={800}
             className="max-h-[80vh] max-w-[90vw] rounded-2xl object-contain shadow-2xl"
             onClick={(e) => e.stopPropagation()}
+            unoptimized
           />
         </div>,
         document.body,

@@ -17,7 +17,7 @@ import { useCalculations } from "@/hooks/useCalculations";
 import { useUIStore } from "@/stores/uiStore";
 import { Search, PlusCircle } from "lucide-react";
 import { useCurrency } from "@/hooks/useCurrency";
-import debounce from "lodash/debounce";
+import { debounce } from "@/lib/debounce";
 
 type SortOption = "day-desc" | "day-asc" | "amount-desc" | "amount-asc";
 

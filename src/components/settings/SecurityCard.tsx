@@ -5,6 +5,7 @@ import { authFetch } from "@/lib/authClient";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useToast } from "@/components/ui/Toast";
 import { Shield, Key, Smartphone, Trash2, Plus, Loader2, Copy, CheckCircle2 } from "lucide-react";
+import Image from "next/image";
 import QRCode from "qrcode";
 
 interface SessionItem {
@@ -287,13 +288,13 @@ export function SecurityCard() {
             {qrDataUrl ? (
               <div className="flex justify-center">
                 <div className="rounded-xl p-3 shadow-sm" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
-                  {/* eslint-disable-next-line @next/next/no-img-element -- data URL, next/image can't optimize */}
-                  <img
+                  <Image
                     src={qrDataUrl}
                     alt="TOTP QR Code"
                     width={200}
                     height={200}
                     className="rounded-lg"
+                    unoptimized
                   />
                 </div>
               </div>

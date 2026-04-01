@@ -3,7 +3,7 @@ import { prisma } from "@/lib/server/prisma";
 import { requireAuth, jsonError } from "@/lib/server/guards";
 import { verifyTotp, generateRecoveryCodes } from "@/lib/server/totp";
 import { audit } from "@/lib/server/audit";
-import { hashIp } from "@/lib/server/tokens";
+import { hashIp, hashToken } from "@/lib/server/tokens";
 import { totpVerifySchema } from "@/lib/validators";
 
 export async function POST(req: NextRequest) {
@@ -39,11 +39,12 @@ export async function POST(req: NextRequest) {
   // If not yet enabled, activate it now
   if (!user.totpEnabledAt) {
     const codes = generateRecoveryCodes();
+    const hashedCodes = codes.map((c) => hashToken(c));
     await prisma.user.update({
       where: { id: auth.userId },
       data: {
         totpEnabledAt: new Date(),
-        recoveryCodes: codes,
+        recoveryCodes: hashedCodes,
       },
     });
 

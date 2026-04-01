@@ -11,6 +11,7 @@ import {
 } from "@/lib/server/tokens";
 import { audit } from "@/lib/server/audit";
 import { verify2FASchema } from "@/lib/validators";
+import { rateLimit } from "@/lib/server/rateLimit";
 
 /**
  * POST /api/auth/login/verify-2fa
@@ -18,6 +19,15 @@ import { verify2FASchema } from "@/lib/validators";
  * Body: { challengeToken: string, code: string }
  */
 export async function POST(req: NextRequest) {
+  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+  const rl = rateLimit(`2fa:${hashIp(ip)}`, 5, 60_000);
+  if (!rl.ok) {
+    return NextResponse.json(
+      { error: "Too many attempts. Try again later." },
+      { status: 429, headers: { "Retry-After": String(rl.retryAfter) } },
+    );
+  }
+
   let body: unknown;
   try {
     body = await req.json();
@@ -70,9 +80,10 @@ export async function POST(req: NextRequest) {
   // Try TOTP code first
   let valid = verifyTotp(user.totpSecret, code);
 
-  // If TOTP fails, check recovery codes
+  // If TOTP fails, check recovery codes (stored as SHA-256 hashes)
   if (!valid && Array.isArray(user.recoveryCodes)) {
-    const idx = (user.recoveryCodes as string[]).indexOf(code);
+    const codeHash = hashToken(code);
+    const idx = (user.recoveryCodes as string[]).indexOf(codeHash);
     if (idx !== -1) {
       valid = true;
       // Remove used recovery code

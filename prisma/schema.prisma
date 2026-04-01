@@ -21,7 +21,7 @@ model User {
   passwordHash    String?   @map("password_hash") @db.VarChar(255)
   totpSecret      String?   @map("totp_secret") @db.VarChar(64)
   totpEnabledAt   DateTime? @map("totp_enabled_at") @db.Timestamptz
-  recoveryCodes   String[]  @default([]) @map("recovery_codes") @db.VarChar(20)
+  recoveryCodes   String[]  @default([]) @map("recovery_codes") @db.VarChar(64)
   name            String    @default("") @db.VarChar(120)
   avatarUrl       String?   @map("avatar_url") @db.Text
   googleId        String?   @unique @map("google_id") @db.VarChar(255)

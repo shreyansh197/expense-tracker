@@ -51,6 +51,9 @@ export async function ensureSyncColumns(): Promise<void> {
         processed_at TIMESTAMPTZ NOT NULL DEFAULT now(),
         PRIMARY KEY (workspace_id, idempotency_key)
       );
+
+      -- Migration 010: Widen recovery_codes column for SHA-256 hashes
+      ALTER TABLE users ALTER COLUMN recovery_codes TYPE VARCHAR(64)[];
     `);
     console.log("[ensureSyncColumns] Schema migration check complete");
   } catch (err) {
