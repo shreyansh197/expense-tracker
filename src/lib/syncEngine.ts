@@ -95,6 +95,9 @@ let _migrated = false;
 const _pullInFlight = new Map<string, Promise<boolean>>();
 
 export async function pullChanges(workspaceId?: string): Promise<boolean> {
+  // Wait for cursor clear to finish before pulling
+  await _initReady;
+
   const wid = workspaceId ?? getActiveWorkspaceId();
   if (!wid || !isAuthenticated()) return false;
 
@@ -478,6 +481,9 @@ function _schedulePoll() {
 }
 
 async function _doSync() {
+  // Wait for cursor clear to finish before any sync work
+  await _initReady;
+
   const wid = getActiveWorkspaceId();
   if (!wid || !isAuthenticated()) {
     syncLog("doSync", `Skipped: wid=${wid ? wid.slice(0,8)+'…' : 'null'} authenticated=${isAuthenticated()}`);
@@ -594,36 +600,43 @@ async function _migrateStuckData() {
   }
 }
 
+// Promise gate: no sync operations proceed until cursor clear is done.
+// This prevents the race where event listeners / polls / realtime trigger
+// _doSync() or pullChanges() before db.syncMeta.clear() resolves.
+let _initReady: Promise<void> = Promise.resolve();
+
 export function startSyncEngine() {
   if (typeof window === "undefined" || _started) return;
   _started = true;
 
   syncLog("init", "Starting sync engine…");
 
-  // Migrate legacy localStorage data to IDB
-  migrateFromLocalStorage();
+  // Create a gate promise — all sync paths will await this before proceeding
+  _initReady = (async () => {
+    try {
+      // Migrate legacy localStorage data to IDB (await to prevent it from
+      // writing a cursor AFTER the clear)
+      await migrateFromLocalStorage();
 
-  // Force full re-sync on startup: clear saved cursors so the first pull
-  // fetches ALL data from the server. Chain _doSync after clear completes
-  // to avoid a race where the pull reads the old cursor before clear finishes.
-  db.syncMeta.clear().then(() => {
-    syncLog("init", "Cleared sync cursors for full re-sync");
-    _doSync();
-  }).catch(() => {
-    _doSync();
-  });
+      // Force full re-sync on startup: clear saved cursors so the first pull
+      // fetches ALL data from the server.
+      await db.syncMeta.clear();
+      syncLog("init", "Cleared sync cursors for full re-sync");
+    } catch {
+      syncLog("init", "Cursor clear failed (non-fatal)");
+    }
+  })();
 
-  // Auto-sync on reconnect
+  // Set up event handlers — they can fire at any time, but _doSync / pullChanges
+  // will await _initReady before doing real work, so the cursor is always clear.
   _onlineHandler = () => { _doSync(); };
   window.addEventListener("online", _onlineHandler);
 
-  // Auto-sync on tab focus
   _visibilityHandler = () => {
     if (document.visibilityState === "visible") _doSync();
   };
   document.addEventListener("visibilitychange", _visibilityHandler);
 
-  // BroadcastChannel for cross-tab sync (same browser, instant)
   if (typeof BroadcastChannel !== "undefined") {
     _broadcastChannel = new BroadcastChannel("expenstream-sync");
     _broadcastChannel.onmessage = (event) => {
@@ -631,7 +644,6 @@ export function startSyncEngine() {
     };
   }
 
-  // Auth-aware: re-subscribe Realtime when workspace changes
   _currentWid = getActiveWorkspaceId();
   _unsubAuth = subscribeAuth(() => {
     const newWid = getActiveWorkspaceId();
@@ -642,13 +654,10 @@ export function startSyncEngine() {
     }
   });
 
-  // Setup initial Realtime channel (if workspace already known)
   _setupRealtimeChannel(_currentWid);
 
-  // Start adaptive polling
-  _schedulePoll();
-
-  // Note: initial _doSync() is triggered by the db.syncMeta.clear() callback above
+  // Kick off first sync after cursor clear completes, then start polling
+  _initReady.then(() => _doSync()).finally(() => _schedulePoll());
 }
 
 export function stopSyncEngine() {
@@ -662,5 +671,6 @@ export function stopSyncEngine() {
   _currentWid = null;
   _migrated = false;
   _pushInFlight = false;
+  _initReady = Promise.resolve();
   _setSyncPhase("idle");
 }

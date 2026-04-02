@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useSyncExternalStore } from "react";
 import { DEFAULT_SALARY } from "@/lib/constants";
 import { DEFAULT_CATEGORIES } from "@/lib/categories";
-import { getActiveWorkspaceId, isAuthenticated } from "@/lib/authClient";
+import { getActiveWorkspaceId, isAuthenticated, authFetch } from "@/lib/authClient";
 import { db } from "@/lib/db";
 import {
   makeIdempotencyKey,
@@ -175,6 +175,83 @@ async function loadSettingsFromIDB(): Promise<UserSettings | null> {
   }
 }
 
+/**
+ * Failsafe: directly fetch settings from the API when IDB + localStorage
+ * both have default/empty settings. This bypasses the sync cursor entirely.
+ * Only runs once per session to avoid hammering the server.
+ */
+let _directFetchDone = false;
+async function _fetchSettingsFromApi(): Promise<UserSettings | null> {
+  if (_directFetchDone) return null;
+  _directFetchDone = true;
+
+  const wid = getActiveWorkspaceId();
+  if (!wid || !isAuthenticated()) return null;
+
+  try {
+    // Fetch ALL changes (since=epoch) — the server returns settings if they exist
+    const res = await authFetch(`/api/sync/changes?workspaceId=${encodeURIComponent(wid)}&since=1970-01-01T00:00:00.000Z`);
+    if (!res.ok) return null;
+
+    const data = await res.json();
+    if (!data.changes?.settings) return null;
+
+    const s = data.changes.settings;
+    const settings: UserSettings = {
+      salary: Number(s.salary) || 0,
+      currency: s.currency || "INR",
+      categories: s.categories || DEFAULT_CATEGORIES,
+      customCategories: s.customCategories || [],
+      hiddenDefaults: s.hiddenDefaults || [],
+      categoryBudgets: s.categoryBudgets ?? {},
+      recurringExpenses: s.recurringExpenses ?? [],
+      savedFilters: s.savedFilters ?? [],
+      goals: s.goals ?? [],
+      rolloverEnabled: s.rolloverEnabled ?? false,
+      rolloverHistory: s.rolloverHistory ?? {},
+      monthlyBudgets: s.monthlyBudgets ?? {},
+      businessMode: s.businessMode ?? false,
+      revenueExpectations: s.revenueExpectations ?? [],
+      businessTags: s.businessTags ?? [],
+      dashboardLayout: s.dashboardLayout ?? undefined,
+      multiCurrencyEnabled: s.multiCurrencyEnabled ?? false,
+      dismissedRecurringSuggestions: s.dismissedRecurringSuggestions ?? [],
+      autoRules: s.autoRules ?? [],
+      createdAt: Date.now(),
+      updatedAt: new Date(s.updatedAt).getTime(),
+    };
+
+    // Populate IDB so future sync pulls have data
+    await db.settings.put({
+      workspaceId: wid,
+      salary: settings.salary,
+      currency: settings.currency,
+      categories: settings.categories,
+      customCategories: settings.customCategories,
+      hiddenDefaults: settings.hiddenDefaults,
+      categoryBudgets: settings.categoryBudgets ?? {},
+      recurringExpenses: settings.recurringExpenses ?? [],
+      savedFilters: settings.savedFilters ?? [],
+      goals: settings.goals ?? [],
+      rolloverEnabled: settings.rolloverEnabled ?? false,
+      rolloverHistory: settings.rolloverHistory ?? {},
+      monthlyBudgets: settings.monthlyBudgets ?? {},
+      businessMode: settings.businessMode ?? false,
+      revenueExpectations: settings.revenueExpectations ?? [],
+      businessTags: settings.businessTags ?? [],
+      dashboardLayout: settings.dashboardLayout,
+      multiCurrencyEnabled: settings.multiCurrencyEnabled ?? false,
+      dismissedRecurringSuggestions: settings.dismissedRecurringSuggestions ?? [],
+      autoRules: settings.autoRules ?? [],
+      updatedAt: settings.updatedAt,
+    });
+
+    return settings;
+  } catch {
+    return null;
+  }
+}
+
 // ── Module-level initialization (runs once when module loads) ──
 if (typeof window !== "undefined") {
   // Read auth state from localStorage directly (no circular dependency)
@@ -197,12 +274,24 @@ function _syncFromIDB() {
   const userIdAtCallTime = _currentUserId;
   if (!userIdAtCallTime) return;
 
-  loadSettingsFromIDB().then((remote) => {
+  loadSettingsFromIDB().then(async (remote) => {
     if (_currentUserId !== userIdAtCallTime) return;
-    if (!remote) return;
 
+    // Failsafe: if IDB has no settings (or salary=0) and in-memory + localStorage
+    // also have salary=0, directly fetch from the API. This handles the case where
+    // the sync cursor wasn't cleared properly and the incremental pull returned 0 settings.
     const local = loadSettings(userIdAtCallTime);
     const bestKnownSalary = Math.max(_settings.salary, local.salary);
+    if ((!remote || remote.salary === 0) && bestKnownSalary === 0) {
+      const apiSettings = await _fetchSettingsFromApi();
+      if (apiSettings && apiSettings.salary > 0 && _currentUserId === userIdAtCallTime) {
+        saveLocal(apiSettings);
+        _setShared(apiSettings);
+      }
+      return;
+    }
+
+    if (!remote) return;
 
     // Never overwrite a known salary with 0
     if (remote.salary === 0 && bestKnownSalary > 0) {
@@ -259,12 +348,22 @@ export function useSettings() {
   // When the sync engine pulls new data into IDB, we check if settings changed.
   useEffect(() => {
     const unsubscribe = onSyncPull(() => {
-      loadSettingsFromIDB().then((remote) => {
-        if (!remote) return;
-
+      loadSettingsFromIDB().then(async (remote) => {
         // Gather all known sources of salary truth
         const local = loadSettings(_currentUserId);
         const bestKnownSalary = Math.max(_settings.salary, local.salary);
+
+        // Failsafe: if all sources have salary=0, fetch directly from API
+        if ((!remote || remote.salary === 0) && bestKnownSalary === 0) {
+          const apiSettings = await _fetchSettingsFromApi();
+          if (apiSettings && apiSettings.salary > 0) {
+            saveLocal(apiSettings);
+            _setShared(apiSettings);
+          }
+          return;
+        }
+
+        if (!remote) return;
 
         // Never overwrite a known non-zero salary with 0
         if (remote.salary === 0 && bestKnownSalary > 0) {
