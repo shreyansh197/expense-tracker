@@ -604,9 +604,14 @@ export function startSyncEngine() {
   migrateFromLocalStorage();
 
   // Force full re-sync on startup: clear saved cursors so the first pull
-  // fetches ALL data from the server.
-  db.syncMeta.clear().then(() => syncLog("init", "Cleared sync cursors for full re-sync"))
-    .catch(() => {});
+  // fetches ALL data from the server. Chain _doSync after clear completes
+  // to avoid a race where the pull reads the old cursor before clear finishes.
+  db.syncMeta.clear().then(() => {
+    syncLog("init", "Cleared sync cursors for full re-sync");
+    _doSync();
+  }).catch(() => {
+    _doSync();
+  });
 
   // Auto-sync on reconnect
   _onlineHandler = () => { _doSync(); };
@@ -643,8 +648,7 @@ export function startSyncEngine() {
   // Start adaptive polling
   _schedulePoll();
 
-  // Initial sync
-  _doSync();
+  // Note: initial _doSync() is triggered by the db.syncMeta.clear() callback above
 }
 
 export function stopSyncEngine() {

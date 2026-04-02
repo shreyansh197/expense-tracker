@@ -199,40 +199,43 @@ function _syncFromIDB() {
 
   loadSettingsFromIDB().then((remote) => {
     if (_currentUserId !== userIdAtCallTime) return;
-
     if (!remote) return;
 
-    // Always check localStorage as ground truth — it is written synchronously
-    // by saveLocal() and never affected by race conditions with sync pulls.
     const local = loadSettings(userIdAtCallTime);
-    const localTs = local.updatedAt || 0;
-    const remoteTs = remote.updatedAt || 0;
+    const bestKnownSalary = Math.max(_settings.salary, local.salary);
 
-    if (localTs > 0 && localTs >= remoteTs) {
-      // Local is newer or same age — push local to server, keep local state
-      if (_settings.updatedAt < localTs) _setShared(local);
-      pushToApi(local);
+    // Never overwrite a known salary with 0
+    if (remote.salary === 0 && bestKnownSalary > 0) {
+      const best = _settings.salary >= local.salary ? _settings : local;
+      if (best.updatedAt > 0) pushToApi(best);
+      if (_settings.salary < bestKnownSalary) {
+        _setShared({ ...local, salary: bestKnownSalary });
+      }
       return;
     }
 
+    const localTs = local.updatedAt || 0;
+    const remoteTs = remote.updatedAt || 0;
+
     if (remoteTs > localTs) {
-      // Remote is newer — but protect against overwriting real budget with 0
-      if (remote.salary === 0 && local.salary > 0) {
-        pushToApi(local);
-        if (_settings.updatedAt < localTs) _setShared(local);
-        return;
-      }
       localStorage.setItem(storageKeyForUser(userIdAtCallTime), JSON.stringify(remote));
       _setShared(remote);
+    } else if (localTs > 0) {
+      if (_settings.updatedAt < localTs) _setShared(local);
+      pushToApi(local);
     }
   }).catch(() => {});
 }
 
 export function switchSettingsUser(userId: string) {
-  if (_currentUserId === userId) return;
+  const changed = _currentUserId !== userId;
   _currentUserId = userId;
-  const local = loadSettings(userId);
-  _setShared(local);
+  if (changed) {
+    const local = loadSettings(userId);
+    _setShared(local);
+  }
+  // Always sync from IDB — even if userId was pre-set by module init,
+  // IDB may have newer data from a previous sync session.
   _syncFromIDB();
 }
 
@@ -259,28 +262,43 @@ export function useSettings() {
       loadSettingsFromIDB().then((remote) => {
         if (!remote) return;
 
-        // Always compare against localStorage (ground truth), not _settings
-        // which may still be at module-init defaults during startup.
+        // Gather all known sources of salary truth
         const local = loadSettings(_currentUserId);
+        const bestKnownSalary = Math.max(_settings.salary, local.salary);
+
+        // Never overwrite a known non-zero salary with 0
+        if (remote.salary === 0 && bestKnownSalary > 0) {
+          const best = _settings.salary >= local.salary ? _settings : local;
+          if (best.updatedAt > 0) pushToApi(best);
+          if (_settings.salary < bestKnownSalary) {
+            const merged = { ...local, salary: bestKnownSalary };
+            saveLocal(merged);
+            _setShared(merged);
+          }
+          return;
+        }
+
+        // Remote has real data — compare timestamps
         const localTs = local.updatedAt || 0;
         const remoteTs = remote.updatedAt || 0;
 
-        // If local has real data that is newer or same age, keep it
-        if (localTs > 0 && localTs >= remoteTs) {
-          // Ensure in-memory state matches localStorage
+        if (remoteTs > localTs) {
+          // Remote is strictly newer — accept it
+          saveLocal(remote);
+          _setShared(remote);
+        } else if (localTs > 0 && localTs > remoteTs) {
+          // Local is newer — ensure in-memory matches and push
           if (_settings.updatedAt < localTs) _setShared(local);
-          return;
-        }
-
-        // Remote is newer — but protect real budget from being overwritten with 0
-        if (remote.salary === 0 && local.salary > 0) {
           pushToApi(local);
-          if (_settings.updatedAt < localTs) _setShared(local);
-          return;
+        } else {
+          // Same timestamp or both 0 — prefer whichever has real data
+          if (remote.salary > 0 && local.salary === 0) {
+            saveLocal(remote);
+            _setShared(remote);
+          } else if (localTs > 0 && _settings.updatedAt < localTs) {
+            _setShared(local);
+          }
         }
-
-        saveLocal(remote);
-        _setShared(remote);
       });
     });
 
