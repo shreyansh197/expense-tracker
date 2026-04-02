@@ -14,7 +14,7 @@ import type { Expense, ExpenseInput, CategoryId, SyncStatus } from "@/types";
 
 const EMPTY: Expense[] = [];
 
-function toExpense(row: { id: string; category: string; amount: number; currency?: string; day: number; month: number; year: number; remark?: string; isRecurring: boolean; recurringId?: string; createdAt: number; updatedAt: number; deletedAt: number | null }): Expense {
+function toExpense(row: { id: string; category: string; amount: number; currency?: string; day: number; month: number; year: number; remark?: string; isRecurring: boolean; recurringId?: string; createdAt: number; updatedAt: number; deletedAt: number | null | undefined }): Expense {
   return {
     id: row.id,
     category: row.category as CategoryId,
@@ -28,7 +28,7 @@ function toExpense(row: { id: string; category: string; amount: number; currency
     recurringId: row.recurringId,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
-    deletedAt: row.deletedAt,
+    deletedAt: row.deletedAt ?? null,
     deviceId: "",
   };
 }

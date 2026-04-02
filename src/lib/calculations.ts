@@ -3,7 +3,7 @@ import type { Expense, CategoryId, DailyTotal, CategoryTotal, StackedDailyTotal,
 /** Filter active (non-deleted) expenses for a given month/year */
 function activeExpenses(expenses: Expense[], month: number, year: number): Expense[] {
   return expenses.filter(
-    (e) => e.month === month && e.year === year && e.deletedAt === null
+    (e) => e.month === month && e.year === year && !e.deletedAt
   );
 }
 
