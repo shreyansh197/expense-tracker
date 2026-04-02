@@ -35,7 +35,6 @@ const DailyTrendChart = dynamic(
 
 import { useExpenses } from "@/hooks/useExpenses";
 import { useSettings } from "@/hooks/useSettings";
-import { useCalculations } from "@/hooks/useCalculations";
 import { useRecurringExpenses } from "@/hooks/useRecurringExpenses";
 import { useUIStore } from "@/stores/uiStore";
 import { getMonthName } from "@/lib/utils";
@@ -48,9 +47,11 @@ import { useAuth } from "@/components/providers/AuthProvider";
 import { Repeat, PlusCircle, Target, BarChart3, Sparkles, ChevronDown, Check, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { DashboardSectionId, DashboardLayout } from "@/types";
+import { useCalculationsContext } from "@/contexts/CalculationsContext";
 import type { ReactNode } from "react";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import { useMonthUrlSync } from "@/hooks/useMonthUrlSync";
+import { usePageTitle } from "@/hooks/usePageTitle";
 
 /* ── Lightweight fallback for per-section ErrorBoundary ────── */
 function SectionFallback() {
@@ -246,10 +247,11 @@ export default function DashboardPage() {
 }
 
 function DashboardContent() {
+  usePageTitle("Dashboard");
   const { formatCurrency } = useCurrency();
   const router = useRouter();
   const { currentMonth, currentYear } = useUIStore();
-  const { expenses, loading, syncStatus } = useExpenses(currentMonth, currentYear);
+  const { expenses, loading } = useExpenses(currentMonth, currentYear);
   const { settings, updateSettings } = useSettings();
   const { user } = useAuth();
 
@@ -272,18 +274,7 @@ function DashboardContent() {
     forecast,
     anomalies,
     effectiveBudget,
-  } = useCalculations(
-    expenses,
-    settings.categories,
-    settings.salary,
-    currentMonth,
-    currentYear,
-    settings.rolloverEnabled,
-    settings.rolloverHistory,
-    settings.currency,
-    settings.multiCurrencyEnabled,
-    settings.monthlyBudgets,
-  );
+  } = useCalculationsContext();
 
   const recentExpenses = [...expenses]
     .sort((a, b) => b.day - a.day || b.createdAt - a.createdAt)
@@ -360,7 +351,7 @@ function DashboardContent() {
           <div data-tour="dashboard" className="flex items-center justify-between">
             <MonthSwitcher />
             <div className="flex items-center gap-2">
-              <SyncIndicator syncStatus={syncStatus} />
+              <SyncIndicator />
               <DashboardCustomizer layout={settings.dashboardLayout} onSave={handleSaveLayout} />
               <div className="relative z-[60] lg:hidden">
                 <QuickHelpButton />

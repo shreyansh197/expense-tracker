@@ -94,14 +94,19 @@ export function CategoryChart({ categoryTotals, onCategoryClick, categoryBudgets
     );
   }
 
+  // Build screen-reader description
+  const topThree = data.slice(0, 3).map((d) => `${d.name} ${formatCurrency(d.value)}`).join(", ");
+  const chartLabel = `Category breakdown: ${data.length} categories totalling ${formatCurrency(total)}. Top: ${topThree}.`;
+
   return (
-    <div role="img" aria-label="Category breakdown chart">
+    <div role="img" aria-label={chartLabel}>
       <div className="mb-2 flex justify-end">
-        <div className="segmented-control">
+        <div className="segmented-control" role="group" aria-label="View mode">
           <button
             data-active={!showTable}
             onClick={() => setShowTable(false)}
             className="flex items-center gap-1"
+            aria-pressed={!showTable}
           >
             <PieChartIcon size={13} />
             Chart
@@ -110,6 +115,7 @@ export function CategoryChart({ categoryTotals, onCategoryClick, categoryBudgets
             data-active={showTable}
             onClick={() => setShowTable(true)}
             className="flex items-center gap-1"
+            aria-pressed={showTable}
           >
             <Table2 size={13} />
             Table
@@ -139,6 +145,9 @@ export function CategoryChart({ categoryTotals, onCategoryClick, categoryBudgets
                     className="cursor-pointer transition-colors hover:bg-[var(--surface-secondary)]"
                     style={{ borderBottom: '1px solid var(--border-subtle)' }}
                     onClick={() => onCategoryClick?.(d.slug)}
+                    tabIndex={onCategoryClick ? 0 : undefined}
+                    onKeyDown={(e) => { if ((e.key === "Enter" || e.key === " ") && onCategoryClick) { e.preventDefault(); onCategoryClick(d.slug); } }}
+                    role={onCategoryClick ? "button" : undefined}
                   >
                     <td className="py-2">
                       <div className="flex items-center gap-2">
@@ -175,6 +184,10 @@ export function CategoryChart({ categoryTotals, onCategoryClick, categoryBudgets
         </div>
       ) : (
         <div className="h-[220px] w-full">
+          {/* Screen reader: summarize data in chart view */}
+          <p className="sr-only">
+            {data.map((d) => `${d.name}: ${formatCurrency(d.value)}`).join(". ")}. Switch to Table view for full details.
+          </p>
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie

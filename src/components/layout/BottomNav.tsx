@@ -9,6 +9,7 @@ import {
   Plus,
   Settings,
   Briefcase,
+  BarChart3,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUIStore } from "@/stores/uiStore";
@@ -19,6 +20,7 @@ import { useSettings } from "@/hooks/useSettings";
 const personalLinks = [
   { href: "/", icon: LayoutDashboard, label: "Dashboard" },
   { href: "/expenses", icon: List, label: "Expenses" },
+  { href: "/analytics", icon: BarChart3, label: "Analytics" },
   { href: "/settings", icon: Settings, label: "Settings" },
 ];
 
@@ -26,6 +28,7 @@ const businessLinks = [
   { href: "/", icon: LayoutDashboard, label: "Home" },
   { href: "/business", icon: Briefcase, label: "Business" },
   { href: "/expenses", icon: List, label: "Expenses" },
+  { href: "/analytics", icon: BarChart3, label: "Analytics" },
   { href: "/settings", icon: Settings, label: "Settings" },
 ];
 

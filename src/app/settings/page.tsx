@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { InstallButton } from "@/components/pwa/InstallButton";
 import { useToast } from "@/components/ui/Toast";
+import { usePageTitle } from "@/hooks/usePageTitle";
 import { SettingsAccordion, AccordionSection } from "@/components/settings/SettingsAccordion";
 import { AccountCard } from "@/components/settings/AccountCard";
 import { SecurityCard } from "@/components/settings/SecurityCard";
@@ -103,6 +104,7 @@ function RateSourceInfo({ baseCurrency }: { baseCurrency: string }) {
 }
 
 export default function SettingsPage() {
+  usePageTitle("Settings");
   const { settings, updateSettings } = useSettings();
   const { symbol, formatCurrency } = useCurrency();
   const { toast } = useToast();
@@ -184,10 +186,26 @@ export default function SettingsPage() {
     { id: "zone-automation", label: "Automation" },
     { id: "zone-preferences", label: "Preferences" },
   ];
-  const [activeZone, setActiveZone] = useState(zones[0].id);
+  const [activeZone, setActiveZone] = useState(() => {
+    // Check URL hash to pre-select the right zone
+    if (typeof window === "undefined") return zones[0].id;
+    const hash = window.location.hash.replace("#", "");
+    if (!hash) return zones[0].id;
+    // Map section ids (like "budget", "account") to their parent zone
+    const sectionToZone: Record<string, string> = {
+      account: "zone-account", security: "zone-account", members: "zone-account",
+      budget: "zone-finances", categories: "zone-finances", recurring: "zone-finances", goals: "zone-finances", rollover: "zone-finances",
+      rules: "zone-automation", "export-import": "zone-automation", "data-management": "zone-automation",
+      "app-mode": "zone-preferences", "multi-currency": "zone-preferences", theme: "zone-preferences",
+    };
+    return sectionToZone[hash] ?? zones[0].id;
+  });
   const observerRef = useRef<IntersectionObserver | null>(null);
 
+  // IntersectionObserver for mobile scroll tracking (desktop uses tab switching)
   useEffect(() => {
+    const isDesktop = window.matchMedia("(min-width: 1024px)").matches;
+    if (isDesktop) return;
     observerRef.current = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
@@ -210,23 +228,24 @@ export default function SettingsPage() {
         <PageTransition className="relative mx-auto max-w-3xl space-y-2 p-4 lg:p-6">
         <h1 className="text-page-title mb-4">Settings</h1>
 
-        {/* Quick-nav pills — desktop only */}
-        <div className="hidden lg:flex sticky top-0 z-10 gap-1.5 rounded-xl p-1.5 mb-4 backdrop-blur-md" style={{ background: 'color-mix(in srgb, var(--surface) 85%, transparent)', border: '1px solid var(--border-subtle)' }}>
+        {/* Tab navigation — desktop: shows only active zone; mobile: all zones visible */}
+        <div role="tablist" aria-label="Settings sections" className="hidden lg:flex sticky top-0 z-10 gap-1.5 rounded-xl p-1.5 mb-4 backdrop-blur-md" style={{ background: 'color-mix(in srgb, var(--surface) 85%, transparent)', border: '1px solid var(--border-subtle)' }}>
           {zones.map((z) => (
             <button
               key={z.id}
+              role="tab"
+              aria-selected={activeZone === z.id}
+              aria-controls={`${z.id}`}
+              id={`tab-${z.id}`}
               onClick={() => {
                 setActiveZone(z.id);
-                document.getElementById(z.id)?.scrollIntoView({ behavior: "smooth", block: "start" });
               }}
-              className="rounded-lg px-3 py-1.5 text-xs font-semibold transition-all"
+              className="rounded-lg px-3 py-1.5 text-xs font-semibold transition-all hover:bg-[var(--surface-secondary)]"
               style={
                 activeZone === z.id
                   ? { background: 'var(--primary-soft)', color: 'var(--primary)' }
                   : { color: 'var(--text-secondary)' }
               }
-              onMouseEnter={activeZone !== z.id ? (e: React.MouseEvent<HTMLButtonElement>) => { e.currentTarget.style.background = 'var(--surface-secondary)'; } : undefined}
-              onMouseLeave={activeZone !== z.id ? (e: React.MouseEvent<HTMLButtonElement>) => { e.currentTarget.style.background = ''; } : undefined}
             >
               {z.label}
             </button>
@@ -236,7 +255,7 @@ export default function SettingsPage() {
         <SettingsAccordion>
 
           {/* ━━━ YOUR ACCOUNT — indigo zone ━━━ */}
-          <div id="zone-account" className="section-zone section-indigo space-y-2 scroll-mt-16">
+          <div id="zone-account" role="tabpanel" aria-labelledby="tab-zone-account" className={`section-zone section-indigo space-y-2 scroll-mt-16 ${activeZone !== 'zone-account' ? 'lg:hidden' : ''}`}>
           <h3 className="text-[11px] font-bold uppercase tracking-wider pb-1 px-1" style={{ color: 'var(--text-tertiary)' }}>
             Your Account
           </h3>
@@ -276,7 +295,7 @@ export default function SettingsPage() {
           </div>
 
           {/* ━━━ FINANCES — teal zone ━━━ */}
-          <div id="zone-finances" className="section-zone section-teal space-y-2 scroll-mt-16">
+          <div id="zone-finances" role="tabpanel" aria-labelledby="tab-zone-finances" className={`section-zone section-teal space-y-2 scroll-mt-16 ${activeZone !== 'zone-finances' ? 'lg:hidden' : ''}`}>
           <h3 className="text-[11px] font-bold uppercase tracking-wider pt-2 pb-1 px-1" style={{ color: 'var(--text-tertiary)' }}>
             Finances
           </h3>
@@ -480,7 +499,7 @@ export default function SettingsPage() {
           </div>
 
           {/* ━━━ AUTOMATION & DATA — coral zone ━━━ */}
-          <div id="zone-automation" className="section-zone section-coral space-y-2 scroll-mt-16">
+          <div id="zone-automation" role="tabpanel" aria-labelledby="tab-zone-automation" className={`section-zone section-coral space-y-2 scroll-mt-16 ${activeZone !== 'zone-automation' ? 'lg:hidden' : ''}`}>
           <h3 className="text-[11px] font-bold uppercase tracking-wider pt-2 pb-1 px-1" style={{ color: 'var(--text-tertiary)' }}>
             Automation & Data
           </h3>
@@ -520,7 +539,7 @@ export default function SettingsPage() {
           </div>
 
           {/* ━━━ PREFERENCES — indigo zone ━━━ */}
-          <div id="zone-preferences" className="section-zone section-indigo space-y-2 scroll-mt-16">
+          <div id="zone-preferences" role="tabpanel" aria-labelledby="tab-zone-preferences" className={`section-zone section-indigo space-y-2 scroll-mt-16 ${activeZone !== 'zone-preferences' ? 'lg:hidden' : ''}`}>
           <h3 className="text-[11px] font-bold uppercase tracking-wider pt-2 pb-1 px-1" style={{ color: 'var(--text-tertiary)' }}>
             Preferences
           </h3>

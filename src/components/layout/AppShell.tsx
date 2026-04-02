@@ -12,6 +12,7 @@ import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useSettings } from "@/hooks/useSettings";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useUIStore } from "@/stores/uiStore";
+import { CalculationsProvider } from "@/contexts/CalculationsContext";
 
 function AppShellInner({ children }: { children: React.ReactNode }) {
   const [showShortcuts, setShowShortcuts] = useState(false);
@@ -31,8 +32,12 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
     // Only trigger if horizontal swipe is dominant and >80px
     if (Math.abs(dx) > 80 && Math.abs(dx) > Math.abs(dy) * 1.5) {
       if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate(50);
-      if (dx > 0) prevMonth();
-      else nextMonth();
+      const change = dx > 0 ? prevMonth : nextMonth;
+      if (typeof document !== "undefined" && "startViewTransition" in document) {
+        (document as unknown as { startViewTransition: (cb: () => void) => void }).startViewTransition(change);
+      } else {
+        change();
+      }
     }
   }, [nextMonth, prevMonth]);
 
@@ -44,19 +49,21 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
       >
         Skip to main content
       </a>
-      <div className="flex flex-1 overflow-hidden">
-        <Sidebar />
-        <main
-          id="main-content"
-          className="flex-1 overflow-y-auto pb-20 lg:pb-0"
-          style={{ background: 'linear-gradient(180deg, var(--surface-secondary), transparent 200px)' }}
-          onTouchStart={onTouchStart}
-          onTouchEnd={onTouchEnd}
-        >
-          <ErrorBoundary>{children}</ErrorBoundary>
-        </main>
-      </div>
-      <BottomNav />
+      <CalculationsProvider>
+        <div className="flex flex-1 overflow-hidden">
+          <Sidebar />
+          <main
+            id="main-content"
+            className="flex-1 overflow-y-auto pb-20 lg:pb-0"
+            style={{ background: 'linear-gradient(180deg, var(--surface-secondary), transparent 200px)', viewTransitionName: 'month-content' }}
+            onTouchStart={onTouchStart}
+            onTouchEnd={onTouchEnd}
+          >
+            <ErrorBoundary>{children}</ErrorBoundary>
+          </main>
+        </div>
+        <BottomNav />
+      </CalculationsProvider>
       <ExpenseFormModal />
       <KeyboardShortcutsHelp
         open={showShortcuts}

@@ -5,6 +5,15 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useUIStore } from "@/stores/uiStore";
 import { getMonthName } from "@/lib/utils";
 
+/** Wrap a callback in the View Transitions API when supported */
+function withViewTransition(fn: () => void) {
+  if (typeof document !== "undefined" && "startViewTransition" in document) {
+    (document as unknown as { startViewTransition: (cb: () => void) => void }).startViewTransition(fn);
+  } else {
+    fn();
+  }
+}
+
 export function MonthSwitcher() {
   const { currentMonth, currentYear, nextMonth, prevMonth } = useUIStore();
   const [display, setDisplay] = useState({ month: currentMonth, year: currentYear });
@@ -27,12 +36,12 @@ export function MonthSwitcher() {
 
   const handlePrev = useCallback(() => {
     if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate(50);
-    prevMonth();
+    withViewTransition(prevMonth);
   }, [prevMonth]);
 
   const handleNext = useCallback(() => {
     if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate(50);
-    nextMonth();
+    withViewTransition(nextMonth);
   }, [nextMonth]);
 
   const now = new Date();
@@ -58,6 +67,7 @@ export function MonthSwitcher() {
           style={{
             color: 'var(--text-primary)',
             animation: dir ? `month-slide-${dir} 0.3s cubic-bezier(0.22, 1, 0.36, 1) both` : undefined,
+            viewTransitionName: 'month-label',
           }}
         >
           {label}

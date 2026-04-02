@@ -750,6 +750,16 @@ input[type="password"]::-ms-clear {
   100% { opacity: 1; transform: translateX(0) scale(1); }
 }
 
+/* View Transition API — crossfade for month switches */
+::view-transition-old(month-content) {
+  animation: 180ms ease-out both vt-fade-out;
+}
+::view-transition-new(month-content) {
+  animation: 180ms ease-in 60ms both vt-fade-in;
+}
+@keyframes vt-fade-out { to { opacity: 0; transform: scale(0.98); } }
+@keyframes vt-fade-in  { from { opacity: 0; transform: scale(0.98); } }
+
 /* Swipe-to-delete hint — one-time nudge on first expense */
 @keyframes swipe-hint {
   0%   { transform: translateX(0); }

@@ -106,8 +106,12 @@ export function DailyTrendChart({ dailyTotals, stackedDailyTotals, activeCategor
   // Table data - filter days with data
   const tableDays = dailyTotals.filter((d) => d.total > 0);
 
+  const grandTotal = dailyTotals.reduce((s, d) => s + d.total, 0);
+  const peakDay = tableDays.length > 0 ? tableDays.reduce((a, b) => (b.total > a.total ? b : a)) : null;
+  const chartLabel = `Daily spending trend: ${tableDays.length} days with spending totalling ${formatCurrency(grandTotal)}${peakDay ? `. Peak: Day ${peakDay.day} at ${formatCurrency(peakDay.total)}` : ""}.`;
+
   return (
-    <div role="img" aria-label="Daily spending trend chart" className="flex h-full flex-col">
+    <div role="img" aria-label={chartLabel} className="flex h-full flex-col">
       <div className="mb-2 flex justify-end gap-1">
         {hasStackedData && (
           <button
@@ -128,11 +132,12 @@ export function DailyTrendChart({ dailyTotals, stackedDailyTotals, activeCategor
             Stacked
           </button>
         )}
-        <div className="segmented-control">
+        <div className="segmented-control" role="group" aria-label="View mode">
           <button
             data-active={!showTable}
             onClick={() => setShowTable(false)}
             className="flex items-center gap-1"
+            aria-pressed={!showTable}
           >
             <BarChart3 size={13} />
             Chart
@@ -141,6 +146,7 @@ export function DailyTrendChart({ dailyTotals, stackedDailyTotals, activeCategor
             data-active={showTable}
             onClick={() => setShowTable(true)}
             className="flex items-center gap-1"
+            aria-pressed={showTable}
           >
             <Table2 size={13} />
             Table
@@ -166,6 +172,9 @@ export function DailyTrendChart({ dailyTotals, stackedDailyTotals, activeCategor
                   onMouseEnter={e => { e.currentTarget.style.background = 'var(--surface-secondary)'; }}
                   onMouseLeave={e => { e.currentTarget.style.background = ''; }}
                   onClick={() => onBarClick?.(d.day)}
+                  tabIndex={onBarClick ? 0 : undefined}
+                  onKeyDown={(e) => { if ((e.key === "Enter" || e.key === " ") && onBarClick) { e.preventDefault(); onBarClick(d.day); } }}
+                  role={onBarClick ? "button" : undefined}
                 >
                   <td className="py-1.5" style={{ color: 'var(--text-primary)' }}>{d.day}</td>
                   <td className="py-1.5 text-right font-medium" style={{ color: 'var(--text-primary)' }}>
@@ -178,6 +187,10 @@ export function DailyTrendChart({ dailyTotals, stackedDailyTotals, activeCategor
         </div>
       ) : stacked && stackedDailyTotals && catKeys.length > 0 ? (
         <div className="flex-1 min-h-[220px] w-full">
+          <p className="sr-only">
+            Stacked bar chart showing daily spending by category. {tableDays.length} days with spending.
+            Switch to Table view for full details.
+          </p>
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
               data={stackedDailyTotals}
@@ -225,6 +238,10 @@ export function DailyTrendChart({ dailyTotals, stackedDailyTotals, activeCategor
         </div>
       ) : (
         <div className="flex-1 min-h-[180px] w-full">
+          <p className="sr-only">
+            Bar chart showing daily spending. {tableDays.length} days with spending totalling {formatCurrency(grandTotal)}.
+            Switch to Table view for full details.
+          </p>
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
               data={dailyTotals}

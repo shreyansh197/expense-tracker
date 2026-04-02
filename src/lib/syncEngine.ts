@@ -30,6 +30,25 @@ function _notifySyncPull() {
   _syncListeners.forEach((fn) => fn());
 }
 
+// ── Observable sync status for UI ──
+
+type SyncPhase = "idle" | "syncing" | "error";
+let _syncPhase: SyncPhase = "idle";
+const _syncPhaseListeners = new Set<(phase: SyncPhase) => void>();
+
+function _setSyncPhase(phase: SyncPhase) {
+  if (_syncPhase === phase) return;
+  _syncPhase = phase;
+  _syncPhaseListeners.forEach((fn) => fn(phase));
+}
+
+export function getSyncPhase(): SyncPhase { return _syncPhase; }
+
+export function onSyncPhaseChange(fn: (phase: SyncPhase) => void): () => void {
+  _syncPhaseListeners.add(fn);
+  return () => { _syncPhaseListeners.delete(fn); };
+}
+
 // ── Idempotency key generation ──
 
 let _counter = 0;
@@ -359,11 +378,16 @@ export function trySyncPush(workspaceId?: string) {
   if (!navigator.onLine) { syncWarn("push", "Offline, skipping push"); return; }
   _lastMutationAt = Date.now();
   _schedulePoll(); // Switch to fast polling
+  _setSyncPhase("syncing");
   pushMutations(workspaceId).then(async () => {
     await pullChanges(workspaceId);
     const wid = workspaceId ?? getActiveWorkspaceId();
     if (wid) _broadcastSyncEvent(wid);
-  }).catch((err) => { syncErr("push", "trySyncPush error:", err); });
+    _setSyncPhase("idle");
+  }).catch((err) => {
+    syncErr("push", "trySyncPush error:", err);
+    _setSyncPhase("error");
+  });
 }
 
 // ── Pending mutation count ──
@@ -460,6 +484,7 @@ async function _doSync() {
     return;
   }
   try {
+    _setSyncPhase("syncing");
     if (!_migrated) {
       syncLog("migrate", "Running one-time migration…");
       await _migrateStuckData();
@@ -468,8 +493,10 @@ async function _doSync() {
     }
     await pushMutations(wid);
     await pullChanges(wid);
+    _setSyncPhase("idle");
   } catch (err) {
     syncErr("doSync", "Exception:", err);
+    _setSyncPhase("error");
   }
 }
 
@@ -631,4 +658,5 @@ export function stopSyncEngine() {
   _currentWid = null;
   _migrated = false;
   _pushInFlight = false;
+  _setSyncPhase("idle");
 }

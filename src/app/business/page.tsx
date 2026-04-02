@@ -11,6 +11,7 @@ import { useAllPayments } from "@/hooks/useAllPayments";
 import { useBusinessCalculations } from "@/hooks/useBusinessCalculations";
 import { useSettings } from "@/hooks/useSettings";
 import { useUIStore } from "@/stores/uiStore";
+import { usePageTitle } from "@/hooks/usePageTitle";
 import { LedgerCard } from "@/components/business/LedgerCard";
 import { LedgerForm } from "@/components/business/LedgerForm";
 import { BusinessKpiCards } from "@/components/business/BusinessKpiCards";
@@ -83,7 +84,8 @@ function LedgerCardWithPayments({ ledger }: { ledger: Ledger }) {
 }
 
 export default function BusinessPage() {
-  const { ledgers, loading, syncStatus, addLedger } = useLedgers();
+  usePageTitle("Business");
+  const { ledgers, loading, addLedger } = useLedgers();
   const { settings } = useSettings();
   const { payments: allPayments } = useAllPayments();
   const stats = useBusinessCalculations(ledgers, allPayments);
@@ -138,7 +140,7 @@ export default function BusinessPage() {
             <p className="text-meta mt-0.5">{ledgers.length} ledger{ledgers.length !== 1 ? "s" : ""}</p>
           </div>
           <div className="flex items-center gap-3">
-            <SyncIndicator syncStatus={syncStatus} />
+            <SyncIndicator />
             {ledgers.length > 0 && (
               <BusinessExport ledgers={ledgers} allPayments={allPayments} receivedByLedger={stats.receivedByLedger} />
             )}

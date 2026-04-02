@@ -4,19 +4,19 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { m } from "framer-motion";
-import { LayoutDashboard, List, Settings, PlusCircle, Briefcase, User } from "lucide-react";
+import { LayoutDashboard, List, Settings, PlusCircle, Briefcase, User, BarChart3 } from "lucide-react";
 import { QuickHelpButton } from "@/components/ui/QuickHelpButton";
 import { cn } from "@/lib/utils";
 import { useUIStore } from "@/stores/uiStore";
 import { useSettings } from "@/hooks/useSettings";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useCurrency } from "@/hooks/useCurrency";
-import { useExpenses } from "@/hooks/useExpenses";
-import { useCalculations } from "@/hooks/useCalculations";
+import { useCalculationsContext } from "@/contexts/CalculationsContext";
 
 const personalNav = [
   { href: "/", icon: LayoutDashboard, label: "Dashboard" },
   { href: "/expenses", icon: List, label: "Expenses" },
+  { href: "/analytics", icon: BarChart3, label: "Analytics" },
   { href: "/settings", icon: Settings, label: "Settings" },
 ];
 
@@ -24,29 +24,17 @@ const businessNav = [
   { href: "/", icon: LayoutDashboard, label: "Dashboard" },
   { href: "/business", icon: Briefcase, label: "Business" },
   { href: "/expenses", icon: List, label: "Expenses" },
+  { href: "/analytics", icon: BarChart3, label: "Analytics" },
   { href: "/settings", icon: Settings, label: "Settings" },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
   const openAddForm = useUIStore((s) => s.openAddForm);
-  const { currentMonth, currentYear } = useUIStore();
   const { settings } = useSettings();
   const { user } = useAuth();
   const { formatCurrency } = useCurrency();
-  const { expenses } = useExpenses(currentMonth, currentYear);
-  const { monthlyTotal, remaining, budgetUsedPercent } = useCalculations(
-    expenses,
-    settings.categories,
-    settings.salary,
-    currentMonth,
-    currentYear,
-    settings.rolloverEnabled,
-    settings.rolloverHistory,
-    settings.currency,
-    settings.multiCurrencyEnabled,
-    settings.monthlyBudgets,
-  );
+  const { monthlyTotal, remaining, budgetUsedPercent } = useCalculationsContext();
 
   const navItems = settings.businessMode ? businessNav : personalNav;
   const isBusinessRoute = pathname.startsWith("/business");

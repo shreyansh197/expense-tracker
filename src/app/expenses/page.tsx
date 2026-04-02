@@ -10,14 +10,14 @@ import { ExpenseList } from "@/components/expenses/ExpenseList";
 import { CategoryChips } from "@/components/expenses/CategoryChips";
 import { FilterPanel } from "@/components/expenses/FilterPanel";
 import { useExpenses } from "@/hooks/useExpenses";
-import { useSettings } from "@/hooks/useSettings";
-import { useCalculations } from "@/hooks/useCalculations";
 import { useUIStore } from "@/stores/uiStore";
 import { Search, PlusCircle } from "lucide-react";
 import { useCurrency } from "@/hooks/useCurrency";
 import { debounce } from "@/lib/debounce";
 import { useMonthUrlSync } from "@/hooks/useMonthUrlSync";
 import { useSearchParams } from "next/navigation";
+import { usePageTitle } from "@/hooks/usePageTitle";
+import { useCalculationsContext } from "@/contexts/CalculationsContext";
 
 type SortOption = "day-desc" | "day-asc" | "amount-desc" | "amount-asc";
 
@@ -30,6 +30,7 @@ export default function ExpensesPage() {
 }
 
 function ExpensesContent() {
+  usePageTitle("Expenses");
   const { formatCurrency } = useCurrency();
   useMonthUrlSync();
   const searchParams = useSearchParams();
@@ -42,19 +43,8 @@ function ExpensesContent() {
     setActiveCategories,
     openAddForm,
   } = useUIStore();
-  const { expenses, loading, syncStatus, deleteExpense, deleteExpenses } = useExpenses(currentMonth, currentYear);
-  const { settings } = useSettings();
-  const { monthlyTotal } = useCalculations(
-    expenses,
-    settings.categories,
-    settings.salary,
-    currentMonth,
-    currentYear,
-    undefined,
-    undefined,
-    settings.currency,
-    settings.multiCurrencyEnabled,
-  );
+  const { expenses, loading, deleteExpense, deleteExpenses } = useExpenses(currentMonth, currentYear);
+  const { monthlyTotal } = useCalculationsContext();
 
   const [amountMin, setAmountMin] = useState("");
   const [amountMax, setAmountMax] = useState("");
@@ -108,7 +98,7 @@ function ExpensesContent() {
           <div className="flex items-center justify-between">
             <MonthSwitcher />
             <div className="flex items-center gap-3">
-              <SyncIndicator syncStatus={syncStatus} />
+              <SyncIndicator />
               <button
                 onClick={openAddForm}
                 className="hidden items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all active:scale-[0.97] lg:flex"

@@ -2,18 +2,12 @@
 
 import { Wifi, WifiOff, RefreshCw, AlertCircle } from "lucide-react";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
-import { useDexieQuery } from "@/hooks/useDexieQuery";
-import { db } from "@/lib/db";
-import type { SyncStatus } from "@/types";
+import { useSyncStatus } from "@/hooks/useSyncStatus";
 import { cn } from "@/lib/utils";
 
-interface SyncIndicatorProps {
-  syncStatus: SyncStatus;
-}
-
-export function SyncIndicator({ syncStatus }: SyncIndicatorProps) {
+export function SyncIndicator() {
   const isOnline = useOnlineStatus();
-  const pendingCount = useDexieQuery(() => db.mutations.count(), [], 0);
+  const { syncStatus, pendingCount } = useSyncStatus();
 
   const effective = isOnline ? syncStatus : "offline";
 

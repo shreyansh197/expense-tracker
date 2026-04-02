@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import dynamic from "next/dynamic";
 import { AppShell } from "@/components/layout/AppShell";
 import { useExpenses } from "@/hooks/useExpenses";
+import { usePageTitle } from "@/hooks/usePageTitle";
 import { useSettings } from "@/hooks/useSettings";
 import { useCalculations } from "@/hooks/useCalculations";
 import { buildCategoryMap } from "@/lib/categories";
@@ -37,6 +38,7 @@ export default function CategoryPage({ params }: { params: Promise<{ slug: strin
   const meta = catMap[slug];
   const categoryLabel = meta?.label || slug;
   const categoryColor = meta?.color || "var(--category-fallback)";
+  usePageTitle(categoryLabel);
 
   const categoryExpenses = expenses
     .filter((e) => e.category === slug)
