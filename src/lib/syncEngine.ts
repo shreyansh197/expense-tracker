@@ -114,13 +114,18 @@ export async function pullChanges(workspaceId?: string): Promise<boolean> {
 
   const promise = (async () => {
     try {
-      // Read the last sync cursor so we only fetch changes since then
+      // On the very first pull after page load, ALWAYS do a full sync
+      // (ignore stored cursor). This is simpler and more reliable than
+      // trying to clear the cursor table before any pull can race.
       const syncMeta = await db.syncMeta.get(wid);
+      const useFullSync = !_firstPullDone;
+      if (useFullSync) _firstPullDone = true;
+
       const params = new URLSearchParams({ workspaceId: wid });
-      if (syncMeta?.cursor) {
+      if (!useFullSync && syncMeta?.cursor) {
         params.set("since", syncMeta.cursor);
       }
-      syncLog("pull", `Fetching changes for workspace=${wid.slice(0,8)}… since=${syncMeta?.cursor ?? "NONE (full sync)"}`);
+      syncLog("pull", `Fetching changes for workspace=${wid.slice(0,8)}… since=${useFullSync ? "NONE (forced full sync)" : (syncMeta?.cursor ?? "NONE (no cursor)")}`);
       const res = await authFetch(`/api/sync/changes?${params}`);
       if (!res.ok) {
         syncErr("pull", `HTTP ${res.status} from /api/sync/changes`);
@@ -600,10 +605,11 @@ async function _migrateStuckData() {
   }
 }
 
-// Promise gate: no sync operations proceed until cursor clear is done.
-// This prevents the race where event listeners / polls / realtime trigger
-// _doSync() or pullChanges() before db.syncMeta.clear() resolves.
+// Promise gate: no sync operations proceed until init is done.
 let _initReady: Promise<void> = Promise.resolve();
+
+// Flag: first pull for each workspace always does a full sync (ignores cursor)
+let _firstPullDone = false;
 
 export function startSyncEngine() {
   if (typeof window === "undefined" || _started) return;
@@ -611,19 +617,13 @@ export function startSyncEngine() {
 
   syncLog("init", "Starting sync engine…");
 
-  // Create a gate promise — all sync paths will await this before proceeding
+  // Init gate — migrate legacy data before any pull can run.
+  // Cursor clear is NOT needed: pullChanges ignores stored cursor on first pull.
   _initReady = (async () => {
     try {
-      // Migrate legacy localStorage data to IDB (await to prevent it from
-      // writing a cursor AFTER the clear)
       await migrateFromLocalStorage();
-
-      // Force full re-sync on startup: clear saved cursors so the first pull
-      // fetches ALL data from the server.
-      await db.syncMeta.clear();
-      syncLog("init", "Cleared sync cursors for full re-sync");
     } catch {
-      syncLog("init", "Cursor clear failed (non-fatal)");
+      // Non-fatal
     }
   })();
 
@@ -671,6 +671,7 @@ export function stopSyncEngine() {
   _currentWid = null;
   _migrated = false;
   _pushInFlight = false;
+  _firstPullDone = false;
   _initReady = Promise.resolve();
   _setSyncPhase("idle");
 }

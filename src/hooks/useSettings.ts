@@ -51,6 +51,9 @@ function _notify() {
 }
 
 function _setShared(next: UserSettings) {
+  if (next.salary !== _settings.salary) {
+    console.log(`[settings] salary changed: ${_settings.salary} → ${next.salary} (updatedAt=${next.updatedAt})`);
+  }
   _settings = next;
   _notify();
 }
@@ -183,20 +186,24 @@ async function loadSettingsFromIDB(): Promise<UserSettings | null> {
 let _directFetchDone = false;
 async function _fetchSettingsFromApi(): Promise<UserSettings | null> {
   if (_directFetchDone) return null;
-  _directFetchDone = true;
 
   const wid = getActiveWorkspaceId();
   if (!wid || !isAuthenticated()) return null;
 
+  // Only mark as done once we have a valid workspace and will attempt the fetch
+  _directFetchDone = true;
+
   try {
+    console.log(`[settings:apiFetch] Fetching settings directly from API for workspace=${wid.slice(0,8)}…`);
     // Fetch ALL changes (since=epoch) — the server returns settings if they exist
     const res = await authFetch(`/api/sync/changes?workspaceId=${encodeURIComponent(wid)}&since=1970-01-01T00:00:00.000Z`);
-    if (!res.ok) return null;
+    if (!res.ok) { console.log(`[settings:apiFetch] HTTP ${res.status}`); return null; }
 
     const data = await res.json();
-    if (!data.changes?.settings) return null;
+    if (!data.changes?.settings) { console.log(`[settings:apiFetch] No settings in response`); return null; }
 
     const s = data.changes.settings;
+    console.log(`[settings:apiFetch] Got settings: salary=${s.salary}, updatedAt=${s.updatedAt}`);
     const settings: UserSettings = {
       salary: Number(s.salary) || 0,
       currency: s.currency || "INR",
@@ -262,6 +269,7 @@ if (typeof window !== "undefined") {
     const userId = authState?.user?.id ?? null;
     _currentUserId = userId;
     const local = loadSettings(userId);
+    console.log(`[settings:init] userId=${userId?.slice(0,8) ?? 'null'} local.salary=${local.salary} local.updatedAt=${local.updatedAt}`);
     _setShared(local);
   } catch {
     const local = loadSettings(null);
@@ -282,7 +290,10 @@ function _syncFromIDB() {
     // the sync cursor wasn't cleared properly and the incremental pull returned 0 settings.
     const local = loadSettings(userIdAtCallTime);
     const bestKnownSalary = Math.max(_settings.salary, local.salary);
+    console.log(`[settings:syncFromIDB] remote.salary=${remote?.salary ?? 'null'}, local.salary=${local.salary}, inMemory.salary=${_settings.salary}, best=${bestKnownSalary}`);
+
     if ((!remote || remote.salary === 0) && bestKnownSalary === 0) {
+      console.log(`[settings:syncFromIDB] All sources have salary=0, trying failsafe API fetch…`);
       const apiSettings = await _fetchSettingsFromApi();
       if (apiSettings && apiSettings.salary > 0 && _currentUserId === userIdAtCallTime) {
         saveLocal(apiSettings);
@@ -321,7 +332,10 @@ export function switchSettingsUser(userId: string) {
   _currentUserId = userId;
   if (changed) {
     const local = loadSettings(userId);
+    console.log(`[settings:switchUser] userId=${userId.slice(0,8)}… changed=${changed} local.salary=${local.salary}`);
     _setShared(local);
+  } else {
+    console.log(`[settings:switchUser] userId=${userId.slice(0,8)}… changed=false, still syncing from IDB`);
   }
   // Always sync from IDB — even if userId was pre-set by module init,
   // IDB may have newer data from a previous sync session.
@@ -352,6 +366,7 @@ export function useSettings() {
         // Gather all known sources of salary truth
         const local = loadSettings(_currentUserId);
         const bestKnownSalary = Math.max(_settings.salary, local.salary);
+        console.log(`[settings:onSyncPull] remote.salary=${remote?.salary ?? 'null'}, local.salary=${local.salary}, inMemory.salary=${_settings.salary}, best=${bestKnownSalary}`);
 
         // Failsafe: if all sources have salary=0, fetch directly from API
         if ((!remote || remote.salary === 0) && bestKnownSalary === 0) {
