@@ -177,8 +177,19 @@ async function loadSettingsFromIDB(): Promise<UserSettings | null> {
 
 // ── Module-level initialization (runs once when module loads) ──
 if (typeof window !== "undefined") {
-  const local = loadSettings(null);
-  _setShared(local);
+  // Read auth state from localStorage directly (no circular dependency)
+  // to ensure settings load with the correct user-scoped key from the start.
+  try {
+    const authRaw = localStorage.getItem("expenstream-auth");
+    const authState = authRaw ? JSON.parse(authRaw) : null;
+    const userId = authState?.user?.id ?? null;
+    _currentUserId = userId;
+    const local = loadSettings(userId);
+    _setShared(local);
+  } catch {
+    const local = loadSettings(null);
+    _setShared(local);
+  }
 }
 
 /** Sync settings from IDB (populated by sync engine). */
@@ -191,17 +202,28 @@ function _syncFromIDB() {
 
     if (!remote) return;
 
-    const localTs = _settings.updatedAt || 0;
+    // Always check localStorage as ground truth — it is written synchronously
+    // by saveLocal() and never affected by race conditions with sync pulls.
+    const local = loadSettings(userIdAtCallTime);
+    const localTs = local.updatedAt || 0;
     const remoteTs = remote.updatedAt || 0;
-    if (remoteTs >= localTs) {
-      if (remote.salary === 0 && _settings.salary > 0) {
-        if (localTs > 0) pushToApi(_settings);
+
+    if (localTs > 0 && localTs >= remoteTs) {
+      // Local is newer or same age — push local to server, keep local state
+      if (_settings.updatedAt < localTs) _setShared(local);
+      pushToApi(local);
+      return;
+    }
+
+    if (remoteTs > localTs) {
+      // Remote is newer — but protect against overwriting real budget with 0
+      if (remote.salary === 0 && local.salary > 0) {
+        pushToApi(local);
+        if (_settings.updatedAt < localTs) _setShared(local);
         return;
       }
       localStorage.setItem(storageKeyForUser(userIdAtCallTime), JSON.stringify(remote));
       _setShared(remote);
-    } else {
-      if (localTs > 0) pushToApi(_settings);
     }
   }).catch(() => {});
 }
@@ -235,15 +257,30 @@ export function useSettings() {
   useEffect(() => {
     const unsubscribe = onSyncPull(() => {
       loadSettingsFromIDB().then((remote) => {
-        if (remote && remote.updatedAt > _settings.updatedAt) {
-          // Don't overwrite a real salary with 0 from remote
-          if (remote.salary === 0 && _settings.salary > 0 && _settings.updatedAt > 0) {
-            pushToApi(_settings);
-            return;
-          }
-          saveLocal(remote);
-          _setShared(remote);
+        if (!remote) return;
+
+        // Always compare against localStorage (ground truth), not _settings
+        // which may still be at module-init defaults during startup.
+        const local = loadSettings(_currentUserId);
+        const localTs = local.updatedAt || 0;
+        const remoteTs = remote.updatedAt || 0;
+
+        // If local has real data that is newer or same age, keep it
+        if (localTs > 0 && localTs >= remoteTs) {
+          // Ensure in-memory state matches localStorage
+          if (_settings.updatedAt < localTs) _setShared(local);
+          return;
         }
+
+        // Remote is newer — but protect real budget from being overwritten with 0
+        if (remote.salary === 0 && local.salary > 0) {
+          pushToApi(local);
+          if (_settings.updatedAt < localTs) _setShared(local);
+          return;
+        }
+
+        saveLocal(remote);
+        _setShared(remote);
       });
     });
 
