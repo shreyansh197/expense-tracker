@@ -109,18 +109,18 @@
   --secondary: #818CF8;
   --secondary-soft: rgba(129, 140, 248, 0.12);
   --secondary-gradient: linear-gradient(135deg, #818CF8, #6366F1);
-  /* ── Accent (Coral — consistent across themes) ── */
-  --accent: #FFAB91;
-  --accent-soft: rgba(255, 138, 101, 0.14);
-  --accent-gradient: linear-gradient(135deg, #FFAB91, #FF8A65);
+  /* ── Accent (Violet for dark — better contrast than coral) ── */
+  --accent: #A78BFA;
+  --accent-soft: rgba(167, 139, 250, 0.14);
+  --accent-gradient: linear-gradient(135deg, #A78BFA, #8B5CF6);
   /* ── CTA buttons (alias → accent for consistency) ── */
   --cta: var(--accent);
-  --cta-hover: #FF8A65;
-  --cta-deep: #FF7043;
+  --cta-hover: #8B5CF6;
+  --cta-deep: #7C3AED;
   /* ── Coral track (stays warm across themes) ── */
-  --coral: #FFAB91;
-  --coral-soft: rgba(255, 138, 101, 0.12);
-  --coral-border: rgba(255, 138, 101, 0.3);
+  --coral: #A78BFA;
+  --coral-soft: rgba(167, 139, 250, 0.12);
+  --coral-border: rgba(167, 139, 250, 0.3);
   /* ── Primary derived ── */
   --primary-hover: #93C5FD;
   --primary-border: rgba(96, 165, 250, 0.3);

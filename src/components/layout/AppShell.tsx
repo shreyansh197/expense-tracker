@@ -49,21 +49,23 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
       >
         Skip to main content
       </a>
-      <CalculationsProvider>
-        <div className="flex flex-1 overflow-hidden">
-          <Sidebar />
-          <main
-            id="main-content"
-            className="flex-1 overflow-y-auto pb-20 lg:pb-0"
-            style={{ background: 'linear-gradient(180deg, var(--surface-secondary), transparent 200px)', viewTransitionName: 'month-content' }}
-            onTouchStart={onTouchStart}
-            onTouchEnd={onTouchEnd}
-          >
-            <ErrorBoundary>{children}</ErrorBoundary>
-          </main>
-        </div>
-        <BottomNav />
-      </CalculationsProvider>
+      <ErrorBoundary>
+        <CalculationsProvider>
+          <div className="flex flex-1 overflow-hidden">
+            <Sidebar />
+            <main
+              id="main-content"
+              className="flex-1 overflow-y-auto pb-20 lg:pb-0"
+              style={{ background: 'linear-gradient(180deg, var(--surface-secondary), transparent 200px)' }}
+              onTouchStart={onTouchStart}
+              onTouchEnd={onTouchEnd}
+            >
+              {children}
+            </main>
+          </div>
+          <BottomNav />
+        </CalculationsProvider>
+      </ErrorBoundary>
       <ExpenseFormModal />
       <KeyboardShortcutsHelp
         open={showShortcuts}

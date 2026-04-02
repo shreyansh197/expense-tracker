@@ -25,7 +25,25 @@ interface CalculationsContextValue {
   effectiveBudget: number;
 }
 
-const CalculationsContext = createContext<CalculationsContextValue | null>(null);
+const DEFAULTS: CalculationsContextValue = {
+  monthlyTotal: 0,
+  remaining: 0,
+  budgetUsedPercent: 0,
+  avgDaily: 0,
+  categoryTotals: [],
+  dailyTotals: [],
+  stackedDailyTotals: [],
+  topCategory: null,
+  daysInMonth: 30,
+  elapsedDays: 0,
+  daysRemaining: 30,
+  paceToStayUnder: 0,
+  forecast: { projectedTotal: 0, projectedRemaining: 0, confidence: "low", method: "linear", historicalMonths: 0 },
+  anomalies: [],
+  effectiveBudget: 0,
+};
+
+const CalculationsContext = createContext<CalculationsContextValue>(DEFAULTS);
 
 export function CalculationsProvider({ children }: { children: React.ReactNode }) {
   const { currentMonth, currentYear } = useUIStore();
@@ -53,7 +71,5 @@ export function CalculationsProvider({ children }: { children: React.ReactNode }
 }
 
 export function useCalculationsContext() {
-  const ctx = useContext(CalculationsContext);
-  if (!ctx) throw new Error("useCalculationsContext must be used within CalculationsProvider");
-  return ctx;
+  return useContext(CalculationsContext);
 }
