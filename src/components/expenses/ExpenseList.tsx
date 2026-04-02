@@ -159,6 +159,20 @@ export function ExpenseList({
   const [pendingDeletes, setPendingDeletes] = useState<Set<string>>(new Set());
   const pendingTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
+  // One-time swipe-to-delete hint on first expense
+  const [swipeHintShown, setSwipeHintShown] = useState(() => {
+    if (typeof window === "undefined") return true;
+    return localStorage.getItem("expenstream-swipe-hint") === "1";
+  });
+  useEffect(() => {
+    if (swipeHintShown) return;
+    const timer = setTimeout(() => {
+      localStorage.setItem("expenstream-swipe-hint", "1");
+      setSwipeHintShown(true);
+    }, 2500); // animation plays for ~1.5s, then mark as shown
+    return () => clearTimeout(timer);
+  }, [swipeHintShown]);
+
   const handleDelete = async (id: string) => {
     // Optimistically hide the expense and show undo toast
     setPendingDeletes((prev) => new Set(prev).add(id));
@@ -325,7 +339,7 @@ export function ExpenseList({
         </div>
       )}
 
-      {paginatedGroups.map((group) => (
+      {paginatedGroups.map((group, gIdx) => (
         <div key={group.day}>
           {/* Day header */}
           <div className="sticky top-0 z-[5] mb-2 flex items-center justify-between rounded-lg px-1 py-1.5 backdrop-blur-sm" style={{ background: 'color-mix(in srgb, var(--background) 90%, transparent)' }}>
@@ -367,6 +381,7 @@ export function ExpenseList({
                 baseCurrency={baseCurrency}
                 multiCurrency={multiCurrency}
                 rates={rates}
+                swipeHint={!swipeHintShown && gIdx === 0 && idx === 0}
               />
             ))}
             </AnimatePresence>
@@ -403,6 +418,7 @@ function SwipeableExpenseItem({
   baseCurrency,
   multiCurrency,
   rates,
+  swipeHint = false,
 }: {
   expense: Expense;
   idx: number;
@@ -414,6 +430,7 @@ function SwipeableExpenseItem({
   baseCurrency: string;
   multiCurrency: boolean;
   rates: Record<string, number> | null;
+  swipeHint?: boolean;
 }) {
   const deleteCallback = useCallback(() => handleDelete(expense.id), [handleDelete, expense.id]);
   const { offsetX, deleting, onTouchStart, onTouchMove, onTouchEnd, snapBack, confirmDelete } = useSwipeToDelete(deleteCallback);
@@ -433,7 +450,7 @@ function SwipeableExpenseItem({
       className="relative overflow-hidden rounded-2xl"
     >
       {/* Red delete action — full-width behind the row, revealed by card translate */}
-      {absOffset > 0 && (
+      {(absOffset > 0 || swipeHint) && (
         <div
           className="absolute inset-0 flex items-center justify-end overflow-hidden rounded-2xl"
           style={{
@@ -481,6 +498,7 @@ function SwipeableExpenseItem({
           transform: `translateX(${offsetX > -9000 ? offsetX : -window.innerWidth}px)`,
           transition: isDragging ? 'none' : 'transform 0.3s cubic-bezier(0.22, 1, 0.36, 1)',
           willChange: isRevealing ? 'transform' : undefined,
+          animation: swipeHint && absOffset === 0 ? 'swipe-hint 1.5s cubic-bezier(0.22, 1, 0.36, 1) 0.8s' : undefined,
         }}
       >
         <button

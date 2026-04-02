@@ -116,7 +116,7 @@ export function Sidebar() {
               {Math.round(budgetUsedPercent)}%
             </span>
           </div>
-          <div className="h-1.5 w-full rounded-full overflow-hidden" style={{ background: 'var(--border)' }}>
+          <div className="h-1.5 w-full rounded-full overflow-hidden" style={{ background: 'var(--border)' }} role="progressbar" aria-valuenow={Math.min(Math.round(budgetUsedPercent), 100)} aria-valuemin={0} aria-valuemax={100} aria-label="Budget used">
             <m.div
               className={cn(
                 "h-full rounded-full",

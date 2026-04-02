@@ -8,7 +8,7 @@ type Phase = "visible" | "fading" | "hidden";
 const DISPLAY_DURATION = 800;
 const FADE_DURATION = 400;
 
-const BG = "linear-gradient(135deg, #0a0f1e 0%, #0d1340 45%, #130a2e 100%)";
+const BG = "linear-gradient(135deg, var(--background) 0%, var(--surface-secondary) 100%)";
 
 export function SplashScreen() {
   const [phase, setPhase] = useState<Phase>("hidden");
@@ -51,7 +51,7 @@ export function SplashScreen() {
         height: 80,
         borderRadius: "50%",
         overflow: "hidden",
-        boxShadow: "0 0 40px rgba(99,102,241,0.4), 0 0 80px rgba(99,102,241,0.15)",
+        boxShadow: "0 0 40px var(--accent-soft), 0 0 80px var(--primary-soft)",
         animation: "et-icon-scale 0.4s cubic-bezier(0.22, 1, 0.36, 1) both",
       }}>
         <Image src="/icons/icon-192.png" alt="ExpenStream" width={80} height={80} style={{ display: "block", width: "100%", height: "100%" }} />
@@ -62,7 +62,7 @@ export function SplashScreen() {
         fontSize: "1.75rem",
         fontWeight: 700,
         letterSpacing: "-0.03em",
-        color: "#ffffff",
+        color: "var(--text-primary)",
         opacity: 0,
         animation: "et-slide-up 0.4s cubic-bezier(0.22, 1, 0.36, 1) both 0.1s",
       }}>

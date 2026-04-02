@@ -78,7 +78,7 @@ export function SavingsGoalsWidget() {
       </div>
 
       {/* Overall progress bar */}
-      <div className="mb-4 h-2 w-full overflow-hidden rounded-full" style={{ background: 'var(--surface-secondary)' }}>
+      <div className="mb-4 h-2 w-full overflow-hidden rounded-full" style={{ background: 'var(--surface-secondary)' }} role="progressbar" aria-valuenow={Math.min(overallPct, 100)} aria-valuemin={0} aria-valuemax={100} aria-label="Overall savings progress">
         <div
           className="h-full rounded-full bg-ok transition-all duration-500"
           style={{ width: `${Math.min(overallPct, 100)}%` }}
@@ -140,7 +140,7 @@ export function SavingsGoalsWidget() {
               </div>
 
               {/* Progress bar */}
-              <div className="h-2 w-full overflow-hidden rounded-full" style={{ background: 'var(--surface-secondary)' }}>
+              <div className="h-2 w-full overflow-hidden rounded-full" style={{ background: 'var(--surface-secondary)' }} role="progressbar" aria-valuenow={Math.min(pct, 100)} aria-valuemin={0} aria-valuemax={100} aria-label={`${g.name} progress`}>
                 <div
                   className="h-full rounded-full transition-all duration-500"
                   style={{

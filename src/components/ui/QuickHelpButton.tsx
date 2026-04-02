@@ -68,7 +68,7 @@ export function QuickHelpButton({ variant = "icon" }: { variant?: "icon" | "side
             <h3 className="text-xs font-bold uppercase tracking-wider" style={{ color: "var(--text-primary)" }}>
               Quick Tips
             </h3>
-            <button onClick={() => setOpen(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
+            <button onClick={() => setOpen(false)} style={{ color: 'var(--text-muted)' }} className="transition-colors hover:opacity-80">
               <X size={14} />
             </button>
           </div>
@@ -76,7 +76,7 @@ export function QuickHelpButton({ variant = "icon" }: { variant?: "icon" | "side
           <ul className="space-y-1.5">
             {TIPS.map((tip, i) => (
               <li key={i} className="flex items-center gap-2 text-xs leading-relaxed" style={{ color: "var(--text-secondary)" }}>
-                <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-indigo-500" />
+                <span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: 'var(--secondary)' }} />
                 {tip}
               </li>
             ))}

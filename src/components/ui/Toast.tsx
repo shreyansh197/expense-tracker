@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, createContext, useContext } from "react";
+import { useState, useCallback, createContext, useContext } from "react";
 import { m, AnimatePresence } from "framer-motion";
 import { CheckCircle, XCircle, AlertCircle, X } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -67,15 +67,15 @@ function ToastItem({ toast, onClose }: { toast: Toast; onClose: () => void }) {
 
   const colors =
     toast.type === "success"
-      ? "border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300"
+      ? "border-ok/30 bg-ok-soft text-ok-text"
       : toast.type === "error"
-      ? "border-red-200 bg-red-50 text-red-800 dark:border-red-800 dark:bg-red-900/40 dark:text-red-300"
-      : "border-blue-200 bg-blue-50 text-blue-800 dark:border-blue-800 dark:bg-blue-900/40 dark:text-blue-300";
+      ? "border-err/30 bg-err-soft text-err"
+      : "border-info/30 bg-info-soft text-info";
 
   const progressColor =
-    toast.type === "success" ? "bg-emerald-400 dark:bg-emerald-500"
-    : toast.type === "error" ? "bg-red-400 dark:bg-red-500"
-    : "bg-blue-400 dark:bg-blue-500";
+    toast.type === "success" ? "bg-ok"
+    : toast.type === "error" ? "bg-err"
+    : "bg-info";
 
   return (
     <m.div

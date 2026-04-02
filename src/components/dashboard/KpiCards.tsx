@@ -8,8 +8,10 @@ import {
   TrendingUp,
   Clock,
   ChevronDown,
+  Settings,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 import { useCurrency } from "@/hooks/useCurrency";
 import { BUDGET_WARNING_THRESHOLD } from "@/lib/constants";
 import { InfoTooltip } from "@/components/ui/InfoTooltip";
@@ -94,6 +96,23 @@ export function KpiCards({
       animate="visible"
       variants={{ visible: { transition: { staggerChildren: 0.08 } } }}
     >
+      {/* ── Budget-not-set banner ── */}
+      {salary <= 0 && (
+        <m.div
+          className="flex items-center justify-between rounded-xl border px-4 py-3"
+          style={{ background: 'var(--warning-soft)', borderColor: 'var(--warning)', color: 'var(--text-primary)' }}
+          variants={{ hidden: { opacity: 0, y: 8 }, visible: { opacity: 1, y: 0, transition: { duration: 0.35, ease: [0.22, 1, 0.36, 1] } } }}
+        >
+          <div className="flex items-center gap-2 text-sm">
+            <Settings size={14} style={{ color: 'var(--warning)' }} />
+            <span>Set a monthly budget to unlock forecasts and alerts</span>
+          </div>
+          <Link href="/settings#budget" className="shrink-0 rounded-lg px-3 py-1 text-xs font-semibold transition-colors" style={{ background: 'var(--warning)', color: '#fff' }}>
+            Set Budget
+          </Link>
+        </m.div>
+      )}
+
       {/* ── PRIMARY: Budget Status Hero ── */}
       <m.div
         className={cn("relative overflow-hidden rounded-2xl border p-4 sm:p-5", sc.bg)}
@@ -118,7 +137,7 @@ export function KpiCards({
         <p className="mt-2 text-[13px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
           {getStatusCopy(isOverspent, isWarning, daysRemaining, paceToStayUnder, forecastOverBudget, formatCurrency)}
         </p>
-        <div className="mt-3 h-2 w-full overflow-hidden rounded-full" style={{ background: 'var(--surface-secondary)' }}>
+        <div className="mt-3 h-2 w-full overflow-hidden rounded-full" style={{ background: 'var(--surface-secondary)' }} role="progressbar" aria-valuenow={Math.min(budgetUsedPercent, 100)} aria-valuemin={0} aria-valuemax={100} aria-label="Budget used">
           <m.div
             className={cn("h-full rounded-full", isOverspent ? "bg-red-500" : isWarning ? "bg-amber-500" : "bg-brand")}
             initial={{ width: 0 }}
@@ -139,7 +158,7 @@ export function KpiCards({
 
       {/* ── SECONDARY: Supporting Metrics (compact inline) ── */}
       <m.div
-        className="grid grid-cols-3 gap-2 sm:gap-3"
+        className="grid grid-cols-1 gap-2 sm:grid-cols-3 sm:gap-3"
         variants={{ hidden: { opacity: 0, y: 8 }, visible: { opacity: 1, y: 0, transition: { duration: 0.4, delay: 0.1, ease: [0.22, 1, 0.36, 1] } } }}
       >
         <div className="rounded-xl border p-3 sm:p-3.5" style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>

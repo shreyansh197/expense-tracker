@@ -303,12 +303,14 @@ export function ExpenseForm({
         <label className="form-label mb-2 uppercase">
           Category {!category && submitted && <span className="text-red-500 normal-case">— please select</span>}
         </label>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Select category">
           {allCategories.map((cat) => (
             <m.button
               key={cat.id}
               type="button"
               onClick={() => setCategory(cat.id)}
+              role="radio"
+              aria-checked={category === cat.id}
               className={cn(
                 "rounded-full px-3 py-1.5 text-xs font-medium transition-all",
                 category === cat.id

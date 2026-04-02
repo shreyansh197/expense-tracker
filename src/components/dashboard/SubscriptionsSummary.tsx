@@ -38,7 +38,7 @@ export function SubscriptionsSummary() {
       </div>
 
       {/* Stats row */}
-      <div className="mb-4 grid grid-cols-3 gap-2">
+      <div className="mb-4 grid grid-cols-1 gap-2 sm:grid-cols-3">
         <div className="rounded-xl px-3 py-2.5" style={{ background: 'var(--surface-secondary)' }}>
           <p className="text-[10px] font-medium" style={{ color: 'var(--text-tertiary)' }}>Monthly</p>
           <p className="text-sm font-bold tabular-nums" style={{ color: 'var(--text-primary)' }}>

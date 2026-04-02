@@ -31,8 +31,12 @@ export function formatCurrency(amount: number, currency = "INR"): string {
 
 export function formatCurrencyCompact(amount: number, currency = "INR"): string {
   const meta = getCurrencyMeta(currency);
-  if (amount >= 100000) {
+  // Use Lakh notation only for INR (Indian convention)
+  if (currency === "INR" && amount >= 100000) {
     return `${meta.symbol}${(amount / 100000).toFixed(1)}L`;
+  }
+  if (amount >= 1000000) {
+    return `${meta.symbol}${(amount / 1000000).toFixed(1)}M`;
   }
   if (amount >= 1000) {
     return `${meta.symbol}${(amount / 1000).toFixed(1)}K`;

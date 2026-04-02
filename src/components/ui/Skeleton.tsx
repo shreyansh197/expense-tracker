@@ -29,7 +29,7 @@ export function Skeleton({ className, style }: SkeletonProps) {
 
 export function SkeletonKpiCards() {
   return (
-    <div className="grid grid-cols-2 gap-3 lg:grid-cols-3">
+    <div className="grid grid-cols-2 gap-3 lg:grid-cols-3" role="status" aria-busy="true" aria-label="Loading budget overview">
       {Array.from({ length: 6 }).map((_, i) => (
         <div
           key={i}
@@ -47,7 +47,7 @@ export function SkeletonKpiCards() {
 export function SkeletonChart() {
   const heights = [45, 70, 35, 80, 55, 65, 40, 75];
   return (
-    <div className="card p-5">
+    <div className="card p-5" role="status" aria-busy="true" aria-label="Loading chart">
       <Skeleton className="mb-3 h-4 w-32" />
       <div className="flex items-end justify-between gap-1 h-[220px] pt-4">
         {heights.map((h, i) => (
@@ -64,7 +64,7 @@ export function SkeletonChart() {
 
 export function SkeletonExpenseList() {
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" role="status" aria-busy="true" aria-label="Loading expenses">
       {Array.from({ length: 3 }).map((_, g) => (
         <div key={g}>
           <div className="mb-2 flex items-center justify-between">
@@ -92,7 +92,7 @@ export function SkeletonExpenseList() {
 
 export function SkeletonCategoryDetail() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" role="status" aria-busy="true" aria-label="Loading category details">
       <div className="grid grid-cols-3 gap-3">
         {Array.from({ length: 3 }).map((_, i) => (
           <div
@@ -111,7 +111,7 @@ export function SkeletonCategoryDetail() {
 
 export function SkeletonBusinessKpi() {
   return (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5" role="status" aria-busy="true" aria-label="Loading business overview">
       {Array.from({ length: 5 }).map((_, i) => (
         <div key={i} className="card-sm p-3.5">
           <div className="flex items-center gap-2 mb-2">
@@ -127,7 +127,7 @@ export function SkeletonBusinessKpi() {
 
 export function SkeletonLedgerList() {
   return (
-    <div className="grid gap-3 sm:grid-cols-2">
+    <div className="grid gap-3 sm:grid-cols-2" role="status" aria-busy="true" aria-label="Loading ledgers">
       {Array.from({ length: 4 }).map((_, i) => (
         <div key={i} className="card p-4">
           <div className="flex items-center gap-3 mb-3">
@@ -150,7 +150,7 @@ export function SkeletonLedgerList() {
 
 export function SkeletonLedgerDetail() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" role="status" aria-busy="true" aria-label="Loading ledger details">
       {/* Header card */}
       <div className="card p-5">
         <div className="flex items-start gap-4">
