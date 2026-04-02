@@ -1,7 +1,7 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useState, useCallback, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useState, useCallback, useEffect, Suspense } from "react";
 import dynamic from "next/dynamic";
 import { m, AnimatePresence } from "framer-motion";
 import { AppShell } from "@/components/layout/AppShell";
@@ -250,10 +250,20 @@ function DashboardContent() {
   usePageTitle("Dashboard");
   const { formatCurrency } = useCurrency();
   const router = useRouter();
-  const { currentMonth, currentYear } = useUIStore();
+  const searchParams = useSearchParams();
+  const { currentMonth, currentYear, setMonth } = useUIStore();
   const { expenses, loading } = useExpenses(currentMonth, currentYear);
   const { settings, updateSettings } = useSettings();
   const { user } = useAuth();
+
+  // Reset to present month when navigating to dashboard without explicit URL params
+  useEffect(() => {
+    if (!searchParams.get("m") && !searchParams.get("y")) {
+      const now = new Date();
+      setMonth(now.getMonth() + 1, now.getFullYear());
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Sync month/year ↔ URL search params (?m=4&y=2026)
   useMonthUrlSync();
@@ -381,7 +391,7 @@ function DashboardContent() {
                   <m.div key="kpi-skeleton" className="section-zone section-coral dash-section" initial={{ opacity: 0.6 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
                     <SkeletonKpiCards />
                   </m.div>
-                ) : expenses.length === 0 ? null : (
+                ) : (
                   <m.div key="kpi-content" className="section-zone section-coral dash-section" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
                   <KpiCards
                   monthlyTotal={monthlyTotal}
