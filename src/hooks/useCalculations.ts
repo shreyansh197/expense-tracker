@@ -78,10 +78,10 @@ export function useCalculations(
   // Calculate effective budget with per-month override and rollover
   const effectiveBudget = useMemo(() => {
     // Per-month budget override takes priority over global salary
+    // Only use the override if it's a positive number (0 or missing = use salary)
     const monthKey = `${year}-${String(month).padStart(2, "0")}`;
-    const baseBudget = (monthlyBudgets && monthlyBudgets[monthKey] !== undefined)
-      ? monthlyBudgets[monthKey]
-      : salary;
+    const override = monthlyBudgets?.[monthKey];
+    const baseBudget = (override !== undefined && override > 0) ? override : salary;
 
     if (!rolloverEnabled || !rolloverHistory) return baseBudget;
     let pm = month - 1;

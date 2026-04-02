@@ -50,6 +50,12 @@ export function CalculationsProvider({ children }: { children: React.ReactNode }
   const { settings } = useSettings();
   const { expenses } = useExpenses(currentMonth, currentYear);
 
+  // Debug: trace exactly what CalculationsProvider feeds to useCalculations
+  if (typeof window !== 'undefined') {
+    const mk = `${currentYear}-${String(currentMonth).padStart(2, '0')}`;
+    console.log(`[CalcProvider] m=${currentMonth} y=${currentYear} expenses=${expenses.length} salary=${settings.salary} monthlyBudgets[${mk}]=${settings.monthlyBudgets?.[mk]} budgetKeys=${JSON.stringify(Object.keys(settings.monthlyBudgets ?? {}))}`);
+  }
+
   const calcs = useCalculations(
     expenses,
     settings.categories,

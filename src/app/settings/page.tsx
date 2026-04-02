@@ -153,7 +153,7 @@ export default function SettingsPage() {
     const val = parseFloat(monthBudget);
     const key = `${budgetYear}-${String(budgetMonth).padStart(2, "0")}`;
     const updated = { ...(settings.monthlyBudgets ?? {}) };
-    if (!monthBudget || isNaN(val)) {
+    if (!monthBudget || isNaN(val) || val <= 0) {
       // Clear the override — use default salary
       delete updated[key];
     } else {

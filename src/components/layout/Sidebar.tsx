@@ -34,13 +34,13 @@ export function Sidebar() {
   const { settings } = useSettings();
   const { user } = useAuth();
   const { formatCurrency } = useCurrency();
-  const { monthlyTotal, remaining, budgetUsedPercent } = useCalculationsContext();
+  const { monthlyTotal, remaining, budgetUsedPercent, effectiveBudget } = useCalculationsContext();
 
   const navItems = settings.businessMode ? businessNav : personalNav;
   const isBusinessRoute = pathname.startsWith("/business");
   const isLedgerDetail = /^\/business\/[^/]+/.test(pathname);
   const shouldHideFAB = isLedgerDetail || pathname.startsWith("/settings");
-  const hasBudget = settings.salary > 0;
+  const hasBudget = effectiveBudget > 0 || settings.salary > 0;
   const pct = Math.min(budgetUsedPercent, 100);
   const overBudget = budgetUsedPercent > 100;
 
@@ -95,7 +95,7 @@ export function Sidebar() {
         <div
           className="mx-3 mb-3 rounded-xl p-3"
           style={{ background: 'var(--surface-secondary)' }}
-          title={`${formatCurrency(monthlyTotal)} of ${formatCurrency(settings.salary)} used`}
+          title={`${formatCurrency(monthlyTotal)} of ${formatCurrency(effectiveBudget)} used`}
         >          <div className="flex items-center justify-between mb-2">
             <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: 'var(--text-tertiary)' }}>
               Budget
