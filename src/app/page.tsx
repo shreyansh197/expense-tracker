@@ -366,9 +366,11 @@ function DashboardContent() {
               </p>
             </div>
           )}
-          <div data-tour="dashboard" className="flex items-center justify-between">
-            <MonthSwitcher />
-            <div className="flex items-center gap-2">
+          <div data-tour="dashboard" className="flex items-center justify-between gap-2 overflow-hidden">
+            <div className="min-w-0">
+              <MonthSwitcher />
+            </div>
+            <div className="flex shrink-0 items-center gap-2">
               <SyncIndicator />
               <DashboardCustomizer layout={settings.dashboardLayout} onSave={handleSaveLayout} />
               <div className="relative z-[60] lg:hidden">
