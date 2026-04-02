@@ -29,8 +29,17 @@ import {
 export default function AnalyticsPage() {
   return (
     <Suspense>
-      <AnalyticsContent />
+      <AnalyticsShell />
     </Suspense>
+  );
+}
+
+/** Thin wrapper so AnalyticsContent renders INSIDE AppShell / CalculationsProvider */
+function AnalyticsShell() {
+  return (
+    <AppShell>
+      <AnalyticsContent />
+    </AppShell>
   );
 }
 
@@ -105,7 +114,6 @@ function AnalyticsContent() {
           : "var(--text-secondary)";
 
   return (
-    <AppShell>
       <PageTransition className="relative mx-auto min-h-[80vh] max-w-4xl xl:max-w-6xl space-y-4 sm:space-y-6 p-3 sm:p-4 md:p-5 lg:p-6">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -540,6 +548,5 @@ function AnalyticsContent() {
           </m.div>
         )}
       </PageTransition>
-    </AppShell>
   );
 }

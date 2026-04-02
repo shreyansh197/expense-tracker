@@ -24,8 +24,17 @@ type SortOption = "day-desc" | "day-asc" | "amount-desc" | "amount-asc";
 export default function ExpensesPage() {
   return (
     <Suspense>
-      <ExpensesContent />
+      <ExpensesShell />
     </Suspense>
+  );
+}
+
+/** Thin wrapper so ExpensesContent renders INSIDE AppShell / CalculationsProvider */
+function ExpensesShell() {
+  return (
+    <AppShell>
+      <ExpensesContent />
+    </AppShell>
   );
 }
 
@@ -91,7 +100,6 @@ function ExpensesContent() {
   };
 
   return (
-    <AppShell>
       <PageTransition className="relative mx-auto min-h-[80vh] max-w-4xl xl:max-w-6xl space-y-4 p-4 lg:p-6">
         {/* Header — hero zone */}
         <div className="zone-header">
@@ -194,6 +202,5 @@ function ExpensesContent() {
         />
         )}
       </PageTransition>
-    </AppShell>
   );
 }

@@ -241,8 +241,17 @@ function WelcomeCard({ onAddExpense, hasBudget }: { onAddExpense: () => void; ha
 export default function DashboardPage() {
   return (
     <Suspense>
-      <DashboardContent />
+      <DashboardShell />
     </Suspense>
+  );
+}
+
+/** Thin wrapper so DashboardContent renders INSIDE AppShell / CalculationsProvider */
+function DashboardShell() {
+  return (
+    <AppShell>
+      <DashboardContent />
+    </AppShell>
   );
 }
 
@@ -323,7 +332,6 @@ function DashboardContent() {
   };
 
   return (
-    <AppShell>
         <PageTransition className="relative mx-auto min-h-[80vh] max-w-4xl xl:max-w-6xl space-y-4 sm:space-y-6 p-3 sm:p-4 md:p-5 lg:p-6">
         {/* Header — hero zone */}
         <m.div
@@ -601,6 +609,5 @@ function DashboardContent() {
           return <ErrorBoundary key={sectionId} fallback={<SectionFallback />}>{renderer[sectionId]()}</ErrorBoundary>;
         })}
       </PageTransition>
-    </AppShell>
   );
 }
