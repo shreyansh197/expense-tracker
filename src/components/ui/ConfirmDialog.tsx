@@ -4,6 +4,7 @@ import { useState, useCallback, createContext, useContext, useRef, useEffect } f
 import { m, AnimatePresence } from "framer-motion";
 import { AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 
 interface ConfirmOptions {
   title: string;
@@ -83,6 +84,41 @@ export function ConfirmProvider({ children }: { children: React.ReactNode }) {
       {children}
       <AnimatePresence>
       {pending && (
+        <ConfirmDialogInner
+          pending={pending}
+          inputValue={inputValue}
+          setInputValue={setInputValue}
+          inputRef={inputRef}
+          handleConfirm={handleConfirm}
+          handleCancel={handleCancel}
+          variantColors={variantColors}
+        />
+      )}
+      </AnimatePresence>
+    </ConfirmContext.Provider>
+  );
+}
+
+function ConfirmDialogInner({
+  pending,
+  inputValue,
+  setInputValue,
+  inputRef,
+  handleConfirm,
+  handleCancel,
+  variantColors,
+}: {
+  pending: { options: ConfirmOptions; resolve: (v: boolean) => void };
+  inputValue: string;
+  setInputValue: (v: string) => void;
+  inputRef: React.RefObject<HTMLInputElement | null>;
+  handleConfirm: () => void;
+  handleCancel: () => void;
+  variantColors: Record<string, { icon: string; button: string; border: string }>;
+}) {
+  const trapRef = useFocusTrap<HTMLDivElement>(true);
+
+  return (
         <m.div
           className="fixed inset-0 z-[200] flex items-center justify-center p-4"
           onClick={(e) => { if (e.target === e.currentTarget) handleCancel(); }}
@@ -94,7 +130,7 @@ export function ConfirmProvider({ children }: { children: React.ReactNode }) {
           exit={{ backgroundColor: 'rgba(0,0,0,0)' }}
           transition={{ duration: 0.2 }}
         >
-          <m.div className={cn(
+          <m.div ref={trapRef} className={cn(
             "w-full max-w-sm rounded-xl border p-5 shadow-xl",
             variantColors[pending.options.variant || "default"].border
           )} style={{ background: 'var(--surface)' }}
@@ -137,10 +173,8 @@ export function ConfirmProvider({ children }: { children: React.ReactNode }) {
             <div className="mt-4 flex justify-end gap-2">
               <button
                 onClick={handleCancel}
-                className="rounded-lg px-4 py-2 text-sm font-medium transition-colors"
+                className="rounded-lg px-4 py-2 text-sm font-medium transition-colors hover:bg-[var(--surface-secondary)]"
                 style={{ color: 'var(--text-primary)' }}
-                onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--surface-secondary)'; }}
-                onMouseLeave={(e) => { e.currentTarget.style.background = ''; }}
               >
                 {pending.options.cancelLabel || "Cancel"}
               </button>
@@ -161,8 +195,5 @@ export function ConfirmProvider({ children }: { children: React.ReactNode }) {
             </div>
           </m.div>
         </m.div>
-      )}
-      </AnimatePresence>
-    </ConfirmContext.Provider>
   );
 }

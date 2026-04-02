@@ -80,6 +80,8 @@ export function InfoTooltip({ title, children, className }: InfoTooltipProps) {
               width: pos.width,
               left: pos.left,
               ...(pos.flipUp ? { bottom: pos.bottom } : { top: pos.top }),
+              animation: 'tooltip-enter 0.15s ease-out both',
+              transformOrigin: pos.flipUp ? 'bottom center' : 'top center',
             }}
           >
             <div className="flex items-start justify-between gap-2">

@@ -192,10 +192,8 @@ export function AlertsPanel({
       {!expanded && hiddenCount > 0 && (
         <button
           onClick={() => setExpanded(true)}
-          className="flex w-full items-center justify-center gap-1 rounded-lg py-2 text-xs font-medium transition-colors"
+          className="flex w-full items-center justify-center gap-1 rounded-lg py-2 text-xs font-medium transition-colors hover:bg-[var(--surface-secondary)]"
           style={{ color: 'var(--text-tertiary)' }}
-          onMouseEnter={(e) => e.currentTarget.style.background = 'var(--surface-secondary)'}
-          onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
         >
           Show {hiddenCount} more
           <ChevronDown size={12} />

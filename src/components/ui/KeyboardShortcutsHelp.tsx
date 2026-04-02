@@ -33,10 +33,8 @@ export function KeyboardShortcutsHelp({ open, onClose }: KeyboardShortcutsHelpPr
           </div>
           <button
             onClick={onClose}
-            className="rounded-lg p-1.5 transition-colors"
+            className="rounded-lg p-1.5 transition-colors hover:bg-[var(--surface-secondary)]"
             style={{ color: 'var(--text-muted)' }}
-            onMouseEnter={e => { e.currentTarget.style.background = 'var(--surface-secondary)'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = ''; }}
             aria-label="Close keyboard shortcuts"
           >
             <X size={16} />
@@ -46,9 +44,7 @@ export function KeyboardShortcutsHelp({ open, onClose }: KeyboardShortcutsHelpPr
           {filtered.map((s, i) => (
             <div
               key={i}
-              className="flex items-center justify-between rounded-lg px-3 py-2 transition-colors"
-              onMouseEnter={e => { e.currentTarget.style.background = 'var(--surface-secondary)'; }}
-              onMouseLeave={e => { e.currentTarget.style.background = ''; }}
+              className="flex items-center justify-between rounded-lg px-3 py-2 transition-colors hover:bg-[var(--surface-secondary)]"
             >
               <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>
                 {s.description}

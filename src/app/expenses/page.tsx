@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, Suspense, useEffect } from "react";
 import { AppShell } from "@/components/layout/AppShell";
 import { PageTransition } from "@/components/ui/PageTransition";
 import { SkeletonExpenseList } from "@/components/ui/Skeleton";
@@ -16,11 +16,23 @@ import { useUIStore } from "@/stores/uiStore";
 import { Search, PlusCircle } from "lucide-react";
 import { useCurrency } from "@/hooks/useCurrency";
 import { debounce } from "@/lib/debounce";
+import { useMonthUrlSync } from "@/hooks/useMonthUrlSync";
+import { useSearchParams } from "next/navigation";
 
 type SortOption = "day-desc" | "day-asc" | "amount-desc" | "amount-asc";
 
 export default function ExpensesPage() {
+  return (
+    <Suspense>
+      <ExpensesContent />
+    </Suspense>
+  );
+}
+
+function ExpensesContent() {
   const { formatCurrency } = useCurrency();
+  useMonthUrlSync();
+  const searchParams = useSearchParams();
   const {
     currentMonth,
     currentYear,
@@ -53,6 +65,19 @@ export default function ExpensesPage() {
     return (localStorage.getItem("expenstream-expenses-sort") as SortOption) || "day-desc";
   });
   const [localSearch, setLocalSearch] = useState(searchQuery);
+
+  // Pre-fill day filter from URL ?day=N (e.g. from clicking a daily bar chart)
+  useEffect(() => {
+    const dayParam = searchParams.get("day");
+    if (dayParam) {
+      const d = parseInt(dayParam, 10);
+      if (d >= 1 && d <= 31) {
+        setDayMin(String(d));
+        setDayMax(String(d));
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const debouncedSetSearch = useCallback(

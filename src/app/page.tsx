@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, Suspense } from "react";
 import dynamic from "next/dynamic";
 import { m, AnimatePresence } from "framer-motion";
 import { AppShell } from "@/components/layout/AppShell";
@@ -50,6 +50,7 @@ import { cn } from "@/lib/utils";
 import type { DashboardSectionId, DashboardLayout } from "@/types";
 import type { ReactNode } from "react";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
+import { useMonthUrlSync } from "@/hooks/useMonthUrlSync";
 
 /* ── Lightweight fallback for per-section ErrorBoundary ────── */
 function SectionFallback() {
@@ -237,6 +238,14 @@ function WelcomeCard({ onAddExpense, hasBudget }: { onAddExpense: () => void; ha
 }
 
 export default function DashboardPage() {
+  return (
+    <Suspense>
+      <DashboardContent />
+    </Suspense>
+  );
+}
+
+function DashboardContent() {
   const { formatCurrency } = useCurrency();
   const router = useRouter();
   const { currentMonth, currentYear } = useUIStore();
@@ -244,13 +253,8 @@ export default function DashboardPage() {
   const { settings, updateSettings } = useSettings();
   const { user } = useAuth();
 
-  // Always reset to current month when dashboard mounts
-  useEffect(() => {
-    const now = new Date();
-    const m = now.getMonth() + 1;
-    const y = now.getFullYear();
-    useUIStore.getState().setMonth(m, y);
-  }, []);
+  // Sync month/year ↔ URL search params (?m=4&y=2026)
+  useMonthUrlSync();
 
   // Auto-apply recurring expenses for current month
   useRecurringExpenses(currentMonth, currentYear);
@@ -313,13 +317,13 @@ export default function DashboardPage() {
   const handleDayClick = (day: number) => {
     const { setActiveCategories, setSearchQuery } = useUIStore.getState();
     setActiveCategories([]);
-    setSearchQuery(`day:${day}`);
-    router.push("/expenses");
+    setSearchQuery("");
+    router.push(`/expenses?m=${currentMonth}&y=${currentYear}&day=${day}`);
   };
 
   return (
     <AppShell>
-        <PageTransition className="relative mx-auto min-h-[80vh] max-w-4xl xl:max-w-6xl space-y-4 sm:space-y-6 p-3 sm:p-4 lg:p-6">
+        <PageTransition className="relative mx-auto min-h-[80vh] max-w-4xl xl:max-w-6xl space-y-4 sm:space-y-6 p-3 sm:p-4 md:p-5 lg:p-6">
         {/* Header — hero zone */}
         <m.div
           className="zone-header dash-section relative z-20 rounded-2xl p-4 sm:p-5"
@@ -459,12 +463,12 @@ export default function DashboardPage() {
               <div className="section-zone section-teal" key="charts">
               <AnimatePresence mode="wait">
                 {loading ? (
-                  <m.div key="chart-skeleton" className="dash-section grid gap-4 lg:grid-cols-2" initial={{ opacity: 0.6 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
+                  <m.div key="chart-skeleton" className="dash-section grid gap-4 md:grid-cols-2" initial={{ opacity: 0.6 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
                     <SkeletonChart />
                     <SkeletonChart />
                   </m.div>
                 ) : expenses.length === 0 ? (
-                <div className="dash-section relative grid gap-4 lg:grid-cols-2">
+                <div className="dash-section relative grid gap-4 md:grid-cols-2">
                   <div className="card relative overflow-hidden p-5">
                     <AmbientBackground />
                     <h3 className="relative text-section-title mb-4">Category Breakdown</h3>
@@ -489,7 +493,7 @@ export default function DashboardPage() {
                   </div>
                 </div>
               ) : (
-              <div className="dash-section grid gap-4 lg:grid-cols-2">
+              <div className="dash-section grid gap-4 md:grid-cols-2">
                 <div className="card p-5">
                   <h3 className="text-section-title mb-4">
                     Category Breakdown
@@ -551,12 +555,10 @@ export default function DashboardPage() {
                     {recentExpenses.map((e, idx) => (
                       <m.div
                         key={e.id}
-                        className="flex items-center justify-between rounded-xl px-3 py-3 transition-colors"
+                        className="flex items-center justify-between rounded-xl px-3 py-3 transition-colors hover:bg-[var(--surface-secondary)]"
                         initial={{ opacity: 0, y: 6 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: idx * 0.04, duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-                        onMouseEnter={(ev) => ev.currentTarget.style.background = 'var(--surface-secondary)'}
-                        onMouseLeave={(ev) => ev.currentTarget.style.background = 'transparent'}
                       >
                         <div className="grid min-w-0 flex-1" style={{ gridTemplateColumns: "5.5rem 1fr", gap: "0.75rem", alignItems: "center" }}>
                           <div className="w-[5.5rem] flex justify-start">

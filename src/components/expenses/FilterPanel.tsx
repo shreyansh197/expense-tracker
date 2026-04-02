@@ -208,9 +208,7 @@ export function FilterPanel({
                 </button>
                 <button
                   onClick={() => setShowSaveInput(false)}
-                  className="rounded p-1 transition-colors" style={{ color: 'var(--text-muted)' }}
-                  onMouseEnter={e => { e.currentTarget.style.background = 'var(--surface-secondary)'; }}
-                  onMouseLeave={e => { e.currentTarget.style.background = ''; }}
+                  className="rounded p-1 transition-colors hover:bg-[var(--surface-secondary)]" style={{ color: 'var(--text-muted)' }}
                 >
                   <X size={14} />
                 </button>
@@ -237,25 +235,19 @@ export function FilterPanel({
                 {savedFilters.map((f) => (
                   <div
                     key={f.id}
-                    className="flex items-center gap-2 rounded-lg px-2 py-1.5 transition-colors"
-                    onMouseEnter={e => { e.currentTarget.style.background = 'var(--surface-secondary)'; }}
-                    onMouseLeave={e => { e.currentTarget.style.background = ''; }}
+                    className="flex items-center gap-2 rounded-lg px-2 py-1.5 transition-colors hover:bg-[var(--surface-secondary)]"
                   >
                     <BookmarkCheck size={12} className="shrink-0 text-brand" />
                     <button
                       onClick={() => handleApplyFilter(f)}
-                      className="flex-1 text-left text-xs font-medium transition-colors"
+                      className="flex-1 text-left text-xs font-medium transition-colors hover:text-[var(--primary)]"
                       style={{ color: 'var(--text-secondary)' }}
-                      onMouseEnter={e => { e.currentTarget.style.color = 'var(--primary)'; }}
-                      onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-secondary)'; }}
                     >
                       {f.name}
                     </button>
                     <button
                       onClick={() => handleDeleteFilter(f.id)}
-                      className="rounded p-0.5 transition-colors" style={{ color: 'var(--text-muted)' }}
-                      onMouseEnter={e => { e.currentTarget.style.color = 'var(--danger)'; }}
-                      onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-muted)'; }}
+                      className="rounded p-0.5 transition-colors hover:text-[var(--danger)]" style={{ color: 'var(--text-muted)' }}
                     >
                       <Trash2 size={12} />
                     </button>

@@ -174,6 +174,7 @@ export function ExpenseList({
   }, [swipeHintShown]);
 
   const handleDelete = async (id: string) => {
+    const expense = expenses.find(e => e.id === id);
     // Optimistically hide the expense and show undo toast
     setPendingDeletes((prev) => new Set(prev).add(id));
     const timer = setTimeout(() => {
@@ -186,7 +187,8 @@ export function ExpenseList({
       pendingTimers.current.delete(id);
     }, 5000);
     pendingTimers.current.set(id, timer);
-    toast("Expense deleted", "error", {
+    const msg = expense ? `${formatCurrency(expense.amount)} deleted` : "Expense deleted";
+    toast(msg, "error", {
       label: "Undo",
       onClick: () => {
         clearTimeout(pendingTimers.current.get(id));
@@ -394,10 +396,8 @@ export function ExpenseList({
         <div className="flex justify-center pt-4">
           <button
             onClick={() => setVisibleCount((v) => v + PAGE_SIZE)}
-            className="rounded-xl px-5 py-2.5 text-xs font-semibold transition-all"
+            className="rounded-xl px-5 py-2.5 text-xs font-semibold transition-all hover:bg-[var(--surface-hover)]"
             style={{ background: 'var(--surface-secondary)', color: 'var(--text-secondary)' }}
-            onMouseEnter={(e) => e.currentTarget.style.background = 'var(--surface-hover)'}
-            onMouseLeave={(e) => e.currentTarget.style.background = 'var(--surface-secondary)'}
           >
             Show more ({totalCount - visibleCount} remaining)
           </button>
@@ -545,10 +545,8 @@ function SwipeableExpenseItem({
         <div className="flex items-center gap-1 opacity-100 lg:opacity-0 lg:transition-opacity lg:group-hover:opacity-100">
           <button
             onClick={() => openEditForm(expense.id)}
-            className="rounded-lg p-1.5 transition-colors"
+            className="rounded-lg p-1.5 transition-colors hover:bg-[var(--surface-secondary)] hover:text-[var(--text-secondary)]"
             style={{ color: 'var(--text-muted)' }}
-            onMouseEnter={e => { e.currentTarget.style.background = 'var(--surface-secondary)'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = ''; e.currentTarget.style.color = 'var(--text-muted)'; }}
             aria-label="Edit expense"
           >
             <Edit3 size={14} />

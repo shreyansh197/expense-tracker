@@ -158,7 +158,7 @@ export function KpiCards({
 
       {/* ── SECONDARY: Supporting Metrics (compact inline) ── */}
       <m.div
-        className="grid grid-cols-1 gap-2 sm:grid-cols-3 sm:gap-3"
+        className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3 sm:gap-3"
         variants={{ hidden: { opacity: 0, y: 8 }, visible: { opacity: 1, y: 0, transition: { duration: 0.4, delay: 0.1, ease: [0.22, 1, 0.36, 1] } } }}
       >
         <div className="rounded-xl border p-3 sm:p-3.5" style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>
@@ -226,10 +226,8 @@ export function KpiCards({
       <div>
         <button
           onClick={toggleExpanded}
-          className="flex w-full items-center justify-center gap-1 rounded-lg py-1.5 text-xs font-medium transition-colors"
+          className="flex w-full items-center justify-center gap-1 rounded-lg py-1.5 text-xs font-medium transition-colors hover:text-[var(--text-secondary)]"
           style={{ color: 'var(--text-tertiary)' }}
-          onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--text-secondary)'; }}
-          onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-tertiary)'; }}
           aria-expanded={expanded}
         >
           {expanded ? "Hide details" : "More details"}

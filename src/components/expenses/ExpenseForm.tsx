@@ -173,7 +173,8 @@ export function ExpenseForm({
           });
         }
         localStorage.setItem("expenstream-last-category", category);
-        toast(editExpense ? "Expense updated" : "Expense added");
+        const catLabel = allCategories.find(c => c.id === category)?.label ?? category;
+        toast(editExpense ? `${symbol}${parsedAmount} in ${catLabel} updated` : `${symbol}${parsedAmount} added to ${catLabel}`);
         // Brief success flash before closing
         setShowSuccess(true);
         setTimeout(() => {
@@ -236,10 +237,8 @@ export function ExpenseForm({
             <button
               type="button"
               onClick={() => setShowScanner((v) => !v)}
-              className="rounded-lg p-1.5 transition-colors"
+              className="rounded-lg p-1.5 transition-colors hover:bg-[var(--surface-secondary)]"
               style={{ color: showScanner ? 'var(--brand)' : 'var(--text-muted)' }}
-              onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--surface-secondary)'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = ''; }}
               aria-label="Scan receipt"
               title="Scan receipt"
             >
@@ -260,10 +259,8 @@ export function ExpenseForm({
             e.preventDefault();
             closeForm();
           }}
-          className="rounded-lg p-1.5 transition-colors"
+          className="rounded-lg p-1.5 transition-colors hover:bg-[var(--surface-secondary)]"
           style={{ color: 'var(--text-muted)' }}
-          onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--surface-secondary)'; }}
-          onMouseLeave={(e) => { e.currentTarget.style.background = ''; }}
           aria-label="Close form"
         >
           <X size={18} />

@@ -38,7 +38,7 @@ export function SubscriptionsSummary() {
       </div>
 
       {/* Stats row */}
-      <div className="mb-4 grid grid-cols-1 gap-2 sm:grid-cols-3">
+      <div className="mb-4 grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3">
         <div className="rounded-xl px-3 py-2.5" style={{ background: 'var(--surface-secondary)' }}>
           <p className="text-[10px] font-medium" style={{ color: 'var(--text-tertiary)' }}>Monthly</p>
           <p className="text-sm font-bold tabular-nums" style={{ color: 'var(--text-primary)' }}>
@@ -69,10 +69,8 @@ export function SubscriptionsSummary() {
             {stats.upcoming.slice(0, 3).map((r) => (
               <div
                 key={r.id}
-                className="flex items-center justify-between rounded-lg px-2 py-1.5 transition-colors"
+                className="flex items-center justify-between rounded-lg px-2 py-1.5 transition-colors hover:bg-[var(--surface-secondary)]"
                 style={{ cursor: 'default' }}
-                onMouseEnter={e => { e.currentTarget.style.background = 'var(--surface-secondary)'; }}
-                onMouseLeave={e => { e.currentTarget.style.background = ''; }}
               >
                 <div className="flex items-center gap-2">
                   <Calendar size={11} style={{ color: 'var(--text-muted)' }} />

@@ -5,6 +5,7 @@ import { m, AnimatePresence } from "framer-motion";
 import { useUIStore } from "@/stores/uiStore";
 import { ExpenseForm } from "./ExpenseForm";
 import { useExpenses } from "@/hooks/useExpenses";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 
 const DISMISS_THRESHOLD = 100;
 
@@ -15,6 +16,7 @@ export function ExpenseFormModal() {
   const [dragY, setDragY] = useState(0);
   const dragStartRef = useRef<number | null>(null);
   const closingRef = useRef(false);
+  const trapRef = useFocusTrap<HTMLDivElement>(showExpenseForm);
 
   const editExpense = editingExpenseId
     ? expenses.find((e) => e.id === editingExpenseId) ?? null
@@ -92,7 +94,7 @@ export function ExpenseFormModal() {
     <AnimatePresence>
       {showExpenseForm && (
       <m.div
-        className="fixed inset-0 z-[60] flex items-end justify-center backdrop-blur-sm lg:items-center"
+        className="fixed inset-0 z-[60] flex items-end justify-center backdrop-blur-sm md:items-center"
         onClick={handleBackdropClick}
         initial={{ backgroundColor: 'rgba(0,0,0,0)' }}
         animate={{ backgroundColor: 'rgba(0,0,0,0.4)' }}
@@ -100,10 +102,11 @@ export function ExpenseFormModal() {
         transition={{ duration: 0.15 }}
       >
         <m.div
+          ref={trapRef}
           role="dialog"
           aria-modal="true"
           aria-label="Expense form"
-          className="expense-form-modal w-full max-w-md max-h-[90vh] overflow-y-auto rounded-t-2xl shadow-lg lg:max-h-none lg:overflow-visible lg:rounded-2xl"
+          className="expense-form-modal w-full max-w-md max-h-[90vh] overflow-y-auto rounded-t-2xl shadow-lg md:max-h-none md:overflow-visible md:rounded-2xl"
           style={{
             background: 'var(--surface)',
             border: '1px solid var(--border)',

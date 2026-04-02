@@ -109,14 +109,14 @@
   --secondary: #818CF8;
   --secondary-soft: rgba(129, 140, 248, 0.12);
   --secondary-gradient: linear-gradient(135deg, #818CF8, #6366F1);
-  /* ── Accent (Blue) ── */
-  --accent: #60A5FA;
-  --accent-soft: rgba(96, 165, 250, 0.12);
-  --accent-gradient: linear-gradient(135deg, #60A5FA, #3B82F6);
+  /* ── Accent (Coral — consistent across themes) ── */
+  --accent: #FFAB91;
+  --accent-soft: rgba(255, 138, 101, 0.14);
+  --accent-gradient: linear-gradient(135deg, #FFAB91, #FF8A65);
   /* ── CTA buttons (alias → accent for consistency) ── */
   --cta: var(--accent);
-  --cta-hover: #2563EB;
-  --cta-deep: #1D4ED8;
+  --cta-hover: #FF8A65;
+  --cta-deep: #FF7043;
   /* ── Coral track (stays warm across themes) ── */
   --coral: #FFAB91;
   --coral-soft: rgba(255, 138, 101, 0.12);
@@ -756,6 +756,12 @@ input[type="password"]::-ms-clear {
   20%  { transform: translateX(-40px); }
   50%  { transform: translateX(-40px); }
   100% { transform: translateX(0); }
+}
+
+/* InfoTooltip enter animation */
+@keyframes tooltip-enter {
+  from { opacity: 0; transform: scale(0.95) translateY(-2px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
 }
 
 @keyframes et-icon-scale {

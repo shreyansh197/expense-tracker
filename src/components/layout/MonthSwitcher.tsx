@@ -45,10 +45,8 @@ export function MonthSwitcher() {
     <div className="flex items-center gap-1">
       <button
         onClick={handlePrev}
-        className="flex h-9 w-9 items-center justify-center rounded-xl transition-all duration-200 hover:scale-110 active:scale-95"
+        className="flex h-9 w-9 items-center justify-center rounded-xl transition-all duration-200 hover:scale-110 hover:bg-[var(--surface-secondary)] active:scale-95"
         style={{ color: 'var(--text-tertiary)' }}
-        onMouseEnter={e => { e.currentTarget.style.background = 'var(--surface-secondary)'; }}
-        onMouseLeave={e => { e.currentTarget.style.background = ''; }}
         aria-label="Previous month"
       >
         <ChevronLeft size={18} />
@@ -67,10 +65,8 @@ export function MonthSwitcher() {
       </div>
       <button
         onClick={handleNext}
-        className="flex h-9 w-9 items-center justify-center rounded-xl transition-all duration-200 hover:scale-110 active:scale-95"
+        className="flex h-9 w-9 items-center justify-center rounded-xl transition-all duration-200 hover:scale-110 hover:bg-[var(--surface-secondary)] active:scale-95"
         style={{ color: 'var(--text-tertiary)' }}
-        onMouseEnter={e => { e.currentTarget.style.background = 'var(--surface-secondary)'; }}
-        onMouseLeave={e => { e.currentTarget.style.background = ''; }}
         aria-label="Next month"
       >
         <ChevronRight size={18} />

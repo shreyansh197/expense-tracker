@@ -136,10 +136,8 @@ export function CategoryChart({ categoryTotals, onCategoryClick, categoryBudgets
                 return (
                   <tr
                     key={d.slug}
-                    className="cursor-pointer transition-colors"
+                    className="cursor-pointer transition-colors hover:bg-[var(--surface-secondary)]"
                     style={{ borderBottom: '1px solid var(--border-subtle)' }}
-                    onMouseEnter={e => { e.currentTarget.style.background = 'var(--surface-secondary)'; }}
-                    onMouseLeave={e => { e.currentTarget.style.background = ''; }}
                     onClick={() => onCategoryClick?.(d.slug)}
                   >
                     <td className="py-2">
@@ -248,10 +246,8 @@ export function CategoryLegend({ categoryTotals, onCategoryClick, categoryBudget
           return (
             <div
               key={c.category}
-              className="rounded-lg px-1 py-0.5 transition-colors"
+              className="rounded-lg px-1 py-0.5 transition-colors hover:bg-[var(--surface-secondary)]"
               style={{ cursor: onCategoryClick ? "pointer" : undefined }}
-              onMouseEnter={e => { e.currentTarget.style.background = 'var(--surface-secondary)'; }}
-              onMouseLeave={e => { e.currentTarget.style.background = ''; }}
               onClick={() => onCategoryClick?.(c.category)}
               role={onCategoryClick ? "button" : undefined}
               tabIndex={onCategoryClick ? 0 : undefined}
