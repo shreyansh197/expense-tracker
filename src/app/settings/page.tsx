@@ -136,7 +136,10 @@ export default function SettingsPage() {
 
   const handleSalaryUpdate = async () => {
     const val = parseFloat(salary);
-    if (isNaN(val) || val <= 0) return;
+    if (isNaN(val) || val <= 0) {
+      toast("Please enter a valid amount greater than 0");
+      return;
+    }
     setSaving(true);
     try {
       await updateSettings({ salary: val });
@@ -344,7 +347,7 @@ export default function SettingsPage() {
                     value={salary}
                     onChange={(e) => setSalary(e.target.value)}
                     onKeyDown={(e) => { if (e.key === "Enter") handleSalaryUpdate(); }}
-                    className="w-full rounded-xl py-2.5 pl-7 pr-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-brand/20"
+                    className="w-full rounded-xl py-2.5 pl-7 pr-3 text-base font-medium focus:outline-none focus:ring-2 focus:ring-brand/20"
                     style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
                   />
                 </div>
@@ -386,7 +389,7 @@ export default function SettingsPage() {
                       value={monthBudget}
                       onChange={(e) => setMonthBudget(e.target.value)}
                       onKeyDown={(e) => { if (e.key === "Enter") handleMonthBudgetUpdate(); }}
-                      className="w-full rounded-xl py-2.5 pl-7 pr-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-brand/20"
+                      className="w-full rounded-xl py-2.5 pl-7 pr-3 text-base font-medium focus:outline-none focus:ring-2 focus:ring-brand/20"
                       style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
                     />
                   </div>

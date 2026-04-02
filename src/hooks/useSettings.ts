@@ -236,6 +236,11 @@ export function useSettings() {
     const unsubscribe = onSyncPull(() => {
       loadSettingsFromIDB().then((remote) => {
         if (remote && remote.updatedAt > _settings.updatedAt) {
+          // Don't overwrite a real salary with 0 from remote
+          if (remote.salary === 0 && _settings.salary > 0 && _settings.updatedAt > 0) {
+            pushToApi(_settings);
+            return;
+          }
           saveLocal(remote);
           _setShared(remote);
         }
