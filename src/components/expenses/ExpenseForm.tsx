@@ -101,14 +101,37 @@ export function ExpenseForm({
         const cv = value.toLowerCase();
         if (operator === "contains") match = rv.includes(cv);
         else if (operator === "equals") match = rv === cv;
+        else if (operator === "starts_with") match = rv.startsWith(cv);
+        else if (operator === "ends_with") match = rv.endsWith(cv);
       } else if (field === "amount" && amount) {
         const num = parseFloat(amount);
         if (!isNaN(num)) {
-          const target = parseFloat(value);
-          if (operator === "greater_than") match = num > target;
-          else if (operator === "less_than") match = num < target;
-          else if (operator === "equals") match = num === target;
+          if (operator === "between") {
+            const [minStr, maxStr] = value.split(",");
+            const min = parseFloat(minStr), max = parseFloat(maxStr);
+            if (!isNaN(min) && !isNaN(max)) match = num >= min && num <= max;
+          } else {
+            const target = parseFloat(value);
+            if (operator === "greater_than") match = num > target;
+            else if (operator === "less_than") match = num < target;
+            else if (operator === "equals") match = num === target;
+          }
         }
+      } else if (field === "day_of_month") {
+        if (operator === "between") {
+          const [minStr, maxStr] = value.split(",");
+          const min = parseInt(minStr, 10), max = parseInt(maxStr, 10);
+          if (!isNaN(min) && !isNaN(max)) match = day >= min && day <= max;
+        } else {
+          const target = parseInt(value, 10);
+          if (!isNaN(target)) {
+            if (operator === "equals") match = day === target;
+            else if (operator === "greater_than") match = day > target;
+            else if (operator === "less_than") match = day < target;
+          }
+        }
+      } else if (field === "is_recurring") {
+        match = value === "true" ? false : true; // Non-recurring by default for new expenses
       }
       if (match && allCategories.some((c) => c.id === rule.action.value)) {
         setCategory(rule.action.value as CategoryId);
@@ -121,7 +144,7 @@ export function ExpenseForm({
       setCategory("");
       setAutoApplied(false);
     }
-  }, [remark, amount, autoRules, editExpense, allCategories, autoApplied]);
+  }, [remark, amount, day, autoRules, editExpense, allCategories, autoApplied]);
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {

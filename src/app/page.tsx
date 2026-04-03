@@ -355,13 +355,13 @@ function DashboardContent() {
 
           {user?.name && (
             <div className="mb-3">
-              <p className="text-[13px] font-medium tracking-wide" style={{ color: 'var(--text-muted)' }}>
+              <p className="text-[11px] sm:text-xs font-medium tracking-wide uppercase" style={{ color: 'var(--text-muted)' }}>
                 {new Date().getHours() < 12 ? "Good morning" : new Date().getHours() < 17 ? "Good afternoon" : "Good evening"}
               </p>
-              <p className="text-lg sm:text-xl font-bold tracking-tight" style={{ color: 'var(--text-primary)' }}>
+              <p className="text-xl sm:text-2xl font-normal tracking-tight" style={{ fontFamily: 'var(--font-display), Georgia, serif', color: 'var(--text-primary)' }}>
                 {user.name.split(" ")[0]}
               </p>
-              <p className="mt-0.5 text-[11px] tracking-wide" style={{ color: 'var(--text-tertiary)' }}>
+              <p className="mt-0.5 text-[10px] sm:text-[11px] tracking-wide" style={{ color: 'var(--text-tertiary)' }}>
                 {new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}
               </p>
             </div>

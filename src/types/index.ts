@@ -45,8 +45,8 @@ export interface AutoRule {
   id: string;
   name: string;
   condition: {
-    field: "remark" | "amount" | "category";
-    operator: "contains" | "equals" | "greater_than" | "less_than";
+    field: "remark" | "amount" | "category" | "day_of_month" | "is_recurring";
+    operator: "contains" | "equals" | "greater_than" | "less_than" | "starts_with" | "ends_with" | "between";
     value: string;
   };
   action: {

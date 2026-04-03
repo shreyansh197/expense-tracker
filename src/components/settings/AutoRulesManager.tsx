@@ -69,9 +69,10 @@ export function AutoRulesManager() {
 
   const [showForm, setShowForm] = useState(false);
   const [name, setName] = useState("");
-  const [condField, setCondField] = useState<"remark" | "amount">("remark");
-  const [condOp, setCondOp] = useState<"contains" | "equals" | "greater_than" | "less_than">("contains");
+  const [condField, setCondField] = useState<"remark" | "amount" | "day_of_month" | "is_recurring">("remark");
+  const [condOp, setCondOp] = useState<"contains" | "equals" | "greater_than" | "less_than" | "starts_with" | "ends_with" | "between">("contains");
   const [condValue, setCondValue] = useState("");
+  const [condValue2, setCondValue2] = useState("");
   const [actionType, setActionType] = useState<"set_category" | "flag">("set_category");
   const [actionValue, setActionValue] = useState<string>(allCategories[0]?.id || "");
 
@@ -80,19 +81,39 @@ export function AutoRulesManager() {
     setCondField("remark");
     setCondOp("contains");
     setCondValue("");
+    setCondValue2("");
     setActionType("set_category");
     setActionValue(allCategories[0]?.id || "");
     setShowForm(false);
   };
 
   const handleAdd = () => {
-    if (!name.trim() || !condValue.trim()) {
+    if (!name.trim()) {
       toast("Fill in all fields", "error");
       return;
     }
+    // is_recurring needs no value; between needs both values; other fields need condValue
+    if (condField === "is_recurring") {
+      // value is "true"/"false", always valid
+    } else if (condOp === "between") {
+      if (!condValue.trim() || !condValue2.trim()) {
+        toast("Fill in both range values", "error");
+        return;
+      }
+    } else if (!condValue.trim()) {
+      toast("Fill in all fields", "error");
+      return;
+    }
+
+    const finalValue = condField === "is_recurring"
+      ? condValue || "true"
+      : condOp === "between"
+        ? `${condValue.trim()},${condValue2.trim()}`
+        : condValue.trim();
+
     addRule({
       name: name.trim(),
-      condition: { field: condField, operator: condOp, value: condValue.trim() },
+      condition: { field: condField, operator: condOp, value: finalValue },
       action: { type: actionType, value: actionValue },
       enabled: true,
     });
@@ -139,8 +160,13 @@ export function AutoRulesManager() {
               {rule.name}
             </p>
             <p className="text-[10px]" style={{ color: 'var(--text-muted)' }}>
-              If {rule.condition.field} {rule.condition.operator.replace("_", " ")}{" "}
-              &ldquo;{rule.condition.value}&rdquo; → {rule.action.type === "set_category" ? catMap[rule.action.value]?.label || rule.action.value : "Flag"}
+              If {rule.condition.field === "is_recurring" ? "recurring" : rule.condition.field.replace("_", " ")}{" "}
+              {rule.condition.field === "is_recurring"
+                ? (rule.condition.value === "true" ? "= yes" : "= no")
+                : rule.condition.operator === "between"
+                  ? `between ${rule.condition.value.replace(",", " and ")}`
+                  : `${rule.condition.operator.replace(/_/g, " ")} "${rule.condition.value}"`}{" "}
+              → {rule.action.type === "set_category" ? catMap[rule.action.value]?.label || rule.action.value : "Flag"}
             </p>
           </div>
           <button
@@ -180,40 +206,104 @@ export function AutoRulesManager() {
             maxLength={50}
             className="form-input text-sm"
           />
-          <div className="grid grid-cols-3 gap-2">
-            <select
-              value={condField}
-              onChange={(e) => setCondField(e.target.value as "remark" | "amount")}
-              className="form-select rounded px-2 py-1.5 text-xs"
-            >
-              <option value="remark">Remark</option>
-              <option value="amount">Amount</option>
-            </select>
-            <select
-              value={condOp}
-              onChange={(e) => setCondOp(e.target.value as typeof condOp)}
-              className="form-select rounded px-2 py-1.5 text-xs"
-            >
-              {condField === "remark" ? (
-                <>
-                  <option value="contains">Contains</option>
-                  <option value="equals">Equals</option>
-                </>
-              ) : (
-                <>
-                  <option value="greater_than">Greater than</option>
-                  <option value="less_than">Less than</option>
-                  <option value="equals">Equals</option>
-                </>
+          <div className="space-y-2">
+            <div className="grid grid-cols-2 gap-2">
+              <select
+                value={condField}
+                onChange={(e) => {
+                  const f = e.target.value as typeof condField;
+                  setCondField(f);
+                  setCondValue("");
+                  setCondValue2("");
+                  // Set sensible default operators per field
+                  if (f === "remark") setCondOp("contains");
+                  else if (f === "amount") setCondOp("greater_than");
+                  else if (f === "day_of_month") setCondOp("equals");
+                  else if (f === "is_recurring") setCondOp("equals");
+                }}
+                className="form-select rounded px-2 py-1.5 text-xs"
+              >
+                <option value="remark">Remark</option>
+                <option value="amount">Amount</option>
+                <option value="day_of_month">Day of Month</option>
+                <option value="is_recurring">Is Recurring</option>
+              </select>
+              {condField !== "is_recurring" && (
+                <select
+                  value={condOp}
+                  onChange={(e) => setCondOp(e.target.value as typeof condOp)}
+                  className="form-select rounded px-2 py-1.5 text-xs"
+                >
+                  {condField === "remark" ? (
+                    <>
+                      <option value="contains">Contains</option>
+                      <option value="equals">Equals</option>
+                      <option value="starts_with">Starts with</option>
+                      <option value="ends_with">Ends with</option>
+                    </>
+                  ) : condField === "day_of_month" ? (
+                    <>
+                      <option value="equals">Equals</option>
+                      <option value="greater_than">After day</option>
+                      <option value="less_than">Before day</option>
+                      <option value="between">Between</option>
+                    </>
+                  ) : (
+                    <>
+                      <option value="greater_than">Greater than</option>
+                      <option value="less_than">Less than</option>
+                      <option value="equals">Equals</option>
+                      <option value="between">Between</option>
+                    </>
+                  )}
+                </select>
               )}
-            </select>
-            <input
-              type={condField === "amount" ? "number" : "text"}
-              placeholder={condField === "amount" ? `${symbol} amount` : "keyword"}
-              value={condValue}
-              onChange={(e) => setCondValue(e.target.value)}
-              className="form-input rounded px-2 py-1.5 text-xs"
-            />
+            </div>
+            {condField === "is_recurring" ? (
+              <select
+                value={condValue || "true"}
+                onChange={(e) => setCondValue(e.target.value)}
+                className="form-select rounded px-2 py-1.5 text-xs w-full"
+              >
+                <option value="true">Yes (recurring)</option>
+                <option value="false">No (one-time)</option>
+              </select>
+            ) : condOp === "between" ? (
+              <div className="grid grid-cols-2 gap-2">
+                <input
+                  type="number"
+                  inputMode="decimal"
+                  style={{ fontSize: "16px" }}
+                  placeholder={condField === "day_of_month" ? "From day" : `Min ${symbol}`}
+                  value={condValue}
+                  onChange={(e) => setCondValue(e.target.value)}
+                  className="form-input rounded px-2 py-1.5 text-xs"
+                />
+                <input
+                  type="number"
+                  inputMode="decimal"
+                  style={{ fontSize: "16px" }}
+                  placeholder={condField === "day_of_month" ? "To day" : `Max ${symbol}`}
+                  value={condValue2}
+                  onChange={(e) => setCondValue2(e.target.value)}
+                  className="form-input rounded px-2 py-1.5 text-xs"
+                />
+              </div>
+            ) : (
+              <input
+                type={condField === "amount" || condField === "day_of_month" ? "number" : "text"}
+                inputMode={condField === "amount" || condField === "day_of_month" ? "decimal" : undefined}
+                style={condField === "amount" || condField === "day_of_month" ? { fontSize: "16px" } : undefined}
+                placeholder={
+                  condField === "amount" ? `${symbol} amount`
+                  : condField === "day_of_month" ? "Day (1-31)"
+                  : "keyword"
+                }
+                value={condValue}
+                onChange={(e) => setCondValue(e.target.value)}
+                className="form-input rounded px-2 py-1.5 text-xs w-full"
+              />
+            )}
           </div>
           <div className="grid grid-cols-2 gap-2">
             <select
