@@ -90,7 +90,7 @@ export function useLedgers() {
       idempotencyKey: makeIdempotencyKey(),
     }, workspace);
 
-    trySyncPush(workspace);
+    trySyncPush(workspace, true);
   }, []);
 
   const updateLedger = useCallback(async (id: string, updates: Partial<LedgerInput>) => {
@@ -110,7 +110,7 @@ export function useLedgers() {
       idempotencyKey: makeIdempotencyKey(),
     }, workspace);
 
-    trySyncPush(workspace);
+    trySyncPush(workspace, true);
   }, []);
 
   const deleteLedger = useCallback(async (id: string) => {
@@ -127,7 +127,7 @@ export function useLedgers() {
       idempotencyKey: makeIdempotencyKey(),
     }, workspace);
 
-    trySyncPush(workspace);
+    trySyncPush(workspace, true);
   }, []);
 
   const completeLedger = useCallback(async (id: string) => {

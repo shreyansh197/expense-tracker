@@ -418,20 +418,17 @@ export async function pushMutations(workspaceId?: string): Promise<number> {
 
 // ── Immediate push attempt (non-blocking) ──
 
-export function trySyncPush(workspaceId?: string) {
+export function trySyncPush(workspaceId?: string, showSpinner = false) {
   if (!navigator.onLine) { syncWarn("push", "Offline, skipping push"); return; }
   _lastMutationAt = Date.now();
   _schedulePoll(); // Switch to fast polling
-  // Don't set phase to "syncing" here — the next _doSync poll will show the
-  // spinner only when appropriate.  Calling _setSyncPhase("syncing") on every
-  // trySyncPush (including settings-reconciliation pushes) caused a visible
-  // spinner flash on every poll cycle.
-  pushMutations(workspaceId).then(async () => {
+  if (showSpinner) _setSyncPhase("syncing");
+  pushMutations(workspaceId).then(async (applied) => {
+    if (applied > 0) _lastPushAt = Date.now(); // Mark push time for Realtime echo suppression
     await pullChanges(workspaceId);
     const wid = workspaceId ?? getActiveWorkspaceId();
-    if (wid) _broadcastSyncEvent(wid);
-    // Only transition to idle if we were previously syncing (avoid idle→idle flicker)
-    if (_syncPhase === "syncing") _setSyncPhase("idle");
+    if (wid && applied > 0) _broadcastSyncEvent(wid);
+    if (showSpinner) _setSyncPhase("idle");
   }).catch((err) => {
     syncErr("push", "trySyncPush error:", err);
     _setSyncPhase("error");
@@ -455,10 +452,12 @@ let _unsubAuth: (() => void) | null = null;
 let _started = false;
 let _currentWid: string | null = null;
 let _lastMutationAt = 0;
+let _lastPushAt = 0; // Timestamp of last successful push (for Realtime echo suppression)
 
 const FAST_POLL_MS = 3_000;    // 3s after recent mutations
 const SLOW_POLL_MS = 10_000;   // 10s when idle
 const FAST_POLL_WINDOW = 120_000; // fast-poll for 2 minutes after last mutation
+const REALTIME_ECHO_COOLDOWN = 3_000; // Ignore realtime events this long after own push
 
 // ── Realtime channel setup (auth-aware, can be called multiple times) ──
 
@@ -477,12 +476,28 @@ function _setupRealtimeChannel(wid: string | null) {
       pullChanges(wid);
     })
     .on("postgres_changes", { event: "*", schema: "public", table: "expenses", filter: `workspace_id=eq.${wid}` }, () => {
+      if (Date.now() - _lastPushAt < REALTIME_ECHO_COOLDOWN) {
+        syncLog("realtime", "postgres_changes on expenses → suppressed (own echo)");
+        return;
+      }
       syncLog("realtime", "postgres_changes on expenses → pulling");
       pullChanges(wid);
     })
-    .on("postgres_changes", { event: "*", schema: "public", table: "workspace_settings", filter: `workspace_id=eq.${wid}` }, () => pullChanges(wid))
-    .on("postgres_changes", { event: "*", schema: "public", table: "business_ledgers", filter: `workspace_id=eq.${wid}` }, () => pullChanges(wid))
-    .on("postgres_changes", { event: "*", schema: "public", table: "business_payments", filter: `workspace_id=eq.${wid}` }, () => pullChanges(wid))
+    .on("postgres_changes", { event: "*", schema: "public", table: "workspace_settings", filter: `workspace_id=eq.${wid}` }, () => {
+      if (Date.now() - _lastPushAt < REALTIME_ECHO_COOLDOWN) {
+        syncLog("realtime", "postgres_changes on workspace_settings → suppressed (own echo)");
+        return;
+      }
+      pullChanges(wid);
+    })
+    .on("postgres_changes", { event: "*", schema: "public", table: "business_ledgers", filter: `workspace_id=eq.${wid}` }, () => {
+      if (Date.now() - _lastPushAt < REALTIME_ECHO_COOLDOWN) return;
+      pullChanges(wid);
+    })
+    .on("postgres_changes", { event: "*", schema: "public", table: "business_payments", filter: `workspace_id=eq.${wid}` }, () => {
+      if (Date.now() - _lastPushAt < REALTIME_ECHO_COOLDOWN) return;
+      pullChanges(wid);
+    })
     .subscribe((status) => {
       syncLog("realtime", `Supabase channel status: ${status}`);
     });
@@ -535,10 +550,11 @@ async function _doSync() {
     return;
   }
   try {
-    // Only show "syncing" indicator when there are pending mutations to push.
-    // Routine polls (pull-only with no changes) should not flash the spinner.
-    const hasPending = (await db.mutations.count()) > 0;
-    if (hasPending) _setSyncPhase("syncing");
+    // Background polling should NEVER flash the sync spinner.
+    // The spinner is only shown during explicit user-triggered syncs.
+    // Routine polls that happen to find pending mutations (from settings
+    // reconciliation, rollover auto-computation, etc.) must not cause
+    // visible UI changes.
 
     if (!_migrated) {
       syncLog("migrate", "Running one-time migration…");
@@ -546,7 +562,8 @@ async function _doSync() {
       _migrated = true;
       syncLog("migrate", "Migration complete");
     }
-    await pushMutations(wid);
+    const applied = await pushMutations(wid);
+    if (applied > 0) _lastPushAt = Date.now();
     await pullChanges(wid);
     _setSyncPhase("idle");
   } catch (err) {
@@ -716,6 +733,7 @@ export function stopSyncEngine() {
   _migrated = false;
   _pushInFlight = false;
   _firstPullDone = false;
+  _lastPushAt = 0;
   _initReady = Promise.resolve();
   _setSyncPhase("idle");
 }

@@ -99,7 +99,7 @@ export function useExpenses(month: number, year: number) {
       idempotencyKey: makeIdempotencyKey(),
     }, workspace);
 
-    trySyncPush(workspace);
+    trySyncPush(workspace, true);
   }, []);
 
   const updateExpense = useCallback(async (id: string, updates: Partial<ExpenseInput>) => {
@@ -120,7 +120,7 @@ export function useExpenses(month: number, year: number) {
       idempotencyKey: makeIdempotencyKey(),
     }, workspace);
 
-    trySyncPush(workspace);
+    trySyncPush(workspace, true);
   }, []);
 
   const deleteExpense = useCallback(async (id: string) => {
@@ -138,7 +138,7 @@ export function useExpenses(month: number, year: number) {
       idempotencyKey: makeIdempotencyKey(),
     }, workspace);
 
-    trySyncPush(workspace);
+    trySyncPush(workspace, true);
   }, []);
 
   const deleteExpenses = useCallback(async (ids: string[]) => {
@@ -158,7 +158,7 @@ export function useExpenses(month: number, year: number) {
       }, workspace);
     }
 
-    trySyncPush(workspace);
+    trySyncPush(workspace, true);
   }, []);
 
   return {

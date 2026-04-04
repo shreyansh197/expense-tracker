@@ -91,7 +91,7 @@ export function usePayments(ledgerId: string | null) {
       idempotencyKey: makeIdempotencyKey(),
     }, workspace);
 
-    trySyncPush(workspace);
+    trySyncPush(workspace, true);
     notifyPaymentChange();
   }, []);
 
@@ -112,7 +112,7 @@ export function usePayments(ledgerId: string | null) {
       idempotencyKey: makeIdempotencyKey(),
     }, workspace);
 
-    trySyncPush(workspace);
+    trySyncPush(workspace, true);
     notifyPaymentChange();
   }, []);
 
@@ -130,7 +130,7 @@ export function usePayments(ledgerId: string | null) {
       idempotencyKey: makeIdempotencyKey(),
     }, workspace);
 
-    trySyncPush(workspace);
+    trySyncPush(workspace, true);
     notifyPaymentChange();
   }, []);
 
