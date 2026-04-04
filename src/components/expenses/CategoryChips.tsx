@@ -1,10 +1,12 @@
 "use client";
 
 import { useRef, useCallback } from "react";
+import { m } from "framer-motion";
 import { getAllCategories, buildCategoryMap } from "@/lib/categories";
 import { cn } from "@/lib/utils";
 import { useUIStore } from "@/stores/uiStore";
 import { useSettings } from "@/hooks/useSettings";
+import { scale } from "@/lib/motion/tokens";
 import type { CategoryId } from "@/types";
 
 export function CategoryChips() {
@@ -70,13 +72,14 @@ export function CategoryChips() {
         const isActive =
           activeCategories.length === 0 || activeCategories.includes(cat.id);
         return (
-          <button
+          <m.button
             key={cat.id}
             onClick={() => toggleCategory(cat.id)}
             onKeyDown={(e) => handleKeyDown(e, i)}
             aria-pressed={activeCategories.length > 0 && activeCategories.includes(cat.id)}
+            whileTap={{ scale: scale.tapChip }}
             className={cn(
-              "shrink-0 rounded-full px-3 py-1 text-xs font-medium transition-all active:scale-95",
+              "shrink-0 rounded-full px-3 py-1 text-xs font-medium transition-all",
               isActive
                 ? "text-white"
                 : ""
@@ -84,7 +87,7 @@ export function CategoryChips() {
             style={isActive ? { backgroundColor: cat.color } : { background: 'var(--surface-secondary)', color: 'var(--text-secondary)' }}
           >
             {cat.label}
-          </button>
+          </m.button>
         );
       })}
     </div>

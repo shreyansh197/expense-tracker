@@ -2,6 +2,7 @@
 
 import { m } from "framer-motion";
 import type { ReactNode } from "react";
+import { pageTransition } from "@/lib/motion";
 
 interface PageTransitionProps {
   children: ReactNode;
@@ -11,9 +12,9 @@ interface PageTransitionProps {
 export function PageTransition({ children, className }: PageTransitionProps) {
   return (
     <m.div
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+      variants={pageTransition}
+      initial="initial"
+      animate="animate"
       className={className}
     >
       {children}

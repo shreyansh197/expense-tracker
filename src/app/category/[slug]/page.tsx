@@ -16,6 +16,7 @@ import { authFetch, getActiveWorkspaceId } from "@/lib/authClient";
 import { SkeletonCategoryDetail } from "@/components/ui/Skeleton";
 import { PageTransition } from "@/components/ui/PageTransition";
 import { TargetIllustration } from "@/components/ui/illustrations";
+import { RevealOnScroll } from "@/components/motion/RevealOnScroll";
 import { ArrowLeft } from "lucide-react";
 
 const CategoryTrendChart = dynamic(
@@ -212,7 +213,7 @@ export default function CategoryPage({ params }: { params: Promise<{ slug: strin
         )}
 
         {/* Monthly trend chart */}
-        <div className="card p-4">
+        <RevealOnScroll className="card p-4">
           <h3 className="mb-3 text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
             Monthly Trend
           </h3>
@@ -229,7 +230,7 @@ export default function CategoryPage({ params }: { params: Promise<{ slug: strin
               <p className="text-xs" style={{ color: 'var(--text-muted)' }}>No trend data yet — keep logging expenses to see monthly patterns.</p>
             </div>
           )}
-        </div>
+        </RevealOnScroll>
 
         {/* Expenses list */}
         <div className="card p-4">

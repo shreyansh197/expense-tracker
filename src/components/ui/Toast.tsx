@@ -4,6 +4,7 @@ import { useState, useCallback, createContext, useContext } from "react";
 import { m, AnimatePresence } from "framer-motion";
 import { CheckCircle, XCircle, AlertCircle, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { duration as motionDuration, ease } from "@/lib/motion/tokens";
 
 type ToastType = "success" | "error" | "info";
 
@@ -82,8 +83,12 @@ function ToastItem({ toast, onClose }: { toast: Toast; onClose: () => void }) {
       layout
       initial={{ opacity: 0, y: 16, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.15 } }}
-      transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+      exit={{ opacity: 0, x: 200, transition: { duration: motionDuration.exit } }}
+      transition={{ duration: motionDuration.normal, ease: ease.out }}
+      drag="x"
+      dragConstraints={{ left: 0, right: 0 }}
+      dragElastic={{ left: 0, right: 0.5 }}
+      onDragEnd={(_e, info) => { if (info.offset.x > 100) onClose(); }}
       role={toast.type === "error" ? "alert" : "status"}
       aria-live={toast.type === "error" ? "assertive" : "polite"}
       className={cn(

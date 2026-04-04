@@ -14,6 +14,9 @@ import {
 import { cn } from "@/lib/utils";
 import { useUIStore } from "@/stores/uiStore";
 import { useSettings } from "@/hooks/useSettings";
+import { spring } from "@/lib/motion/tokens";
+
+const springStiff = spring.stiff;
 
 /* ── NAV LINKS (no Add — FAB handles that) ────────────────── */
 
@@ -129,7 +132,7 @@ export function BottomNav() {
                       "absolute -top-2 h-[3px] w-6 rounded-full",
                       isBiz ? "bg-emerald-600 dark:bg-emerald-400" : "bg-data-text"
                     )}
-                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                    transition={springStiff}
                   />
                 )}
                 <Icon size={22} />

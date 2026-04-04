@@ -13,6 +13,7 @@ import { useSettings } from "@/hooks/useSettings";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useUIStore } from "@/stores/uiStore";
 import { CalculationsProvider } from "@/contexts/CalculationsContext";
+import { RouteTransition } from "@/components/motion/RouteTransition";
 
 function AppShellInner({ children }: { children: React.ReactNode }) {
   const [showShortcuts, setShowShortcuts] = useState(false);
@@ -60,7 +61,9 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
               onTouchStart={onTouchStart}
               onTouchEnd={onTouchEnd}
             >
-              {children}
+              <RouteTransition>
+                {children}
+              </RouteTransition>
             </main>
           </div>
           <BottomNav />

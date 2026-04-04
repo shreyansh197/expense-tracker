@@ -220,7 +220,7 @@ export function ExpenseForm({
         setSubmitting(false);
       }
     },
-    [amount, day, category, remark, editExpense, onSubmit, onUpdate, closeForm, selectedMonth, selectedYear, toast, multiCurrency, expenseCurrency]
+    [amount, day, category, remark, editExpense, onSubmit, onUpdate, closeForm, selectedMonth, selectedYear, toast, multiCurrency, expenseCurrency, allCategories, symbol]
   );
 
   const handleKeyDown = useCallback(
@@ -241,18 +241,25 @@ export function ExpenseForm({
       onKeyDown={handleKeyDown}
       className="space-y-5"
     >
-      {/* Success micro-animation — inline badge, not overlay */}
+      {/* Success micro-animation — burst animation */}
       <AnimatePresence>
         {showSuccess && (
           <m.div
-            initial={{ opacity: 0, y: -4 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -4 }}
-            transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-            className="flex items-center justify-center gap-2 rounded-xl py-2 px-3"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+            className="flex items-center justify-center gap-2 rounded-xl py-3 px-3"
             style={{ background: 'var(--success-soft)' }}
           >
-            <CheckCircle size={16} className="text-emerald-500" strokeWidth={2} />
+            <m.div
+              className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-500 text-white"
+              initial={{ scale: 0 }}
+              animate={{ scale: [0, 1.2, 1] }}
+              transition={{ duration: 0.35, times: [0, 0.6, 1], ease: "easeOut" }}
+            >
+              <CheckCircle size={16} strokeWidth={2.5} />
+            </m.div>
             <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
               {editExpense ? "Updated!" : "Added!"}
             </span>

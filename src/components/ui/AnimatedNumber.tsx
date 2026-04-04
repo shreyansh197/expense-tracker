@@ -21,7 +21,6 @@ export function AnimatedNumber({ value, format, duration = 400, className, style
     prev.current = to;
 
     if (from === to) {
-      setDisplay(to);
       return;
     }
 

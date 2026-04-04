@@ -1,8 +1,10 @@
 "use client";
 
 import { useState, useCallback, useEffect, createContext, useContext, type ReactNode } from "react";
+import { m, AnimatePresence } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { duration, ease } from "@/lib/motion/tokens";
 
 const STORAGE_KEY = "settings:v2:lastOpen";
 
@@ -179,22 +181,24 @@ export function AccordionSection({
           />
         )}
       </button>
-      <div
+      <AnimatePresence initial={false}>
+      {isOpen && (
+      <m.div
         id={`section-${id}`}
         role="region"
         aria-labelledby={`header-${id}`}
-        className={cn(
-          "grid transition-[grid-template-rows] duration-[250ms]",
-          isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
-        )}
-        style={{ willChange: "grid-template-rows" }}
+        initial={{ height: 0, opacity: 0 }}
+        animate={{ height: "auto", opacity: 1 }}
+        exit={{ height: 0, opacity: 0 }}
+        transition={{ duration: duration.normal, ease: ease.inOut }}
+        style={{ overflow: "hidden" }}
       >
-        <div className="overflow-hidden">
           <div className="border-t px-4 py-4" style={{ borderColor: 'var(--border)' }}>
             {children}
           </div>
-        </div>
-      </div>
+      </m.div>
+      )}
+      </AnimatePresence>
     </section>
   );
 }

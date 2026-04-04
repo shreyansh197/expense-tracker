@@ -6,6 +6,7 @@ import { useUIStore } from "@/stores/uiStore";
 import { ExpenseForm } from "./ExpenseForm";
 import { useExpenses } from "@/hooks/useExpenses";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
+import { spring, duration } from "@/lib/motion/tokens";
 
 const DISMISS_THRESHOLD = 100;
 
@@ -131,8 +132,8 @@ export function ExpenseFormModal() {
             opacity: dragY > 0 ? Math.max(1 - dragY / 300, 0.5) : 1,
           }}
           initial={{ opacity: 0, y: 40, scale: 0.97 }}
-          animate={{ opacity: 1, y: 0, scale: 1, transition: { type: "spring", stiffness: 400, damping: 30 } }}
-          exit={{ opacity: 0, y: 20, scale: 0.97, transition: { duration: 0.15, ease: "easeIn" } }}
+          animate={{ opacity: 1, y: 0, scale: 1, transition: spring.default }}
+          exit={{ opacity: 0, y: 20, scale: 0.97, transition: { duration: duration.exit, ease: "easeIn" } }}
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}

@@ -16,6 +16,7 @@ import { LedgerCard } from "@/components/business/LedgerCard";
 import { LedgerForm } from "@/components/business/LedgerForm";
 import { BusinessKpiCards } from "@/components/business/BusinessKpiCards";
 import { TagBreakdown } from "@/components/business/TagBreakdown";
+import { RevealOnScroll } from "@/components/motion/RevealOnScroll";
 
 const CollectionChart = dynamic(
   () => import("@/components/business/CollectionChart").then((m) => m.CollectionChart),
@@ -184,8 +185,12 @@ export default function BusinessPage() {
         {!loading && ledgers.length > 0 && (
           <div className="section-zone section-teal">
           <div className="grid gap-4 lg:grid-cols-2">
-            <CollectionChart data={stats.monthlyCollections} />
-            <TagBreakdown data={stats.tagBreakdown} />
+            <RevealOnScroll>
+              <CollectionChart data={stats.monthlyCollections} />
+            </RevealOnScroll>
+            <RevealOnScroll delay={0.1}>
+              <TagBreakdown data={stats.tagBreakdown} />
+            </RevealOnScroll>
           </div>
           </div>
         )}

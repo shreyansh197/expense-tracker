@@ -13,11 +13,13 @@ import { SubscriptionsSummary } from "@/components/dashboard/SubscriptionsSummar
 import { RecurringSuggestions } from "@/components/dashboard/RecurringSuggestions";
 import { SavingsGoalsWidget } from "@/components/dashboard/SavingsGoalsWidget";
 import { DashboardCustomizer, getVisibleSections } from "@/components/dashboard/DashboardCustomizer";
+import { RevealOnScroll } from "@/components/motion/RevealOnScroll";
+import { staggerLoose, fadeUp } from "@/lib/motion/variants";
 import { SkeletonKpiCards, SkeletonChart } from "@/components/ui/Skeleton";
 import { PageTransition } from "@/components/ui/PageTransition";
 import { AmbientBackground } from "@/components/ui/AmbientBackground";
 import { ChartIllustration } from "@/components/ui/illustrations";
-import { WalletIllustration } from "@/components/ui/illustrations";
+import { LazyCoinScene } from "@/components/3d/LazyCoinScene";
 
 // Lazy-load heavy chart components (recharts ~200KB)
 const CategoryChart = dynamic(
@@ -45,6 +47,7 @@ import { CategoryDot } from "@/components/expenses/CategoryChips";
 import { QuickHelpButton } from "@/components/ui/QuickHelpButton";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { Repeat, PlusCircle, Target, BarChart3, Sparkles, ChevronDown, Check, ArrowRight } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { DashboardSectionId, DashboardLayout } from "@/types";
 import { useCalculationsContext } from "@/contexts/CalculationsContext";
@@ -108,7 +111,7 @@ function OnboardingStep({
   color,
 }: {
   done: boolean;
-  icon: React.ElementType;
+  icon: LucideIcon;
   title: string;
   subtitle: string;
   color: string;
@@ -393,6 +396,7 @@ function DashboardContent() {
         )}
 
         {/* ── Dashboard sections rendered in user-customized order ── */}
+        <m.div initial="initial" animate="animate" variants={staggerLoose}>
         {visibleSections.map((sectionId) => {
           const renderer: Record<DashboardSectionId, () => ReactNode> = {
             kpi: () => (
@@ -505,7 +509,7 @@ function DashboardContent() {
                 </div>
               ) : (
               <div className="dash-section grid gap-4 md:grid-cols-2">
-                <div className="card p-5">
+                <RevealOnScroll className="card p-5">
                   <h3 className="text-section-title mb-4">
                     Category Breakdown
                   </h3>
@@ -518,9 +522,9 @@ function DashboardContent() {
                   <div className="mt-4">
                     <CategoryLegend categoryTotals={categoryTotals} onCategoryClick={handleCategoryClick} categoryBudgets={settings.categoryBudgets} />
                   </div>
-                </div>
+                </RevealOnScroll>
 
-                <div className="card flex flex-col p-5">
+                <RevealOnScroll className="card flex flex-col p-5" delay={0.1}>
                   <h3 className="text-section-title mb-4">
                     Daily Spending Trend
                   </h3>
@@ -531,7 +535,7 @@ function DashboardContent() {
                     onBarClick={handleDayClick}
                   />
                   </div>
-                </div>
+                </RevealOnScroll>
               </div>
               )}
               </AnimatePresence>
@@ -557,7 +561,7 @@ function DashboardContent() {
                 </div>
                 {recentExpenses.length === 0 ? (
                   <div className="flex flex-col items-center gap-2 py-6">
-                    <WalletIllustration size={100} />
+                    <LazyCoinScene />
                     <p className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>No expenses this month</p>
                     <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Your recent spending will show up here</p>
                   </div>
@@ -608,8 +612,9 @@ function DashboardContent() {
             ),
           };
 
-          return <ErrorBoundary key={sectionId} fallback={<SectionFallback />}>{renderer[sectionId]()}</ErrorBoundary>;
+          return <m.div key={sectionId} variants={fadeUp}><ErrorBoundary fallback={<SectionFallback />}>{renderer[sectionId]()}</ErrorBoundary></m.div>;
         })}
+        </m.div>
       </PageTransition>
   );
 }

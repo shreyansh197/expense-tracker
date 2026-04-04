@@ -10,11 +10,12 @@ import { useUIStore } from "@/stores/uiStore";
 import { useToast } from "@/components/ui/Toast";
 import { useConfirm } from "@/components/ui/ConfirmDialog";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { WalletIllustration } from "@/components/ui/illustrations";
+import { LazyCoinScene } from "@/components/3d/LazyCoinScene";
 import { ReceiptIllustration } from "@/components/ui/illustrations";
 import { filterExpenses, groupByDay } from "@/lib/filters";
 import { formatCurrency as fmtCurrency } from "@/lib/utils";
 import { fetchRates, convert, getFallbackRates } from "@/lib/exchangeRates";
+import { staggerDelay, duration, ease } from "@/lib/motion/tokens";
 import type { Expense, CategoryId } from "@/types";
 
 const SWIPE_THRESHOLD = 80;
@@ -300,7 +301,7 @@ export function ExpenseList({
     return (
       <EmptyState
         icon={hasFilters ? Receipt : Wallet}
-        illustration={hasFilters ? <ReceiptIllustration /> : <WalletIllustration />}
+        illustration={hasFilters ? <ReceiptIllustration /> : <LazyCoinScene />}
         title={hasFilters ? "No expenses found" : "No expenses yet"}
         description={
           hasFilters
@@ -445,8 +446,11 @@ function SwipeableExpenseItem({
       layout
       initial={{ opacity: 0, y: 6 }}
       animate={deleting ? { opacity: 0, height: 0, marginBottom: 0 } : { opacity: 1, y: 0 }}
-      exit={{ opacity: 0, height: 0, marginBottom: 0 }}
-      transition={deleting ? { duration: 0.3, ease: [0.22, 1, 0.36, 1] } : { delay: idx * 0.03, duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+      exit={{ opacity: 0, x: -80, height: 0, marginBottom: 0 }}
+      transition={deleting
+        ? { duration: duration.normal, ease: ease.out }
+        : { delay: staggerDelay(idx), duration: duration.normal, ease: ease.out }
+      }
       className="relative overflow-hidden rounded-2xl"
     >
       {/* Red delete action — full-width behind the row, revealed by card translate */}

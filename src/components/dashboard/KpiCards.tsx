@@ -17,6 +17,7 @@ import { BUDGET_WARNING_THRESHOLD } from "@/lib/constants";
 import { InfoTooltip } from "@/components/ui/InfoTooltip";
 import { AnimatedNumber } from "@/components/ui/AnimatedNumber";
 import type { Forecast } from "@/types";
+import { duration, ease, stagger as motionStagger } from "@/lib/motion/tokens";
 
 interface KpiCardsProps {
   monthlyTotal: number;
@@ -94,14 +95,14 @@ export function KpiCards({
       className="space-y-3"
       initial="hidden"
       animate="visible"
-      variants={{ visible: { transition: { staggerChildren: 0.08 } } }}
+      variants={{ visible: { transition: { staggerChildren: motionStagger.normal } } }}
     >
       {/* ── Budget-not-set banner ── */}
       {salary <= 0 && (
         <m.div
           className="flex items-center justify-between rounded-xl border px-4 py-3"
           style={{ background: 'var(--warning-soft)', borderColor: 'var(--warning)', color: 'var(--text-primary)' }}
-          variants={{ hidden: { opacity: 0, y: 8 }, visible: { opacity: 1, y: 0, transition: { duration: 0.35, ease: [0.22, 1, 0.36, 1] } } }}
+          variants={{ hidden: { opacity: 0, y: 8 }, visible: { opacity: 1, y: 0, transition: { duration: duration.normal, ease: ease.out } } }}
         >
           <div className="flex items-center gap-2 text-sm">
             <Settings size={14} style={{ color: 'var(--warning)' }} />
@@ -116,7 +117,7 @@ export function KpiCards({
       {/* ── PRIMARY: Budget Status Hero ── */}
       <m.div
         className={cn("relative overflow-hidden rounded-2xl border p-4 sm:p-5", sc.bg)}
-        variants={{ hidden: { opacity: 0, y: 12 }, visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] } } }}
+        variants={{ hidden: { opacity: 0, y: 12 }, visible: { opacity: 1, y: 0, transition: { duration: duration.emphasis, ease: ease.out } } }}
       >
         <div className={cn("absolute inset-x-0 top-0 h-1 rounded-t-2xl", sc.bar)} />
         <div className="flex items-center justify-between">
@@ -142,7 +143,7 @@ export function KpiCards({
             className={cn("h-full rounded-full", isOverspent ? "bg-red-500" : isWarning ? "bg-amber-500" : "bg-brand")}
             initial={{ width: 0 }}
             animate={{ width: `${Math.min(budgetUsedPercent, 100)}%` }}
-            transition={{ delay: 0.3, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ delay: 0.3, duration: duration.slow, ease: ease.out }}
           />
         </div>
         <div className="mt-2 flex items-center justify-between text-xs" style={{ color: 'var(--text-tertiary)' }}>
@@ -159,7 +160,7 @@ export function KpiCards({
       {/* ── SECONDARY: Supporting Metrics (compact inline) ── */}
       <m.div
         className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3 sm:gap-3"
-        variants={{ hidden: { opacity: 0, y: 8 }, visible: { opacity: 1, y: 0, transition: { duration: 0.4, delay: 0.1, ease: [0.22, 1, 0.36, 1] } } }}
+        variants={{ hidden: { opacity: 0, y: 8 }, visible: { opacity: 1, y: 0, transition: { duration: duration.emphasis, delay: 0.1, ease: ease.out } } }}
       >
         <div className="rounded-xl border p-3 sm:p-3.5" style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>
           <p className="text-meta font-medium">Daily Pace</p>

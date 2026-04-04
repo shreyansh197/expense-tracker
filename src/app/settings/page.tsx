@@ -26,11 +26,11 @@ import { AutoRulesManager } from "@/components/settings/AutoRulesManager";
 import { DataAccountManagement } from "@/components/settings/DataAccountManagement";
 import { SettingsFooterLogout } from "@/components/settings/SettingsFooterLogout";
 import { PageTransition } from "@/components/ui/PageTransition";
-import { fetchRates, getRateInfo, clearRateCache, convert } from "@/lib/exchangeRates";
+import { fetchRates, getRateInfo, clearRateCache } from "@/lib/exchangeRates";
 
 /** Shows live rate source, sample conversions, and a refresh button */
 function RateSourceInfo({ baseCurrency }: { baseCurrency: string }) {
-  const [info, setInfo] = useState<{ source: string; fetchedAt: Date; base: string } | null>(null);
+  const [info, setInfo] = useState<{ source: string; fetchedAt: Date; base: string } | null>(() => getRateInfo());
   const [sampleRates, setSampleRates] = useState<Record<string, number> | null>(null);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -39,21 +39,22 @@ function RateSourceInfo({ baseCurrency }: { baseCurrency: string }) {
     setInfo(cached);
   };
 
-  const doFetch = async () => {
-    const rates = await fetchRates(baseCurrency);
-    setSampleRates(rates);
-    loadInfo();
-  };
-
   useEffect(() => {
-    loadInfo();
-    doFetch();
-  }, [baseCurrency]); // eslint-disable-line react-hooks/exhaustive-deps
+    let cancelled = false;
+    fetchRates(baseCurrency).then((rates) => {
+      if (cancelled) return;
+      setSampleRates(rates);
+      setInfo(getRateInfo());
+    });
+    return () => { cancelled = true; };
+  }, [baseCurrency]);
 
   const handleRefresh = async () => {
     setRefreshing(true);
     clearRateCache();
-    await doFetch();
+    const rates = await fetchRates(baseCurrency);
+    setSampleRates(rates);
+    loadInfo();
     setRefreshing(false);
   };
 
