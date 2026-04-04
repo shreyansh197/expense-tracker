@@ -1,6 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import { LazyLoadingGem } from "@/components/3d/LazyLoadingGem";
 
 interface SkeletonProps {
   className?: string;
@@ -29,17 +30,22 @@ export function Skeleton({ className, style }: SkeletonProps) {
 
 export function SkeletonKpiCards() {
   return (
-    <div className="grid grid-cols-2 gap-3 lg:grid-cols-3" role="status" aria-busy="true" aria-label="Loading budget overview">
-      {Array.from({ length: 6 }).map((_, i) => (
-        <div
-          key={i}
-          className="card-sm p-4"
-        >
-          <Skeleton className="mb-2 h-3 w-16" />
-          <Skeleton className="mb-2 h-7 w-24" />
-          <Skeleton className="h-2 w-full" />
-        </div>
-      ))}
+    <div role="status" aria-busy="true" aria-label="Loading budget overview">
+      <div className="mb-3 flex justify-center">
+        <LazyLoadingGem />
+      </div>
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-3">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div
+            key={i}
+            className="card-sm p-4"
+          >
+            <Skeleton className="mb-2 h-3 w-16" />
+            <Skeleton className="mb-2 h-7 w-24" />
+            <Skeleton className="h-2 w-full" />
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

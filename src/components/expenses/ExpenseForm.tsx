@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { m, AnimatePresence } from "framer-motion";
-import { X, Loader2, CheckCircle, Camera, ChevronDown, CalendarDays } from "lucide-react";
+import { X, Loader2, Camera, ChevronDown, CalendarDays } from "lucide-react";
+import { LazySuccessCoinFlip } from "@/components/3d/LazySuccessCoinFlip";
 import { getAllCategories } from "@/lib/categories";
 import { cn, getDaysInMonth, getCurrencySymbol } from "@/lib/utils";
 import { useUIStore } from "@/stores/uiStore";
@@ -241,7 +242,7 @@ export function ExpenseForm({
       onKeyDown={handleKeyDown}
       className="space-y-5"
     >
-      {/* Success micro-animation — burst animation */}
+      {/* Success micro-animation — 3D coin flip */}
       <AnimatePresence>
         {showSuccess && (
           <m.div
@@ -252,14 +253,7 @@ export function ExpenseForm({
             className="flex items-center justify-center gap-2 rounded-xl py-3 px-3"
             style={{ background: 'var(--success-soft)' }}
           >
-            <m.div
-              className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-500 text-white"
-              initial={{ scale: 0 }}
-              animate={{ scale: [0, 1.2, 1] }}
-              transition={{ duration: 0.35, times: [0, 0.6, 1], ease: "easeOut" }}
-            >
-              <CheckCircle size={16} strokeWidth={2.5} />
-            </m.div>
+            <LazySuccessCoinFlip />
             <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
               {editExpense ? "Updated!" : "Added!"}
             </span>

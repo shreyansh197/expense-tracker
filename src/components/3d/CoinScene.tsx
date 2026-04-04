@@ -1,9 +1,11 @@
 "use client";
 
-import { useRef, useState, useEffect } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
+import { useRef } from "react";
+import { useFrame } from "@react-three/fiber";
 import { Text } from "@react-three/drei";
 import { useReducedMotion } from "@/lib/motion/useReducedMotion";
+import { ThreeCanvas } from "./ThreeCanvas";
+import { CoinFallback } from "./CoinFallback";
 import type { Group } from "three";
 
 function Coin() {
@@ -34,7 +36,6 @@ function Coin() {
         color="#92400e"
         anchorX="center"
         anchorY="middle"
-        font="/fonts/inter-bold.woff"
       >
         $
       </Text>
@@ -46,7 +47,6 @@ function Coin() {
         anchorX="center"
         anchorY="middle"
         rotation={[0, Math.PI, 0]}
-        font="/fonts/inter-bold.woff"
       >
         $
       </Text>
@@ -54,34 +54,12 @@ function Coin() {
   );
 }
 
+export { Coin };
+
 export function CoinScene() {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = useState(false);
-
-  // Pause rendering when off-screen
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => setVisible(entry.isIntersecting),
-      { threshold: 0.1 },
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
-
   return (
-    <div ref={containerRef} className="h-24 w-24">
-      <Canvas
-        dpr={[1, 1.5]}
-        gl={{ antialias: false }}
-        frameloop={visible ? "always" : "never"}
-        camera={{ position: [0, 0, 4], fov: 35 }}
-      >
-        <ambientLight intensity={0.6} />
-        <directionalLight position={[3, 3, 5]} intensity={0.8} />
-        <Coin />
-      </Canvas>
-    </div>
+    <ThreeCanvas className="h-24 w-24" fallback={<CoinFallback />}>
+      <Coin />
+    </ThreeCanvas>
   );
 }
