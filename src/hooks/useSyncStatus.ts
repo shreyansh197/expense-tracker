@@ -27,9 +27,9 @@ export function useSyncStatus(): { syncStatus: SyncStatus; pendingCount: number 
     syncStatus = "error";
   } else if (phase === "syncing") {
     syncStatus = "syncing";
-  } else if (pendingCount > 0) {
-    syncStatus = "syncing";
   } else {
+    // phase is idle — don't show spinning icon just because mutations are queued;
+    // the next poll cycle will push them. Avoids permanent spinner from stuck mutations.
     syncStatus = "synced";
   }
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import { useSettings } from "@/hooks/useSettings";
 import { getAllCategories } from "@/lib/categories";
 import { useCurrency } from "@/hooks/useCurrency";
@@ -206,83 +207,95 @@ export function RecurringManager() {
       })}
 
       {showAdd ? (
-        <div className="space-y-3 rounded-lg p-3" style={{ background: 'var(--surface-secondary)', border: '1px solid var(--border-subtle)' }}>
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>
-              {editId ? "Edit Recurring" : "Add Recurring"}
-            </span>
-            <button onClick={resetForm} style={{ color: 'var(--text-muted)' }} aria-label="Close form">
-              <X size={14} />
-            </button>
-          </div>
-          <div className="flex flex-wrap gap-1.5">
-            {allCategories.map((cat) => (
-              <button
-                key={cat.id}
-                type="button"
-                onClick={() => setCategory(cat.id)}
-                className={`rounded-full px-2.5 py-1 text-xs font-medium transition-all ${
-                  category === cat.id
-                    ? "text-white shadow-sm"
-                    : ""
-                }`}
-                style={category !== cat.id ? { background: 'var(--surface-hover)', color: 'var(--text-secondary)' } : category === cat.id ? { backgroundColor: cat.color } : undefined}
-              >
-                {cat.label}
-              </button>
-            ))}
-          </div>
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <label className="form-label">Amount ({symbol})</label>
-              <input
-                type="number"
-                min="0.01"
-                step="0.01"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                placeholder="0"
-                className="form-input text-sm"
-              />
-            </div>
-            <div>
-              <label className="form-label">Day of month</label>
-              <input
-                type="number"
-                min="1"
-                max="28"
-                value={day}
-                onChange={(e) => setDay(e.target.value)}
-                className="form-input text-sm"
-              />
-            </div>
-          </div>
-          <input
-            type="text"
-            value={remark}
-            onChange={(e) => setRemark(e.target.value)}
-            placeholder="Remark"
-            maxLength={100}
-            className="form-input text-sm"
-          />
-          <div className="flex gap-2">
-            <button
-              onClick={handleSave}
-              className="rounded-lg bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+        createPortal(
+          <div
+            className="fixed inset-0 z-[70] flex items-center justify-center p-4 backdrop-blur-sm"
+            style={{ backgroundColor: 'rgba(0,0,0,0.4)' }}
+            onClick={(e) => { if (e.target === e.currentTarget) resetForm(); }}
+          >
+            <div
+              className="w-full max-w-md rounded-2xl p-5 shadow-xl space-y-3"
+              style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
             >
-              {editId ? "Update" : "Add"}
-            </button>
-            <button
-              onClick={resetForm}
-              className="rounded-lg px-3 py-2 text-sm font-medium transition-colors"
-              style={{ color: 'var(--text-secondary)' }}
-              onMouseEnter={e => { e.currentTarget.style.background = 'var(--surface-hover)'; }}
-              onMouseLeave={e => { e.currentTarget.style.background = ''; }}
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
+                  {editId ? "Edit Recurring Expense" : "Add Recurring Expense"}
+                </span>
+                <button onClick={resetForm} style={{ color: 'var(--text-muted)' }} aria-label="Close form">
+                  <X size={16} />
+                </button>
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {allCategories.map((cat) => (
+                  <button
+                    key={cat.id}
+                    type="button"
+                    onClick={() => setCategory(cat.id)}
+                    className={`rounded-full px-2.5 py-1 text-xs font-medium transition-all ${
+                      category === cat.id
+                        ? "text-white shadow-sm"
+                        : ""
+                    }`}
+                    style={category !== cat.id ? { background: 'var(--surface-hover)', color: 'var(--text-secondary)' } : category === cat.id ? { backgroundColor: cat.color } : undefined}
+                  >
+                    {cat.label}
+                  </button>
+                ))}
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="form-label">Amount ({symbol})</label>
+                  <input
+                    type="number"
+                    min="0.01"
+                    step="0.01"
+                    value={amount}
+                    onChange={(e) => setAmount(e.target.value)}
+                    placeholder="0"
+                    className="form-input"
+                  />
+                </div>
+                <div>
+                  <label className="form-label">Day of month</label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="28"
+                    value={day}
+                    onChange={(e) => setDay(e.target.value)}
+                    className="form-input"
+                  />
+                </div>
+              </div>
+              <input
+                type="text"
+                value={remark}
+                onChange={(e) => setRemark(e.target.value)}
+                placeholder="Remark"
+                maxLength={100}
+                className="form-input"
+              />
+              <div className="flex gap-2 pt-1">
+                <button
+                  onClick={handleSave}
+                  className="rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700"
+                >
+                  {editId ? "Update" : "Add"}
+                </button>
+                <button
+                  onClick={resetForm}
+                  className="rounded-lg px-4 py-2.5 text-sm font-medium transition-colors"
+                  style={{ color: 'var(--text-secondary)' }}
+                  onMouseEnter={e => { e.currentTarget.style.background = 'var(--surface-hover)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = ''; }}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>,
+          document.body,
+        )
       ) : (
         <button
           onClick={() => setShowAdd(true)}

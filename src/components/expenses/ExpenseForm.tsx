@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { m, AnimatePresence } from "framer-motion";
 import { X, Loader2, CheckCircle, Camera, ChevronDown, CalendarDays } from "lucide-react";
 import { getAllCategories } from "@/lib/categories";
-import { cn, getDaysInMonth } from "@/lib/utils";
+import { cn, getDaysInMonth, getCurrencySymbol } from "@/lib/utils";
 import { useUIStore } from "@/stores/uiStore";
 import { useToast } from "@/components/ui/Toast";
 import { DatePicker } from "@/components/ui/DatePicker";
@@ -51,6 +51,7 @@ export function ExpenseForm({
     return "";
   });
   const [autoApplied, setAutoApplied] = useState(false);
+  const [manualOverride, setManualOverride] = useState(false);
   const [amount, setAmount] = useState(editExpense?.amount?.toString() || prefill?.amount?.toString() || "");
   const today = new Date();
   const [day, setDay] = useState(editExpense?.day || today.getDate());
@@ -91,9 +92,17 @@ export function ExpenseForm({
 
   // Apply auto-rules when remark or amount changes (only for new expenses)
   useEffect(() => {
-    if (editExpense) return;
+    if (editExpense || manualOverride) return;
     const enabledRules = autoRules.filter((r) => r.enabled && r.action.type === "set_category");
-    for (const rule of enabledRules) {
+    // Sort: exact-match operators (equals) before range operators (less_than, greater_than, etc.)
+    // so "amount equals 25 → transport" wins over "amount < 100 → small expenses"
+    const sortedRules = [...enabledRules].sort((a, b) => {
+      const exactOps = ["equals"];
+      const aExact = exactOps.includes(a.condition.operator) ? 0 : 1;
+      const bExact = exactOps.includes(b.condition.operator) ? 0 : 1;
+      return aExact - bExact;
+    });
+    for (const rule of sortedRules) {
       const { field, operator, value } = rule.condition;
       let match = false;
       if (field === "remark" && remark.trim()) {
@@ -144,7 +153,7 @@ export function ExpenseForm({
       setCategory("");
       setAutoApplied(false);
     }
-  }, [remark, amount, day, autoRules, editExpense, allCategories, autoApplied]);
+  }, [remark, amount, day, autoRules, editExpense, allCategories, autoApplied, manualOverride]);
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
@@ -197,7 +206,8 @@ export function ExpenseForm({
         }
         localStorage.setItem("expenstream-last-category", category);
         const catLabel = allCategories.find(c => c.id === category)?.label ?? category;
-        toast(editExpense ? `${symbol}${parsedAmount} in ${catLabel} updated` : `${symbol}${parsedAmount} added to ${catLabel}`);
+        const displaySymbol = multiCurrency && expenseCurrency ? getCurrencySymbol(expenseCurrency) : symbol;
+        toast(editExpense ? `${displaySymbol}${parsedAmount} in ${catLabel} updated` : `${displaySymbol}${parsedAmount} added to ${catLabel}`);
         // Brief success flash before closing
         setShowSuccess(true);
         setTimeout(() => {
@@ -328,7 +338,18 @@ export function ExpenseForm({
             <m.button
               key={cat.id}
               type="button"
-              onClick={() => setCategory(cat.id)}
+              onClick={() => {
+                if (category === cat.id) {
+                  // Deselect — allow user to override auto-applied category
+                  setCategory("");
+                  setAutoApplied(false);
+                  setManualOverride(true);
+                } else {
+                  setCategory(cat.id);
+                  setAutoApplied(false);
+                  setManualOverride(true);
+                }
+              }}
               role="radio"
               aria-checked={category === cat.id}
               className={cn(

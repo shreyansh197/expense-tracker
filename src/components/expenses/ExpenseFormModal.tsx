@@ -90,6 +90,23 @@ export function ExpenseFormModal() {
     return () => window.removeEventListener("keydown", handleGlobalKeyDown);
   }, []);
 
+  // On mobile, when keyboard opens, scroll the focused input into view
+  useEffect(() => {
+    if (!showExpenseForm) return;
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const handleResize = () => {
+      const el = document.activeElement as HTMLElement | null;
+      if (el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.tagName === "SELECT")) {
+        requestAnimationFrame(() => {
+          el.scrollIntoView({ block: "center", behavior: "smooth" });
+        });
+      }
+    };
+    vv.addEventListener("resize", handleResize);
+    return () => vv.removeEventListener("resize", handleResize);
+  }, [showExpenseForm]);
+
   return (
     <AnimatePresence>
       {showExpenseForm && (
@@ -106,7 +123,7 @@ export function ExpenseFormModal() {
           role="dialog"
           aria-modal="true"
           aria-label="Expense form"
-          className="expense-form-modal w-full max-w-md max-h-[90vh] overflow-y-auto rounded-t-2xl shadow-lg md:max-h-none md:overflow-visible md:rounded-2xl"
+          className="expense-form-modal w-full max-w-md max-h-[90dvh] overflow-y-auto rounded-t-2xl shadow-lg md:max-h-none md:overflow-visible md:rounded-2xl"
           style={{
             background: 'var(--surface)',
             border: '1px solid var(--border)',

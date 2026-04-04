@@ -100,7 +100,7 @@ export function DataAccountManagement({ onScrollToExport }: DataAccountManagemen
               <p className="text-xs mb-3" style={{ color: 'var(--text-secondary)' }}>
                 {COPY.deleteWorkspaceHelp}
               </p>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex gap-2">
                 <button
                   onClick={handleExportFirst}
                   className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium transition-colors"

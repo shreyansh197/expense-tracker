@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Plus, Trash2, Zap, X } from "lucide-react";
+import { Plus, Trash2, Zap, X, Pencil } from "lucide-react";
 import { useSettings } from "@/hooks/useSettings";
 import { getAllCategories } from "@/lib/categories";
 import { useToast } from "@/components/ui/Toast";
@@ -56,18 +56,27 @@ export function useAutoRules() {
     });
   };
 
-  return { rules, addRule, removeRule, toggleRule };
+  const updateRule = (id: string, updates: Partial<Omit<AutoRule, "id" | "createdAt">>) => {
+    updateSettings({
+      autoRules: rules.map((r) =>
+        r.id === id ? { ...r, ...updates } : r
+      ),
+    });
+  };
+
+  return { rules, addRule, removeRule, toggleRule, updateRule };
 }
 
 export function AutoRulesManager() {
   const { symbol } = useCurrency();
-  const { rules, addRule, removeRule, toggleRule } = useAutoRules();
+  const { rules, addRule, removeRule, toggleRule, updateRule } = useAutoRules();
   const { settings } = useSettings();
   const { toast } = useToast();
   const { confirm } = useConfirm();
   const allCategories = getAllCategories(settings.customCategories, settings.hiddenDefaults);
 
   const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [name, setName] = useState("");
   const [condField, setCondField] = useState<"remark" | "amount" | "day_of_month" | "is_recurring">("remark");
   const [condOp, setCondOp] = useState<"contains" | "equals" | "greater_than" | "less_than" | "starts_with" | "ends_with" | "between">("contains");
@@ -84,6 +93,7 @@ export function AutoRulesManager() {
     setCondValue2("");
     setActionType("set_category");
     setActionValue(allCategories[0]?.id || "");
+    setEditingId(null);
     setShowForm(false);
   };
 
@@ -111,14 +121,41 @@ export function AutoRulesManager() {
         ? `${condValue.trim()},${condValue2.trim()}`
         : condValue.trim();
 
-    addRule({
-      name: name.trim(),
-      condition: { field: condField, operator: condOp, value: finalValue },
-      action: { type: actionType, value: actionValue },
-      enabled: true,
-    });
+    if (editingId) {
+      updateRule(editingId, {
+        name: name.trim(),
+        condition: { field: condField, operator: condOp, value: finalValue },
+        action: { type: actionType, value: actionValue },
+      });
+      toast("Rule updated");
+    } else {
+      addRule({
+        name: name.trim(),
+        condition: { field: condField, operator: condOp, value: finalValue },
+        action: { type: actionType, value: actionValue },
+        enabled: true,
+      });
+      toast("Rule created");
+    }
     resetForm();
-    toast("Rule created");
+  };
+
+  const handleEdit = (rule: AutoRule) => {
+    setEditingId(rule.id);
+    setName(rule.name);
+    setCondField(rule.condition.field as typeof condField);
+    setCondOp(rule.condition.operator as typeof condOp);
+    if (rule.condition.operator === "between" && rule.condition.value.includes(",")) {
+      const [v1, v2] = rule.condition.value.split(",");
+      setCondValue(v1);
+      setCondValue2(v2);
+    } else {
+      setCondValue(rule.condition.value);
+      setCondValue2("");
+    }
+    setActionType(rule.action.type as typeof actionType);
+    setActionValue(rule.action.value);
+    setShowForm(true);
   };
 
   const handleDelete = async (id: string) => {
@@ -170,6 +207,14 @@ export function AutoRulesManager() {
             </p>
           </div>
           <button
+            onClick={() => handleEdit(rule)}
+            className="rounded p-1 transition-colors"
+            style={{ color: 'var(--text-muted)' }}
+            title="Edit rule"
+          >
+            <Pencil size={13} />
+          </button>
+          <button
             onClick={() => toggleRule(rule.id)}
             className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${
               rule.enabled
@@ -193,7 +238,7 @@ export function AutoRulesManager() {
       {showForm ? (
         <div className="space-y-3 rounded-lg p-3" style={{ background: 'var(--surface-secondary)', border: '1px solid var(--border-subtle)' }}>
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>New Rule</span>
+            <span className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>{editingId ? "Edit Rule" : "New Rule"}</span>
             <button onClick={resetForm} style={{ color: 'var(--text-muted)' }}>
               <X size={14} />
             </button>
@@ -332,7 +377,7 @@ export function AutoRulesManager() {
               disabled={!name.trim() || !condValue.trim()}
               className="rounded-lg bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-40"
             >
-              Create Rule
+              {editingId ? "Update Rule" : "Create Rule"}
             </button>
             <button
               onClick={resetForm}

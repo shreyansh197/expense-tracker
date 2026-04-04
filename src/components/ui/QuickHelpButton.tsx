@@ -18,16 +18,26 @@ export function QuickHelpButton({ variant = "icon" }: { variant?: "icon" | "side
 
   useEffect(() => {
     if (!open) return;
-    const handler = (e: MouseEvent | TouchEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
-    };
-    document.addEventListener("mousedown", handler);
-    document.addEventListener("touchstart", handler);
+    // Small delay so the touch/click that opened the popup doesn't immediately close it
+    const timerId = setTimeout(() => {
+      const handler = (e: MouseEvent | TouchEvent) => {
+        if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+      };
+      document.addEventListener("mousedown", handler);
+      document.addEventListener("touchstart", handler, { passive: true });
+      handlerRef.current = handler;
+    }, 100);
     return () => {
-      document.removeEventListener("mousedown", handler);
-      document.removeEventListener("touchstart", handler);
+      clearTimeout(timerId);
+      if (handlerRef.current) {
+        document.removeEventListener("mousedown", handlerRef.current);
+        document.removeEventListener("touchstart", handlerRef.current);
+        handlerRef.current = null;
+      }
     };
   }, [open]);
+
+  const handlerRef = useRef<((e: MouseEvent | TouchEvent) => void) | null>(null);
 
   const isMac = typeof navigator !== "undefined" && navigator.platform.includes("Mac");
   const shortcuts = SHORTCUTS.filter((s) => (isMac ? !s.ctrl : !s.meta));
@@ -54,10 +64,10 @@ export function QuickHelpButton({ variant = "icon" }: { variant?: "icon" | "side
       {open && (
         <div
           className={cn(
-            "w-72 rounded-xl border p-4 shadow-xl",
+            "w-72 rounded-xl border p-4 shadow-xl max-h-[70vh] overflow-y-auto",
             variant === "sidebar"
               ? "absolute z-[9999] bottom-full left-0 mb-2"
-              : "absolute z-[10000] right-0 top-full mt-2"
+              : "fixed z-[10000] right-3 top-auto mt-2 sm:absolute sm:right-0 sm:top-full sm:fixed-auto"
           )}
           style={{
             background: "var(--surface)",
