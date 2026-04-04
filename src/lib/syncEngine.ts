@@ -495,7 +495,11 @@ async function _doSync() {
     return;
   }
   try {
-    _setSyncPhase("syncing");
+    // Only show "syncing" indicator when there are pending mutations to push.
+    // Routine polls (pull-only with no changes) should not flash the spinner.
+    const hasPending = (await db.mutations.count()) > 0;
+    if (hasPending) _setSyncPhase("syncing");
+
     if (!_migrated) {
       syncLog("migrate", "Running one-time migration…");
       await _migrateStuckData();
