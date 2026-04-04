@@ -360,13 +360,29 @@ export function useSettings() {
 
   // On mount: subscribe to sync engine pull notifications.
   // When the sync engine pulls new data into IDB, we check if settings changed.
+  // Guard: prevent push-pull-push cycle — if a push was triggered by this
+  // handler recently, skip to avoid re-entry loops with the sync engine.
   useEffect(() => {
+    let lastHandlerPushAt = 0;
+    const HANDLER_DEBOUNCE = 5_000; // ms — don't push back within 5s of last handler push
+
     const unsubscribe = onSyncPull(() => {
       loadSettingsFromIDB().then(async (remote) => {
         // Gather all known sources of salary truth
         const local = loadSettings(_currentUserId);
         const bestKnownSalary = Math.max(_settings.salary, local.salary);
         console.log(`[settings:onSyncPull] remote.salary=${remote?.salary ?? 'null'}, local.salary=${local.salary}, inMemory.salary=${_settings.salary}, best=${bestKnownSalary}`);
+
+        // Helper: guarded push that prevents re-entry loops
+        const guardedPush = (s: UserSettings) => {
+          const now = Date.now();
+          if (now - lastHandlerPushAt < HANDLER_DEBOUNCE) {
+            console.log(`[settings:onSyncPull] Skipping push — debounced (${now - lastHandlerPushAt}ms since last)`);
+            return;
+          }
+          lastHandlerPushAt = now;
+          pushToApi(s);
+        };
 
         // Failsafe: if all sources have salary=0, fetch directly from API
         if ((!remote || remote.salary === 0) && bestKnownSalary === 0) {
@@ -383,7 +399,7 @@ export function useSettings() {
         // Never overwrite a known non-zero salary with 0
         if (remote.salary === 0 && bestKnownSalary > 0) {
           const best = _settings.salary >= local.salary ? _settings : local;
-          if (best.updatedAt > 0) pushToApi(best);
+          if (best.updatedAt > 0) guardedPush(best);
           if (_settings.salary < bestKnownSalary) {
             const merged = { ...local, salary: bestKnownSalary };
             saveLocal(merged);
@@ -403,7 +419,7 @@ export function useSettings() {
         } else if (localTs > 0 && localTs > remoteTs) {
           // Local is newer — ensure in-memory matches and push
           if (_settings.updatedAt < localTs) _setShared(local);
-          pushToApi(local);
+          guardedPush(local);
         } else {
           // Same timestamp or both 0 — prefer whichever has real data
           if (remote.salary > 0 && local.salary === 0) {

@@ -158,6 +158,12 @@ export async function pullChanges(workspaceId?: string): Promise<boolean> {
         pendingMutations.filter(m => m.operation === "delete" && m.id).map(m => m.id!)
       );
 
+      // Track whether we actually wrote something (skip _notifySyncPull if no real changes)
+      let didWrite = false;
+
+      // Pre-read existing settings to avoid redundant writes
+      const existingSettings = changes.settings ? await db.settings.get(wid) : null;
+
       await db.transaction(
         "rw",
         [db.expenses, db.settings, db.ledgers, db.payments, db.syncMeta],
@@ -186,13 +192,14 @@ export async function pullChanges(workspaceId?: string): Promise<boolean> {
                   deletedAt: null,
                 });
               }
+              didWrite = true;
             }
           }
 
           // ── Settings ──
           if (changes.settings) {
             const s = changes.settings;
-            await db.settings.put({
+            const incoming = {
               workspaceId: wid,
               salary: Number(s.salary),
               currency: s.currency as string,
@@ -214,7 +221,27 @@ export async function pullChanges(workspaceId?: string): Promise<boolean> {
               dismissedRecurringSuggestions: s.dismissedRecurringSuggestions ?? [],
               autoRules: s.autoRules ?? [],
               updatedAt: new Date(s.updatedAt as string).getTime(),
-            });
+            };
+            // Only write if settings actually changed (avoids unnecessary
+            // Dexie observable triggers → re-renders → onSyncPull loops)
+            const settingsChanged = !existingSettings
+              || existingSettings.salary !== incoming.salary
+              || existingSettings.currency !== incoming.currency
+              || existingSettings.updatedAt !== incoming.updatedAt
+              || JSON.stringify(existingSettings.categories) !== JSON.stringify(incoming.categories)
+              || JSON.stringify(existingSettings.categoryBudgets) !== JSON.stringify(incoming.categoryBudgets)
+              || JSON.stringify(existingSettings.recurringExpenses) !== JSON.stringify(incoming.recurringExpenses)
+              || JSON.stringify(existingSettings.autoRules) !== JSON.stringify(incoming.autoRules)
+              || existingSettings.rolloverEnabled !== incoming.rolloverEnabled
+              || existingSettings.businessMode !== incoming.businessMode
+              || existingSettings.multiCurrencyEnabled !== incoming.multiCurrencyEnabled;
+            if (settingsChanged) {
+              syncLog("pull", "Settings changed — writing to IDB");
+              await db.settings.put(incoming);
+              didWrite = true;
+            } else {
+              syncLog("pull", "Settings unchanged — skipping IDB write");
+            }
           }
 
           // ── Ledgers ──
@@ -239,6 +266,7 @@ export async function pullChanges(workspaceId?: string): Promise<boolean> {
                   deletedAt: null,
                 });
               }
+              didWrite = true;
             }
           }
 
@@ -263,6 +291,7 @@ export async function pullChanges(workspaceId?: string): Promise<boolean> {
                   deletedAt: null,
                 });
               }
+              didWrite = true;
             }
           }
 
@@ -273,7 +302,14 @@ export async function pullChanges(workspaceId?: string): Promise<boolean> {
         }
       );
 
-      _notifySyncPull();
+      // Only notify subscribers if we actually wrote data — prevents
+      // cascading re-renders and push-pull loops from no-op pulls.
+      if (didWrite) {
+        syncLog("pull", "Data changed — notifying subscribers");
+        _notifySyncPull();
+      } else {
+        syncLog("pull", "No data changes — skipping notification");
+      }
 
       // If server indicated more data is available, pull again
       if (data.hasMore) {
@@ -386,12 +422,16 @@ export function trySyncPush(workspaceId?: string) {
   if (!navigator.onLine) { syncWarn("push", "Offline, skipping push"); return; }
   _lastMutationAt = Date.now();
   _schedulePoll(); // Switch to fast polling
-  _setSyncPhase("syncing");
+  // Don't set phase to "syncing" here — the next _doSync poll will show the
+  // spinner only when appropriate.  Calling _setSyncPhase("syncing") on every
+  // trySyncPush (including settings-reconciliation pushes) caused a visible
+  // spinner flash on every poll cycle.
   pushMutations(workspaceId).then(async () => {
     await pullChanges(workspaceId);
     const wid = workspaceId ?? getActiveWorkspaceId();
     if (wid) _broadcastSyncEvent(wid);
-    _setSyncPhase("idle");
+    // Only transition to idle if we were previously syncing (avoid idle→idle flicker)
+    if (_syncPhase === "syncing") _setSyncPhase("idle");
   }).catch((err) => {
     syncErr("push", "trySyncPush error:", err);
     _setSyncPhase("error");
