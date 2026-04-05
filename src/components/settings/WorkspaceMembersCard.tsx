@@ -146,7 +146,7 @@ export function WorkspaceMembersCard() {
                         {m.name || m.email}
                         {m.id === user?.id && <span className="ml-1" style={{ color: 'var(--text-muted)' }}>(you)</span>}
                       </p>
-                      <p className="text-[11px]" style={{ color: 'var(--text-muted)' }}>{m.role}</p>
+                      <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{m.role}</p>
                     </div>
                   </div>
                   {m.role !== "OWNER" && m.id !== user?.id && (
@@ -222,7 +222,7 @@ export function WorkspaceMembersCard() {
                   <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
                     {inv.role} invite
                   </p>
-                  <p className="text-[11px]" style={{ color: 'var(--text-muted)' }}>
+                  <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
                     Expires: {new Date(inv.expiresAt).toLocaleDateString()}
                   </p>
                 </div>

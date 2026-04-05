@@ -136,7 +136,7 @@ export function BottomNav() {
                   />
                 )}
                 <Icon size={22} />
-                <span className="text-[11px] font-medium">{item.label}</span>
+                <span className="text-caption font-medium">{item.label}</span>
               </Link>
             );
           })}

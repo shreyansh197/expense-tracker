@@ -162,7 +162,7 @@ export default function CategoryPage({ params }: { params: Promise<{ slug: strin
                     style={{ width: `${Math.min(budgetPct, 100)}%` }}
                   />
                 </div>
-                <p className="mt-1 text-[11px]" style={{ color: 'var(--text-muted)' }}>
+                <p className="mt-1 text-xs" style={{ color: 'var(--text-muted)' }}>
                   {budgetPct}% of {formatCurrency(categoryBudget)} budget
                 </p>
               </div>
@@ -197,7 +197,7 @@ export default function CategoryPage({ params }: { params: Promise<{ slug: strin
                 {formatCurrency(enhancedStats.largest.amount)}
               </p>
               {enhancedStats.largest.remark && (
-                <p className="mt-0.5 truncate text-[11px]" style={{ color: 'var(--text-muted)' }}>{enhancedStats.largest.remark}</p>
+                <p className="mt-0.5 truncate text-xs" style={{ color: 'var(--text-muted)' }}>{enhancedStats.largest.remark}</p>
               )}
             </div>
             <div className="card p-4">
@@ -206,7 +206,7 @@ export default function CategoryPage({ params }: { params: Promise<{ slug: strin
                 {formatCurrency(enhancedStats.smallest.amount)}
               </p>
               {enhancedStats.smallest.remark && (
-                <p className="mt-0.5 truncate text-[11px]" style={{ color: 'var(--text-muted)' }}>{enhancedStats.smallest.remark}</p>
+                <p className="mt-0.5 truncate text-xs" style={{ color: 'var(--text-muted)' }}>{enhancedStats.smallest.remark}</p>
               )}
             </div>
           </div>

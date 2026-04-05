@@ -46,19 +46,19 @@ export function LedgerCard({ ledger, totalReceived }: LedgerCardProps) {
               {ledger.name}
             </h3>
             {isOverdue && (
-              <span className="flex items-center gap-0.5 rounded-full bg-red-50 px-1.5 py-0.5 text-[11px] font-semibold text-red-600 dark:bg-red-900/30 dark:text-red-400">
+              <span className="flex items-center gap-0.5 rounded-full bg-red-50 px-1.5 py-0.5 text-caption font-semibold text-red-600 dark:bg-red-900/30 dark:text-red-400">
                 <AlertTriangle size={10} />
                 {overdueDays}d overdue
               </span>
             )}
           </div>
           <div className="mt-1 flex items-center gap-2">
-            <span className={cn("inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[11px] font-medium", status.color)}>
+            <span className={cn("inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-caption font-medium", status.color)}>
               <StatusIcon size={10} />
               {status.label}
             </span>
             {ledger.dueDate && (
-              <span className="text-[11px]" style={{ color: 'var(--text-muted)' }}>
+              <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
                 Due {new Date(ledger.dueDate).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" })}
               </span>
             )}
@@ -68,7 +68,7 @@ export function LedgerCard({ ledger, totalReceived }: LedgerCardProps) {
           <p className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>
             {formatCurrency(totalReceived)}
           </p>
-          <p className="text-[11px]" style={{ color: 'var(--text-muted)' }}>
+          <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
             {ledger.expectedAmount > 0 ? `of ${formatCurrency(ledger.expectedAmount)}` : 'No target set'}
           </p>
         </div>
@@ -97,14 +97,14 @@ export function LedgerCard({ ledger, totalReceived }: LedgerCardProps) {
           {ledger.tags.slice(0, 3).map((tag) => (
             <span
               key={tag}
-              className="rounded-full px-1.5 py-0.5 text-[11px]"
+              className="rounded-full px-1.5 py-0.5 text-caption"
               style={{ background: 'var(--surface-secondary)', color: 'var(--text-secondary)' }}
             >
               {tag}
             </span>
           ))}
           {ledger.tags.length > 3 && (
-            <span className="text-[11px]" style={{ color: 'var(--text-muted)' }}>+{ledger.tags.length - 3}</span>
+            <span className="text-xs" style={{ color: 'var(--text-muted)' }}>+{ledger.tags.length - 3}</span>
           )}
         </div>
       )}

@@ -56,7 +56,7 @@ export function LedgerProgressRing({
           style={{ transition: "stroke-dashoffset 0.8s cubic-bezier(0.22, 1, 0.36, 1)" }}
         />
       </svg>
-      <span className="absolute text-[11px] font-bold" style={{ color: 'var(--text-primary)' }}>
+      <span className="absolute text-xs font-bold" style={{ color: 'var(--text-primary)' }}>
         {Math.round(percent)}%
       </span>
     </div>

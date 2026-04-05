@@ -181,7 +181,7 @@ function DetailRow({
     <div className="flex items-start gap-3 py-3">
       <span className="mt-0.5 shrink-0" style={{ color: 'var(--text-tertiary)' }}>{icon}</span>
       <div className="flex-1 min-w-0">
-        <p className="text-[11px] font-medium uppercase tracking-wide" style={{ color: 'var(--text-tertiary)' }}>{label}</p>
+        <p className="text-xs font-medium uppercase tracking-wide" style={{ color: 'var(--text-tertiary)' }}>{label}</p>
         <p
           className={`mt-0.5 text-sm ${mono ? "font-mono" : ""} ${multiline ? "whitespace-pre-wrap" : "break-all"}`}
           style={{ color: 'var(--text-secondary)' }}
@@ -250,19 +250,19 @@ export function PaymentList({ payments, onDelete }: PaymentListProps) {
 
                 {/* Method badge */}
                 {p.method && (
-                  <span className={`mt-1 inline-block rounded-md px-1.5 py-0.5 text-[11px] font-medium ${iconColor}`}>
+                  <span className={`mt-1 inline-block rounded-md px-1.5 py-0.5 text-caption font-medium ${iconColor}`}>
                     {methodLabels[p.method]}
                   </span>
                 )}
 
                 {/* Date */}
-                <p className="mt-1 text-[11px]" style={{ color: 'var(--text-tertiary)' }}>
+                <p className="mt-1 text-xs" style={{ color: 'var(--text-tertiary)' }}>
                   {formatDate(p.date)}
                 </p>
 
                 {/* Reference */}
                 {p.reference && (
-                  <p className="mt-0.5 truncate text-[11px]" style={{ color: 'var(--text-tertiary)' }}>
+                  <p className="mt-0.5 truncate text-xs" style={{ color: 'var(--text-tertiary)' }}>
                     <span className="font-medium" style={{ color: 'var(--text-secondary)' }}>Ref:</span>{" "}
                     {p.reference}
                   </p>
@@ -270,7 +270,7 @@ export function PaymentList({ payments, onDelete }: PaymentListProps) {
 
                 {/* Notes preview */}
                 {p.notes && (
-                  <p className="mt-0.5 truncate text-[11px] italic" style={{ color: 'var(--text-tertiary)' }}>
+                  <p className="mt-0.5 truncate text-xs italic" style={{ color: 'var(--text-tertiary)' }}>
                     {p.notes}
                   </p>
                 )}
@@ -278,8 +278,8 @@ export function PaymentList({ payments, onDelete }: PaymentListProps) {
 
               {/* Running total */}
               <div className="shrink-0 text-right">
-                <p className="text-[11px]" style={{ color: 'var(--text-tertiary)' }}>Running</p>
-                <p className="text-[11px] font-medium text-amount" style={{ color: 'var(--text-secondary)' }}>
+                <p className="text-xs" style={{ color: 'var(--text-tertiary)' }}>Running</p>
+                <p className="text-xs font-medium text-amount" style={{ color: 'var(--text-secondary)' }}>
                   {formatCurrency(p.runningTotal)}
                 </p>
               </div>

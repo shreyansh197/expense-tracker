@@ -307,7 +307,7 @@ export function SecurityCard() {
             {/* Manual entry secret */}
             {totpSecret && (
               <div className="rounded-lg px-3 py-2.5" style={{ background: 'var(--surface-secondary)' }}>
-                <p className="text-[11px] font-medium uppercase tracking-wider mb-1" style={{ color: 'var(--text-muted)' }}>
+                <p className="text-xs font-medium uppercase tracking-wider mb-1" style={{ color: 'var(--text-muted)' }}>
                   Can&apos;t scan? Enter manually:
                 </p>
                 <div className="flex items-center gap-2">
@@ -419,7 +419,7 @@ export function SecurityCard() {
                     {s.deviceName || "Unknown Device"}
                     {s.isCurrent && <span className="ml-2 text-emerald-500">(current)</span>}
                   </p>
-                  <p className="text-[11px]" style={{ color: 'var(--text-muted)' }}>
+                  <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
                     Last active: {new Date(s.lastActiveAt).toLocaleDateString()}
                   </p>
                 </div>
@@ -464,7 +464,7 @@ export function SecurityCard() {
                     {d.name || "Unnamed Device"}
                     {d.isCurrent && <span className="ml-2 text-emerald-500">(this device)</span>}
                   </p>
-                  <p className="text-[11px]" style={{ color: 'var(--text-muted)' }}>
+                  <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
                     Last active: {new Date(d.lastActiveAt).toLocaleDateString()}
                   </p>
                 </div>

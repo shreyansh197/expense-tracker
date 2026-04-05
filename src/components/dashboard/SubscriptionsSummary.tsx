@@ -1,10 +1,12 @@
 "use client";
 
-import { useMemo } from "react";
-import { Repeat, Calendar, Pause, Play } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Repeat, Calendar, Pause, Play, ChevronDown } from "lucide-react";
+import { AnimatePresence, m } from "framer-motion";
 import { useCurrency } from "@/hooks/useCurrency";
 import { buildCategoryMap } from "@/lib/categories";
 import { useSettings } from "@/hooks/useSettings";
+import { duration, ease } from "@/lib/motion/tokens";
 
 export function SubscriptionsSummary() {
   const { settings } = useSettings();
@@ -26,6 +28,8 @@ export function SubscriptionsSummary() {
     return { active, paused, totalMonthly, pctOfBudget, upcoming };
   }, [recurring, settings.salary]);
 
+  const [expanded, setExpanded] = useState(false);
+
   if (recurring.length === 0) return null;
 
   return (
@@ -40,19 +44,19 @@ export function SubscriptionsSummary() {
       {/* Stats row */}
       <div className="mb-4 grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3">
         <div className="rounded-xl px-3 py-2.5" style={{ background: 'var(--surface-secondary)' }}>
-          <p className="text-[11px] font-medium" style={{ color: 'var(--text-tertiary)' }}>Monthly</p>
+          <p className="text-xs font-medium" style={{ color: 'var(--text-tertiary)' }}>Monthly</p>
           <p className="text-sm font-bold text-amount" style={{ color: 'var(--text-primary)' }}>
             {formatCurrency(stats.totalMonthly)}
           </p>
         </div>
         <div className="rounded-xl px-3 py-2.5" style={{ background: 'var(--surface-secondary)' }}>
-          <p className="text-[11px] font-medium" style={{ color: 'var(--text-tertiary)' }}>% of Budget</p>
+          <p className="text-xs font-medium" style={{ color: 'var(--text-tertiary)' }}>% of Budget</p>
           <p className="text-sm font-bold text-amount" style={{ color: 'var(--text-primary)' }}>
             {stats.pctOfBudget}%
           </p>
         </div>
         <div className="rounded-xl px-3 py-2.5" style={{ background: 'var(--surface-secondary)' }}>
-          <p className="text-[11px] font-medium" style={{ color: 'var(--text-tertiary)' }}>Active / Paused</p>
+          <p className="text-xs font-medium" style={{ color: 'var(--text-tertiary)' }}>Active / Paused</p>
           <p className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>
             {stats.active.length} / {stats.paused.length}
           </p>
@@ -62,7 +66,7 @@ export function SubscriptionsSummary() {
       {/* Upcoming */}
       {stats.upcoming.length > 0 && (
         <div>
-          <p className="mb-1.5 text-[11px] font-medium uppercase" style={{ color: 'var(--text-muted)' }}>
+          <p className="mb-1.5 text-xs font-medium uppercase" style={{ color: 'var(--text-muted)' }}>
             Upcoming This Month
           </p>
           <div className="space-y-1">
@@ -91,37 +95,59 @@ export function SubscriptionsSummary() {
       )}
 
       {/* All recurring items */}
-      <details className="mt-2">
-        <summary className="cursor-pointer text-[11px] font-medium text-data-text hover:text-data-hover">
+      <div className="mt-2">
+        <button
+          onClick={() => setExpanded((v) => !v)}
+          className="flex items-center gap-1 cursor-pointer text-xs font-medium text-data-text hover:text-data-hover transition-colors"
+        >
+          <m.span
+            animate={{ rotate: expanded ? 180 : 0 }}
+            transition={{ duration: duration.fast, ease: ease.out }}
+            className="inline-flex"
+          >
+            <ChevronDown size={12} />
+          </m.span>
           View all ({recurring.length})
-        </summary>
-        <div className="mt-2 space-y-1">
-          {recurring.map((r) => (
-            <div
-              key={r.id}
-              className="flex items-center justify-between rounded-lg px-2 py-1.5 text-xs"
+        </button>
+        <AnimatePresence initial={false}>
+          {expanded && (
+            <m.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: duration.normal, ease: ease.out }}
+              className="overflow-hidden"
             >
-              <div className="flex items-center gap-2">
-                {r.active ? (
-                  <Play size={10} className="text-ok" />
-                ) : (
-                  <Pause size={10} style={{ color: 'var(--text-muted)' }} />
-                )}
-                <span className="w-5 shrink-0 text-center font-medium" style={{ color: 'var(--text-muted)' }}>{r.day}</span>
-                <span
-                  className={r.active ? "" : "line-through"}
-                  style={{ color: r.active ? 'var(--text-secondary)' : 'var(--text-muted)' }}
-                >
-                  {r.remark || catMap[r.category]?.label || r.category}
-                </span>
+              <div className="mt-2 space-y-1">
+                {recurring.map((r) => (
+                  <div
+                    key={r.id}
+                    className="flex items-center justify-between rounded-lg px-2 py-1.5 text-xs"
+                  >
+                    <div className="flex items-center gap-2">
+                      {r.active ? (
+                        <Play size={10} className="text-ok" />
+                      ) : (
+                        <Pause size={10} style={{ color: 'var(--text-muted)' }} />
+                      )}
+                      <span className="w-5 shrink-0 text-center font-medium" style={{ color: 'var(--text-muted)' }}>{r.day}</span>
+                      <span
+                        className={r.active ? "" : "line-through"}
+                        style={{ color: r.active ? 'var(--text-secondary)' : 'var(--text-muted)' }}
+                      >
+                        {r.remark || catMap[r.category]?.label || r.category}
+                      </span>
+                    </div>
+                    <span className="font-medium" style={{ color: 'var(--text-primary)' }}>
+                      {formatCurrency(r.amount)}
+                    </span>
+                  </div>
+                ))}
               </div>
-              <span className="font-medium" style={{ color: 'var(--text-primary)' }}>
-                {formatCurrency(r.amount)}
-              </span>
-            </div>
-          ))}
-        </div>
-      </details>
+            </m.div>
+          )}
+        </AnimatePresence>
+      </div>
     </div>
   );
 }

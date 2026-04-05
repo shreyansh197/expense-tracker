@@ -126,13 +126,13 @@ export function KpiCards({
             <span>{isOverspent ? "Over Budget" : "You still have"}</span>
           </div>
           {daysRemaining > 0 && (
-            <span className="flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-medium" style={{ background: 'var(--surface-secondary)', color: 'var(--text-secondary)' }}>
+            <span className="flex items-center gap-1.5 rounded-full px-2 py-0.5 text-caption font-medium" style={{ background: 'var(--surface-secondary)', color: 'var(--text-secondary)' }}>
             <Clock size={11} />
               {daysRemaining}d left
             </span>
           )}
         </div>
-        <p className={cn("text-amount mt-1.5 text-4xl sm:text-5xl font-extrabold tracking-tight", sc.text)}>
+        <p className={cn("text-amount mt-1.5 text-3xl sm:text-4xl font-extrabold tracking-tight", sc.text)}>
           <AnimatedNumber value={Math.abs(remaining)} format={formatCurrency} />
         </p>
         <p className="mt-2 text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
@@ -151,7 +151,7 @@ export function KpiCards({
           <span>{expenseCount} transaction{expenseCount !== 1 ? "s" : ""}</span>
         </div>
         {rolloverAmount > 0 && (
-          <p className="mt-1 text-[11px] font-medium text-brand">
+          <p className="mt-1 text-xs font-medium text-brand">
             Includes +{formatCurrency(rolloverAmount)} rollover from last month
           </p>
         )}
@@ -159,7 +159,7 @@ export function KpiCards({
 
       {/* ── SECONDARY: Supporting Metrics (compact inline) ── */}
       <m.div
-        className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3 sm:gap-3"
+        className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3"
         variants={{ hidden: { opacity: 0, y: 8 }, visible: { opacity: 1, y: 0, transition: { duration: duration.emphasis, delay: 0.1, ease: ease.out } } }}
       >
         <div className="rounded-xl p-3 sm:p-3.5" style={{ background: 'var(--surface-secondary)' }}>
@@ -201,7 +201,7 @@ export function KpiCards({
             <TrendingUp size={12} />
             <span>Forecast</span>
             {forecast.method === "weighted" && forecast.historicalMonths > 0 && (
-              <span className="ml-auto text-[11px] font-normal opacity-60">
+              <span className="ml-auto text-xs font-normal opacity-60">
                 {forecast.historicalMonths}mo avg
               </span>
             )}

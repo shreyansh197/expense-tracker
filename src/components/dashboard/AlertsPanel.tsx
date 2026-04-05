@@ -144,9 +144,9 @@ export function AlertsPanel({
             <p>Flags unusually large expenses compared to your typical spending in each category.</p>
             <p className="mt-1"><strong>How it works:</strong> For each category, we calculate the median amount and the Median Absolute Deviation (MAD). Expenses that are more than 3× MAD above the median are flagged.</p>
             <p className="mt-1">This helps you spot one-off big purchases or accidental double charges that stand out from your normal pattern.</p>
-            <p className="mt-1 text-[11px] opacity-60">Requires at least 3 transactions per category to detect anomalies.</p>
+            <p className="mt-1 text-xs opacity-60">Requires at least 3 transactions per category to detect anomalies.</p>
           </InfoTooltip>
-          <span className="text-[11px] text-gray-400">Anomaly detection active</span>
+          <span className="text-xs text-gray-400">Anomaly detection active</span>
         </div>
       )}
       {visibleAlerts.map((alert, i) => (

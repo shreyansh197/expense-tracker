@@ -28,7 +28,7 @@ export function SyncIndicator() {
         <div className="flex items-center gap-1 text-slate-400" title="Offline">
           <WifiOff size={14} />
           {pendingCount > 0 && (
-            <span className="ml-0.5 rounded-full bg-amber-500 px-1.5 py-0.5 text-[11px] font-bold text-white">
+            <span className="ml-0.5 rounded-full bg-amber-500 px-1.5 py-0.5 text-caption font-bold text-white">
               {pendingCount}
             </span>
           )}

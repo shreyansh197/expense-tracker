@@ -461,8 +461,8 @@ function SwipeableExpenseItem({
           className="absolute inset-0 flex items-center justify-end overflow-hidden rounded-2xl"
           style={{
             background: isFullSwipe
-              ? '#EF4444'
-              : 'linear-gradient(to left, #EF4444 0%, #F87171 40%, transparent 100%)',
+              ? 'var(--danger)'
+              : 'linear-gradient(to left, var(--danger) 0%, #F87171 40%, transparent 100%)',
             transition: isDragging ? 'none' : 'background 0.2s',
           }}
           aria-hidden
@@ -543,7 +543,7 @@ function SwipeableExpenseItem({
               : formatCurrency(expense.amount)}
           </span>
           {multiCurrency && expense.currency && expense.currency !== baseCurrency && (
-            <span className="text-[11px] text-amount" style={{ color: 'var(--text-muted)' }}>
+            <span className="text-xs text-amount" style={{ color: 'var(--text-muted)' }}>
               ≈ {fmtCurrency(convert(expense.amount, expense.currency, baseCurrency, rates ?? getFallbackRates(baseCurrency)), baseCurrency)}
             </span>
           )}

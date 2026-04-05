@@ -287,7 +287,7 @@ function MobileAuthPage({ children }: { children: React.ReactNode }) {
           <div className="flex-1 flex flex-col justify-center">
             {children}
           </div>
-          <p className="mt-4 text-center text-[11px] text-slate-400 dark:text-slate-600">
+          <p className="mt-4 text-center text-xs text-slate-400 dark:text-slate-600">
             By continuing, you agree to our Terms of Service.
           </p>
         </div>
@@ -315,7 +315,7 @@ function DesktopAuthPage({ children }: { children: React.ReactNode }) {
           <div className="rounded-2xl p-8 shadow-xl" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
             {children}
           </div>
-          <p className="mt-4 text-center text-[11px]" style={{ color: 'var(--text-tertiary)' }}>
+          <p className="mt-4 text-center text-xs" style={{ color: 'var(--text-tertiary)' }}>
             By continuing, you agree to our Terms of Service.
           </p>
         </div>
@@ -571,7 +571,7 @@ export function AuthModal({
           {/* OR divider */}
           <div className="relative flex items-center gap-3">
             <div className="flex-1 border-t border-slate-200 dark:border-slate-700/80" />
-            <span className="text-[11px] font-medium text-slate-400 dark:text-slate-600 uppercase tracking-wide">or</span>
+            <span className="text-xs font-medium text-slate-400 dark:text-slate-600 uppercase tracking-wide">or</span>
             <div className="flex-1 border-t border-slate-200 dark:border-slate-700/80" />
           </div>
 
@@ -737,7 +737,7 @@ export function AuthModal({
       {/* OR + Google button */}
       <div className="mt-6 relative flex items-center gap-3">
         <div className="flex-1 border-t border-slate-200 dark:border-slate-700/80" />
-        <span className="text-[11px] font-medium text-slate-400 dark:text-slate-600 uppercase tracking-wide">or continue with</span>
+        <span className="text-xs font-medium text-slate-400 dark:text-slate-600 uppercase tracking-wide">or continue with</span>
         <div className="flex-1 border-t border-slate-200 dark:border-slate-700/80" />
       </div>
       <button

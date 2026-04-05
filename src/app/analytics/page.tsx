@@ -108,7 +108,7 @@ function AnalyticsContent() {
     history.monthOverMonthChange === null
       ? "var(--text-muted)"
       : history.monthOverMonthChange > 5
-        ? "#EF4444"
+        ? "var(--danger)"
         : history.monthOverMonthChange < -5
           ? "#10B981"
           : "var(--text-secondary)";
@@ -166,7 +166,7 @@ function AnalyticsContent() {
                         className="absolute top-0 h-full w-0.5"
                         style={{
                           left: `${Math.min((effectiveBudget / maxMonthTotal) * 100, 100)}%`,
-                          background: "#EF4444",
+                          background: "var(--danger)",
                           opacity: 0.7,
                         }}
                       />
@@ -180,7 +180,7 @@ function AnalyticsContent() {
             })}
           </div>
           {effectiveBudget > 0 && (
-            <p className="text-[11px] mt-2" style={{ color: "var(--text-muted)" }}>
+            <p className="text-xs mt-2" style={{ color: "var(--text-muted)" }}>
               Red line = budget ({formatCurrencyCompact(effectiveBudget)})
             </p>
           )}
@@ -196,7 +196,7 @@ function AnalyticsContent() {
           >
             <div className="flex items-center gap-1.5">
               <DollarSign size={13} style={{ color: "var(--text-muted)" }} />
-              <span className="text-[11px] uppercase tracking-wider font-semibold" style={{ color: "var(--text-muted)" }}>
+              <span className="text-xs uppercase tracking-wider font-semibold" style={{ color: "var(--text-muted)" }}>
                 Avg Monthly
               </span>
             </div>
@@ -213,7 +213,7 @@ function AnalyticsContent() {
           >
             <div className="flex items-center gap-1.5">
               <MoMIcon size={13} style={{ color: momColor }} />
-              <span className="text-[11px] uppercase tracking-wider font-semibold" style={{ color: "var(--text-muted)" }}>
+              <span className="text-xs uppercase tracking-wider font-semibold" style={{ color: "var(--text-muted)" }}>
                 vs Last Month
               </span>
             </div>
@@ -232,14 +232,14 @@ function AnalyticsContent() {
           >
             <div className="flex items-center gap-1.5">
               <Repeat size={13} style={{ color: "var(--text-muted)" }} />
-              <span className="text-[11px] uppercase tracking-wider font-semibold" style={{ color: "var(--text-muted)" }}>
+              <span className="text-xs uppercase tracking-wider font-semibold" style={{ color: "var(--text-muted)" }}>
                 Recurring
               </span>
             </div>
             <span className="text-lg font-bold" style={{ color: "var(--text-primary)" }}>
               {formatCurrencyCompact(history.recurringVsOneTime.recurring)}
             </span>
-            <span className="text-[11px]" style={{ color: "var(--text-tertiary)" }}>
+            <span className="text-xs" style={{ color: "var(--text-tertiary)" }}>
               vs {formatCurrencyCompact(history.recurringVsOneTime.oneTime)} one-time
             </span>
           </m.div>
@@ -252,14 +252,14 @@ function AnalyticsContent() {
           >
             <div className="flex items-center gap-1.5">
               <Zap size={13} style={{ color: anomalies.length > 0 ? "#F59E0B" : "var(--text-muted)" }} />
-              <span className="text-[11px] uppercase tracking-wider font-semibold" style={{ color: "var(--text-muted)" }}>
+              <span className="text-xs uppercase tracking-wider font-semibold" style={{ color: "var(--text-muted)" }}>
                 Anomalies
               </span>
             </div>
             <span className="text-lg font-bold" style={{ color: anomalies.length > 0 ? "#F59E0B" : "var(--text-primary)" }}>
               {anomalies.length}
             </span>
-            <span className="text-[11px]" style={{ color: "var(--text-tertiary)" }}>
+            <span className="text-xs" style={{ color: "var(--text-tertiary)" }}>
               unusual spikes
             </span>
           </m.div>
@@ -289,22 +289,22 @@ function AnalyticsContent() {
                         className="absolute bottom-0 w-full rounded-t-sm transition-all duration-500"
                         style={{
                           height: `${Math.max(pct, 4)}%`,
-                          background: factor >= 1.2 ? "#EF4444" : factor >= 0.8 ? "var(--color-accent)" : "var(--text-muted)",
+                          background: factor >= 1.2 ? "var(--danger)" : factor >= 0.8 ? "var(--color-accent)" : "var(--text-muted)",
                           opacity: factor >= 0.8 ? 0.9 : 0.4,
                         }}
                       />
                     </div>
-                    <span className="text-[11px] font-medium" style={{ color: "var(--text-tertiary)" }}>
+                    <span className="text-xs font-medium" style={{ color: "var(--text-tertiary)" }}>
                       {label}
                     </span>
-                    <span className="text-[11px] font-mono" style={{ color: "var(--text-muted)" }}>
+                    <span className="text-xs font-mono" style={{ color: "var(--text-muted)" }}>
                       {factor.toFixed(1)}x
                     </span>
                   </div>
                 );
               })}
             </div>
-            <p className="text-[11px] mt-3" style={{ color: "var(--text-muted)" }}>
+            <p className="text-xs mt-3" style={{ color: "var(--text-muted)" }}>
               1.0x = average · higher = you spend more on that day
             </p>
           </m.div>
@@ -331,7 +331,7 @@ function AnalyticsContent() {
                   return (
                     <div key={e.id} className="flex items-center gap-3">
                       <span
-                        className="w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-bold shrink-0"
+                        className="w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
                         style={{
                           background: cat?.bgColor || "var(--bg-secondary)",
                           color: cat?.color || "var(--text-muted)",
@@ -343,7 +343,7 @@ function AnalyticsContent() {
                         <p className="text-xs font-medium truncate" style={{ color: "var(--text-primary)" }}>
                           {e.remark || cat?.label || e.category}
                         </p>
-                        <p className="text-[11px]" style={{ color: "var(--text-tertiary)" }}>
+                        <p className="text-xs" style={{ color: "var(--text-tertiary)" }}>
                           {cat?.label || e.category} · Day {e.day}
                         </p>
                       </div>
@@ -396,7 +396,7 @@ function AnalyticsContent() {
                     y1={140 - (effectiveBudget / maxCumulative) * 120}
                     x2="390"
                     y2={140 - (effectiveBudget / maxCumulative) * 120}
-                    stroke="#EF4444"
+                    stroke="var(--danger)"
                     strokeWidth="1"
                     strokeDasharray="5 3"
                     opacity="0.7"
@@ -443,7 +443,7 @@ function AnalyticsContent() {
                 </text>
               </svg>
               {effectiveBudget > 0 && (
-                <p className="text-[11px] mt-1" style={{ color: "var(--text-muted)" }}>
+                <p className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>
                   Dashed red line = budget limit
                 </p>
               )}
@@ -508,7 +508,7 @@ function AnalyticsContent() {
                       <span className="text-xs font-medium" style={{ color: cat?.color || "var(--text-primary)" }}>
                         {cat?.label || category}
                       </span>
-                      <span className="text-[11px] font-mono" style={{ color: "var(--text-muted)" }}>
+                      <span className="text-xs font-mono" style={{ color: "var(--text-muted)" }}>
                         {formatCurrencyCompact(monthValues[monthValues.length - 1])} this month
                       </span>
                     </div>

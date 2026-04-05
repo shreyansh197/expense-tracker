@@ -267,7 +267,7 @@ export function GoalsManager() {
                       {g.name}
                     </span>
                     {isComplete && (
-                      <span className="rounded-full bg-emerald-100 px-1.5 py-0.5 text-[11px] font-semibold text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400">
+                      <span className="rounded-full bg-emerald-100 px-1.5 py-0.5 text-caption font-semibold text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400">
                         Done!
                       </span>
                     )}
@@ -275,7 +275,7 @@ export function GoalsManager() {
                   <div className="flex items-center gap-1">
                     <button
                       onClick={() => { setFundGoalId(g.id); setFundMode("add"); setFundAmount(""); }}
-                      className="rounded-lg px-2 py-1 text-[11px] font-medium text-indigo-600 hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-900/30"
+                      className="rounded-lg px-2 py-1 text-xs font-medium text-indigo-600 hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-900/30"
                     >
                       + Add
                     </button>
@@ -366,7 +366,7 @@ export function GoalsManager() {
                     }}
                   />
                 </div>
-                <div className="mt-1.5 flex items-center justify-between text-[11px]" style={{ color: 'var(--text-muted)' }}>
+                <div className="mt-1.5 flex items-center justify-between text-xs" style={{ color: 'var(--text-muted)' }}>
                   <span>
                     {formatCurrency(g.savedAmount)} of {formatCurrency(g.targetAmount)} ({pct}%)
                   </span>

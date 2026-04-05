@@ -60,6 +60,16 @@
   --warning-soft: #fff8ee;
   --danger: #EF5350;
   --danger-soft: #fdeeed;
+  /* ── Status surfaces (semantic feedback) ── */
+  --status-ok-bg: #ecfdf5;
+  --status-ok-border: #a7f3d0;
+  --status-ok-text: #059669;
+  --status-warn-bg: #fffbeb;
+  --status-warn-border: #fde68a;
+  --status-warn-text: #d97706;
+  --status-err-bg: #fef2f2;
+  --status-err-border: #fecaca;
+  --status-err-text: #dc2626;
   /* ── General ── */
   --overlay: rgba(0, 0, 0, 0.4);
   --category-fallback: #6B7280;
@@ -146,6 +156,16 @@
   --warning-soft: rgba(251, 191, 36, 0.12);
   --danger: #F87171;
   --danger-soft: rgba(248, 113, 113, 0.12);
+  /* ── Status surfaces (semantic feedback) ── */
+  --status-ok-bg: rgba(16, 185, 129, 0.12);
+  --status-ok-border: rgba(16, 185, 129, 0.25);
+  --status-ok-text: #6ee7b7;
+  --status-warn-bg: rgba(245, 158, 11, 0.12);
+  --status-warn-border: rgba(245, 158, 11, 0.25);
+  --status-warn-text: #fcd34d;
+  --status-err-bg: rgba(239, 68, 68, 0.12);
+  --status-err-border: rgba(239, 68, 68, 0.25);
+  --status-err-text: #fca5a5;
   /* ── General ── */
   --overlay: rgba(0, 0, 0, 0.6);
   --category-fallback: #6B7280;
@@ -419,6 +439,12 @@ button, a {
   line-height: 1.5;
   color: var(--text-tertiary);
 }
+.text-caption {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--text-tertiary);
+}
 .text-amount {
   font-weight: 600;
   font-variant-numeric: tabular-nums;
@@ -675,13 +701,6 @@ input[type="password"]::-ms-clear {
   50%       { transform: translateY(-8px); }
 }
 
-/* Slow ambient gradient drift for empty-state backgrounds */
-@keyframes gradient-drift {
-  0%   { background-position: 0% 50%; }
-  50%  { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
 /* Skeleton shimmer sweep (premium replacement for pulse) */
 @keyframes shimmer {
   0%   { transform: translateX(-100%); }
@@ -698,15 +717,6 @@ input[type="password"]::-ms-clear {
 @keyframes donut-sweep {
   from { stroke-dashoffset: 251.3; }
   to   { stroke-dashoffset: var(--target-offset, 62.8); }
-}
-
-/* Floating particle drift */
-@keyframes particle-drift {
-  0%   { transform: translate(0, 0) scale(1);    opacity: 0.4; }
-  25%  { transform: translate(8px, -12px) scale(1.1); opacity: 0.6; }
-  50%  { transform: translate(-4px, -20px) scale(0.9); opacity: 0.35; }
-  75%  { transform: translate(6px, -10px) scale(1.05); opacity: 0.55; }
-  100% { transform: translate(0, 0) scale(1);    opacity: 0.4; }
 }
 
 /* Utility: hover lift for cards (desktop only) */
@@ -731,12 +741,6 @@ input[type="password"]::-ms-clear {
 /* Utility: ambient float */
 .animate-float {
   animation: float-gentle 6s ease-in-out;
-}
-
-/* Utility: ambient gradient */
-.animate-gradient-drift {
-  background-size: 200% 200%;
-  animation: gradient-drift 8s ease infinite;
 }
 
 /* Toast countdown progress bar */

@@ -185,7 +185,7 @@ export default function LedgerDetailPage() {
               {ledger.tags.map((tag) => (
                 <span
                   key={tag}
-                  className="rounded-full px-2 py-0.5 text-[11px]"
+                  className="rounded-full px-2 py-0.5 text-caption"
                   style={{ background: 'var(--surface-secondary)', color: 'var(--text-secondary)' }}
                 >
                   {tag}

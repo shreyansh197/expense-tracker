@@ -70,13 +70,13 @@ function RateSourceInfo({ baseCurrency }: { baseCurrency: string }) {
   return (
     <div className="rounded-lg p-3 space-y-2" style={{ background: "var(--surface-secondary)" }}>
       <div className="flex items-center justify-between">
-        <p className="text-[11px] font-semibold uppercase tracking-wide" style={{ color: "var(--text-tertiary)" }}>
+        <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--text-tertiary)" }}>
           Exchange Rates
         </p>
         <button
           onClick={handleRefresh}
           disabled={refreshing}
-          className="flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-medium transition-colors"
+          className="flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-medium transition-colors"
           style={{ color: "var(--brand)", background: "var(--accent-soft)" }}
         >
           <RefreshCw size={10} className={refreshing ? "animate-spin" : ""} />
@@ -84,7 +84,7 @@ function RateSourceInfo({ baseCurrency }: { baseCurrency: string }) {
         </button>
       </div>
       {info && (
-        <p className="text-[11px]" style={{ color: "var(--text-muted)" }}>
+        <p className="text-xs" style={{ color: "var(--text-muted)" }}>
           Source: {sourceLabel[info.source] ?? info.source} · Updated {info.fetchedAt.toLocaleTimeString()}
         </p>
       )}
@@ -262,7 +262,7 @@ export default function SettingsPage() {
 
           {/* ━━━ YOUR ACCOUNT — indigo zone ━━━ */}
           <div id="zone-account" role="tabpanel" aria-labelledby="tab-zone-account" className={`section-zone section-indigo space-y-2 scroll-mt-16 ${activeZone !== 'zone-account' ? 'lg:hidden' : ''}`}>
-          <h3 className="text-[11px] font-bold uppercase tracking-wider pb-1 px-1" style={{ color: 'var(--text-tertiary)' }}>
+          <h3 className="text-xs font-bold uppercase tracking-wider pb-1 px-1" style={{ color: 'var(--text-tertiary)' }}>
             Your Account
           </h3>
 
@@ -302,7 +302,7 @@ export default function SettingsPage() {
 
           {/* ━━━ FINANCES — teal zone ━━━ */}
           <div id="zone-finances" role="tabpanel" aria-labelledby="tab-zone-finances" className={`section-zone section-teal space-y-2 scroll-mt-16 ${activeZone !== 'zone-finances' ? 'lg:hidden' : ''}`}>
-          <h3 className="text-[11px] font-bold uppercase tracking-wider pt-2 pb-1 px-1" style={{ color: 'var(--text-tertiary)' }}>
+          <h3 className="text-xs font-bold uppercase tracking-wider pt-2 pb-1 px-1" style={{ color: 'var(--text-tertiary)' }}>
             Finances
           </h3>
 
@@ -363,7 +363,7 @@ export default function SettingsPage() {
                 </button>
 
                 </div>
-                <p className="mt-1 text-[11px]" style={{ color: 'var(--text-muted)' }}>
+                <p className="mt-1 text-xs" style={{ color: 'var(--text-muted)' }}>
                   Used for any month without a specific override below
                 </p>
               </div>
@@ -405,7 +405,7 @@ export default function SettingsPage() {
                     {saving ? "..." : "Set"}
                   </button>
                 </div>
-                <p className="mt-1 text-[11px]" style={{ color: 'var(--text-muted)' }}>
+                <p className="mt-1 text-xs" style={{ color: 'var(--text-muted)' }}>
                   {monthlyBudgets[budgetKey] !== undefined
                     ? `Override: ${formatCurrency(monthlyBudgets[budgetKey])} — clear input and click Set to remove`
                     : "No override — using default budget"}
@@ -507,7 +507,7 @@ export default function SettingsPage() {
 
           {/* ━━━ AUTOMATION & DATA — coral zone ━━━ */}
           <div id="zone-automation" role="tabpanel" aria-labelledby="tab-zone-automation" className={`section-zone section-coral space-y-2 scroll-mt-16 ${activeZone !== 'zone-automation' ? 'lg:hidden' : ''}`}>
-          <h3 className="text-[11px] font-bold uppercase tracking-wider pt-2 pb-1 px-1" style={{ color: 'var(--text-tertiary)' }}>
+          <h3 className="text-xs font-bold uppercase tracking-wider pt-2 pb-1 px-1" style={{ color: 'var(--text-tertiary)' }}>
             Automation & Data
           </h3>
 
@@ -547,7 +547,7 @@ export default function SettingsPage() {
 
           {/* ━━━ PREFERENCES — indigo zone ━━━ */}
           <div id="zone-preferences" role="tabpanel" aria-labelledby="tab-zone-preferences" className={`section-zone section-indigo space-y-2 scroll-mt-16 ${activeZone !== 'zone-preferences' ? 'lg:hidden' : ''}`}>
-          <h3 className="text-[11px] font-bold uppercase tracking-wider pt-2 pb-1 px-1" style={{ color: 'var(--text-tertiary)' }}>
+          <h3 className="text-xs font-bold uppercase tracking-wider pt-2 pb-1 px-1" style={{ color: 'var(--text-tertiary)' }}>
             Preferences
           </h3>
 

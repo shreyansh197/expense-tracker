@@ -97,10 +97,10 @@ export function Sidebar() {
           style={{ background: 'var(--surface-secondary)' }}
           title={`${formatCurrency(monthlyTotal)} of ${formatCurrency(effectiveBudget)} used`}
         >          <div className="flex items-center justify-between mb-2">
-            <span className="text-[11px] font-bold uppercase tracking-wider" style={{ color: 'var(--text-tertiary)' }}>
+            <span className="text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--text-tertiary)' }}>
               Budget
             </span>
-            <span className="text-[11px] font-medium" style={{ color: 'var(--text-secondary)' }}>
+            <span className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>
               {Math.round(budgetUsedPercent)}%
             </span>
           </div>
@@ -115,7 +115,7 @@ export function Sidebar() {
               transition={{ delay: 0.2, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
             />
           </div>
-          <div className="mt-2 flex justify-between text-[11px]">
+          <div className="mt-2 flex justify-between text-xs">
             <span style={{ color: 'var(--text-secondary)' }}>
               {formatCurrency(monthlyTotal)} spent
             </span>

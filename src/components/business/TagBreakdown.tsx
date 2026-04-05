@@ -22,10 +22,10 @@ export function TagBreakdown({ data }: TagBreakdownProps) {
             <div key={item.tag} className="space-y-1">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
+                  <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-caption font-medium text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
                     {item.tag}
                   </span>
-                  <span className="text-[11px]" style={{ color: 'var(--text-tertiary)' }}>{item.count} ledger{item.count !== 1 ? "s" : ""}</span>
+                  <span className="text-xs" style={{ color: 'var(--text-tertiary)' }}>{item.count} ledger{item.count !== 1 ? "s" : ""}</span>
                 </div>
                 <span className="text-xs font-medium text-amount" style={{ color: 'var(--text-secondary)' }}>
                   {formatCurrency(item.received)} / {formatCurrency(item.expected)}

@@ -123,7 +123,7 @@ export function RecurringSuggestions() {
                 <p className="truncate text-sm font-medium" style={{ color: "var(--text-primary)" }}>
                   {label}
                 </p>
-                <p className="text-[11px]" style={{ color: "var(--text-tertiary)" }}>
+                <p className="text-xs" style={{ color: "var(--text-tertiary)" }}>
                   ~{formatCurrency(s.averageAmount)} · Day {s.averageDay} · {s.matchCount} months · {pct}% confident
                 </p>
               </div>
@@ -155,7 +155,7 @@ export function RecurringSuggestions() {
       </div>
 
       {suggestions.length > 3 && (
-        <p className="mt-2 text-center text-[11px]" style={{ color: "var(--text-tertiary)" }}>
+        <p className="mt-2 text-center text-xs" style={{ color: "var(--text-tertiary)" }}>
           +{suggestions.length - 3} more pattern{suggestions.length - 3 !== 1 ? "s" : ""} detected
         </p>
       )}

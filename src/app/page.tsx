@@ -84,7 +84,7 @@ function CollapsibleSection({ id, title, children }: { id: string; title: string
     <div className="dash-section">
       <button
         onClick={toggle}
-        className="flex w-full items-center justify-between rounded-lg px-1 py-2 text-[11px] font-semibold uppercase tracking-wider lg:hidden"
+        className="flex w-full items-center justify-between rounded-lg px-1 py-2 text-xs font-semibold uppercase tracking-wider lg:hidden"
         style={{ color: 'var(--text-tertiary)' }}
         aria-expanded={open}
       >
@@ -142,7 +142,7 @@ function OnboardingStep({
         <p className={cn("text-sm font-semibold leading-tight", done && "line-through")} style={{ color: 'var(--text-primary)' }}>
           {title}
         </p>
-        <p className="mt-0.5 text-[11px] leading-relaxed" style={{ color: 'var(--text-tertiary)' }}>
+        <p className="mt-0.5 text-xs leading-relaxed" style={{ color: 'var(--text-tertiary)' }}>
           {subtitle}
         </p>
       </div>
@@ -197,7 +197,7 @@ function WelcomeCard({ onAddExpense, hasBudget }: { onAddExpense: () => void; ha
               transition={{ delay: 0.4, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
             />
           </div>
-          <span className="text-[11px] font-bold text-amount" style={{ color: 'var(--text-tertiary)' }}>
+          <span className="text-xs font-bold text-amount" style={{ color: 'var(--text-tertiary)' }}>
             {stepsCompleted}/{totalSteps}
           </span>
         </div>
@@ -356,7 +356,7 @@ function DashboardContent() {
               <p className="text-xl sm:text-2xl font-normal tracking-tight" style={{ fontFamily: 'var(--font-display), Georgia, serif', color: 'var(--text-primary)' }}>
                 {user.name.split(" ")[0]}
               </p>
-              <p className="mt-0.5 text-[11px] sm:text-xs tracking-wide" style={{ color: 'var(--text-tertiary)' }}>
+              <p className="mt-0.5 text-xs sm:text-xs tracking-wide" style={{ color: 'var(--text-tertiary)' }}>
                 {new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}
               </p>
             </div>
@@ -599,7 +599,7 @@ function DashboardContent() {
                             : formatCurrency(e.amount)}
                         </span>
                         {settings.multiCurrencyEnabled && e.currency && e.currency !== settings.currency && (
-                          <span className="text-amount ml-3 shrink-0 text-[11px]" style={{ color: 'var(--text-muted)' }}>
+                          <span className="text-amount ml-3 shrink-0 text-xs" style={{ color: 'var(--text-muted)' }}>
                             ≈ {fmtCurrency(convert(e.amount, e.currency, settings.currency, getFallbackRates(settings.currency)), settings.currency)}
                           </span>
                         )}

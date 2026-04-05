@@ -290,7 +290,7 @@ export function CategoryManager() {
         </button>
       )}
 
-      <p className="text-[11px] text-slate-400">
+      <p className="text-xs text-slate-400">
         Tap the budget amount to set per-category spending limits. Drag custom categories to reorder.
       </p>
     </div>

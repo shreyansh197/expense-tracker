@@ -239,7 +239,7 @@ function CalendarGrid({
         {DAYS_OF_WEEK.map((d) => (
           <div
             key={d}
-            className="flex h-8 items-center justify-center text-[11px] font-semibold uppercase"
+            className="flex h-8 items-center justify-center text-caption font-semibold uppercase"
             style={{ color: 'var(--text-muted)' }}
           >
             {d}
