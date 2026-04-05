@@ -393,7 +393,7 @@ function DashboardContent() {
         )}
 
         {/* ── Dashboard sections rendered in user-customized order ── */}
-        <m.div initial="initial" animate="animate" variants={staggerLoose}>
+        <m.div initial="initial" animate="animate" variants={staggerLoose} className="space-y-6 sm:space-y-8">
         {visibleSections.map((sectionId) => {
           const renderer: Record<DashboardSectionId, () => ReactNode> = {
             kpi: () => (
