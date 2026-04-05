@@ -459,7 +459,7 @@ function DashboardContent() {
             ),
 
             subscriptions: () => (
-              <div key="subscriptions">
+              <div key="subscriptions" className="space-y-6 sm:space-y-8">
                 {(settings.recurringExpenses ?? []).length > 0 && (
                   <div>
                   <CollapsibleSection id="subscriptions" title="Recurring Expenses">
