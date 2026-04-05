@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useSettings } from "@/hooks/useSettings";
 import { useToast } from "@/components/ui/Toast";
 import { useCurrency } from "@/hooks/useCurrency";
-import { LazyGoalRing } from "@/components/3d/LazyGoalRing";
+
 
 export function SavingsGoalsWidget() {
   const { settings, updateSettings } = useSettings();
@@ -98,9 +98,18 @@ export function SavingsGoalsWidget() {
 
           return (
             <div key={g.id} className="flex items-start gap-3">
-              {/* 3D Goal Ring */}
-              <div className="shrink-0 pt-1">
-                <LazyGoalRing progress={pct} color={g.color} />
+              {/* Circular progress ring */}
+              <div
+                className="shrink-0 mt-1 rounded-full"
+                style={{
+                  width: 40,
+                  height: 40,
+                  background: `conic-gradient(${g.color} ${pct * 3.6}deg, var(--surface-secondary) 0deg)`,
+                }}
+              >
+                <div className="flex h-full w-full items-center justify-center rounded-full" style={{ background: 'var(--surface-primary)', width: 30, height: 30, margin: 5 }}>
+                  <span className="text-[9px] font-bold" style={{ color: g.color }}>{Math.round(pct)}%</span>
+                </div>
               </div>
               {/* Goal details */}
               <div className="min-w-0 flex-1 space-y-1.5">

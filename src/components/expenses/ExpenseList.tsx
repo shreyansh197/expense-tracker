@@ -10,8 +10,7 @@ import { useUIStore } from "@/stores/uiStore";
 import { useToast } from "@/components/ui/Toast";
 import { useConfirm } from "@/components/ui/ConfirmDialog";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { LazyCoinScene } from "@/components/3d/LazyCoinScene";
-import { LazyCoinDrop } from "@/components/3d/LazyCoinDrop";
+
 import { ReceiptIllustration } from "@/components/ui/illustrations";
 import { filterExpenses, groupByDay } from "@/lib/filters";
 import { formatCurrency as fmtCurrency } from "@/lib/utils";
@@ -302,7 +301,7 @@ export function ExpenseList({
     return (
       <EmptyState
         icon={hasFilters ? Receipt : Wallet}
-        illustration={hasFilters ? <ReceiptIllustration /> : <LazyCoinScene />}
+        illustration={<ReceiptIllustration />}
         title={hasFilters ? "No expenses found" : "No expenses yet"}
         description={
           hasFilters
@@ -434,9 +433,9 @@ function SwipeableExpenseItem({
   rates: Record<string, number> | null;
   swipeHint?: boolean;
 }) {
-  const deleteCallback = useCallback(() => { setShowCoinDrop(true); handleDelete(expense.id); }, [handleDelete, expense.id]);
+  const deleteCallback = useCallback(() => { handleDelete(expense.id); }, [handleDelete, expense.id]);
   const { offsetX, deleting, onTouchStart, onTouchMove, onTouchEnd, snapBack, confirmDelete } = useSwipeToDelete(deleteCallback);
-  const [showCoinDrop, setShowCoinDrop] = useState(false);
+
   const isSelected = selectedIds.has(expense.id);
   const absOffset = Math.abs(offsetX);
   const isRevealing = absOffset > 10;
@@ -455,12 +454,7 @@ function SwipeableExpenseItem({
       }
       className="relative overflow-hidden rounded-2xl"
     >
-      {/* Coin drop animation on delete */}
-      {deleting && showCoinDrop && (
-        <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center">
-          <LazyCoinDrop onComplete={() => setShowCoinDrop(false)} />
-        </div>
-      )}
+
       {/* Red delete action — full-width behind the row, revealed by card translate */}
       {(absOffset > 0 || swipeHint) && (
         <div

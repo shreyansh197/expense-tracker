@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { InstallButton } from "@/components/pwa/InstallButton";
 import { useToast } from "@/components/ui/Toast";
-import { LazyVaultDoor } from "@/components/3d/LazyVaultDoor";
+
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { SettingsAccordion, AccordionSection } from "@/components/settings/SettingsAccordion";
 import { AccountCard } from "@/components/settings/AccountCard";
@@ -114,7 +114,7 @@ export default function SettingsPage() {
 
   const [salary, setSalary] = useState(settings.salary.toString());
   const [saving, setSaving] = useState(false);
-  const [showVaultDoor, setShowVaultDoor] = useState(false);
+
 
   // Per-month budget state
   const now = new Date();
@@ -146,7 +146,6 @@ export default function SettingsPage() {
     setSaving(true);
     try {
       await updateSettings({ salary: val });
-      setShowVaultDoor(true);
       toast("Default budget updated");
     } finally {
       setSaving(false);
@@ -362,7 +361,7 @@ export default function SettingsPage() {
                 >
                   {saving ? "Saving..." : "Update"}
                 </button>
-                {showVaultDoor && <LazyVaultDoor />}
+
                 </div>
                 <p className="mt-1 text-[11px]" style={{ color: 'var(--text-muted)' }}>
                   Used for any month without a specific override below

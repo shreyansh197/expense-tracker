@@ -8,7 +8,7 @@ import { useCurrency } from "@/hooks/useCurrency";
 import { useToast } from "@/components/ui/Toast";
 import { useConfirm } from "@/components/ui/ConfirmDialog";
 import { Plus, Trash2, ToggleLeft, ToggleRight, Pencil, X, ArrowUpDown } from "lucide-react";
-import { LazyKeyTurn } from "@/components/3d/LazyKeyTurn";
+
 import type { RecurringExpense, CategoryId } from "@/types";
 
 type SortKey = "day" | "amount" | "remark";
@@ -22,7 +22,7 @@ export function RecurringManager() {
   const recurring = settings.recurringExpenses || [];
 
   const [showAdd, setShowAdd] = useState(false);
-  const [showKeyTurn, setShowKeyTurn] = useState(false);
+
   const [editId, setEditId] = useState<string | null>(null);
   const [category, setCategory] = useState<CategoryId>(allCategories[0]?.id || "miscellaneous");
   const [amount, setAmount] = useState("");
@@ -73,7 +73,6 @@ export function RecurringManager() {
         createdAt: 0,
       };
       updateSettings({ recurringExpenses: [...recurring, newItem] });
-      setShowKeyTurn(true);
       toast("Recurring expense added");
     }
     resetForm();
@@ -154,11 +153,7 @@ export function RecurringManager() {
         </p>
       )}
 
-      {showKeyTurn && (
-        <div className="flex justify-center py-2">
-          <LazyKeyTurn onComplete={() => setShowKeyTurn(false)} />
-        </div>
-      )}
+
 
       {sorted.map((r) => {
         const cat = catMap[r.category];

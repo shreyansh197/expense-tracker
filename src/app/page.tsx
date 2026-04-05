@@ -19,8 +19,7 @@ import { SkeletonKpiCards, SkeletonChart } from "@/components/ui/Skeleton";
 import { PageTransition } from "@/components/ui/PageTransition";
 import { AmbientBackground } from "@/components/ui/AmbientBackground";
 import { ChartIllustration } from "@/components/ui/illustrations";
-import { LazyCoinScene } from "@/components/3d/LazyCoinScene";
-import { LazyTrophy } from "@/components/3d/LazyTrophy";
+import { Trophy, Wallet } from "lucide-react";
 
 // Lazy-load heavy chart components (recharts ~200KB)
 const CategoryChart = dynamic(
@@ -411,7 +410,7 @@ function DashboardContent() {
                   {/* Trophy: month ended under budget */}
                   {daysRemaining === 0 && remaining >= 0 && effectiveBudget > 0 && (
                     <div className="mb-3 flex items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-3 dark:border-emerald-900/40 dark:bg-emerald-950/30">
-                      <LazyTrophy />
+                      <Trophy size={28} className="text-emerald-500 shrink-0" />
                       <div>
                         <p className="text-sm font-semibold text-emerald-700 dark:text-emerald-400">Budget Goal Met!</p>
                         <p className="text-xs text-emerald-600/80 dark:text-emerald-400/70">You stayed under budget this month. Great discipline!</p>
@@ -572,7 +571,7 @@ function DashboardContent() {
                 </div>
                 {recentExpenses.length === 0 ? (
                   <div className="flex flex-col items-center gap-2 py-6">
-                    <LazyCoinScene />
+                    <Wallet size={32} className="text-brand opacity-60" />
                     <p className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>No expenses this month</p>
                     <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Your recent spending will show up here</p>
                   </div>
