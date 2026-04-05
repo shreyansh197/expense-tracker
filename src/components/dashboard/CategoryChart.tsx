@@ -290,14 +290,14 @@ export function CategoryLegend({ categoryTotals, onCategoryClick, categoryBudget
                         style={{ width: `${Math.min(budgetPct, 100)}%` }}
                       />
                     </div>
-                    <span className={`text-[10px] font-medium ${
+                    <span className={`text-[11px] font-medium ${
                       isOverBudget ? "text-red-500" : isNearBudget ? "text-amber-500" : ""
                     }`} style={!isOverBudget && !isNearBudget ? { color: 'var(--text-muted)' } : undefined}>
                       {budgetPct}%
                     </span>
                   </div>
                   {isOverBudget && (
-                    <p className="text-[10px] text-red-500 mt-0.5">
+                    <p className="text-[11px] text-red-500 mt-0.5">
                       Over by {formatCurrency(c.total - budget)}
                     </p>
                   )}

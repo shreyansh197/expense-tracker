@@ -359,11 +359,11 @@ export function ExpenseList({
                   <Square size={14} />
                 )}
               </button>
-              <span className="text-[11px] font-bold uppercase tracking-wide" style={{ color: 'var(--text-tertiary)' }}>
+              <span className="text-xs font-bold uppercase tracking-wide" style={{ color: 'var(--text-tertiary)' }}>
                 Day {group.day}
               </span>
             </div>
-            <span className="tabular-nums text-xs font-semibold" style={{ color: 'var(--text-secondary)' }}>
+            <span className="text-amount text-xs font-semibold" style={{ color: 'var(--text-secondary)' }}>
               {formatCurrency(group.expenses.reduce((s, e) => s + toBase(e), 0))}
             </span>
           </div>
@@ -537,13 +537,13 @@ function SwipeableExpenseItem({
           </div>
         </div>
         <div className="flex flex-col items-end">
-          <span className="tabular-nums text-base font-bold" style={{ color: 'var(--text-primary)' }}>
+          <span className="text-amount text-base font-bold" style={{ color: 'var(--text-primary)' }}>
             {multiCurrency && expense.currency && expense.currency !== baseCurrency
               ? fmtCurrency(expense.amount, expense.currency)
               : formatCurrency(expense.amount)}
           </span>
           {multiCurrency && expense.currency && expense.currency !== baseCurrency && (
-            <span className="text-[10px] tabular-nums" style={{ color: 'var(--text-muted)' }}>
+            <span className="text-[11px] text-amount" style={{ color: 'var(--text-muted)' }}>
               ≈ {fmtCurrency(convert(expense.amount, expense.currency, baseCurrency, rates ?? getFallbackRates(baseCurrency)), baseCurrency)}
             </span>
           )}

@@ -148,15 +148,15 @@ export default function LedgerDetailPage() {
           <div className="mt-4 grid grid-cols-3 gap-3 pt-4" style={{ borderTop: '1px solid var(--border)' }}>
             <div>
               <p className="text-meta font-medium">Expected</p>
-              <p className="text-sm font-bold tabular-nums" style={{ color: 'var(--text-primary)' }}>{formatCurrency(ledger.expectedAmount)}</p>
+              <p className="text-sm font-bold text-amount" style={{ color: 'var(--text-primary)' }}>{formatCurrency(ledger.expectedAmount)}</p>
             </div>
             <div>
               <p className="text-meta font-medium">Received</p>
-              <p className="text-sm font-bold tabular-nums text-emerald-600 dark:text-emerald-400">{formatCurrency(totalReceived)}</p>
+              <p className="text-sm font-bold text-amount text-emerald-600 dark:text-emerald-400">{formatCurrency(totalReceived)}</p>
             </div>
             <div>
               <p className="text-meta font-medium">Remaining</p>
-              <p className={cn("text-sm font-bold tabular-nums", remaining <= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-amber-600 dark:text-amber-400")}>
+              <p className={cn("text-sm font-bold text-amount", remaining <= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-amber-600 dark:text-amber-400")}>
                 {formatCurrency(Math.max(0, remaining))}
               </p>
             </div>
@@ -185,7 +185,7 @@ export default function LedgerDetailPage() {
               {ledger.tags.map((tag) => (
                 <span
                   key={tag}
-                  className="rounded-full px-2 py-0.5 text-[10px]"
+                  className="rounded-full px-2 py-0.5 text-[11px]"
                   style={{ background: 'var(--surface-secondary)', color: 'var(--text-secondary)' }}
                 >
                   {tag}

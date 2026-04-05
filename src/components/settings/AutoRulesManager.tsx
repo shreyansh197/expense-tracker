@@ -196,7 +196,7 @@ export function AutoRulesManager() {
             <p className="truncate text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
               {rule.name}
             </p>
-            <p className="text-[10px]" style={{ color: 'var(--text-muted)' }}>
+            <p className="text-[11px]" style={{ color: 'var(--text-muted)' }}>
               If {rule.condition.field === "is_recurring" ? "recurring" : rule.condition.field.replace("_", " ")}{" "}
               {rule.condition.field === "is_recurring"
                 ? (rule.condition.value === "true" ? "= yes" : "= no")
@@ -216,7 +216,7 @@ export function AutoRulesManager() {
           </button>
           <button
             onClick={() => toggleRule(rule.id)}
-            className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${
+            className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${
               rule.enabled
                 ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400"
                 : ""

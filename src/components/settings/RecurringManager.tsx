@@ -137,7 +137,7 @@ export function RecurringManager() {
           </div>
           <button
             onClick={() => setSortKey((k) => k === "day" ? "amount" : k === "amount" ? "remark" : "day")}
-            className="flex items-center gap-1 text-[10px] font-medium transition-colors"
+            className="flex items-center gap-1 text-[11px] font-medium transition-colors"
             style={{ color: 'var(--text-muted)' }}
             title={`Sort by ${sortKey}`}
           >

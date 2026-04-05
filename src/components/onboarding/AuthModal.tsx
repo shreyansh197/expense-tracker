@@ -287,7 +287,7 @@ function MobileAuthPage({ children }: { children: React.ReactNode }) {
           <div className="flex-1 flex flex-col justify-center">
             {children}
           </div>
-          <p className="mt-4 text-center text-[10px] text-slate-400 dark:text-slate-600">
+          <p className="mt-4 text-center text-[11px] text-slate-400 dark:text-slate-600">
             By continuing, you agree to our Terms of Service.
           </p>
         </div>

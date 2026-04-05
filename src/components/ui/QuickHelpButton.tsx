@@ -100,7 +100,7 @@ export function QuickHelpButton({ variant = "icon" }: { variant?: "icon" | "side
               {shortcuts.map((s, i) => (
                 <div key={i} className="flex items-center justify-between text-xs">
                   <span style={{ color: "var(--text-secondary)" }}>{s.description}</span>
-                  <kbd className="rounded border px-1.5 py-0.5 font-mono text-[10px]" style={{ borderColor: "var(--border)", color: "var(--text-secondary)", background: "var(--surface-secondary)" }}>
+                  <kbd className="rounded border px-1.5 py-0.5 font-mono text-[11px]" style={{ borderColor: "var(--border)", color: "var(--text-secondary)", background: "var(--surface-secondary)" }}>
                     {s.label}
                   </kbd>
                 </div>
@@ -108,7 +108,7 @@ export function QuickHelpButton({ variant = "icon" }: { variant?: "icon" | "side
             </div>
           </div>
 
-          <p className="mt-3 text-center text-[10px]" style={{ color: "var(--text-secondary)" }}>
+          <p className="mt-3 text-center text-[11px]" style={{ color: "var(--text-secondary)" }}>
             Press <kbd className="rounded border px-1 py-0.5 font-mono" style={{ borderColor: "var(--border)", background: "var(--surface-secondary)", color: "var(--text-primary)" }}>Shift + ?</kbd> for full shortcuts panel
           </p>
         </div>

@@ -17,7 +17,6 @@ import { RevealOnScroll } from "@/components/motion/RevealOnScroll";
 import { staggerLoose, fadeUp } from "@/lib/motion/variants";
 import { SkeletonKpiCards, SkeletonChart } from "@/components/ui/Skeleton";
 import { PageTransition } from "@/components/ui/PageTransition";
-import { AmbientBackground } from "@/components/ui/AmbientBackground";
 import { ChartIllustration } from "@/components/ui/illustrations";
 import { Trophy, Wallet } from "lucide-react";
 
@@ -140,7 +139,7 @@ function OnboardingStep({
         )}
       </div>
       <div className="min-w-0 flex-1">
-        <p className={cn("text-[13px] font-semibold leading-tight", done && "line-through")} style={{ color: 'var(--text-primary)' }}>
+        <p className={cn("text-sm font-semibold leading-tight", done && "line-through")} style={{ color: 'var(--text-primary)' }}>
           {title}
         </p>
         <p className="mt-0.5 text-[11px] leading-relaxed" style={{ color: 'var(--text-tertiary)' }}>
@@ -163,7 +162,6 @@ function WelcomeCard({ onAddExpense, hasBudget }: { onAddExpense: () => void; ha
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
     >
-      <AmbientBackground />
       {/* Gradient accent bar */}
       <div className="h-1" style={{ background: 'var(--accent-gradient)' }} />
 
@@ -175,14 +173,14 @@ function WelcomeCard({ onAddExpense, hasBudget }: { onAddExpense: () => void; ha
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.15, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
         >
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl" style={{ background: 'var(--accent-soft)', animation: 'glow-ring 3s ease-in-out infinite' }}>
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl" style={{ background: 'var(--accent-soft)' }}>
             <Sparkles size={18} style={{ color: 'var(--accent)' }} />
           </div>
           <div>
             <h2 className="text-lg font-bold tracking-tight sm:text-xl" style={{ color: 'var(--text-primary)' }}>
               Welcome to ExpenStream
             </h2>
-            <p className="mt-0.5 text-[13px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+            <p className="mt-0.5 text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
               Get set up in a few quick steps.
             </p>
           </div>
@@ -199,7 +197,7 @@ function WelcomeCard({ onAddExpense, hasBudget }: { onAddExpense: () => void; ha
               transition={{ delay: 0.4, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
             />
           </div>
-          <span className="text-[11px] font-bold tabular-nums" style={{ color: 'var(--text-tertiary)' }}>
+          <span className="text-[11px] font-bold text-amount" style={{ color: 'var(--text-tertiary)' }}>
             {stepsCompleted}/{totalSteps}
           </span>
         </div>
@@ -340,31 +338,25 @@ function DashboardContent() {
         <m.div
           className="zone-header dash-section relative z-40 rounded-2xl p-4 sm:p-5"
           style={{
-            background: 'linear-gradient(135deg, var(--accent-soft) 0%, var(--surface) 50%, var(--primary-soft) 100%)',
+            background: 'var(--surface)',
             border: '1px solid var(--border-card)',
-            boxShadow: 'var(--card-shadow)',
+            boxShadow: 'var(--shadow-sm)',
           }}
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
         >
           <h1 className="sr-only">Dashboard</h1>
-          {/* Gradient accent top bar */}
-          <div className="absolute inset-x-0 top-0 h-1 rounded-t-2xl" style={{ background: 'var(--accent-gradient)' }} />
-          {/* Subtle decorative dots */}
-          <div className="pointer-events-none absolute right-4 top-3 opacity-[0.06]" aria-hidden>
-            <svg width="80" height="80" viewBox="0 0 80 80"><pattern id="hdr-dots" x="0" y="0" width="16" height="16" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1.5" fill="currentColor"/></pattern><rect width="80" height="80" fill="url(#hdr-dots)"/></svg>
-          </div>
 
           {user?.name && (
             <div className="mb-3">
-              <p className="text-[11px] sm:text-xs font-medium tracking-wide uppercase" style={{ color: 'var(--text-muted)' }}>
+              <p className="text-xs sm:text-xs font-medium tracking-wide uppercase" style={{ color: 'var(--text-muted)' }}>
                 {new Date().getHours() < 12 ? "Good morning" : new Date().getHours() < 17 ? "Good afternoon" : "Good evening"}
               </p>
               <p className="text-xl sm:text-2xl font-normal tracking-tight" style={{ fontFamily: 'var(--font-display), Georgia, serif', color: 'var(--text-primary)' }}>
                 {user.name.split(" ")[0]}
               </p>
-              <p className="mt-0.5 text-[10px] sm:text-[11px] tracking-wide" style={{ color: 'var(--text-tertiary)' }}>
+              <p className="mt-0.5 text-[11px] sm:text-xs tracking-wide" style={{ color: 'var(--text-tertiary)' }}>
                 {new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}
               </p>
             </div>
@@ -402,11 +394,11 @@ function DashboardContent() {
             kpi: () => (
               <AnimatePresence mode="wait" key="kpi">
                 {loading ? (
-                  <m.div key="kpi-skeleton" className="section-zone section-coral dash-section" initial={{ opacity: 0.6 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
+                  <m.div key="kpi-skeleton" className="dash-section" initial={{ opacity: 0.6 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
                     <SkeletonKpiCards />
                   </m.div>
                 ) : (
-                  <m.div key="kpi-content" className="section-zone section-coral dash-section" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
+                  <m.div key="kpi-content" className="dash-section" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
                   {/* Trophy: month ended under budget */}
                   {daysRemaining === 0 && remaining >= 0 && effectiveBudget > 0 && (
                     <div className="mb-3 flex items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-3 dark:border-emerald-900/40 dark:bg-emerald-950/30">
@@ -444,7 +436,7 @@ function DashboardContent() {
 
             alerts: () => (
               expenses.length > 0 && effectiveBudget > 0 ? (
-                <div className="section-zone section-indigo" key="alerts">
+                <div key="alerts">
                 <CollapsibleSection id="alerts" title="Alerts">
                 <AlertsPanel
                   categoryTotals={categoryTotals}
@@ -464,7 +456,7 @@ function DashboardContent() {
             subscriptions: () => (
               <div key="subscriptions">
                 {(settings.recurringExpenses ?? []).length > 0 && (
-                  <div className="section-zone section-indigo">
+                  <div>
                   <CollapsibleSection id="subscriptions" title="Recurring Expenses">
                   <SubscriptionsSummary />
                   </CollapsibleSection>
@@ -476,7 +468,7 @@ function DashboardContent() {
 
             goals: () => (
               (settings.goals ?? []).length > 0 ? (
-                <div className="section-zone section-indigo" key="goals">
+                <div key="goals">
                 <CollapsibleSection id="goals" title="Savings Goals">
                 <SavingsGoalsWidget />
                 </CollapsibleSection>
@@ -485,7 +477,7 @@ function DashboardContent() {
             ),
 
             charts: () => (
-              <div className="section-zone section-teal" key="charts">
+              <div key="charts">
               <AnimatePresence mode="wait">
                 {loading ? (
                   <m.div key="chart-skeleton" className="dash-section grid gap-4 md:grid-cols-2" initial={{ opacity: 0.6 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
@@ -495,23 +487,21 @@ function DashboardContent() {
                 ) : expenses.length === 0 ? (
                 <div className="dash-section relative grid gap-4 md:grid-cols-2">
                   <div className="card relative overflow-hidden p-5">
-                    <AmbientBackground />
                     <h3 className="relative text-section-title mb-4">Category Breakdown</h3>
                     <div className="relative flex h-[220px] items-center justify-center">
                       <div className="flex flex-col items-center text-center">
                         <ChartIllustration size={120} />
-                        <p className="mt-2 text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Preview</p>
+                        <p className="mt-2 text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Preview</p>
                         <p className="mt-1 text-xs" style={{ color: 'var(--text-muted)' }}>Your spending breakdown will appear here</p>
                       </div>
                     </div>
                   </div>
                   <div className="card relative overflow-hidden p-5">
-                    <AmbientBackground />
                     <h3 className="relative text-section-title mb-4">Daily Spending Trend</h3>
                     <div className="relative flex h-[220px] items-center justify-center">
                       <div className="flex flex-col items-center text-center">
                         <ChartIllustration size={120} />
-                        <p className="mt-2 text-[10px] font-semibold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Preview</p>
+                        <p className="mt-2 text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Preview</p>
                         <p className="mt-1 text-xs" style={{ color: 'var(--text-muted)' }}>Your daily trend will appear here</p>
                       </div>
                     </div>
@@ -553,7 +543,7 @@ function DashboardContent() {
             ),
 
             recent: () => (
-              <div className="section-zone section-coral" key="recent">
+              <div key="recent">
               <div className="dash-section card p-5">
                 <div className="mb-4 flex items-center justify-between">
                   <h3 className="text-section-title">
@@ -603,13 +593,13 @@ function DashboardContent() {
                             )}
                           </div>
                         </div>
-                        <span className="tabular-nums ml-3 shrink-0 text-base font-bold" style={{ color: 'var(--text-primary)' }}>
+                        <span className="text-amount ml-3 shrink-0 text-base font-bold" style={{ color: 'var(--text-primary)' }}>
                           {settings.multiCurrencyEnabled && e.currency && e.currency !== settings.currency
                             ? fmtCurrency(e.amount, e.currency)
                             : formatCurrency(e.amount)}
                         </span>
                         {settings.multiCurrencyEnabled && e.currency && e.currency !== settings.currency && (
-                          <span className="tabular-nums ml-3 shrink-0 text-[10px]" style={{ color: 'var(--text-muted)' }}>
+                          <span className="text-amount ml-3 shrink-0 text-[11px]" style={{ color: 'var(--text-muted)' }}>
                             ≈ {fmtCurrency(convert(e.amount, e.currency, settings.currency, getFallbackRates(settings.currency)), settings.currency)}
                           </span>
                         )}

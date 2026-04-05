@@ -239,7 +239,7 @@ export function ExpenseForm({
     <form
       onSubmit={handleSubmit}
       onKeyDown={handleKeyDown}
-      className="space-y-5"
+      className="space-y-4"
     >
       {/* Success micro-animation — 3D coin flip */}
       <AnimatePresence>
@@ -333,7 +333,7 @@ export function ExpenseForm({
         <label className="form-label mb-2 uppercase">
           Category {!category && submitted && <span className="text-red-500 normal-case">— please select</span>}
         </label>
-        <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Select category">
+        <div className="flex max-h-40 flex-wrap gap-2 overflow-y-auto" role="radiogroup" aria-label="Select category">
           {allCategories.map((cat) => (
             <m.button
               key={cat.id}
@@ -444,7 +444,7 @@ export function ExpenseForm({
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-            className="overflow-hidden space-y-5"
+            className="overflow-hidden space-y-4"
           >
 
       {/* Currency selector (multi-currency mode only) */}

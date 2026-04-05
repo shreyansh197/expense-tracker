@@ -76,7 +76,7 @@ function RateSourceInfo({ baseCurrency }: { baseCurrency: string }) {
         <button
           onClick={handleRefresh}
           disabled={refreshing}
-          className="flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-medium transition-colors"
+          className="flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-medium transition-colors"
           style={{ color: "var(--brand)", background: "var(--accent-soft)" }}
         >
           <RefreshCw size={10} className={refreshing ? "animate-spin" : ""} />
@@ -84,7 +84,7 @@ function RateSourceInfo({ baseCurrency }: { baseCurrency: string }) {
         </button>
       </div>
       {info && (
-        <p className="text-[10px]" style={{ color: "var(--text-muted)" }}>
+        <p className="text-[11px]" style={{ color: "var(--text-muted)" }}>
           Source: {sourceLabel[info.source] ?? info.source} · Updated {info.fetchedAt.toLocaleTimeString()}
         </p>
       )}
@@ -94,7 +94,7 @@ function RateSourceInfo({ baseCurrency }: { baseCurrency: string }) {
             const rate = sampleRates[c];
             if (!rate) return null;
             return (
-              <span key={c} className="text-xs tabular-nums font-medium" style={{ color: "var(--text-secondary)" }}>
+              <span key={c} className="text-xs text-amount font-medium" style={{ color: "var(--text-secondary)" }}>
                 1 {baseCurrency} = {rate < 1 ? rate.toFixed(4) : rate.toFixed(2)} {c}
               </span>
             );

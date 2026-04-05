@@ -63,20 +63,24 @@
   /* ── General ── */
   --overlay: rgba(0, 0, 0, 0.4);
   --category-fallback: #6B7280;
-  /* ── Section zone washes (unified neutral wash) ── */
-  --section-teal: rgba(46, 196, 182, 0.05);
-  --section-indigo: rgba(46, 196, 182, 0.05);
-  --section-coral: rgba(46, 196, 182, 0.05);
-  --section-emerald: rgba(46, 196, 182, 0.05);
+  /* ── Quiet grouping surface ── */
+  --surface-quiet: rgba(0, 0, 0, 0.015);
+  /* ── Section zone washes (neutralized — structural only) ── */
+  --section-teal: transparent;
+  --section-indigo: transparent;
+  --section-coral: transparent;
+  --section-emerald: transparent;
   /* ── Accent card surfaces (unified primary tint) ── */
   --surface-accent-teal: #e6f9f7;
   --surface-accent-indigo: #e6f9f7;
   --surface-accent-coral: #e6f9f7;
   /* ── Hero gradient ── */
   --gradient-hero: linear-gradient(135deg, rgba(46, 196, 182, 0.12) 0%, rgba(76, 92, 255, 0.09) 100%);
-  /* ── Effects ── */
-  --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.03);
-  --card-shadow-hover: 0 4px 16px rgba(46, 196, 182, 0.14), 0 2px 4px rgba(0, 0, 0, 0.04);
+  /* ── Elevation (2-level shadow system) ── */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --card-shadow: var(--shadow-sm);
+  --card-shadow-hover: var(--shadow-md);
   --section-gap: 1.5rem;
   /* ── Charts ── */
   --chart-tooltip-bg: #ffffff;
@@ -145,20 +149,24 @@
   /* ── General ── */
   --overlay: rgba(0, 0, 0, 0.6);
   --category-fallback: #6B7280;
-  /* ── Section zone washes (unified neutral wash) ── */
-  --section-teal: rgba(96, 165, 250, 0.06);
-  --section-indigo: rgba(96, 165, 250, 0.06);
-  --section-coral: rgba(96, 165, 250, 0.06);
-  --section-emerald: rgba(96, 165, 250, 0.06);
+  /* ── Quiet grouping surface ── */
+  --surface-quiet: rgba(255, 255, 255, 0.02);
+  /* ── Section zone washes (neutralized — structural only) ── */
+  --section-teal: transparent;
+  --section-indigo: transparent;
+  --section-coral: transparent;
+  --section-emerald: transparent;
   /* ── Accent card surfaces (unified primary tint) ── */
   --surface-accent-teal: rgba(96, 165, 250, 0.10);
   --surface-accent-indigo: rgba(96, 165, 250, 0.10);
   --surface-accent-coral: rgba(96, 165, 250, 0.10);
   /* ── Hero gradient ── */
   --gradient-hero: linear-gradient(135deg, rgba(96, 165, 250, 0.14) 0%, rgba(129, 140, 248, 0.10) 100%);
-  /* ── Effects ── */
-  --card-shadow: 0 1px 4px rgba(0, 0, 0, 0.45), 0 1px 2px rgba(0, 0, 0, 0.25);
-  --card-shadow-hover: 0 4px 20px rgba(96, 165, 250, 0.15), 0 4px 12px rgba(0, 0, 0, 0.35);
+  /* ── Elevation (2-level shadow system) ── */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.15);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4), 0 2px 4px rgba(0, 0, 0, 0.2);
+  --card-shadow: var(--shadow-sm);
+  --card-shadow-hover: var(--shadow-md);
   /* ── Charts ── */
   --chart-tooltip-bg: #131B2E;
   --chart-tooltip-fg: #E2E8F0;
@@ -299,20 +307,13 @@ button, a {
 .section-indigo { background: var(--section-indigo); }
 .section-coral  { background: var(--section-coral); }
 .section-emerald { background: var(--section-emerald); }
-.dark .section-zone {
-  border: 1px solid var(--border-card);
-}
 
 .zone-header {
-  background: var(--gradient-hero);
   border-radius: 1rem;
   padding: 1rem;
 }
 @media (min-width: 640px) {
   .zone-header { padding: 1.25rem; }
-}
-.dark .zone-header {
-  border: 1px solid var(--border-card);
 }
 
 /* ── Card utility classes ──────────────────────────────────── */
@@ -373,6 +374,13 @@ button, a {
     border-color: color-mix(in srgb, var(--primary) 12%, var(--border-card));
   }
 }
+.card-hero {
+  background: var(--surface);
+  border: 1px solid var(--border-card);
+  border-radius: 1rem;
+  box-shadow: var(--shadow-md);
+  transition: box-shadow 0.25s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
 
 /* ── Typography scale ──────────────────────────────────────── */
 .text-page-title {
@@ -410,6 +418,11 @@ button, a {
   font-weight: 400;
   line-height: 1.5;
   color: var(--text-tertiary);
+}
+.text-amount {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
 }
 
 /* ── Segmented control (chart mode toggle) ─────────────────── */
@@ -673,12 +686,6 @@ input[type="password"]::-ms-clear {
 @keyframes shimmer {
   0%   { transform: translateX(-100%); }
   100% { transform: translateX(100%); }
-}
-
-/* Subtle glow ring expansion for icons */
-@keyframes glow-ring {
-  0%, 100% { box-shadow: 0 0 0 0 var(--accent-soft), 0 0 12px var(--accent-soft); }
-  50%       { box-shadow: 0 0 0 5px transparent, 0 0 20px var(--accent-soft); }
 }
 
 /* Preview bar grow from baseline */

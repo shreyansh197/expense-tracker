@@ -102,7 +102,7 @@ export function FilterPanel({
           <SlidersHorizontal size={14} />
           Filters
           {hasActiveFilters && (
-            <span className="ml-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-brand px-1 text-[10px] font-bold text-white">
+            <span className="ml-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-brand px-1 text-[11px] font-bold text-white">
               {activeFilterCount}
             </span>
           )}

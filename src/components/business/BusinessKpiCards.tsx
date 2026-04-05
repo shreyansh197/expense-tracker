@@ -86,7 +86,7 @@ export function BusinessKpiCards({
                 {card.label}
               </span>
             </div>
-            <p className={cn("mt-2 tabular-nums text-lg font-bold", card.color)}>
+            <p className={cn("mt-2 text-amount text-lg font-bold", card.color)}>
               {card.value}
             </p>
           </div>

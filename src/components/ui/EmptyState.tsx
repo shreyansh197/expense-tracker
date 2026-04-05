@@ -3,7 +3,6 @@
 import { m } from "framer-motion";
 import type { LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
-import { AmbientBackground } from "./AmbientBackground";
 import { staggerContainer, fadeUpSmall } from "@/lib/motion";
 import { scale as scaleTokens } from "@/lib/motion/tokens";
 
@@ -33,7 +32,6 @@ export function EmptyState({ icon: Icon, secondaryIcon: SecondaryIcon, illustrat
       initial="initial"
       animate="animate"
     >
-      <AmbientBackground />
 
       {illustration ? (
         <m.div variants={fadeUpSmall}>
@@ -42,7 +40,7 @@ export function EmptyState({ icon: Icon, secondaryIcon: SecondaryIcon, illustrat
       ) : (
         <m.div
           className="relative flex h-16 w-16 items-center justify-center rounded-2xl"
-          style={{ background: 'var(--surface-secondary)', animation: 'glow-ring 3s ease-in-out infinite' }}
+          style={{ background: 'var(--surface-secondary)' }}
           variants={fadeUpSmall}
         >
           <Icon size={28} style={{ color: 'var(--text-muted)' }} />

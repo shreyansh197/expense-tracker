@@ -117,10 +117,9 @@ export function KpiCards({
 
       {/* ── PRIMARY: Budget Status Hero ── */}
       <m.div
-        className={cn("relative overflow-hidden rounded-2xl border p-4 sm:p-5", sc.bg)}
+        className={cn("card-hero relative overflow-hidden rounded-2xl border-l-[3px] p-4 sm:p-5", sc.bg)}
         variants={{ hidden: { opacity: 0, y: 12 }, visible: { opacity: 1, y: 0, transition: { duration: duration.emphasis, ease: ease.out } } }}
       >
-        <div className={cn("absolute inset-x-0 top-0 h-1 rounded-t-2xl", sc.bar)} />
         <div className="flex items-center justify-between">
           <div className={cn("flex items-center gap-2 text-sm font-semibold", sc.text)}>
             {status !== "safe" ? <ShieldAlert size={15} className={status === "danger" ? "animate-pulse" : ""} /> : isOverspent ? <AlertTriangle size={15} /> : <PiggyBank size={15} />}
@@ -133,10 +132,10 @@ export function KpiCards({
             </span>
           )}
         </div>
-        <p className={cn("tabular-nums mt-1.5 text-4xl sm:text-5xl font-extrabold tracking-tight", sc.text)}>
+        <p className={cn("text-amount mt-1.5 text-4xl sm:text-5xl font-extrabold tracking-tight", sc.text)}>
           <AnimatedNumber value={Math.abs(remaining)} format={formatCurrency} />
         </p>
-        <p className="mt-2 text-[13px] leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+        <p className="mt-2 text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
           {getStatusCopy(isOverspent, isWarning, daysRemaining, paceToStayUnder, forecastOverBudget, formatCurrency)}
         </p>
         <div className="mt-3 h-2 w-full overflow-hidden rounded-full" style={{ background: 'var(--surface-secondary)' }} role="progressbar" aria-valuenow={Math.min(budgetUsedPercent, 100)} aria-valuemin={0} aria-valuemax={100} aria-label="Budget used">
@@ -148,11 +147,11 @@ export function KpiCards({
           />
         </div>
         <div className="mt-2 flex items-center justify-between text-xs" style={{ color: 'var(--text-tertiary)' }}>
-          <span className="tabular-nums">{formatCurrency(monthlyTotal)} of {formatCurrency(salary)} spent</span>
+          <span className="text-amount">{formatCurrency(monthlyTotal)} of {formatCurrency(salary)} spent</span>
           <span>{expenseCount} transaction{expenseCount !== 1 ? "s" : ""}</span>
         </div>
         {rolloverAmount > 0 && (
-          <p className="mt-1 text-[10px] font-medium text-brand">
+          <p className="mt-1 text-[11px] font-medium text-brand">
             Includes +{formatCurrency(rolloverAmount)} rollover from last month
           </p>
         )}
@@ -163,31 +162,31 @@ export function KpiCards({
         className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3 sm:gap-3"
         variants={{ hidden: { opacity: 0, y: 8 }, visible: { opacity: 1, y: 0, transition: { duration: duration.emphasis, delay: 0.1, ease: ease.out } } }}
       >
-        <div className="rounded-xl border p-3 sm:p-3.5" style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>
+        <div className="rounded-xl p-3 sm:p-3.5" style={{ background: 'var(--surface-secondary)' }}>
           <p className="text-meta font-medium">Daily Pace</p>
           <p className={cn(
-            "tabular-nums mt-1 text-base sm:text-lg font-bold",
+            "text-amount mt-1 text-base sm:text-lg font-bold",
             paceToStayUnder <= 0 ? "text-red-600 dark:text-red-400"
               : paceExceeded ? "text-amber-600 dark:text-amber-400" : ""
           )} style={paceToStayUnder > 0 && !paceExceeded ? { color: 'var(--text-primary)' } : undefined}>
             {formatCurrency(avgDaily)}/d
           </p>
-          <p className="mt-0.5 text-[11px]" style={{ color: 'var(--text-tertiary)' }}>
+          <p className="mt-0.5 text-xs" style={{ color: 'var(--text-tertiary)' }}>
             {paceToStayUnder > 0 ? `Target \u2264 ${formatCurrency(paceToStayUnder)}/d` : "No budget left"}
           </p>
         </div>
 
-        <div className="relative rounded-xl border p-3 sm:p-3.5" style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>
+        <div className="relative rounded-xl p-3 sm:p-3.5" style={{ background: 'var(--surface-secondary)' }}>
           <p className="text-meta font-medium">Saving</p>
           <p className={cn(
-            "tabular-nums mt-1 text-base sm:text-lg font-bold",
+            "text-amount mt-1 text-base sm:text-lg font-bold",
             savingsRate < 0 ? "text-red-600 dark:text-red-400"
               : savingsRate < 20 ? "text-amber-600 dark:text-amber-400"
               : "text-emerald-600 dark:text-emerald-400"
           )}>
             {savingsRate}%
           </p>
-          <p className="mt-0.5 text-[11px]" style={{ color: 'var(--text-tertiary)' }}>
+          <p className="mt-0.5 text-xs" style={{ color: 'var(--text-tertiary)' }}>
             {remaining >= 0 ? `${formatCurrency(remaining)} saved` : `${formatCurrency(Math.abs(remaining))} over`}
           </p>
         </div>
@@ -202,19 +201,19 @@ export function KpiCards({
             <TrendingUp size={12} />
             <span>Forecast</span>
             {forecast.method === "weighted" && forecast.historicalMonths > 0 && (
-              <span className="ml-auto text-[9px] font-normal opacity-60">
+              <span className="ml-auto text-[11px] font-normal opacity-60">
                 {forecast.historicalMonths}mo avg
               </span>
             )}
           </div>
           <p className={cn(
-            "tabular-nums mt-1 text-base sm:text-lg font-bold",
+            "text-amount mt-1 text-base sm:text-lg font-bold",
             forecastOverBudget ? "text-red-700 dark:text-red-400"
               : forecastWarning ? "text-amber-700 dark:text-amber-400" : ""
           )} style={!forecastOverBudget && !forecastWarning ? { color: 'var(--text-primary)' } : undefined}>
             {forecast.projectedTotal > 0 ? formatCurrency(forecast.projectedTotal) : "\u2014"}
           </p>
-          <p className="mt-0.5 text-[11px]" style={{ color: 'var(--text-tertiary)' }}>
+          <p className="mt-0.5 text-xs" style={{ color: 'var(--text-tertiary)' }}>
             {forecast.projectedTotal > 0 && forecast.confidence !== "low"
               ? (forecastOverBudget
                   ? `Over by ${formatCurrency(Math.abs(forecast.projectedRemaining))}`
@@ -247,10 +246,10 @@ export function KpiCards({
               <div className="grid grid-cols-2 gap-2 sm:gap-3 pt-1">
                 <div className="rounded-xl p-3" style={{ background: 'var(--surface-secondary)' }}>
                   <p className="text-meta font-medium">Budget Used</p>
-                  <p className="tabular-nums mt-1 text-base font-bold" style={{ color: 'var(--text-primary)' }}>
+                  <p className="text-amount mt-1 text-base font-bold" style={{ color: 'var(--text-primary)' }}>
                     {budgetUsedPercent}%
                   </p>
-                  <p className="mt-0.5 text-[11px]" style={{ color: 'var(--text-tertiary)' }}>
+                  <p className="mt-0.5 text-xs" style={{ color: 'var(--text-tertiary)' }}>
                     {formatCurrency(monthlyTotal)} of {formatCurrency(salary)}
                   </p>
                 </div>
@@ -267,10 +266,10 @@ export function KpiCards({
                       </ul>
                     </InfoTooltip>
                   </div>
-                  <p className="tabular-nums mt-1 text-base font-bold" style={{ color: 'var(--text-primary)' }}>
+                  <p className="text-amount mt-1 text-base font-bold" style={{ color: 'var(--text-primary)' }}>
                     {forecast.projectedTotal > 0 ? formatCurrency(forecast.projectedTotal) : "\u2014"}
                   </p>
-                  <p className="mt-0.5 text-[11px]" style={{ color: 'var(--text-tertiary)' }}>
+                  <p className="mt-0.5 text-xs" style={{ color: 'var(--text-tertiary)' }}>
                     {forecast.confidence ? `${forecast.confidence[0].toUpperCase()}${forecast.confidence.slice(1)} confidence` : "\u00A0"}
                   </p>
                 </div>

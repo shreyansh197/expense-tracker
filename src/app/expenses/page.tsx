@@ -124,7 +124,7 @@ function ExpensesContent() {
           <span className="text-section-title">
             Monthly Total
           </span>
-          <span className="tabular-nums text-lg font-bold" style={{ color: 'var(--text-primary)' }}>
+          <span className="text-amount text-lg font-bold" style={{ color: 'var(--text-primary)' }}>
             {formatCurrency(monthlyTotal)}
           </span>
         </div>

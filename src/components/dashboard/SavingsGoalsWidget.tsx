@@ -65,7 +65,7 @@ export function SavingsGoalsWidget() {
           <h3 className="text-section-title">
             Savings Goals
           </h3>
-          <span className="tabular-nums rounded-full bg-ok-soft px-2 py-0.5 text-[10px] font-bold text-ok-text">
+          <span className="text-amount rounded-full bg-ok-soft px-2 py-0.5 text-xs font-bold text-ok-text">
             {overallPct}%
           </span>
         </div>
@@ -98,19 +98,18 @@ export function SavingsGoalsWidget() {
 
           return (
             <div key={g.id} className="flex items-start gap-3">
-              {/* Circular progress ring */}
-              <div
-                className="shrink-0 mt-1 rounded-full"
-                style={{
-                  width: 40,
-                  height: 40,
-                  background: `conic-gradient(${g.color} ${pct * 3.6}deg, var(--surface-secondary) 0deg)`,
-                }}
-              >
-                <div className="flex h-full w-full items-center justify-center rounded-full" style={{ background: 'var(--surface-primary)', width: 30, height: 30, margin: 5 }}>
-                  <span className="text-[9px] font-bold" style={{ color: g.color }}>{Math.round(pct)}%</span>
-                </div>
-              </div>
+              {/* Circular progress ring (SVG) */}
+              <svg className="shrink-0 mt-1" width="40" height="40" viewBox="0 0 40 40" aria-hidden>
+                <circle cx="20" cy="20" r="17" fill="none" stroke="var(--surface-secondary)" strokeWidth="4" />
+                <circle
+                  cx="20" cy="20" r="17" fill="none"
+                  stroke={g.color} strokeWidth="4" strokeLinecap="round"
+                  strokeDasharray={`${pct * 1.068} 106.8`}
+                  transform="rotate(-90 20 20)"
+                  style={{ transition: 'stroke-dasharray 0.5s ease' }}
+                />
+                <text x="20" y="20" textAnchor="middle" dominantBaseline="central" fill={g.color} fontSize="9" fontWeight="700">{Math.round(pct)}%</text>
+              </svg>
               {/* Goal details */}
               <div className="min-w-0 flex-1 space-y-1.5">
               {/* Goal row */}
@@ -124,14 +123,14 @@ export function SavingsGoalsWidget() {
                     {g.name}
                   </span>
                   {isComplete && (
-                    <span className="shrink-0 rounded-full bg-ok-soft px-1.5 py-0.5 text-[10px] font-semibold text-ok-text">
+                    <span className="shrink-0 rounded-full bg-ok-soft px-1.5 py-0.5 text-xs font-semibold text-ok-text">
                       Done!
                     </span>
                   )}
                 </div>
 
                 <div className="flex shrink-0 items-center gap-2">
-                  <span className="tabular-nums whitespace-nowrap text-xs" style={{ color: 'var(--text-secondary)' }}>
+                  <span className="text-amount whitespace-nowrap text-xs" style={{ color: 'var(--text-secondary)' }}>
                     {formatCurrency(g.savedAmount)}{" "}
                     <span style={{ color: 'var(--text-muted)' }}>/</span>{" "}
                     {formatCurrency(g.targetAmount)}
@@ -147,7 +146,7 @@ export function SavingsGoalsWidget() {
                           setFundMode("add");
                         }
                       }}
-                      className="rounded-md bg-ok-soft px-2 py-0.5 text-[11px] font-medium text-ok-text transition-colors hover:bg-ok-soft-hover"
+                      className="rounded-md bg-ok-soft px-2 py-0.5 text-xs font-medium text-ok-text transition-colors hover:bg-ok-soft-hover"
                     >
                       {isActive ? "Cancel" : "+ Add"}
                     </button>
@@ -165,7 +164,7 @@ export function SavingsGoalsWidget() {
                   }}
                 />
               </div>
-              <div className="flex justify-between text-[10px]" style={{ color: 'var(--text-muted)' }}>
+              <div className="flex justify-between text-xs" style={{ color: 'var(--text-muted)' }}>
                 <span>{pct}% complete</span>
                 {g.deadline && (
                   <span>

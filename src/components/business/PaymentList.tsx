@@ -181,7 +181,7 @@ function DetailRow({
     <div className="flex items-start gap-3 py-3">
       <span className="mt-0.5 shrink-0" style={{ color: 'var(--text-tertiary)' }}>{icon}</span>
       <div className="flex-1 min-w-0">
-        <p className="text-[10px] font-medium uppercase tracking-wide" style={{ color: 'var(--text-tertiary)' }}>{label}</p>
+        <p className="text-[11px] font-medium uppercase tracking-wide" style={{ color: 'var(--text-tertiary)' }}>{label}</p>
         <p
           className={`mt-0.5 text-sm ${mono ? "font-mono" : ""} ${multiline ? "whitespace-pre-wrap" : "break-all"}`}
           style={{ color: 'var(--text-secondary)' }}
@@ -244,13 +244,13 @@ export function PaymentList({ payments, onDelete }: PaymentListProps) {
               {/* Info block */}
               <div className="min-w-0 flex-1">
                 {/* Amount */}
-                <p className="text-sm font-bold tabular-nums" style={{ color: 'var(--text-primary)' }}>
+                <p className="text-sm font-bold text-amount" style={{ color: 'var(--text-primary)' }}>
                   {formatCurrency(p.amount)}
                 </p>
 
                 {/* Method badge */}
                 {p.method && (
-                  <span className={`mt-1 inline-block rounded-md px-1.5 py-0.5 text-[10px] font-medium ${iconColor}`}>
+                  <span className={`mt-1 inline-block rounded-md px-1.5 py-0.5 text-[11px] font-medium ${iconColor}`}>
                     {methodLabels[p.method]}
                   </span>
                 )}
@@ -278,8 +278,8 @@ export function PaymentList({ payments, onDelete }: PaymentListProps) {
 
               {/* Running total */}
               <div className="shrink-0 text-right">
-                <p className="text-[10px]" style={{ color: 'var(--text-tertiary)' }}>Running</p>
-                <p className="text-[11px] font-medium tabular-nums" style={{ color: 'var(--text-secondary)' }}>
+                <p className="text-[11px]" style={{ color: 'var(--text-tertiary)' }}>Running</p>
+                <p className="text-[11px] font-medium text-amount" style={{ color: 'var(--text-secondary)' }}>
                   {formatCurrency(p.runningTotal)}
                 </p>
               </div>

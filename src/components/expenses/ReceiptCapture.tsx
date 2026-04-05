@@ -141,7 +141,7 @@ export function ReceiptCapture({ onExtracted, onClose }: ReceiptCaptureProps) {
             onChange={handleFileChange}
             className="hidden"
           />
-          <p className="text-[10px]" style={{ color: "var(--text-tertiary)" }}>
+          <p className="text-[11px]" style={{ color: "var(--text-tertiary)" }}>
             Supported: JPG, PNG, WebP — max 10MB
           </p>
         </div>
@@ -188,7 +188,7 @@ export function ReceiptCapture({ onExtracted, onClose }: ReceiptCaptureProps) {
           <p className="text-sm font-medium" style={{ color: "var(--text-secondary)" }}>
             Processing receipt...
           </p>
-          <p className="text-[10px]" style={{ color: "var(--text-tertiary)" }}>
+          <p className="text-[11px]" style={{ color: "var(--text-tertiary)" }}>
             This may take a few seconds
           </p>
         </div>
@@ -200,25 +200,25 @@ export function ReceiptCapture({ onExtracted, onClose }: ReceiptCaptureProps) {
           {/* Extracted fields */}
           <div className="space-y-2 rounded-xl border p-3" style={{ borderColor: "var(--border)", background: "var(--surface-secondary)" }}>
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-medium" style={{ color: "var(--text-tertiary)" }}>Amount</span>
-              <span className="text-sm font-bold tabular-nums" style={{ color: result.amount ? "var(--text-primary)" : "var(--text-muted)" }}>
+              <span className="text-[11px] font-medium" style={{ color: "var(--text-tertiary)" }}>Amount</span>
+              <span className="text-sm font-bold text-amount" style={{ color: result.amount ? "var(--text-primary)" : "var(--text-muted)" }}>
                 {result.amount != null ? result.amount.toLocaleString() : "Not detected"}
               </span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-medium" style={{ color: "var(--text-tertiary)" }}>Category</span>
+              <span className="text-[11px] font-medium" style={{ color: "var(--text-tertiary)" }}>Category</span>
               <span className="text-xs font-medium" style={{ color: result.category ? "var(--text-primary)" : "var(--text-muted)" }}>
                 {result.category ? (catMap[result.category]?.label || result.category) : "Not detected"}
               </span>
             </div>
             {result.remark && (
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-medium" style={{ color: "var(--text-tertiary)" }}>Merchant</span>
+                <span className="text-[11px] font-medium" style={{ color: "var(--text-tertiary)" }}>Merchant</span>
                 <span className="text-xs" style={{ color: "var(--text-primary)" }}>{result.remark}</span>
               </div>
             )}
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-medium" style={{ color: "var(--text-tertiary)" }}>Confidence</span>
+              <span className="text-[11px] font-medium" style={{ color: "var(--text-tertiary)" }}>Confidence</span>
               <span className={`text-xs font-medium ${
                 result.confidence >= 70 ? "text-green-600 dark:text-green-400"
                   : result.confidence >= 40 ? "text-amber-600 dark:text-amber-400"

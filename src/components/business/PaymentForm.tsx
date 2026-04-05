@@ -59,7 +59,7 @@ export function PaymentForm({ ledgerId, onSubmit, onCancel }: PaymentFormProps) 
       <div className="grid grid-cols-2 gap-3">
         {/* Amount */}
         <div>
-          <label className="mb-1 block text-[10px] font-medium" style={{ color: 'var(--text-tertiary)' }}>Amount</label>
+          <label className="mb-1 block text-[11px] font-medium" style={{ color: 'var(--text-tertiary)' }}>Amount</label>
           <div className="relative">
             <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs" style={{ color: 'var(--text-tertiary)' }}>{symbol}</span>
             <input
@@ -79,7 +79,7 @@ export function PaymentForm({ ledgerId, onSubmit, onCancel }: PaymentFormProps) 
 
         {/* Date */}
         <div>
-          <label className="mb-1 block text-[10px] font-medium" style={{ color: 'var(--text-tertiary)' }}>Date</label>
+          <label className="mb-1 block text-[11px] font-medium" style={{ color: 'var(--text-tertiary)' }}>Date</label>
           <DatePicker
             value={parseInt(date.split("-")[2], 10)}
             month={parseInt(date.split("-")[1], 10)}
@@ -97,7 +97,7 @@ export function PaymentForm({ ledgerId, onSubmit, onCancel }: PaymentFormProps) 
       <div className="grid grid-cols-2 gap-3">
         {/* Method */}
         <div>
-          <label className="mb-1 block text-[10px] font-medium" style={{ color: 'var(--text-tertiary)' }}>Method</label>
+          <label className="mb-1 block text-[11px] font-medium" style={{ color: 'var(--text-tertiary)' }}>Method</label>
           <select
             value={method}
             onChange={(e) => setMethod(e.target.value as PaymentMethod)}
@@ -112,7 +112,7 @@ export function PaymentForm({ ledgerId, onSubmit, onCancel }: PaymentFormProps) 
 
         {/* Reference */}
         <div>
-          <label className="mb-1 block text-[10px] font-medium" style={{ color: 'var(--text-tertiary)' }}>Reference</label>
+          <label className="mb-1 block text-[11px] font-medium" style={{ color: 'var(--text-tertiary)' }}>Reference</label>
           <input
             type="text"
             value={reference}
@@ -126,7 +126,7 @@ export function PaymentForm({ ledgerId, onSubmit, onCancel }: PaymentFormProps) 
 
       {/* Notes */}
       <div>
-        <label className="mb-1 block text-[10px] font-medium" style={{ color: 'var(--text-tertiary)' }}>Notes</label>
+        <label className="mb-1 block text-[11px] font-medium" style={{ color: 'var(--text-tertiary)' }}>Notes</label>
         <input
           type="text"
           value={notes}
