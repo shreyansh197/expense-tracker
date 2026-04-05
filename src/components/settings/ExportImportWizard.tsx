@@ -9,6 +9,7 @@ import { buildCategoryMap, getAllCategories } from "@/lib/categories";
 import { useToast } from "@/components/ui/Toast";
 import { getMonthName } from "@/lib/utils";
 import { useCurrency } from "@/hooks/useCurrency";
+import { LazySafeDeposit } from "@/components/3d/LazySafeDeposit";
 import type { Expense, ExpenseInput } from "@/types";
 
 export function ExportImportWizard() {
@@ -38,6 +39,7 @@ export function ExportImportWizard() {
     ]);
     const csv = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
     downloadFile(csv, `expenses-${getMonthName(currentMonth)}-${currentYear}.csv`, "text/csv");
+    setShowSafeDeposit(true);
     toast("CSV exported");
   };
 
@@ -77,12 +79,14 @@ export function ExportImportWizard() {
       })),
     };
     downloadFile(JSON.stringify(payload, null, 2), `expenstream-backup-${currentYear}-${currentMonth}.json`, "application/json");
+    setShowSafeDeposit(true);
     toast("Full backup exported");
   };
 
   // Import
   const fileRef = useRef<HTMLInputElement>(null);
   const [importing, setImporting] = useState(false);
+  const [showSafeDeposit, setShowSafeDeposit] = useState(false);
   const [preview, setPreview] = useState<ParsedRow[] | null>(null);
   const [importResult, setImportResult] = useState<{ success: number; failed: number } | null>(null);
 
@@ -267,6 +271,11 @@ export function ExportImportWizard() {
             Full Backup
           </button>
         </div>
+        {showSafeDeposit && (
+          <div className="mt-2 flex justify-center">
+            <LazySafeDeposit onComplete={() => setShowSafeDeposit(false)} />
+          </div>
+        )}
       </div>
 
       {/* Import section */}

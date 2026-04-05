@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { m, AnimatePresence } from "framer-motion";
 import { X, Loader2, Camera, ChevronDown, CalendarDays } from "lucide-react";
 import { LazySuccessCoinFlip } from "@/components/3d/LazySuccessCoinFlip";
+import { LazyCoinStack } from "@/components/3d/LazyCoinStack";
 import { getAllCategories } from "@/lib/categories";
 import { cn, getDaysInMonth, getCurrencySymbol } from "@/lib/utils";
 import { useUIStore } from "@/stores/uiStore";
@@ -253,6 +254,7 @@ export function ExpenseForm({
             className="flex items-center justify-center gap-2 rounded-xl py-3 px-3"
             style={{ background: 'var(--success-soft)' }}
           >
+            <LazyCoinStack />
             <LazySuccessCoinFlip />
             <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
               {editExpense ? "Updated!" : "Added!"}

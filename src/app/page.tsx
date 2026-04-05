@@ -20,6 +20,7 @@ import { PageTransition } from "@/components/ui/PageTransition";
 import { AmbientBackground } from "@/components/ui/AmbientBackground";
 import { ChartIllustration } from "@/components/ui/illustrations";
 import { LazyCoinScene } from "@/components/3d/LazyCoinScene";
+import { LazyTrophy } from "@/components/3d/LazyTrophy";
 
 // Lazy-load heavy chart components (recharts ~200KB)
 const CategoryChart = dynamic(
@@ -407,6 +408,16 @@ function DashboardContent() {
                   </m.div>
                 ) : (
                   <m.div key="kpi-content" className="section-zone section-coral dash-section" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
+                  {/* Trophy: month ended under budget */}
+                  {daysRemaining === 0 && remaining >= 0 && effectiveBudget > 0 && (
+                    <div className="mb-3 flex items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-3 dark:border-emerald-900/40 dark:bg-emerald-950/30">
+                      <LazyTrophy />
+                      <div>
+                        <p className="text-sm font-semibold text-emerald-700 dark:text-emerald-400">Budget Goal Met!</p>
+                        <p className="text-xs text-emerald-600/80 dark:text-emerald-400/70">You stayed under budget this month. Great discipline!</p>
+                      </div>
+                    </div>
+                  )}
                   <KpiCards
                   monthlyTotal={monthlyTotal}
                   remaining={remaining}

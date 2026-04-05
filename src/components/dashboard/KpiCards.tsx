@@ -6,7 +6,6 @@ import {
   PiggyBank,
   AlertTriangle,
   TrendingUp,
-  Clock,
   ChevronDown,
   Settings,
 } from "lucide-react";
@@ -19,6 +18,9 @@ import { AnimatedNumber } from "@/components/ui/AnimatedNumber";
 import type { Forecast } from "@/types";
 import { duration, ease, stagger as motionStagger } from "@/lib/motion/tokens";
 import { LazyBudgetJar } from "@/components/3d/LazyBudgetJar";
+import { LazyBalanceScale } from "@/components/3d/LazyBalanceScale";
+import { LazyShieldPulse } from "@/components/3d/LazyShieldPulse";
+import { LazyHourglass } from "@/components/3d/LazyHourglass";
 
 interface KpiCardsProps {
   monthlyTotal: number;
@@ -129,12 +131,12 @@ export function KpiCards({
         )}
         <div className="flex items-center justify-between">
           <div className={cn("flex items-center gap-2 text-sm font-semibold", sc.text)}>
-            {isOverspent ? <AlertTriangle size={15} /> : <PiggyBank size={15} />}
+            {status !== "safe" ? <LazyShieldPulse status={status as "caution" | "danger"} /> : isOverspent ? <AlertTriangle size={15} /> : <PiggyBank size={15} />}
             <span>{isOverspent ? "Over Budget" : "You still have"}</span>
           </div>
           {daysRemaining > 0 && (
-            <span className="flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium" style={{ background: 'var(--surface-secondary)', color: 'var(--text-secondary)' }}>
-              <Clock size={11} />
+            <span className="flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-medium" style={{ background: 'var(--surface-secondary)', color: 'var(--text-secondary)' }}>
+              <LazyHourglass progress={Math.round((1 - daysRemaining / Math.max(new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate(), 1)) * 100)} />
               {daysRemaining}d left
             </span>
           )}
@@ -183,7 +185,12 @@ export function KpiCards({
           </p>
         </div>
 
-        <div className="rounded-xl border p-3 sm:p-3.5" style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>
+        <div className="relative rounded-xl border p-3 sm:p-3.5" style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>
+          {salary > 0 && (
+            <div className="absolute right-2 top-2 z-0 opacity-40">
+              <LazyBalanceScale tilt={Math.min(budgetUsedPercent, 100)} />
+            </div>
+          )}
           <p className="text-meta font-medium">Saving</p>
           <p className={cn(
             "tabular-nums mt-1 text-base sm:text-lg font-bold",
