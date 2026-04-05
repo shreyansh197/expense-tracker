@@ -130,9 +130,13 @@ export function AlertsPanel({
   if (alerts.length === 0) {
     return (
       <div className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm" style={{ background: 'var(--status-ok-bg)', border: '1px solid var(--status-ok-border)' }}>
-        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full" style={{ background: 'var(--status-ok-border)' }}>
-          <Zap size={13} style={{ color: 'var(--status-ok-text)' }} />
-        </span>
+        {/* All-clear burst — 3 concentric arcs + check */}
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true" className="shrink-0">
+          <circle cx="14" cy="14" r="13" stroke="var(--status-ok-border)" strokeWidth="1" opacity="0.5" />
+          <circle cx="14" cy="14" r="9" stroke="var(--status-ok-border)" strokeWidth="1" opacity="0.35" />
+          <circle cx="14" cy="14" r="5" fill="var(--status-ok-border)" opacity="0.25" />
+          <path d="M10 14.5l2.5 2.5 5-5" stroke="var(--status-ok-text)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
         <div>
           <p className="font-medium" style={{ color: 'var(--status-ok-text)' }}>Looking good — no alerts this month</p>
           <p className="mt-0.5 text-xs" style={{ color: 'var(--text-muted)' }}>We&apos;ll flag anything that needs your attention</p>

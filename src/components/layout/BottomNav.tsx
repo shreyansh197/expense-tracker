@@ -4,13 +4,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { m } from "framer-motion";
 import {
-  LayoutDashboard,
   List,
   Plus,
-  Settings,
   Briefcase,
-  BarChart3,
 } from "lucide-react";
+import { IconDashboard, IconAnalytics, IconSettings } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 import { useUIStore } from "@/stores/uiStore";
 import { useSettings } from "@/hooks/useSettings";
@@ -21,18 +19,18 @@ const springStiff = spring.stiff;
 /* ── NAV LINKS (no Add — FAB handles that) ────────────────── */
 
 const personalLinks = [
-  { href: "/", icon: LayoutDashboard, label: "Dashboard" },
+  { href: "/", icon: IconDashboard, label: "Dashboard" },
   { href: "/expenses", icon: List, label: "Expenses" },
-  { href: "/analytics", icon: BarChart3, label: "Analytics" },
-  { href: "/settings", icon: Settings, label: "Settings" },
+  { href: "/analytics", icon: IconAnalytics, label: "Analytics" },
+  { href: "/settings", icon: IconSettings, label: "Settings" },
 ];
 
 const businessLinks = [
-  { href: "/", icon: LayoutDashboard, label: "Home" },
+  { href: "/", icon: IconDashboard, label: "Home" },
   { href: "/business", icon: Briefcase, label: "Business" },
   { href: "/expenses", icon: List, label: "Expenses" },
-  { href: "/analytics", icon: BarChart3, label: "Analytics" },
-  { href: "/settings", icon: Settings, label: "Settings" },
+  { href: "/analytics", icon: IconAnalytics, label: "Analytics" },
+  { href: "/settings", icon: IconSettings, label: "Settings" },
 ];
 
 /* ── NAV BAR HEIGHT (px) ──────────────────────────────────── */

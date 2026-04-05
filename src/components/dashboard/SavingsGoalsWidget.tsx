@@ -1,11 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { PiggyBank, TrendingUp, Minus, ChevronRight, X } from "lucide-react";
+import { TrendingUp, Minus, ChevronRight, X } from "lucide-react";
+import { IconGoals } from "@/components/ui/icons";
 import Link from "next/link";
 import { useSettings } from "@/hooks/useSettings";
 import { useToast } from "@/components/ui/Toast";
 import { useCurrency } from "@/hooks/useCurrency";
+import { GrowthGraphic } from "@/components/ui/illustrations";
 
 
 export function SavingsGoalsWidget() {
@@ -57,11 +59,16 @@ export function SavingsGoalsWidget() {
   const overallPct = totalTarget > 0 ? Math.round((totalSaved / totalTarget) * 100) : 0;
 
   return (
-    <div className="card p-5">
+    <div className="card relative overflow-hidden p-5">
+      {/* Abstract growth graphic — desktop only */}
+      <div className="pointer-events-none absolute right-3 top-2">
+        <GrowthGraphic />
+      </div>
+
       {/* Header */}
-      <div className="mb-4 flex items-center justify-between">
+      <div className="relative mb-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <PiggyBank size={15} className="text-ok" />
+          <IconGoals size={15} className="text-ok" />
           <h3 className="text-section-title">
             Savings Goals
           </h3>

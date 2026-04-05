@@ -98,9 +98,16 @@ export function RecurringSuggestions() {
           <TrendingUp size={14} className="text-data-text" />
           <h3 className="text-section-title">Recurring Patterns</h3>
         </div>
-        <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-          We&apos;ll spot your recurring expenses over time — keep logging to unlock insights.
-        </p>
+        <div className="flex items-center gap-3">
+          {/* Decorative wave arc */}
+          <svg width="40" height="32" viewBox="0 0 40 32" fill="none" aria-hidden="true" className="shrink-0 hidden sm:block">
+            <path d="M4 24 Q 12 8, 20 16 Q 28 24, 36 8" stroke="var(--secondary)" strokeWidth="2" strokeLinecap="round" fill="none" opacity="0.15" />
+            <circle cx="36" cy="8" r="3" fill="var(--secondary)" opacity="0.12" />
+          </svg>
+          <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+            We&apos;ll spot your recurring expenses over time — keep logging to unlock insights.
+          </p>
+        </div>
       </div>
     );
   }

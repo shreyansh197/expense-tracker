@@ -4,7 +4,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { m } from "framer-motion";
-import { LayoutDashboard, List, Settings, PlusCircle, Briefcase, User, BarChart3 } from "lucide-react";
+import { PlusCircle, Briefcase, User, List } from "lucide-react";
+import { IconDashboard, IconAnalytics, IconSettings } from "@/components/ui/icons";
 import { QuickHelpButton } from "@/components/ui/QuickHelpButton";
 import { cn } from "@/lib/utils";
 import { useUIStore } from "@/stores/uiStore";
@@ -14,18 +15,18 @@ import { useCurrency } from "@/hooks/useCurrency";
 import { useCalculationsContext } from "@/contexts/CalculationsContext";
 
 const personalNav = [
-  { href: "/", icon: LayoutDashboard, label: "Dashboard" },
+  { href: "/", icon: IconDashboard, label: "Dashboard" },
   { href: "/expenses", icon: List, label: "Expenses" },
-  { href: "/analytics", icon: BarChart3, label: "Analytics" },
-  { href: "/settings", icon: Settings, label: "Settings" },
+  { href: "/analytics", icon: IconAnalytics, label: "Analytics" },
+  { href: "/settings", icon: IconSettings, label: "Settings" },
 ];
 
 const businessNav = [
-  { href: "/", icon: LayoutDashboard, label: "Dashboard" },
+  { href: "/", icon: IconDashboard, label: "Dashboard" },
   { href: "/business", icon: Briefcase, label: "Business" },
   { href: "/expenses", icon: List, label: "Expenses" },
-  { href: "/analytics", icon: BarChart3, label: "Analytics" },
-  { href: "/settings", icon: Settings, label: "Settings" },
+  { href: "/analytics", icon: IconAnalytics, label: "Analytics" },
+  { href: "/settings", icon: IconSettings, label: "Settings" },
 ];
 
 export function Sidebar() {

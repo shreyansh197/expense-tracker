@@ -17,7 +17,7 @@ import { RevealOnScroll } from "@/components/motion/RevealOnScroll";
 import { staggerLoose, fadeUp } from "@/lib/motion/variants";
 import { SkeletonKpiCards, SkeletonChart } from "@/components/ui/Skeleton";
 import { PageTransition } from "@/components/ui/PageTransition";
-import { ChartIllustration } from "@/components/ui/illustrations";
+import { ChartIllustration, HeaderGraphic } from "@/components/ui/illustrations";
 import { Trophy, Wallet } from "lucide-react";
 
 // Lazy-load heavy chart components (recharts ~200KB)
@@ -336,7 +336,7 @@ function DashboardContent() {
         <PageTransition className="relative mx-auto min-h-[80vh] max-w-4xl xl:max-w-6xl space-y-6 sm:space-y-8 p-4 sm:p-6 lg:p-8">
         {/* Header — hero zone */}
         <m.div
-          className="zone-header dash-section relative z-40 rounded-2xl p-5 sm:p-6"
+          className="zone-header dash-section relative z-40 overflow-hidden rounded-2xl p-5 sm:p-6"
           style={{
             background: 'var(--surface)',
             border: '1px solid var(--border-card)',
@@ -346,6 +346,11 @@ function DashboardContent() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
         >
+          {/* Abstract decorative graphic — desktop only */}
+          <div className="pointer-events-none absolute right-3 top-3 sm:right-5 sm:top-3">
+            <HeaderGraphic />
+          </div>
+
           <h1 className="sr-only">Dashboard</h1>
 
           {user?.name && (

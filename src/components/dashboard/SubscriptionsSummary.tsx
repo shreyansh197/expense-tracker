@@ -1,7 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Repeat, Calendar, Pause, Play, ChevronDown } from "lucide-react";
+import { Calendar, Pause, Play, ChevronDown } from "lucide-react";
+import { IconRecurring } from "@/components/ui/icons";
 import { AnimatePresence, m } from "framer-motion";
 import { useCurrency } from "@/hooks/useCurrency";
 import { buildCategoryMap } from "@/lib/categories";
@@ -36,7 +37,7 @@ export function SubscriptionsSummary() {
   return (
     <div className="card p-5">
       <div className="mb-4 flex items-center gap-2">
-        <Repeat size={14} className="text-data-text" />
+        <IconRecurring size={14} className="text-data-text" />
         <h3 className="text-section-title">
           Recurring Summary
         </h3>
