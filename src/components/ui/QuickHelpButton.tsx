@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { HelpCircle, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SHORTCUTS } from "@/hooks/useKeyboardShortcuts";
@@ -61,21 +62,65 @@ export function QuickHelpButton({ variant = "icon" }: { variant?: "icon" | "side
         {variant === "sidebar" && "Help & Tips"}
       </button>
 
-      {open && variant !== "sidebar" && (
-        <div
-          className="fixed inset-0 z-[9999] bg-black/20 backdrop-blur-[1px] sm:hidden"
-          onClick={() => setOpen(false)}
-        />
+      {open && variant !== "sidebar" && createPortal(
+        <>
+          <div
+            className="fixed inset-0 z-[9999] bg-black/20 backdrop-blur-[1px] sm:hidden"
+            onClick={() => setOpen(false)}
+          />
+          <div
+            className="fixed inset-x-3 top-20 z-[10000] w-auto sm:inset-x-auto sm:w-72 sm:right-6 sm:top-16 rounded-xl border p-4 shadow-xl max-h-[70vh] overflow-y-auto"
+            style={{
+              background: "var(--surface)",
+              borderColor: "var(--border)",
+              boxShadow: "0 8px 32px rgba(0,0,0,0.18)",
+            }}
+          >
+          <div className="mb-3 flex items-center justify-between">
+            <h3 className="text-xs font-bold uppercase tracking-wider" style={{ color: "var(--text-primary)" }}>
+              Quick Tips
+            </h3>
+            <button onClick={() => setOpen(false)} style={{ color: 'var(--text-muted)' }} className="transition-colors hover:opacity-80">
+              <X size={14} />
+            </button>
+          </div>
+
+          <ul className="space-y-1.5">
+            {TIPS.map((tip, i) => (
+              <li key={i} className="flex items-center gap-2 text-xs leading-relaxed" style={{ color: "var(--text-secondary)" }}>
+                <span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: 'var(--secondary)' }} />
+                {tip}
+              </li>
+            ))}
+          </ul>
+
+          <div className="mt-3 border-t pt-3" style={{ borderColor: "var(--border)" }}>
+            <h4 className="mb-2 text-xs font-bold uppercase tracking-wider" style={{ color: "var(--text-primary)" }}>
+              Keyboard Shortcuts
+            </h4>
+            <div className="space-y-1">
+              {shortcuts.map((s, i) => (
+                <div key={i} className="flex items-center justify-between text-xs">
+                  <span style={{ color: "var(--text-secondary)" }}>{s.description}</span>
+                  <kbd className="rounded border px-1.5 py-0.5 font-mono text-caption" style={{ borderColor: "var(--border)", color: "var(--text-secondary)", background: "var(--surface-secondary)" }}>
+                    {s.label}
+                  </kbd>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <p className="mt-3 text-center text-xs" style={{ color: "var(--text-secondary)" }}>
+            Press <kbd className="rounded border px-1 py-0.5 font-mono" style={{ borderColor: "var(--border)", background: "var(--surface-secondary)", color: "var(--text-primary)" }}>Shift + ?</kbd> for full shortcuts panel
+          </p>
+        </div>
+        </>,
+        document.body,
       )}
 
-      {open && (
+      {open && variant === "sidebar" && (
         <div
-          className={cn(
-            "w-72 rounded-xl border p-4 shadow-xl max-h-[70vh] overflow-y-auto",
-            variant === "sidebar"
-              ? "absolute z-[9999] bottom-full left-0 mb-2"
-              : "fixed inset-x-3 top-20 z-[10000] sm:inset-x-auto sm:top-auto sm:right-3 sm:top-16"
-          )}
+          className="absolute z-[9999] bottom-full left-0 mb-2 w-72 rounded-xl border p-4 shadow-xl max-h-[70vh] overflow-y-auto"
           style={{
             background: "var(--surface)",
             borderColor: "var(--border)",
