@@ -444,7 +444,7 @@ export function ExpenseForm({
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-            className="overflow-hidden space-y-4"
+            className="overflow-hidden md:overflow-visible space-y-4"
           >
 
       {/* Currency selector (multi-currency mode only) */}

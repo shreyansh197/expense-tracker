@@ -93,7 +93,7 @@ export function KpiCards({
 
   return (
     <m.div
-      className="space-y-4"
+      className="space-y-5"
       initial="hidden"
       animate="visible"
       variants={{ visible: { transition: { staggerChildren: motionStagger.normal } } }}
@@ -159,7 +159,7 @@ export function KpiCards({
 
       {/* ── SECONDARY: Supporting Metrics (compact inline) ── */}
       <m.div
-        className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3"
+        className="grid grid-cols-1 gap-5 sm:grid-cols-2 md:grid-cols-3"
         variants={{ hidden: { opacity: 0, y: 8 }, visible: { opacity: 1, y: 0, transition: { duration: duration.emphasis, delay: 0.1, ease: ease.out } } }}
       >
         <div className="rounded-xl p-3 sm:p-3.5" style={{ background: 'var(--surface-secondary)' }}>

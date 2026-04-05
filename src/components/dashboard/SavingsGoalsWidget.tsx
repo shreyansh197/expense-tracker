@@ -186,13 +186,13 @@ export function SavingsGoalsWidget() {
 
               {/* Inline fund form */}
               {isActive && (
-                <div className="flex items-center gap-2 rounded-lg p-2" style={{ background: 'var(--surface-secondary)' }}>
+                <div className="flex items-center gap-1.5 rounded-lg px-2 py-1.5" style={{ background: 'var(--surface-secondary)' }}>
                   {/* Add / Subtract toggle */}
                   <div className="flex overflow-hidden rounded-lg" style={{ border: '1px solid var(--border)' }}>
                     <button
                       onClick={() => setFundMode("add")}
                       title="Add funds"
-                      className={`px-2.5 py-1.5 text-xs font-medium transition-colors ${
+                      className={`px-2 py-1 text-xs font-medium transition-colors ${
                         fundMode === "add"
                           ? "bg-ok-soft text-ok-text"
                           : ""
@@ -206,7 +206,7 @@ export function SavingsGoalsWidget() {
                     <button
                       onClick={() => setFundMode("subtract")}
                       title="Remove funds"
-                      className={`px-2.5 py-1.5 text-xs font-medium transition-colors ${
+                      className={`px-2 py-1 text-xs font-medium transition-colors ${
                         fundMode === "subtract"
                           ? "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400"
                           : ""
@@ -233,21 +233,21 @@ export function SavingsGoalsWidget() {
                       }}
                       autoFocus
                       placeholder="Amount"
-                      className="form-input w-full py-1.5 pl-6 pr-2 text-xs"
+                      className="form-input w-full min-w-0 py-1 pl-6 pr-2 text-xs"
                     />
                   </div>
 
                   <button
                     onClick={handleFund}
                     disabled={!fundAmount || parseFloat(fundAmount) <= 0}
-                    className="shrink-0 rounded-lg bg-ok px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-ok-hover disabled:opacity-40"
+                    className="shrink-0 rounded-lg bg-ok px-2.5 py-1 text-xs font-medium text-white transition-colors hover:bg-ok-hover disabled:opacity-40"
                   >
                     Save
                   </button>
 
                   <button
                     onClick={handleCancel}
-                    className="shrink-0 rounded-lg p-1.5 transition-colors"
+                    className="shrink-0 rounded-lg p-1 transition-colors"
                     style={{ color: 'var(--text-muted)' }}
                     onMouseEnter={e => { e.currentTarget.style.background = 'var(--surface-hover)'; }}
                     onMouseLeave={e => { e.currentTarget.style.background = ''; }}
