@@ -338,7 +338,7 @@ function DashboardContent() {
         <PageTransition className="relative mx-auto min-h-[80vh] max-w-4xl xl:max-w-6xl space-y-4 sm:space-y-6 p-3 sm:p-4 md:p-5 lg:p-6">
         {/* Header — hero zone */}
         <m.div
-          className="zone-header dash-section relative z-20 rounded-2xl p-4 sm:p-5"
+          className="zone-header dash-section relative z-30 rounded-2xl p-4 sm:p-5"
           style={{
             background: 'linear-gradient(135deg, var(--accent-soft) 0%, var(--surface) 50%, var(--primary-soft) 100%)',
             border: '1px solid var(--border-card)',

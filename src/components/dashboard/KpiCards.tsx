@@ -123,7 +123,7 @@ export function KpiCards({
         <div className={cn("absolute inset-x-0 top-0 h-1 rounded-t-2xl", sc.bar)} />
         {/* 3D piggy bank accent — top right */}
         {salary > 0 && (
-          <div className="absolute right-3 top-3 opacity-50 pointer-events-auto z-10">
+          <div className="absolute right-3 top-3 opacity-50">
             <LazyPiggyBankScene />
           </div>
         )}
