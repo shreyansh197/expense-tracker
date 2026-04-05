@@ -7,13 +7,11 @@
 export function HeaderGraphic() {
   return (
     <svg
-      width="120"
-      height="90"
       viewBox="0 0 120 90"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       aria-hidden="true"
-      className="hidden sm:block"
+      className="h-[50px] w-[66px] sm:h-[90px] sm:w-[120px]"
     >
       {/* Large soft circle — primary brand at low opacity */}
       <circle cx="80" cy="35" r="32" fill="var(--primary)" opacity="0.08" />

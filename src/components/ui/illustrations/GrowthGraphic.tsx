@@ -7,13 +7,11 @@
 export function GrowthGraphic() {
   return (
     <svg
-      width="64"
-      height="80"
       viewBox="0 0 64 80"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       aria-hidden="true"
-      className="hidden sm:block"
+      className="h-[44px] w-[35px] sm:h-[80px] sm:w-[64px]"
     >
       {/* Upward sweeping arc — growth trajectory */}
       <path

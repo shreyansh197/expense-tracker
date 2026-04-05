@@ -17,7 +17,7 @@ import { RevealOnScroll } from "@/components/motion/RevealOnScroll";
 import { staggerLoose, fadeUp } from "@/lib/motion/variants";
 import { SkeletonKpiCards, SkeletonChart } from "@/components/ui/Skeleton";
 import { PageTransition } from "@/components/ui/PageTransition";
-import { ChartIllustration, HeaderGraphic } from "@/components/ui/illustrations";
+import { ChartIllustration, HeaderGraphic, SparkGraphic, WavePatternGraphic } from "@/components/ui/illustrations";
 import { Trophy, Wallet } from "lucide-react";
 
 // Lazy-load heavy chart components (recharts ~200KB)
@@ -492,7 +492,10 @@ function DashboardContent() {
                 ) : expenses.length === 0 ? (
                 <div className="dash-section relative grid gap-4 md:grid-cols-2">
                   <div className="card relative overflow-hidden p-5">
+                    <div className="flex items-center justify-between">
                     <h3 className="relative text-section-title mb-4">Category Breakdown</h3>
+                    <WavePatternGraphic />
+                    </div>
                     <div className="relative flex h-[220px] items-center justify-center">
                       <div className="flex flex-col items-center text-center">
                         <ChartIllustration size={120} />
@@ -502,7 +505,10 @@ function DashboardContent() {
                     </div>
                   </div>
                   <div className="card relative overflow-hidden p-5">
+                    <div className="flex items-center justify-between">
                     <h3 className="relative text-section-title mb-4">Daily Spending Trend</h3>
+                    <WavePatternGraphic />
+                    </div>
                     <div className="relative flex h-[220px] items-center justify-center">
                       <div className="flex flex-col items-center text-center">
                         <ChartIllustration size={120} />
@@ -551,9 +557,12 @@ function DashboardContent() {
               <div key="recent">
               <div className="dash-section card p-5">
                 <div className="mb-4 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
                   <h3 className="text-section-title">
                     Recent Expenses
                   </h3>
+                  <SparkGraphic />
+                  </div>
                   {recentExpenses.length > 0 && (
                     <a
                       href="/expenses"

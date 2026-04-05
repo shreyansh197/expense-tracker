@@ -26,7 +26,7 @@ import { SyncIndicator } from "@/components/sync/SyncIndicator";
 import { BusinessExport } from "@/components/business/BusinessExport";
 import { SkeletonBusinessKpi, SkeletonLedgerList } from "@/components/ui/Skeleton";
 import { PageTransition } from "@/components/ui/PageTransition";
-import { WalletIllustration } from "@/components/ui/illustrations";
+import { WalletIllustration, BusinessGraphic } from "@/components/ui/illustrations";
 import { m, AnimatePresence } from "framer-motion";
 import type { LedgerInput, Ledger } from "@/types";
 
@@ -134,7 +134,11 @@ export default function BusinessPage() {
     <AppShell>
       <PageTransition className="relative mx-auto min-h-[80vh] max-w-5xl xl:max-w-7xl space-y-6 p-4 lg:p-6">
         {/* Header + KPIs — emerald zone */}
-        <div className="section-zone section-emerald space-y-6">
+        <div className="section-zone section-emerald space-y-6 relative overflow-hidden">
+        {/* Abstract decorative graphic */}
+        <div className="pointer-events-none absolute right-3 top-3 sm:right-5 sm:top-4">
+          <BusinessGraphic />
+        </div>
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-page-title">Business</h1>

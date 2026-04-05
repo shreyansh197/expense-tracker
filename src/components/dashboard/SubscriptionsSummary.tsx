@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { Calendar, Pause, Play, ChevronDown } from "lucide-react";
 import { IconRecurring } from "@/components/ui/icons";
+import { CycleGraphic } from "@/components/ui/illustrations";
 import { AnimatePresence, m } from "framer-motion";
 import { useCurrency } from "@/hooks/useCurrency";
 import { buildCategoryMap } from "@/lib/categories";
@@ -35,7 +36,11 @@ export function SubscriptionsSummary() {
   if (recurring.length === 0) return null;
 
   return (
-    <div className="card p-5">
+    <div className="card relative overflow-hidden p-5">
+      {/* Abstract cycle graphic */}
+      <div className="pointer-events-none absolute -right-1 -top-1 sm:right-2 sm:top-1">
+        <CycleGraphic />
+      </div>
       <div className="mb-4 flex items-center gap-2">
         <IconRecurring size={14} className="text-data-text" />
         <h3 className="text-section-title">

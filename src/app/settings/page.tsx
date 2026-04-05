@@ -27,6 +27,7 @@ import { AutoRulesManager } from "@/components/settings/AutoRulesManager";
 import { DataAccountManagement } from "@/components/settings/DataAccountManagement";
 import { SettingsFooterLogout } from "@/components/settings/SettingsFooterLogout";
 import { PageTransition } from "@/components/ui/PageTransition";
+import { SettingsGraphic } from "@/components/ui/illustrations";
 import { fetchRates, getRateInfo, clearRateCache } from "@/lib/exchangeRates";
 
 /** Shows live rate source, sample conversions, and a refresh button */
@@ -232,7 +233,10 @@ export default function SettingsPage() {
   return (
     <AppShell>
         <PageTransition className="relative mx-auto max-w-3xl space-y-2 p-4 lg:p-6">
-        <h1 className="text-page-title mb-4">Settings</h1>
+        <div className="relative flex items-center justify-between mb-4">
+          <h1 className="text-page-title">Settings</h1>
+          <SettingsGraphic />
+        </div>
 
         {/* Tab navigation — desktop: shows only active zone; mobile: all zones visible */}
         <div role="tablist" aria-label="Settings sections" className="hidden lg:flex sticky top-0 z-10 gap-1.5 rounded-xl p-1.5 mb-4 backdrop-blur-md" style={{ background: 'color-mix(in srgb, var(--surface) 85%, transparent)', border: '1px solid var(--border-subtle)' }}>

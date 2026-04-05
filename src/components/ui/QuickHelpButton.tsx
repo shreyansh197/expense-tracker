@@ -61,17 +61,25 @@ export function QuickHelpButton({ variant = "icon" }: { variant?: "icon" | "side
         {variant === "sidebar" && "Help & Tips"}
       </button>
 
+      {open && variant !== "sidebar" && (
+        <div
+          className="fixed inset-0 z-[9999] bg-black/20 backdrop-blur-[1px] sm:hidden"
+          onClick={() => setOpen(false)}
+        />
+      )}
+
       {open && (
         <div
           className={cn(
             "w-72 rounded-xl border p-4 shadow-xl max-h-[70vh] overflow-y-auto",
             variant === "sidebar"
               ? "absolute z-[9999] bottom-full left-0 mb-2"
-              : "fixed z-[10000] right-3 top-auto mt-2 sm:absolute sm:right-0 sm:top-full sm:fixed-auto"
+              : "fixed inset-x-3 top-20 z-[10000] sm:inset-x-auto sm:top-auto sm:right-3 sm:top-16"
           )}
           style={{
             background: "var(--surface)",
             borderColor: "var(--border)",
+            boxShadow: "0 8px 32px rgba(0,0,0,0.18)",
           }}
         >
           <div className="mb-3 flex items-center justify-between">
