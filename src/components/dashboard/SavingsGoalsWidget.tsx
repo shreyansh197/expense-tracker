@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useSettings } from "@/hooks/useSettings";
 import { useToast } from "@/components/ui/Toast";
 import { useCurrency } from "@/hooks/useCurrency";
+import { LazyGoalRing } from "@/components/3d/LazyGoalRing";
 
 export function SavingsGoalsWidget() {
   const { settings, updateSettings } = useSettings();
@@ -96,7 +97,13 @@ export function SavingsGoalsWidget() {
           const isActive = activeGoalId === g.id;
 
           return (
-            <div key={g.id} className="space-y-1.5">
+            <div key={g.id} className="flex items-start gap-3">
+              {/* 3D Goal Ring */}
+              <div className="shrink-0 pt-1">
+                <LazyGoalRing progress={pct} color={g.color} />
+              </div>
+              {/* Goal details */}
+              <div className="min-w-0 flex-1 space-y-1.5">
               {/* Goal row */}
               <div className="flex items-center justify-between gap-2">
                 <div className="flex min-w-0 items-center gap-2">
@@ -235,6 +242,7 @@ export function SavingsGoalsWidget() {
                   </button>
                 </div>
               )}
+              </div>{/* end goal details */}
             </div>
           );
         })}

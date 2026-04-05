@@ -18,7 +18,7 @@ import { InfoTooltip } from "@/components/ui/InfoTooltip";
 import { AnimatedNumber } from "@/components/ui/AnimatedNumber";
 import type { Forecast } from "@/types";
 import { duration, ease, stagger as motionStagger } from "@/lib/motion/tokens";
-import { LazyPiggyBankScene } from "@/components/3d/LazyPiggyBankScene";
+import { LazyBudgetJar } from "@/components/3d/LazyBudgetJar";
 
 interface KpiCardsProps {
   monthlyTotal: number;
@@ -121,10 +121,10 @@ export function KpiCards({
         variants={{ hidden: { opacity: 0, y: 12 }, visible: { opacity: 1, y: 0, transition: { duration: duration.emphasis, ease: ease.out } } }}
       >
         <div className={cn("absolute inset-x-0 top-0 h-1 rounded-t-2xl", sc.bar)} />
-        {/* 3D piggy bank accent — top right */}
+        {/* 3D budget jar accent — top right */}
         {salary > 0 && (
-          <div className="absolute right-3 top-3 opacity-50">
-            <LazyPiggyBankScene />
+          <div className="absolute right-3 top-3 z-0 opacity-60">
+            <LazyBudgetJar level={Math.min(budgetUsedPercent, 100)} status={status} />
           </div>
         )}
         <div className="flex items-center justify-between">
