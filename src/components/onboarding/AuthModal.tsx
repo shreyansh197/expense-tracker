@@ -458,7 +458,8 @@ export function AuthModal({
             value={totpCode}
             onChange={(e) => setTotpCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
             autoFocus
-            className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-4 text-center font-mono text-2xl tracking-[0.5em] text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#2EC4B6] focus:border-[#2EC4B6] dark:focus:ring-[#3B82F6] dark:focus:border-[#3B82F6] transition-all placeholder:tracking-normal placeholder:text-slate-300 dark:placeholder:text-slate-600"
+            className="w-full rounded-2xl py-4 text-center font-mono text-2xl tracking-[0.5em] transition-all placeholder:tracking-normal focus:outline-none focus:ring-2"
+            style={{ background: 'var(--surface-secondary)', border: '1px solid var(--border)', color: 'var(--text-primary)', '--tw-ring-color': 'var(--primary)' } as React.CSSProperties}
             onKeyDown={(e) => { if (e.key === "Enter") handleVerify2FA(); }}
           />
 
@@ -513,7 +514,8 @@ export function AuthModal({
             onChange={(e) => setSalary(e.target.value)}
             autoFocus
             onKeyDown={(e) => { if (e.key === "Enter") handleSalarySubmit(); }}
-            className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-4 pl-10 pr-4 text-xl font-semibold text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#2EC4B6] focus:border-[#2EC4B6] dark:focus:ring-[#3B82F6] dark:focus:border-[#3B82F6] transition-all placeholder:text-slate-300 dark:placeholder:text-slate-600 placeholder:font-normal"
+            className="w-full rounded-2xl py-4 pl-10 pr-4 text-xl font-semibold transition-all placeholder:font-normal focus:outline-none focus:ring-2"
+            style={{ background: 'var(--surface-secondary)', border: '1px solid var(--border)', color: 'var(--text-primary)', '--tw-ring-color': 'var(--primary)' } as React.CSSProperties}
           />
         </div>
 
@@ -570,9 +572,9 @@ export function AuthModal({
 
           {/* OR divider */}
           <div className="relative flex items-center gap-3">
-            <div className="flex-1 border-t border-slate-200 dark:border-slate-700/80" />
-            <span className="text-xs font-medium text-slate-400 dark:text-slate-600 uppercase tracking-wide">or</span>
-            <div className="flex-1 border-t border-slate-200 dark:border-slate-700/80" />
+            <div className="flex-1" style={{ borderTop: '1px solid var(--border)' }} />
+            <span className="text-xs font-medium uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>or</span>
+            <div className="flex-1" style={{ borderTop: '1px solid var(--border)' }} />
           </div>
 
           {/* Create Account — primary CTA */}
@@ -654,7 +656,8 @@ export function AuthModal({
               placeholder="Name (optional)"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full rounded-xl border border-slate-200 bg-slate-50 py-3.5 pl-10 pr-4 text-sm text-slate-900 placeholder:text-slate-400 dark:border-slate-700 dark:bg-slate-800/80 dark:text-white dark:placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-[#2EC4B6] focus:border-[#2EC4B6] dark:focus:ring-[#3B82F6] dark:focus:border-[#3B82F6] transition-all"
+              className="w-full rounded-xl py-3.5 pl-10 pr-4 text-sm transition-all focus:outline-none focus:ring-2"
+              style={{ background: 'var(--surface-secondary)', border: '1px solid var(--border)', color: 'var(--text-primary)', '--tw-ring-color': 'var(--primary)' } as React.CSSProperties}
             />
           </div>
         )}
@@ -667,7 +670,8 @@ export function AuthModal({
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             autoComplete="email"
-            className="w-full rounded-xl border border-slate-200 bg-slate-50 py-3.5 pl-10 pr-4 text-sm text-slate-900 placeholder:text-slate-400 dark:border-slate-700 dark:bg-slate-800/80 dark:text-white dark:placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-[#2EC4B6] focus:border-[#2EC4B6] dark:focus:ring-[#3B82F6] dark:focus:border-[#3B82F6] transition-all"
+            className="w-full rounded-xl py-3.5 pl-10 pr-4 text-sm transition-all focus:outline-none focus:ring-2"
+            style={{ background: 'var(--surface-secondary)', border: '1px solid var(--border)', color: 'var(--text-primary)', '--tw-ring-color': 'var(--primary)' } as React.CSSProperties}
           />
         </div>
 
@@ -679,8 +683,8 @@ export function AuthModal({
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             autoComplete={isRegister ? "new-password" : "current-password"}
-            className="w-full rounded-xl border border-slate-200 bg-slate-50 py-3.5 pl-10 pr-11 text-sm text-slate-900 placeholder:text-slate-400 dark:border-slate-700 dark:bg-slate-800/80 dark:text-white dark:placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-[#2EC4B6] focus:border-[#2EC4B6] dark:focus:ring-[#3B82F6] dark:focus:border-[#3B82F6] transition-all [&::-ms-reveal]:hidden [&::-ms-clear]:hidden [&::-webkit-contacts-auto-fill-button]:hidden [&::-webkit-credentials-auto-fill-button]:hidden"
-            style={{ WebkitTextSecurity: showPassword ? "none" : undefined } as React.CSSProperties}
+            className="w-full rounded-xl py-3.5 pl-10 pr-11 text-sm transition-all focus:outline-none focus:ring-2 [&::-ms-reveal]:hidden [&::-ms-clear]:hidden [&::-webkit-contacts-auto-fill-button]:hidden [&::-webkit-credentials-auto-fill-button]:hidden"
+            style={{ background: 'var(--surface-secondary)', border: '1px solid var(--border)', color: 'var(--text-primary)', '--tw-ring-color': 'var(--primary)', WebkitTextSecurity: showPassword ? "none" : undefined } as React.CSSProperties}
           />
           <button
             type="button"
@@ -736,14 +740,15 @@ export function AuthModal({
 
       {/* OR + Google button */}
       <div className="mt-6 relative flex items-center gap-3">
-        <div className="flex-1 border-t border-slate-200 dark:border-slate-700/80" />
-        <span className="text-xs font-medium text-slate-400 dark:text-slate-600 uppercase tracking-wide">or continue with</span>
-        <div className="flex-1 border-t border-slate-200 dark:border-slate-700/80" />
+        <div className="flex-1" style={{ borderTop: '1px solid var(--border)' }} />
+        <span className="text-xs font-medium uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>or continue with</span>
+        <div className="flex-1" style={{ borderTop: '1px solid var(--border)' }} />
       </div>
       <button
         type="button"
         onClick={() => { window.location.href = "/api/auth/google"; }}
-        className="mt-3 flex w-full items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white py-3 text-sm font-medium text-slate-700 transition-all hover:bg-slate-50 hover:border-slate-300 hover:shadow-sm active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700/80 dark:hover:border-slate-600"
+        className="mt-3 flex w-full items-center justify-center gap-3 rounded-xl py-3 text-sm font-medium transition-all hover:shadow-sm active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)]"
+        style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-secondary)' }}
       >
         <GoogleIcon className="h-4 w-4" />
         Google

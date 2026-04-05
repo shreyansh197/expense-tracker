@@ -3,21 +3,32 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
+  /* ── Spacing scale ── */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
   /* ── Surfaces ── */
-  --background: #F0F4F8;
+  --background: #F7F8FC;
   --foreground: #1a2332;
   --surface: #ffffff;
-  --surface-secondary: #E8EFF5;
-  --surface-hover: #dde6ef;
-  --surface-tertiary: #d0dae5;
+  --surface-secondary: #F1F4F9;
+  --surface-hover: #E8EDF4;
+  --surface-tertiary: #DDE3ED;
+  --surface-elevated: #ffffff;
   /* ── Borders ── */
-  --border: #DBE3ED;
-  --border-subtle: #E8F0F8;
-  --border-card: #CFD9E5;
+  --border: #E2E7F0;
+  --border-subtle: #EDF0F7;
+  --border-card: #E5EAF2;
   /* ── Text ── */
   --text-primary: #1a2332;
   --text-secondary: #4b5e6d;
-  --text-tertiary: #7a8b9b;
+  --text-tertiary: #6B7B8B;
   --text-muted: #c2ced6;
   /* ── Primary (Brand — Teal) ── */
   --primary: #2EC4B6;
@@ -27,18 +38,18 @@
   --secondary: #4C5CFF;
   --secondary-soft: #eef0ff;
   --secondary-gradient: linear-gradient(135deg, #4C5CFF, #6366f1);
-  /* ── Accent (CTA — Coral) ── */
-  --accent: #FF8A65;
-  --accent-soft: #fff3ee;
-  --accent-gradient: linear-gradient(135deg, #FF8A65, #FF7043);
+  /* ── Accent (CTA — Orange) ── */
+  --accent: #F97316;
+  --accent-soft: #FFF7ED;
+  --accent-gradient: linear-gradient(135deg, #F97316, #EA580C);
   /* ── CTA buttons (alias → accent for consistency) ── */
   --cta: var(--accent);
-  --cta-hover: #FF7043;
-  --cta-deep: #E64A19;
+  --cta-hover: #EA580C;
+  --cta-deep: #C2410C;
   /* ── Coral track (stays warm across themes) ── */
-  --coral: #FF8A65;
-  --coral-soft: #fff3ee;
-  --coral-border: #ffd4c2;
+  --coral: #F97316;
+  --coral-soft: #FFF7ED;
+  --coral-border: #FDBA74;
   /* ── Primary derived ── */
   --primary-hover: #26a69a;
   --primary-border: #b2ece6;
@@ -75,20 +86,21 @@
   --category-fallback: #6B7280;
   /* ── Quiet grouping surface ── */
   --surface-quiet: rgba(0, 0, 0, 0.015);
-  /* ── Section zone washes (neutralized — structural only) ── */
-  --section-teal: transparent;
-  --section-indigo: transparent;
-  --section-coral: transparent;
-  --section-emerald: transparent;
+  /* ── Section zone washes (subtle tinted backgrounds) ── */
+  --section-teal: rgba(46, 196, 182, 0.035);
+  --section-indigo: rgba(99, 102, 241, 0.03);
+  --section-coral: rgba(249, 115, 22, 0.03);
+  --section-emerald: rgba(16, 185, 129, 0.03);
   /* ── Accent card surfaces (unified primary tint) ── */
   --surface-accent-teal: #e6f9f7;
   --surface-accent-indigo: #e6f9f7;
   --surface-accent-coral: #e6f9f7;
   /* ── Hero gradient ── */
   --gradient-hero: linear-gradient(135deg, rgba(46, 196, 182, 0.12) 0%, rgba(76, 92, 255, 0.09) 100%);
-  /* ── Elevation (2-level shadow system) ── */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
-  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+  /* ── Elevation (3-level shadow system) ── */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.03);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.03);
   --card-shadow: var(--shadow-sm);
   --card-shadow-hover: var(--shadow-md);
   --section-gap: 1.5rem;
@@ -99,21 +111,23 @@
 }
 
 .dark {
-  /* ── Surfaces (blue-black with layered depth) ── */
-  --background: #0B1120;
+  /* ── Spacing scale (inherited from :root) ── */
+  /* ── Surfaces (deep navy with layered depth) ── */
+  --background: #0B1220;
   --foreground: #E2E8F0;
-  --surface: #131B2E;
-  --surface-secondary: #1A2440;
-  --surface-hover: #223052;
-  --surface-tertiary: #2A3A60;
+  --surface: #111827;
+  --surface-secondary: #1E293B;
+  --surface-hover: #283548;
+  --surface-tertiary: #334155;
+  --surface-elevated: #1A2332;
   /* ── Borders ── */
-  --border: #1E2D4A;
-  --border-subtle: #141E36;
-  --border-card: #243352;
+  --border: #1E293B;
+  --border-subtle: #1A2332;
+  --border-card: #283548;
   /* ── Text ── */
   --text-primary: #E2E8F0;
   --text-secondary: #94A3B8;
-  --text-tertiary: #64748B;
+  --text-tertiary: #708090;
   --text-muted: #475569;
   /* ── Primary (Blue) ── */
   --primary: #60A5FA;
@@ -171,20 +185,21 @@
   --category-fallback: #6B7280;
   /* ── Quiet grouping surface ── */
   --surface-quiet: rgba(255, 255, 255, 0.02);
-  /* ── Section zone washes (neutralized — structural only) ── */
-  --section-teal: transparent;
-  --section-indigo: transparent;
-  --section-coral: transparent;
-  --section-emerald: transparent;
+  /* ── Section zone washes (subtle tinted backgrounds) ── */
+  --section-teal: rgba(46, 196, 182, 0.045);
+  --section-indigo: rgba(99, 102, 241, 0.04);
+  --section-coral: rgba(249, 115, 22, 0.04);
+  --section-emerald: rgba(16, 185, 129, 0.04);
   /* ── Accent card surfaces (unified primary tint) ── */
   --surface-accent-teal: rgba(96, 165, 250, 0.10);
   --surface-accent-indigo: rgba(96, 165, 250, 0.10);
   --surface-accent-coral: rgba(96, 165, 250, 0.10);
   /* ── Hero gradient ── */
   --gradient-hero: linear-gradient(135deg, rgba(96, 165, 250, 0.14) 0%, rgba(129, 140, 248, 0.10) 100%);
-  /* ── Elevation (2-level shadow system) ── */
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.15);
-  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4), 0 2px 4px rgba(0, 0, 0, 0.2);
+  /* ── Elevation (3-level shadow system) ── */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.25), 0 1px 2px rgba(0, 0, 0, 0.12);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.35), 0 2px 4px rgba(0, 0, 0, 0.18);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.45), 0 2px 8px rgba(0, 0, 0, 0.2);
   --card-shadow: var(--shadow-sm);
   --card-shadow-hover: var(--shadow-md);
   /* ── Charts ── */
@@ -379,39 +394,39 @@ button, a {
   .card:hover {
     box-shadow: var(--card-shadow-hover);
     border-color: color-mix(in srgb, var(--primary) 15%, var(--border-card));
+    transform: translateY(-1px);
   }
 }
 .card-sm {
   background: var(--surface);
   border: 1px solid var(--border-card);
   border-radius: 0.75rem;
-  box-shadow: var(--card-shadow);
   transition: box-shadow 0.25s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.25s cubic-bezier(0.22, 1, 0.36, 1);
 }
 @media (hover: hover) {
   .card-sm:hover {
-    box-shadow: var(--card-shadow-hover);
+    box-shadow: var(--card-shadow);
     border-color: color-mix(in srgb, var(--primary) 12%, var(--border-card));
   }
 }
 .card-hero {
-  background: var(--surface);
+  background: var(--surface-elevated);
   border: 1px solid var(--border-card);
-  border-radius: 1rem;
-  box-shadow: var(--shadow-md);
+  border-radius: 1.25rem;
+  box-shadow: var(--shadow-lg);
   transition: box-shadow 0.25s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.25s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 /* ── Typography scale ──────────────────────────────────────── */
 .text-page-title {
-  font-size: 1.375rem;
+  font-size: 1.5rem;
   font-weight: 700;
   line-height: 1.25;
-  letter-spacing: -0.025em;
+  letter-spacing: -0.03em;
   color: var(--text-primary);
 }
 @media (min-width: 640px) {
-  .text-page-title { font-size: 1.5rem; }
+  .text-page-title { font-size: 1.75rem; }
 }
 .text-section-title {
   font-size: 0.8125rem;
@@ -419,7 +434,7 @@ button, a {
   line-height: 1.4;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--text-primary);
+  color: var(--text-secondary);
 }
 .text-card-title {
   font-size: 0.8125rem;
@@ -449,6 +464,13 @@ button, a {
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.01em;
+}
+.text-hero-amount {
+  font-size: 2.25rem;
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
 }
 
 /* ── Segmented control (chart mode toggle) ─────────────────── */
@@ -480,9 +502,10 @@ button, a {
 @layer base {
 .form-input {
   width: 100%;
+  min-height: 2.75rem;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 0.75rem;
+  border-radius: 0.875rem;
   padding: 0.625rem 0.75rem;
   font-size: 1rem !important; /* 16px prevents iOS Safari auto-zoom on focus */
   color: var(--text-primary);
@@ -491,11 +514,12 @@ button, a {
 }
 .form-input:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-soft);
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.15);
   transform: scale(1.003);
 }
 .form-input::placeholder {
-  color: var(--text-tertiary);
+  color: var(--text-muted);
+  font-weight: 400;
 }
 .form-input:disabled {
   opacity: 0.5;
@@ -503,9 +527,10 @@ button, a {
 }
 .form-select {
   width: 100%;
+  min-height: 2.75rem;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 0.75rem;
+  border-radius: 0.875rem;
   padding: 0.625rem 0.75rem;
   font-size: 1rem !important; /* 16px prevents iOS Safari auto-zoom on focus */
   color: var(--text-primary);
@@ -751,16 +776,6 @@ input[type="password"]::-ms-clear {
 
 /* ── Splash Screen Animations ──────────────────────────────── */
 
-/* Month switcher slide */
-@keyframes month-slide-left {
-  0%   { opacity: 0; transform: translateX(40px) scale(0.92); }
-  100% { opacity: 1; transform: translateX(0) scale(1); }
-}
-@keyframes month-slide-right {
-  0%   { opacity: 0; transform: translateX(-40px) scale(0.92); }
-  100% { opacity: 1; transform: translateX(0) scale(1); }
-}
-
 /* View Transition API — crossfade for month switches */
 ::view-transition-old(month-content) {
   animation: 180ms ease-out both vt-fade-out;
@@ -805,26 +820,6 @@ input[type="password"]::-ms-clear {
 @keyframes et-screen-in {
   from { opacity: 0; transform: scale(0.96); }
   to   { opacity: 1; transform: scale(1); }
-}
-
-@keyframes et-screen-out {
-  from { opacity: 1; transform: scale(1); }
-  to   { opacity: 0; transform: scale(0.96); }
-}
-
-@keyframes et-offline-ring {
-  0%   { transform: scale(1);   opacity: 0.6; }
-  100% { transform: scale(2.2); opacity: 0; }
-}
-
-@keyframes et-shake {
-  0%, 100% { transform: translateX(0); }
-  15%       { transform: translateX(-6px); }
-  30%       { transform: translateX(6px); }
-  45%       { transform: translateX(-4px); }
-  60%       { transform: translateX(4px); }
-  75%       { transform: translateX(-2px); }
-  90%       { transform: translateX(2px); }
 }
 
 @media (prefers-reduced-motion: reduce) {

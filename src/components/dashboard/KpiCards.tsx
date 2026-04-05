@@ -41,11 +41,11 @@ function getStatusCopy(
   forecastOverBudget: boolean,
   formatCurrency: (n: number) => string,
 ): string {
-  if (isOverspent) return "You\u2019ve gone over budget this month";
-  if (daysRemaining === 0) return "This month has ended";
-  if (forecastOverBudget) return "At this pace, you may overspend before month end";
-  if (isWarning) return `Spend \u2264 ${formatCurrency(paceToStayUnder)}/day to stay on track`;
-  if (daysRemaining <= 3) return `Only ${daysRemaining} day${daysRemaining !== 1 ? "s" : ""} left this month`;
+  if (isOverspent) return "Spending\u2019s ahead of plan this month";
+  if (daysRemaining === 0) return "This month has wrapped up";
+  if (forecastOverBudget) return "At this pace, you may go a bit over before month end";
+  if (isWarning) return `Aim for \u2264 ${formatCurrency(paceToStayUnder)}/day to stay on track`;
+  if (daysRemaining <= 3) return `Almost there \u2014 ${daysRemaining} day${daysRemaining !== 1 ? "s" : ""} left`;
   return `You\u2019re on track \u2014 ${daysRemaining} days to go`;
 }
 
@@ -85,15 +85,15 @@ export function KpiCards({
     isOverspent ? "danger" : (isWarning || forecastOverBudget) ? "caution" : "safe";
 
   const statusColors = {
-    safe: { text: "text-emerald-700 dark:text-emerald-400", bg: "border-emerald-200 bg-emerald-50 dark:border-emerald-900/40 dark:bg-emerald-950/30", bar: "bg-gradient-to-r from-emerald-500 to-teal-400" },
-    caution: { text: "text-amber-700 dark:text-amber-400", bg: "border-amber-200 bg-amber-50 dark:border-amber-900/40 dark:bg-amber-950/30", bar: "bg-gradient-to-r from-amber-500 to-orange-400" },
-    danger: { text: "text-red-700 dark:text-red-400", bg: "border-red-200 bg-red-50 dark:border-red-900/40 dark:bg-red-950/30", bar: "bg-gradient-to-r from-red-500 to-rose-400" },
+    safe: { text: "text-[var(--status-ok-text)]", bg: "border-[var(--status-ok-border)] bg-[var(--status-ok-bg)]", bar: "bg-gradient-to-r from-emerald-500 to-teal-400" },
+    caution: { text: "text-[var(--status-warn-text)]", bg: "border-[var(--status-warn-border)] bg-[var(--status-warn-bg)]", bar: "bg-gradient-to-r from-amber-500 to-orange-400" },
+    danger: { text: "text-[var(--status-err-text)]", bg: "border-[var(--status-err-border)] bg-[var(--status-err-bg)]", bar: "bg-gradient-to-r from-red-500 to-rose-400" },
   };
   const sc = statusColors[status];
 
   return (
     <m.div
-      className="space-y-3"
+      className="space-y-4"
       initial="hidden"
       animate="visible"
       variants={{ visible: { transition: { staggerChildren: motionStagger.normal } } }}
@@ -117,13 +117,13 @@ export function KpiCards({
 
       {/* ── PRIMARY: Budget Status Hero ── */}
       <m.div
-        className={cn("card-hero relative overflow-hidden rounded-2xl border-l-[3px] p-4 sm:p-5", sc.bg)}
+        className={cn("card-hero relative overflow-hidden rounded-2xl border-l-[3px] p-5 sm:p-6", sc.bg)}
         variants={{ hidden: { opacity: 0, y: 12 }, visible: { opacity: 1, y: 0, transition: { duration: duration.emphasis, ease: ease.out } } }}
       >
         <div className="flex items-center justify-between">
           <div className={cn("flex items-center gap-2 text-sm font-semibold", sc.text)}>
             {status !== "safe" ? <ShieldAlert size={15} className={status === "danger" ? "animate-pulse" : ""} /> : isOverspent ? <AlertTriangle size={15} /> : <PiggyBank size={15} />}
-            <span>{isOverspent ? "Over Budget" : "You still have"}</span>
+            <span>{isOverspent ? "Ahead of plan" : "You still have"}</span>
           </div>
           {daysRemaining > 0 && (
             <span className="flex items-center gap-1.5 rounded-full px-2 py-0.5 text-caption font-medium" style={{ background: 'var(--surface-secondary)', color: 'var(--text-secondary)' }}>
@@ -159,7 +159,7 @@ export function KpiCards({
 
       {/* ── SECONDARY: Supporting Metrics (compact inline) ── */}
       <m.div
-        className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3"
+        className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3"
         variants={{ hidden: { opacity: 0, y: 8 }, visible: { opacity: 1, y: 0, transition: { duration: duration.emphasis, delay: 0.1, ease: ease.out } } }}
       >
         <div className="rounded-xl p-3 sm:p-3.5" style={{ background: 'var(--surface-secondary)' }}>
@@ -169,10 +169,10 @@ export function KpiCards({
             paceToStayUnder <= 0 ? "text-red-600 dark:text-red-400"
               : paceExceeded ? "text-amber-600 dark:text-amber-400" : ""
           )} style={paceToStayUnder > 0 && !paceExceeded ? { color: 'var(--text-primary)' } : undefined}>
-            {formatCurrency(avgDaily)}/d
+            <AnimatedNumber value={avgDaily} format={(n) => `${formatCurrency(n)}/d`} />
           </p>
           <p className="mt-0.5 text-xs" style={{ color: 'var(--text-tertiary)' }}>
-            {paceToStayUnder > 0 ? `Target \u2264 ${formatCurrency(paceToStayUnder)}/d` : "No budget left"}
+            {paceToStayUnder > 0 ? `Target \u2264 ${formatCurrency(paceToStayUnder)}/d` : "Budget fully committed"}
           </p>
         </div>
 
@@ -184,7 +184,7 @@ export function KpiCards({
               : savingsRate < 20 ? "text-amber-600 dark:text-amber-400"
               : "text-emerald-600 dark:text-emerald-400"
           )}>
-            {savingsRate}%
+            <AnimatedNumber value={savingsRate} format={(n) => `${Math.round(n)}%`} />
           </p>
           <p className="mt-0.5 text-xs" style={{ color: 'var(--text-tertiary)' }}>
             {remaining >= 0 ? `${formatCurrency(remaining)} saved` : `${formatCurrency(Math.abs(remaining))} over`}
@@ -211,12 +211,12 @@ export function KpiCards({
             forecastOverBudget ? "text-red-700 dark:text-red-400"
               : forecastWarning ? "text-amber-700 dark:text-amber-400" : ""
           )} style={!forecastOverBudget && !forecastWarning ? { color: 'var(--text-primary)' } : undefined}>
-            {forecast.projectedTotal > 0 ? formatCurrency(forecast.projectedTotal) : "\u2014"}
+            {forecast.projectedTotal > 0 ? <AnimatedNumber value={forecast.projectedTotal} format={formatCurrency} /> : "\u2014"}
           </p>
           <p className="mt-0.5 text-xs" style={{ color: 'var(--text-tertiary)' }}>
             {forecast.projectedTotal > 0 && forecast.confidence !== "low"
               ? (forecastOverBudget
-                  ? `Over by ${formatCurrency(Math.abs(forecast.projectedRemaining))}`
+                  ? `${formatCurrency(Math.abs(forecast.projectedRemaining))} above your rhythm`
                   : `${formatCurrency(forecast.projectedRemaining)} under budget`)
               : forecast.confidence === "low" ? "Not enough data yet" : "\u00A0"}
           </p>

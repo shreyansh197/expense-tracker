@@ -98,7 +98,7 @@ export const listItem: Variants = {
   },
   exit: {
     opacity: 0,
-    x: -80,
+    x: -distance.swipeExit,
     height: 0,
     marginBottom: 0,
     transition: { duration: duration.normal, ease: ease.out },
@@ -116,7 +116,7 @@ export const modalBackdrop: Variants = {
 // ── Modal content (bottom sheet / centered) ──
 
 export const modalContent: Variants = {
-  initial: { opacity: 0, y: 40, scale: scale.modalEnter },
+  initial: { opacity: 0, y: distance.lg, scale: scale.modalEnter },
   animate: {
     opacity: 1,
     y: 0,
@@ -125,7 +125,7 @@ export const modalContent: Variants = {
   },
   exit: {
     opacity: 0,
-    y: 20,
+    y: distance.md,
     scale: scale.modalEnter,
     transition: { duration: duration.exit, ease: "easeIn" },
   },
@@ -145,3 +145,9 @@ export const pageTransition: Variants = {
     transition: { duration: duration.exit },
   },
 };
+
+// ── Tap scale presets (for whileTap prop) ──
+
+export const tapButton = { scale: scale.tapButton };
+export const tapChip = { scale: scale.tapChip };
+export const tapFab = { scale: scale.tapFab };

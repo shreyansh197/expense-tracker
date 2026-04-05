@@ -114,7 +114,7 @@ function AnalyticsContent() {
           : "var(--text-secondary)";
 
   return (
-      <PageTransition className="relative mx-auto min-h-[80vh] max-w-4xl xl:max-w-6xl space-y-4 sm:space-y-6 p-3 sm:p-4 md:p-5 lg:p-6">
+      <PageTransition className="relative mx-auto min-h-[80vh] max-w-4xl xl:max-w-6xl space-y-6 sm:space-y-8 p-4 sm:p-6 lg:p-8">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
@@ -187,7 +187,7 @@ function AnalyticsContent() {
         </m.div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           <m.div
             className="card p-4 flex flex-col gap-1"
             initial={{ opacity: 0, y: 12 }}
@@ -534,7 +534,7 @@ function AnalyticsContent() {
                       {history.months.map((md) => (
                         <span
                           key={`label-${md.year}-${md.month}`}
-                          className="flex-1 text-center text-[7px]"
+                          className="flex-1 text-center text-[9px]"
                           style={{ color: "var(--text-muted)" }}
                         >
                           {md.label.split(" ")[0]}

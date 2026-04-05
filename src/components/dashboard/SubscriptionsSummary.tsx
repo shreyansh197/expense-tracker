@@ -7,6 +7,7 @@ import { useCurrency } from "@/hooks/useCurrency";
 import { buildCategoryMap } from "@/lib/categories";
 import { useSettings } from "@/hooks/useSettings";
 import { duration, ease } from "@/lib/motion/tokens";
+import { AnimatedNumber } from "@/components/ui/AnimatedNumber";
 
 export function SubscriptionsSummary() {
   const { settings } = useSettings();
@@ -46,7 +47,7 @@ export function SubscriptionsSummary() {
         <div className="rounded-xl px-3 py-2.5" style={{ background: 'var(--surface-secondary)' }}>
           <p className="text-xs font-medium" style={{ color: 'var(--text-tertiary)' }}>Monthly</p>
           <p className="text-sm font-bold text-amount" style={{ color: 'var(--text-primary)' }}>
-            {formatCurrency(stats.totalMonthly)}
+            <AnimatedNumber value={stats.totalMonthly} format={formatCurrency} />
           </p>
         </div>
         <div className="rounded-xl px-3 py-2.5" style={{ background: 'var(--surface-secondary)' }}>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Trash2, X, Pencil, TrendingUp, Minus } from "lucide-react";
+import { Plus, Trash2, X, Pencil, TrendingUp, Minus, Target } from "lucide-react";
 import { useSettings } from "@/hooks/useSettings";
 import { useToast } from "@/components/ui/Toast";
 import { useConfirm } from "@/components/ui/ConfirmDialog";
@@ -125,17 +125,17 @@ export function GoalsManager() {
     <div>
       {/* Summary bar */}
       {goals.length > 0 && (
-        <div className="mb-3 rounded-lg bg-emerald-50 px-3 py-2 dark:bg-emerald-900/20">
+        <div className="mb-4 rounded-xl px-4 py-3" style={{ background: 'var(--status-ok-bg)', border: '1px solid var(--status-ok-border)' }}>
           <div className="flex items-center justify-between text-xs">
             <span style={{ color: 'var(--text-secondary)' }}>
-              Total progress: <span className="font-semibold text-emerald-700 dark:text-emerald-400">{formatCurrency(totalSaved)}</span> / {formatCurrency(totalTarget)}
+              Total progress: <span className="font-semibold" style={{ color: 'var(--status-ok-text)' }}>{formatCurrency(totalSaved)}</span> / {formatCurrency(totalTarget)}
             </span>
-            <span className="font-semibold text-emerald-700 dark:text-emerald-400">{overallPct}%</span>
+            <span className="font-semibold" style={{ color: 'var(--status-ok-text)' }}>{overallPct}%</span>
           </div>
-          <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-emerald-100 dark:bg-emerald-900/30">
+          <div className="mt-1.5 h-2 w-full overflow-hidden rounded-full" style={{ background: 'var(--surface-secondary)' }}>
             <div
-              className="h-full rounded-full bg-emerald-500 transition-all"
-              style={{ width: `${Math.min(overallPct, 100)}%` }}
+              className="h-full rounded-full transition-all duration-700"
+              style={{ width: `${Math.min(overallPct, 100)}%`, backgroundColor: 'var(--success)' }}
             />
           </div>
         </div>
@@ -239,11 +239,15 @@ export function GoalsManager() {
       )}
 
       {goals.length === 0 && !showForm ? (
-        <p className="py-4 text-center text-xs" style={{ color: 'var(--text-muted)' }}>
-          No goals yet. Set a savings target to track your progress.
-        </p>
+        <div className="flex flex-col items-center py-8 text-center">
+          <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl" style={{ background: 'var(--surface-secondary)' }}>
+            <Target size={24} style={{ color: 'var(--text-muted)' }} />
+          </div>
+          <p className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Set your first savings goal</p>
+          <p className="mt-1 max-w-[240px] text-xs" style={{ color: 'var(--text-muted)' }}>Future you will appreciate it. Start small — every target begins with a number.</p>
+        </div>
       ) : (
-        <div className="space-y-2">
+        <div className="space-y-3">
           {goals.map((g) => {
             const pct = g.targetAmount > 0 ? Math.round((g.savedAmount / g.targetAmount) * 100) : 0;
             const isComplete = pct >= 100;
@@ -254,7 +258,7 @@ export function GoalsManager() {
             return (
               <div
                 key={g.id}
-                className="rounded-xl p-3"
+                className="rounded-xl p-4"
                 style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
               >
                 <div className="flex items-center justify-between mb-2">
@@ -267,44 +271,45 @@ export function GoalsManager() {
                       {g.name}
                     </span>
                     {isComplete && (
-                      <span className="rounded-full bg-emerald-100 px-1.5 py-0.5 text-caption font-semibold text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400">
-                        Done!
+                      <span className="rounded-full px-2 py-0.5 text-caption font-semibold" style={{ background: 'var(--status-ok-bg)', color: 'var(--status-ok-text)' }}>
+                        Goal achieved!
                       </span>
                     )}
                   </div>
                   <div className="flex items-center gap-1">
                     <button
                       onClick={() => { setFundGoalId(g.id); setFundMode("add"); setFundAmount(""); }}
-                      className="rounded-lg px-2 py-1 text-xs font-medium text-indigo-600 hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-900/30"
+                      className="rounded-lg px-2.5 py-1.5 text-xs font-medium text-indigo-600 hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-900/30"
                     >
                       + Add
                     </button>
                     <button
                       onClick={() => handleEdit(g)}
-                      className="rounded p-1 transition-colors"
+                      className="flex h-8 w-8 items-center justify-center rounded-lg transition-colors hover:bg-[var(--surface-secondary)]"
                       style={{ color: 'var(--text-muted)' }}
                       aria-label="Edit goal"
                     >
-                      <Pencil size={12} />
+                      <Pencil size={13} />
                     </button>
                     <button
                       onClick={() => handleDelete(g.id)}
-                      className="rounded p-1 transition-colors hover:text-red-500"
+                      className="flex h-8 w-8 items-center justify-center rounded-lg transition-colors hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/30"
                       style={{ color: 'var(--text-muted)' }}
                       aria-label="Delete goal"
                     >
-                      <Trash2 size={12} />
+                      <Trash2 size={13} />
                     </button>
                   </div>
                 </div>
 
                 {/* Add/Subtract Funds inline */}
                 {fundGoalId === g.id && (
-                  <div className="mb-2 flex items-center gap-2 rounded-lg px-2 py-2" style={{ background: 'var(--surface-secondary)' }}>
+                  <div className="mb-3 rounded-xl px-3 py-3" style={{ background: 'var(--surface-secondary)' }}>
+                    <div className="flex items-center gap-2">
                     <div className="flex rounded-lg" style={{ border: '1px solid var(--border)' }}>
                       <button
                         onClick={() => setFundMode("add")}
-                        className={`px-2 py-1 text-xs font-medium rounded-l-lg ${
+                        className={`flex h-8 w-8 items-center justify-center text-xs font-medium rounded-l-lg ${
                           fundMode === "add"
                             ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400"
                             : ""
@@ -312,11 +317,11 @@ export function GoalsManager() {
                         style={fundMode !== "add" ? { color: 'var(--text-muted)' } : undefined}
                         aria-label="Add funds"
                       >
-                        <TrendingUp size={12} />
+                        <TrendingUp size={14} />
                       </button>
                       <button
                         onClick={() => setFundMode("subtract")}
-                        className={`px-2 py-1 text-xs font-medium rounded-r-lg ${
+                        className={`flex h-8 w-8 items-center justify-center text-xs font-medium rounded-r-lg ${
                           fundMode === "subtract"
                             ? "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400"
                             : ""
@@ -324,7 +329,7 @@ export function GoalsManager() {
                         style={fundMode !== "subtract" ? { color: 'var(--text-muted)' } : undefined}
                         aria-label="Subtract funds"
                       >
-                        <Minus size={12} />
+                        <Minus size={14} />
                       </button>
                     </div>
                     <div className="relative flex-1">
@@ -338,26 +343,29 @@ export function GoalsManager() {
                         onKeyDown={(e) => { if (e.key === "Enter") handleFundSave(); if (e.key === "Escape") setFundGoalId(null); }}
                         autoFocus
                         placeholder="Amount"
-                        className="form-input py-1 pl-6 pr-2 text-xs"
+                        className="form-input py-2 pl-7 pr-2 text-sm"
                       />
                     </div>
                     <button
                       onClick={handleFundSave}
-                      className="rounded px-2 py-1 text-xs font-medium text-indigo-600 hover:bg-indigo-50 dark:text-indigo-400"
+                      className="rounded-lg px-3 py-2 text-xs font-medium text-indigo-600 hover:bg-indigo-50 dark:text-indigo-400"
                     >
                       Save
                     </button>
                     <button
                       onClick={() => setFundGoalId(null)}
+                      className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-[var(--surface-hover)]"
                       style={{ color: 'var(--text-muted)' }}
                       aria-label="Cancel"
                     >
-                      <X size={12} />
+                      <X size={14} />
                     </button>
+                    </div>
+                    <p className="mt-1.5 text-xs" style={{ color: 'var(--text-muted)' }}>Enter amount to {fundMode === "add" ? "add to" : "remove from"} your goal</p>
                   </div>
                 )}
 
-                <div className="h-2 w-full overflow-hidden rounded-full" style={{ background: 'var(--surface-secondary)' }}>
+                <div className="h-2.5 w-full overflow-hidden rounded-full" style={{ background: 'var(--surface-secondary)' }}>
                   <div
                     className="h-full rounded-full transition-all"
                     style={{
@@ -369,6 +377,7 @@ export function GoalsManager() {
                 <div className="mt-1.5 flex items-center justify-between text-xs" style={{ color: 'var(--text-muted)' }}>
                   <span>
                     {formatCurrency(g.savedAmount)} of {formatCurrency(g.targetAmount)} ({pct}%)
+                    {pct >= 100 ? " — Goal achieved, well done!" : pct >= 50 ? " — Halfway there, keep going!" : ""}
                   </span>
                   <span className="flex items-center gap-2">
                     {monthsLeft && !isComplete && (

@@ -284,7 +284,7 @@ export function CategoryLegend({ categoryTotals, onCategoryClick, categoryBudget
                   <div className="flex items-center gap-2">
                     <div className="h-1.5 flex-1 rounded-full" style={{ background: 'var(--surface-secondary)' }}>
                       <div
-                        className={`h-1.5 rounded-full transition-all ${
+                        className={`h-1.5 rounded-full transition-all duration-500 ${
                           isOverBudget ? "bg-red-500" : isNearBudget ? "bg-amber-500" : "bg-emerald-500"
                         }`}
                         style={{ width: `${Math.min(budgetPct, 100)}%` }}

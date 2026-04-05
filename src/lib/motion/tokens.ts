@@ -42,6 +42,7 @@ export const distance = {
   sm: 6,   // list items
   md: 12,  // cards, sections
   lg: 24,  // modals, page enter
+  swipeExit: 80, // swipe-to-delete exit
 } as const;
 
 // ── Scale values ──

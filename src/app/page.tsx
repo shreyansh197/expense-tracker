@@ -333,10 +333,10 @@ function DashboardContent() {
   };
 
   return (
-        <PageTransition className="relative mx-auto min-h-[80vh] max-w-4xl xl:max-w-6xl space-y-4 sm:space-y-6 p-3 sm:p-4 md:p-5 lg:p-6">
+        <PageTransition className="relative mx-auto min-h-[80vh] max-w-4xl xl:max-w-6xl space-y-6 sm:space-y-8 p-4 sm:p-6 lg:p-8">
         {/* Header — hero zone */}
         <m.div
-          className="zone-header dash-section relative z-40 rounded-2xl p-4 sm:p-5"
+          className="zone-header dash-section relative z-40 rounded-2xl p-5 sm:p-6"
           style={{
             background: 'var(--surface)',
             border: '1px solid var(--border-card)',

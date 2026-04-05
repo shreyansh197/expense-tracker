@@ -158,7 +158,7 @@ export default function CategoryPage({ params }: { params: Promise<{ slug: strin
               <div className="mt-2">
                 <div className="h-1.5 rounded-full" style={{ background: 'var(--surface-secondary)' }}>
                   <div
-                    className={`h-1.5 rounded-full ${isOverBudget ? "bg-red-500" : budgetPct >= 80 ? "bg-amber-500" : "bg-emerald-500"}`}
+                    className={`h-1.5 rounded-full transition-all duration-700 ${isOverBudget ? "bg-red-500" : budgetPct >= 80 ? "bg-amber-500" : "bg-emerald-500"}`}
                     style={{ width: `${Math.min(budgetPct, 100)}%` }}
                   />
                 </div>

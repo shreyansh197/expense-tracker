@@ -91,7 +91,19 @@ export function RecurringSuggestions() {
     [settings.dismissedRecurringSuggestions, updateSettings],
   );
 
-  if (suggestions.length === 0) return null;
+  if (suggestions.length === 0) {
+    return (
+      <div className="card p-5">
+        <div className="mb-3 flex items-center gap-2">
+          <TrendingUp size={14} className="text-data-text" />
+          <h3 className="text-section-title">Recurring Patterns</h3>
+        </div>
+        <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+          We&apos;ll spot your recurring expenses over time — keep logging to unlock insights.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="card p-5">

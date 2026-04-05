@@ -53,10 +53,10 @@ export function PaymentForm({ ledgerId, onSubmit, onCancel }: PaymentFormProps) 
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-3 rounded-xl p-4" style={{ background: 'var(--surface-secondary)', border: '1px solid var(--border)' }}>
+    <form onSubmit={handleSubmit} className="space-y-4 rounded-xl p-5" style={{ background: 'var(--surface-secondary)', border: '1px solid var(--border)' }}>
       <h4 className="text-xs font-semibold text-emerald-700 dark:text-emerald-400">Log Payment</h4>
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-4">
         {/* Amount */}
         <div>
           <label className="mb-1 block form-label">Amount</label>
@@ -94,7 +94,7 @@ export function PaymentForm({ ledgerId, onSubmit, onCancel }: PaymentFormProps) 
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-4">
         {/* Method */}
         <div>
           <label className="mb-1 block form-label">Method</label>
