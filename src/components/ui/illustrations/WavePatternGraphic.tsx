@@ -20,7 +20,7 @@ export function WavePatternGraphic() {
         strokeWidth="2.5"
         strokeLinecap="round"
         fill="none"
-        opacity="0.10"
+        opacity="0.18"
       />
 
       {/* Secondary wave — offset rhythm */}
@@ -30,19 +30,19 @@ export function WavePatternGraphic() {
         strokeWidth="1.5"
         strokeLinecap="round"
         fill="none"
-        opacity="0.07"
+        opacity="0.12"
       />
 
       {/* Dots along the primary wave */}
-      <circle cx="20" cy="18" r="3" fill="var(--primary)" opacity="0.12" />
-      <circle cx="60" cy="32" r="3.5" fill="var(--accent)" opacity="0.10" />
-      <circle cx="100" cy="10" r="4" fill="var(--primary)" opacity="0.08" />
+      <circle cx="20" cy="18" r="3" fill="var(--primary)" opacity="0.20" />
+      <circle cx="60" cy="32" r="3.5" fill="var(--accent)" opacity="0.18" />
+      <circle cx="100" cy="10" r="4" fill="var(--primary)" opacity="0.14" />
 
       {/* Soft fill area under the wave */}
       <path
         d="M4 35 Q 20 10, 40 25 Q 60 40, 80 20 Q 100 0, 116 18 L 116 50 L 4 50 Z"
         fill="var(--primary)"
-        opacity="0.03"
+        opacity="0.05"
       />
     </svg>
   );

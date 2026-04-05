@@ -103,11 +103,7 @@ function ExpensesContent() {
   return (
       <PageTransition className="relative mx-auto min-h-[80vh] max-w-4xl xl:max-w-6xl space-y-4 p-4 lg:p-6">
         {/* Header — hero zone */}
-        <div className="zone-header relative overflow-hidden">
-          {/* Abstract decorative graphic */}
-          <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 sm:right-4">
-            <ExpensesGraphic />
-          </div>
+        <div className="zone-header">
           <div className="flex items-center justify-between">
             <MonthSwitcher />
             <div className="flex items-center gap-3">
@@ -125,7 +121,11 @@ function ExpensesContent() {
         </div>
 
         {/* Total summary — teal accent card */}
-        <div className="card-accent-teal flex items-center justify-between px-5 py-3.5">
+        <div className="card-accent-teal relative flex items-center justify-between overflow-hidden px-5 py-3.5">
+          {/* Abstract decorative graphic */}
+          <div className="pointer-events-none absolute right-10 top-1/2 -translate-y-1/2 sm:right-16">
+            <ExpensesGraphic />
+          </div>
           <span className="text-section-title">
             Monthly Total
           </span>

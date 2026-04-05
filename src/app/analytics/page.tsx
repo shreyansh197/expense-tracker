@@ -116,17 +116,19 @@ function AnalyticsContent() {
   return (
       <PageTransition className="relative mx-auto min-h-[80vh] max-w-4xl xl:max-w-6xl space-y-6 sm:space-y-8 p-4 sm:p-6 lg:p-8">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-page-title">Analytics</h1>
-            <p className="text-xs mt-0.5" style={{ color: "var(--text-tertiary)" }}>
-              Deep dive into your spending patterns
-            </p>
+        <div className="zone-header space-y-3">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <h1 className="text-page-title">Analytics</h1>
+              <p className="text-xs mt-0.5" style={{ color: "var(--text-tertiary)" }}>
+                Deep dive into your spending patterns
+              </p>
+            </div>
+            <div className="shrink-0">
+              <SyncIndicator />
+            </div>
           </div>
-          <div className="flex items-center gap-3">
-            <MonthSwitcher />
-            <SyncIndicator />
-          </div>
+          <MonthSwitcher />
         </div>
 
         {/* Monthly Spending Trend */}

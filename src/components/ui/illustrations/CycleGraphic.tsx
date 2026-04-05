@@ -14,7 +14,7 @@ export function CycleGraphic() {
       className="h-[36px] w-[36px] sm:h-[56px] sm:w-[56px]"
     >
       {/* Outer orbit ring */}
-      <circle cx="32" cy="32" r="26" stroke="var(--primary)" strokeWidth="1.5" fill="none" opacity="0.08" />
+      <circle cx="32" cy="32" r="26" stroke="var(--primary)" strokeWidth="1.5" fill="none" opacity="0.15" />
 
       {/* Partial arc — active orbit segment */}
       <path
@@ -23,7 +23,7 @@ export function CycleGraphic() {
         strokeWidth="2.5"
         strokeLinecap="round"
         fill="none"
-        opacity="0.14"
+        opacity="0.25"
       />
 
       {/* Second partial arc */}
@@ -33,18 +33,18 @@ export function CycleGraphic() {
         strokeWidth="2"
         strokeLinecap="round"
         fill="none"
-        opacity="0.10"
+        opacity="0.18"
       />
 
       {/* Orbiting dots at key positions */}
-      <circle cx="32" cy="6" r="4" fill="var(--accent)" opacity="0.16" />
-      <circle cx="58" cy="32" r="3.5" fill="var(--primary)" opacity="0.12" />
-      <circle cx="32" cy="58" r="3" fill="var(--primary)" opacity="0.10" />
-      <circle cx="6" cy="32" r="3.5" fill="var(--accent)" opacity="0.08" />
+      <circle cx="32" cy="6" r="4" fill="var(--accent)" opacity="0.28" />
+      <circle cx="58" cy="32" r="3.5" fill="var(--primary)" opacity="0.22" />
+      <circle cx="32" cy="58" r="3" fill="var(--primary)" opacity="0.18" />
+      <circle cx="6" cy="32" r="3.5" fill="var(--accent)" opacity="0.14" />
 
       {/* Center hub */}
-      <circle cx="32" cy="32" r="6" fill="var(--primary)" opacity="0.06" />
-      <circle cx="32" cy="32" r="2.5" fill="var(--accent)" opacity="0.12" />
+      <circle cx="32" cy="32" r="6" fill="var(--primary)" opacity="0.10" />
+      <circle cx="32" cy="32" r="2.5" fill="var(--accent)" opacity="0.22" />
     </svg>
   );
 }

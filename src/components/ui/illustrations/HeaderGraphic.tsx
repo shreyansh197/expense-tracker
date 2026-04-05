@@ -13,11 +13,11 @@ export function HeaderGraphic() {
       aria-hidden="true"
       className="h-[50px] w-[66px] sm:h-[90px] sm:w-[120px]"
     >
-      {/* Large soft circle — primary brand at low opacity */}
-      <circle cx="80" cy="35" r="32" fill="var(--primary)" opacity="0.08" />
+      {/* Large soft circle — primary brand */}
+      <circle cx="80" cy="35" r="32" fill="var(--primary)" opacity="0.14" />
 
       {/* Rounded rectangle — accent tint */}
-      <rect x="50" y="50" width="44" height="28" rx="10" fill="var(--accent)" opacity="0.06" />
+      <rect x="50" y="50" width="44" height="28" rx="10" fill="var(--accent)" opacity="0.10" />
 
       {/* Small arc / crescent — secondary accent */}
       <path
@@ -26,12 +26,12 @@ export function HeaderGraphic() {
         strokeWidth="3"
         strokeLinecap="round"
         fill="none"
-        opacity="0.10"
+        opacity="0.18"
       />
 
       {/* Tiny dot cluster — depth accent */}
-      <circle cx="105" cy="18" r="4" fill="var(--accent)" opacity="0.10" />
-      <circle cx="38" cy="65" r="3" fill="var(--primary)" opacity="0.06" />
+      <circle cx="105" cy="18" r="4" fill="var(--accent)" opacity="0.18" />
+      <circle cx="38" cy="65" r="3" fill="var(--primary)" opacity="0.10" />
     </svg>
   );
 }

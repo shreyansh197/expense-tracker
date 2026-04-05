@@ -134,15 +134,14 @@ export default function BusinessPage() {
     <AppShell>
       <PageTransition className="relative mx-auto min-h-[80vh] max-w-5xl xl:max-w-7xl space-y-6 p-4 lg:p-6">
         {/* Header + KPIs — emerald zone */}
-        <div className="section-zone section-emerald space-y-6 relative overflow-hidden">
-        {/* Abstract decorative graphic */}
-        <div className="pointer-events-none absolute right-3 top-3 sm:right-5 sm:top-4">
-          <BusinessGraphic />
-        </div>
+        <div className="section-zone section-emerald space-y-6">
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-page-title">Business</h1>
-            <p className="text-meta mt-0.5">{ledgers.length} ledger{ledgers.length !== 1 ? "s" : ""}</p>
+          <div className="flex items-center gap-3">
+            <BusinessGraphic />
+            <div>
+              <h1 className="text-page-title">Business</h1>
+              <p className="text-meta mt-0.5">{ledgers.length} ledger{ledgers.length !== 1 ? "s" : ""}</p>
+            </div>
           </div>
           <div className="flex items-center gap-3">
             <SyncIndicator />
