@@ -351,8 +351,8 @@ function DashboardContent() {
           <div className="pointer-events-none absolute right-3 top-3 sm:right-5 sm:top-3">
             <HeaderGraphic />
           </div>
-          {/* Character illustration — ObserverCharacter for calm presence (desktop only, density: max 1 character + 1 art per section) */}
-          <div className="pointer-events-none absolute right-16 bottom-3 hidden sm:block opacity-70">
+          {/* Character illustration — ObserverCharacter for calm presence (density: max 1 character + 1 art per section) */}
+          <div className="pointer-events-none absolute right-16 bottom-3 opacity-40 sm:opacity-70 scale-75 sm:scale-100 origin-bottom-right">
             <ObserverCharacter size={80} />
           </div>
 

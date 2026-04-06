@@ -129,8 +129,8 @@ function AnalyticsContent() {
               <SyncIndicator />
             </div>
           </div>
-          {/* ReflectiveCharacter — awareness/pause archetype (desktop only) */}
-          <div className="pointer-events-none absolute right-4 top-1 hidden sm:block opacity-60">
+          {/* ReflectiveCharacter — awareness/pause archetype */}
+          <div className="pointer-events-none absolute right-4 top-1 opacity-30 sm:opacity-60 scale-75 sm:scale-100 origin-top-right">
             <ReflectiveCharacter size={72} />
           </div>
           <MonthSwitcher />

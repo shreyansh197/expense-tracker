@@ -61,12 +61,12 @@ export function SavingsGoalsWidget() {
 
   return (
     <div className="card relative overflow-hidden p-5">
-      {/* BuilderCharacter — growth archetype for savings (desktop only, density: 1 char + 1 art max) */}
-      <div className="pointer-events-none absolute right-2 top-6 hidden sm:block opacity-40">
+      {/* BuilderCharacter — growth archetype for savings (density: 1 char + 1 art max) */}
+      <div className="pointer-events-none absolute right-2 top-6 opacity-25 sm:opacity-40 scale-75 sm:scale-100 origin-top-right">
         <BuilderCharacter size={72} />
       </div>
-      {/* Abstract growth graphic — desktop only */}
-      <div className="pointer-events-none absolute right-3 top-2 sm:hidden">
+      {/* Abstract growth graphic — hidden when character is visible (density cap: 1 char + 1 art max) */}
+      <div className="pointer-events-none absolute right-3 top-2 hidden">
         <GrowthGraphic />
       </div>
 

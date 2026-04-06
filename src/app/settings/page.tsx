@@ -237,8 +237,8 @@ export default function SettingsPage() {
         <div className="relative flex items-center justify-between mb-4">
           <h1 className="text-page-title">Settings</h1>
           <div className="flex items-center gap-2">
-            {/* ReflectiveCharacter — calm awareness (desktop only, density: max 1 character + 1 art per section) */}
-            <div className="pointer-events-none hidden sm:block opacity-50">
+            {/* ReflectiveCharacter — calm awareness (density: max 1 character + 1 art per section) */}
+            <div className="pointer-events-none opacity-30 sm:opacity-50 scale-75 sm:scale-100 origin-center">
               <ReflectiveCharacter size={56} />
             </div>
             <SettingsGraphic />

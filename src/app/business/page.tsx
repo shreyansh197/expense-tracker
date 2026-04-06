@@ -136,8 +136,8 @@ export default function BusinessPage() {
       <PageTransition className="relative mx-auto min-h-[80vh] max-w-5xl xl:max-w-7xl space-y-6 p-4 lg:p-6">
         {/* Header + KPIs — emerald zone */}
         <div className="section-zone section-emerald space-y-6 relative overflow-hidden">
-        {/* BuilderCharacter — growth archetype (desktop only) */}
-        <div className="pointer-events-none absolute right-4 top-2 hidden lg:block opacity-50">
+        {/* BuilderCharacter — growth archetype */}
+        <div className="pointer-events-none absolute right-4 top-2 opacity-30 sm:opacity-50 scale-[0.6] sm:scale-75 lg:scale-100 origin-top-right">
           <BuilderCharacter size={90} />
         </div>
         <div className="flex items-center justify-between">
