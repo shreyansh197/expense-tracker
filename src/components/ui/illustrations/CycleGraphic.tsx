@@ -23,7 +23,7 @@ export function CycleGraphic() {
         strokeWidth="2.5"
         strokeLinecap="round"
         fill="none"
-        opacity="0.25"
+        opacity="0.18"
       />
 
       {/* Second partial arc */}
@@ -33,18 +33,18 @@ export function CycleGraphic() {
         strokeWidth="2"
         strokeLinecap="round"
         fill="none"
-        opacity="0.18"
+        opacity="0.15"
       />
 
       {/* Orbiting dots at key positions */}
-      <circle cx="32" cy="6" r="4" fill="var(--accent)" opacity="0.28" />
-      <circle cx="58" cy="32" r="3.5" fill="var(--primary)" opacity="0.22" />
-      <circle cx="32" cy="58" r="3" fill="var(--primary)" opacity="0.18" />
-      <circle cx="6" cy="32" r="3.5" fill="var(--accent)" opacity="0.14" />
+      <circle cx="32" cy="6" r="4" fill="var(--accent)" opacity="0.18" />
+      <circle cx="58" cy="32" r="3.5" fill="var(--primary)" opacity="0.16" />
+      <circle cx="32" cy="58" r="3" fill="var(--primary)" opacity="0.14" />
+      <circle cx="6" cy="32" r="3.5" fill="var(--accent)" opacity="0.12" />
 
       {/* Center hub */}
       <circle cx="32" cy="32" r="6" fill="var(--primary)" opacity="0.10" />
-      <circle cx="32" cy="32" r="2.5" fill="var(--accent)" opacity="0.22" />
+      <circle cx="32" cy="32" r="2.5" fill="var(--accent)" opacity="0.18" />
     </svg>
   );
 }

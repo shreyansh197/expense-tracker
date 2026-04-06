@@ -20,13 +20,13 @@ export function GrowthGraphic() {
         strokeWidth="2.5"
         strokeLinecap="round"
         fill="none"
-        opacity="0.22"
+        opacity="0.18"
       />
 
       {/* Ascending step dots along the arc */}
-      <circle cx="16" cy="58" r="3.5" fill="var(--success)" opacity="0.18" />
-      <circle cx="32" cy="38" r="4" fill="var(--success)" opacity="0.24" />
-      <circle cx="50" cy="18" r="5" fill="var(--primary)" opacity="0.18" />
+      <circle cx="16" cy="58" r="3.5" fill="var(--success)" opacity="0.14" />
+      <circle cx="32" cy="38" r="4" fill="var(--success)" opacity="0.18" />
+      <circle cx="50" cy="18" r="5" fill="var(--primary)" opacity="0.14" />
 
       {/* Background soft shape — visual grounding */}
       <rect x="22" y="42" width="30" height="30" rx="10" fill="var(--primary)" opacity="0.07" />

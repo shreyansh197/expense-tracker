@@ -6,9 +6,8 @@ import { m } from "framer-motion";
 import {
   List,
   Plus,
-  Briefcase,
 } from "lucide-react";
-import { IconDashboard, IconAnalytics, IconSettings } from "@/components/ui/icons";
+import { IconDashboard, IconAnalytics, IconSettings, IconBusiness } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 import { useUIStore } from "@/stores/uiStore";
 import { useSettings } from "@/hooks/useSettings";
@@ -27,7 +26,7 @@ const personalLinks = [
 
 const businessLinks = [
   { href: "/", icon: IconDashboard, label: "Home" },
-  { href: "/business", icon: Briefcase, label: "Business" },
+  { href: "/business", icon: IconBusiness, label: "Business" },
   { href: "/expenses", icon: List, label: "Expenses" },
   { href: "/analytics", icon: IconAnalytics, label: "Analytics" },
   { href: "/settings", icon: IconSettings, label: "Settings" },

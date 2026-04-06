@@ -28,6 +28,7 @@ import { DataAccountManagement } from "@/components/settings/DataAccountManageme
 import { SettingsFooterLogout } from "@/components/settings/SettingsFooterLogout";
 import { PageTransition } from "@/components/ui/PageTransition";
 import { SettingsGraphic } from "@/components/ui/illustrations";
+import { ReflectiveCharacter } from "@/components/ui/illustrations/characters";
 import { fetchRates, getRateInfo, clearRateCache } from "@/lib/exchangeRates";
 
 /** Shows live rate source, sample conversions, and a refresh button */
@@ -232,10 +233,16 @@ export default function SettingsPage() {
 
   return (
     <AppShell>
-        <PageTransition className="relative mx-auto max-w-3xl space-y-2 p-4 lg:p-6">
+        <PageTransition className="relative mx-auto max-w-3xl space-y-4 sm:space-y-6 p-4 lg:p-6">
         <div className="relative flex items-center justify-between mb-4">
           <h1 className="text-page-title">Settings</h1>
-          <SettingsGraphic />
+          <div className="flex items-center gap-2">
+            {/* ReflectiveCharacter — calm awareness (desktop only, density: max 1 character + 1 art per section) */}
+            <div className="pointer-events-none hidden sm:block opacity-50">
+              <ReflectiveCharacter size={56} />
+            </div>
+            <SettingsGraphic />
+          </div>
         </div>
 
         {/* Tab navigation — desktop: shows only active zone; mobile: all zones visible */}
@@ -265,7 +272,7 @@ export default function SettingsPage() {
         <SettingsAccordion>
 
           {/* ━━━ YOUR ACCOUNT — indigo zone ━━━ */}
-          <div id="zone-account" role="tabpanel" aria-labelledby="tab-zone-account" className={`section-zone section-indigo space-y-2 scroll-mt-16 ${activeZone !== 'zone-account' ? 'lg:hidden' : ''}`}>
+          <div id="zone-account" role="tabpanel" aria-labelledby="tab-zone-account" className={`section-zone section-indigo space-y-3 scroll-mt-16 ${activeZone !== 'zone-account' ? 'lg:hidden' : ''}`}>
           <h3 className="text-xs font-bold uppercase tracking-wider pb-1 px-1" style={{ color: 'var(--text-tertiary)' }}>
             Your Account
           </h3>
@@ -305,7 +312,7 @@ export default function SettingsPage() {
           </div>
 
           {/* ━━━ FINANCES — teal zone ━━━ */}
-          <div id="zone-finances" role="tabpanel" aria-labelledby="tab-zone-finances" className={`section-zone section-teal space-y-2 scroll-mt-16 ${activeZone !== 'zone-finances' ? 'lg:hidden' : ''}`}>
+          <div id="zone-finances" role="tabpanel" aria-labelledby="tab-zone-finances" className={`section-zone section-teal space-y-3 scroll-mt-16 ${activeZone !== 'zone-finances' ? 'lg:hidden' : ''}`}>
           <h3 className="text-xs font-bold uppercase tracking-wider pt-2 pb-1 px-1" style={{ color: 'var(--text-tertiary)' }}>
             Finances
           </h3>
@@ -509,8 +516,8 @@ export default function SettingsPage() {
           </AccordionSection>
           </div>
 
-          {/* ━━━ AUTOMATION & DATA — coral zone ━━━ */}
-          <div id="zone-automation" role="tabpanel" aria-labelledby="tab-zone-automation" className={`section-zone section-coral space-y-2 scroll-mt-16 ${activeZone !== 'zone-automation' ? 'lg:hidden' : ''}`}>
+          {/* ━━━ AUTOMATION & DATA — violet zone ━━━ */}
+          <div id="zone-automation" role="tabpanel" aria-labelledby="tab-zone-automation" className={`section-zone section-violet space-y-3 scroll-mt-16 ${activeZone !== 'zone-automation' ? 'lg:hidden' : ''}`}>
           <h3 className="text-xs font-bold uppercase tracking-wider pt-2 pb-1 px-1" style={{ color: 'var(--text-tertiary)' }}>
             Automation & Data
           </h3>
@@ -550,7 +557,7 @@ export default function SettingsPage() {
           </div>
 
           {/* ━━━ PREFERENCES — indigo zone ━━━ */}
-          <div id="zone-preferences" role="tabpanel" aria-labelledby="tab-zone-preferences" className={`section-zone section-indigo space-y-2 scroll-mt-16 ${activeZone !== 'zone-preferences' ? 'lg:hidden' : ''}`}>
+          <div id="zone-preferences" role="tabpanel" aria-labelledby="tab-zone-preferences" className={`section-zone section-indigo space-y-3 scroll-mt-16 ${activeZone !== 'zone-preferences' ? 'lg:hidden' : ''}`}>
           <h3 className="text-xs font-bold uppercase tracking-wider pt-2 pb-1 px-1" style={{ color: 'var(--text-tertiary)' }}>
             Preferences
           </h3>

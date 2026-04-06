@@ -8,6 +8,7 @@ import { useSettings } from "@/hooks/useSettings";
 import { useToast } from "@/components/ui/Toast";
 import { useCurrency } from "@/hooks/useCurrency";
 import { GrowthGraphic } from "@/components/ui/illustrations";
+import { BuilderCharacter } from "@/components/ui/illustrations/characters";
 
 
 export function SavingsGoalsWidget() {
@@ -60,8 +61,12 @@ export function SavingsGoalsWidget() {
 
   return (
     <div className="card relative overflow-hidden p-5">
+      {/* BuilderCharacter — growth archetype for savings (desktop only, density: 1 char + 1 art max) */}
+      <div className="pointer-events-none absolute right-2 top-6 hidden sm:block opacity-40">
+        <BuilderCharacter size={72} />
+      </div>
       {/* Abstract growth graphic — desktop only */}
-      <div className="pointer-events-none absolute right-3 top-2">
+      <div className="pointer-events-none absolute right-3 top-2 sm:hidden">
         <GrowthGraphic />
       </div>
 

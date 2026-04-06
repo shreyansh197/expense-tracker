@@ -38,18 +38,18 @@
   --secondary: #4C5CFF;
   --secondary-soft: #eef0ff;
   --secondary-gradient: linear-gradient(135deg, #4C5CFF, #6366f1);
-  /* ── Accent (CTA — Orange) ── */
-  --accent: #F97316;
-  --accent-soft: #FFF7ED;
-  --accent-gradient: linear-gradient(135deg, #F97316, #EA580C);
+  /* ── Accent (CTA — Soft Violet) ── */
+  --accent: #8B5CF6;
+  --accent-soft: #EDE9FE;
+  --accent-gradient: linear-gradient(135deg, #8B5CF6, #7C3AED);
   /* ── CTA buttons (alias → accent for consistency) ── */
   --cta: var(--accent);
-  --cta-hover: #EA580C;
-  --cta-deep: #C2410C;
-  /* ── Coral track (stays warm across themes) ── */
-  --coral: #F97316;
-  --coral-soft: #FFF7ED;
-  --coral-border: #FDBA74;
+  --cta-hover: #7C3AED;
+  --cta-deep: #6D28D9;
+  /* ── Violet track (stays violet across themes) ── */
+  --coral: #8B5CF6;
+  --coral-soft: #EDE9FE;
+  --coral-border: #C4B5FD;
   /* ── Primary derived ── */
   --primary-hover: #26a69a;
   --primary-border: #b2ece6;
@@ -62,25 +62,25 @@
   --info: #42A5F5;
   --info-soft: #e8f4fd;
   /* ── Semantic ── */
-  --success: #4CAF50;
-  --success-soft: #edf7ee;
-  --success-text: #388E3C;
-  --success-hover: #43A047;
-  --success-soft-hover: #ddefde;
-  --warning: #FFA726;
-  --warning-soft: #fff8ee;
-  --danger: #EF5350;
-  --danger-soft: #fdeeed;
+  --success: #10B981;
+  --success-soft: #D1FAE5;
+  --success-text: #059669;
+  --success-hover: #059669;
+  --success-soft-hover: #A7F3D0;
+  --warning: #F59E0B;
+  --warning-soft: #FEF3C7;
+  --danger: #EF4444;
+  --danger-soft: #FEE2E2;
   /* ── Status surfaces (semantic feedback) ── */
-  --status-ok-bg: #ecfdf5;
-  --status-ok-border: #a7f3d0;
+  --status-ok-bg: #ECFDF5;
+  --status-ok-border: #A7F3D0;
   --status-ok-text: #059669;
-  --status-warn-bg: #fffbeb;
-  --status-warn-border: #fde68a;
-  --status-warn-text: #d97706;
-  --status-err-bg: #fef2f2;
-  --status-err-border: #fecaca;
-  --status-err-text: #dc2626;
+  --status-warn-bg: #FFFBEB;
+  --status-warn-border: #FDE68A;
+  --status-warn-text: #D97706;
+  --status-err-bg: #FEF2F2;
+  --status-err-border: #FECACA;
+  --status-err-text: #DC2626;
   /* ── General ── */
   --overlay: rgba(0, 0, 0, 0.4);
   --category-fallback: #6B7280;
@@ -89,14 +89,15 @@
   /* ── Section zone washes (subtle tinted backgrounds) ── */
   --section-teal: rgba(46, 196, 182, 0.035);
   --section-indigo: rgba(99, 102, 241, 0.03);
-  --section-coral: rgba(249, 115, 22, 0.03);
+  --section-violet: rgba(139, 92, 246, 0.03);
   --section-emerald: rgba(16, 185, 129, 0.03);
-  /* ── Accent card surfaces (unified primary tint) ── */
+  --section-mint: rgba(16, 185, 129, 0.03);
+  /* ── Accent card surfaces (themed tints) ── */
   --surface-accent-teal: #e6f9f7;
-  --surface-accent-indigo: #e6f9f7;
-  --surface-accent-coral: #e6f9f7;
+  --surface-accent-indigo: #eef0ff;
+  --surface-accent-coral: #EDE9FE;
   /* ── Hero gradient ── */
-  --gradient-hero: linear-gradient(135deg, rgba(46, 196, 182, 0.12) 0%, rgba(76, 92, 255, 0.09) 100%);
+  --gradient-hero: linear-gradient(135deg, rgba(46, 196, 182, 0.10) 0%, rgba(76, 92, 255, 0.10) 50%, rgba(139, 92, 246, 0.06) 100%);
   --hero-glow: rgba(46, 196, 182, 0.05);
   /* ── Elevation (3-level shadow system) ── */
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
@@ -105,6 +106,7 @@
   --card-shadow: var(--shadow-sm);
   --card-shadow-hover: var(--shadow-md);
   --section-gap: 1.5rem;
+  --section-gap-lg: 2.5rem;
   /* ── Charts ── */
   --chart-tooltip-bg: #ffffff;
   --chart-tooltip-fg: #1a2332;
@@ -138,7 +140,7 @@
   --secondary: #818CF8;
   --secondary-soft: rgba(129, 140, 248, 0.12);
   --secondary-gradient: linear-gradient(135deg, #818CF8, #6366F1);
-  /* ── Accent (Violet for dark — better contrast than coral) ── */
+  /* ── Accent (Violet for dark — lighter for contrast) ── */
   --accent: #A78BFA;
   --accent-soft: rgba(167, 139, 250, 0.14);
   --accent-gradient: linear-gradient(135deg, #A78BFA, #8B5CF6);
@@ -146,7 +148,7 @@
   --cta: var(--accent);
   --cta-hover: #8B5CF6;
   --cta-deep: #7C3AED;
-  /* ── Coral track (stays warm across themes) ── */
+  /* ── Violet track (stays violet across themes) ── */
   --coral: #A78BFA;
   --coral-soft: rgba(167, 139, 250, 0.12);
   --coral-border: rgba(167, 139, 250, 0.3);
@@ -162,11 +164,11 @@
   --info: #67E8F9;
   --info-soft: rgba(103, 232, 249, 0.12);
   /* ── Semantic ── */
-  --success: #4ADE80;
-  --success-soft: rgba(74, 222, 128, 0.12);
-  --success-text: #66BB6A;
-  --success-hover: #22C55E;
-  --success-soft-hover: rgba(102, 187, 106, 0.2);
+  --success: #34D399;
+  --success-soft: rgba(52, 211, 153, 0.12);
+  --success-text: #6EE7B7;
+  --success-hover: #10B981;
+  --success-soft-hover: rgba(16, 185, 129, 0.2);
   --warning: #FBBF24;
   --warning-soft: rgba(251, 191, 36, 0.12);
   --danger: #F87171;
@@ -189,19 +191,20 @@
   /* ── Section zone washes (subtle tinted backgrounds) ── */
   --section-teal: rgba(46, 196, 182, 0.045);
   --section-indigo: rgba(99, 102, 241, 0.04);
-  --section-coral: rgba(249, 115, 22, 0.04);
+  --section-violet: rgba(139, 92, 246, 0.04);
   --section-emerald: rgba(16, 185, 129, 0.04);
-  /* ── Accent card surfaces (unified primary tint) ── */
+  --section-mint: rgba(16, 185, 129, 0.04);
+  /* ── Accent card surfaces (themed tints) ── */
   --surface-accent-teal: rgba(96, 165, 250, 0.10);
-  --surface-accent-indigo: rgba(96, 165, 250, 0.10);
-  --surface-accent-coral: rgba(96, 165, 250, 0.10);
+  --surface-accent-indigo: rgba(129, 140, 248, 0.10);
+  --surface-accent-coral: rgba(167, 139, 250, 0.10);
   /* ── Hero gradient ── */
-  --gradient-hero: linear-gradient(135deg, rgba(96, 165, 250, 0.14) 0%, rgba(129, 140, 248, 0.10) 100%);
+  --gradient-hero: linear-gradient(135deg, rgba(96, 165, 250, 0.12) 0%, rgba(129, 140, 248, 0.10) 50%, rgba(167, 139, 250, 0.06) 100%);
   --hero-glow: rgba(96, 165, 250, 0.04);
   /* ── Elevation (3-level shadow system) ── */
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.25), 0 1px 2px rgba(0, 0, 0, 0.12);
-  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.35), 0 2px 4px rgba(0, 0, 0, 0.18);
-  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.45), 0 2px 8px rgba(0, 0, 0, 0.2);
+  --shadow-sm: 0 1px 4px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.15);
+  --shadow-md: 0 4px 18px rgba(0, 0, 0, 0.4), 0 2px 4px rgba(0, 0, 0, 0.2);
+  --shadow-lg: 0 8px 36px rgba(0, 0, 0, 0.5), 0 2px 8px rgba(0, 0, 0, 0.25);
   --card-shadow: var(--shadow-sm);
   --card-shadow-hover: var(--shadow-md);
   /* ── Charts ── */
@@ -257,8 +260,9 @@
   /* Section zones */
   --color-section-teal: var(--section-teal);
   --color-section-indigo: var(--section-indigo);
-  --color-section-coral: var(--section-coral);
+  --color-section-violet: var(--section-violet);
   --color-section-emerald: var(--section-emerald);
+  --color-section-mint: var(--section-mint);
 }
 
 body {
@@ -342,8 +346,9 @@ button, a {
 }
 .section-teal  { background: var(--section-teal); }
 .section-indigo { background: var(--section-indigo); }
-.section-coral  { background: var(--section-coral); }
+.section-violet  { background: var(--section-violet); }
 .section-emerald { background: var(--section-emerald); }
+.section-mint { background: var(--section-mint); }
 
 .zone-header {
   border-radius: 1rem;
@@ -370,7 +375,7 @@ button, a {
 }
 .card-accent-coral {
   background: var(--surface-accent-coral);
-  border: 1px solid rgba(255, 138, 101, 0.12);
+  border: 1px solid rgba(139, 92, 246, 0.12);
   border-radius: 1rem;
   box-shadow: var(--card-shadow);
   transition: box-shadow 0.25s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.25s cubic-bezier(0.22, 1, 0.36, 1);
@@ -524,8 +529,8 @@ button, a {
   transition: border-color 0.2s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.25s cubic-bezier(0.22, 1, 0.36, 1), transform 0.2s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .form-input:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.15);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(46, 196, 182, 0.15);
   transform: scale(1.003);
 }
 .form-input::placeholder {
@@ -554,8 +559,8 @@ button, a {
   padding-right: 2rem;
 }
 .form-select:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-soft);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-soft);
 }
 .form-label {
   display: block;
@@ -628,8 +633,8 @@ button, a {
 }
 .btn-secondary:hover {
   color: var(--text-primary);
-  border-color: var(--text-muted);
-  background: var(--surface-secondary);
+  border-color: var(--accent);
+  background: var(--accent-soft);
 }
 
 .btn-danger {

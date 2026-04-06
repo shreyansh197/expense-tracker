@@ -53,15 +53,15 @@ export function AlertsPanel({
     alerts.push({
       id: "budget-over",
       severity: "critical",
-      message: "You\u2019ve gone over your monthly budget",
-      detail: `${budgetUsedPercent - 100}% over \u2014 consider pausing non-essential spending`,
+      message: "You\u2019ve moved past your monthly budget",
+      detail: `${budgetUsedPercent - 100}% over \u2014 a good moment to review upcoming plans`,
     });
   } else if (budgetUsedPercent >= 80) {
     alerts.push({
       id: "budget-warning",
       severity: "warning",
       message: `You\u2019ve used ${budgetUsedPercent}% of your budget`,
-      detail: `${100 - budgetUsedPercent}% left \u2014 try to spread it across the remaining days`,
+      detail: `${100 - budgetUsedPercent}% left \u2014 you have room to adjust over the remaining days`,
     });
   }
 

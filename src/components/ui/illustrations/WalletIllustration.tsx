@@ -39,24 +39,24 @@ export function WalletIllustration({ size = 140 }: { size?: number }) {
 
       {/* Floating coin 1 — top right */}
       <g style={{ animation: 'float-gentle 4s ease-in-out 0s' }}>
-        <circle cx="105" cy="35" r="10" fill="var(--warning-soft)" stroke="var(--text-tertiary)" strokeWidth="1.5" opacity="0.8" />
-        <text x="105" y="39" textAnchor="middle" fontSize="10" fontWeight="bold" fill="var(--accent)" opacity="0.85">$</text>
+        <circle cx="105" cy="35" r="10" fill="var(--warning-soft)" stroke="var(--text-tertiary)" strokeWidth="1.5" opacity="0.55" />
+        <text x="105" y="39" textAnchor="middle" fontSize="10" fontWeight="bold" fill="var(--accent)" opacity="0.6">$</text>
       </g>
 
       {/* Floating coin 2 — top left */}
       <g style={{ animation: 'float-gentle 5s ease-in-out 1.2s' }}>
-        <circle cx="45" cy="30" r="8" fill="var(--warning-soft)" stroke="var(--text-tertiary)" strokeWidth="1.5" opacity="0.7" />
-        <text x="45" y="34" textAnchor="middle" fontSize="8" fontWeight="bold" fill="var(--accent)" opacity="0.8">$</text>
+        <circle cx="45" cy="30" r="8" fill="var(--warning-soft)" stroke="var(--text-tertiary)" strokeWidth="1.5" opacity="0.45" />
+        <text x="45" y="34" textAnchor="middle" fontSize="8" fontWeight="bold" fill="var(--accent)" opacity="0.55">$</text>
       </g>
 
       {/* Floating coin 3 — right side */}
       <g style={{ animation: 'float-gentle 4.5s ease-in-out 0.6s' }}>
-        <circle cx="115" cy="58" r="6" fill="var(--warning-soft)" stroke="var(--text-tertiary)" strokeWidth="1" opacity="0.65" />
+        <circle cx="115" cy="58" r="6" fill="var(--warning-soft)" stroke="var(--text-tertiary)" strokeWidth="1" opacity="0.40" />
       </g>
 
       {/* Sparkle accents */}
-      <path d="M22 45L24 41L26 45L24 49Z" fill="var(--text-tertiary)" opacity="0.55" />
-      <path d="M118 90L119.5 87L121 90L119.5 93Z" fill="var(--text-tertiary)" opacity="0.5" />
+      <path d="M22 45L24 41L26 45L24 49Z" fill="var(--text-tertiary)" opacity="0.35" />
+      <path d="M118 90L119.5 87L121 90L119.5 93Z" fill="var(--text-tertiary)" opacity="0.30" />
     </svg>
   );
 }

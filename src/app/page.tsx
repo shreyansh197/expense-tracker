@@ -18,6 +18,7 @@ import { staggerLoose, fadeUp } from "@/lib/motion/variants";
 import { SkeletonKpiCards, SkeletonChart } from "@/components/ui/Skeleton";
 import { PageTransition } from "@/components/ui/PageTransition";
 import { ChartIllustration, HeaderGraphic, SparkGraphic, WavePatternGraphic } from "@/components/ui/illustrations";
+import { ObserverCharacter } from "@/components/ui/illustrations/characters";
 import { Trophy, Wallet } from "lucide-react";
 
 // Lazy-load heavy chart components (recharts ~200KB)
@@ -333,7 +334,7 @@ function DashboardContent() {
   };
 
   return (
-        <PageTransition className="relative mx-auto min-h-[80vh] max-w-4xl xl:max-w-6xl space-y-6 sm:space-y-8 p-4 sm:p-6 lg:p-8">
+        <PageTransition className="relative mx-auto min-h-[80vh] max-w-4xl xl:max-w-6xl space-y-8 sm:space-y-10 p-4 sm:p-6 lg:p-8">
         {/* Header — hero zone */}
         <m.div
           className="zone-header dash-section relative z-40 overflow-hidden rounded-2xl p-5 sm:p-6"
@@ -349,6 +350,10 @@ function DashboardContent() {
           {/* Abstract decorative graphic — desktop only */}
           <div className="pointer-events-none absolute right-3 top-3 sm:right-5 sm:top-3">
             <HeaderGraphic />
+          </div>
+          {/* Character illustration — ObserverCharacter for calm presence (desktop only, density: max 1 character + 1 art per section) */}
+          <div className="pointer-events-none absolute right-16 bottom-3 hidden sm:block opacity-70">
+            <ObserverCharacter size={80} />
           </div>
 
           <h1 className="sr-only">Dashboard</h1>
@@ -393,7 +398,7 @@ function DashboardContent() {
         )}
 
         {/* ── Dashboard sections rendered in user-customized order ── */}
-        <m.div initial="initial" animate="animate" variants={staggerLoose} className="space-y-6 sm:space-y-8">
+        <m.div initial="initial" animate="animate" variants={staggerLoose} className="space-y-8 sm:space-y-10">
         {visibleSections.map((sectionId) => {
           const renderer: Record<DashboardSectionId, () => ReactNode> = {
             kpi: () => (

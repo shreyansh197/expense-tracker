@@ -17,12 +17,12 @@ export function BusinessGraphic() {
       <rect x="20" y="14" width="52" height="52" rx="12" fill="var(--success)" opacity="0.09" />
 
       {/* Inner card outline */}
-      <rect x="30" y="24" width="32" height="22" rx="6" stroke="var(--success)" strokeWidth="1.5" fill="none" opacity="0.22" />
+      <rect x="30" y="24" width="32" height="22" rx="6" stroke="var(--success)" strokeWidth="1.5" fill="none" opacity="0.18" />
 
       {/* Rising bar chart inside card */}
-      <rect x="36" y="36" width="5" height="8" rx="1.5" fill="var(--success)" opacity="0.26" />
-      <rect x="44" y="32" width="5" height="12" rx="1.5" fill="var(--primary)" opacity="0.22" />
-      <rect x="52" y="28" width="5" height="16" rx="1.5" fill="var(--success)" opacity="0.28" />
+      <rect x="36" y="36" width="5" height="8" rx="1.5" fill="var(--success)" opacity="0.18" />
+      <rect x="44" y="32" width="5" height="12" rx="1.5" fill="var(--primary)" opacity="0.16" />
+      <rect x="52" y="28" width="5" height="16" rx="1.5" fill="var(--success)" opacity="0.18" />
 
       {/* Upward trend arc — business growth */}
       <path

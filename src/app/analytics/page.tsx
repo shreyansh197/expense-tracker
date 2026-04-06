@@ -25,6 +25,7 @@ import {
   DollarSign,
   Award,
 } from "lucide-react";
+import { ReflectiveCharacter } from "@/components/ui/illustrations/characters";
 
 export default function AnalyticsPage() {
   return (
@@ -114,9 +115,9 @@ function AnalyticsContent() {
           : "var(--text-secondary)";
 
   return (
-      <PageTransition className="relative mx-auto min-h-[80vh] max-w-4xl xl:max-w-6xl space-y-6 sm:space-y-8 p-4 sm:p-6 lg:p-8">
+      <PageTransition className="relative mx-auto min-h-[80vh] max-w-4xl xl:max-w-6xl space-y-8 sm:space-y-10 p-4 sm:p-6 lg:p-8">
         {/* Header */}
-        <div className="zone-header space-y-3">
+        <div className="zone-header space-y-3 relative overflow-hidden">
           <div className="flex items-start justify-between gap-3">
             <div>
               <h1 className="text-page-title">Analytics</h1>
@@ -124,9 +125,13 @@ function AnalyticsContent() {
                 Deep dive into your spending patterns
               </p>
             </div>
-            <div className="shrink-0">
+            <div className="shrink-0 flex items-center gap-2">
               <SyncIndicator />
             </div>
+          </div>
+          {/* ReflectiveCharacter — awareness/pause archetype (desktop only) */}
+          <div className="pointer-events-none absolute right-4 top-1 hidden sm:block opacity-60">
+            <ReflectiveCharacter size={72} />
           </div>
           <MonthSwitcher />
         </div>

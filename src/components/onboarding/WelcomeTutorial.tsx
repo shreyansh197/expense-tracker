@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { ArrowRight, X } from "lucide-react";
+import { ObserverCharacter } from "@/components/ui/illustrations/characters";
 
 /* ── Step definitions ─────────────────────────────────────── */
 
@@ -176,6 +177,12 @@ export function WelcomeTutorial({ onComplete }: WelcomeTutorialProps) {
         </div>
 
         {/* Content */}
+        {/* Onboarding exception: higher character prominence allowed */}
+        {isLast && (
+          <div className="flex justify-center mb-2">
+            <ObserverCharacter size={100} />
+          </div>
+        )}
         <h2
           className="text-base font-bold"
           style={{ color: "var(--text-primary)" }}

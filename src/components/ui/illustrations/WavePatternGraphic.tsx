@@ -34,9 +34,9 @@ export function WavePatternGraphic() {
       />
 
       {/* Dots along the primary wave */}
-      <circle cx="20" cy="18" r="3" fill="var(--primary)" opacity="0.20" />
-      <circle cx="60" cy="32" r="3.5" fill="var(--accent)" opacity="0.18" />
-      <circle cx="100" cy="10" r="4" fill="var(--primary)" opacity="0.14" />
+      <circle cx="20" cy="18" r="3" fill="var(--primary)" opacity="0.16" />
+      <circle cx="60" cy="32" r="3.5" fill="var(--accent)" opacity="0.14" />
+      <circle cx="100" cy="10" r="4" fill="var(--primary)" opacity="0.12" />
 
       {/* Soft fill area under the wave */}
       <path

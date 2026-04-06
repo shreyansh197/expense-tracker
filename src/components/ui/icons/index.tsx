@@ -1,3 +1,21 @@
+/**
+ * ExpenStream Custom Icon System (16 icons)
+ *
+ * Style rules:
+ * - All 24×24 viewBox, rounded geometry, medium stroke (~2px)
+ * - Use `currentColor` for theme-awareness
+ * - Support mono & duotone via opacity layers
+ * - Calm, premium feel — no sharp angles, no complex detail
+ *
+ * Brand/finance icons: IconDashboard, IconAnalytics, IconAddExpense, IconSettings,
+ *   IconWallet, IconGoals, IconRecurring, IconTrendUp, IconTrendDown,
+ *   IconInsight, IconWarning, IconSuccess, IconProfile, IconCategory,
+ *   IconBusiness, IconSavings
+ *
+ * Utility icons (from lucide-react): X, ChevronLeft/Right/Down, Plus, Minus,
+ *   Check, Search, Calendar, Edit3, Trash2, Loader2, Camera, Info, HelpCircle
+ */
+
 interface IconProps {
   size?: number;
   className?: string;
@@ -162,6 +180,34 @@ export function IconCategory({ size = 24, className, style }: IconProps) {
       <rect x="3" y="3" width="18" height="18" rx="5" fill="currentColor" opacity="0.1" />
       <circle cx="9" cy="9" r="2" fill="currentColor" opacity="0.6" />
       <path d="M12.5 3.5l8 8-7.5 7.5a3 3 0 0 1-4.2 0L4.5 14.7a3 3 0 0 1 0-4.2l8-7z" stroke="currentColor" strokeWidth="1.5" fill="none" opacity="0.5" />
+    </svg>
+  );
+}
+
+/** Rounded briefcase — Business/Ledger icon */
+export function IconBusiness({ size = 24, className, style }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} style={style} aria-hidden="true">
+      <rect x="2" y="7" width="20" height="13" rx="3" fill="currentColor" opacity="0.12" />
+      <rect x="2" y="7" width="20" height="13" rx="3" stroke="currentColor" strokeWidth="1.8" fill="none" />
+      <path d="M8 7V5.5A2.5 2.5 0 0 1 10.5 3h3A2.5 2.5 0 0 1 16 5.5V7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" fill="none" />
+      <path d="M2 12h20" stroke="currentColor" strokeWidth="1.5" opacity="0.3" />
+      <circle cx="12" cy="12" r="1.5" fill="currentColor" />
+    </svg>
+  );
+}
+
+/** Coin stack — Savings icon */
+export function IconSavings({ size = 24, className, style }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} style={style} aria-hidden="true">
+      <ellipse cx="12" cy="18" rx="8" ry="3" fill="currentColor" opacity="0.15" />
+      <ellipse cx="12" cy="18" rx="8" ry="3" stroke="currentColor" strokeWidth="1.5" fill="none" />
+      <ellipse cx="12" cy="14" rx="8" ry="3" fill="currentColor" opacity="0.12" />
+      <ellipse cx="12" cy="14" rx="8" ry="3" stroke="currentColor" strokeWidth="1.5" fill="none" />
+      <ellipse cx="12" cy="10" rx="8" ry="3" fill="currentColor" opacity="0.08" />
+      <ellipse cx="12" cy="10" rx="8" ry="3" stroke="currentColor" strokeWidth="1.5" fill="none" />
+      <path d="M4 10v8M20 10v8" stroke="currentColor" strokeWidth="1.5" opacity="0.3" />
     </svg>
   );
 }

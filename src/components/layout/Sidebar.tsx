@@ -4,8 +4,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { m } from "framer-motion";
-import { PlusCircle, Briefcase, User, List } from "lucide-react";
-import { IconDashboard, IconAnalytics, IconSettings } from "@/components/ui/icons";
+import { PlusCircle, User, List } from "lucide-react";
+import { IconDashboard, IconAnalytics, IconSettings, IconBusiness } from "@/components/ui/icons";
 import { QuickHelpButton } from "@/components/ui/QuickHelpButton";
 import { cn } from "@/lib/utils";
 import { useUIStore } from "@/stores/uiStore";
@@ -23,7 +23,7 @@ const personalNav = [
 
 const businessNav = [
   { href: "/", icon: IconDashboard, label: "Dashboard" },
-  { href: "/business", icon: Briefcase, label: "Business" },
+  { href: "/business", icon: IconBusiness, label: "Business" },
   { href: "/expenses", icon: List, label: "Expenses" },
   { href: "/analytics", icon: IconAnalytics, label: "Analytics" },
   { href: "/settings", icon: IconSettings, label: "Settings" },

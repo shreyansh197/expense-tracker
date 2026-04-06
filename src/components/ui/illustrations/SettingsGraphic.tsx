@@ -15,8 +15,8 @@ export function SettingsGraphic() {
     >
       {/* Large gear ring — implied cog */}
       <circle cx="50" cy="42" r="26" stroke="var(--primary)" strokeWidth="2" fill="none" opacity="0.13" />
-      <circle cx="50" cy="42" r="16" stroke="var(--primary)" strokeWidth="1.5" fill="none" opacity="0.18" />
-      <circle cx="50" cy="42" r="5" fill="var(--primary)" opacity="0.22" />
+      <circle cx="50" cy="42" r="16" stroke="var(--primary)" strokeWidth="1.5" fill="none" opacity="0.16" />
+      <circle cx="50" cy="42" r="5" fill="var(--primary)" opacity="0.18" />
 
       {/* Gear teeth — 4 small rectangles at cardinal points */}
       <rect x="47" y="10" width="6" height="10" rx="2" fill="var(--primary)" opacity="0.15" />
@@ -26,10 +26,10 @@ export function SettingsGraphic() {
 
       {/* Slider bars — below gear */}
       <line x1="15" y1="78" x2="45" y2="78" stroke="var(--accent)" strokeWidth="2" strokeLinecap="round" opacity="0.18" />
-      <circle cx="35" cy="78" r="3" fill="var(--accent)" opacity="0.24" />
+      <circle cx="35" cy="78" r="3" fill="var(--accent)" opacity="0.18" />
 
       <line x1="55" y1="78" x2="85" y2="78" stroke="var(--primary)" strokeWidth="2" strokeLinecap="round" opacity="0.15" />
-      <circle cx="72" cy="78" r="3" fill="var(--primary)" opacity="0.22" />
+      <circle cx="72" cy="78" r="3" fill="var(--primary)" opacity="0.18" />
 
       {/* Floating accents */}
       <circle cx="86" cy="18" r="4" fill="var(--accent)" opacity="0.15" />

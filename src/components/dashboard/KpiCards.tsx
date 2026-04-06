@@ -41,10 +41,10 @@ function getStatusCopy(
   forecastOverBudget: boolean,
   formatCurrency: (n: number) => string,
 ): string {
-  if (isOverspent) return "Spending\u2019s ahead of plan this month";
-  if (daysRemaining === 0) return "This month has wrapped up";
-  if (forecastOverBudget) return "At this pace, you may go a bit over before month end";
-  if (isWarning) return `Aim for \u2264 ${formatCurrency(paceToStayUnder)}/day to stay on track`;
+  if (isOverspent) return "Spending\u2019s a bit ahead of plan \u2014 you\u2019ve got this";
+  if (daysRemaining === 0) return "This month has wrapped up \u2014 nice work";
+  if (forecastOverBudget) return "At this pace, you may go a bit over \u2014 small adjustments help";
+  if (isWarning) return `Aim for \u2264 ${formatCurrency(paceToStayUnder)}/day to finish strong`;
   if (daysRemaining <= 3) return `Almost there \u2014 ${daysRemaining} day${daysRemaining !== 1 ? "s" : ""} left`;
   return `You\u2019re on track \u2014 ${daysRemaining} days to go`;
 }
