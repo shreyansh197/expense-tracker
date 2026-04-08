@@ -83,11 +83,11 @@ export function SavingsGoalsWidget() {
   return (
     <div className="card relative overflow-hidden p-5">
       {/* Fund Modal — portaled to body to escape overflow-hidden */}
-      {createPortal(
+      {typeof document !== "undefined" && createPortal(
       <AnimatePresence>
         {activeGoalId && activeGoal && (
           <m.div
-            className="fixed inset-0 z-[200] flex items-center justify-center p-4"
+            className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
             onClick={(e) => { if (e.target === e.currentTarget) handleCancel(); }}
             role="dialog"
             aria-modal="true"
