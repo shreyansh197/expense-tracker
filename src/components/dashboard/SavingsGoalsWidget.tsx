@@ -193,11 +193,11 @@ export function SavingsGoalsWidget() {
               {isActive && (
                 <div className="flex items-center gap-1.5 rounded-lg px-2 py-1.5" style={{ background: 'var(--surface-secondary)' }}>
                   {/* Add / Subtract toggle */}
-                  <div className="flex overflow-hidden rounded-lg" style={{ border: '1px solid var(--border)' }}>
+                  <div className="flex shrink-0 overflow-hidden rounded-md" style={{ border: '1px solid var(--border)' }}>
                     <button
                       onClick={() => setFundMode("add")}
                       title="Add funds"
-                      className={`px-2 py-1 text-xs font-medium transition-colors ${
+                      className={`flex items-center justify-center h-7 w-7 text-xs font-medium transition-colors ${
                         fundMode === "add"
                           ? "bg-ok-soft text-ok-text"
                           : ""
@@ -211,7 +211,7 @@ export function SavingsGoalsWidget() {
                     <button
                       onClick={() => setFundMode("subtract")}
                       title="Remove funds"
-                      className={`px-2 py-1 text-xs font-medium transition-colors ${
+                      className={`flex items-center justify-center h-7 w-7 text-xs font-medium transition-colors ${
                         fundMode === "subtract"
                           ? "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400"
                           : ""
@@ -225,8 +225,8 @@ export function SavingsGoalsWidget() {
                   </div>
 
                   {/* Amount input */}
-                  <div className="relative flex-1">
-                    <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs" style={{ color: 'var(--text-muted)' }}>{symbol}</span>
+                  <div className="relative flex-1 min-w-0">
+                    <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs" style={{ color: 'var(--text-muted)' }}>{symbol}</span>
                     <input
                       type="number"
                       min="1"
@@ -238,21 +238,22 @@ export function SavingsGoalsWidget() {
                       }}
                       autoFocus
                       placeholder="Amount"
-                      className="form-input w-full min-w-0 py-1 pl-6 pr-2 text-xs"
+                      className="form-input w-full min-w-0 pl-5 pr-2"
+                      style={{ fontSize: '0.75rem', minHeight: '1.75rem', padding: '0.25rem 0.5rem 0.25rem 1.25rem', borderRadius: '0.5rem' }}
                     />
                   </div>
 
                   <button
                     onClick={handleFund}
                     disabled={!fundAmount || parseFloat(fundAmount) <= 0}
-                    className="shrink-0 rounded-lg bg-ok px-2.5 py-1 text-xs font-medium text-white transition-colors hover:bg-ok-hover disabled:opacity-40"
+                    className="shrink-0 rounded-md bg-ok px-2 py-1 text-xs font-medium text-white transition-colors hover:bg-ok-hover disabled:opacity-40"
                   >
                     Save
                   </button>
 
                   <button
                     onClick={handleCancel}
-                    className="shrink-0 rounded-lg p-1 transition-colors"
+                    className="shrink-0 rounded-md p-1 transition-colors"
                     style={{ color: 'var(--text-muted)' }}
                     onMouseEnter={e => { e.currentTarget.style.background = 'var(--surface-hover)'; }}
                     onMouseLeave={e => { e.currentTarget.style.background = ''; }}

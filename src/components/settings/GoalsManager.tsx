@@ -304,9 +304,9 @@ export function GoalsManager() {
 
                 {/* Add/Subtract Funds inline */}
                 {fundGoalId === g.id && (
-                  <div className="mb-3 rounded-xl px-3 py-3" style={{ background: 'var(--surface-secondary)' }}>
+                  <div className="mb-3 rounded-xl px-3 py-2.5" style={{ background: 'var(--surface-secondary)' }}>
                     <div className="flex items-center gap-2">
-                    <div className="flex rounded-lg" style={{ border: '1px solid var(--border)' }}>
+                    <div className="flex shrink-0 rounded-lg" style={{ border: '1px solid var(--border)' }}>
                       <button
                         onClick={() => setFundMode("add")}
                         className={`flex h-8 w-8 items-center justify-center text-xs font-medium rounded-l-lg ${
@@ -332,7 +332,7 @@ export function GoalsManager() {
                         <Minus size={14} />
                       </button>
                     </div>
-                    <div className="relative flex-1">
+                    <div className="relative flex-1 min-w-0">
                       <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs" style={{ color: 'var(--text-tertiary)' }}>{symbol}</span>
                       <input
                         type="number"
@@ -343,18 +343,19 @@ export function GoalsManager() {
                         onKeyDown={(e) => { if (e.key === "Enter") handleFundSave(); if (e.key === "Escape") setFundGoalId(null); }}
                         autoFocus
                         placeholder="Amount"
-                        className="form-input py-2 pl-7 pr-2 text-sm"
+                        className="form-input w-full pl-7 pr-2"
+                        style={{ fontSize: '0.8125rem', minHeight: '2rem', padding: '0.375rem 0.5rem 0.375rem 1.75rem', borderRadius: '0.5rem' }}
                       />
                     </div>
                     <button
                       onClick={handleFundSave}
-                      className="rounded-lg px-3 py-2 text-xs font-medium text-indigo-600 hover:bg-indigo-50 dark:text-indigo-400"
+                      className="shrink-0 rounded-lg px-3 py-1.5 text-xs font-medium text-indigo-600 hover:bg-indigo-50 dark:text-indigo-400"
                     >
                       Save
                     </button>
                     <button
                       onClick={() => setFundGoalId(null)}
-                      className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-[var(--surface-hover)]"
+                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg hover:bg-[var(--surface-hover)]"
                       style={{ color: 'var(--text-muted)' }}
                       aria-label="Cancel"
                     >
