@@ -194,7 +194,7 @@ export function SavingsGoalsWidget() {
 
               {/* Inline fund form — full width, outside the ring+details flex row */}
               {isActive && (
-                <div className="rounded-xl p-3 space-y-2.5 max-w-md" style={{ background: 'var(--surface-secondary)' }}>
+                <div className="rounded-xl p-3 space-y-2.5 max-w-lg" style={{ background: 'var(--surface-secondary)' }}>
                   {/* Row 1: input (left) + toggle (right) */}
                   <div className="flex items-center gap-2">
                     <div className="relative flex-1 min-w-0">
