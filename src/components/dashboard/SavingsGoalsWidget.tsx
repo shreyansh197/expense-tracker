@@ -194,9 +194,26 @@ export function SavingsGoalsWidget() {
 
               {/* Inline fund form — full width, outside the ring+details flex row */}
               {isActive && (
-                <div className="rounded-xl p-3 space-y-2.5" style={{ background: 'var(--surface-secondary)' }}>
-                  {/* Row 1: toggle + input */}
+                <div className="rounded-xl p-3 space-y-2.5 max-w-md" style={{ background: 'var(--surface-secondary)' }}>
+                  {/* Row 1: input (left) + toggle (right) */}
                   <div className="flex items-center gap-2">
+                    <div className="relative flex-1 min-w-0">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm" style={{ color: 'var(--text-muted)' }}>{symbol}</span>
+                      <input
+                        type="number"
+                        min="1"
+                        value={fundAmount}
+                        onChange={(e) => setFundAmount(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") handleFund();
+                          if (e.key === "Escape") handleCancel();
+                        }}
+                        autoFocus
+                        placeholder="Enter amount"
+                        className="form-input w-full"
+                        style={{ fontSize: '0.875rem', minHeight: '2.25rem', paddingLeft: '1.75rem', borderRadius: '0.625rem' }}
+                      />
+                    </div>
                     <div className="flex shrink-0 overflow-hidden rounded-lg" style={{ border: '1px solid var(--border)' }}>
                       <button
                         onClick={() => setFundMode("add")}
@@ -226,23 +243,6 @@ export function SavingsGoalsWidget() {
                       >
                         <Minus size={14} />
                       </button>
-                    </div>
-                    <div className="relative flex-1 min-w-0">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm" style={{ color: 'var(--text-muted)' }}>{symbol}</span>
-                      <input
-                        type="number"
-                        min="1"
-                        value={fundAmount}
-                        onChange={(e) => setFundAmount(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") handleFund();
-                          if (e.key === "Escape") handleCancel();
-                        }}
-                        autoFocus
-                        placeholder="Enter amount"
-                        className="form-input w-full"
-                        style={{ fontSize: '0.875rem', minHeight: '2.25rem', paddingLeft: '1.75rem', borderRadius: '0.625rem' }}
-                      />
                     </div>
                   </div>
                   {/* Row 2: action buttons */}
