@@ -338,7 +338,7 @@ export function AuthModal({
   onComplete,
   initialMode = "register",
 }: AuthModalProps) {
-  const [mode, setMode] = useState<"choose" | "register" | "login" | "totp">(
+  const [mode, setMode] = useState<"choose" | "register" | "login" | "totp" | "forgot">(
     initialMode === "join" ? "login" : "choose",
   );
   const [email, setEmail] = useState("");
@@ -351,6 +351,7 @@ export function AuthModal({
   const [pendingChallengeToken, setPendingChallengeToken] = useState<string | null>(null);
   const [totpCode, setTotpCode] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [forgotSent, setForgotSent] = useState(false);
   const { symbol } = useCurrency();
 
   const { login, loginWith2FA, register } = useAuth();
@@ -426,6 +427,117 @@ export function AuthModal({
     const val = parseFloat(salary);
     onComplete(val > 0 ? val : undefined);
   };
+
+  // ── Forgot password step ────────────────────────────────────
+
+  const handleForgotPassword = async () => {
+    if (!email) {
+      setError("Please enter your email address");
+      return;
+    }
+    setError("");
+    setLoading(true);
+    try {
+      const res = await fetch("/api/auth/forgot-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        setError(data.error ?? "Something went wrong. Please try again.");
+        return;
+      }
+      setForgotSent(true);
+    } catch {
+      setError("Network error. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (mode === "forgot") {
+    return (
+      <AuthPage>
+        <button
+          onClick={() => { setMode("login"); setError(""); setForgotSent(false); }}
+          className="mb-6 flex items-center gap-1.5 text-sm text-slate-400 hover:text-slate-700 dark:text-slate-500 dark:hover:text-slate-300 transition-colors"
+        >
+          <ArrowLeft className="h-4 w-4" /> Back to Sign In
+        </button>
+
+        <div className="mb-1 flex h-11 w-11 items-center justify-center rounded-2xl bg-[#eef0ff] dark:bg-[rgba(123,135,255,0.15)] ring-1 ring-[#c7cbff] dark:ring-[#4C5CFF]/40">
+          <Mail className="h-5 w-5 text-[#4C5CFF] dark:text-[#7B87FF]" />
+        </div>
+        <h2 className="mt-3 text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+          Forgot password?
+        </h2>
+        <p className="mt-1.5 text-sm text-slate-500 dark:text-slate-400 mb-7">
+          {forgotSent
+            ? "Check your inbox for a password reset link."
+            : "Enter your email and we\u2019ll send you a reset link."}
+        </p>
+
+        {forgotSent ? (
+          <div className="space-y-4">
+            <div className="flex items-start gap-2.5 rounded-xl bg-emerald-50 p-3.5 text-sm text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/40">
+              <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
+              If an account exists for <strong>{email}</strong>, you&apos;ll receive an email with a reset link shortly.
+            </div>
+            <button
+              onClick={() => { setMode("login"); setForgotSent(false); setError(""); }}
+              className="w-full rounded-xl py-3.5 text-base font-semibold text-white transition-all hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2"
+              style={{
+                background: "linear-gradient(135deg, #2EC4B6 0%, #26a69a 50%, #4C5CFF 100%)",
+                boxShadow: "0 6px 20px rgba(46,196,182,0.35)",
+              }}
+            >
+              Back to Sign In
+            </button>
+          </div>
+        ) : (
+          <form
+            onSubmit={(e) => { e.preventDefault(); if (!loading) handleForgotPassword(); }}
+            className="space-y-3.5"
+          >
+            <div className="relative">
+              <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 dark:text-slate-500" />
+              <input
+                type="email"
+                placeholder="Email address"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                autoComplete="email"
+                autoFocus
+                className="w-full rounded-xl py-3.5 pl-10 pr-4 text-sm transition-all focus:outline-none focus:ring-2"
+                style={{ background: 'var(--surface-secondary)', border: '1px solid var(--border)', color: 'var(--text-primary)', '--tw-ring-color': 'var(--primary)' } as React.CSSProperties}
+              />
+            </div>
+
+            {error && (
+              <div className="flex items-start gap-2.5 rounded-xl bg-red-50 p-3.5 text-sm text-red-700 dark:bg-red-900/20 dark:text-red-400 border border-red-100 dark:border-red-900/40">
+                <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
+                {error}
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full rounded-xl py-3.5 text-base font-semibold text-white transition-all hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 flex items-center justify-center gap-2"
+              style={{
+                background: "linear-gradient(135deg, #2EC4B6 0%, #26a69a 50%, #4C5CFF 100%)",
+                boxShadow: "0 6px 20px rgba(46,196,182,0.35)",
+              }}
+            >
+              {loading && <Loader2 className="h-4 w-4 animate-spin" />}
+              Send Reset Link
+            </button>
+          </form>
+        )}
+      </AuthPage>
+    );
+  }
 
   // ── TOTP verification step ─────────────────────────────────
 
@@ -696,6 +808,18 @@ export function AuthModal({
             {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
           </button>
         </div>
+
+        {!isRegister && (
+          <div className="flex justify-end -mt-1">
+            <button
+              type="button"
+              onClick={() => { setMode("forgot"); setError(""); setForgotSent(false); }}
+              className="text-xs font-medium text-[#2EC4B6] dark:text-[#60A5FA] hover:underline"
+            >
+              Forgot password?
+            </button>
+          </div>
+        )}
 
         {error && (
           <div className="flex items-start gap-2.5 rounded-xl bg-red-50 p-3.5 text-sm text-red-700 dark:bg-red-900/20 dark:text-red-400 border border-red-100 dark:border-red-900/40">

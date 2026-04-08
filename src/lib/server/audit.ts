@@ -21,6 +21,7 @@ type AuditAction =
   | "session.revoke"
   | "user.delete_account"
   | "user.change_password"
+  | "user.reset_password"
   | "migration.sync_code";
 
 export async function audit(params: {

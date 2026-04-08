@@ -8,6 +8,8 @@ const PUBLIC_PATHS = new Set([
   "/api/auth/refresh",
   "/api/auth/magic-link",
   "/api/auth/magic-link/verify",
+  "/api/auth/forgot-password",
+  "/api/auth/reset-password",
   "/api/auth/passkey/login-options",
   "/api/auth/passkey/login-verify",
   // Google OAuth

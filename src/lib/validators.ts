@@ -40,6 +40,17 @@ export const refreshSchema = z.object({
   refreshToken: z.string().min(1),
 });
 
+// ── Forgot / Reset Password ───────────────────────────────────
+
+export const forgotPasswordSchema = z.object({
+  email: z.string().email("Enter a valid email address").max(255),
+});
+
+export const resetPasswordSchema = z.object({
+  token: z.string().min(1, "Reset token is required"),
+  newPassword: z.string().min(8, "Password must be at least 8 characters").max(72),
+});
+
 // ── Magic Link ───────────────────────────────────────────────
 
 export const magicLinkRequestSchema = z.object({

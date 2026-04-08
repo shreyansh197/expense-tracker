@@ -90,6 +90,29 @@ export async function verify2FAChallenge(token: string): Promise<string> {
   return payload.sub;
 }
 
+// ── Password Reset Token (short-lived, proves email ownership) ──
+
+const PASSWORD_RESET_TTL = "15m";
+
+export async function signPasswordResetToken(userId: string): Promise<string> {
+  return new SignJWT({ sub: userId, purpose: "password-reset" })
+    .setProtectedHeader({ alg: "HS256" })
+    .setIssuedAt()
+    .setExpirationTime(PASSWORD_RESET_TTL)
+    .setIssuer("expenstream")
+    .sign(getSecret());
+}
+
+export async function verifyPasswordResetToken(token: string): Promise<string> {
+  const { payload } = await jwtVerify(token, getSecret(), {
+    issuer: "expenstream",
+  });
+  if (payload.purpose !== "password-reset" || !payload.sub) {
+    throw new Error("Invalid password reset token");
+  }
+  return payload.sub;
+}
+
 // ── IP hashing (privacy-preserving) ──────────────────────────
 
 export function hashIp(ip: string): string {
