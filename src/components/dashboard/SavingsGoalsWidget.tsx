@@ -191,76 +191,74 @@ export function SavingsGoalsWidget() {
 
               {/* Inline fund form */}
               {isActive && (
-                <div className="flex items-center gap-1.5 rounded-lg px-2 py-1.5" style={{ background: 'var(--surface-secondary)' }}>
-                  {/* Add / Subtract toggle */}
-                  <div className="flex shrink-0 overflow-hidden rounded-md" style={{ border: '1px solid var(--border)' }}>
+                <div className="rounded-xl p-3 space-y-2.5" style={{ background: 'var(--surface-secondary)' }}>
+                  {/* Row 1: toggle + input */}
+                  <div className="flex items-center gap-2">
+                    <div className="flex shrink-0 overflow-hidden rounded-lg" style={{ border: '1px solid var(--border)' }}>
+                      <button
+                        onClick={() => setFundMode("add")}
+                        title="Add funds"
+                        className={`flex items-center justify-center h-9 w-9 text-xs font-medium transition-colors ${
+                          fundMode === "add"
+                            ? "bg-ok-soft text-ok-text"
+                            : ""
+                        }`}
+                        style={fundMode !== "add" ? { color: 'var(--text-muted)' } : undefined}
+                        onMouseEnter={e => { if (fundMode !== 'add') e.currentTarget.style.background = 'var(--surface-hover)'; }}
+                        onMouseLeave={e => { if (fundMode !== 'add') e.currentTarget.style.background = ''; }}
+                      >
+                        <TrendingUp size={14} />
+                      </button>
+                      <button
+                        onClick={() => setFundMode("subtract")}
+                        title="Remove funds"
+                        className={`flex items-center justify-center h-9 w-9 text-xs font-medium transition-colors ${
+                          fundMode === "subtract"
+                            ? "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400"
+                            : ""
+                        }`}
+                        style={fundMode !== "subtract" ? { color: 'var(--text-muted)' } : undefined}
+                        onMouseEnter={e => { if (fundMode !== 'subtract') e.currentTarget.style.background = 'var(--surface-hover)'; }}
+                        onMouseLeave={e => { if (fundMode !== 'subtract') e.currentTarget.style.background = ''; }}
+                      >
+                        <Minus size={14} />
+                      </button>
+                    </div>
+                    <div className="relative flex-1 min-w-0">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm" style={{ color: 'var(--text-muted)' }}>{symbol}</span>
+                      <input
+                        type="number"
+                        min="1"
+                        value={fundAmount}
+                        onChange={(e) => setFundAmount(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") handleFund();
+                          if (e.key === "Escape") handleCancel();
+                        }}
+                        autoFocus
+                        placeholder="Enter amount"
+                        className="form-input w-full"
+                        style={{ fontSize: '0.875rem', minHeight: '2.25rem', paddingLeft: '1.75rem', borderRadius: '0.625rem' }}
+                      />
+                    </div>
+                  </div>
+                  {/* Row 2: action buttons */}
+                  <div className="flex items-center gap-2">
                     <button
-                      onClick={() => setFundMode("add")}
-                      title="Add funds"
-                      className={`flex items-center justify-center h-7 w-7 text-xs font-medium transition-colors ${
-                        fundMode === "add"
-                          ? "bg-ok-soft text-ok-text"
-                          : ""
-                      }`}
-                      style={fundMode !== "add" ? { color: 'var(--text-muted)' } : undefined}
-                      onMouseEnter={e => { if (fundMode !== 'add') e.currentTarget.style.background = 'var(--surface-hover)'; }}
-                      onMouseLeave={e => { if (fundMode !== 'add') e.currentTarget.style.background = ''; }}
+                      onClick={handleFund}
+                      disabled={!fundAmount || parseFloat(fundAmount) <= 0}
+                      className="flex-1 rounded-lg bg-ok py-2 text-xs font-semibold text-white transition-colors hover:bg-ok-hover disabled:opacity-40"
                     >
-                      <TrendingUp size={12} />
+                      {fundMode === "add" ? "Add Funds" : "Remove Funds"}
                     </button>
                     <button
-                      onClick={() => setFundMode("subtract")}
-                      title="Remove funds"
-                      className={`flex items-center justify-center h-7 w-7 text-xs font-medium transition-colors ${
-                        fundMode === "subtract"
-                          ? "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400"
-                          : ""
-                      }`}
-                      style={fundMode !== "subtract" ? { color: 'var(--text-muted)' } : undefined}
-                      onMouseEnter={e => { if (fundMode !== 'subtract') e.currentTarget.style.background = 'var(--surface-hover)'; }}
-                      onMouseLeave={e => { if (fundMode !== 'subtract') e.currentTarget.style.background = ''; }}
+                      onClick={handleCancel}
+                      className="rounded-lg px-4 py-2 text-xs font-medium transition-colors"
+                      style={{ color: 'var(--text-secondary)', background: 'var(--surface)', border: '1px solid var(--border)' }}
                     >
-                      <Minus size={12} />
+                      Cancel
                     </button>
                   </div>
-
-                  {/* Amount input */}
-                  <div className="relative flex-1 min-w-0">
-                    <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs" style={{ color: 'var(--text-muted)' }}>{symbol}</span>
-                    <input
-                      type="number"
-                      min="1"
-                      value={fundAmount}
-                      onChange={(e) => setFundAmount(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") handleFund();
-                        if (e.key === "Escape") handleCancel();
-                      }}
-                      autoFocus
-                      placeholder="Amount"
-                      className="form-input w-full min-w-0 pl-5 pr-2"
-                      style={{ fontSize: '0.75rem', minHeight: '1.75rem', padding: '0.25rem 0.5rem 0.25rem 1.25rem', borderRadius: '0.5rem' }}
-                    />
-                  </div>
-
-                  <button
-                    onClick={handleFund}
-                    disabled={!fundAmount || parseFloat(fundAmount) <= 0}
-                    className="shrink-0 rounded-md bg-ok px-2 py-1 text-xs font-medium text-white transition-colors hover:bg-ok-hover disabled:opacity-40"
-                  >
-                    Save
-                  </button>
-
-                  <button
-                    onClick={handleCancel}
-                    className="shrink-0 rounded-md p-1 transition-colors"
-                    style={{ color: 'var(--text-muted)' }}
-                    onMouseEnter={e => { e.currentTarget.style.background = 'var(--surface-hover)'; }}
-                    onMouseLeave={e => { e.currentTarget.style.background = ''; }}
-                    aria-label="Cancel"
-                  >
-                    <X size={12} />
-                  </button>
                 </div>
               )}
               </div>{/* end goal details */}

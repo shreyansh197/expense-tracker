@@ -304,65 +304,68 @@ export function GoalsManager() {
 
                 {/* Add/Subtract Funds inline */}
                 {fundGoalId === g.id && (
-                  <div className="mb-3 rounded-xl px-3 py-2.5" style={{ background: 'var(--surface-secondary)' }}>
+                  <div className="mb-3 rounded-xl p-3 space-y-2.5" style={{ background: 'var(--surface-secondary)' }}>
+                    {/* Row 1: toggle + input */}
                     <div className="flex items-center gap-2">
-                    <div className="flex shrink-0 rounded-lg" style={{ border: '1px solid var(--border)' }}>
+                      <div className="flex shrink-0 rounded-lg" style={{ border: '1px solid var(--border)' }}>
+                        <button
+                          onClick={() => setFundMode("add")}
+                          className={`flex h-9 w-9 items-center justify-center text-xs font-medium rounded-l-lg ${
+                            fundMode === "add"
+                              ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400"
+                              : ""
+                          }`}
+                          style={fundMode !== "add" ? { color: 'var(--text-muted)' } : undefined}
+                          aria-label="Add funds"
+                        >
+                          <TrendingUp size={14} />
+                        </button>
+                        <button
+                          onClick={() => setFundMode("subtract")}
+                          className={`flex h-9 w-9 items-center justify-center text-xs font-medium rounded-r-lg ${
+                            fundMode === "subtract"
+                              ? "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400"
+                              : ""
+                          }`}
+                          style={fundMode !== "subtract" ? { color: 'var(--text-muted)' } : undefined}
+                          aria-label="Subtract funds"
+                        >
+                          <Minus size={14} />
+                        </button>
+                      </div>
+                      <div className="relative flex-1 min-w-0">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm" style={{ color: 'var(--text-tertiary)' }}>{symbol}</span>
+                        <input
+                          type="number"
+                          min="0.01"
+                          step="0.01"
+                          value={fundAmount}
+                          onChange={(e) => setFundAmount(e.target.value)}
+                          onKeyDown={(e) => { if (e.key === "Enter") handleFundSave(); if (e.key === "Escape") setFundGoalId(null); }}
+                          autoFocus
+                          placeholder="Enter amount"
+                          className="form-input w-full"
+                          style={{ fontSize: '0.875rem', minHeight: '2.25rem', paddingLeft: '1.75rem', borderRadius: '0.625rem' }}
+                        />
+                      </div>
+                    </div>
+                    {/* Row 2: action buttons + helper text */}
+                    <div className="flex items-center gap-2">
                       <button
-                        onClick={() => setFundMode("add")}
-                        className={`flex h-8 w-8 items-center justify-center text-xs font-medium rounded-l-lg ${
-                          fundMode === "add"
-                            ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400"
-                            : ""
-                        }`}
-                        style={fundMode !== "add" ? { color: 'var(--text-muted)' } : undefined}
-                        aria-label="Add funds"
+                        onClick={handleFundSave}
+                        className="flex-1 rounded-lg bg-indigo-600 py-2 text-xs font-semibold text-white transition-colors hover:bg-indigo-700 disabled:opacity-40"
                       >
-                        <TrendingUp size={14} />
+                        {fundMode === "add" ? "Add Funds" : "Remove Funds"}
                       </button>
                       <button
-                        onClick={() => setFundMode("subtract")}
-                        className={`flex h-8 w-8 items-center justify-center text-xs font-medium rounded-r-lg ${
-                          fundMode === "subtract"
-                            ? "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400"
-                            : ""
-                        }`}
-                        style={fundMode !== "subtract" ? { color: 'var(--text-muted)' } : undefined}
-                        aria-label="Subtract funds"
+                        onClick={() => setFundGoalId(null)}
+                        className="rounded-lg px-4 py-2 text-xs font-medium transition-colors"
+                        style={{ color: 'var(--text-secondary)', background: 'var(--surface)', border: '1px solid var(--border)' }}
                       >
-                        <Minus size={14} />
+                        Cancel
                       </button>
                     </div>
-                    <div className="relative flex-1 min-w-0">
-                      <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs" style={{ color: 'var(--text-tertiary)' }}>{symbol}</span>
-                      <input
-                        type="number"
-                        min="0.01"
-                        step="0.01"
-                        value={fundAmount}
-                        onChange={(e) => setFundAmount(e.target.value)}
-                        onKeyDown={(e) => { if (e.key === "Enter") handleFundSave(); if (e.key === "Escape") setFundGoalId(null); }}
-                        autoFocus
-                        placeholder="Amount"
-                        className="form-input w-full pl-7 pr-2"
-                        style={{ fontSize: '0.8125rem', minHeight: '2rem', padding: '0.375rem 0.5rem 0.375rem 1.75rem', borderRadius: '0.5rem' }}
-                      />
-                    </div>
-                    <button
-                      onClick={handleFundSave}
-                      className="shrink-0 rounded-lg px-3 py-1.5 text-xs font-medium text-indigo-600 hover:bg-indigo-50 dark:text-indigo-400"
-                    >
-                      Save
-                    </button>
-                    <button
-                      onClick={() => setFundGoalId(null)}
-                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg hover:bg-[var(--surface-hover)]"
-                      style={{ color: 'var(--text-muted)' }}
-                      aria-label="Cancel"
-                    >
-                      <X size={14} />
-                    </button>
-                    </div>
-                    <p className="mt-1.5 text-xs" style={{ color: 'var(--text-muted)' }}>Enter amount to {fundMode === "add" ? "add to" : "remove from"} your goal</p>
+                    <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Enter amount to {fundMode === "add" ? "add to" : "remove from"} your goal</p>
                   </div>
                 )}
 
