@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { TrendingUp, Minus, ChevronRight } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { TrendingUp, Minus, ChevronRight, X } from "lucide-react";
+import { m, AnimatePresence } from "framer-motion";
 import { IconGoals } from "@/components/ui/icons";
 import Link from "next/link";
 import { useSettings } from "@/hooks/useSettings";
@@ -21,7 +22,7 @@ export function SavingsGoalsWidget() {
   const [fundAmount, setFundAmount] = useState("");
   const [fundMode, setFundMode] = useState<"add" | "subtract">("add");
 
-  if (goals.length === 0) return null;
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const handleFund = () => {
     if (!activeGoalId) return;
@@ -59,8 +60,153 @@ export function SavingsGoalsWidget() {
   const totalSaved = goals.reduce((s, g) => s + g.savedAmount, 0);
   const overallPct = totalTarget > 0 ? Math.round((totalSaved / totalTarget) * 100) : 0;
 
+  // Focus the input when modal opens
+  useEffect(() => {
+    if (activeGoalId && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [activeGoalId]);
+
+  // Close modal on Escape
+  useEffect(() => {
+    if (!activeGoalId) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") handleCancel(); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  });
+
+  const activeGoal = goals.find((g) => g.id === activeGoalId);
+
+  if (goals.length === 0) return null;
+
   return (
     <div className="card relative overflow-hidden p-5">
+      {/* Fund Modal */}
+      <AnimatePresence>
+        {activeGoalId && activeGoal && (
+          <m.div
+            className="fixed inset-0 z-[200] flex items-center justify-center p-4"
+            onClick={(e) => { if (e.target === e.currentTarget) handleCancel(); }}
+            role="dialog"
+            aria-modal="true"
+            aria-label={`Fund ${activeGoal.name}`}
+            initial={{ backgroundColor: "rgba(0,0,0,0)" }}
+            animate={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+            exit={{ backgroundColor: "rgba(0,0,0,0)" }}
+            transition={{ duration: 0.2 }}
+          >
+            <m.div
+              className="w-full max-w-sm rounded-2xl p-5 shadow-xl"
+              style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
+              initial={{ opacity: 0, scale: 0.92, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 8 }}
+              transition={{ type: "spring", stiffness: 400, damping: 28 }}
+            >
+              {/* Modal header */}
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="h-3 w-3 shrink-0 rounded-full" style={{ backgroundColor: activeGoal.color }} />
+                  <h3 className="text-sm font-semibold truncate" style={{ color: "var(--text-primary)" }}>
+                    {activeGoal.name}
+                  </h3>
+                </div>
+                <button
+                  onClick={handleCancel}
+                  className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-colors hover:bg-[var(--surface-secondary)]"
+                  style={{ color: "var(--text-muted)" }}
+                  aria-label="Close"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+
+              {/* Progress info */}
+              <div className="mb-4">
+                <div className="flex justify-between text-xs mb-1.5" style={{ color: "var(--text-secondary)" }}>
+                  <span>{formatCurrency(activeGoal.savedAmount)} saved</span>
+                  <span>of {formatCurrency(activeGoal.targetAmount)}</span>
+                </div>
+                <div className="h-2 w-full overflow-hidden rounded-full" style={{ background: "var(--surface-secondary)" }}>
+                  <div
+                    className="h-full rounded-full transition-all duration-500"
+                    style={{
+                      width: `${Math.min(Math.round((activeGoal.savedAmount / activeGoal.targetAmount) * 100), 100)}%`,
+                      backgroundColor: activeGoal.color,
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* Add / Subtract toggle */}
+              <div className="flex rounded-lg mb-3" style={{ border: "1px solid var(--border)" }}>
+                <button
+                  onClick={() => setFundMode("add")}
+                  className={`flex-1 py-2 text-xs font-medium rounded-l-lg transition-colors ${
+                    fundMode === "add" ? "bg-ok-soft text-ok-text" : ""
+                  }`}
+                  style={fundMode !== "add" ? { color: "var(--text-muted)" } : undefined}
+                >
+                  <TrendingUp size={14} className="inline mr-1.5 -mt-0.5" />
+                  Add Funds
+                </button>
+                <button
+                  onClick={() => setFundMode("subtract")}
+                  className={`flex-1 py-2 text-xs font-medium rounded-r-lg transition-colors ${
+                    fundMode === "subtract" ? "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400" : ""
+                  }`}
+                  style={fundMode !== "subtract" ? { color: "var(--text-muted)" } : undefined}
+                >
+                  <Minus size={14} className="inline mr-1.5 -mt-0.5" />
+                  Remove Funds
+                </button>
+              </div>
+
+              {/* Amount input */}
+              <div className="relative mb-4">
+                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-medium" style={{ color: "var(--text-muted)" }}>{symbol}</span>
+                <input
+                  ref={inputRef}
+                  type="number"
+                  min="1"
+                  value={fundAmount}
+                  onChange={(e) => setFundAmount(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Enter") handleFund(); }}
+                  placeholder="Enter amount"
+                  className="form-input w-full"
+                  style={{ paddingLeft: "2rem" }}
+                />
+              </div>
+
+              {/* Action buttons */}
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleFund}
+                  disabled={!fundAmount || parseFloat(fundAmount) <= 0}
+                  className="flex-1 rounded-xl py-2.5 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-40 disabled:hover:translate-y-0"
+                  style={{
+                    background: fundMode === "add"
+                      ? "linear-gradient(135deg, #2EC4B6 0%, #26a69a 100%)"
+                      : "linear-gradient(135deg, #ef4444 0%, #dc2626 100%)",
+                    boxShadow: fundMode === "add"
+                      ? "0 4px 12px rgba(46,196,182,0.3)"
+                      : "0 4px 12px rgba(239,68,68,0.3)",
+                  }}
+                >
+                  {fundMode === "add" ? "Add Funds" : "Remove Funds"}
+                </button>
+                <button
+                  onClick={handleCancel}
+                  className="rounded-xl px-5 py-2.5 text-sm font-medium transition-colors"
+                  style={{ color: "var(--text-secondary)", background: "var(--surface-secondary)" }}
+                >
+                  Cancel
+                </button>
+              </div>
+            </m.div>
+          </m.div>
+        )}
+      </AnimatePresence>
       {/* BuilderCharacter — growth archetype for savings (density: 1 char + 1 art max) */}
       <div className="pointer-events-none absolute right-2 top-6 opacity-25 sm:opacity-40 scale-75 sm:scale-100 origin-top-right">
         <BuilderCharacter size={72} />
@@ -106,11 +252,9 @@ export function SavingsGoalsWidget() {
               ? Math.round((g.savedAmount / g.targetAmount) * 100)
               : 0;
           const isComplete = pct >= 100;
-          const isActive = activeGoalId === g.id;
 
           return (
-            <div key={g.id} className="space-y-1.5">
-              <div className="flex items-start gap-3">
+            <div key={g.id} className="flex items-start gap-3">
               {/* Circular progress ring (SVG) */}
               <svg className="shrink-0 mt-1" width="40" height="40" viewBox="0 0 40 40" aria-hidden>
                 <circle cx="20" cy="20" r="17" fill="none" stroke="var(--surface-secondary)" strokeWidth="4" />
@@ -151,17 +295,13 @@ export function SavingsGoalsWidget() {
                   {!isComplete && (
                     <button
                       onClick={() => {
-                        if (isActive) {
-                          handleCancel();
-                        } else {
-                          setActiveGoalId(g.id);
-                          setFundAmount("");
-                          setFundMode("add");
-                        }
+                        setActiveGoalId(g.id);
+                        setFundAmount("");
+                        setFundMode("add");
                       }}
                       className="rounded-md bg-ok-soft px-2 py-0.5 text-xs font-medium text-ok-text transition-colors hover:bg-ok-soft-hover"
                     >
-                      {isActive ? "Cancel" : "+ Add"}
+                      + Add
                     </button>
                   )}
                 </div>
@@ -190,80 +330,6 @@ export function SavingsGoalsWidget() {
                 )}
               </div>
               </div>{/* end goal details */}
-              </div>{/* end flex row */}
-
-              {/* Inline fund form — full width, outside the ring+details flex row */}
-              {isActive && (
-                <div className="rounded-xl p-3 space-y-2.5 max-w-lg" style={{ background: 'var(--surface-secondary)' }}>
-                  {/* Row 1: input (left) + toggle (right) */}
-                  <div className="flex items-center gap-2">
-                    <div className="relative flex-1 min-w-0">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm" style={{ color: 'var(--text-muted)' }}>{symbol}</span>
-                      <input
-                        type="number"
-                        min="1"
-                        value={fundAmount}
-                        onChange={(e) => setFundAmount(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") handleFund();
-                          if (e.key === "Escape") handleCancel();
-                        }}
-                        autoFocus
-                        placeholder="Enter amount"
-                        className="form-input w-full"
-                        style={{ fontSize: '0.875rem', minHeight: '2.25rem', paddingLeft: '1.75rem', borderRadius: '0.625rem' }}
-                      />
-                    </div>
-                    <div className="flex shrink-0 overflow-hidden rounded-lg" style={{ border: '1px solid var(--border)' }}>
-                      <button
-                        onClick={() => setFundMode("add")}
-                        title="Add funds"
-                        className={`flex items-center justify-center h-9 w-9 text-xs font-medium transition-colors ${
-                          fundMode === "add"
-                            ? "bg-ok-soft text-ok-text"
-                            : ""
-                        }`}
-                        style={fundMode !== "add" ? { color: 'var(--text-muted)' } : undefined}
-                        onMouseEnter={e => { if (fundMode !== 'add') e.currentTarget.style.background = 'var(--surface-hover)'; }}
-                        onMouseLeave={e => { if (fundMode !== 'add') e.currentTarget.style.background = ''; }}
-                      >
-                        <TrendingUp size={14} />
-                      </button>
-                      <button
-                        onClick={() => setFundMode("subtract")}
-                        title="Remove funds"
-                        className={`flex items-center justify-center h-9 w-9 text-xs font-medium transition-colors ${
-                          fundMode === "subtract"
-                            ? "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400"
-                            : ""
-                        }`}
-                        style={fundMode !== "subtract" ? { color: 'var(--text-muted)' } : undefined}
-                        onMouseEnter={e => { if (fundMode !== 'subtract') e.currentTarget.style.background = 'var(--surface-hover)'; }}
-                        onMouseLeave={e => { if (fundMode !== 'subtract') e.currentTarget.style.background = ''; }}
-                      >
-                        <Minus size={14} />
-                      </button>
-                    </div>
-                  </div>
-                  {/* Row 2: action buttons */}
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={handleFund}
-                      disabled={!fundAmount || parseFloat(fundAmount) <= 0}
-                      className="flex-1 rounded-lg bg-ok py-2 text-xs font-semibold text-white transition-colors hover:bg-ok-hover disabled:opacity-40"
-                    >
-                      {fundMode === "add" ? "Add Funds" : "Remove Funds"}
-                    </button>
-                    <button
-                      onClick={handleCancel}
-                      className="rounded-lg px-4 py-2 text-xs font-medium transition-colors"
-                      style={{ color: 'var(--text-secondary)', background: 'var(--surface)', border: '1px solid var(--border)' }}
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </div>
-              )}
             </div>
           );
         })}

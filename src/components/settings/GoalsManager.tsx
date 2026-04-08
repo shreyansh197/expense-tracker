@@ -304,7 +304,7 @@ export function GoalsManager() {
 
                 {/* Add/Subtract Funds inline */}
                 {fundGoalId === g.id && (
-                  <div className="mb-3 rounded-xl p-3 space-y-2.5 max-w-lg" style={{ background: 'var(--surface-secondary)' }}>
+                  <div className="mb-3 rounded-xl p-3 space-y-2.5" style={{ background: 'var(--surface-secondary)' }}>
                     {/* Row 1: input (left) + toggle (right) */}
                     <div className="flex items-center gap-2">
                       <div className="relative flex-1 min-w-0">
