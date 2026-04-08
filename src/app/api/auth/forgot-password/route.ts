@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/server/prisma";
 import { signPasswordResetToken, hashIp } from "@/lib/server/tokens";
+import { sendPasswordResetEmail } from "@/lib/server/email";
 import { forgotPasswordSchema } from "@/lib/validators";
 import { rateLimit } from "@/lib/server/rateLimit";
 
@@ -52,9 +53,12 @@ export async function POST(req: NextRequest) {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? `${req.nextUrl.protocol}//${req.nextUrl.host}`;
   const resetLink = `${appUrl}/auth/reset-password?token=${encodeURIComponent(resetToken)}`;
 
-  // TODO: Integrate your email service here to send the reset link.
-  // For now, the link is logged to the server console.
-  console.log(`[Password Reset] Link for ${email}: ${resetLink}`);
+  try {
+    await sendPasswordResetEmail(email, resetLink);
+  } catch (err) {
+    console.error("[Password Reset] Email send failed:", err);
+    // Still return success to prevent email enumeration
+  }
 
   return successResponse;
 }

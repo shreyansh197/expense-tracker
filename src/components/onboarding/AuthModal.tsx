@@ -480,9 +480,8 @@ export function AuthModal({
 
         {forgotSent ? (
           <div className="space-y-4">
-            <div className="flex items-start gap-2.5 rounded-xl bg-emerald-50 p-3.5 text-sm text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/40">
-              <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
-              If an account exists for <strong>{email}</strong>, you&apos;ll receive an email with a reset link shortly.
+            <div className="rounded-xl bg-emerald-50 p-4 text-sm text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/40 text-center leading-relaxed">
+              If an account exists for <strong className="break-all">{email}</strong>, you&apos;ll receive an email with a reset link shortly.
             </div>
             <button
               onClick={() => { setMode("login"); setForgotSent(false); setError(""); }}
