@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { TrendingUp, Minus, ChevronRight, X } from "lucide-react";
+import { TrendingUp, Minus, ChevronRight } from "lucide-react";
 import { IconGoals } from "@/components/ui/icons";
 import Link from "next/link";
 import { useSettings } from "@/hooks/useSettings";
@@ -109,7 +109,8 @@ export function SavingsGoalsWidget() {
           const isActive = activeGoalId === g.id;
 
           return (
-            <div key={g.id} className="flex items-start gap-3">
+            <div key={g.id} className="space-y-1.5">
+              <div className="flex items-start gap-3">
               {/* Circular progress ring (SVG) */}
               <svg className="shrink-0 mt-1" width="40" height="40" viewBox="0 0 40 40" aria-hidden>
                 <circle cx="20" cy="20" r="17" fill="none" stroke="var(--surface-secondary)" strokeWidth="4" />
@@ -188,8 +189,10 @@ export function SavingsGoalsWidget() {
                   </span>
                 )}
               </div>
+              </div>{/* end goal details */}
+              </div>{/* end flex row */}
 
-              {/* Inline fund form */}
+              {/* Inline fund form — full width, outside the ring+details flex row */}
               {isActive && (
                 <div className="rounded-xl p-3 space-y-2.5" style={{ background: 'var(--surface-secondary)' }}>
                   {/* Row 1: toggle + input */}
@@ -261,7 +264,6 @@ export function SavingsGoalsWidget() {
                   </div>
                 </div>
               )}
-              </div>{/* end goal details */}
             </div>
           );
         })}
