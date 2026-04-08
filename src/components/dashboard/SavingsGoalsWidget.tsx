@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { TrendingUp, Minus, ChevronRight, X } from "lucide-react";
 import { m, AnimatePresence } from "framer-motion";
 import { IconGoals } from "@/components/ui/icons";
@@ -81,7 +82,8 @@ export function SavingsGoalsWidget() {
 
   return (
     <div className="card relative overflow-hidden p-5">
-      {/* Fund Modal */}
+      {/* Fund Modal — portaled to body to escape overflow-hidden */}
+      {createPortal(
       <AnimatePresence>
         {activeGoalId && activeGoal && (
           <m.div
@@ -206,7 +208,9 @@ export function SavingsGoalsWidget() {
             </m.div>
           </m.div>
         )}
-      </AnimatePresence>
+      </AnimatePresence>,
+      document.body,
+      )}
       {/* BuilderCharacter — growth archetype for savings (density: 1 char + 1 art max) */}
       <div className="pointer-events-none absolute right-2 top-6 opacity-25 sm:opacity-40 scale-75 sm:scale-100 origin-top-right">
         <BuilderCharacter size={72} />
