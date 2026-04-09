@@ -28,7 +28,7 @@ import { useAuth } from "@/components/providers/AuthProvider";
 const SP_BG   = "linear-gradient(135deg, #0a0f1e 0%, #0d1340 45%, #130a2e 100%)";
 const SP_CYAN = "#22d3ee";
 const SP_VIOLET = "#a78bfa";
-const SP_INDIGO = "#2EC4B6";
+const SP_INDIGO = "var(--primary)";
 
 /* ── Google G color-mark SVG ──────────────────────────────── */
 function GoogleIcon({ className }: { className?: string }) {
@@ -496,8 +496,8 @@ export function AuthModal({
               onClick={() => { setMode("login"); setForgotSent(false); setError(""); }}
               className="w-full rounded-xl py-3.5 text-base font-semibold text-white transition-all hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2"
               style={{
-                background: "linear-gradient(135deg, #2EC4B6 0%, #26a69a 50%, #4C5CFF 100%)",
-                boxShadow: "0 6px 20px rgba(46,196,182,0.35)",
+                background: "linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 50%, var(--accent) 100%)",
+                boxShadow: "0 6px 20px color-mix(in srgb, var(--primary) 35%, transparent)",
               }}
             >
               Back to Sign In
@@ -534,8 +534,8 @@ export function AuthModal({
               disabled={loading}
               className="w-full rounded-xl py-3.5 text-base font-semibold text-white transition-all hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 flex items-center justify-center gap-2"
               style={{
-                background: "linear-gradient(135deg, #2EC4B6 0%, #26a69a 50%, #4C5CFF 100%)",
-                boxShadow: "0 6px 20px rgba(46,196,182,0.35)",
+                background: "linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 50%, var(--accent) 100%)",
+                boxShadow: "0 6px 20px color-mix(in srgb, var(--primary) 35%, transparent)",
               }}
             >
               {loading && <Loader2 className="h-4 w-4 animate-spin" />}
@@ -593,7 +593,11 @@ export function AuthModal({
           <button
             onClick={handleVerify2FA}
             disabled={totpCode.length !== 6 || loading}
-            className="w-full rounded-2xl bg-gradient-to-r from-[#2EC4B6] to-[#4C5CFF] py-3.5 text-base font-semibold text-white shadow-lg shadow-[#2EC4B6]/25 hover:shadow-xl hover:shadow-[#2EC4B6]/40 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 transition-all flex items-center justify-center gap-2 dark:from-[#3B82F6] dark:to-[#6366F1] dark:shadow-blue-900/25 dark:hover:shadow-blue-900/40"
+            className="w-full rounded-2xl py-3.5 text-base font-semibold text-white hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 transition-all flex items-center justify-center gap-2"
+            style={{
+              background: "linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%)",
+              boxShadow: "0 4px 14px color-mix(in srgb, var(--primary) 25%, transparent)",
+            }}
           >
             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Shield className="h-4 w-4" />}
             Verify &amp; Sign In
@@ -613,7 +617,7 @@ export function AuthModal({
     return (
       <AuthPage>
         <div className="mb-1 flex h-11 w-11 items-center justify-center rounded-2xl bg-[#e6f9f7] dark:bg-[rgba(96,165,250,0.15)] ring-1 ring-[#b2ece6] dark:ring-[#3B82F6]/40">
-          <Sparkles className="h-5 w-5 text-[#2EC4B6] dark:text-[#60A5FA]" />
+          <Sparkles className="h-5 w-5" style={{ color: 'var(--primary)' }} />
         </div>
         <h2 className="mt-3 text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
           Set your budget
@@ -641,7 +645,11 @@ export function AuthModal({
 
         <button
           onClick={handleSalarySubmit}
-          className="w-full rounded-2xl bg-gradient-to-r from-[#2EC4B6] to-[#4C5CFF] py-3.5 text-base font-semibold text-white shadow-lg shadow-[#2EC4B6]/25 hover:shadow-xl hover:shadow-[#2EC4B6]/40 hover:-translate-y-0.5 active:translate-y-0 transition-all flex items-center justify-center gap-2 dark:from-[#3B82F6] dark:to-[#6366F1] dark:shadow-blue-900/25 dark:hover:shadow-blue-900/40"
+          className="w-full rounded-2xl py-3.5 text-base font-semibold text-white hover:-translate-y-0.5 active:translate-y-0 transition-all flex items-center justify-center gap-2"
+          style={{
+            background: "linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%)",
+            boxShadow: "0 4px 14px color-mix(in srgb, var(--primary) 25%, transparent)",
+          }}
         >
           {salary ? (
             <><ChevronRight className="h-4 w-4" /> Get Started</>
@@ -677,7 +685,7 @@ export function AuthModal({
           {/* Google — prominent secondary */}
           <button
             onClick={() => { window.location.href = "/api/auth/google"; }}
-            className="group relative flex w-full items-center gap-3.5 rounded-2xl border-2 border-slate-200 bg-white px-4 py-3.5 text-left transition-all hover:border-slate-300 hover:shadow-lg hover:shadow-slate-100 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2EC4B6] dark:focus-visible:ring-[#3B82F6] dark:border-slate-700 dark:bg-slate-800/60 dark:hover:border-slate-600 dark:hover:shadow-none"
+            className="group relative flex w-full items-center gap-3.5 rounded-2xl border-2 border-slate-200 bg-white px-4 py-3.5 text-left transition-all hover:border-slate-300 hover:shadow-lg hover:shadow-slate-100 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] dark:border-slate-700 dark:bg-slate-800/60 dark:hover:border-slate-600 dark:hover:shadow-none"
             style={{ animation: "sp-card-in 0.4s ease both", animationDelay: "0.05s" }}
           >
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white shadow-sm border border-slate-100 dark:bg-slate-900 dark:border-slate-700">
@@ -700,10 +708,10 @@ export function AuthModal({
           {/* Create Account — primary CTA */}
           <button
             onClick={() => setMode("register")}
-            className="group relative flex w-full items-center gap-4 rounded-2xl p-4 text-left text-white transition-all hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2EC4B6] dark:focus-visible:ring-[#3B82F6] overflow-hidden"
+            className="group relative flex w-full items-center gap-4 rounded-2xl p-4 text-left text-white transition-all hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] overflow-hidden"
             style={{
-              background: "linear-gradient(135deg, #2EC4B6 0%, #26a69a 50%, #4C5CFF 100%)",
-              boxShadow: "0 8px 24px rgba(46,196,182,0.35), 0 2px 8px rgba(76,92,255,0.2)",
+              background: "linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 50%, var(--accent) 100%)",
+              boxShadow: "0 8px 24px color-mix(in srgb, var(--primary) 35%, transparent), 0 2px 8px color-mix(in srgb, var(--accent) 20%, transparent)",
               animation: "sp-card-in 0.4s ease both",
               animationDelay: "0.12s",
             }}
@@ -725,7 +733,7 @@ export function AuthModal({
           {/* Sign In — secondary */}
           <button
             onClick={() => setMode("login")}
-            className="group relative flex w-full items-center gap-4 rounded-2xl border-2 border-slate-200 bg-white px-4 py-3.5 text-left transition-all hover:border-[#b2ece6] hover:shadow-md hover:shadow-[#e6f9f7] hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2EC4B6] dark:border-slate-700 dark:bg-slate-800/60 dark:hover:border-[#3B82F6]/40 dark:hover:shadow-none dark:focus-visible:ring-[#3B82F6]"
+            className="group relative flex w-full items-center gap-4 rounded-2xl border-2 border-slate-200 bg-white px-4 py-3.5 text-left transition-all hover:border-[color-mix(in_srgb,var(--primary)_30%,white)] hover:shadow-md hover:shadow-[color-mix(in_srgb,var(--primary)_8%,white)] hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] dark:border-slate-700 dark:bg-slate-800/60 dark:hover:border-[color-mix(in_srgb,var(--primary)_40%,transparent)] dark:hover:shadow-none"
             style={{ animation: "sp-card-in 0.4s ease both", animationDelay: "0.19s" }}
           >
             <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#eef0ff] transition-colors group-hover:bg-[#dde0ff] dark:bg-[rgba(123,135,255,0.12)] dark:group-hover:bg-[rgba(123,135,255,0.2)]">
@@ -735,7 +743,7 @@ export function AuthModal({
               <div className="text-base font-semibold text-slate-900 dark:text-white leading-tight">Sign In</div>
               <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Access your existing account</div>
             </div>
-            <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-[#2EC4B6] group-hover:translate-x-0.5 transition-all dark:text-slate-600 dark:group-hover:text-[#60A5FA]" />
+            <ChevronRight className="h-4 w-4 text-slate-300 group-hover:translate-x-0.5 transition-all dark:text-slate-600" style={{ '--tw-group-hover-color': 'var(--primary)' } as React.CSSProperties} />
           </button>
         </div>
       </AuthPage>
@@ -822,7 +830,8 @@ export function AuthModal({
             <button
               type="button"
               onClick={() => { setMode("forgot"); setError(""); setForgotSent(false); }}
-              className="text-xs font-medium text-[#2EC4B6] dark:text-[#60A5FA] hover:underline"
+              className="text-xs font-medium hover:underline"
+              style={{ color: 'var(--primary)' }}
             >
               Forgot password?
             </button>
@@ -841,8 +850,8 @@ export function AuthModal({
           disabled={loading}
           className="w-full rounded-xl py-3.5 text-base font-semibold text-white transition-all hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 flex items-center justify-center gap-2"
           style={{
-            background: "linear-gradient(135deg, #2EC4B6 0%, #26a69a 50%, #4C5CFF 100%)",
-            boxShadow: "0 6px 20px rgba(46,196,182,0.35)",
+            background: "linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 50%, var(--accent) 100%)",
+            boxShadow: "0 6px 20px color-mix(in srgb, var(--primary) 35%, transparent)",
           }}
         >
           {loading && <Loader2 className="h-4 w-4 animate-spin" />}
@@ -854,7 +863,7 @@ export function AuthModal({
             <>
               Already have an account?{" "}
               <button type="button" onClick={() => { setMode("login"); setError(""); }}
-                className="font-medium text-[#2EC4B6] dark:text-[#60A5FA] hover:underline">
+                className="font-medium hover:underline" style={{ color: 'var(--primary)' }}>
                 Sign in
               </button>
             </>
@@ -862,7 +871,7 @@ export function AuthModal({
             <>
               Don&apos;t have an account?{" "}
               <button type="button" onClick={() => { setMode("register"); setError(""); }}
-                className="font-medium text-[#2EC4B6] dark:text-[#60A5FA] hover:underline">
+                className="font-medium hover:underline" style={{ color: 'var(--primary)' }}>
                 Create one
               </button>
             </>

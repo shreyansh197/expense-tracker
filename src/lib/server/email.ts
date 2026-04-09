@@ -22,14 +22,14 @@ export async function sendPasswordResetEmail(
           We received a request to reset your password. Click the button below to choose a new one. This link expires in 15 minutes.
         </p>
         <div style="text-align: center; margin: 32px 0;">
-          <a href="${resetLink}" style="display: inline-block; background: linear-gradient(135deg, #2EC4B6, #4C5CFF); color: #fff; font-size: 15px; font-weight: 600; padding: 14px 32px; border-radius: 12px; text-decoration: none;">
+          <a href="${resetLink}" style="display: inline-block; background: linear-gradient(135deg, #0D9488, #7C3AED); color: #fff; font-size: 15px; font-weight: 600; padding: 14px 32px; border-radius: 12px; text-decoration: none;">
             Reset Password
           </a>
         </div>
         <p style="font-size: 13px; color: #94a3b8; line-height: 1.6; margin: 0 0 8px;">
           If the button doesn't work, copy and paste this link into your browser:
         </p>
-        <p style="font-size: 13px; color: #2EC4B6; word-break: break-all; margin: 0 0 32px;">
+        <p style="font-size: 13px; color: #0D9488; word-break: break-all; margin: 0 0 32px;">
           ${resetLink}
         </p>
         <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 24px 0;" />

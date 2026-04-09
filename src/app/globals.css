@@ -497,6 +497,7 @@ button, a {
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.01em;
+  font-feature-settings: "tnum";
 }
 .text-hero-amount {
   font-size: 2.5rem;
@@ -533,7 +534,7 @@ button, a {
   border-radius: 0.625rem;
 }
 .segmented-control button {
-  padding: 4px 12px;
+  padding: 6px 16px;
   font-size: 0.75rem;
   font-weight: 500;
   border-radius: 0.5rem;
@@ -543,6 +544,7 @@ button, a {
 .segmented-control button[data-active="true"] {
   background: var(--surface);
   color: var(--text-primary);
+  font-weight: 600;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 .segmented-control button:not([data-active="true"]):hover {
@@ -592,6 +594,9 @@ button, a {
   background-repeat: no-repeat;
   background-position: right 0.75rem center;
   padding-right: 2rem;
+}
+.dark .form-select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23cbd5e1' d='M2.5 4.5L6 8l3.5-3.5'/%3E%3C/svg%3E");
 }
 .form-select:focus {
   border-color: var(--accent);

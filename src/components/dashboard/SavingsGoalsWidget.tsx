@@ -188,10 +188,10 @@ export function SavingsGoalsWidget() {
                   className="flex-1 rounded-xl py-2.5 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-40 disabled:hover:translate-y-0"
                   style={{
                     background: fundMode === "add"
-                      ? "linear-gradient(135deg, #2EC4B6 0%, #26a69a 100%)"
+                      ? "linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%)"
                       : "linear-gradient(135deg, #ef4444 0%, #dc2626 100%)",
                     boxShadow: fundMode === "add"
-                      ? "0 4px 12px rgba(46,196,182,0.3)"
+                      ? "0 4px 12px color-mix(in srgb, var(--primary) 30%, transparent)"
                       : "0 4px 12px rgba(239,68,68,0.3)",
                   }}
                 >

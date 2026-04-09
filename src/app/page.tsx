@@ -363,10 +363,10 @@ function DashboardContent() {
 
           {user?.name && (
             <div className="mb-3">
-              <p className="text-xs sm:text-xs font-medium tracking-wide uppercase" style={{ color: 'var(--text-muted)' }}>
+              <p className="text-xs sm:text-xs font-medium tracking-wide" style={{ color: 'var(--text-muted)' }}>
                 {new Date().getHours() < 12 ? "Good morning" : new Date().getHours() < 17 ? "Good afternoon" : "Good evening"}
               </p>
-              <p className="text-xl sm:text-2xl font-normal tracking-tight" style={{ fontFamily: 'var(--font-display), Georgia, serif', color: 'var(--text-primary)' }}>
+              <p className="text-xl sm:text-2xl font-semibold tracking-tight" style={{ color: 'var(--text-primary)' }}>
                 {user.name.split(" ")[0]}
               </p>
               <p className="mt-0.5 text-xs sm:text-xs tracking-wide" style={{ color: 'var(--text-tertiary)' }}>
