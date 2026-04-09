@@ -1,5 +1,5 @@
 /**
- * BuilderCharacter — Abstract human form interacting with ascending growth shapes.
+ * BuilderCharacter — Abstract ascending bar chart with growth trend.
  *
  * Usage: Savings & Goals sections, Business page headers.
  * NEVER place in: transaction lists, charts, forms, error states, inline components.
@@ -26,74 +26,45 @@ export function BuilderCharacter({ size = 120, className = "" }: Props) {
       aria-hidden="true"
       className={className}
     >
-      {/* Body — pill, slight lean toward growth shapes */}
+      {/* Bar 1 — shortest */}
+      <rect x="14" y="94" width="16" height="24" rx="5" fill="var(--primary)" opacity="0.10" />
+      {/* Bar 2 */}
+      <rect x="36" y="76" width="16" height="42" rx="5" fill="var(--primary)" opacity="0.13" />
+      {/* Bar 3 */}
+      <rect x="58" y="58" width="16" height="60" rx="5" fill="var(--accent)" opacity="0.14" />
+      {/* Bar 4 — tallest */}
       <rect
-        x="24"
-        y="52"
-        width="44"
-        height="60"
-        rx="22"
-        fill="var(--primary)"
-        opacity="0.13"
-        transform="rotate(-3 46 82)"
-      />
-      {/* Head — circle */}
-      <circle
-        cx="48"
-        cy="36"
-        r="18"
+        x="80"
+        y="38"
+        width="16"
+        height="80"
+        rx="5"
         fill="var(--primary)"
         opacity="0.16"
-      />
-      {/* Reaching arm — arc toward growth blocks */}
-      <path
-        d="M66 66 Q82 54 94 58"
-        stroke="var(--primary)"
-        strokeWidth="2.5"
-        strokeLinecap="round"
-        fill="none"
-        opacity="0.12"
-      />
-      {/* Ascending growth block 1 — short */}
-      <rect
-        x="86"
-        y="90"
-        width="14"
-        height="22"
-        rx="5"
-        fill="var(--success)"
-        opacity="0.14"
-      />
-      {/* Ascending growth block 2 — medium */}
-      <rect
-        x="86"
-        y="68"
-        width="14"
-        height="44"
-        rx="5"
-        fill="var(--success)"
-        opacity="0.11"
-      />
-      {/* Ascending growth block 3 — tall */}
-      <rect
-        x="104"
-        y="50"
-        width="14"
-        height="62"
-        rx="5"
-        fill="var(--primary)"
-        opacity="0.10"
         className="animate-float"
         style={{ animationDelay: "0.8s" }}
       />
-      {/* Subtle ground shadow */}
-      <ellipse
-        cx="60"
-        cy="120"
-        rx="32"
-        ry="4"
-        fill="var(--text-muted)"
-        opacity="0.08"
+      {/* Growth trend line connecting bar tops */}
+      <path
+        d="M22 92 L44 74 L66 56 L88 36"
+        stroke="var(--accent)"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        fill="none"
+        opacity="0.16"
+      />
+      {/* Trend node on highest bar */}
+      <circle cx="88" cy="36" r="4" fill="var(--accent)" opacity="0.22" />
+      {/* Upward arrow hint */}
+      <path
+        d="M100 28 L106 18 L112 28"
+        stroke="var(--accent)"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        fill="none"
+        opacity="0.14"
       />
     </svg>
   );

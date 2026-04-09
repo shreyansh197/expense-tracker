@@ -1,5 +1,5 @@
 /**
- * ObserverCharacter — Calm presence with floating abstract data shapes.
+ * ObserverCharacter — Abstract concentric data-pulse rings with floating dots.
  *
  * Usage: Dashboard greeting headers, empty states, onboarding.
  * NEVER place in: transaction lists, charts, forms, error states, inline components.
@@ -26,60 +26,74 @@ export function ObserverCharacter({ size = 120, className = "" }: Props) {
       aria-hidden="true"
       className={className}
     >
-      {/* Body — pill / rounded rectangle */}
-      <rect
-        x="36"
-        y="52"
-        width="48"
-        height="62"
-        rx="24"
-        fill="var(--primary)"
-        opacity="0.13"
-      />
-      {/* Head — circle */}
+      {/* Outer pulse ring */}
       <circle
         cx="60"
-        cy="36"
-        r="20"
-        fill="var(--primary)"
-        opacity="0.16"
-      />
-      {/* Shoulder line — soft arc connecting head to body */}
-      <path
-        d="M40 54 Q60 44 80 54"
+        cy="62"
+        r="52"
         stroke="var(--primary)"
-        strokeWidth="2.5"
-        strokeLinecap="round"
+        strokeWidth="1.5"
         fill="none"
-        opacity="0.10"
+        opacity="0.08"
       />
-      {/* Floating data shape 1 — small circle (stability) */}
+      {/* Middle ring */}
       <circle
-        cx="98"
-        cy="28"
-        r="6"
-        fill="var(--secondary)"
-        opacity="0.14"
+        cx="60"
+        cy="62"
+        r="38"
+        stroke="var(--primary)"
+        strokeWidth="1.5"
+        fill="none"
+        opacity="0.12"
+      />
+      {/* Inner filled ring */}
+      <circle
+        cx="60"
+        cy="62"
+        r="22"
+        fill="var(--primary)"
+        opacity="0.08"
+      />
+      {/* Core dot */}
+      <circle cx="60" cy="62" r="5" fill="var(--primary)" opacity="0.22" />
+      {/* Data dot 1 — on outer ring, top-right */}
+      <circle
+        cx="96"
+        cy="32"
+        r="4.5"
+        fill="var(--accent)"
+        opacity="0.20"
         className="animate-float"
         style={{ animationDelay: "0s" }}
       />
-      {/* Floating data shape 2 — rounded triangle (guidance) */}
-      <path
-        d="M16 62 L28 44 L40 62 Z"
-        rx="4"
+      {/* Data dot 2 — on middle ring, left */}
+      <circle
+        cx="26"
+        cy="76"
+        r="3.5"
         fill="var(--primary)"
-        opacity="0.10"
+        opacity="0.18"
         className="animate-float"
-        style={{ animationDelay: "1.5s" }}
+        style={{ animationDelay: "1.2s" }}
       />
-      {/* Subtle ground shadow */}
-      <ellipse
-        cx="60"
-        cy="120"
-        rx="28"
-        ry="4"
-        fill="var(--text-muted)"
-        opacity="0.08"
+      {/* Data dot 3 — on outer ring, bottom */}
+      <circle
+        cx="78"
+        cy="108"
+        r="3"
+        fill="var(--accent)"
+        opacity="0.14"
+        className="animate-float"
+        style={{ animationDelay: "2.4s" }}
+      />
+      {/* Connecting arc segment — partial ring highlight */}
+      <path
+        d="M88 30 A52 52 0 0 1 110 68"
+        stroke="var(--accent)"
+        strokeWidth="2"
+        strokeLinecap="round"
+        fill="none"
+        opacity="0.12"
       />
     </svg>
   );

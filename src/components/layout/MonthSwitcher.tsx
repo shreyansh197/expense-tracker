@@ -54,7 +54,7 @@ export function MonthSwitcher() {
     <div className="flex items-center gap-1">
       <button
         onClick={handlePrev}
-        className="flex h-9 w-9 items-center justify-center rounded-xl transition-all duration-200 hover:scale-110 hover:bg-[var(--surface-secondary)] active:scale-95"
+        className="flex h-11 w-11 items-center justify-center rounded-xl transition-all duration-200 hover:scale-110 hover:bg-[var(--surface-secondary)] active:scale-95"
         style={{ color: 'var(--text-tertiary)' }}
         aria-label="Previous month"
       >
@@ -75,7 +75,7 @@ export function MonthSwitcher() {
       </div>
       <button
         onClick={handleNext}
-        className="flex h-9 w-9 items-center justify-center rounded-xl transition-all duration-200 hover:scale-110 hover:bg-[var(--surface-secondary)] active:scale-95"
+        className="flex h-11 w-11 items-center justify-center rounded-xl transition-all duration-200 hover:scale-110 hover:bg-[var(--surface-secondary)] active:scale-95"
         style={{ color: 'var(--text-tertiary)' }}
         aria-label="Next month"
       >

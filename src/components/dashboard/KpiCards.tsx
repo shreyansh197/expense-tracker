@@ -157,15 +157,15 @@ export function KpiCards({
         )}
       </m.div>
 
-      {/* ── SECONDARY: Supporting Metrics (compact inline) ── */}
+      {/* ── SECONDARY: Metric Grid (2×2) ── */}
       <m.div
-        className="grid grid-cols-1 gap-5 sm:grid-cols-2 md:grid-cols-3"
+        className="grid grid-cols-2 gap-3"
         variants={{ hidden: { opacity: 0, y: 8 }, visible: { opacity: 1, y: 0, transition: { duration: duration.emphasis, delay: 0.1, ease: ease.out } } }}
       >
         <div className="rounded-xl p-3 sm:p-3.5" style={{ background: 'var(--surface-secondary)' }}>
           <p className="text-meta font-medium">Daily Pace</p>
           <p className={cn(
-            "text-amount mt-1 text-base sm:text-lg font-bold",
+            "text-amount-md mt-1",
             paceToStayUnder <= 0 ? "text-red-600 dark:text-red-400"
               : paceExceeded ? "text-amber-600 dark:text-amber-400" : ""
           )} style={paceToStayUnder > 0 && !paceExceeded ? { color: 'var(--text-primary)' } : undefined}>
@@ -176,10 +176,10 @@ export function KpiCards({
           </p>
         </div>
 
-        <div className="relative rounded-xl p-3 sm:p-3.5" style={{ background: 'var(--surface-secondary)' }}>
+        <div className="rounded-xl p-3 sm:p-3.5" style={{ background: 'var(--surface-secondary)' }}>
           <p className="text-meta font-medium">Saving</p>
           <p className={cn(
-            "text-amount mt-1 text-base sm:text-lg font-bold",
+            "text-amount-md mt-1",
             savingsRate < 0 ? "text-red-600 dark:text-red-400"
               : savingsRate < 20 ? "text-amber-600 dark:text-amber-400"
               : "text-emerald-600 dark:text-emerald-400"
@@ -207,7 +207,7 @@ export function KpiCards({
             )}
           </div>
           <p className={cn(
-            "text-amount mt-1 text-base sm:text-lg font-bold",
+            "text-amount-md mt-1",
             forecastOverBudget ? "text-red-700 dark:text-red-400"
               : forecastWarning ? "text-amber-700 dark:text-amber-400" : ""
           )} style={!forecastOverBudget && !forecastWarning ? { color: 'var(--text-primary)' } : undefined}>
@@ -219,6 +219,19 @@ export function KpiCards({
                   ? `${formatCurrency(Math.abs(forecast.projectedRemaining))} above your rhythm`
                   : `${formatCurrency(forecast.projectedRemaining)} under budget`)
               : forecast.confidence === "low" ? "Not enough data yet" : "\u00A0"}
+          </p>
+        </div>
+
+        <div className="rounded-xl p-3 sm:p-3.5" style={{ background: 'var(--surface-secondary)' }}>
+          <div className="flex items-center gap-1 text-meta font-medium">
+            <Clock size={12} />
+            <span>Days Left</span>
+          </div>
+          <p className="text-amount-md mt-1" style={{ color: 'var(--text-primary)' }}>
+            {daysRemaining}
+          </p>
+          <p className="mt-0.5 text-xs" style={{ color: 'var(--text-tertiary)' }}>
+            {daysRemaining === 0 ? "Month complete" : paceToStayUnder > 0 ? `\u2264 ${formatCurrency(paceToStayUnder)}/d to stay on track` : "Set budget for targets"}
           </p>
         </div>
       </m.div>
@@ -246,7 +259,7 @@ export function KpiCards({
               <div className="grid grid-cols-2 gap-2 sm:gap-3 pt-1">
                 <div className="rounded-xl p-3" style={{ background: 'var(--surface-secondary)' }}>
                   <p className="text-meta font-medium">Budget Used</p>
-                  <p className="text-amount mt-1 text-base font-bold" style={{ color: 'var(--text-primary)' }}>
+                  <p className="text-amount-md mt-1" style={{ color: 'var(--text-primary)' }}>
                     {budgetUsedPercent}%
                   </p>
                   <p className="mt-0.5 text-xs" style={{ color: 'var(--text-tertiary)' }}>
@@ -266,7 +279,7 @@ export function KpiCards({
                       </ul>
                     </InfoTooltip>
                   </div>
-                  <p className="text-amount mt-1 text-base font-bold" style={{ color: 'var(--text-primary)' }}>
+                  <p className="text-amount-md mt-1" style={{ color: 'var(--text-primary)' }}>
                     {forecast.projectedTotal > 0 ? formatCurrency(forecast.projectedTotal) : "\u2014"}
                   </p>
                   <p className="mt-0.5 text-xs" style={{ color: 'var(--text-tertiary)' }}>

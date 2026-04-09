@@ -29,7 +29,17 @@
   --text-primary: #1a2332;
   --text-secondary: #4b5e6d;
   --text-tertiary: #6B7B8B;
-  --text-muted: #c2ced6;
+  --text-muted: #8B9CAB;
+  /* ── Radius scale ── */
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.25rem;
+  /* ── Icon sizes ── */
+  --icon-xs: 14px;
+  --icon-sm: 16px;
+  --icon-md: 20px;
+  --icon-lg: 24px;
   /* ── Primary (Brand — Teal) ── */
   --primary: #2EC4B6;
   --primary-soft: #e6f9f7;
@@ -46,6 +56,8 @@
   --cta: var(--accent);
   --cta-hover: #7C3AED;
   --cta-deep: #6D28D9;
+  /* ── Interactive (unified interactive color → accent) ── */
+  --interactive: var(--accent);
   /* ── Violet track (stays violet across themes) ── */
   --coral: #8B5CF6;
   --coral-soft: #EDE9FE;
@@ -87,11 +99,11 @@
   /* ── Quiet grouping surface ── */
   --surface-quiet: rgba(0, 0, 0, 0.015);
   /* ── Section zone washes (subtle tinted backgrounds) ── */
-  --section-teal: rgba(46, 196, 182, 0.035);
-  --section-indigo: rgba(99, 102, 241, 0.03);
-  --section-violet: rgba(139, 92, 246, 0.03);
-  --section-emerald: rgba(16, 185, 129, 0.03);
-  --section-mint: rgba(16, 185, 129, 0.03);
+  --section-teal: transparent;
+  --section-indigo: transparent;
+  --section-violet: transparent;
+  --section-emerald: transparent;
+  --section-mint: transparent;
   /* ── Accent card surfaces (themed tints) ── */
   --surface-accent-teal: #e6f9f7;
   --surface-accent-indigo: #eef0ff;
@@ -148,6 +160,8 @@
   --cta: var(--accent);
   --cta-hover: #8B5CF6;
   --cta-deep: #7C3AED;
+  /* ── Interactive (unified interactive color → accent) ── */
+  --interactive: var(--accent);
   /* ── Violet track (stays violet across themes) ── */
   --coral: #A78BFA;
   --coral-soft: rgba(167, 139, 250, 0.12);
@@ -188,12 +202,12 @@
   --category-fallback: #6B7280;
   /* ── Quiet grouping surface ── */
   --surface-quiet: rgba(255, 255, 255, 0.02);
-  /* ── Section zone washes (subtle tinted backgrounds) ── */
-  --section-teal: rgba(46, 196, 182, 0.045);
-  --section-indigo: rgba(99, 102, 241, 0.04);
-  --section-violet: rgba(139, 92, 246, 0.04);
-  --section-emerald: rgba(16, 185, 129, 0.04);
-  --section-mint: rgba(16, 185, 129, 0.04);
+  /* ── Section zone washes (neutralized — card shadows handle grouping) ── */
+  --section-teal: transparent;
+  --section-indigo: transparent;
+  --section-violet: transparent;
+  --section-emerald: transparent;
+  --section-mint: transparent;
   /* ── Accent card surfaces (themed tints) ── */
   --surface-accent-teal: rgba(96, 165, 250, 0.10);
   --surface-accent-indigo: rgba(129, 140, 248, 0.10);
@@ -255,6 +269,8 @@
   --color-err-soft: var(--danger-soft);
   /* Overlay */
   --color-overlay: var(--overlay);
+  /* Interactive */
+  --color-interactive: var(--interactive);
   /* Misc */
   --color-cat-fb: var(--category-fallback);
   /* Section zones */
@@ -486,6 +502,21 @@ button, a {
   font-weight: 800;
   line-height: 1.1;
   letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+  font-optical-sizing: auto;
+}
+.text-amount-lg {
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+.text-amount-md {
+  font-size: 1.125rem;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
   font-variant-numeric: tabular-nums;
 }
 

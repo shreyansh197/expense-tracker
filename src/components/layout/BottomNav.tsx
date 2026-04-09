@@ -90,8 +90,8 @@ export function BottomNav() {
         className="fixed bottom-0 left-0 right-0 z-30 border-t backdrop-blur-2xl lg:hidden"
         style={{
           paddingBottom: "env(safe-area-inset-bottom)",
-          background: 'linear-gradient(to top, color-mix(in srgb, var(--surface) 92%, transparent), color-mix(in srgb, var(--surface) 80%, transparent))',
-          borderColor: 'var(--border)',
+          background: 'linear-gradient(to top, color-mix(in srgb, var(--surface) 96%, transparent), color-mix(in srgb, var(--surface) 92%, transparent))',
+          borderColor: 'var(--border-subtle)',
         }}
       >
         <div

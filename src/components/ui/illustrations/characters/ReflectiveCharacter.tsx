@@ -1,5 +1,5 @@
 /**
- * ReflectiveCharacter — Abstract seated human form with soft awareness arc.
+ * ReflectiveCharacter — Abstract trend line with insight nodes.
  *
  * Usage: Analytics page headers, Settings headers, insight/summary sections.
  * NEVER place in: transaction lists, charts, forms, error states, inline components.
@@ -26,69 +26,53 @@ export function ReflectiveCharacter({ size = 120, className = "" }: Props) {
       aria-hidden="true"
       className={className}
     >
-      {/* Awareness arc — soft circle behind figure */}
-      <circle
-        cx="60"
-        cy="56"
-        r="40"
-        fill="var(--secondary)"
-        opacity="0.06"
-      />
-      {/* Second subtle arc ring */}
-      <circle
-        cx="60"
-        cy="56"
-        r="48"
-        stroke="var(--secondary)"
-        strokeWidth="1.5"
-        fill="none"
-        opacity="0.08"
-      />
-      {/* Body — seated posture, wider pill */}
+      {/* Subtle background field */}
       <rect
-        x="36"
-        y="56"
-        width="48"
-        height="40"
-        rx="20"
-        fill="var(--secondary)"
-        opacity="0.13"
+        x="8"
+        y="20"
+        width="104"
+        height="80"
+        rx="16"
+        fill="var(--accent)"
+        opacity="0.04"
       />
-      {/* Head — circle */}
-      <circle
-        cx="60"
-        cy="40"
-        r="18"
-        fill="var(--secondary)"
-        opacity="0.16"
-      />
-      {/* Gentle chin-rest gesture — small arc near head */}
+      {/* Grid lines — horizontal */}
+      <line x1="16" y1="40" x2="104" y2="40" stroke="var(--accent)" strokeWidth="1" opacity="0.06" />
+      <line x1="16" y1="60" x2="104" y2="60" stroke="var(--accent)" strokeWidth="1" opacity="0.06" />
+      <line x1="16" y1="80" x2="104" y2="80" stroke="var(--accent)" strokeWidth="1" opacity="0.06" />
+      {/* Trend line — smooth upward curve */}
       <path
-        d="M72 46 Q78 52 76 60"
-        stroke="var(--secondary)"
-        strokeWidth="2"
+        d="M18 82 C34 78, 42 68, 52 58 S72 36, 102 30"
+        stroke="var(--accent)"
+        strokeWidth="2.5"
         strokeLinecap="round"
         fill="none"
-        opacity="0.10"
+        opacity="0.18"
       />
-      {/* Floating insight dot */}
+      {/* Node 1 */}
+      <circle cx="18" cy="82" r="4" fill="var(--accent)" opacity="0.20" />
+      {/* Node 2 */}
       <circle
-        cx="28"
-        cy="36"
-        r="4"
+        cx="52"
+        cy="58"
+        r="4.5"
         fill="var(--primary)"
-        opacity="0.12"
+        opacity="0.22"
+        className="animate-float"
+        style={{ animationDelay: "0.6s" }}
+      />
+      {/* Node 3 — highlight node */}
+      <circle cx="102" cy="30" r="5" fill="var(--accent)" opacity="0.24" />
+      <circle cx="102" cy="30" r="10" fill="var(--accent)" opacity="0.06" />
+      {/* Insight dot — off-trend */}
+      <circle
+        cx="36"
+        cy="46"
+        r="3"
+        fill="var(--primary)"
+        opacity="0.14"
         className="animate-float"
         style={{ animationDelay: "2s" }}
-      />
-      {/* Subtle ground shadow */}
-      <ellipse
-        cx="60"
-        cy="104"
-        rx="26"
-        ry="3.5"
-        fill="var(--text-muted)"
-        opacity="0.08"
       />
     </svg>
   );

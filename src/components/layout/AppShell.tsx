@@ -81,7 +81,7 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
             <Sidebar />
             <main
               id="main-content"
-              className="flex-1 overflow-y-auto pb-20 lg:pb-0"
+              className="flex-1 overflow-y-auto pb-36 lg:pb-0"
               style={{ background: 'linear-gradient(180deg, var(--surface-secondary), transparent 200px)' }}
               onTouchStart={onTouchStart}
               onTouchEnd={onTouchEnd}

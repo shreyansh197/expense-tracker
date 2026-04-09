@@ -90,7 +90,7 @@ function CollapsibleSection({ id, title, children }: { id: string; title: string
         aria-expanded={open}
       >
         <span>{title}</span>
-        <ChevronDown size={14} className={cn("transition-transform duration-300", open && "rotate-180")} />
+        <ChevronDown size={18} className={cn("transition-transform duration-300", open && "rotate-180")} />
       </button>
       <div className={cn(
         "transition-all duration-300 ease-in-out lg:block",

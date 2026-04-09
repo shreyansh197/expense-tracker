@@ -358,7 +358,7 @@ export function ExpenseForm({
               role="radio"
               aria-checked={category === cat.id}
               className={cn(
-                "rounded-full px-3 py-1.5 text-xs font-medium transition-all",
+                "rounded-full px-3 py-2 sm:py-1.5 text-xs font-medium transition-all",
                 category === cat.id
                   ? "text-white shadow-sm"
                   : ""
@@ -417,7 +417,7 @@ export function ExpenseForm({
         <button
           type="button"
           onClick={() => setShowMore(true)}
-          className="flex items-center gap-1.5 self-start rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors"
+          className="flex items-center gap-1.5 self-start rounded-lg px-3 py-2 sm:py-1.5 text-xs font-medium transition-colors"
           style={{ background: 'var(--surface-secondary)', color: 'var(--text-secondary)' }}
         >
           <CalendarDays size={12} />

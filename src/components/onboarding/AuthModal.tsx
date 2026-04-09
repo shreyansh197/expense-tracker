@@ -15,6 +15,7 @@ import {
   TrendingUp,
   PieChart,
   Shield,
+  ShieldCheck,
   Smartphone,
   Eye,
   EyeOff,
@@ -290,6 +291,10 @@ function MobileAuthPage({ children }: { children: React.ReactNode }) {
           <p className="mt-4 text-center text-xs text-slate-400 dark:text-slate-600">
             By continuing, you agree to our Terms of Service.
           </p>
+          <div className="mt-3 flex items-center justify-center gap-4 text-slate-400 dark:text-slate-500">
+            <span className="flex items-center gap-1 text-[0.65rem]"><Lock size={10} /> 256-bit encrypted</span>
+            <span className="flex items-center gap-1 text-[0.65rem]"><ShieldCheck size={10} /> No credit card needed</span>
+          </div>
         </div>
       </div>
     </div>
@@ -318,6 +323,10 @@ function DesktopAuthPage({ children }: { children: React.ReactNode }) {
           <p className="mt-4 text-center text-xs" style={{ color: 'var(--text-tertiary)' }}>
             By continuing, you agree to our Terms of Service.
           </p>
+          <div className="mt-3 flex items-center justify-center gap-4" style={{ color: 'var(--text-muted)' }}>
+            <span className="flex items-center gap-1 text-[0.65rem]"><Lock size={10} /> 256-bit encrypted</span>
+            <span className="flex items-center gap-1 text-[0.65rem]"><ShieldCheck size={10} /> No credit card needed</span>
+          </div>
         </div>
       </div>
     </div>
