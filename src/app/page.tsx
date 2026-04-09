@@ -536,7 +536,7 @@ function DashboardContent() {
                       </m.div>
                     ) : (
                       <m.div key="daily" initial={{ opacity: 0, x: 8 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -8 }} transition={{ duration: 0.2 }}>
-                        <div className="min-h-[280px]">
+                        <div className="h-[320px]">
                           <DailyTrendChart
                             dailyTotals={dailyTotals}
                             stackedDailyTotals={stackedDailyTotals}
@@ -564,7 +564,7 @@ function DashboardContent() {
                 </RevealOnScroll>
                 <RevealOnScroll className="card flex flex-col p-5" delay={0.1}>
                   <h3 className="text-section-title mb-4">Daily Spending Trend</h3>
-                  <div className="flex-1 min-h-[280px]">
+                  <div className="h-[320px]">
                     <DailyTrendChart
                       dailyTotals={dailyTotals}
                       stackedDailyTotals={stackedDailyTotals}
