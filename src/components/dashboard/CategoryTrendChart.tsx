@@ -27,7 +27,7 @@ export function CategoryTrendChart({
     <div className="h-[160px] w-full">
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={trendData} barSize={28}>
-          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb40" />
+          <CartesianGrid vertical={false} />
           <XAxis
             dataKey="label"
             tick={{ fontSize: 11 }}

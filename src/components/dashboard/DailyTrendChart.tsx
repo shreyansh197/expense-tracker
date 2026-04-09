@@ -9,6 +9,7 @@ import {
   ResponsiveContainer,
   Tooltip,
   CartesianGrid,
+  ReferenceLine,
 } from "recharts";
 import { Table2, BarChart3, Layers, TrendingUp } from "lucide-react";
 import { buildCategoryMap } from "@/lib/categories";
@@ -24,6 +25,7 @@ interface DailyTrendChartProps {
   stackedDailyTotals?: StackedDailyTotal[];
   activeCategories?: CategoryId[];
   onBarClick?: (day: number) => void;
+  paceTarget?: number;
 }
 
 function StackedTooltip({ active, payload, label, catMap }: {
@@ -58,7 +60,7 @@ function StackedTooltip({ active, payload, label, catMap }: {
   );
 }
 
-export function DailyTrendChart({ dailyTotals, stackedDailyTotals, activeCategories, onBarClick }: DailyTrendChartProps) {
+export function DailyTrendChart({ dailyTotals, stackedDailyTotals, activeCategories, onBarClick, paceTarget }: DailyTrendChartProps) {
   const [stacked, setStacked] = useState(false);
   const [showTable, setShowTable] = useState(false);
   const { settings } = useSettings();
@@ -282,6 +284,22 @@ export function DailyTrendChart({ dailyTotals, stackedDailyTotals, activeCategor
                 labelStyle={{ color: "var(--chart-tooltip-fg, #111827)" }}
                 itemStyle={{ color: "var(--primary)" }}
               />
+              {paceTarget && paceTarget > 0 && (
+                <ReferenceLine
+                  y={paceTarget}
+                  stroke="var(--warning)"
+                  strokeDasharray="6 4"
+                  strokeWidth={1.5}
+                  strokeOpacity={0.6}
+                  label={{
+                    value: `Target`,
+                    position: "insideTopRight",
+                    fontSize: 10,
+                    fill: "var(--text-muted)",
+                    fontWeight: 500,
+                  }}
+                />
+              )}
               <Bar
                 dataKey="total"
                 fill="var(--primary)"

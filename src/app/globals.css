@@ -51,17 +51,10 @@
   /* ── Accent (CTA — Violet) ── */
   --accent: #7C3AED;
   --accent-soft: #EDE9FE;
+  --accent-hover: #6D28D9;
+  --accent-deep: #5B21B6;
+  --accent-border: #C4B5FD;
   --accent-gradient: linear-gradient(135deg, #7C3AED, #6D28D9);
-  /* ── CTA buttons (alias → accent for consistency) ── */
-  --cta: var(--accent);
-  --cta-hover: #6D28D9;
-  --cta-deep: #5B21B6;
-  /* ── Interactive (unified interactive color → accent) ── */
-  --interactive: var(--accent);
-  /* ── Violet track (stays violet across themes) ── */
-  --coral: #7C3AED;
-  --coral-soft: #EDE9FE;
-  --coral-border: #C4B5FD;
   /* ── Primary derived ── */
   --primary-hover: #0F766E;
   --primary-border: #99F6E4;
@@ -155,17 +148,10 @@
   /* ── Accent (Violet for dark — lighter for contrast) ── */
   --accent: #A78BFA;
   --accent-soft: rgba(167, 139, 250, 0.14);
+  --accent-hover: #8B5CF6;
+  --accent-deep: #7C3AED;
+  --accent-border: rgba(167, 139, 250, 0.3);
   --accent-gradient: linear-gradient(135deg, #A78BFA, #8B5CF6);
-  /* ── CTA buttons (alias → accent for consistency) ── */
-  --cta: var(--accent);
-  --cta-hover: #8B5CF6;
-  --cta-deep: #7C3AED;
-  /* ── Interactive (unified interactive color → accent) ── */
-  --interactive: var(--accent);
-  /* ── Violet track (stays violet across themes) ── */
-  --coral: #A78BFA;
-  --coral-soft: rgba(167, 139, 250, 0.12);
-  --coral-border: rgba(167, 139, 250, 0.3);
   /* ── Primary derived ── */
   --primary-hover: #99F6E4;
   --primary-border: rgba(94, 234, 212, 0.3);
@@ -244,17 +230,17 @@
   --color-data-text: var(--secondary-text);
   --color-data-hover: var(--secondary-hover);
   --color-data-border: var(--secondary-border);
-  /* CTA buttons (coral → blue) */
-  --color-cta: var(--cta);
-  --color-cta-hover: var(--cta-hover);
-  --color-cta-deep: var(--cta-deep);
-  /* Accent (decorative — coral light, blue dark) */
+  /* CTA buttons (→ accent) */
+  --color-cta: var(--accent);
+  --color-cta-hover: var(--accent-hover);
+  --color-cta-deep: var(--accent-deep);
+  /* Accent */
   --color-accent: var(--accent);
   --color-accent-soft: var(--accent-soft);
-  /* Coral track (always warm) */
-  --color-coral: var(--coral);
-  --color-coral-soft: var(--coral-soft);
-  --color-coral-border: var(--coral-border);
+  /* Coral track (→ accent alias for backward compat) */
+  --color-coral: var(--accent);
+  --color-coral-soft: var(--accent-soft);
+  --color-coral-border: var(--accent-border);
   /* Info */
   --color-info: var(--info);
   --color-info-soft: var(--info-soft);
@@ -269,8 +255,8 @@
   --color-err-soft: var(--danger-soft);
   /* Overlay */
   --color-overlay: var(--overlay);
-  /* Interactive */
-  --color-interactive: var(--interactive);
+  /* Interactive (→ accent) */
+  --color-interactive: var(--accent);
   /* Misc */
   --color-cat-fb: var(--category-fallback);
   /* Section zones */
@@ -411,10 +397,19 @@ button, a {
   border: 1px solid var(--border-card);
   border-radius: 1rem;
   box-shadow: var(--card-shadow);
+  transition: box-shadow 0.25s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+/* Interactive cards: clickable/navigable — adds lift on hover */
+.card-interactive {
+  background: var(--surface);
+  border: 1px solid var(--border-card);
+  border-radius: 1rem;
+  box-shadow: var(--card-shadow);
+  cursor: pointer;
   transition: box-shadow 0.25s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.25s cubic-bezier(0.22, 1, 0.36, 1), transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
 }
 @media (hover: hover) {
-  .card:hover {
+  .card-interactive:hover {
     box-shadow: var(--card-shadow-hover);
     border-color: color-mix(in srgb, var(--primary) 15%, var(--border-card));
     transform: translateY(-1px);

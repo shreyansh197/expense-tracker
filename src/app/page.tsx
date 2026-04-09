@@ -343,6 +343,7 @@ function DashboardContent() {
           className="zone-header dash-section relative z-40 overflow-hidden rounded-2xl p-5 sm:p-6"
           style={{
             background: 'var(--surface)',
+            backgroundImage: 'var(--gradient-hero)',
             border: '1px solid var(--border-card)',
             boxShadow: 'var(--shadow-sm)',
           }}
@@ -450,7 +451,8 @@ function DashboardContent() {
             alerts: () => (
               expenses.length > 0 && effectiveBudget > 0 ? (
                 <div key="alerts">
-                <CollapsibleSection id="alerts" title="Alerts">
+                <CollapsibleSection id="alerts" title="Insights & Alerts">
+                <div className="space-y-4">
                 <AlertsPanel
                   categoryTotals={categoryTotals}
                   categoryBudgets={settings.categoryBudgets}
@@ -461,6 +463,8 @@ function DashboardContent() {
                   anomalies={anomalies}
                   onCategoryClick={handleCategoryClick}
                 />
+                {(settings.recurringExpenses ?? []).length > 0 && <SubscriptionsSummary />}
+                </div>
                 </CollapsibleSection>
                 </div>
               ) : null
@@ -468,7 +472,8 @@ function DashboardContent() {
 
             subscriptions: () => (
               <div key="subscriptions" className="space-y-6 sm:space-y-8">
-                {(settings.recurringExpenses ?? []).length > 0 && (
+                {/* Subscriptions shown inside alerts section when budget is set; standalone fallback here */}
+                {!(expenses.length > 0 && effectiveBudget > 0) && (settings.recurringExpenses ?? []).length > 0 && (
                   <div>
                   <CollapsibleSection id="subscriptions" title="Recurring Expenses">
                   <SubscriptionsSummary />
@@ -541,6 +546,7 @@ function DashboardContent() {
                             dailyTotals={dailyTotals}
                             stackedDailyTotals={stackedDailyTotals}
                             onBarClick={handleDayClick}
+                            paceTarget={paceToStayUnder}
                           />
                         </div>
                       </m.div>
@@ -569,6 +575,7 @@ function DashboardContent() {
                       dailyTotals={dailyTotals}
                       stackedDailyTotals={stackedDailyTotals}
                       onBarClick={handleDayClick}
+                      paceTarget={paceToStayUnder}
                     />
                   </div>
                 </RevealOnScroll>
