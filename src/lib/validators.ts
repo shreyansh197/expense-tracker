@@ -91,10 +91,13 @@ export const syncChangesSchema = z.object({
 });
 
 // Per-table data schemas for sync mutations
+// Maximum amount for any single financial entry (10 million)
+const MAX_AMOUNT = 10_000_000;
+
 const expenseMutationData = z.object({
   id: z.string().uuid().optional(),
   category: z.string().max(60).optional(),
-  amount: z.number().optional(),
+  amount: z.number().min(0.01, "Amount must be at least 0.01").max(MAX_AMOUNT, `Amount cannot exceed ${MAX_AMOUNT.toLocaleString()}`).optional(),
   currency: z.string().max(3).nullable().optional(),
   day: z.number().int().min(1).max(31).optional(),
   month: z.number().int().min(1).max(12).optional(),
@@ -130,7 +133,7 @@ const settingsMutationData = z.object({
 const ledgerMutationData = z.object({
   id: z.string().uuid().optional(),
   name: z.string().max(255).optional(),
-  expectedAmount: z.number().optional(),
+  expectedAmount: z.number().min(0.01).max(MAX_AMOUNT).optional(),
   currency: z.string().max(3).optional(),
   status: z.string().max(20).optional(),
   dueDate: z.string().nullable().optional(),
@@ -142,7 +145,7 @@ const ledgerMutationData = z.object({
 const paymentMutationData = z.object({
   id: z.string().uuid().optional(),
   ledgerId: z.string().uuid().optional(),
-  amount: z.number().optional(),
+  amount: z.number().min(0.01).max(MAX_AMOUNT).optional(),
   date: z.string().optional(),
   method: z.string().max(60).nullable().optional(),
   reference: z.string().max(255).nullable().optional(),

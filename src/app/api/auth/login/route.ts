@@ -12,6 +12,7 @@ import {
 import { audit } from "@/lib/server/audit";
 import { loginSchema } from "@/lib/validators";
 import { rateLimit } from "@/lib/server/rateLimit";
+import { setRefreshTokenCookie } from "@/lib/server/cookies";
 
 export async function POST(req: NextRequest) {
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
@@ -178,7 +179,7 @@ export async function POST(req: NextRequest) {
     include: { workspace: { select: { id: true, name: true } } },
   });
 
-  return NextResponse.json({
+  const res = NextResponse.json({
     user: { id: user.id, email: user.email, name: user.name, avatarUrl: user.avatarUrl ?? null },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     workspaces: workspaces.map((m: any) => ({
@@ -188,8 +189,9 @@ export async function POST(req: NextRequest) {
     })),
     activeWorkspaceId: membership.workspaceId,
     accessToken,
-    refreshToken: result.refreshTokenRaw,
   });
+  setRefreshTokenCookie(res, result.refreshTokenRaw);
+  return res;
   } catch (err) {
     console.error("[login]", err);
     return NextResponse.json(

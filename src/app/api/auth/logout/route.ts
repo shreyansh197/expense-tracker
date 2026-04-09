@@ -3,6 +3,7 @@ import { prisma } from "@/lib/server/prisma";
 import { requireAuth, jsonError } from "@/lib/server/guards";
 import { audit } from "@/lib/server/audit";
 import { hashIp } from "@/lib/server/tokens";
+import { clearRefreshTokenCookie } from "@/lib/server/cookies";
 
 export async function POST(req: NextRequest) {
   const auth = await requireAuth(req);
@@ -24,5 +25,7 @@ export async function POST(req: NextRequest) {
     ),
   });
 
-  return NextResponse.json({ ok: true });
+  const res = NextResponse.json({ ok: true });
+  clearRefreshTokenCookie(res);
+  return res;
 }

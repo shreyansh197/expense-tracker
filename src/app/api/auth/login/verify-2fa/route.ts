@@ -12,6 +12,7 @@ import {
 import { audit } from "@/lib/server/audit";
 import { verify2FASchema } from "@/lib/validators";
 import { rateLimit } from "@/lib/server/rateLimit";
+import { setRefreshTokenCookie } from "@/lib/server/cookies";
 
 /**
  * POST /api/auth/login/verify-2fa
@@ -199,7 +200,7 @@ export async function POST(req: NextRequest) {
     include: { workspace: { select: { id: true, name: true } } },
   });
 
-  return NextResponse.json({
+  const res = NextResponse.json({
     user: { id: user.id, email: user.email, name: user.name, avatarUrl: user.avatarUrl ?? null },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     workspaces: workspaces.map((m: any) => ({
@@ -209,8 +210,9 @@ export async function POST(req: NextRequest) {
     })),
     activeWorkspaceId: membership.workspaceId,
     accessToken,
-    refreshToken: result.refreshTokenRaw,
   });
+  setRefreshTokenCookie(res, result.refreshTokenRaw);
+  return res;
 }
 
 function parseDeviceName(ua: string): string {

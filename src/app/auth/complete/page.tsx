@@ -20,7 +20,7 @@ export default function AuthCompletePage() {
 
     (async () => {
       try {
-        const res = await fetch("/api/auth/google/exchange", { method: "POST" });
+        const res = await fetch("/api/auth/google/exchange", { method: "POST", credentials: "include" });
         if (!res.ok) {
           router.replace("/?error=oauth_exchange");
           return;
@@ -30,7 +30,6 @@ export default function AuthCompletePage() {
           user: data.user,
           tokens: {
             accessToken: data.accessToken,
-            refreshToken: data.refreshToken,
           },
           workspaces: data.workspaces,
           activeWorkspaceId: data.activeWorkspaceId,

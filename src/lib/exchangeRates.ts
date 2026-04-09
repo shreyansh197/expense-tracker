@@ -3,8 +3,10 @@
  *
  * Primary:  frankfurter.dev — European Central Bank rates (free, no key, ~4PM CET daily)
  * Fallback: cdn.jsdelivr.net/npm/@fawazahmed0/currency-api — community-maintained, updates more frequently
- * Cache:    localStorage + in-memory, TTL 4 hours for fresher rates
+ * Cache:    IndexedDB + in-memory, TTL 24 hours
  */
+
+import { db, type IDBExchangeRate } from "@/lib/db";
 
 interface RateCache {
   base: string;
@@ -13,28 +15,34 @@ interface RateCache {
   source: "frankfurter" | "fawazahmed" | "fallback";
 }
 
-const CACHE_TTL = 4 * 60 * 60 * 1000; // 4 hours
+const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
 let _memoryCache: RateCache | null = null;
 // Track in-flight fetches to avoid duplicate requests
 const _pendingFetches = new Map<string, Promise<Record<string, number>>>();
 
-function loadFromStorage(base: string): RateCache | null {
+async function loadFromIDB(base: string): Promise<RateCache | null> {
   try {
-    const stored = localStorage.getItem(`expenstream-rates-${base}`);
+    const stored: IDBExchangeRate | undefined = await db.exchangeRates.get(base);
     if (!stored) return null;
-    const parsed: RateCache = JSON.parse(stored);
-    if (Date.now() - parsed.fetchedAt < CACHE_TTL && parsed.source !== "fallback") return parsed;
+    if (Date.now() - stored.fetchedAt < CACHE_TTL && stored.source !== "fallback") {
+      return stored;
+    }
     return null; // expired or was a fallback (always re-fetch over fallback)
   } catch {
     return null;
   }
 }
 
-function saveToStorage(cache: RateCache) {
+async function saveToIDB(cache: RateCache) {
   try {
-    localStorage.setItem(`expenstream-rates-${cache.base}`, JSON.stringify(cache));
+    await db.exchangeRates.put({
+      base: cache.base,
+      rates: cache.rates,
+      fetchedAt: cache.fetchedAt,
+      source: cache.source,
+    });
   } catch {
-    // quota exceeded — ignore
+    // IDB quota or not ready — ignore
   }
 }
 
@@ -86,8 +94,8 @@ export async function fetchRates(base: string): Promise<Record<string, number>> 
     return _memoryCache.rates;
   }
 
-  // Storage cache (rejects fallback-sourced entries)
-  const stored = loadFromStorage(base);
+  // IDB cache (rejects fallback-sourced entries)
+  const stored = await loadFromIDB(base);
   if (stored) {
     _memoryCache = stored;
     return stored.rates;
@@ -111,11 +119,11 @@ export async function fetchRates(base: string): Promise<Record<string, number>> 
     if (rates) {
       const cache: RateCache = { base, rates, fetchedAt: Date.now(), source };
       _memoryCache = cache;
-      saveToStorage(cache);
+      await saveToIDB(cache);
       return rates;
     }
 
-    // Last resort: hardcoded fallback rates (not cached to storage)
+    // Last resort: hardcoded fallback rates (not cached to IDB)
     return getFallbackRates(base);
   })();
 
@@ -162,8 +170,14 @@ export function getRateInfo(): { source: string; fetchedAt: Date; base: string }
 }
 
 /** Force-clear all rate caches (useful if old format is stuck) */
-export function clearRateCache() {
+export async function clearRateCache() {
   _memoryCache = null;
+  try {
+    await db.exchangeRates.clear();
+  } catch {
+    // IDB not ready — ignore
+  }
+  // Also clean up legacy localStorage entries
   if (typeof localStorage !== "undefined") {
     const keysToRemove: string[] = [];
     for (let i = 0; i < localStorage.length; i++) {

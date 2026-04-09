@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { AppShell } from "@/components/layout/AppShell";
 import { useSettings } from "@/hooks/useSettings";
 import { useCurrency } from "@/hooks/useCurrency";
@@ -10,6 +10,7 @@ import {
   Wallet, LinkIcon, Tag, Repeat, TrendingUp, Target, Palette,
   Download, Zap, Sun, Moon, Monitor, Smartphone, Briefcase,
   Shield, Users, Database, Globe, RefreshCw, ChevronLeft, ChevronRight,
+  Search,
 } from "lucide-react";
 import { InstallButton } from "@/components/pwa/InstallButton";
 import { useToast } from "@/components/ui/Toast";
@@ -26,6 +27,7 @@ import { ExportImportWizard } from "@/components/settings/ExportImportWizard";
 import { AutoRulesManager } from "@/components/settings/AutoRulesManager";
 import { DataAccountManagement } from "@/components/settings/DataAccountManagement";
 import { SettingsFooterLogout } from "@/components/settings/SettingsFooterLogout";
+import { usePinLock } from "@/hooks/usePinLock";
 import { PageTransition } from "@/components/ui/PageTransition";
 import { SettingsGraphic } from "@/components/ui/illustrations";
 import { ReflectiveCharacter } from "@/components/ui/illustrations/characters";
@@ -54,7 +56,7 @@ function RateSourceInfo({ baseCurrency }: { baseCurrency: string }) {
 
   const handleRefresh = async () => {
     setRefreshing(true);
-    clearRateCache();
+    await clearRateCache();
     const rates = await fetchRates(baseCurrency);
     setSampleRates(rates);
     loadInfo();
@@ -101,6 +103,138 @@ function RateSourceInfo({ baseCurrency }: { baseCurrency: string }) {
               </span>
             );
           })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** PIN Lock settings UI — embedded in Security section */
+function PinLockSettings() {
+  const { isEnabled, timeout, setupPin, disablePin, updateTimeout } = usePinLock();
+  const [newPin, setNewPin] = useState("");
+  const [confirmPin, setConfirmPin] = useState("");
+  const [step, setStep] = useState<"idle" | "setup" | "confirm">("idle");
+  const { toast } = useToast();
+
+  const handleSetup = () => {
+    if (step === "idle") {
+      setStep("setup");
+      return;
+    }
+    if (step === "setup") {
+      if (newPin.length !== 4 || !/^\d{4}$/.test(newPin)) {
+        toast("PIN must be exactly 4 digits");
+        return;
+      }
+      setStep("confirm");
+      return;
+    }
+    if (step === "confirm") {
+      if (confirmPin !== newPin) {
+        toast("PINs don't match. Try again.");
+        setConfirmPin("");
+        setStep("setup");
+        return;
+      }
+      setupPin(newPin, timeout);
+      setNewPin("");
+      setConfirmPin("");
+      setStep("idle");
+      toast("PIN lock enabled");
+    }
+  };
+
+  const handleDisable = () => {
+    disablePin();
+    toast("PIN lock disabled");
+  };
+
+  return (
+    <div className="mt-4 pt-4" style={{ borderTop: "1px solid var(--border-subtle)" }}>
+      <div className="flex items-center justify-between mb-3">
+        <div>
+          <h4 className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
+            App PIN Lock
+          </h4>
+          <p className="text-xs mt-0.5" style={{ color: "var(--text-secondary)" }}>
+            Require a PIN to access the app after inactivity
+          </p>
+        </div>
+        {isEnabled && (
+          <button
+            onClick={handleDisable}
+            className="rounded-lg px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
+          >
+            Disable
+          </button>
+        )}
+      </div>
+
+      {isEnabled ? (
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <label className="text-xs font-medium" style={{ color: "var(--text-secondary)" }}>
+              Lock after
+            </label>
+            <select
+              value={timeout}
+              onChange={(e) => updateTimeout(Number(e.target.value) as 5 | 15 | 30)}
+              className="rounded-lg border px-2 py-1 text-xs font-medium"
+              style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--text-primary)" }}
+            >
+              <option value={5}>5 minutes</option>
+              <option value={15}>15 minutes</option>
+              <option value={30}>30 minutes</option>
+            </select>
+            <span className="text-xs" style={{ color: "var(--text-tertiary)" }}>of inactivity</span>
+          </div>
+          <p className="text-xs rounded-lg p-2" style={{ background: "var(--surface-secondary)", color: "var(--text-secondary)" }}>
+            PIN lock is active. The app will ask for your PIN after {timeout} minutes of inactivity.
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {step !== "idle" && (
+            <div className="space-y-2">
+              <input
+                type="password"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                maxLength={4}
+                placeholder={step === "setup" ? "Enter 4-digit PIN" : "Confirm PIN"}
+                value={step === "setup" ? newPin : confirmPin}
+                onChange={(e) => {
+                  const v = e.target.value.replace(/\D/g, "").slice(0, 4);
+                  if (step === "setup") setNewPin(v);
+                  else setConfirmPin(v);
+                }}
+                autoFocus
+                className="w-full rounded-xl border py-2.5 px-3 text-center text-lg tracking-[0.5em] font-mono focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/30"
+                style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--text-primary)" }}
+              />
+              <p className="text-xs text-center" style={{ color: "var(--text-tertiary)" }}>
+                {step === "setup" ? "Choose a 4-digit PIN" : "Re-enter your PIN to confirm"}
+              </p>
+            </div>
+          )}
+          <div className="flex gap-2">
+            <button
+              onClick={handleSetup}
+              className="btn-primary rounded-xl px-4 py-2 text-sm"
+            >
+              {step === "idle" ? "Set Up PIN" : step === "setup" ? "Next" : "Confirm"}
+            </button>
+            {step !== "idle" && (
+              <button
+                onClick={() => { setStep("idle"); setNewPin(""); setConfirmPin(""); }}
+                className="rounded-xl px-4 py-2 text-sm"
+                style={{ color: "var(--text-secondary)" }}
+              >
+                Cancel
+              </button>
+            )}
+          </div>
         </div>
       )}
     </div>
@@ -189,10 +323,10 @@ export default function SettingsPage() {
   const goalsCount = settings.goals?.length || 0;
 
   const zones = [
-    { id: "zone-account", label: "Account" },
-    { id: "zone-finances", label: "Finances" },
-    { id: "zone-automation", label: "Automation" },
-    { id: "zone-preferences", label: "Preferences" },
+    { id: "zone-account", label: "Account", description: "Profile, security & workspace" },
+    { id: "zone-finances", label: "Finances", description: "Budget, categories & goals" },
+    { id: "zone-automation", label: "Automation", description: "Rules, export & data" },
+    { id: "zone-preferences", label: "Preferences", description: "Theme, currency & mode" },
   ];
   const [activeZone, setActiveZone] = useState(() => {
     // Check URL hash to pre-select the right zone
@@ -209,6 +343,41 @@ export default function SettingsPage() {
     return sectionToZone[hash] ?? zones[0].id;
   });
   const observerRef = useRef<IntersectionObserver | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // Searchable section index for quick-find
+  const sectionIndex = useMemo(() => [
+    { id: "account", zone: "zone-account", keywords: "account profile email name avatar workspace" },
+    { id: "security", zone: "zone-account", keywords: "security password 2fa two-factor totp recovery sessions devices passkey pin lock" },
+    { id: "members", zone: "zone-account", keywords: "members invite team workspace share access" },
+    { id: "budget", zone: "zone-finances", keywords: "budget salary income monthly amount money" },
+    { id: "categories", zone: "zone-finances", keywords: "categories custom hide show groceries transport" },
+    { id: "recurring", zone: "zone-finances", keywords: "recurring expenses subscription repeat monthly auto" },
+    { id: "goals", zone: "zone-finances", keywords: "goals savings target fund" },
+    { id: "rollover", zone: "zone-finances", keywords: "rollover carry forward surplus deficit budget" },
+    { id: "rules", zone: "zone-automation", keywords: "rules smart auto categorize automation" },
+    { id: "export-import", zone: "zone-automation", keywords: "export import csv json backup restore download" },
+    { id: "data-management", zone: "zone-automation", keywords: "data delete remove workspace reset clear" },
+    { id: "app-mode", zone: "zone-preferences", keywords: "mode personal business switch" },
+    { id: "multi-currency", zone: "zone-preferences", keywords: "currency multi exchange rate convert" },
+    { id: "theme", zone: "zone-preferences", keywords: "theme appearance dark light system color" },
+  ], []);
+
+  // Filter visible sections based on search
+  const visibleSections = useMemo(() => {
+    if (!searchQuery.trim()) return null; // null = show all
+    const q = searchQuery.toLowerCase();
+    return new Set(
+      sectionIndex.filter(s => s.keywords.includes(q) || s.id.includes(q)).map(s => s.id)
+    );
+  }, [searchQuery, sectionIndex]);
+
+  // When searching, auto-switch to the zone containing the first match
+  useEffect(() => {
+    if (!visibleSections || visibleSections.size === 0) return;
+    const firstMatch = sectionIndex.find(s => visibleSections.has(s.id));
+    if (firstMatch) setActiveZone(firstMatch.zone);
+  }, [visibleSections, sectionIndex]);
 
   // IntersectionObserver for mobile scroll tracking (desktop uses tab switching)
   useEffect(() => {
@@ -231,6 +400,12 @@ export default function SettingsPage() {
     return () => observerRef.current?.disconnect();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  /** Check if a section should be visible based on search (null = show all) */
+  const isSectionVisible = (id: string) => !visibleSections || visibleSections.has(id);
+  /** Check if a zone has any visible sections */
+  const isZoneVisible = (zoneId: string) =>
+    !visibleSections || sectionIndex.some(s => s.zone === zoneId && visibleSections.has(s.id));
+
   return (
     <AppShell>
         <PageTransition className="relative mx-auto max-w-4xl xl:max-w-6xl space-y-4 sm:space-y-6 p-4 lg:p-6">
@@ -245,6 +420,40 @@ export default function SettingsPage() {
           </div>
         </div>
 
+        {/* Search bar for quick settings lookup */}
+        <div className="relative mb-2">
+          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: 'var(--text-tertiary)' }} />
+          <input
+            type="text"
+            placeholder="Search settings…"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full rounded-xl border py-2.5 pl-9 pr-3 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/30"
+            style={{ background: 'var(--surface-secondary)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)' }}
+          />
+        </div>
+
+        {/* Mobile TOC — jump to section */}
+        <div className="flex lg:hidden gap-2 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-none">
+          {zones.map((z) => (
+            <button
+              key={z.id}
+              onClick={() => {
+                setActiveZone(z.id);
+                document.getElementById(z.id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+              }}
+              className="flex-shrink-0 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all whitespace-nowrap"
+              style={
+                activeZone === z.id
+                  ? { background: 'var(--primary-soft)', color: 'var(--primary)' }
+                  : { background: 'var(--surface-secondary)', color: 'var(--text-secondary)' }
+              }
+            >
+              {z.label}
+            </button>
+          ))}
+        </div>
+
         {/* Tab navigation — desktop: shows only active zone; mobile: all zones visible */}
         <div role="tablist" aria-label="Settings sections" className="hidden lg:flex sticky top-0 z-10 gap-1.5 rounded-xl p-1.5 mb-4 backdrop-blur-md" style={{ background: 'color-mix(in srgb, var(--surface) 85%, transparent)', border: '1px solid var(--border-subtle)' }}>
           {zones.map((z) => (
@@ -257,14 +466,15 @@ export default function SettingsPage() {
               onClick={() => {
                 setActiveZone(z.id);
               }}
-              className="rounded-lg px-3 py-1.5 text-xs font-semibold transition-all hover:bg-[var(--surface-secondary)]"
+              className="rounded-lg px-3 py-2 text-left transition-all hover:bg-[var(--surface-secondary)]"
               style={
                 activeZone === z.id
                   ? { background: 'var(--primary-soft)', color: 'var(--primary)' }
                   : { color: 'var(--text-secondary)' }
               }
             >
-              {z.label}
+              <span className="block text-xs font-semibold">{z.label}</span>
+              <span className="block text-[10px] font-normal opacity-70">{z.description}</span>
             </button>
           ))}
         </div>
@@ -272,13 +482,13 @@ export default function SettingsPage() {
         <SettingsAccordion>
 
           {/* ━━━ YOUR ACCOUNT — indigo zone ━━━ */}
-          <div id="zone-account" role="tabpanel" aria-labelledby="tab-zone-account" className={`section-zone section-indigo space-y-3 scroll-mt-16 ${activeZone !== 'zone-account' ? 'lg:hidden' : ''}`}>
+          <div id="zone-account" role="tabpanel" aria-labelledby="tab-zone-account" className={`section-zone section-indigo space-y-3 scroll-mt-16 ${activeZone !== 'zone-account' ? 'lg:hidden' : ''} ${!isZoneVisible('zone-account') ? 'hidden' : ''}`}>
           <h3 className="text-xs font-bold uppercase tracking-wider pb-1 px-1" style={{ color: 'var(--text-tertiary)' }}>
             Your Account
           </h3>
 
           {/* ─── Account & Workspace ─── */}
-          <AccordionSection
+          {isSectionVisible('account') && <AccordionSection
             id="account"
             icon={<LinkIcon size={18} />}
             title="Account"
@@ -286,10 +496,10 @@ export default function SettingsPage() {
             iconColor="bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400"
           >
             <AccountCard />
-          </AccordionSection>
+          </AccordionSection>}
 
           {/* ─── Security ─── */}
-          <AccordionSection
+          {isSectionVisible('security') && <AccordionSection
             id="security"
             icon={<Shield size={18} />}
             title="Security"
@@ -297,10 +507,12 @@ export default function SettingsPage() {
             iconColor="bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400"
           >
             <SecurityCard />
-          </AccordionSection>
+            {/* ─── PIN Lock ─── */}
+            <PinLockSettings />
+          </AccordionSection>}
 
           {/* ─── Workspace Members ─── */}
-          <AccordionSection
+          {isSectionVisible('members') && <AccordionSection
             id="members"
             icon={<Users size={18} />}
             title="Workspace Members"
@@ -308,11 +520,11 @@ export default function SettingsPage() {
             iconColor="bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400"
           >
             <WorkspaceMembersCard />
-          </AccordionSection>
+          </AccordionSection>}
           </div>
 
           {/* ━━━ FINANCES — teal zone ━━━ */}
-          <div id="zone-finances" role="tabpanel" aria-labelledby="tab-zone-finances" className={`section-zone section-teal space-y-3 scroll-mt-16 ${activeZone !== 'zone-finances' ? 'lg:hidden' : ''}`}>
+          <div id="zone-finances" role="tabpanel" aria-labelledby="tab-zone-finances" className={`section-zone section-teal space-y-3 scroll-mt-16 ${activeZone !== 'zone-finances' ? 'lg:hidden' : ''} ${!isZoneVisible('zone-finances') ? 'hidden' : ''}`}>
           <h3 className="text-xs font-bold uppercase tracking-wider pt-2 pb-1 px-1" style={{ color: 'var(--text-tertiary)' }}>
             Finances
           </h3>
@@ -325,6 +537,7 @@ export default function SettingsPage() {
             description={`Currently ${formatCurrency(settings.salary)}`}
             alwaysOpen
             iconColor="bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400"
+            className={!isSectionVisible('budget') ? 'hidden' : ''}
           >
             <div className="space-y-3">
               {/* Currency selector */}
@@ -432,6 +645,7 @@ export default function SettingsPage() {
             title="Categories & Budgets"
             description="Manage expense categories and per-category limits"
             iconColor="bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400"
+            className={!isSectionVisible('categories') ? 'hidden' : ''}
           >
             <CategoryManager />
           </AccordionSection>
@@ -448,6 +662,7 @@ export default function SettingsPage() {
             }
             badge={recurringCount > 0 ? recurringCount : undefined}
             iconColor="bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400"
+            className={!isSectionVisible('recurring') ? 'hidden' : ''}
           >
             <RecurringManager />
           </AccordionSection>
@@ -460,6 +675,7 @@ export default function SettingsPage() {
             description={goalsCount > 0 ? `${goalsCount} active goal${goalsCount > 1 ? "s" : ""}` : "Track your savings targets"}
             badge={goalsCount > 0 ? goalsCount : undefined}
             iconColor="bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400"
+            className={!isSectionVisible('goals') ? 'hidden' : ''}
           >
             <GoalsManager />
           </AccordionSection>
@@ -471,6 +687,7 @@ export default function SettingsPage() {
             title="Budget Rollover"
             description="Carry unspent budget to next month"
             iconColor="bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400"
+            className={!isSectionVisible('rollover') ? 'hidden' : ''}
             headerRight={
               <button
                 role="switch"
@@ -517,7 +734,7 @@ export default function SettingsPage() {
           </div>
 
           {/* ━━━ AUTOMATION & DATA — violet zone ━━━ */}
-          <div id="zone-automation" role="tabpanel" aria-labelledby="tab-zone-automation" className={`section-zone section-violet space-y-3 scroll-mt-16 ${activeZone !== 'zone-automation' ? 'lg:hidden' : ''}`}>
+          <div id="zone-automation" role="tabpanel" aria-labelledby="tab-zone-automation" className={`section-zone section-violet space-y-3 scroll-mt-16 ${activeZone !== 'zone-automation' ? 'lg:hidden' : ''} ${!isZoneVisible('zone-automation') ? 'hidden' : ''}`}>
           <h3 className="text-xs font-bold uppercase tracking-wider pt-2 pb-1 px-1" style={{ color: 'var(--text-tertiary)' }}>
             Automation & Data
           </h3>
@@ -529,6 +746,7 @@ export default function SettingsPage() {
             title="Smart Rules"
             description="Auto-assign categories based on patterns"
             iconColor="bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400"
+            className={!isSectionVisible('rules') ? 'hidden' : ''}
           >
             <AutoRulesManager />
           </AccordionSection>
@@ -540,6 +758,7 @@ export default function SettingsPage() {
             title="Export & Import"
             description="Backup, export, or import data"
             iconColor="bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400"
+            className={!isSectionVisible('export-import') ? 'hidden' : ''}
           >
             <ExportImportWizard />
           </AccordionSection>
@@ -551,13 +770,14 @@ export default function SettingsPage() {
             title="Workspace Removal"
             description="Remove or reset workspace data"
             iconColor="bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400"
+            className={!isSectionVisible('data-management') ? 'hidden' : ''}
           >
             <DataAccountManagement />
           </AccordionSection>
           </div>
 
           {/* ━━━ PREFERENCES — indigo zone ━━━ */}
-          <div id="zone-preferences" role="tabpanel" aria-labelledby="tab-zone-preferences" className={`section-zone section-indigo space-y-3 scroll-mt-16 ${activeZone !== 'zone-preferences' ? 'lg:hidden' : ''}`}>
+          <div id="zone-preferences" role="tabpanel" aria-labelledby="tab-zone-preferences" className={`section-zone section-indigo space-y-3 scroll-mt-16 ${activeZone !== 'zone-preferences' ? 'lg:hidden' : ''} ${!isZoneVisible('zone-preferences') ? 'hidden' : ''}`}>
           <h3 className="text-xs font-bold uppercase tracking-wider pt-2 pb-1 px-1" style={{ color: 'var(--text-tertiary)' }}>
             Preferences
           </h3>
@@ -569,6 +789,7 @@ export default function SettingsPage() {
             title="App Mode"
             description={settings.businessMode ? "Business Owner Mode active" : "Personal expense tracking"}
             iconColor="bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400"
+            className={!isSectionVisible('app-mode') ? 'hidden' : ''}
             headerRight={
               <button
                 role="switch"
@@ -609,6 +830,7 @@ export default function SettingsPage() {
             title="Multi-Currency"
             description={settings.multiCurrencyEnabled ? "Per-expense currency active" : "All expenses in base currency"}
             iconColor="bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400"
+            className={!isSectionVisible('multi-currency') ? 'hidden' : ''}
             headerRight={
               <button
                 role="switch"
@@ -650,6 +872,7 @@ export default function SettingsPage() {
             title="Appearance"
             description={`${theme.charAt(0).toUpperCase() + theme.slice(1)} mode`}
             iconColor="bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400"
+            className={!isSectionVisible('theme') ? 'hidden' : ''}
           >
             <div className="space-y-4">
               <div className="flex gap-2">

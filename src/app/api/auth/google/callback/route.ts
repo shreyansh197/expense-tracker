@@ -10,6 +10,7 @@ import {
 } from "@/lib/server/tokens";
 import { audit } from "@/lib/server/audit";
 import { DEFAULT_CATEGORIES } from "@/lib/categories";
+import { setRefreshTokenCookie } from "@/lib/server/cookies";
 
 function getJwtSecret(): Uint8Array {
   const raw = process.env.JWT_SECRET;
@@ -269,6 +270,7 @@ export async function GET(req: NextRequest) {
       maxAge: 300, // 5 minutes
       path: "/",
     });
+    setRefreshTokenCookie(res, result.refreshTokenRaw);
 
     return res;
   } catch (err) {

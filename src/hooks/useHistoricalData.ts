@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useEffect } from "react";
 import { useDexieQuery } from "@/hooks/useDexieQuery";
 import { db } from "@/lib/db";
 import { getActiveWorkspaceId } from "@/lib/authClient";
@@ -74,16 +74,48 @@ export function useHistoricalData(currentMonth: number, currentYear: number, loo
     EMPTY,
   );
 
-  return useMemo(() => {
-    // Build per-month data
+  // Load cached MonthData for completed (non-current) months
+  const cachedMonths = useDexieQuery(
+    async () => {
+      if (!wid) return {} as Record<string, MonthData>;
+      const result: Record<string, MonthData> = {};
+      for (const { m, y } of monthKeys) {
+        if (m === currentMonth && y === currentYear) continue; // skip current month
+        const key = `${wid}-${m}-${y}`;
+        const cached = await db.calcCache.get(key);
+        if (cached && cached.data) {
+          try {
+            result[`${m}-${y}`] = JSON.parse(cached.data) as MonthData;
+          } catch { /* ignore corrupt cache */ }
+        }
+      }
+      return result;
+    },
+    [wid, ...monthKeys.map(k => `${k.y}-${k.m}`)],
+    {} as Record<string, MonthData>,
+  );
+
+  // Compute analytics + track which completed months need caching
+  const { analytics, toCache } = useMemo(() => {
+    // Build per-month data (use cache for completed months)
+    const pendingCache: { key: string; data: MonthData }[] = [];
     const months: MonthData[] = monthKeys.map(({ m, y }) => {
+      const isCurrent = m === currentMonth && y === currentYear;
+      const cacheKey = `${m}-${y}`;
+
+      // Use cache for completed months
+      if (!isCurrent && cachedMonths[cacheKey]) {
+        return { ...cachedMonths[cacheKey], expenses: cachedMonths[cacheKey].expenses || [] };
+      }
+
+      // Compute fresh
       const monthExpenses = allExpenses.filter(e => e.month === m && e.year === y);
       const total = monthExpenses.reduce((s, e) => s + e.amount, 0);
       const categoryBreakdown: Record<string, number> = {};
       for (const e of monthExpenses) {
         categoryBreakdown[e.category] = (categoryBreakdown[e.category] || 0) + e.amount;
       }
-      return {
+      const md: MonthData = {
         month: m,
         year: y,
         label: `${MONTH_NAMES[m - 1]} ${y}`,
@@ -92,6 +124,13 @@ export function useHistoricalData(currentMonth: number, currentYear: number, loo
         expenses: monthExpenses,
         categoryBreakdown,
       };
+
+      // Track completed months for cache write
+      if (!isCurrent && wid) {
+        pendingCache.push({ key: `${wid}-${m}-${y}`, data: md });
+      }
+
+      return md;
     });
 
     const current = months.find(d => d.month === currentMonth && d.year === currentYear);
@@ -145,15 +184,31 @@ export function useHistoricalData(currentMonth: number, currentYear: number, loo
     }
 
     return {
-      months,
-      currentMonth: current,
-      avgMonthlySpend,
-      monthOverMonthChange,
-      topCategoriesAllTime,
-      dayOfWeekFactors,
-      recurringVsOneTime: { recurring, oneTime },
-      biggestExpenses,
-      spendingByWeek,
+      analytics: {
+        months,
+        currentMonth: current,
+        avgMonthlySpend,
+        monthOverMonthChange,
+        topCategoriesAllTime,
+        dayOfWeekFactors,
+        recurringVsOneTime: { recurring, oneTime },
+        biggestExpenses,
+        spendingByWeek,
+      },
+      toCache: pendingCache,
     };
-  }, [allExpenses, monthKeys, currentMonth, currentYear]);
+  }, [allExpenses, monthKeys, currentMonth, currentYear, cachedMonths, wid]);
+
+  // Write freshly computed completed month data to cache (fire-and-forget)
+  useEffect(() => {
+    if (toCache.length === 0) return;
+    for (const { key, data } of toCache) {
+      // Store without expenses array to keep cache small
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { expenses: _e, ...cacheable } = data;
+      db.calcCache.put({ key, data: JSON.stringify(cacheable), computedAt: Date.now() }).catch(() => {});
+    }
+  }, [toCache]);
+
+  return analytics;
 }

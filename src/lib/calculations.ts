@@ -1,5 +1,10 @@
 import type { Expense, CategoryId, DailyTotal, CategoryTotal, StackedDailyTotal, Forecast, AnomalyResult } from "@/types";
 
+/** Round to 2 decimal places (currency precision) to avoid floating-point drift */
+export function roundCurrency(value: number): number {
+  return Math.round(value * 100) / 100;
+}
+
 /** Filter active (non-deleted) expenses for a given month/year */
 function activeExpenses(expenses: Expense[], month: number, year: number): Expense[] {
   return expenses.filter(
@@ -16,9 +21,9 @@ export function getCategoryTotal(
   month: number,
   year: number
 ): number {
-  return activeExpenses(expenses, month, year)
+  return roundCurrency(activeExpenses(expenses, month, year)
     .filter((e) => e.category === category)
-    .reduce((sum, e) => sum + e.amount, 0);
+    .reduce((sum, e) => sum + e.amount, 0));
 }
 
 /**
@@ -30,9 +35,9 @@ export function getDailyTotal(
   month: number,
   year: number
 ): number {
-  return activeExpenses(expenses, month, year)
+  return roundCurrency(activeExpenses(expenses, month, year)
     .filter((e) => e.day === day)
-    .reduce((sum, e) => sum + e.amount, 0);
+    .reduce((sum, e) => sum + e.amount, 0));
 }
 
 /**
@@ -43,7 +48,7 @@ export function getMonthlyTotal(
   month: number,
   year: number
 ): number {
-  return activeExpenses(expenses, month, year).reduce((sum, e) => sum + e.amount, 0);
+  return roundCurrency(activeExpenses(expenses, month, year).reduce((sum, e) => sum + e.amount, 0));
 }
 
 /**
@@ -110,7 +115,7 @@ export function getAllDailyTotals(
  */
 export function getAverageDailySpend(monthlyTotal: number, daysElapsed: number): number {
   if (daysElapsed <= 0) return 0;
-  return Math.round(monthlyTotal / daysElapsed);
+  return roundCurrency(monthlyTotal / daysElapsed);
 }
 
 /**
@@ -160,7 +165,7 @@ export function getDaysRemaining(month: number, year: number): number {
  */
 export function getPaceToStayUnder(remaining: number, daysRemaining: number): number {
   if (daysRemaining <= 0) return 0;
-  return Math.max(0, Math.round(remaining / daysRemaining));
+  return Math.max(0, roundCurrency(remaining / daysRemaining));
 }
 
 /**
@@ -230,7 +235,7 @@ export function getEomForecast(
     return { projectedTotal: 0, projectedRemaining: salary, confidence: "low", method: "linear", historicalMonths: 0 };
   }
   const avgPerDay = monthlyTotal / elapsedDays;
-  const projectedTotal = Math.round(avgPerDay * daysInMonth);
+  const projectedTotal = roundCurrency(avgPerDay * daysInMonth);
   const projectedRemaining = salary - projectedTotal;
   const confidence: Forecast["confidence"] =
     elapsedDays < 7 ? "low" : elapsedDays < 15 ? "medium" : "high";
@@ -296,9 +301,9 @@ export function detectAnomalies(
       if (z > threshold) {
         anomalies.push({
           expense: e,
-          zScore: Math.round(z * 10) / 10,
-          categoryMedian: Math.round(med),
-          categoryMad: Math.round(mad),
+          zScore: Math.round(z * 100) / 100,
+          categoryMedian: roundCurrency(med),
+          categoryMad: roundCurrency(mad),
         });
       }
     }
@@ -327,7 +332,7 @@ export function getExponentialWeightedAvg(monthlyTotals: number[], alpha = 0.3):
   for (let i = 1; i < monthlyTotals.length; i++) {
     ema = alpha * monthlyTotals[i] + (1 - alpha) * ema;
   }
-  return Math.round(ema);
+  return roundCurrency(ema);
 }
 
 /**
@@ -400,7 +405,7 @@ export function getWeightedForecast(
     remainingProjection += historicalDailyAvg * factor;
   }
 
-  const projectedTotal = Math.round(monthlyTotal + remainingProjection);
+  const projectedTotal = roundCurrency(monthlyTotal + remainingProjection);
   const projectedRemaining = salary - projectedTotal;
 
   const confidence: Forecast["confidence"] =

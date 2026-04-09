@@ -14,11 +14,25 @@ import { useAuth } from "@/components/providers/AuthProvider";
 import { useUIStore } from "@/stores/uiStore";
 import { CalculationsProvider } from "@/contexts/CalculationsContext";
 import { RouteTransition } from "@/components/motion/RouteTransition";
+import { onWorkspaceAccessDenied } from "@/lib/syncEngine";
+import { useToast } from "@/components/ui/Toast";
+import { PinLock } from "@/components/app/PinLock";
+import { usePinLock } from "@/hooks/usePinLock";
 
 function AppShellInner({ children }: { children: React.ReactNode }) {
   const [showShortcuts, setShowShortcuts] = useState(false);
+  const [accessDenied, setAccessDenied] = useState(false);
   useKeyboardShortcuts(() => setShowShortcuts(true));
   const { nextMonth, prevMonth } = useUIStore();
+  const { toast } = useToast();
+
+  // Listen for 403 workspace access denied from sync engine
+  useEffect(() => {
+    return onWorkspaceAccessDenied(() => {
+      setAccessDenied(true);
+      toast("You no longer have access to this workspace. Contact the workspace owner.");
+    });
+  }, [toast]);
 
   // Swipe to navigate months (mobile)
   const touchStart = useRef<{ x: number; y: number } | null>(null);
@@ -52,6 +66,17 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
       </a>
       <ErrorBoundary>
         <CalculationsProvider>
+          {accessDenied && (
+            <div className="flex items-center gap-2 bg-red-500/10 px-4 py-2.5 text-sm font-medium text-red-600 dark:text-red-400" role="alert">
+              <span className="flex-1">You no longer have access to this workspace. Sync has been paused.</span>
+              <button
+                onClick={() => setAccessDenied(false)}
+                className="rounded-lg px-3 py-1 text-xs font-semibold hover:bg-red-500/10"
+              >
+                Dismiss
+              </button>
+            </div>
+          )}
           <div className="flex flex-1 overflow-hidden">
             <Sidebar />
             <main
@@ -83,6 +108,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuth();
   const [hydrated, setHydrated] = useState(false);
   const [showTutorial, setShowTutorial] = useState(false);
+  const pinLock = usePinLock();
 
   useEffect(() => {
     setHydrated(true);
@@ -152,6 +178,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex h-screen flex-col" style={{ background: 'var(--background)' }}>
       <AppShellInner>{children}</AppShellInner>
+      {pinLock.isLocked && <PinLock onVerify={pinLock.verifyPin} />}
       {showTutorial && (
         <WelcomeTutorial
           onComplete={() => {

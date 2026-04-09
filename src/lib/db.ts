@@ -101,6 +101,19 @@ export interface IDBSyncMeta {
   lastSyncAt: number;
 }
 
+export interface IDBExchangeRate {
+  base: string;
+  rates: Record<string, number>;
+  fetchedAt: number;
+  source: "frankfurter" | "fawazahmed" | "fallback";
+}
+
+export interface IDBCalcCache {
+  key: string; // workspaceId-month-year
+  data: string; // JSON-serialized calc results
+  computedAt: number;
+}
+
 // ── Database ──
 
 class ExpenseDB extends Dexie {
@@ -110,6 +123,8 @@ class ExpenseDB extends Dexie {
   payments!: Table<IDBPayment, string>;
   mutations!: Table<IDBMutation, number>;
   syncMeta!: Table<IDBSyncMeta, string>;
+  exchangeRates!: Table<IDBExchangeRate, string>;
+  calcCache!: Table<IDBCalcCache, string>;
 
   constructor() {
     super("expenstream");
@@ -120,6 +135,16 @@ class ExpenseDB extends Dexie {
       payments: "id, workspaceId, ledgerId",
       mutations: "++localId, workspaceId, idempotencyKey",
       syncMeta: "workspaceId",
+    });
+    this.version(2).stores({
+      expenses: "id, workspaceId, [workspaceId+month+year], category",
+      settings: "workspaceId",
+      ledgers: "id, workspaceId",
+      payments: "id, workspaceId, ledgerId",
+      mutations: "++localId, workspaceId, idempotencyKey",
+      syncMeta: "workspaceId",
+      exchangeRates: "base",
+      calcCache: "key",
     });
   }
 }

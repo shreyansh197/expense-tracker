@@ -12,6 +12,11 @@ import {
 import { useDexieQuery } from "@/hooks/useDexieQuery";
 import type { Expense, ExpenseInput, CategoryId, SyncStatus } from "@/types";
 
+/** Invalidate the calc cache entry for a given month/year. */
+function invalidateCalcCache(wid: string, month: number, year: number) {
+  db.calcCache.delete(`${wid}-${month}-${year}`).catch(() => {});
+}
+
 const EMPTY: Expense[] = [];
 
 function toExpense(row: { id: string; category: string; amount: number; currency?: string; day: number; month: number; year: number; remark?: string; isRecurring: boolean; recurringId?: string; createdAt: number; updatedAt: number; deletedAt: number | null | undefined }): Expense {
@@ -99,6 +104,7 @@ export function useExpenses(month: number, year: number) {
       idempotencyKey: makeIdempotencyKey(),
     }, workspace);
 
+    invalidateCalcCache(workspace, input.month, input.year);
     trySyncPush(workspace, true);
   }, []);
 
@@ -109,7 +115,11 @@ export function useExpenses(month: number, year: number) {
     // Optimistic IDB update
     const existing = await db.expenses.get(id);
     if (existing) {
+      invalidateCalcCache(workspace, existing.month, existing.year);
       await db.expenses.put({ ...existing, ...updates, updatedAt: Date.now() });
+      if (updates.month || updates.year) {
+        invalidateCalcCache(workspace, updates.month ?? existing.month, updates.year ?? existing.year);
+      }
     }
 
     await enqueueMutation({
@@ -127,8 +137,13 @@ export function useExpenses(month: number, year: number) {
     const workspace = getActiveWorkspaceId();
     if (!workspace) return;
 
+    // Read the expense before deleting to get its month/year for cache invalidation
+    const existing = await db.expenses.get(id);
+
     // Optimistic IDB delete
     await db.expenses.delete(id);
+
+    if (existing) invalidateCalcCache(workspace, existing.month, existing.year);
 
     await enqueueMutation({
       table: "expenses",
@@ -144,6 +159,19 @@ export function useExpenses(month: number, year: number) {
   const deleteExpenses = useCallback(async (ids: string[]) => {
     const workspace = getActiveWorkspaceId();
     if (!workspace) return;
+
+    // Read expenses before deleting for cache invalidation
+    const existing = await db.expenses.bulkGet(ids);
+    const invalidated = new Set<string>();
+    for (const e of existing) {
+      if (e) {
+        const key = `${e.month}-${e.year}`;
+        if (!invalidated.has(key)) {
+          invalidated.add(key);
+          invalidateCalcCache(workspace, e.month, e.year);
+        }
+      }
+    }
 
     // Optimistic IDB delete
     await db.expenses.bulkDelete(ids);

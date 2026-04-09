@@ -12,7 +12,8 @@ function getClientDeviceId(): string {
 
 export interface AuthTokens {
   accessToken: string;
-  refreshToken: string;
+  /** @deprecated Refresh token is now stored as httpOnly cookie. Kept for migration compatibility. */
+  refreshToken?: string;
 }
 
 export interface AuthUser {
@@ -104,14 +105,12 @@ export async function refreshTokens(): Promise<boolean> {
   if (_refreshPromise) return _refreshPromise;
 
   _refreshPromise = (async () => {
-    const rt = _state.tokens?.refreshToken;
-    if (!rt) return false;
-
     try {
       const res = await fetch("/api/auth/refresh", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ refreshToken: rt }),
+        credentials: "include", // sends httpOnly cookie
+        body: JSON.stringify({}),
       });
 
       if (!res.ok) {
@@ -124,7 +123,7 @@ export async function refreshTokens(): Promise<boolean> {
       setAuthState({
         tokens: {
           accessToken: data.accessToken,
-          refreshToken: data.refreshToken,
+          // refreshToken is now in httpOnly cookie, not in response body
         },
       });
       return true;
@@ -151,16 +150,16 @@ export async function authFetch(
   }
   headers.set("X-Device-Id", getClientDeviceId());
 
-  let res = await fetch(input, { ...init, headers });
+  let res = await fetch(input, { ...init, headers, credentials: "include" });
 
-  // If 401, try refreshing
-  if (res.status === 401 && _state.tokens?.refreshToken) {
+  // If 401, try refreshing (cookie-based)
+  if (res.status === 401 && _state.tokens?.accessToken) {
     const ok = await refreshTokens();
     if (ok) {
       const newToken = getAccessToken();
       if (newToken) {
         headers.set("Authorization", `Bearer ${newToken}`);
-        res = await fetch(input, { ...init, headers });
+        res = await fetch(input, { ...init, headers, credentials: "include" });
       }
     }
   }

@@ -134,6 +134,9 @@ export function BottomNav() {
                 )}
                 <Icon size={22} />
                 <span className="text-caption font-medium">{item.label}</span>
+                {isBiz && !isActive && isBusiness && (
+                  <span className="absolute top-1 right-1/4 h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                )}
               </Link>
             );
           })}
