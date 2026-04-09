@@ -59,9 +59,9 @@ export function PinLock({ onVerify }: PinLockProps) {
       {/* Lock icon */}
       <div
         className="flex h-16 w-16 items-center justify-center rounded-2xl"
-        style={{ background: "var(--primary-soft)" }}
+        style={{ background: "var(--accent-soft)" }}
       >
-        <Lock size={28} style={{ color: "var(--primary)" }} />
+        <Lock size={28} style={{ color: "var(--accent)" }} />
       </div>
 
       <div className="text-center">
@@ -74,15 +74,15 @@ export function PinLock({ onVerify }: PinLockProps) {
       </div>
 
       {/* PIN dots */}
-      <div className="flex gap-4">
+      <div className="flex gap-5">
         {Array.from({ length: PIN_LENGTH }, (_, i) => (
           <div
             key={i}
-            className={`h-4 w-4 rounded-full transition-all duration-200 ${
+            className={`h-3.5 w-3.5 rounded-full transition-all duration-200 ${
               error
                 ? "bg-red-500"
                 : i < pin.length
-                  ? "bg-[var(--primary)] scale-110"
+                  ? "bg-[var(--accent)] scale-125"
                   : ""
             }`}
             style={
@@ -103,7 +103,7 @@ export function PinLock({ onVerify }: PinLockProps) {
       )}
 
       {/* Keypad */}
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-3 gap-4">
         {["1", "2", "3", "4", "5", "6", "7", "8", "9", "", "0", "del"].map(
           (key) => {
             if (key === "") return <div key="empty" />;
@@ -113,7 +113,7 @@ export function PinLock({ onVerify }: PinLockProps) {
                   key="del"
                   onClick={handleDelete}
                   disabled={checking || pin.length === 0}
-                  className="flex h-16 w-16 items-center justify-center rounded-2xl text-lg transition-colors active:scale-95 disabled:opacity-30"
+                  className="flex h-[72px] w-[72px] items-center justify-center rounded-2xl text-lg transition-all active:scale-92 disabled:opacity-30 hover:bg-[var(--surface-tertiary)]"
                   style={{ background: "var(--surface-secondary)", color: "var(--text-secondary)" }}
                 >
                   <Delete size={22} />
@@ -125,7 +125,7 @@ export function PinLock({ onVerify }: PinLockProps) {
                 key={key}
                 onClick={() => handleKeypad(key)}
                 disabled={checking}
-                className="flex h-16 w-16 items-center justify-center rounded-2xl text-xl font-semibold transition-colors active:scale-95 disabled:opacity-50"
+                className="flex h-[72px] w-[72px] items-center justify-center rounded-2xl text-xl font-semibold transition-all active:scale-92 disabled:opacity-50 hover:bg-[var(--surface-tertiary)]"
                 style={{ background: "var(--surface-secondary)", color: "var(--text-primary)" }}
               >
                 {key}

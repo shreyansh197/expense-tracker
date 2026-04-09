@@ -117,11 +117,11 @@ export function KpiCards({
 
       {/* ── PRIMARY: Budget Status Hero ── */}
       <m.div
-        className={cn("card-hero relative overflow-hidden rounded-2xl border-l-[3px] p-5 sm:p-6", sc.bg)}
+        className={cn("card-hero relative overflow-hidden rounded-xl border-l-[3px] p-5 sm:p-6", sc.bg)}
         variants={{ hidden: { opacity: 0, y: 12 }, visible: { opacity: 1, y: 0, transition: { duration: duration.emphasis, ease: ease.out } } }}
       >
         <div className="flex items-center justify-between">
-          <div className={cn("flex items-center gap-2 text-sm font-semibold", sc.text)}>
+          <div className={cn("flex items-center gap-2 text-sm font-medium", sc.text)}>
             {status !== "safe" ? <ShieldAlert size={15} className={status === "danger" ? "animate-pulse" : ""} /> : isOverspent ? <AlertTriangle size={15} /> : <PiggyBank size={15} />}
             <span>{isOverspent ? "Ahead of plan" : "You still have"}</span>
           </div>
@@ -132,13 +132,13 @@ export function KpiCards({
             </span>
           )}
         </div>
-        <p className={cn("text-amount mt-1.5 text-3xl sm:text-4xl font-extrabold tracking-tight", sc.text)}>
+        <p className={cn("text-hero-amount mt-2", sc.text)}>
           <AnimatedNumber value={Math.abs(remaining)} format={formatCurrency} />
         </p>
-        <p className="mt-2 text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+        <p className="mt-2.5 text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
           {getStatusCopy(isOverspent, isWarning, daysRemaining, paceToStayUnder, forecastOverBudget, formatCurrency)}
         </p>
-        <div className="mt-3 h-2 w-full overflow-hidden rounded-full" style={{ background: 'var(--surface-secondary)' }} role="progressbar" aria-valuenow={Math.min(budgetUsedPercent, 100)} aria-valuemin={0} aria-valuemax={100} aria-label="Budget used">
+        <div className="mt-3.5 h-1.5 w-full overflow-hidden rounded-full" style={{ background: 'var(--surface-secondary)' }} role="progressbar" aria-valuenow={Math.min(budgetUsedPercent, 100)} aria-valuemin={0} aria-valuemax={100} aria-label="Budget used">
           <m.div
             className={cn("h-full rounded-full", isOverspent ? "bg-red-500" : isWarning ? "bg-amber-500" : "bg-brand")}
             initial={{ width: 0 }}
@@ -192,7 +192,7 @@ export function KpiCards({
         </div>
 
         <div className={cn(
-          "rounded-[0.875rem] border p-3 sm:p-3.5",
+          "rounded-xl border p-3 sm:p-3.5",
           forecastOverBudget ? "border-red-200 bg-red-50 dark:border-red-900/40 dark:bg-red-950/30"
             : forecastWarning ? "border-amber-200 bg-amber-50 dark:border-amber-900/40 dark:bg-amber-950/30"
             : "card-sm"
@@ -240,7 +240,7 @@ export function KpiCards({
       <div>
         <button
           onClick={toggleExpanded}
-          className="flex w-full items-center justify-center gap-1 rounded-lg py-1.5 text-xs font-medium transition-colors hover:text-[var(--text-secondary)]"
+          className="flex w-full items-center justify-center gap-1.5 rounded-lg py-2 px-3 text-xs font-medium transition-all hover:bg-[var(--surface-secondary)]"
           style={{ color: 'var(--text-tertiary)' }}
           aria-expanded={expanded}
         >

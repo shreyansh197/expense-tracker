@@ -68,11 +68,11 @@ export function BottomNav() {
         onClick={handleFabClick}
         aria-label={isBusiness && isBusinessRoute ? "Add ledger" : "Add expense"}
         className={cn(
-          "fixed left-1/2 z-40 flex h-[54px] w-[54px] -translate-x-1/2 items-center justify-center rounded-full text-white shadow-lg shadow-black/15 ring-[3px] ring-white/70 transition-colors lg:hidden",
+          "fixed left-1/2 z-40 flex h-[54px] w-[54px] -translate-x-1/2 items-center justify-center rounded-full text-white transition-colors lg:hidden",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
           accentColor === "emerald"
-            ? "bg-gradient-to-br from-emerald-500 to-emerald-700 hover:from-emerald-600 hover:to-emerald-800 focus-visible:ring-emerald-500"
-            : "bg-gradient-to-br from-accent to-accent/85 hover:from-accent/90 hover:to-accent/75 focus-visible:ring-accent shadow-accent/15"
+            ? "bg-emerald-600 hover:bg-emerald-700 focus-visible:ring-emerald-500 shadow-lg shadow-emerald-600/25"
+            : "bg-accent hover:bg-cta-hover focus-visible:ring-accent shadow-lg shadow-[var(--accent)]/20"
         )}
         style={{
           bottom: `calc(${NAV_HEIGHT}px + env(safe-area-inset-bottom, 0px) + 12px)`,
@@ -87,11 +87,13 @@ export function BottomNav() {
       {/* ─── Nav bar (z-30, below FAB) ─── */}
       <nav
         aria-label="Main navigation"
-        className="fixed bottom-0 left-0 right-0 z-30 border-t backdrop-blur-2xl lg:hidden"
+        className="fixed bottom-0 left-0 right-0 z-30 border-t lg:hidden"
         style={{
           paddingBottom: "env(safe-area-inset-bottom)",
-          background: 'linear-gradient(to top, color-mix(in srgb, var(--surface) 96%, transparent), color-mix(in srgb, var(--surface) 92%, transparent))',
-          borderColor: 'var(--border-subtle)',
+          background: 'color-mix(in srgb, var(--surface) 97%, transparent)',
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
+          borderColor: 'var(--border)',
         }}
       >
         <div
@@ -116,7 +118,7 @@ export function BottomNav() {
                     ? cn(
                         isBiz
                           ? "text-emerald-600 dark:text-emerald-400"
-                          : "text-data-text"
+                          : "text-accent"
                       )
                     : ""
                 )}
@@ -126,8 +128,8 @@ export function BottomNav() {
                   <m.span
                     layoutId="nav-active-indicator"
                     className={cn(
-                      "absolute -top-2 h-[3px] w-6 rounded-full",
-                      isBiz ? "bg-emerald-600 dark:bg-emerald-400" : "bg-data-text"
+                      "absolute -top-2 h-[3px] w-5 rounded-full",
+                      isBiz ? "bg-emerald-600 dark:bg-emerald-400" : "bg-accent"
                     )}
                     transition={springStiff}
                   />

@@ -44,9 +44,10 @@ export function CategoryTrendChart({
           <Tooltip
             formatter={(value: number) => [formatCurrency(value), categoryLabel]}
             contentStyle={{
-              borderRadius: "8px",
+              borderRadius: "12px",
               border: "1px solid var(--chart-tooltip-border, #e5e7eb)",
-              fontSize: "13px",
+              fontSize: "12px",
+              padding: "8px 12px",
               backgroundColor: "var(--chart-tooltip-bg, #fff)",
               color: "var(--chart-tooltip-fg, #111827)",
             }}

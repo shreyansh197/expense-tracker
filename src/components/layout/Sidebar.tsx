@@ -84,7 +84,7 @@ export function Sidebar() {
                 isActive
                   ? isBiz
                     ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400 border-l-[3px] border-emerald-600 dark:border-emerald-400"
-                    : "bg-data-soft text-data-text border-l-[3px] border-data-text"
+                    : "bg-accent-soft text-accent border-l-[3px] border-accent"
                   : "border-l-[3px] border-transparent hover:bg-[var(--surface-secondary)]"
               )}
               style={!isActive ? { color: 'var(--text-secondary)' } : undefined}
@@ -149,7 +149,7 @@ export function Sidebar() {
             "flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all",
             isBusinessRoute
               ? "bg-gradient-to-r from-emerald-600 to-teal-600 text-white hover:from-emerald-700 hover:to-teal-700 shadow-sm shadow-emerald-600/20"
-              : "bg-gradient-to-r from-accent to-accent/85 text-white hover:from-accent/90 hover:to-accent/75 shadow-sm shadow-accent/20"
+              : "bg-accent text-white hover:bg-cta-hover shadow-sm shadow-accent/20"
           )}
           whileTap={{ scale: 0.96 }}
         >
