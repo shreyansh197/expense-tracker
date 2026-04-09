@@ -2,6 +2,8 @@ import { db, migrateFromLocalStorage } from "./db";
 import type { IDBMutation } from "./db";
 import { authFetch, getActiveWorkspaceId, isAuthenticated, subscribeAuth } from "./authClient";
 import { supabase } from "./supabase";
+import { encryptJSON, decryptJSON, hasEncryptionKey } from "./crypto";
+import * as Sentry from "@sentry/nextjs";
 
 // ── Sync logging — visible in browser console for debugging ──
 
@@ -14,6 +16,10 @@ function syncWarn(tag: string, ...args: unknown[]) {
 }
 function syncErr(tag: string, ...args: unknown[]) {
   console.error(`[sync:${tag}]`, ...args);
+  // Report sync errors to Sentry for observability
+  const message = args.map(a => (a instanceof Error ? a.message : String(a))).join(" ");
+  const error = args.find(a => a instanceof Error) as Error | undefined;
+  Sentry.captureException(error ?? new Error(`[sync:${tag}] ${message}`));
 }
 
 // ── Notification system for hooks to react to IDB changes ──
@@ -49,6 +55,21 @@ export function onSyncPhaseChange(fn: (phase: SyncPhase) => void): () => void {
   return () => { _syncPhaseListeners.delete(fn); };
 }
 
+// ── Workspace access denied observable ──
+
+type AccessDeniedListener = (workspaceId: string) => void;
+const _accessDeniedListeners = new Set<AccessDeniedListener>();
+
+export function onWorkspaceAccessDenied(fn: AccessDeniedListener): () => void {
+  _accessDeniedListeners.add(fn);
+  return () => { _accessDeniedListeners.delete(fn); };
+}
+
+function _notifyAccessDenied(workspaceId: string) {
+  syncWarn("pull", `Access denied (403) for workspace ${workspaceId.slice(0, 8)}…`);
+  _accessDeniedListeners.forEach((fn) => fn(workspaceId));
+}
+
 // ── Idempotency key generation ──
 
 let _counter = 0;
@@ -82,8 +103,17 @@ export async function enqueueMutation(
   workspaceId: string,
 ): Promise<void> {
   syncLog("enqueue", `${mutation.table}:${mutation.operation} id=${mutation.id?.slice(0,8)}… key=${mutation.idempotencyKey}`);
+
+  // Encrypt mutation data at rest if encryption key is available
+  let storedData = mutation.data;
+  if (hasEncryptionKey() && mutation.data && Object.keys(mutation.data).length > 0) {
+    const encrypted = await encryptJSON(mutation.data);
+    storedData = { __enc: encrypted };
+  }
+
   await db.mutations.add({
     ...mutation,
+    data: storedData,
     workspaceId,
     createdAt: Date.now(),
   });
@@ -126,8 +156,12 @@ export async function pullChanges(workspaceId?: string): Promise<boolean> {
         params.set("since", syncMeta.cursor);
       }
       syncLog("pull", `Fetching changes for workspace=${wid.slice(0,8)}… since=${useFullSync ? "NONE (forced full sync)" : (syncMeta?.cursor ?? "NONE (no cursor)")}`);
-      const res = await authFetch(`/api/sync/changes?${params}`);
+      const res = await authFetch(`/api/sync/changes?${params}`, { signal: AbortSignal.timeout(15_000) });
       if (!res.ok) {
+        if (res.status === 403) {
+          _notifyAccessDenied(wid);
+          return false;
+        }
         syncErr("pull", `HTTP ${res.status} from /api/sync/changes`);
         try { syncErr("pull", await res.text()); } catch {}
         return false;
@@ -367,9 +401,23 @@ export async function pushMutations(workspaceId?: string): Promise<number> {
     for (let i = 0; i < mutations.length; i += 100) {
       const batch = mutations.slice(i, i + 100);
       try {
+        // Decrypt any encrypted mutation data before sending to server
+        const decryptedBatch = await Promise.all(
+          batch.map(async (m) => {
+            let data = m.data;
+            if (data && typeof data.__enc === "string") {
+              try {
+                data = await decryptJSON<Record<string, unknown>>(data.__enc as string);
+              } catch {
+                syncWarn("push", `Failed to decrypt mutation ${m.idempotencyKey}, sending as-is`);
+              }
+            }
+            return { ...m, data };
+          })
+        );
         const payload = {
           workspaceId: wid,
-          mutations: batch.map(m => ({
+          mutations: decryptedBatch.map(m => ({
             table: m.table,
             operation: m.operation,
             id: m.id,
@@ -382,6 +430,7 @@ export async function pushMutations(workspaceId?: string): Promise<number> {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
+          signal: AbortSignal.timeout(30_000),
         });
         if (res.ok) {
           const body = await res.json();
@@ -397,10 +446,13 @@ export async function pushMutations(workspaceId?: string): Promise<number> {
         } else {
           const bodyText = await res.text().catch(() => "");
           syncErr("push", `HTTP ${res.status} from /api/sync/commit:`, bodyText);
+          if (res.status === 403) {
+            _notifyAccessDenied(wid);
+            break;
+          }
           // 400 = bad request (validation failure) — log details but DON'T delete,
           // these mutations have valid UUIDs so the issue may be transient (schema mismatch etc.)
           // 401 = needs token refresh — authFetch already retried, so give up for this cycle
-          // 403 = not a workspace member — skip for now, don't delete user data
           // Other = server error, retry later
           break;
         }
@@ -549,23 +601,28 @@ async function _doSync() {
     syncLog("doSync", `Skipped: wid=${wid ? wid.slice(0,8)+'…' : 'null'} authenticated=${isAuthenticated()}`);
     return;
   }
-  try {
-    // Background polling should NEVER flash the sync spinner.
-    // The spinner is only shown during explicit user-triggered syncs.
-    // Routine polls that happen to find pending mutations (from settings
-    // reconciliation, rollover auto-computation, etc.) must not cause
-    // visible UI changes.
 
-    if (!_migrated) {
-      syncLog("migrate", "Running one-time migration…");
-      await _migrateStuckData();
-      _migrated = true;
-      syncLog("migrate", "Migration complete");
-    }
-    const applied = await pushMutations(wid);
-    if (applied > 0) _lastPushAt = Date.now();
-    await pullChanges(wid);
-    _setSyncPhase("idle");
+  // Master timeout: abort entire sync cycle after 60s to prevent hangs
+  const masterTimeout = new Promise<never>((_, reject) =>
+    setTimeout(() => reject(new Error("Sync master timeout (60s)")), 60_000)
+  );
+
+  try {
+    await Promise.race([
+      (async () => {
+        if (!_migrated) {
+          syncLog("migrate", "Running one-time migration…");
+          await _migrateStuckData();
+          _migrated = true;
+          syncLog("migrate", "Migration complete");
+        }
+        const applied = await pushMutations(wid);
+        if (applied > 0) _lastPushAt = Date.now();
+        await pullChanges(wid);
+        _setSyncPhase("idle");
+      })(),
+      masterTimeout,
+    ]);
   } catch (err) {
     syncErr("doSync", "Exception:", err);
     _setSyncPhase("error");

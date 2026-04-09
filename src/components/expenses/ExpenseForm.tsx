@@ -168,6 +168,11 @@ export function ExpenseForm({
         return;
       }
 
+      if (parsedAmount > 10_000_000) {
+        setError("Amount cannot exceed 10,000,000");
+        return;
+      }
+
       if (!category) {
         setError("Select a category");
         return;

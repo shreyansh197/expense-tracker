@@ -12,6 +12,7 @@ import { audit } from "@/lib/server/audit";
 import { registerSchema } from "@/lib/validators";
 import { DEFAULT_CATEGORIES } from "@/lib/categories";
 import { rateLimit } from "@/lib/server/rateLimit";
+import { setRefreshTokenCookie } from "@/lib/server/cookies";
 
 export async function POST(req: NextRequest) {
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
@@ -141,7 +142,7 @@ export async function POST(req: NextRequest) {
     ),
   });
 
-  return NextResponse.json(
+  const res = NextResponse.json(
     {
       user: {
         id: result.user.id,
@@ -153,10 +154,11 @@ export async function POST(req: NextRequest) {
         name: result.workspace.name,
       },
       accessToken,
-      refreshToken: result.refreshTokenRaw,
     },
     { status: 201 },
   );
+  setRefreshTokenCookie(res, result.refreshTokenRaw);
+  return res;
   } catch (err) {
     console.error("[register]", err);
     return NextResponse.json(

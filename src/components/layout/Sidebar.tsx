@@ -59,6 +59,11 @@ export function Sidebar() {
         <span className="text-lg font-bold tracking-tight" style={{ color: 'var(--text-primary)' }}>
           ExpenStream
         </span>
+        {settings.businessMode && (
+          <span className="ml-1 inline-flex items-center rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+            Biz
+          </span>
+        )}
       </div>
 
       {/* Navigation */}

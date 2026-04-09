@@ -21,6 +21,8 @@ import {
 } from "@/lib/authClient";
 import { switchSettingsUser, clearSettingsForCurrentUser } from "@/hooks/useSettings";
 import { getDeviceId } from "@/lib/utils";
+import { storeEncryptionKey, clearEncryptionKey, hasEncryptionKey } from "@/lib/crypto";
+import * as Sentry from "@sentry/nextjs";
 
 // ── Context ──────────────────────────────────────────────────
 
@@ -45,12 +47,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     activeWorkspaceId: null,
   }));
 
+  // Fetch workspace encryption key and store in sessionStorage
+  const fetchEncryptionKey = useCallback(async () => {
+    try {
+      const res = await authFetch("/api/auth/encryption-key");
+      if (res.ok) {
+        const { key } = await res.json();
+        if (key) storeEncryptionKey(key);
+      }
+    } catch {
+      // Non-fatal: encryption is best-effort
+    }
+  }, []);
+
   const login = useCallback(
     async (email: string, password: string) => {
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json", "X-Device-Id": getDeviceId() },
         body: JSON.stringify({ email, password }),
+        credentials: "include",
       });
 
       let data;
@@ -65,16 +81,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         user: data.user as AuthUser,
         tokens: {
           accessToken: data.accessToken,
-          refreshToken: data.refreshToken,
         },
         workspaces: data.workspaces,
         activeWorkspaceId: data.activeWorkspaceId,
       });
       switchSettingsUser(data.user.id);
+      fetchEncryptionKey();
 
       return {};
     },
-    [],
+    [fetchEncryptionKey],
   );
 
   const loginWith2FA = useCallback(
@@ -83,6 +99,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         method: "POST",
         headers: { "Content-Type": "application/json", "X-Device-Id": getDeviceId() },
         body: JSON.stringify({ challengeToken, code }),
+        credentials: "include",
       });
 
       let data;
@@ -93,16 +110,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         user: data.user as AuthUser,
         tokens: {
           accessToken: data.accessToken,
-          refreshToken: data.refreshToken,
         },
         workspaces: data.workspaces,
         activeWorkspaceId: data.activeWorkspaceId,
       });
       switchSettingsUser(data.user.id);
+      fetchEncryptionKey();
 
       return {};
     },
-    [],
+    [fetchEncryptionKey],
   );
 
   const register = useCallback(
@@ -111,6 +128,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password, name }),
+        credentials: "include",
       });
 
       let data;
@@ -121,7 +139,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         user: data.user as AuthUser,
         tokens: {
           accessToken: data.accessToken,
-          refreshToken: data.refreshToken,
         },
         workspaces: [
           { id: data.workspace.id, name: data.workspace.name, role: "OWNER" },
@@ -129,10 +146,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         activeWorkspaceId: data.workspace.id,
       });
       switchSettingsUser(data.user.id);
+      fetchEncryptionKey();
 
       return {};
     },
-    [],
+    [fetchEncryptionKey],
   );
 
   const logout = useCallback(async () => {
@@ -142,6 +160,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Best-effort
     }
     clearSettingsForCurrentUser();
+    clearEncryptionKey();
     clearAuthState();
     setAuthState({
       user: null,
@@ -153,7 +172,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const switchWorkspace = useCallback((workspaceId: string) => {
     setAuthState({ activeWorkspaceId: workspaceId });
-  }, []);
+    fetchEncryptionKey();
+  }, [fetchEncryptionKey]);
 
   // ── Restore settings for user already in localStorage on page load ──
   // switchSettingsUser is only called on explicit login/register, but auth state
@@ -161,8 +181,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (state.user?.id) {
       switchSettingsUser(state.user.id);
+      Sentry.setUser({ id: state.user.id, email: state.user.email });
+    } else {
+      Sentry.setUser(null);
     }
-  }, [state.user?.id]);
+  }, [state.user?.id, state.user?.email]);
+
+  // ── Restore encryption key on page load if auth exists but key is gone ──
+  useEffect(() => {
+    if (state.tokens?.accessToken && !hasEncryptionKey()) {
+      fetchEncryptionKey();
+    }
+  }, [state.tokens?.accessToken, fetchEncryptionKey]);
 
   // ── Session heartbeat: detect revoked sessions ────────────
   const logoutRef = useRef(logout);

@@ -19,6 +19,7 @@ import { useSearchParams } from "next/navigation";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { useCalculationsContext } from "@/contexts/CalculationsContext";
 import { ExpensesGraphic } from "@/components/ui/illustrations";
+import { ExpenseExport } from "@/components/expenses/ExpenseExport";
 
 type SortOption = "day-desc" | "day-asc" | "amount-desc" | "amount-asc";
 
@@ -107,6 +108,7 @@ function ExpensesContent() {
           <div className="flex items-center justify-between">
             <MonthSwitcher />
             <div className="flex items-center gap-3">
+              <ExpenseExport expenses={expenses} month={currentMonth} year={currentYear} />
               <SyncIndicator />
               <button
                 onClick={openAddForm}

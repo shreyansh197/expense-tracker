@@ -8,24 +8,32 @@ import {
   REFRESH_TOKEN_TTL_DAYS,
 } from "@/lib/server/tokens";
 import { refreshSchema } from "@/lib/validators";
+import { setRefreshTokenCookie, getRefreshTokenFromCookie } from "@/lib/server/cookies";
 
 export async function POST(req: NextRequest) {
-  let body: unknown;
-  try {
-    body = await req.json();
-  } catch {
-    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+  // Read refresh token from httpOnly cookie first, fall back to body for backwards compatibility
+  let refreshTokenValue = getRefreshTokenFromCookie(req);
+
+  if (!refreshTokenValue) {
+    // Backwards compatibility: read from body during migration period
+    let body: unknown;
+    try {
+      body = await req.json();
+    } catch {
+      return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+    }
+
+    const parsed = refreshSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "refreshToken is required" },
+        { status: 400 },
+      );
+    }
+    refreshTokenValue = parsed.data.refreshToken;
   }
 
-  const parsed = refreshSchema.safeParse(body);
-  if (!parsed.success) {
-    return NextResponse.json(
-      { error: "refreshToken is required" },
-      { status: 400 },
-    );
-  }
-
-  const tokenHash = hashToken(parsed.data.refreshToken);
+  const tokenHash = hashToken(refreshTokenValue);
 
   // Find the matching session
   const session = await prisma.session.findFirst({
@@ -91,8 +99,7 @@ export async function POST(req: NextRequest) {
     data: { lastActiveAt: new Date() },
   });
 
-  return NextResponse.json({
-    accessToken,
-    refreshToken: newRefreshTokenRaw,
-  });
+  const res = NextResponse.json({ accessToken });
+  setRefreshTokenCookie(res, newRefreshTokenRaw);
+  return res;
 }

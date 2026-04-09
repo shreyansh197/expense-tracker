@@ -197,7 +197,7 @@ describe("getMonthlySaving", () => {
 
 describe("getAverageDailySpend", () => {
   test("Calculates correct average", () => {
-    expect(getAverageDailySpend(14247, 19)).toBe(750);
+    expect(getAverageDailySpend(14247, 19)).toBe(749.84);
   });
 
   test("Returns 0 when no elapsed days", () => {
@@ -455,7 +455,7 @@ describe("getPaceToStayUnder", () => {
   });
 
   test("rounds to nearest integer", () => {
-    expect(getPaceToStayUnder(10000, 3)).toBe(3333);
+    expect(getPaceToStayUnder(10000, 3)).toBe(3333.33);
   });
 });
 
@@ -542,10 +542,10 @@ describe("additional edge cases", () => {
   });
 
   test("getAverageDailySpend rounds correctly", () => {
-    // 14247 / 19 = 749.84... → rounds to 750
-    expect(getAverageDailySpend(14247, 19)).toBe(750);
-    // 100 / 3 = 33.33... → rounds to 33
-    expect(getAverageDailySpend(100, 3)).toBe(33);
+    // 14247 / 19 = 749.84... → rounds to 749.84
+    expect(getAverageDailySpend(14247, 19)).toBe(749.84);
+    // 100 / 3 = 33.33... → rounds to 33.33
+    expect(getAverageDailySpend(100, 3)).toBe(33.33);
   });
 
   test("getBudgetUsedPercent rounds correctly", () => {

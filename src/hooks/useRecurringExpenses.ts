@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { useSettings } from "@/hooks/useSettings";
 import { useExpenses } from "@/hooks/useExpenses";
+import { useToast } from "@/components/ui/Toast";
 import type { RecurringExpense } from "@/types";
 
 const APPLIED_KEY = "expenstream-recurring-applied";
@@ -30,6 +31,7 @@ function markApplied(key: string) {
 export function useRecurringExpenses(month: number, year: number) {
   const { settings } = useSettings();
   const { addExpense, expenses, loading } = useExpenses(month, year);
+  const { toast } = useToast();
   const appliedRef = useRef(false);
 
   useEffect(() => {
@@ -59,6 +61,7 @@ export function useRecurringExpenses(month: number, year: number) {
 
     // Apply recurring expenses — dedup using already-fetched expenses list
     (async () => {
+      let appliedCount = 0;
       for (const r of candidates) {
         try {
           // Check if this recurring expense already exists in the fetched data
@@ -82,10 +85,14 @@ export function useRecurringExpenses(month: number, year: number) {
             recurringId: r.id,
           });
           markApplied(getAppliedKey(r.id, month, year));
+          appliedCount++;
         } catch {
           // Silently fail — will retry next time
         }
       }
+      if (appliedCount > 0) {
+        toast(`Applied ${appliedCount} recurring expense${appliedCount > 1 ? "s" : ""}`);
+      }
     })();
-  }, [settings.recurringExpenses, month, year, addExpense, expenses, loading]);
+  }, [settings.recurringExpenses, month, year, addExpense, expenses, loading, toast]);
 }

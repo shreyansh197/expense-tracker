@@ -69,6 +69,8 @@ model Workspace {
   ownerId        String  @map("owner_id") @db.Uuid
   /// Legacy sync code for migration. NULL for new workspaces.
   legacySyncCode String? @unique @map("legacy_sync_code") @db.VarChar(10)
+  /// AES-256 key (base64) for client-side encryption at rest. Generated on first access.
+  encryptionKey  String? @map("encryption_key") @db.VarChar(64)
   createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
   updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz
 
