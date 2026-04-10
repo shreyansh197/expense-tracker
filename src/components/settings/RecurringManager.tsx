@@ -168,20 +168,18 @@ export function RecurringManager() {
               style={{ backgroundColor: cat?.color || "var(--category-fallback)" }}
             />
             <div className="flex-1 min-w-0">
-              <div className="flex items-baseline gap-1.5">
-                <p className="truncate text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
-                  {r.remark}
-                </p>
-                <span className="shrink-0 text-xs" style={{ color: 'var(--text-muted)' }}>
-                  {cat?.label || r.category}
-                </span>
-              </div>
+              <p className="truncate text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
+                {r.remark}
+              </p>
               <div className="flex items-center gap-1.5 mt-0.5">
                 <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>Day {r.day}</span>
                 <span className="text-xs" style={{ color: 'var(--text-muted)' }}>·</span>
                 <span className="text-xs font-semibold" style={{ color: 'var(--text-primary)' }}>{formatCurrency(r.amount)}</span>
               </div>
             </div>
+            <span className="shrink-0 w-20 text-right text-xs" style={{ color: 'var(--text-muted)' }}>
+              {cat?.label || r.category}
+            </span>
             <div className="flex shrink-0 items-center">
               <button
                 onClick={() => handleEdit(r)}
