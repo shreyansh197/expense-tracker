@@ -160,52 +160,55 @@ export function RecurringManager() {
         return (
           <div
             key={r.id}
-            className={`flex items-center gap-3 rounded-lg px-3 py-2.5 ${r.active ? "" : "opacity-60"}`}
+            className={`flex items-center gap-2 rounded-lg px-2.5 py-2 ${r.active ? "" : "opacity-60"}`}
             style={{ background: 'var(--surface-secondary)', border: '1px solid var(--border-subtle)' }}
           >
             <div
-              className="h-2.5 w-2.5 shrink-0 rounded-full"
+              className="h-2 w-2 shrink-0 rounded-full"
               style={{ backgroundColor: cat?.color || "var(--category-fallback)" }}
             />
-            <div className="w-8 shrink-0 text-center">
-              <span className="text-xs font-semibold" style={{ color: 'var(--text-secondary)' }}>{r.day}</span>
-            </div>
             <div className="flex-1 min-w-0">
-              <p className="truncate text-sm" style={{ color: 'var(--text-primary)' }}>
-                {r.remark}
-              </p>
-              <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                {cat?.label || r.category}
-              </p>
+              <div className="flex items-baseline gap-1.5">
+                <p className="truncate text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
+                  {r.remark}
+                </p>
+                <span className="shrink-0 text-xs" style={{ color: 'var(--text-muted)' }}>
+                  {cat?.label || r.category}
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5 mt-0.5">
+                <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>Day {r.day}</span>
+                <span className="text-xs" style={{ color: 'var(--text-muted)' }}>·</span>
+                <span className="text-xs font-semibold" style={{ color: 'var(--text-primary)' }}>{formatCurrency(r.amount)}</span>
+              </div>
             </div>
-            <span className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
-              {formatCurrency(r.amount)}
-            </span>
-            <button
-              onClick={() => handleEdit(r)}
-              className="rounded p-2 flex items-center justify-center transition-colors"
-              style={{ color: 'var(--text-muted)' }}
-              title="Edit"
-              aria-label="Edit recurring expense"
-            >
-              <Pencil size={14} />
-            </button>
-            <button
-              onClick={() => handleToggle(r.id)}
-              className="shrink-0 p-1 transition-colors"
-              style={{ color: 'var(--text-muted)' }}
-              title={r.active ? "Pause" : "Resume"}
-            >
-              {r.active ? <ToggleRight size={20} className="text-ok" /> : <ToggleLeft size={20} />}
-            </button>
-            <button
-              onClick={() => handleDelete(r.id)}
-              className="rounded p-2 flex items-center justify-center transition-colors hover:bg-err-soft hover:text-err"
-              style={{ color: 'var(--text-muted)' }}
-              aria-label="Delete recurring expense"
-            >
-              <Trash2 size={14} />
-            </button>
+            <div className="flex shrink-0 items-center">
+              <button
+                onClick={() => handleEdit(r)}
+                className="rounded p-1.5 transition-colors"
+                style={{ color: 'var(--text-muted)' }}
+                title="Edit"
+                aria-label="Edit recurring expense"
+              >
+                <Pencil size={13} />
+              </button>
+              <button
+                onClick={() => handleToggle(r.id)}
+                className="p-1 transition-colors"
+                style={{ color: 'var(--text-muted)' }}
+                title={r.active ? "Pause" : "Resume"}
+              >
+                {r.active ? <ToggleRight size={18} className="text-ok" /> : <ToggleLeft size={18} />}
+              </button>
+              <button
+                onClick={() => handleDelete(r.id)}
+                className="rounded p-1.5 transition-colors hover:bg-err-soft hover:text-err"
+                style={{ color: 'var(--text-muted)' }}
+                aria-label="Delete recurring expense"
+              >
+                <Trash2 size={13} />
+              </button>
+            </div>
           </div>
         );
       })}

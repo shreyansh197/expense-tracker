@@ -499,6 +499,13 @@ function DashboardContent() {
                   </m.div>
                 ) : (
                   <m.div key="kpi-content" className="dash-section" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
+                  {/* vs last month comparison — inline with section */}
+                  {prevMonthTotal > 0 && (
+                    <div className="mb-2 flex items-center gap-2">
+                      <span className="text-xs font-medium" style={{ color: 'var(--text-muted)' }}>This month</span>
+                      <SpendingComparison currentTotal={monthlyTotal} previousTotal={prevMonthTotal} />
+                    </div>
+                  )}
                   {/* Trophy: month ended under budget */}
                   {daysRemaining === 0 && remaining >= 0 && effectiveBudget > 0 && (
                     <div className="mb-3 flex items-center gap-3 rounded-xl border p-3" style={{ borderColor: 'var(--goal-achieved-border)', background: 'var(--goal-achieved-bg)' }}>
@@ -529,11 +536,6 @@ function DashboardContent() {
                       : 0
                   }
                 />
-                {prevMonthTotal > 0 && (
-                  <div className="mt-2">
-                    <SpendingComparison currentTotal={monthlyTotal} previousTotal={prevMonthTotal} />
-                  </div>
-                )}
                 </m.div>
               )}
               </AnimatePresence>
@@ -610,8 +612,8 @@ function DashboardContent() {
               <>
               {/* Mobile: single card with tab toggle */}
               <div className="dash-section md:hidden">
-                <div className="card overflow-hidden p-5">
-                  <div className="mb-4 flex items-center justify-between">
+                <div className="card overflow-hidden p-4">
+                  <div className="mb-2 flex items-center justify-between">
                     <div className="segmented-control">
                       <button data-active={chartTab === "category" ? "true" : undefined} onClick={() => setChartTab("category")}>Categories</button>
                       <button data-active={chartTab === "daily" ? "true" : undefined} onClick={() => setChartTab("daily")}>Daily</button>
@@ -626,7 +628,7 @@ function DashboardContent() {
                           categoryBudgets={settings.categoryBudgets}
                           expenses={expenses}
                         />
-                        <div className="mt-4">
+                        <div className="mt-3">
                           <CategoryLegend categoryTotals={categoryTotals} onCategoryClick={handleCategoryClick} categoryBudgets={settings.categoryBudgets} />
                         </div>
                       </m.div>

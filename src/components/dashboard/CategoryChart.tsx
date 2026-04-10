@@ -100,7 +100,7 @@ export function CategoryChart({ categoryTotals, onCategoryClick, categoryBudgets
 
   return (
     <div role="img" aria-label={chartLabel}>
-      <div className="mb-2 flex justify-end">
+      <div className="mb-1 flex justify-end">
         <div className="segmented-control" role="group" aria-label="View mode">
           <button
             data-active={!showTable}
