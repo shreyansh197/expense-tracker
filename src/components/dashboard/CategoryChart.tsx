@@ -16,12 +16,14 @@ import { useSettings } from "@/hooks/useSettings";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ChartIllustration } from "@/components/ui/illustrations";
 import type { CategoryTotal, Expense } from "@/types";
+import type { ReactNode } from "react";
 
 interface CategoryChartProps {
   categoryTotals: CategoryTotal[];
   onCategoryClick?: (categorySlug: string) => void;
   categoryBudgets?: Record<string, number>;
   expenses?: Expense[];
+  headerLeft?: ReactNode;
 }
 
 function CustomTooltip({ active, payload, total, budgets, expenseCountMap }: {
@@ -53,7 +55,7 @@ function CustomTooltip({ active, payload, total, budgets, expenseCountMap }: {
   );
 }
 
-export function CategoryChart({ categoryTotals, onCategoryClick, categoryBudgets, expenses }: CategoryChartProps) {
+export function CategoryChart({ categoryTotals, onCategoryClick, categoryBudgets, expenses, headerLeft }: CategoryChartProps) {
   const [showTable, setShowTable] = useState(false);
   const { settings } = useSettings();
   const { formatCurrency } = useCurrency();
@@ -100,7 +102,8 @@ export function CategoryChart({ categoryTotals, onCategoryClick, categoryBudgets
 
   return (
     <div role="img" aria-label={chartLabel}>
-      <div className="mb-1 flex justify-end">
+      <div className="mb-2 flex items-center justify-between gap-2">
+        {headerLeft}
         <div className="segmented-control" role="group" aria-label="View mode">
           <button
             data-active={!showTable}

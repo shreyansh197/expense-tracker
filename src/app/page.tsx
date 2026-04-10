@@ -610,13 +610,15 @@ function DashboardContent() {
               ) : (
               <>
               <div className="dash-section">
-                <div className="card overflow-hidden p-5">
-                  <div className="mb-4 flex items-center justify-between">
+                {(() => {
+                  const tabToggle = (
                     <div className="segmented-control">
                       <button data-active={chartTab === "category" ? "true" : undefined} onClick={() => setChartTab("category")}>Categories</button>
                       <button data-active={chartTab === "daily" ? "true" : undefined} onClick={() => setChartTab("daily")}>Daily</button>
                     </div>
-                  </div>
+                  );
+                  return (
+                <div className="card overflow-hidden p-5">
                   <AnimatePresence mode="wait" initial={false}>
                     {chartTab === "category" ? (
                       <m.div key="cat" initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 8 }} transition={{ duration: 0.2 }}>
@@ -625,6 +627,7 @@ function DashboardContent() {
                           onCategoryClick={handleCategoryClick}
                           categoryBudgets={settings.categoryBudgets}
                           expenses={expenses}
+                          headerLeft={tabToggle}
                         />
                         <div className="mt-4">
                           <CategoryLegend categoryTotals={categoryTotals} onCategoryClick={handleCategoryClick} categoryBudgets={settings.categoryBudgets} />
@@ -637,12 +640,15 @@ function DashboardContent() {
                             dailyTotals={dailyTotals}
                             stackedDailyTotals={stackedDailyTotals}
                             onBarClick={handleDayClick}
+                            headerLeft={tabToggle}
                           />
                         </div>
                       </m.div>
                     )}
                   </AnimatePresence>
                 </div>
+                  );
+                })()}
               </div>
               <RevealOnScroll className="dash-section mt-4" delay={0.15}>
                 <SpendingHeatmap

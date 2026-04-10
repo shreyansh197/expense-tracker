@@ -20,6 +20,7 @@ import { useSettings } from "@/hooks/useSettings";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ChartIllustration } from "@/components/ui/illustrations";
 import type { DailyTotal, StackedDailyTotal, CategoryId } from "@/types";
+import type { ReactNode } from "react";
 
 interface DailyTrendChartProps {
   dailyTotals: DailyTotal[];
@@ -27,6 +28,7 @@ interface DailyTrendChartProps {
   activeCategories?: CategoryId[];
   onBarClick?: (day: number) => void;
   paceTarget?: number;
+  headerLeft?: ReactNode;
 }
 
 function StackedTooltip({ active, payload, label, catMap }: {
@@ -61,7 +63,7 @@ function StackedTooltip({ active, payload, label, catMap }: {
   );
 }
 
-export function DailyTrendChart({ dailyTotals, stackedDailyTotals, activeCategories, onBarClick, paceTarget }: DailyTrendChartProps) {
+export function DailyTrendChart({ dailyTotals, stackedDailyTotals, activeCategories, onBarClick, paceTarget, headerLeft }: DailyTrendChartProps) {
   const [stacked, setStacked] = useState(false);
   const [showTable, setShowTable] = useState(false);
   const { settings } = useSettings();
@@ -115,7 +117,9 @@ export function DailyTrendChart({ dailyTotals, stackedDailyTotals, activeCategor
 
   return (
     <div role="img" aria-label={chartLabel} className="flex h-full flex-col">
-      <div className="mb-1 flex justify-end gap-1">
+      <div className="mb-2 flex items-center justify-between gap-2">
+        {headerLeft}
+        <div className="flex items-center gap-1">
         {hasStackedData && (
           <button
             onClick={() => { setStacked((v) => !v); setShowTable(false); }}
@@ -154,6 +158,7 @@ export function DailyTrendChart({ dailyTotals, stackedDailyTotals, activeCategor
             <Table2 size={13} />
             Table
           </button>
+        </div>
         </div>
       </div>
 
