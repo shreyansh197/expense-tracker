@@ -707,12 +707,18 @@ button, a {
   border-radius: 0.625rem;
 }
 .segmented-control button {
-  padding: 6px 16px;
+  padding: 5px 10px;
   font-size: 0.75rem;
   font-weight: 500;
   border-radius: 0.5rem;
   color: var(--text-tertiary);
   transition: all 0.15s cubic-bezier(0.22, 1, 0.36, 1);
+  white-space: nowrap;
+}
+@media (min-width: 640px) {
+  .segmented-control button {
+    padding: 6px 16px;
+  }
 }
 .segmented-control button[data-active="true"] {
   background: var(--surface);

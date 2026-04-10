@@ -117,7 +117,7 @@ export function DailyTrendChart({ dailyTotals, stackedDailyTotals, activeCategor
 
   return (
     <div role="img" aria-label={chartLabel} className="flex h-full flex-col">
-      <div className="mb-2 flex items-center justify-between gap-2">
+      <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
         {headerLeft}
         <div className="flex items-center gap-1">
         {hasStackedData && (

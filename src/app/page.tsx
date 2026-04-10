@@ -635,7 +635,7 @@ function DashboardContent() {
                       </m.div>
                     ) : (
                       <m.div key="daily" initial={{ opacity: 0, x: 8 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -8 }} transition={{ duration: 0.2 }}>
-                        <div className="min-h-[280px]">
+                        <div className="h-[320px]">
                           <DailyTrendChart
                             dailyTotals={dailyTotals}
                             stackedDailyTotals={stackedDailyTotals}

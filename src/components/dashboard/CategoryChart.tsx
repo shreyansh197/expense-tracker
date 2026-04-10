@@ -102,7 +102,7 @@ export function CategoryChart({ categoryTotals, onCategoryClick, categoryBudgets
 
   return (
     <div role="img" aria-label={chartLabel}>
-      <div className="mb-2 flex items-center justify-between gap-2">
+      <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
         {headerLeft}
         <div className="segmented-control" role="group" aria-label="View mode">
           <button
