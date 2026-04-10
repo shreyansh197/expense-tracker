@@ -52,6 +52,7 @@ export function BottomNav() {
   const accentColor = isBusiness && isBusinessRoute ? "emerald" : "blue";
 
   const handleFabClick = () => {
+    if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate(50);
     if (isBusiness && isBusinessRoute) {
       openLedgerForm();
     } else {

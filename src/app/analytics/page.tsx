@@ -111,7 +111,7 @@ function AnalyticsContent() {
       : history.monthOverMonthChange > 5
         ? "var(--danger)"
         : history.monthOverMonthChange < -5
-          ? "#10B981"
+          ? "var(--success)"
           : "var(--text-secondary)";
 
   return (
@@ -258,12 +258,12 @@ function AnalyticsContent() {
             transition={{ delay: 0.2 }}
           >
             <div className="flex items-center gap-1.5">
-              <Zap size={13} style={{ color: anomalies.length > 0 ? "#F59E0B" : "var(--text-muted)" }} />
+              <Zap size={13} style={{ color: anomalies.length > 0 ? "var(--warning)" : "var(--text-muted)" }} />
               <span className="text-xs uppercase tracking-wider font-semibold" style={{ color: "var(--text-muted)" }}>
                 Anomalies
               </span>
             </div>
-            <span className="text-lg font-bold" style={{ color: anomalies.length > 0 ? "#F59E0B" : "var(--text-primary)" }}>
+            <span className="text-lg font-bold" style={{ color: anomalies.length > 0 ? "var(--warning)" : "var(--text-primary)" }}>
               {anomalies.length}
             </span>
             <span className="text-xs" style={{ color: "var(--text-tertiary)" }}>

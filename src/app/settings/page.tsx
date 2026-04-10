@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo, lazy, Suspense } from "react";
 import { AppShell } from "@/components/layout/AppShell";
 import { useSettings } from "@/hooks/useSettings";
 import { useCurrency } from "@/hooks/useCurrency";
@@ -20,18 +20,22 @@ import { SettingsAccordion, AccordionSection } from "@/components/settings/Setti
 import { AccountCard } from "@/components/settings/AccountCard";
 import { SecurityCard } from "@/components/settings/SecurityCard";
 import { WorkspaceMembersCard } from "@/components/settings/WorkspaceMembersCard";
-import { CategoryManager } from "@/components/settings/CategoryManager";
-import { RecurringManager } from "@/components/settings/RecurringManager";
-import { GoalsManager } from "@/components/settings/GoalsManager";
-import { ExportImportWizard } from "@/components/settings/ExportImportWizard";
-import { AutoRulesManager } from "@/components/settings/AutoRulesManager";
-import { DataAccountManagement } from "@/components/settings/DataAccountManagement";
+const CategoryManager = lazy(() => import("@/components/settings/CategoryManager").then(m => ({ default: m.CategoryManager })));
+const RecurringManager = lazy(() => import("@/components/settings/RecurringManager").then(m => ({ default: m.RecurringManager })));
+const GoalsManager = lazy(() => import("@/components/settings/GoalsManager").then(m => ({ default: m.GoalsManager })));
+const ExportImportWizard = lazy(() => import("@/components/settings/ExportImportWizard").then(m => ({ default: m.ExportImportWizard })));
+const AutoRulesManager = lazy(() => import("@/components/settings/AutoRulesManager").then(m => ({ default: m.AutoRulesManager })));
+const DataAccountManagement = lazy(() => import("@/components/settings/DataAccountManagement").then(m => ({ default: m.DataAccountManagement })));
 import { SettingsFooterLogout } from "@/components/settings/SettingsFooterLogout";
 import { usePinLock } from "@/hooks/usePinLock";
 import { PageTransition } from "@/components/ui/PageTransition";
 import { SettingsGraphic } from "@/components/ui/illustrations";
 import { ReflectiveCharacter } from "@/components/ui/illustrations/characters";
 import { fetchRates, getRateInfo, clearRateCache } from "@/lib/exchangeRates";
+
+function LazyFallback() {
+  return <div className="flex items-center justify-center py-12"><div className="h-6 w-6 animate-spin rounded-full border-2 border-current border-t-transparent" style={{ color: 'var(--text-muted)' }} /></div>;
+}
 
 /** Shows live rate source, sample conversions, and a refresh button */
 function RateSourceInfo({ baseCurrency }: { baseCurrency: string }) {
@@ -647,7 +651,7 @@ export default function SettingsPage() {
             iconColor="bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400"
             className={!isSectionVisible('categories') ? 'hidden' : ''}
           >
-            <CategoryManager />
+            <Suspense fallback={<LazyFallback />}><CategoryManager /></Suspense>
           </AccordionSection>
 
           {/* ─── Recurring Expenses ─── */}
@@ -664,7 +668,7 @@ export default function SettingsPage() {
             iconColor="bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400"
             className={!isSectionVisible('recurring') ? 'hidden' : ''}
           >
-            <RecurringManager />
+            <Suspense fallback={<LazyFallback />}><RecurringManager /></Suspense>
           </AccordionSection>
 
           {/* ─── Savings Goals ─── */}
@@ -677,7 +681,7 @@ export default function SettingsPage() {
             iconColor="bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400"
             className={!isSectionVisible('goals') ? 'hidden' : ''}
           >
-            <GoalsManager />
+            <Suspense fallback={<LazyFallback />}><GoalsManager /></Suspense>
           </AccordionSection>
 
           {/* ─── Budget Rollover ─── */}
@@ -748,7 +752,7 @@ export default function SettingsPage() {
             iconColor="bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400"
             className={!isSectionVisible('rules') ? 'hidden' : ''}
           >
-            <AutoRulesManager />
+            <Suspense fallback={<LazyFallback />}><AutoRulesManager /></Suspense>
           </AccordionSection>
 
           {/* ─── Export & Import ─── */}
@@ -760,7 +764,7 @@ export default function SettingsPage() {
             iconColor="bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400"
             className={!isSectionVisible('export-import') ? 'hidden' : ''}
           >
-            <ExportImportWizard />
+            <Suspense fallback={<LazyFallback />}><ExportImportWizard /></Suspense>
           </AccordionSection>
 
           {/* ─── Workspace Removal ─── */}
@@ -772,7 +776,7 @@ export default function SettingsPage() {
             iconColor="bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400"
             className={!isSectionVisible('data-management') ? 'hidden' : ''}
           >
-            <DataAccountManagement />
+            <Suspense fallback={<LazyFallback />}><DataAccountManagement /></Suspense>
           </AccordionSection>
           </div>
 

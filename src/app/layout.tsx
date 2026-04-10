@@ -56,7 +56,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body>
+      <body className="transition-colors duration-200">
         <Providers>{children}</Providers>
         <ServiceWorkerRegistration />
       </body>

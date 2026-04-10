@@ -213,6 +213,7 @@ export function ExpenseForm({
         const catLabel = allCategories.find(c => c.id === category)?.label ?? category;
         const displaySymbol = multiCurrency && expenseCurrency ? getCurrencySymbol(expenseCurrency) : symbol;
         toast(editExpense ? `${displaySymbol}${parsedAmount} in ${catLabel} updated` : `${displaySymbol}${parsedAmount} added to ${catLabel}`);
+        if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate([30, 30, 30]);
         // Brief success flash before closing
         setShowSuccess(true);
         setTimeout(() => {
