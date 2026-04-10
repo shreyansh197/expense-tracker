@@ -377,6 +377,8 @@ function DashboardContent() {
 
   const showWelcome = !loading && !welcomeDismissed && expenses.length === 0;
 
+  const [chartTab, setChartTab] = useState<"category" | "daily">("category");
+
   const visibleSections = getVisibleSections(settings.dashboardLayout);
 
   const handleSaveLayout = useCallback((layout: DashboardLayout) => {
@@ -588,69 +590,59 @@ function DashboardContent() {
               <div key="charts">
               <AnimatePresence mode="wait">
                 {loading ? (
-                  <m.div key="chart-skeleton" className="dash-section grid gap-4 md:grid-cols-2" initial={{ opacity: 0.6 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
-                    <SkeletonChart />
+                  <m.div key="chart-skeleton" className="dash-section" initial={{ opacity: 0.6 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
                     <SkeletonChart />
                   </m.div>
                 ) : expenses.length === 0 ? (
-                <div className="dash-section relative grid gap-4 md:grid-cols-2">
-                  <div className="card relative overflow-hidden p-5">
-                    <div className="flex items-center justify-between">
-                    <h3 className="relative text-section-title mb-4">Category Breakdown</h3>
+                <div className="dash-section card relative overflow-hidden p-5">
+                  <div className="flex items-center justify-between">
+                    <h3 className="relative text-section-title mb-4">Spending Insights</h3>
                     <WavePatternGraphic />
-                    </div>
-                    <div className="relative flex h-[220px] items-center justify-center">
-                      <div className="flex flex-col items-center text-center">
-                        <ChartIllustration size={120} />
-                        <p className="mt-2 text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Preview</p>
-                        <p className="mt-1 text-xs" style={{ color: 'var(--text-muted)' }}>Your spending breakdown will appear here</p>
-                      </div>
-                    </div>
                   </div>
-                  <div className="card relative overflow-hidden p-5">
-                    <div className="flex items-center justify-between">
-                    <h3 className="relative text-section-title mb-4">Daily Spending Trend</h3>
-                    <WavePatternGraphic />
-                    </div>
-                    <div className="relative flex h-[220px] items-center justify-center">
-                      <div className="flex flex-col items-center text-center">
-                        <ChartIllustration size={120} />
-                        <p className="mt-2 text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Preview</p>
-                        <p className="mt-1 text-xs" style={{ color: 'var(--text-muted)' }}>Your daily trend will appear here</p>
-                      </div>
+                  <div className="relative flex h-[220px] items-center justify-center">
+                    <div className="flex flex-col items-center text-center">
+                      <ChartIllustration size={120} />
+                      <p className="mt-2 text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Preview</p>
+                      <p className="mt-1 text-xs" style={{ color: 'var(--text-muted)' }}>Your spending charts will appear here</p>
                     </div>
                   </div>
                 </div>
               ) : (
               <>
-              <div className="dash-section grid gap-4 md:grid-cols-2">
-                <RevealOnScroll className="card p-5">
-                  <h3 className="text-section-title mb-4">
-                    Category Breakdown
-                  </h3>
-                  <CategoryChart
-                    categoryTotals={categoryTotals}
-                    onCategoryClick={handleCategoryClick}
-                    categoryBudgets={settings.categoryBudgets}
-                    expenses={expenses}
-                  />
-                  <div className="mt-4">
-                    <CategoryLegend categoryTotals={categoryTotals} onCategoryClick={handleCategoryClick} categoryBudgets={settings.categoryBudgets} />
+              <div className="dash-section">
+                <div className="card overflow-hidden p-5">
+                  <div className="mb-4 flex items-center justify-between">
+                    <div className="segmented-control">
+                      <button data-active={chartTab === "category" ? "true" : undefined} onClick={() => setChartTab("category")}>Categories</button>
+                      <button data-active={chartTab === "daily" ? "true" : undefined} onClick={() => setChartTab("daily")}>Daily</button>
+                    </div>
                   </div>
-                </RevealOnScroll>
-
-                <RevealOnScroll className="card flex flex-col p-5" delay={0.1}>
-                  <h3 className="text-section-title mb-4">
-                    Daily Spending Trend
-                  </h3>
-                  <div className="flex-1 min-h-[280px]">
-                  <DailyTrendChart
-                    dailyTotals={dailyTotals}
-                    stackedDailyTotals={stackedDailyTotals}
-                    onBarClick={handleDayClick}
-                  />
-                  </div>
-                </RevealOnScroll>
+                  <AnimatePresence mode="wait" initial={false}>
+                    {chartTab === "category" ? (
+                      <m.div key="cat" initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 8 }} transition={{ duration: 0.2 }}>
+                        <CategoryChart
+                          categoryTotals={categoryTotals}
+                          onCategoryClick={handleCategoryClick}
+                          categoryBudgets={settings.categoryBudgets}
+                          expenses={expenses}
+                        />
+                        <div className="mt-4">
+                          <CategoryLegend categoryTotals={categoryTotals} onCategoryClick={handleCategoryClick} categoryBudgets={settings.categoryBudgets} />
+                        </div>
+                      </m.div>
+                    ) : (
+                      <m.div key="daily" initial={{ opacity: 0, x: 8 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -8 }} transition={{ duration: 0.2 }}>
+                        <div className="min-h-[280px]">
+                          <DailyTrendChart
+                            dailyTotals={dailyTotals}
+                            stackedDailyTotals={stackedDailyTotals}
+                            onBarClick={handleDayClick}
+                          />
+                        </div>
+                      </m.div>
+                    )}
+                  </AnimatePresence>
+                </div>
               </div>
               <RevealOnScroll className="dash-section mt-4" delay={0.15}>
                 <SpendingHeatmap
