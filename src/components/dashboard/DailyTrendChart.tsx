@@ -117,14 +117,14 @@ export function DailyTrendChart({ dailyTotals, stackedDailyTotals, activeCategor
 
   return (
     <div role="img" aria-label={chartLabel} className="flex h-full flex-col">
-      <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+      <div className="mb-2 flex items-center justify-between gap-2">
         {headerLeft}
         <div className="flex items-center gap-1">
         {hasStackedData && (
           <button
             onClick={() => { setStacked((v) => !v); setShowTable(false); }}
             className={cn(
-              "flex items-center gap-1 rounded-md px-2 py-1 text-xs transition-colors",
+              "flex items-center justify-center rounded-md p-1.5 text-xs transition-colors",
               stacked
                 ? "bg-brand-soft text-brand"
                 : ""
@@ -134,9 +134,9 @@ export function DailyTrendChart({ dailyTotals, stackedDailyTotals, activeCategor
             onMouseLeave={e => { if (!stacked) e.currentTarget.style.background = ''; }}
             aria-label={stacked ? "Show simple bars" : "Stack by category"}
             aria-pressed={stacked}
+            title={stacked ? "Show simple bars" : "Stack by category"}
           >
-            <Layers size={13} />
-            Stacked
+            <Layers size={14} />
           </button>
         )}
         <div className="segmented-control" role="group" aria-label="View mode">
