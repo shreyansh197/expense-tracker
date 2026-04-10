@@ -1130,15 +1130,7 @@ input[type="password"]::-ms-clear {
 
 /* ── Cross-platform polish ─────────────────────────────────── */
 
-/* Container query support for chart cards */
-.card {
-  container-type: inline-size;
-}
 
-/* Compact chart styles in narrow containers */
-@container (max-width: 320px) {
-  .text-section-title { font-size: 0.8125rem; }
-}
 
 /* Reduce motion for accessibility */
 @media (prefers-reduced-motion: reduce) {
@@ -1156,11 +1148,6 @@ input[type="password"]::-ms-clear {
 
 /* Touch device optimizations */
 @media (pointer: coarse) {
-  /* Ensure minimum 44px touch targets */
-  button, a, [role="button"] {
-    min-height: 44px;
-    min-width: 44px;
-  }
   /* Disable hover effects that cause stickiness on touch */
   .hover-lift:hover { transform: none; box-shadow: var(--card-shadow); }
 }
@@ -1172,12 +1159,7 @@ input[type="password"]::-ms-clear {
   }
 }
 
-/* High-DPI screen optimizations */
-@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-  .card {
-    border-width: 0.5px;
-  }
-}
+
 
 @keyframes et-icon-scale {
   from { opacity: 0; transform: scale(0.75); }

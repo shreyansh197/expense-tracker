@@ -398,7 +398,7 @@ function DashboardContent() {
   };
 
   return (
-        <PageTransition className="relative mx-auto min-h-[80vh] max-w-4xl xl:max-w-6xl space-y-8 sm:space-y-10 p-4 sm:p-6 lg:p-8">
+        <PageTransition className="relative mx-auto min-h-[80vh] max-w-4xl xl:max-w-6xl space-y-5 sm:space-y-6 p-4 sm:p-6 lg:p-8">
         {/* Header — hero zone */}
         <m.div
           className="zone-header dash-section relative z-40 overflow-hidden rounded-2xl p-5 sm:p-6"
@@ -451,8 +451,8 @@ function DashboardContent() {
               </p>
             </div>
           )}
-          <div data-tour="dashboard" className="flex items-center justify-between gap-2 overflow-hidden">
-            <div className="min-w-0">
+          <div data-tour="dashboard" className="flex items-center justify-between gap-2">
+            <div className="min-w-0 shrink-1">
               <MonthSwitcher />
             </div>
             <div className="flex shrink-0 items-center gap-2">
@@ -488,7 +488,7 @@ function DashboardContent() {
         )}
 
         {/* ── Dashboard sections rendered in user-customized order ── */}
-        <m.div initial="initial" animate="animate" variants={staggerLoose} className="space-y-8 sm:space-y-10">
+        <m.div initial="initial" animate="animate" variants={staggerLoose} className="space-y-5 sm:space-y-6">
         {visibleSections.map((sectionId) => {
           const renderer: Record<DashboardSectionId, () => ReactNode> = {
             kpi: () => (
@@ -530,7 +530,7 @@ function DashboardContent() {
                   }
                 />
                 {prevMonthTotal > 0 && (
-                  <div className="mt-3 flex justify-end">
+                  <div className="mt-2">
                     <SpendingComparison currentTotal={monthlyTotal} previousTotal={prevMonthTotal} />
                   </div>
                 )}
@@ -562,7 +562,7 @@ function DashboardContent() {
             ),
 
             subscriptions: () => (
-              <div key="subscriptions" className="space-y-6 sm:space-y-8">
+              <div key="subscriptions" className="space-y-4 sm:space-y-5">
                 {/* Subscriptions shown inside alerts section when budget is set; standalone fallback here */}
                 {!(expenses.length > 0 && effectiveBudget > 0) && (settings.recurringExpenses ?? []).length > 0 && (
                   <div>

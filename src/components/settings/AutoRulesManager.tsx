@@ -208,7 +208,7 @@ export function AutoRulesManager() {
           </div>
           <button
             onClick={() => handleEdit(rule)}
-            className="rounded p-2 min-h-11 min-w-11 flex items-center justify-center transition-colors"
+            className="rounded p-2 flex items-center justify-center transition-colors"
             style={{ color: 'var(--text-muted)' }}
             title="Edit rule"
           >
@@ -227,7 +227,7 @@ export function AutoRulesManager() {
           </button>
           <button
             onClick={() => handleDelete(rule.id)}
-            className="rounded p-2 min-h-11 min-w-11 flex items-center justify-center transition-colors hover:bg-err-soft hover:text-err"
+            className="rounded p-2 flex items-center justify-center transition-colors hover:bg-err-soft hover:text-err"
             style={{ color: 'var(--text-muted)' }}
           >
             <Trash2 size={14} />

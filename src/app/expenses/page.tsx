@@ -102,7 +102,7 @@ function ExpensesContent() {
   };
 
   return (
-      <PageTransition className="relative mx-auto min-h-[80vh] max-w-4xl xl:max-w-6xl space-y-6 sm:space-y-8 p-4 sm:p-6 lg:p-8">
+      <PageTransition className="relative mx-auto min-h-[80vh] max-w-4xl xl:max-w-6xl space-y-5 sm:space-y-6 p-4 sm:p-6 lg:p-8">
         {/* Header — hero zone */}
         <div className="zone-header">
           <div className="flex items-center justify-between">

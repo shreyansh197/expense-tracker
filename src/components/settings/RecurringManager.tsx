@@ -183,7 +183,7 @@ export function RecurringManager() {
             </span>
             <button
               onClick={() => handleEdit(r)}
-              className="rounded p-2 min-h-11 min-w-11 flex items-center justify-center transition-colors"
+              className="rounded p-2 flex items-center justify-center transition-colors"
               style={{ color: 'var(--text-muted)' }}
               title="Edit"
               aria-label="Edit recurring expense"
@@ -192,7 +192,7 @@ export function RecurringManager() {
             </button>
             <button
               onClick={() => handleToggle(r.id)}
-              className="transition-colors"
+              className="shrink-0 p-1 transition-colors"
               style={{ color: 'var(--text-muted)' }}
               title={r.active ? "Pause" : "Resume"}
             >
@@ -200,7 +200,7 @@ export function RecurringManager() {
             </button>
             <button
               onClick={() => handleDelete(r.id)}
-              className="rounded p-2 min-h-11 min-w-11 flex items-center justify-center transition-colors hover:bg-err-soft hover:text-err"
+              className="rounded p-2 flex items-center justify-center transition-colors hover:bg-err-soft hover:text-err"
               style={{ color: 'var(--text-muted)' }}
               aria-label="Delete recurring expense"
             >
