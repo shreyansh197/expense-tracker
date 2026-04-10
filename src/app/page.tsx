@@ -627,7 +627,6 @@ function DashboardContent() {
                           onCategoryClick={handleCategoryClick}
                           categoryBudgets={settings.categoryBudgets}
                           expenses={expenses}
-                          compact
                         />
                         <div className="mt-3">
                           <CategoryLegend categoryTotals={categoryTotals} onCategoryClick={handleCategoryClick} categoryBudgets={settings.categoryBudgets} />
@@ -641,7 +640,6 @@ function DashboardContent() {
                             stackedDailyTotals={stackedDailyTotals}
                             onBarClick={handleDayClick}
                             paceTarget={paceToStayUnder}
-                            compact
                           />
                         </div>
                       </m.div>
