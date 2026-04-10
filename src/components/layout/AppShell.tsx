@@ -18,6 +18,9 @@ import { onWorkspaceAccessDenied } from "@/lib/syncEngine";
 import { useToast } from "@/components/ui/Toast";
 import { PinLock } from "@/components/app/PinLock";
 import { usePinLock } from "@/hooks/usePinLock";
+import { usePullToRefresh } from "@/hooks/usePullToRefresh";
+import { PullToRefreshIndicator } from "@/components/ui/PullToRefreshIndicator";
+import { OfflineBanner } from "@/components/sync/SyncIndicator";
 
 function AppShellInner({ children }: { children: React.ReactNode }) {
   const [showShortcuts, setShowShortcuts] = useState(false);
@@ -25,6 +28,15 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
   useKeyboardShortcuts(() => setShowShortcuts(true));
   const { nextMonth, prevMonth } = useUIStore();
   const { toast } = useToast();
+
+  // Pull-to-refresh: reload current page data
+  const handleRefresh = useCallback(async () => {
+    if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate(30);
+    window.dispatchEvent(new CustomEvent("pull-to-refresh"));
+    // Small delay so the spinner feels responsive
+    await new Promise((r) => setTimeout(r, 600));
+  }, []);
+  const { pulling, pullDistance, refreshing, ready } = usePullToRefresh({ onRefresh: handleRefresh });
 
   // Listen for 403 workspace access denied from sync engine
   useEffect(() => {
@@ -58,6 +70,7 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
 
   return (
     <>
+      <PullToRefreshIndicator pulling={pulling} pullDistance={pullDistance} refreshing={refreshing} ready={ready} />
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[300] focus:rounded-lg focus:bg-brand focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-white focus:shadow-lg"
@@ -66,6 +79,7 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
       </a>
       <ErrorBoundary>
         <CalculationsProvider>
+          <OfflineBanner />
           {accessDenied && (
             <div className="flex items-center gap-2 bg-red-500/10 px-4 py-2.5 text-sm font-medium text-red-600 dark:text-red-400" role="alert">
               <span className="flex-1">You no longer have access to this workspace. Sync has been paused.</span>

@@ -68,6 +68,7 @@ export function BottomNav() {
         data-tour="fab"
         onClick={handleFabClick}
         aria-label={isBusiness && isBusinessRoute ? "Add ledger" : "Add expense"}
+        title={isBusiness && isBusinessRoute ? "Add ledger (Ctrl+N)" : "Add expense (Ctrl+N)"}
         className={cn(
           "fixed left-1/2 z-40 flex h-[54px] w-[54px] -translate-x-1/2 items-center justify-center rounded-full text-white transition-colors lg:hidden",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",

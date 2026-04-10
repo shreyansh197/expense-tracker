@@ -533,7 +533,7 @@ export function ExpenseForm({
       <m.button
         type="submit"
         disabled={submitting}
-        className="btn-primary w-full justify-center gap-2 rounded-xl py-2.5"
+        className="btn-primary btn-lg w-full justify-center"
         whileTap={{ scale: 0.97 }}
       >
         {submitting && <Loader2 size={16} className="animate-spin" />}

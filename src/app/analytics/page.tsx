@@ -26,6 +26,8 @@ import {
   Award,
 } from "lucide-react";
 import { ReflectiveCharacter } from "@/components/ui/illustrations/characters";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { ChartIllustration } from "@/components/ui/illustrations";
 
 export default function AnalyticsPage() {
   return (
@@ -136,6 +138,16 @@ function AnalyticsContent() {
           <MonthSwitcher />
         </div>
 
+        {/* Empty state when no spending data exists */}
+        {history.months.length === 0 ? (
+          <EmptyState
+            icon={BarChart3}
+            illustration={<ChartIllustration size={140} />}
+            title="No analytics yet"
+            description="Start adding expenses to see spending trends, patterns, and insights here."
+          />
+        ) : (
+        <>
         {/* Monthly Spending Trend */}
         <m.div
           className="card p-5"
@@ -553,6 +565,8 @@ function AnalyticsContent() {
               })}
             </div>
           </m.div>
+        )}
+        </>
         )}
       </PageTransition>
   );

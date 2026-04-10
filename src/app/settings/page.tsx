@@ -225,7 +225,7 @@ function PinLockSettings() {
           <div className="flex gap-2">
             <button
               onClick={handleSetup}
-              className="btn-primary rounded-xl px-4 py-2 text-sm"
+              className="btn-primary btn-md"
             >
               {step === "idle" ? "Set Up PIN" : step === "setup" ? "Next" : "Confirm"}
             </button>
@@ -585,7 +585,7 @@ export default function SettingsPage() {
                 <button
                   onClick={handleSalaryUpdate}
                   disabled={saving}
-                  className="btn-primary rounded-xl px-4 py-2.5"
+                  className="btn-primary btn-md"
                 >
                   {saving ? "Saving..." : "Update"}
                 </button>
@@ -628,7 +628,7 @@ export default function SettingsPage() {
                   <button
                     onClick={handleMonthBudgetUpdate}
                     disabled={saving}
-                    className="btn-primary rounded-xl px-4 py-2.5"
+                    className="btn-primary btn-md"
                   >
                     {saving ? "..." : "Set"}
                   </button>

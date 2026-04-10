@@ -247,7 +247,7 @@ export function DashboardCustomizer({ layout, onSave }: DashboardCustomizerProps
                 </button>
                 <button
                   onClick={handleSave}
-                  className="btn-primary rounded-xl px-5 py-2"
+                  className="btn-primary btn-md"
                 >
                   Save Layout
                 </button>

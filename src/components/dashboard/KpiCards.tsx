@@ -97,6 +97,8 @@ export function KpiCards({
       initial="hidden"
       animate="visible"
       variants={{ visible: { transition: { staggerChildren: motionStagger.normal } } }}
+      aria-live="polite"
+      aria-atomic="true"
     >
       {/* ── Budget-not-set banner ── */}
       {salary <= 0 && (

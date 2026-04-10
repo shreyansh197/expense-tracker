@@ -138,13 +138,14 @@ export function Sidebar() {
         <m.button
           data-tour="fab-desktop"
           onClick={() => {
+            if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate(50);
             if (isBusinessRoute) {
               useUIStore.getState().openLedgerForm();
             } else {
               openAddForm();
             }
           }}
-          title={isBusinessRoute ? "Add Ledger" : "Add Expense"}
+          title={isBusinessRoute ? "Add Ledger (Ctrl+N)" : "Add Expense (Ctrl+N)"}
           className={cn(
             "flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all",
             isBusinessRoute

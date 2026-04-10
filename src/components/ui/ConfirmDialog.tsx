@@ -173,7 +173,7 @@ function ConfirmDialogInner({
             <div className="mt-4 flex justify-end gap-2">
               <button
                 onClick={handleCancel}
-                className="rounded-lg px-4 py-2 text-sm font-medium transition-colors hover:bg-[var(--surface-secondary)]"
+                className="btn-ghost btn-md"
                 style={{ color: 'var(--text-primary)' }}
               >
                 {pending.options.cancelLabel || "Cancel"}
@@ -186,7 +186,7 @@ function ConfirmDialogInner({
                     : false
                 }
                 className={cn(
-                  "rounded-lg px-4 py-2 text-sm font-medium disabled:opacity-40",
+                  "btn-md disabled:opacity-40",
                   variantColors[pending.options.variant || "default"].button
                 )}
               >

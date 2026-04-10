@@ -316,7 +316,9 @@ export function ExpenseList({
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" aria-live="polite">
+      {/* Screen reader expense count announcement */}
+      <p className="sr-only">{filtered.length} expense{filtered.length !== 1 ? "s" : ""} shown</p>
       {/* Batch action bar */}
       {selectedIds.size > 0 && (
         <div className="sticky top-0 z-10 flex items-center justify-between rounded-xl border border-brand-border bg-brand-soft px-4 py-2.5">
@@ -326,7 +328,7 @@ export function ExpenseList({
           <div className="flex items-center gap-2">
             <button
               onClick={handleBulkDelete}
-              className="btn-danger gap-1.5 rounded-lg px-3 py-1.5 text-xs"
+              className="btn-danger btn-sm"
             >
               <Trash2 size={12} />
               Delete
