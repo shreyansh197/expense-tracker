@@ -60,7 +60,7 @@ export function Sidebar() {
           ExpenStream
         </span>
         {settings.businessMode && (
-          <span className="ml-1 inline-flex items-center rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+          <span className="ml-1 inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider" style={{ background: 'var(--biz-accent-soft)', color: 'var(--biz-accent-text)' }}>
             Biz
           </span>
         )}
@@ -83,7 +83,7 @@ export function Sidebar() {
                 "flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-all duration-200 justify-start",
                 isActive
                   ? isBiz
-                    ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400 border-l-[3px] border-emerald-600 dark:border-emerald-400"
+                    ? "border-l-[3px] bg-[var(--biz-accent-soft)] text-[var(--biz-accent-text)] border-[var(--biz-accent)]"
                     : "bg-accent-soft text-accent border-l-[3px] border-accent"
                   : "border-l-[3px] border-transparent hover:bg-[var(--surface-secondary)]"
               )}
@@ -114,7 +114,7 @@ export function Sidebar() {
             <m.div
               className={cn(
                 "h-full rounded-full",
-                overBudget ? "bg-red-500" : pct > 80 ? "bg-amber-500" : "bg-brand"
+                overBudget ? "bg-err" : pct > 80 ? "bg-warn" : "bg-brand"
               )}
               initial={{ width: 0 }}
               animate={{ width: `${pct}%` }}
@@ -125,7 +125,7 @@ export function Sidebar() {
             <span style={{ color: 'var(--text-secondary)' }}>
               {formatCurrency(monthlyTotal)} spent
             </span>
-            <span className={cn("font-medium", overBudget ? "text-red-500" : "text-emerald-600 dark:text-emerald-400")}>
+            <span className="font-medium" style={{ color: overBudget ? 'var(--danger)' : 'var(--biz-accent-text)' }}>
               {formatCurrency(Math.abs(remaining))} {overBudget ? "over" : "left"}
             </span>
           </div>
@@ -149,10 +149,11 @@ export function Sidebar() {
           className={cn(
             "flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all",
             isBusinessRoute
-              ? "bg-gradient-to-r from-emerald-600 to-teal-600 text-white hover:from-emerald-700 hover:to-teal-700 shadow-sm shadow-emerald-600/20"
+              ? "text-white shadow-sm"
               : "bg-accent text-white hover:bg-cta-hover shadow-sm shadow-accent/20"
           )}
           whileTap={{ scale: 0.96 }}
+          style={isBusinessRoute ? { background: 'var(--biz-accent-gradient)', boxShadow: '0 1px 3px var(--focus-ring-biz)' } : undefined}
         >
           <PlusCircle size={18} className="flex-shrink-0" />
           <span>{isBusinessRoute ? "Add Ledger" : "Add Expense"}</span>

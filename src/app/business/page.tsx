@@ -122,6 +122,7 @@ export default function BusinessPage() {
         <div className="flex flex-col items-center justify-center p-8 text-center">
           <EmptyState
             icon={Briefcase}
+            illustration={<BusinessGraphic />}
             title="Business Mode is Off"
             description="Enable Business Mode in Settings to unlock ledger tracking, collection charts, and payment management."
             action={{ label: "Go to Settings", onClick: () => window.location.href = "/settings", color: "emerald" }}
@@ -155,7 +156,8 @@ export default function BusinessPage() {
             )}
             <button
               onClick={() => setShowForm(true)}
-              className="hidden items-center gap-1.5 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-emerald-600/20 hover:bg-emerald-700 active:scale-[0.97] lg:flex"
+              className="hidden items-center gap-1.5 rounded-xl px-4 py-2.5 text-sm font-semibold text-white shadow-sm active:scale-[0.97] lg:flex"
+              style={{ background: 'var(--biz-accent)', boxShadow: '0 1px 3px var(--focus-ring-biz)' }}
             >
               <PlusCircle size={16} />
               New Ledger
@@ -213,14 +215,14 @@ export default function BusinessPage() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search ledgers..."
-                className="w-full rounded-xl py-2.5 pl-9 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                className="w-full rounded-xl py-2.5 pl-9 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--focus-ring-biz)]"
                 style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
               />
             </div>
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="rounded-xl px-3 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+              className="rounded-xl px-3 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[var(--focus-ring-biz)]"
               style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-secondary)' }}
             >
               <option value="all">All Status</option>

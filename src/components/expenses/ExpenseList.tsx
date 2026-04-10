@@ -464,7 +464,7 @@ function SwipeableExpenseItem({
           style={{
             background: isFullSwipe
               ? 'var(--danger)'
-              : 'linear-gradient(to left, var(--danger) 0%, #F87171 40%, transparent 100%)',
+              : 'linear-gradient(to left, var(--danger) 0%, var(--danger) 40%, transparent 100%)',
             transition: isDragging ? 'none' : 'background 0.2s',
           }}
           aria-hidden
@@ -561,7 +561,7 @@ function SwipeableExpenseItem({
           </button>
           <button
             onClick={() => handleDelete(expense.id)}
-            className="rounded-lg p-1.5 transition-colors hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/30 dark:hover:text-red-400"
+            className="rounded-lg p-1.5 transition-colors hover:bg-err-soft hover:text-err"
             style={{ color: 'var(--text-muted)' }}
             aria-label="Delete expense"
           >

@@ -45,7 +45,7 @@ function CustomTooltip({ active, payload, total, budgets, expenseCountMap }: {
         {formatCurrency(item.value)} · {pct}% · {count} txn{count !== 1 ? "s" : ""}
       </p>
       {budget && (
-        <p className={item.value > budget ? "text-red-500 mt-0.5" : "mt-0.5"} style={item.value <= budget ? { color: 'var(--text-muted)' } : undefined}>
+        <p className={item.value > budget ? "mt-0.5" : "mt-0.5"} style={item.value > budget ? { color: 'var(--danger)' } : { color: 'var(--text-muted)' }}>
           Budget: {formatCurrency(budget)} ({Math.round((item.value / budget) * 100)}%)
         </p>
       )}
@@ -161,7 +161,7 @@ export function CategoryChart({ categoryTotals, onCategoryClick, categoryBudgets
                     <td className="py-2 text-right" style={{ color: 'var(--text-secondary)' }}>{pct}%</td>
                     <td className="py-2 text-right">
                       {budget ? (
-                        <span className={budgetPct >= 100 ? "text-red-500" : budgetPct >= 80 ? "text-amber-500" : ""} style={budgetPct < 80 ? { color: 'var(--text-muted)' } : undefined}>
+                        <span className={budgetPct >= 100 ? "text-err" : budgetPct >= 80 ? "text-warn" : ""} style={budgetPct < 80 ? { color: 'var(--text-muted)' } : undefined}>
                           {budgetPct}%
                         </span>
                       ) : (
@@ -285,19 +285,19 @@ export function CategoryLegend({ categoryTotals, onCategoryClick, categoryBudget
                     <div className="h-1.5 flex-1 rounded-full" style={{ background: 'var(--surface-secondary)' }}>
                       <div
                         className={`h-1.5 rounded-full transition-all duration-500 ${
-                          isOverBudget ? "bg-red-500" : isNearBudget ? "bg-amber-500" : "bg-emerald-500"
+                          isOverBudget ? "bg-err" : isNearBudget ? "bg-warn" : "bg-ok"
                         }`}
                         style={{ width: `${Math.min(budgetPct, 100)}%` }}
                       />
                     </div>
                     <span className={`text-xs font-medium ${
-                      isOverBudget ? "text-red-500" : isNearBudget ? "text-amber-500" : ""
+                      isOverBudget ? "text-err" : isNearBudget ? "text-warn" : ""
                     }`} style={!isOverBudget && !isNearBudget ? { color: 'var(--text-muted)' } : undefined}>
                       {budgetPct}%
                     </span>
                   </div>
                   {isOverBudget && (
-                    <p className="text-xs text-red-500 mt-0.5">
+                    <p className="text-xs text-err mt-0.5">
                       Over by {formatCurrency(c.total - budget)}
                     </p>
                   )}

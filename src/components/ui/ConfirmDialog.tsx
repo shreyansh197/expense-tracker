@@ -63,14 +63,14 @@ export function ConfirmProvider({ children }: { children: React.ReactNode }) {
 
   const variantColors = {
     danger: {
-      icon: "text-red-500",
+      icon: "text-err",
       button: "btn-danger",
-      border: "border-red-200 dark:border-red-800",
+      border: "border-[var(--danger-border)]",
     },
     warning: {
-      icon: "text-amber-500",
+      icon: "text-warn",
       button: "btn-primary",
-      border: "border-amber-200 dark:border-amber-800",
+      border: "border-[var(--warning-border)]",
     },
     default: {
     icon: "text-data-text",

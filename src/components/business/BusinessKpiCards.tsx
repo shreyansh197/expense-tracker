@@ -33,23 +33,23 @@ export function BusinessKpiCards({
       label: "Total Received",
       value: formatCurrency(totalReceived),
       icon: TrendingUp,
-      color: "text-emerald-600 dark:text-emerald-400",
-      bg: "bg-emerald-50 dark:bg-emerald-900/20",
+      color: "text-[var(--biz-accent-text)]",
+      bg: "bg-[var(--biz-accent-soft)]",
     },
     {
       label: "Collection %",
       value: `${collectionPercent.toFixed(0)}%`,
       icon: CheckCircle2,
       color: collectionPercent >= 80
-        ? "text-emerald-600 dark:text-emerald-400"
+        ? "text-[var(--biz-accent-text)]"
         : collectionPercent >= 50
         ? "text-blue-600 dark:text-blue-400"
-        : "text-amber-600 dark:text-amber-400",
+        : "text-[var(--warning-text)]",
       bg: collectionPercent >= 80
-        ? "bg-emerald-50 dark:bg-emerald-900/20"
+        ? "bg-[var(--biz-accent-soft)]"
         : collectionPercent >= 50
         ? "bg-blue-50 dark:bg-blue-900/20"
-        : "bg-amber-50 dark:bg-amber-900/20",
+        : "bg-[var(--warning-soft)]",
     },
     {
       label: "Active",
@@ -63,8 +63,8 @@ export function BusinessKpiCards({
           label: "Overdue",
           value: overdueCount.toString(),
           icon: AlertTriangle,
-          color: "text-red-600 dark:text-red-400",
-          bg: "bg-red-50 dark:bg-red-900/20",
+          color: "text-[var(--danger-text)]",
+          bg: "bg-[var(--danger-soft)]",
         }]
       : []),
   ];

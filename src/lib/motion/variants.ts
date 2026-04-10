@@ -151,3 +151,60 @@ export const pageTransition: Variants = {
 export const tapButton = { scale: scale.tapButton };
 export const tapChip = { scale: scale.tapChip };
 export const tapFab = { scale: scale.tapFab };
+
+// ── Slide from right (drawers, panels) ──
+
+export const slideFromRight: Variants = {
+  initial: { opacity: 0, x: distance.lg },
+  animate: {
+    opacity: 1,
+    x: 0,
+    transition: { duration: duration.emphasis, ease: ease.out },
+  },
+  exit: {
+    opacity: 0,
+    x: distance.lg,
+    transition: { duration: duration.exit, ease: "easeIn" },
+  },
+};
+
+// ── Expand / collapse (accordion sections) ──
+
+export const expandCollapse: Variants = {
+  initial: { height: 0, opacity: 0, overflow: "hidden" },
+  animate: {
+    height: "auto",
+    opacity: 1,
+    overflow: "hidden",
+    transition: { duration: duration.normal, ease: ease.out },
+  },
+  exit: {
+    height: 0,
+    opacity: 0,
+    overflow: "hidden",
+    transition: { duration: duration.exit, ease: "easeIn" },
+  },
+};
+
+// ── Number tick (KPI counter pop) ──
+
+export const numberTick: Variants = {
+  initial: { opacity: 0, y: -distance.sm, scale: 0.9 },
+  animate: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: spring.stiff,
+  },
+};
+
+// ── Success pulse (goal achievement celebration) ──
+
+export const successPulse: Variants = {
+  initial: { scale: 0.8, opacity: 0 },
+  animate: {
+    scale: [0.8, 1.05, 1],
+    opacity: 1,
+    transition: { duration: duration.emphasis, ease: ease.out },
+  },
+};

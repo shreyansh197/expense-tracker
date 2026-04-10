@@ -174,10 +174,10 @@ export function AlertsPanel({
           className={cn(
             "flex items-start gap-3 rounded-xl border-l-[3px] px-4 py-3 text-sm",
             alert.severity === "critical"
-              ? "border-l-red-500 bg-red-50/70 text-red-800 dark:bg-red-950/20 dark:text-red-300"
+              ? "border-l-err bg-[var(--status-err-bg)] text-[var(--status-err-text)]"
               : alert.severity === "warning"
-                ? "border-l-amber-500 bg-amber-50/70 text-amber-800 dark:bg-amber-950/20 dark:text-amber-300"
-                : "border-l-info bg-blue-50/70 text-blue-800 dark:bg-blue-950/20 dark:text-blue-300"
+                ? "border-l-warn bg-[var(--status-warn-bg)] text-[var(--status-warn-text)]"
+                : "border-l-info bg-[var(--info-soft)] text-[var(--info-text)]"
           )}
           style={{ borderTop: '1px solid var(--border-subtle)', borderRight: '1px solid var(--border-subtle)', borderBottom: '1px solid var(--border-subtle)' }}
         >
@@ -186,7 +186,7 @@ export function AlertsPanel({
           ) : alert.severity === "info" ? (
             <Zap size={16} className="mt-0.5 shrink-0" />
           ) : (
-            <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-amber-500" />
+            <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-warn" />
           )}
           <div className="flex-1 min-w-0">
             <p className="font-medium">{alert.message}</p>

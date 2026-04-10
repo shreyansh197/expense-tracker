@@ -155,7 +155,7 @@ export function SavingsGoalsWidget() {
                 <button
                   onClick={() => setFundMode("subtract")}
                   className={`flex-1 py-2 text-xs font-medium rounded-r-lg transition-colors ${
-                    fundMode === "subtract" ? "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400" : ""
+                    fundMode === "subtract" ? "bg-[var(--danger-soft)] text-[var(--danger-text)]" : ""
                   }`}
                   style={fundMode !== "subtract" ? { color: "var(--text-muted)" } : undefined}
                 >

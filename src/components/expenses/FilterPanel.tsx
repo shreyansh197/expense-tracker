@@ -208,7 +208,7 @@ export function FilterPanel({
                 </button>
                 <button
                   onClick={() => setShowSaveInput(false)}
-                  className="rounded p-1 transition-colors hover:bg-[var(--surface-secondary)]" style={{ color: 'var(--text-muted)' }}
+                  className="rounded p-2 min-h-11 min-w-11 flex items-center justify-center transition-colors hover:bg-[var(--surface-secondary)]" style={{ color: 'var(--text-muted)' }}
                 >
                   <X size={14} />
                 </button>

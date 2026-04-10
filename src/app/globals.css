@@ -74,8 +74,14 @@
   --success-soft-hover: #A7F3D0;
   --warning: #F59E0B;
   --warning-soft: #FEF3C7;
+  --warning-text: #D97706;
+  --warning-border: #FDE68A;
   --danger: #EF4444;
   --danger-soft: #FEE2E2;
+  --danger-text: #DC2626;
+  --danger-border: #FECACA;
+  --info-text: #2563EB;
+  --info-border: #BFDBFE;
   /* ── Status surfaces (semantic feedback) ── */
   --status-ok-bg: #ECFDF5;
   --status-ok-border: #A7F3D0;
@@ -86,17 +92,36 @@
   --status-err-bg: #FEF2F2;
   --status-err-border: #FECACA;
   --status-err-text: #DC2626;
+  /* ── Business mode accent (Emerald) ── */
+  --biz-accent: #059669;
+  --biz-accent-soft: #ECFDF5;
+  --biz-accent-hover: #047857;
+  --biz-accent-border: #A7F3D0;
+  --biz-accent-text: #059669;
+  --biz-accent-gradient: linear-gradient(135deg, #059669, #0D9488);
+  /* ── Interactive state tokens ── */
+  --focus-ring: rgba(124, 58, 237, 0.2);
+  --focus-ring-biz: rgba(5, 150, 105, 0.2);
+  --disabled-opacity: 0.4;
+  /* ── Goal / achievement tokens ── */
+  --goal-achieved-bg: #ECFDF5;
+  --goal-achieved-text: #059669;
+  --goal-achieved-border: #A7F3D0;
+  --goal-warning-bg: #FFFBEB;
+  --goal-warning-text: #D97706;
+  --goal-exceeded-bg: #FEF2F2;
+  --goal-exceeded-text: #DC2626;
   /* ── General ── */
   --overlay: rgba(0, 0, 0, 0.4);
   --category-fallback: #6B7280;
   /* ── Quiet grouping surface ── */
   --surface-quiet: rgba(0, 0, 0, 0.015);
   /* ── Section zone washes (subtle tinted backgrounds) ── */
-  --section-teal: transparent;
-  --section-indigo: transparent;
-  --section-violet: transparent;
-  --section-emerald: transparent;
-  --section-mint: transparent;
+  --section-teal: rgba(13, 148, 136, 0.03);
+  --section-indigo: rgba(76, 92, 255, 0.03);
+  --section-violet: rgba(124, 58, 237, 0.03);
+  --section-emerald: rgba(5, 150, 105, 0.03);
+  --section-mint: rgba(20, 184, 166, 0.03);
   /* ── Accent card surfaces (themed tints) ── */
   --surface-accent-teal: #CCFBF1;
   --surface-accent-indigo: #eef0ff;
@@ -171,8 +196,14 @@
   --success-soft-hover: rgba(16, 185, 129, 0.2);
   --warning: #FBBF24;
   --warning-soft: rgba(251, 191, 36, 0.12);
+  --warning-text: #fcd34d;
+  --warning-border: rgba(245, 158, 11, 0.25);
   --danger: #F87171;
   --danger-soft: rgba(248, 113, 113, 0.12);
+  --danger-text: #fca5a5;
+  --danger-border: rgba(239, 68, 68, 0.25);
+  --info-text: #67E8F9;
+  --info-border: rgba(103, 232, 249, 0.25);
   /* ── Status surfaces (semantic feedback) ── */
   --status-ok-bg: rgba(16, 185, 129, 0.12);
   --status-ok-border: rgba(16, 185, 129, 0.25);
@@ -183,17 +214,36 @@
   --status-err-bg: rgba(239, 68, 68, 0.12);
   --status-err-border: rgba(239, 68, 68, 0.25);
   --status-err-text: #fca5a5;
+  /* ── Business mode accent (Emerald) ── */
+  --biz-accent: #34D399;
+  --biz-accent-soft: rgba(52, 211, 153, 0.12);
+  --biz-accent-hover: #6EE7B7;
+  --biz-accent-border: rgba(52, 211, 153, 0.25);
+  --biz-accent-text: #34D399;
+  --biz-accent-gradient: linear-gradient(135deg, #34D399, #5EEAD4);
+  /* ── Interactive state tokens ── */
+  --focus-ring: rgba(167, 139, 250, 0.2);
+  --focus-ring-biz: rgba(52, 211, 153, 0.2);
+  --disabled-opacity: 0.4;
+  /* ── Goal / achievement tokens ── */
+  --goal-achieved-bg: rgba(16, 185, 129, 0.12);
+  --goal-achieved-text: #6EE7B7;
+  --goal-achieved-border: rgba(16, 185, 129, 0.25);
+  --goal-warning-bg: rgba(245, 158, 11, 0.12);
+  --goal-warning-text: #fcd34d;
+  --goal-exceeded-bg: rgba(239, 68, 68, 0.12);
+  --goal-exceeded-text: #fca5a5;
   /* ── General ── */
   --overlay: rgba(0, 0, 0, 0.6);
   --category-fallback: #6B7280;
   /* ── Quiet grouping surface ── */
   --surface-quiet: rgba(255, 255, 255, 0.02);
-  /* ── Section zone washes (neutralized — card shadows handle grouping) ── */
-  --section-teal: transparent;
-  --section-indigo: transparent;
-  --section-violet: transparent;
-  --section-emerald: transparent;
-  --section-mint: transparent;
+  /* ── Section zone washes ── */
+  --section-teal: rgba(94, 234, 212, 0.04);
+  --section-indigo: rgba(129, 140, 248, 0.04);
+  --section-violet: rgba(167, 139, 250, 0.04);
+  --section-emerald: rgba(52, 211, 153, 0.04);
+  --section-mint: rgba(45, 212, 191, 0.04);
   /* ── Accent card surfaces (themed tints) ── */
   --surface-accent-teal: rgba(94, 234, 212, 0.10);
   --surface-accent-indigo: rgba(129, 140, 248, 0.10);
@@ -250,9 +300,30 @@
   --color-ok-text: var(--success-text);
   --color-ok-hover: var(--success-hover);
   --color-ok-soft-hover: var(--success-soft-hover);
+  /* Warning */
+  --color-warn: var(--warning);
+  --color-warn-soft: var(--warning-soft);
+  --color-warn-text: var(--warning-text);
+  --color-warn-border: var(--warning-border);
   /* Danger */
   --color-err: var(--danger);
   --color-err-soft: var(--danger-soft);
+  --color-err-text: var(--danger-text);
+  --color-err-border: var(--danger-border);
+  /* Business accent */
+  --color-biz: var(--biz-accent);
+  --color-biz-soft: var(--biz-accent-soft);
+  --color-biz-hover: var(--biz-accent-hover);
+  --color-biz-border: var(--biz-accent-border);
+  --color-biz-text: var(--biz-accent-text);
+  /* Goal status */
+  --color-goal-ok-bg: var(--goal-achieved-bg);
+  --color-goal-ok-text: var(--goal-achieved-text);
+  --color-goal-ok-border: var(--goal-achieved-border);
+  --color-goal-warn-bg: var(--goal-warning-bg);
+  --color-goal-warn-text: var(--goal-warning-text);
+  --color-goal-over-bg: var(--goal-exceeded-bg);
+  --color-goal-over-text: var(--goal-exceeded-text);
   /* Overlay */
   --color-overlay: var(--overlay);
   /* Interactive (→ accent) */

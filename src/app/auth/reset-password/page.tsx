@@ -70,8 +70,8 @@ function ResetPasswordForm() {
     return (
       <div className="flex min-h-screen items-center justify-center px-4" style={{ background: "var(--background)" }}>
         <div className="w-full max-w-sm rounded-2xl p-8 shadow-xl text-center" style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
-          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 dark:bg-emerald-900/20 ring-1 ring-emerald-200 dark:ring-emerald-800/40">
-            <CheckCircle2 className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl" style={{ background: 'var(--success-soft)', boxShadow: 'inset 0 0 0 1px var(--goal-achieved-border)' }}>
+            <CheckCircle2 className="h-6 w-6" style={{ color: 'var(--success-text)' }} />
           </div>
           <h2 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">
             Password Reset!
@@ -146,7 +146,7 @@ function ResetPasswordForm() {
           </div>
 
           {error && (
-            <div className="flex items-start gap-2.5 rounded-xl bg-red-50 p-3.5 text-sm text-red-700 dark:bg-red-900/20 dark:text-red-400 border border-red-100 dark:border-red-900/40">
+            <div className="flex items-start gap-2.5 rounded-xl p-3.5 text-sm border" style={{ background: 'var(--danger-soft)', color: 'var(--danger-text)', borderColor: 'var(--danger-border)' }}>
               <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
               {error}
             </div>

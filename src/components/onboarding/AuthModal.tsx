@@ -489,7 +489,7 @@ export function AuthModal({
 
         {forgotSent ? (
           <div className="space-y-4">
-            <div className="rounded-xl bg-emerald-50 p-4 text-sm text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/40 text-center leading-relaxed">
+            <div className="rounded-xl p-4 text-sm border text-center leading-relaxed" style={{ background: 'var(--success-soft)', color: 'var(--success-text)', borderColor: 'var(--goal-achieved-border)' }}>
               If an account exists for <strong className="break-all">{email}</strong>, you&apos;ll receive an email with a reset link shortly.
             </div>
             <button
@@ -523,7 +523,7 @@ export function AuthModal({
             </div>
 
             {error && (
-              <div className="flex items-start gap-2.5 rounded-xl bg-red-50 p-3.5 text-sm text-red-700 dark:bg-red-900/20 dark:text-red-400 border border-red-100 dark:border-red-900/40">
+              <div className="flex items-start gap-2.5 rounded-xl p-3.5 text-sm border" style={{ background: 'var(--danger-soft)', color: 'var(--danger-text)', borderColor: 'var(--danger-border)' }}>
                 <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
                 {error}
               </div>
@@ -584,7 +584,7 @@ export function AuthModal({
           />
 
           {error && (
-            <div className="flex items-start gap-2.5 rounded-xl bg-red-50 p-3.5 text-sm text-red-700 dark:bg-red-900/20 dark:text-red-400 border border-red-100 dark:border-red-900/40">
+            <div className="flex items-start gap-2.5 rounded-xl p-3.5 text-sm border" style={{ background: 'var(--danger-soft)', color: 'var(--danger-text)', borderColor: 'var(--danger-border)' }}>
               <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
               {error}
             </div>
@@ -839,7 +839,7 @@ export function AuthModal({
         )}
 
         {error && (
-          <div className="flex items-start gap-2.5 rounded-xl bg-red-50 p-3.5 text-sm text-red-700 dark:bg-red-900/20 dark:text-red-400 border border-red-100 dark:border-red-900/40">
+          <div className="flex items-start gap-2.5 rounded-xl p-3.5 text-sm border" style={{ background: 'var(--danger-soft)', color: 'var(--danger-text)', borderColor: 'var(--danger-border)' }}>
             <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
             {error}
           </div>

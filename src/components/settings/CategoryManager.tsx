@@ -448,7 +448,8 @@ function CategoryRow({
           )}
           <button
             onClick={onDelete}
-            className="rounded p-1 text-slate-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/30 dark:hover:text-red-400"
+            className="rounded p-2 min-h-11 min-w-11 flex items-center justify-center hover:bg-err-soft hover:text-err"
+            style={{ color: 'var(--text-muted)' }}
             aria-label={`Remove ${cat.label}`}
           >
             <Trash2 size={14} />

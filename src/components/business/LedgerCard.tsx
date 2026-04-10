@@ -26,7 +26,7 @@ export function LedgerCard({ ledger, totalReceived }: LedgerCardProps) {
 
   const statusConfig = {
     active: { icon: Clock, label: "Payment Pending", color: "text-blue-600 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-400" },
-    completed: { icon: CheckCircle2, label: "Paid", color: "text-emerald-600 bg-emerald-50 dark:bg-emerald-900/30 dark:text-emerald-400" },
+    completed: { icon: CheckCircle2, label: "Paid", color: "text-[var(--biz-accent-text)] bg-[var(--biz-accent-soft)]" },
     cancelled: { icon: XCircle, label: "Cancelled", color: "text-gray-500 bg-gray-100 dark:bg-gray-800 dark:text-gray-400" },
   };
 
@@ -46,7 +46,7 @@ export function LedgerCard({ ledger, totalReceived }: LedgerCardProps) {
               {ledger.name}
             </h3>
             {isOverdue && (
-              <span className="flex items-center gap-0.5 rounded-full bg-red-50 px-1.5 py-0.5 text-caption font-semibold text-red-600 dark:bg-red-900/30 dark:text-red-400">
+              <span className="flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-caption font-semibold bg-err-soft text-err">
                 <AlertTriangle size={10} />
                 {overdueDays}d overdue
               </span>
@@ -81,9 +81,9 @@ export function LedgerCard({ ledger, totalReceived }: LedgerCardProps) {
             className={cn(
               "h-2 rounded-full transition-all duration-500",
               percent >= 100
-                ? "bg-emerald-500"
+                ? "bg-biz"
                 : isOverdue
-                ? "bg-red-500"
+                ? "bg-err"
                 : "bg-blue-500"
             )}
             style={{ width: `${Math.min(percent, 100)}%` }}

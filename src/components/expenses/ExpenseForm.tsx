@@ -258,8 +258,8 @@ export function ExpenseForm({
             className="flex items-center justify-center gap-2 rounded-xl py-3 px-3"
             style={{ background: 'var(--success-soft)' }}
           >
-            <CheckCircle2 size={18} className="text-emerald-500" />
-            <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+            <CheckCircle2 size={18} style={{ color: 'var(--success)' }} />
+            <span className="text-xs font-semibold" style={{ color: 'var(--success-text)' }}>
               {editExpense ? "Updated!" : "Added!"}
             </span>
           </m.div>
@@ -337,7 +337,7 @@ export function ExpenseForm({
       {/* Category Selector — teal zone */}
       <div className="-mx-1 rounded-xl p-3" style={{ background: 'var(--section-teal)' }}>
         <label className="form-label mb-2 uppercase">
-          Category {!category && submitted && <span className="text-red-500 normal-case">— please select</span>}
+          Category {!category && submitted && <span className="text-err normal-case">— please select</span>}
         </label>
         <div className="flex max-h-40 flex-wrap gap-2 overflow-y-auto" role="radiogroup" aria-label="Select category">
           {allCategories.map((cat) => (
@@ -394,7 +394,7 @@ export function ExpenseForm({
           value={amount}
           onChange={(e) => { setAmount(e.target.value); if (submitted) setSubmitted(false); }}
           placeholder="e.g. 500"
-          className={cn("form-input w-full text-lg font-semibold", amountInvalid && "!border-red-400 !ring-red-400/20")}
+          className={cn("form-input w-full text-lg font-semibold", amountInvalid && "!border-[var(--danger)] !ring-[var(--danger)]/20")}
           required
           aria-invalid={amountInvalid || undefined}
         />
@@ -405,7 +405,7 @@ export function ExpenseForm({
               animate={{ opacity: 1, height: "auto", marginTop: 4 }}
               exit={{ opacity: 0, height: 0, marginTop: 0 }}
               transition={{ duration: 0.2 }}
-              className="text-xs font-medium text-red-500 overflow-hidden"
+              className="text-xs font-medium text-err overflow-hidden"
             >
               Enter a valid positive amount
             </m.p>
@@ -522,7 +522,7 @@ export function ExpenseForm({
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.2 }}
-            className="text-xs font-medium text-red-500 overflow-hidden"
+            className="text-xs font-medium text-err overflow-hidden"
           >
             {error}
           </m.p>

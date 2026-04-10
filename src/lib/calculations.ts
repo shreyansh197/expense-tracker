@@ -59,6 +59,33 @@ export function getMonthlySaving(salary: number, monthlyTotal: number): number {
 }
 
 /**
+ * Spending streak — count consecutive days (ending today) that have ≥1 expense logged.
+ * Returns 0 if the user didn't log anything today.
+ */
+export function getSpendingStreak(expenses: Expense[]): number {
+  const active = expenses.filter((e) => !e.deletedAt);
+  if (active.length === 0) return 0;
+
+  // Build a set of "YYYY-MM-DD" strings for dates with expenses
+  const loggedDays = new Set<string>();
+  for (const e of active) {
+    loggedDays.add(`${e.year}-${String(e.month).padStart(2, "0")}-${String(e.day).padStart(2, "0")}`);
+  }
+
+  const today = new Date();
+  let streak = 0;
+  const cursor = new Date(today);
+
+  while (true) {
+    const key = `${cursor.getFullYear()}-${String(cursor.getMonth() + 1).padStart(2, "0")}-${String(cursor.getDate()).padStart(2, "0")}`;
+    if (!loggedDays.has(key)) break;
+    streak++;
+    cursor.setDate(cursor.getDate() - 1);
+  }
+  return streak;
+}
+
+/**
  * All category totals for a month — includes orphan categories from expenses
  * that aren't in the local categories list (e.g. before settings sync completes)
  */

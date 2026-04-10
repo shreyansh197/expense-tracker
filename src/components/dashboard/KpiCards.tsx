@@ -85,9 +85,9 @@ export function KpiCards({
     isOverspent ? "danger" : (isWarning || forecastOverBudget) ? "caution" : "safe";
 
   const statusColors = {
-    safe: { text: "text-[var(--status-ok-text)]", bg: "border-[var(--status-ok-border)] bg-[var(--status-ok-bg)]", bar: "bg-gradient-to-r from-emerald-500 to-teal-400" },
-    caution: { text: "text-[var(--status-warn-text)]", bg: "border-[var(--status-warn-border)] bg-[var(--status-warn-bg)]", bar: "bg-gradient-to-r from-amber-500 to-orange-400" },
-    danger: { text: "text-[var(--status-err-text)]", bg: "border-[var(--status-err-border)] bg-[var(--status-err-bg)]", bar: "bg-gradient-to-r from-red-500 to-rose-400" },
+    safe: { text: "text-[var(--status-ok-text)]", bg: "border-[var(--status-ok-border)] bg-[var(--status-ok-bg)]", bar: "bg-gradient-to-r from-ok to-brand" },
+    caution: { text: "text-[var(--status-warn-text)]", bg: "border-[var(--status-warn-border)] bg-[var(--status-warn-bg)]", bar: "bg-gradient-to-r from-warn to-[var(--warning)]" },
+    danger: { text: "text-[var(--status-err-text)]", bg: "border-[var(--status-err-border)] bg-[var(--status-err-bg)]", bar: "bg-gradient-to-r from-err to-[var(--danger)]" },
   };
   const sc = statusColors[status];
 
@@ -142,7 +142,7 @@ export function KpiCards({
         </p>
         <div className="mt-3.5 h-1.5 w-full overflow-hidden rounded-full" style={{ background: 'var(--surface-secondary)' }} role="progressbar" aria-valuenow={Math.min(budgetUsedPercent, 100)} aria-valuemin={0} aria-valuemax={100} aria-label="Budget used">
           <m.div
-            className={cn("h-full rounded-full", isOverspent ? "bg-red-500" : isWarning ? "bg-amber-500" : "bg-brand")}
+            className={cn("h-full rounded-full", isOverspent ? "bg-err" : isWarning ? "bg-warn" : "bg-brand")}
             initial={{ width: 0 }}
             animate={{ width: `${Math.min(budgetUsedPercent, 100)}%` }}
             transition={{ delay: 0.3, duration: duration.slow, ease: ease.out }}
@@ -168,8 +168,8 @@ export function KpiCards({
           <p className="text-meta font-medium">Daily Pace</p>
           <p className={cn(
             "text-amount-md mt-1",
-            paceToStayUnder <= 0 ? "text-red-600 dark:text-red-400"
-              : paceExceeded ? "text-amber-600 dark:text-amber-400" : ""
+            paceToStayUnder <= 0 ? "text-[var(--danger-text)]"
+              : paceExceeded ? "text-[var(--warning-text)]" : ""
           )} style={paceToStayUnder > 0 && !paceExceeded ? { color: 'var(--text-primary)' } : undefined}>
             <AnimatedNumber value={avgDaily} format={(n) => `${formatCurrency(n)}/d`} />
           </p>
@@ -182,9 +182,9 @@ export function KpiCards({
           <p className="text-meta font-medium">Saving</p>
           <p className={cn(
             "text-amount-md mt-1",
-            savingsRate < 0 ? "text-red-600 dark:text-red-400"
-              : savingsRate < 20 ? "text-amber-600 dark:text-amber-400"
-              : "text-emerald-600 dark:text-emerald-400"
+            savingsRate < 0 ? "text-[var(--danger-text)]"
+              : savingsRate < 20 ? "text-[var(--warning-text)]"
+              : "text-[var(--success-text)]"
           )}>
             <AnimatedNumber value={savingsRate} format={(n) => `${Math.round(n)}%`} />
           </p>
@@ -195,8 +195,8 @@ export function KpiCards({
 
         <div className={cn(
           "rounded-xl border p-3 sm:p-3.5",
-          forecastOverBudget ? "border-red-200 bg-red-50 dark:border-red-900/40 dark:bg-red-950/30"
-            : forecastWarning ? "border-amber-200 bg-amber-50 dark:border-amber-900/40 dark:bg-amber-950/30"
+          forecastOverBudget ? "border-[var(--danger-border)] bg-[var(--danger-soft)]"
+            : forecastWarning ? "border-[var(--warning-border)] bg-[var(--warning-soft)]"
             : "card-sm"
         )}>
           <div className="flex items-center gap-1 text-meta font-medium">
@@ -210,8 +210,8 @@ export function KpiCards({
           </div>
           <p className={cn(
             "text-amount-md mt-1",
-            forecastOverBudget ? "text-red-700 dark:text-red-400"
-              : forecastWarning ? "text-amber-700 dark:text-amber-400" : ""
+            forecastOverBudget ? "text-[var(--danger-text)]"
+              : forecastWarning ? "text-[var(--warning-text)]" : ""
           )} style={!forecastOverBudget && !forecastWarning ? { color: 'var(--text-primary)' } : undefined}>
             {forecast.projectedTotal > 0 ? <AnimatedNumber value={forecast.projectedTotal} format={formatCurrency} /> : "\u2014"}
           </p>

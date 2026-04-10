@@ -87,7 +87,7 @@ export function LedgerForm({ initial, onSubmit, onCancel, submitLabel = "Create 
             onChange={(e) => setExpectedAmount(e.target.value)}
             onBlur={() => setAmountTouched(true)}
             placeholder="e.g. 25,000"
-            className={cn("form-input w-full pl-9", amountInvalid && "!border-red-400 !ring-red-400/20")}
+            className={cn("form-input w-full pl-9", amountInvalid && "!border-[var(--danger)] !ring-[var(--danger)]/20")}
             required
             aria-invalid={amountInvalid || undefined}
           />
@@ -99,7 +99,7 @@ export function LedgerForm({ initial, onSubmit, onCancel, submitLabel = "Create 
               animate={{ opacity: 1, height: "auto", marginTop: 4 }}
               exit={{ opacity: 0, height: 0, marginTop: 0 }}
               transition={{ duration: 0.2 }}
-              className="text-xs font-medium text-red-500 overflow-hidden"
+              className="text-xs font-medium text-err overflow-hidden"
             >
               Enter a valid positive amount
             </m.p>

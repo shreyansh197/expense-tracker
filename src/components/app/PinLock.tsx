@@ -96,7 +96,7 @@ export function PinLock({ onVerify }: PinLockProps) {
 
       {/* Error message */}
       {error && (
-        <div className="flex items-center gap-1.5 text-red-500 text-sm">
+        <div className="flex items-center gap-1.5 text-err text-sm">
           <AlertCircle size={14} />
           <span>Incorrect PIN. Try again.</span>
         </div>

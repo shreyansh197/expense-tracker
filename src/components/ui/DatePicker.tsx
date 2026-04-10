@@ -99,7 +99,7 @@ export function DatePicker({ value, onChange, month, year }: DatePickerProps) {
         onClick={handleToggleOpen}
         className={cn(
           "flex w-full items-center gap-2 rounded-lg border px-3 py-2.5 text-sm font-medium transition-all",
-          open && "border-indigo-500 ring-2 ring-indigo-500/20 dark:border-indigo-500"
+          open && "border-[var(--secondary)] ring-2 ring-[var(--secondary)]/20"
         )}
         style={{ borderColor: open ? undefined : 'var(--border)', background: 'var(--surface)', color: 'var(--text-primary)' }}
       >
@@ -260,13 +260,13 @@ function CalendarGrid({
               className={cn(
                 "flex h-11 w-full items-center justify-center rounded-lg text-sm font-medium transition-all",
                 day === value
-                  ? "bg-indigo-600 text-white shadow-sm"
+                  ? "bg-data text-white shadow-sm"
                   : "",
                 day !== value && "hover:opacity-80",
                 isCurrentMonth &&
                   day === todayDay &&
                   day !== value &&
-                  "ring-1 ring-indigo-400 font-bold text-indigo-600 dark:text-indigo-400 dark:ring-indigo-500"
+                  "ring-1 ring-[var(--secondary-border)] font-bold text-data"
               )}
               style={day !== value ? { color: 'var(--text-primary)', background: 'transparent' } : undefined}
               onMouseEnter={day !== value ? (e) => { e.currentTarget.style.background = 'var(--surface-secondary)'; } : undefined}
@@ -283,7 +283,7 @@ function CalendarGrid({
         <button
           type="button"
           onClick={() => onSelect(todayDay)}
-          className="mt-2 w-full rounded-lg py-2 text-xs font-medium text-indigo-600 transition-colors dark:text-indigo-400"
+          className="mt-2 w-full rounded-lg py-2 text-xs font-medium text-data transition-colors"
           style={{ background: 'var(--surface-secondary)' }}
           onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--surface-hover)'; }}
           onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--surface-secondary)'; }}

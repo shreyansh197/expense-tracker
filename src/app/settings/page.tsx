@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useMemo, lazy, Suspense } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback, lazy, Suspense } from "react";
 import { AppShell } from "@/components/layout/AppShell";
 import { useSettings } from "@/hooks/useSettings";
 import { useCurrency } from "@/hooks/useCurrency";
@@ -168,7 +168,7 @@ function PinLockSettings() {
         {isEnabled && (
           <button
             onClick={handleDisable}
-            className="rounded-lg px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
+            className="rounded-lg px-3 py-1.5 text-xs font-medium text-err hover:bg-err-soft"
           >
             Disable
           </button>
@@ -332,20 +332,30 @@ export default function SettingsPage() {
     { id: "zone-automation", label: "Automation", description: "Rules, export & data" },
     { id: "zone-preferences", label: "Preferences", description: "Theme, currency & mode" },
   ];
-  const [activeZone, setActiveZone] = useState(() => {
+  const [activeZone, setActiveZoneRaw] = useState(() => {
     // Check URL hash to pre-select the right zone
     if (typeof window === "undefined") return zones[0].id;
     const hash = window.location.hash.replace("#", "");
-    if (!hash) return zones[0].id;
-    // Map section ids (like "budget", "account") to their parent zone
-    const sectionToZone: Record<string, string> = {
-      account: "zone-account", security: "zone-account", members: "zone-account",
-      budget: "zone-finances", categories: "zone-finances", recurring: "zone-finances", goals: "zone-finances", rollover: "zone-finances",
-      rules: "zone-automation", "export-import": "zone-automation", "data-management": "zone-automation",
-      "app-mode": "zone-preferences", "multi-currency": "zone-preferences", theme: "zone-preferences",
-    };
-    return sectionToZone[hash] ?? zones[0].id;
+    if (hash) {
+      // Map section ids (like "budget", "account") to their parent zone
+      const sectionToZone: Record<string, string> = {
+        account: "zone-account", security: "zone-account", members: "zone-account",
+        budget: "zone-finances", categories: "zone-finances", recurring: "zone-finances", goals: "zone-finances", rollover: "zone-finances",
+        rules: "zone-automation", "export-import": "zone-automation", "data-management": "zone-automation",
+        "app-mode": "zone-preferences", "multi-currency": "zone-preferences", theme: "zone-preferences",
+      };
+      const mapped = sectionToZone[hash];
+      if (mapped) return mapped;
+    }
+    // Fall back to persisted tab
+    const stored = localStorage.getItem("expenstream-settings-zone");
+    if (stored && zones.some((z) => z.id === stored)) return stored;
+    return zones[0].id;
   });
+  const setActiveZone = useCallback((id: string) => {
+    setActiveZoneRaw(id);
+    localStorage.setItem("expenstream-settings-zone", id);
+  }, []);
   const observerRef = useRef<IntersectionObserver | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -540,7 +550,7 @@ export default function SettingsPage() {
             title="Monthly Budget"
             description={`Currently ${formatCurrency(settings.salary)}`}
             alwaysOpen
-            iconColor="bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400"
+            iconColor="bg-[var(--secondary-soft)] text-[var(--secondary-text)]"
             className={!isSectionVisible('budget') ? 'hidden' : ''}
           >
             <div className="space-y-3">
@@ -564,6 +574,9 @@ export default function SettingsPage() {
                     </button>
                   ))}
                 </div>
+                <p className="mt-1.5 text-xs" style={{ color: 'var(--text-tertiary)' }}>
+                  Preview: <span className="font-medium" style={{ color: 'var(--text-secondary)' }}>{formatCurrency(123456.78)}</span>
+                </p>
               </div>
               {/* Salary input — default budget */}
               <div>
@@ -648,7 +661,7 @@ export default function SettingsPage() {
             icon={<Tag size={18} />}
             title="Categories & Budgets"
             description="Manage expense categories and per-category limits"
-            iconColor="bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400"
+            iconColor="bg-[var(--warning-soft)] text-[var(--warning-text)]"
             className={!isSectionVisible('categories') ? 'hidden' : ''}
           >
             <Suspense fallback={<LazyFallback />}><CategoryManager /></Suspense>
@@ -678,8 +691,7 @@ export default function SettingsPage() {
             title="Savings Goals"
             description={goalsCount > 0 ? `${goalsCount} active goal${goalsCount > 1 ? "s" : ""}` : "Track your savings targets"}
             badge={goalsCount > 0 ? goalsCount : undefined}
-            iconColor="bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400"
-            className={!isSectionVisible('goals') ? 'hidden' : ''}
+            iconColor="bg-[var(--goal-achieved-bg)] text-[var(--goal-achieved-text)]"
           >
             <Suspense fallback={<LazyFallback />}><GoalsManager /></Suspense>
           </AccordionSection>
@@ -690,7 +702,7 @@ export default function SettingsPage() {
             icon={<TrendingUp size={18} />}
             title="Budget Rollover"
             description="Carry unspent budget to next month"
-            iconColor="bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400"
+            iconColor="bg-[var(--primary-soft)] text-[var(--primary-text)]"
             className={!isSectionVisible('rollover') ? 'hidden' : ''}
             headerRight={
               <button
@@ -725,7 +737,7 @@ export default function SettingsPage() {
                       .map(([key, amount]) => (
                         <div key={key} className="flex items-center justify-between text-xs">
                           <span style={{ color: 'var(--text-tertiary)' }}>{key}</span>
-                          <span className={`font-medium ${amount >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400"}`}>
+                          <span className="font-medium" style={{ color: amount >= 0 ? 'var(--success-text)' : 'var(--danger-text)' }}>
                             {amount >= 0 ? "+" : ""}{formatCurrency(amount)}
                           </span>
                         </div>
@@ -768,16 +780,18 @@ export default function SettingsPage() {
           </AccordionSection>
 
           {/* ─── Workspace Removal ─── */}
+          <div className="rounded-2xl p-[2px]" style={{ background: 'var(--danger-border)' }}>
           <AccordionSection
             id="data-management"
             icon={<Database size={18} />}
             title="Workspace Removal"
             description="Remove or reset workspace data"
-            iconColor="bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400"
+            iconColor="bg-[var(--danger-soft)] text-[var(--danger-text)]"
             className={!isSectionVisible('data-management') ? 'hidden' : ''}
           >
             <Suspense fallback={<LazyFallback />}><DataAccountManagement /></Suspense>
           </AccordionSection>
+          </div>
           </div>
 
           {/* ━━━ PREFERENCES — indigo zone ━━━ */}
@@ -792,15 +806,14 @@ export default function SettingsPage() {
             icon={<Briefcase size={18} />}
             title="App Mode"
             description={settings.businessMode ? "Business Owner Mode active" : "Personal expense tracking"}
-            iconColor="bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400"
-            className={!isSectionVisible('app-mode') ? 'hidden' : ''}
+            iconColor="bg-[var(--biz-accent-soft)] text-[var(--biz-accent-text)]"
             headerRight={
               <button
                 role="switch"
                 aria-checked={settings.businessMode ?? false}
                 onClick={() => updateSettings({ businessMode: !settings.businessMode })}
                 className={`relative h-6 w-11 rounded-full transition-colors ${
-                  settings.businessMode ? "bg-emerald-600" : "bg-slate-300 dark:bg-slate-600"
+                  settings.businessMode ? "bg-biz" : "bg-slate-300 dark:bg-slate-600"
                 }`}
               >
                 <span
@@ -818,8 +831,8 @@ export default function SettingsPage() {
                   : "Enable Business Owner Mode to track client payments, revenue expectations, and receivables alongside your expenses."}
               </p>
               {settings.businessMode && (
-                <div className="rounded-lg bg-emerald-50 p-3 dark:bg-emerald-900/20">
-                  <p className="text-xs font-medium text-emerald-700 dark:text-emerald-400">
+                <div className="rounded-lg p-3" style={{ background: 'var(--biz-accent-soft)' }}>
+                  <p className="text-xs font-medium" style={{ color: 'var(--biz-accent-text)' }}>
                     A &quot;Business&quot; tab is now visible in your navigation. Manage ledgers and payments there.
                   </p>
                 </div>
@@ -879,11 +892,11 @@ export default function SettingsPage() {
             className={!isSectionVisible('theme') ? 'hidden' : ''}
           >
             <div className="space-y-4">
-              <div className="flex gap-2">
+              <div className="grid grid-cols-3 gap-2">
                 {[
-                  { value: "light" as const, icon: Sun, label: "Light" },
-                  { value: "dark" as const, icon: Moon, label: "Dark" },
-                  { value: "system" as const, icon: Monitor, label: "System" },
+                  { value: "light" as const, icon: Sun, label: "Light", swatches: ["#FFFFFF", "#F3F4F6", "#7C3AED", "#111827"] },
+                  { value: "dark" as const, icon: Moon, label: "Dark", swatches: ["#1F2937", "#111827", "#A78BFA", "#F9FAFB"] },
+                  { value: "system" as const, icon: Monitor, label: "System", swatches: ["#FFFFFF", "#1F2937", "#7C3AED", "#A78BFA"] },
                 ].map((opt) => {
                   const Icon = opt.icon;
                   const active = theme === opt.value;
@@ -891,15 +904,23 @@ export default function SettingsPage() {
                     <button
                       key={opt.value}
                       onClick={() => setTheme(opt.value)}
-                      className={`flex flex-1 items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
+                      className={`flex flex-col items-center gap-1.5 rounded-xl px-3 py-3 text-sm font-medium transition-colors ${
                         active
-                          ? "bg-brand-soft text-brand"
+                          ? "bg-brand-soft text-brand ring-2"
                           : ""
                       }`}
-                      style={!active ? { color: 'var(--text-secondary)' } : undefined}
+                      style={{
+                        ...(!active ? { color: 'var(--text-secondary)' } : {}),
+                        ...(active ? { ringColor: undefined, boxShadow: 'inset 0 0 0 2px var(--accent)' } : {}),
+                      }}
                     >
                       <Icon size={16} />
                       {opt.label}
+                      <div className="flex gap-1">
+                        {opt.swatches.map((c, i) => (
+                          <span key={i} className="h-2.5 w-2.5 rounded-full" style={{ background: c, border: '1px solid rgba(0,0,0,0.1)' }} />
+                        ))}
+                      </div>
                     </button>
                   );
                 })}

@@ -168,7 +168,7 @@ export function WelcomeTutorial({ onComplete }: WelcomeTutorialProps) {
         <div className="flex justify-end">
           <button
             onClick={onComplete}
-            className="rounded-lg p-1 transition-colors"
+            className="rounded-lg p-2 min-h-11 min-w-11 flex items-center justify-center transition-colors"
             style={{ color: "var(--text-muted)" }}
             aria-label="Skip tutorial"
           >

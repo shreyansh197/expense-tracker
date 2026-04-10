@@ -49,7 +49,7 @@ export default function DeviceLinkPage() {
     return (
       <div className="flex min-h-screen items-center justify-center p-4">
         <div className="w-full max-w-sm rounded-2xl p-6 shadow-xl text-center" style={{ background: 'var(--surface)' }}>
-          <XCircle className="mx-auto h-12 w-12 text-red-500 mb-4" />
+          <XCircle className="mx-auto h-12 w-12 mb-4" style={{ color: 'var(--danger)' }} />
           <h2 className="text-lg font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
             Device Link Failed
           </h2>
@@ -58,7 +58,7 @@ export default function DeviceLinkPage() {
           </p>
           <button
             onClick={() => router.push("/")}
-            className="flex items-center gap-2 mx-auto text-sm text-indigo-600 dark:text-indigo-400 hover:underline"
+            className="flex items-center gap-2 mx-auto text-sm text-data hover:underline"
           >
             <ArrowLeft className="h-4 w-4" />
             Go to Dashboard
@@ -72,7 +72,7 @@ export default function DeviceLinkPage() {
     return (
       <div className="flex min-h-screen items-center justify-center p-4">
         <div className="w-full max-w-sm rounded-2xl p-6 shadow-xl text-center" style={{ background: 'var(--surface)' }}>
-          <CheckCircle2 className="mx-auto h-12 w-12 text-emerald-500 mb-4" />
+          <CheckCircle2 className="mx-auto h-12 w-12 mb-4" style={{ color: 'var(--success)' }} />
           <h2 className="text-lg font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
             Device Linked!
           </h2>
@@ -87,7 +87,7 @@ export default function DeviceLinkPage() {
   return (
     <div className="flex min-h-screen items-center justify-center p-4">
       <div className="w-full max-w-sm rounded-2xl p-6 shadow-xl text-center" style={{ background: 'var(--surface)' }}>
-        <Smartphone className="mx-auto h-12 w-12 text-indigo-500 mb-4" />
+        <Smartphone className="mx-auto h-12 w-12 text-data mb-4" />
         <h2 className="text-lg font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
           Link This Device
         </h2>
@@ -100,14 +100,14 @@ export default function DeviceLinkPage() {
         {!isAuthenticated && (
           <button
             onClick={handleAccept}
-            className="w-full rounded-xl bg-indigo-600 py-3 text-base font-semibold text-white hover:bg-indigo-700 transition-colors"
+            className="w-full rounded-xl bg-data py-3 text-base font-semibold text-white hover:bg-data-hover transition-colors"
           >
             Sign In to Link
           </button>
         )}
 
         {isAuthenticated && accepting && (
-          <Loader2 className="mx-auto h-8 w-8 animate-spin text-indigo-500" />
+          <Loader2 className="mx-auto h-8 w-8 animate-spin text-data" />
         )}
       </div>
     </div>

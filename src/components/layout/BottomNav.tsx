@@ -73,11 +73,12 @@ export function BottomNav() {
           "fixed left-1/2 z-40 flex h-[54px] w-[54px] -translate-x-1/2 items-center justify-center rounded-full text-white transition-colors lg:hidden",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
           accentColor === "emerald"
-            ? "bg-emerald-600 hover:bg-emerald-700 focus-visible:ring-emerald-500 shadow-lg shadow-emerald-600/25"
+            ? "text-white shadow-lg"
             : "bg-accent hover:bg-cta-hover focus-visible:ring-accent shadow-lg shadow-[var(--accent)]/20"
         )}
         style={{
           bottom: `calc(${NAV_HEIGHT}px + env(safe-area-inset-bottom, 0px) + 12px)`,
+          ...(accentColor === "emerald" ? { background: 'var(--biz-accent)', boxShadow: '0 10px 15px -3px var(--focus-ring-biz)' } : {}),
         }}
         initial={false}
         whileTap={{ scale: 0.88 }}
@@ -119,7 +120,7 @@ export function BottomNav() {
                   isActive
                     ? cn(
                         isBiz
-                          ? "text-emerald-600 dark:text-emerald-400"
+                          ? "text-[var(--biz-accent-text)]"
                           : "text-accent"
                       )
                     : ""
@@ -131,7 +132,7 @@ export function BottomNav() {
                     layoutId="nav-active-indicator"
                     className={cn(
                       "absolute -top-2 h-[3px] w-5 rounded-full",
-                      isBiz ? "bg-emerald-600 dark:bg-emerald-400" : "bg-accent"
+                      isBiz ? "bg-[var(--biz-accent)]" : "bg-accent"
                     )}
                     transition={springStiff}
                   />
@@ -139,7 +140,7 @@ export function BottomNav() {
                 <Icon size={22} />
                 <span className="text-caption font-medium">{item.label}</span>
                 {isBiz && !isActive && isBusiness && (
-                  <span className="absolute top-1 right-1/4 h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                  <span className="absolute top-1 right-1/4 h-1.5 w-1.5 rounded-full bg-biz" />
                 )}
               </Link>
             );

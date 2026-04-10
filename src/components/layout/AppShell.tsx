@@ -81,11 +81,11 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
         <CalculationsProvider>
           <OfflineBanner />
           {accessDenied && (
-            <div className="flex items-center gap-2 bg-red-500/10 px-4 py-2.5 text-sm font-medium text-red-600 dark:text-red-400" role="alert">
+            <div className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium" style={{ background: 'var(--danger-soft)', color: 'var(--danger-text)' }} role="alert">
               <span className="flex-1">You no longer have access to this workspace. Sync has been paused.</span>
               <button
                 onClick={() => setAccessDenied(false)}
-                className="rounded-lg px-3 py-1 text-xs font-semibold hover:bg-red-500/10"
+                className="rounded-lg px-3 py-2.5 text-xs font-semibold transition-colors hover:bg-err-soft"
               >
                 Dismiss
               </button>

@@ -145,7 +145,7 @@ export function GoalsManager() {
         {!showForm && (
           <button
             onClick={() => setShowForm(true)}
-            className="flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-medium text-indigo-600 hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-900/30"
+            className="flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-medium text-data hover:bg-data-soft"
           >
             <Plus size={13} />
             Add Goal
@@ -230,7 +230,7 @@ export function GoalsManager() {
             <button
               onClick={handleSave}
               disabled={!name.trim() || !targetAmount || parseFloat(targetAmount) <= 0}
-              className="w-full rounded-lg bg-indigo-600 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700 disabled:opacity-40"
+              className="w-full rounded-lg bg-data py-2 text-sm font-medium text-white transition-colors hover:bg-data-hover disabled:opacity-40"
             >
               {editId ? "Update Goal" : "Create Goal"}
             </button>
@@ -279,7 +279,7 @@ export function GoalsManager() {
                   <div className="flex items-center gap-1">
                     <button
                       onClick={() => { setFundGoalId(g.id); setFundMode("add"); setFundAmount(""); }}
-                      className="rounded-lg px-2.5 py-1.5 text-xs font-medium text-indigo-600 hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-900/30"
+                      className="rounded-lg px-2.5 py-1.5 text-xs font-medium text-data hover:bg-data-soft"
                     >
                       + Add
                     </button>
@@ -293,7 +293,7 @@ export function GoalsManager() {
                     </button>
                     <button
                       onClick={() => handleDelete(g.id)}
-                      className="flex h-8 w-8 items-center justify-center rounded-lg transition-colors hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/30"
+                      className="flex h-8 w-8 items-center justify-center rounded-lg transition-colors hover:bg-err-soft hover:text-err"
                       style={{ color: 'var(--text-muted)' }}
                       aria-label="Delete goal"
                     >
@@ -327,7 +327,7 @@ export function GoalsManager() {
                           onClick={() => setFundMode("add")}
                           className={`flex h-9 w-9 items-center justify-center text-xs font-medium rounded-l-lg ${
                             fundMode === "add"
-                              ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400"
+                              ? "bg-[var(--goal-achieved-bg)] text-[var(--goal-achieved-text)]"
                               : ""
                           }`}
                           style={fundMode !== "add" ? { color: 'var(--text-muted)' } : undefined}
@@ -339,7 +339,7 @@ export function GoalsManager() {
                           onClick={() => setFundMode("subtract")}
                           className={`flex h-9 w-9 items-center justify-center text-xs font-medium rounded-r-lg ${
                             fundMode === "subtract"
-                              ? "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400"
+                              ? "bg-[var(--goal-exceeded-bg)] text-[var(--goal-exceeded-text)]"
                               : ""
                           }`}
                           style={fundMode !== "subtract" ? { color: 'var(--text-muted)' } : undefined}
@@ -353,7 +353,7 @@ export function GoalsManager() {
                     <div className="flex items-center gap-2">
                       <button
                         onClick={handleFundSave}
-                        className="flex-1 rounded-lg bg-indigo-600 py-2 text-xs font-semibold text-white transition-colors hover:bg-indigo-700 disabled:opacity-40"
+                        className="flex-1 rounded-lg bg-data py-2 text-xs font-semibold text-white transition-colors hover:bg-data-hover disabled:opacity-40"
                       >
                         {fundMode === "add" ? "Add Funds" : "Remove Funds"}
                       </button>
@@ -385,7 +385,7 @@ export function GoalsManager() {
                   </span>
                   <span className="flex items-center gap-2">
                     {monthsLeft && !isComplete && (
-                      <span className="text-indigo-500">~{monthsLeft}mo left</span>
+                      <span className="text-data">~{monthsLeft}mo left</span>
                     )}
                     {g.deadline && (
                       <span>Due: {g.deadline}</span>

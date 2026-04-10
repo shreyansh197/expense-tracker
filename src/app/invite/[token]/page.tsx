@@ -70,7 +70,7 @@ export default function InvitePage() {
     return (
       <div className="flex min-h-screen items-center justify-center p-4">
         <div className="w-full max-w-sm rounded-2xl p-6 shadow-xl text-center" style={{ background: 'var(--surface)' }}>
-          <XCircle className="mx-auto h-12 w-12 text-red-500 mb-4" />
+          <XCircle className="mx-auto h-12 w-12 mb-4" style={{ color: 'var(--danger)' }} />
           <h2 className="text-lg font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
             Invite Not Available
           </h2>
@@ -79,7 +79,7 @@ export default function InvitePage() {
           </p>
           <button
             onClick={() => router.push("/")}
-            className="flex items-center gap-2 mx-auto text-sm text-indigo-600 dark:text-indigo-400 hover:underline"
+            className="flex items-center gap-2 mx-auto text-sm text-data hover:underline"
           >
             <ArrowLeft className="h-4 w-4" />
             Go to Dashboard
@@ -94,7 +94,7 @@ export default function InvitePage() {
   if (!preview) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
+        <Loader2 className="h-8 w-8 animate-spin text-data" />
       </div>
     );
   }
@@ -105,7 +105,7 @@ export default function InvitePage() {
     return (
       <div className="flex min-h-screen items-center justify-center p-4">
         <div className="w-full max-w-sm rounded-2xl p-6 shadow-xl text-center" style={{ background: 'var(--surface)' }}>
-          <CheckCircle2 className="mx-auto h-12 w-12 text-emerald-500 mb-4" />
+          <CheckCircle2 className="mx-auto h-12 w-12 mb-4" style={{ color: 'var(--success)' }} />
           <h2 className="text-lg font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
             Joined Successfully!
           </h2>
@@ -122,8 +122,8 @@ export default function InvitePage() {
   return (
     <div className="flex min-h-screen items-center justify-center p-4">
       <div className="w-full max-w-sm rounded-2xl p-6 shadow-xl" style={{ background: 'var(--surface)' }}>
-        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900 mx-auto mb-4">
-          <Users className="h-7 w-7 text-indigo-600 dark:text-indigo-400" />
+        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-data-soft mx-auto mb-4">
+          <Users className="h-7 w-7 text-data" />
         </div>
 
         <h2 className="text-center text-lg font-bold mb-1" style={{ color: 'var(--text-primary)' }}>
@@ -146,7 +146,7 @@ export default function InvitePage() {
         <button
           onClick={handleAccept}
           disabled={accepting}
-          className="w-full rounded-xl bg-indigo-600 py-3 text-base font-semibold text-white hover:bg-indigo-700 disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
+          className="w-full rounded-xl bg-data py-3 text-base font-semibold text-white hover:bg-data-hover disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
         >
           {accepting && <Loader2 className="h-4 w-4 animate-spin" />}
           {isAuthenticated ? "Accept Invite" : "Sign In to Accept"}

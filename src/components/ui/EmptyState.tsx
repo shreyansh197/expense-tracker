@@ -22,7 +22,7 @@ interface EmptyStateProps {
 
 export function EmptyState({ icon: Icon, secondaryIcon: SecondaryIcon, illustration, title, description, action }: EmptyStateProps) {
   const btnColor = action?.color === "emerald"
-    ? "bg-emerald-600 hover:bg-emerald-700"
+    ? ""
     : "bg-accent hover:brightness-110";
 
   return (
@@ -60,6 +60,7 @@ export function EmptyState({ icon: Icon, secondaryIcon: SecondaryIcon, illustrat
         <m.button
           onClick={action.onClick}
           className={`mt-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all press-scale ${btnColor}`}
+          style={action.color === "emerald" ? { background: 'var(--biz-accent)' } : undefined}
           variants={fadeUpSmall}
           whileTap={{ scale: scaleTokens.tapButton }}
         >

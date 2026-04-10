@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState, useCallback, useEffect, Suspense } from "react";
+import { useState, useCallback, useEffect, Suspense, useMemo } from "react";
 import dynamic from "next/dynamic";
 import { m, AnimatePresence } from "framer-motion";
 import { AppShell } from "@/components/layout/AppShell";
@@ -43,13 +43,18 @@ import { getMonthName } from "@/lib/utils";
 import { formatCurrency as fmtCurrency } from "@/lib/utils";
 import { convert, getFallbackRates } from "@/lib/exchangeRates";
 import { useCurrency } from "@/hooks/useCurrency";
+import { getSpendingStreak } from "@/lib/calculations";
+import { useDexieQuery } from "@/hooks/useDexieQuery";
+import { db } from "@/lib/db";
+import { getActiveWorkspaceId } from "@/lib/authClient";
 import { CategoryDot } from "@/components/expenses/CategoryChips";
 import { QuickHelpButton } from "@/components/ui/QuickHelpButton";
 import { useAuth } from "@/components/providers/AuthProvider";
-import { Repeat, PlusCircle, Target, BarChart3, Sparkles, ChevronDown, Check, ArrowRight } from "lucide-react";
+import { useToast } from "@/components/ui/Toast";
+import { Repeat, PlusCircle, Target, BarChart3, Sparkles, ChevronDown, Check, ArrowRight, Flame } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { DashboardSectionId, DashboardLayout } from "@/types";
+import type { DashboardSectionId, DashboardLayout, Expense } from "@/types";
 import { useCalculationsContext } from "@/contexts/CalculationsContext";
 import type { ReactNode } from "react";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
@@ -131,10 +136,10 @@ function OnboardingStep({
       {/* Step indicator */}
       <div className={cn(
         "flex h-9 w-9 shrink-0 items-center justify-center rounded-xl transition-all",
-        done ? "bg-emerald-50 dark:bg-emerald-900/30" : c.bg
+        done ? "bg-[var(--goal-achieved-bg)]" : c.bg
       )}>
         {done ? (
-          <Check size={16} className="text-emerald-600 dark:text-emerald-400" strokeWidth={2.5} />
+          <Check size={16} className="text-ok" strokeWidth={2.5} />
         ) : (
           <Icon size={16} className={c.text} />
         )}
@@ -301,6 +306,42 @@ function DashboardContent() {
     .sort((a, b) => b.day - a.day || b.createdAt - a.createdAt)
     .slice(0, 5);
 
+  // Spending streak — consecutive days with at least one expense logged
+  const allExpenses = useDexieQuery(
+    () => {
+      const wid = getActiveWorkspaceId();
+      if (!wid) return [] as { year: number; month: number; day: number; deletedAt: number | null }[];
+      return db.expenses.where("workspaceId").equals(wid).toArray();
+    },
+    [],
+    [] as { year: number; month: number; day: number; deletedAt: number | null }[],
+  );
+  const streak = useMemo(() => getSpendingStreak(allExpenses as Expense[]), [allExpenses]);
+
+  // Budget milestone celebrations — toast at 25%, 50%, 75% savings thresholds (once per month)
+  const { toast } = useToast();
+  useEffect(() => {
+    if (!effectiveBudget || effectiveBudget <= 0 || loading) return;
+    const savedPercent = Math.round(((effectiveBudget - monthlyTotal) / effectiveBudget) * 100);
+    if (savedPercent <= 0) return;
+    const milestoneKey = `expenstream-milestone-${currentYear}-${currentMonth}`;
+    const shown: number[] = JSON.parse(localStorage.getItem(milestoneKey) || "[]");
+    const milestones = [75, 50, 25] as const;
+    for (const m of milestones) {
+      if (savedPercent >= m && !shown.includes(m)) {
+        shown.push(m);
+        localStorage.setItem(milestoneKey, JSON.stringify(shown));
+        const msgs: Record<number, string> = {
+          25: `25% of budget saved — nice start!`,
+          50: `Halfway there — 50% saved this month!`,
+          75: `75% saved — outstanding discipline! 🏆`,
+        };
+        toast(msgs[m], "success");
+        break; // only one toast per render cycle
+      }
+    }
+  }, [effectiveBudget, monthlyTotal, currentMonth, currentYear, loading, toast]);
+
   // Welcome card: only show for truly new users, dismiss permanently once any expense exists
   const WELCOME_KEY = "expenstream-welcome-dismissed";
   const [welcomeDismissed, setWelcomeDismissed] = useState(() => {
@@ -364,9 +405,17 @@ function DashboardContent() {
 
           {user?.name && (
             <div className="mb-3">
-              <p className="text-xs sm:text-xs font-medium tracking-wide" style={{ color: 'var(--text-muted)' }}>
-                {new Date().getHours() < 12 ? "Good morning" : new Date().getHours() < 17 ? "Good afternoon" : "Good evening"}
-              </p>
+              <div className="flex items-center gap-2">
+                <p className="text-xs sm:text-xs font-medium tracking-wide" style={{ color: 'var(--text-muted)' }}>
+                  {new Date().getHours() < 12 ? "Good morning" : new Date().getHours() < 17 ? "Good afternoon" : "Good evening"}
+                </p>
+                {streak >= 2 && (
+                  <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold" style={{ background: 'var(--warning-soft)', color: 'var(--warning-text)' }}>
+                    <Flame size={10} />
+                    {streak}d streak
+                  </span>
+                )}
+              </div>
               <p className="text-xl sm:text-2xl font-semibold tracking-tight" style={{ color: 'var(--text-primary)' }}>
                 {user.name.split(" ")[0]}
               </p>
@@ -415,11 +464,11 @@ function DashboardContent() {
                   <m.div key="kpi-content" className="dash-section" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
                   {/* Trophy: month ended under budget */}
                   {daysRemaining === 0 && remaining >= 0 && effectiveBudget > 0 && (
-                    <div className="mb-3 flex items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-3 dark:border-emerald-900/40 dark:bg-emerald-950/30">
-                      <Trophy size={28} className="text-emerald-500 shrink-0" />
+                    <div className="mb-3 flex items-center gap-3 rounded-xl border p-3" style={{ borderColor: 'var(--goal-achieved-border)', background: 'var(--goal-achieved-bg)' }}>
+                      <Trophy size={28} className="shrink-0" style={{ color: 'var(--success)' }} />
                       <div>
-                        <p className="text-sm font-semibold text-emerald-700 dark:text-emerald-400">Budget Goal Met!</p>
-                        <p className="text-xs text-emerald-600/80 dark:text-emerald-400/70">You stayed under budget this month. Great discipline!</p>
+                        <p className="text-sm font-semibold" style={{ color: 'var(--goal-achieved-text)' }}>Budget Goal Met!</p>
+                        <p className="text-xs" style={{ color: 'var(--goal-achieved-text)', opacity: 0.8 }}>You stayed under budget this month. Great discipline!</p>
                       </div>
                     </div>
                   )}
