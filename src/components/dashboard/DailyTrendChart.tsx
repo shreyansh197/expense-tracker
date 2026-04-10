@@ -27,6 +27,8 @@ interface DailyTrendChartProps {
   activeCategories?: CategoryId[];
   onBarClick?: (day: number) => void;
   paceTarget?: number;
+  /** Hide internal Chart/Table toggle (used when embedded in mobile combined card) */
+  compact?: boolean;
 }
 
 function StackedTooltip({ active, payload, label, catMap }: {
@@ -61,7 +63,7 @@ function StackedTooltip({ active, payload, label, catMap }: {
   );
 }
 
-export function DailyTrendChart({ dailyTotals, stackedDailyTotals, activeCategories, onBarClick, paceTarget }: DailyTrendChartProps) {
+export function DailyTrendChart({ dailyTotals, stackedDailyTotals, activeCategories, onBarClick, paceTarget, compact }: DailyTrendChartProps) {
   const [stacked, setStacked] = useState(false);
   const [showTable, setShowTable] = useState(false);
   const { settings } = useSettings();
@@ -115,6 +117,7 @@ export function DailyTrendChart({ dailyTotals, stackedDailyTotals, activeCategor
 
   return (
     <div role="img" aria-label={chartLabel} className="flex h-full flex-col">
+      {!compact && (
       <div className="mb-1 flex justify-end gap-1">
         {hasStackedData && (
           <button
@@ -156,6 +159,7 @@ export function DailyTrendChart({ dailyTotals, stackedDailyTotals, activeCategor
           </button>
         </div>
       </div>
+      )}
 
       {showTable ? (
         <div className="flex-1 min-h-[180px] overflow-y-auto overflow-x-auto">

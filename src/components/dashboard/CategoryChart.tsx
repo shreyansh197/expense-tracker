@@ -22,6 +22,8 @@ interface CategoryChartProps {
   onCategoryClick?: (categorySlug: string) => void;
   categoryBudgets?: Record<string, number>;
   expenses?: Expense[];
+  /** Hide internal Chart/Table toggle (used when embedded in mobile combined card) */
+  compact?: boolean;
 }
 
 function CustomTooltip({ active, payload, total, budgets, expenseCountMap }: {
@@ -53,7 +55,7 @@ function CustomTooltip({ active, payload, total, budgets, expenseCountMap }: {
   );
 }
 
-export function CategoryChart({ categoryTotals, onCategoryClick, categoryBudgets, expenses }: CategoryChartProps) {
+export function CategoryChart({ categoryTotals, onCategoryClick, categoryBudgets, expenses, compact }: CategoryChartProps) {
   const [showTable, setShowTable] = useState(false);
   const { settings } = useSettings();
   const { formatCurrency } = useCurrency();
@@ -100,6 +102,7 @@ export function CategoryChart({ categoryTotals, onCategoryClick, categoryBudgets
 
   return (
     <div role="img" aria-label={chartLabel}>
+      {!compact && (
       <div className="mb-1 flex justify-end">
         <div className="segmented-control" role="group" aria-label="View mode">
           <button
@@ -122,6 +125,7 @@ export function CategoryChart({ categoryTotals, onCategoryClick, categoryBudgets
           </button>
         </div>
       </div>
+      )}
 
       {showTable ? (
         <div className="overflow-x-auto">
