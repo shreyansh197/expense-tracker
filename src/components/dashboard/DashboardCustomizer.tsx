@@ -171,7 +171,7 @@ export function DashboardCustomizer({ layout, onSave }: DashboardCustomizerProps
           <>
             {/* Backdrop */}
             <m.div
-              className="fixed inset-0 z-[70] bg-black/40"
+              className="fixed inset-0 z-[200] bg-black/40"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -180,7 +180,7 @@ export function DashboardCustomizer({ layout, onSave }: DashboardCustomizerProps
 
             {/* Panel */}
             <m.div
-              className="fixed right-0 top-0 z-[71] flex h-full w-full max-w-sm flex-col shadow-2xl"
+              className="fixed right-0 top-0 z-[201] flex h-full w-full max-w-sm flex-col shadow-2xl"
               style={{ background: "var(--surface)" }}
               initial={{ x: "100%" }}
               animate={{ x: 0 }}

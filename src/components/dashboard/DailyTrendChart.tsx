@@ -10,6 +10,7 @@ import {
   Tooltip,
   CartesianGrid,
   ReferenceLine,
+  Cell,
 } from "recharts";
 import { Table2, BarChart3, Layers, TrendingUp } from "lucide-react";
 import { buildCategoryMap } from "@/lib/categories";
@@ -204,16 +205,16 @@ export function DailyTrendChart({ dailyTotals, stackedDailyTotals, activeCategor
               }}
               style={{ cursor: onBarClick ? "pointer" : undefined }}
             >
-              <CartesianGrid vertical={false} />
+              <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="var(--border-subtle)" strokeOpacity={0.5} />
               <XAxis
                 dataKey="day"
-                tick={{ fontSize: 10 }}
+                tick={{ fontSize: 10, fill: "var(--text-muted)" }}
                 axisLine={false}
                 tickLine={false}
                 interval={4}
               />
               <YAxis
-                tick={{ fontSize: 10 }}
+                tick={{ fontSize: 10, fill: "var(--text-muted)" }}
                 axisLine={false}
                 tickLine={false}
                 tickFormatter={(v: number) => (v >= 1000 ? `${v / 1000}K` : `${v}`)}
@@ -255,16 +256,22 @@ export function DailyTrendChart({ dailyTotals, stackedDailyTotals, activeCategor
               }}
               style={{ cursor: onBarClick ? "pointer" : undefined }}
             >
-              <CartesianGrid vertical={false} />
+              <defs>
+                <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="var(--primary)" stopOpacity={0.9} />
+                  <stop offset="100%" stopColor="var(--primary)" stopOpacity={0.4} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="var(--border-subtle)" strokeOpacity={0.5} />
               <XAxis
                 dataKey="day"
-                tick={{ fontSize: 10 }}
+                tick={{ fontSize: 10, fill: "var(--text-muted)" }}
                 axisLine={false}
                 tickLine={false}
                 interval={4}
               />
               <YAxis
-                tick={{ fontSize: 10 }}
+                tick={{ fontSize: 10, fill: "var(--text-muted)" }}
                 axisLine={false}
                 tickLine={false}
                 tickFormatter={(v: number) => (v >= 1000 ? `${v / 1000}K` : `${v}`)}
@@ -302,13 +309,22 @@ export function DailyTrendChart({ dailyTotals, stackedDailyTotals, activeCategor
               )}
               <Bar
                 dataKey="total"
-                fill="var(--primary)"
+                fill="url(#barGradient)"
                 radius={[4, 4, 0, 0]}
                 isAnimationActive={true}
                 animationBegin={100}
                 animationDuration={600}
                 animationEasing="ease-out"
-              />
+              >
+                {dailyTotals.map((entry) => (
+                  <Cell
+                    key={entry.day}
+                    fill={entry.day === new Date().getDate() ? "var(--primary)" : "url(#barGradient)"}
+                    strokeWidth={entry.day === new Date().getDate() ? 1.5 : 0}
+                    stroke={entry.day === new Date().getDate() ? "var(--primary)" : "none"}
+                  />
+                ))}
+              </Bar>
             </BarChart>
           </ResponsiveContainer>
         </div>

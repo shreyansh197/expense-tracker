@@ -190,6 +190,12 @@ export function CategoryChart({ categoryTotals, onCategoryClick, categoryBudgets
           </p>
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
+              <defs>
+                <filter id="pieGlow">
+                  <feGaussianBlur stdDeviation="2" result="blur" />
+                  <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                </filter>
+              </defs>
               <Pie
                 data={data}
                 cx="50%"
@@ -200,8 +206,8 @@ export function CategoryChart({ categoryTotals, onCategoryClick, categoryBudgets
                 dataKey="value"
                 stroke="none"
                 isAnimationActive={true}
-                animationBegin={200}
-                animationDuration={800}
+                animationBegin={100}
+                animationDuration={900}
                 animationEasing="ease-out"
                 activeShape={(props: unknown) => {
                   const p = props as Record<string, number>;

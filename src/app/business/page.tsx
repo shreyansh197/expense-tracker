@@ -134,7 +134,7 @@ export default function BusinessPage() {
 
   return (
     <AppShell>
-      <PageTransition className="relative mx-auto min-h-[80vh] max-w-5xl xl:max-w-7xl space-y-6 p-4 lg:p-6">
+      <PageTransition className="relative mx-auto min-h-[80vh] max-w-5xl xl:max-w-7xl space-y-6 p-4 sm:p-6 lg:p-8">
         {/* Header + KPIs — emerald zone */}
         <div className="section-zone section-emerald space-y-6 relative overflow-hidden">
         {/* BuilderCharacter — growth archetype */}

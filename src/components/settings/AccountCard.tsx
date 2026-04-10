@@ -259,7 +259,7 @@ export function AccountCard() {
       {/* Fullscreen photo viewer — portaled to body to avoid scroll/overflow issues */}
       {showFullPhoto && avatarSrc && createPortal(
         <div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm animate-in fade-in"
+          className="fixed inset-0 z-[300] flex items-center justify-center bg-black/70 backdrop-blur-sm animate-in fade-in"
           onClick={() => setShowFullPhoto(false)}
         >
           <button

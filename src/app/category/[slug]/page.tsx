@@ -120,7 +120,7 @@ export default function CategoryPage({ params }: { params: Promise<{ slug: strin
 
   return (
     <AppShell>
-      <PageTransition className="mx-auto max-w-4xl xl:max-w-6xl space-y-8 sm:space-y-10 p-4 lg:p-6">
+      <PageTransition className="mx-auto max-w-4xl xl:max-w-6xl space-y-8 sm:space-y-10 p-4 sm:p-6 lg:p-8">
         {/* Header */}
         <div className="flex items-center gap-3">
           <button

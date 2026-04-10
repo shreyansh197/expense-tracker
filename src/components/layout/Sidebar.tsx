@@ -46,9 +46,9 @@ export function Sidebar() {
   const overBudget = budgetUsedPercent > 100;
 
   return (
-    <aside aria-label="Sidebar" className="hidden lg:flex lg:w-[15rem] lg:flex-col transition-[width] duration-200" style={{ background: 'linear-gradient(to bottom, color-mix(in srgb, var(--surface) 94%, var(--primary)), var(--surface), color-mix(in srgb, var(--surface-secondary) 40%, var(--surface)))', borderRight: '1px solid var(--border)' }}>
+    <aside aria-label="Sidebar" className="hidden lg:flex lg:w-[4rem] xl:w-[15rem] lg:flex-col transition-[width] duration-200 group/sidebar" style={{ background: 'linear-gradient(to bottom, color-mix(in srgb, var(--surface) 94%, var(--primary)), var(--surface), color-mix(in srgb, var(--surface-secondary) 40%, var(--surface)))', borderRight: '1px solid var(--border)' }}>
       {/* Logo */}
-      <div className="flex items-center gap-2.5 px-5 py-5 justify-start" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+      <div className="flex items-center gap-2.5 px-5 py-5 justify-center xl:justify-start" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
         <Image
           src="/icons/icon-192.png"
           alt="ExpenStream"
@@ -56,11 +56,11 @@ export function Sidebar() {
           height={32}
           className="rounded-lg flex-shrink-0"
         />
-        <span className="text-lg font-bold tracking-tight" style={{ color: 'var(--text-primary)' }}>
+        <span className="hidden xl:inline text-lg font-bold tracking-tight" style={{ color: 'var(--text-primary)' }}>
           ExpenStream
         </span>
         {settings.businessMode && (
-          <span className="ml-1 inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider" style={{ background: 'var(--biz-accent-soft)', color: 'var(--biz-accent-text)' }}>
+          <span className="ml-1 hidden xl:inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider" style={{ background: 'var(--biz-accent-soft)', color: 'var(--biz-accent-text)' }}>
             Biz
           </span>
         )}
@@ -80,17 +80,17 @@ export function Sidebar() {
               aria-current={isActive ? "page" : undefined}
               title={item.label}
               className={cn(
-                "flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-all duration-200 justify-start",
+                "flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-all duration-200 lg:justify-center xl:justify-start",
                 isActive
                   ? isBiz
-                    ? "border-l-[3px] bg-[var(--biz-accent-soft)] text-[var(--biz-accent-text)] border-[var(--biz-accent)]"
-                    : "bg-accent-soft text-accent border-l-[3px] border-accent"
-                  : "border-l-[3px] border-transparent hover:bg-[var(--surface-secondary)]"
+                    ? "lg:border-l-0 xl:border-l-[3px] bg-[var(--biz-accent-soft)] text-[var(--biz-accent-text)] border-[var(--biz-accent)]"
+                    : "bg-accent-soft text-accent lg:border-l-0 xl:border-l-[3px] border-accent"
+                  : "lg:border-l-0 xl:border-l-[3px] border-transparent hover:bg-[var(--surface-secondary)]"
               )}
               style={!isActive ? { color: 'var(--text-secondary)' } : undefined}
             >
               <Icon size={18} className="flex-shrink-0" />
-              <span>{item.label}</span>
+              <span className="hidden xl:inline">{item.label}</span>
             </Link>
           );
         })}
@@ -99,7 +99,7 @@ export function Sidebar() {
       {/* Budget Widget — hidden in rail mode */}
       {hasBudget && (
         <div
-          className="mx-3 mb-3 rounded-xl p-3"
+          className="mx-3 mb-3 rounded-xl p-3 hidden xl:block"
           style={{ background: 'var(--surface-secondary)' }}
           title={`${formatCurrency(monthlyTotal)} of ${formatCurrency(effectiveBudget)} used`}
         >          <div className="flex items-center justify-between mb-2">
@@ -156,21 +156,21 @@ export function Sidebar() {
           style={isBusinessRoute ? { background: 'var(--biz-accent-gradient)', boxShadow: '0 1px 3px var(--focus-ring-biz)' } : undefined}
         >
           <PlusCircle size={18} className="flex-shrink-0" />
-          <span>{isBusinessRoute ? "Add Ledger" : "Add Expense"}</span>
+          <span className="hidden xl:inline">{isBusinessRoute ? "Add Ledger" : "Add Expense"}</span>
         </m.button>
       </div>
       )}
 
       {/* User Info + Help */}
       <div className="px-3 pb-4 pt-2 space-y-2" style={{ borderTop: '1px solid var(--border-subtle)' }}>
-        <div>
+        <div className="hidden xl:block">
           <QuickHelpButton variant="sidebar" />
         </div>
         {user && (
           <Link
             href="/settings#account"
             title={user.name}
-            className="flex items-center gap-2 rounded-lg px-2 py-1.5 transition-colors hover:bg-[var(--surface-secondary)] justify-start"
+            className="flex items-center gap-2 rounded-lg px-2 py-1.5 transition-colors hover:bg-[var(--surface-secondary)] lg:justify-center xl:justify-start"
             style={{ color: 'var(--text-secondary)' }}
           >
             {user.avatarUrl ? (
@@ -180,7 +180,7 @@ export function Sidebar() {
                 <User size={12} className="text-amber-600 dark:text-blue-400" />
               </div>
             )}
-            <span className="truncate text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>
+            <span className="hidden xl:inline truncate text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>
               {user.name}
             </span>
           </Link>

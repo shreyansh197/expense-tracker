@@ -88,7 +88,7 @@ export default function LedgerDetailPage() {
 
   return (
     <AppShell>
-      <div className="mx-auto max-w-3xl xl:max-w-5xl space-y-6 p-4 lg:p-6">
+      <div className="mx-auto max-w-3xl xl:max-w-5xl space-y-6 p-4 sm:p-6 lg:p-8">
         {/* Back + Actions */}
         <div className="flex items-center justify-between">
           <button
@@ -285,7 +285,7 @@ export default function LedgerDetailPage() {
 
         {/* Delete Confirm */}
         {showDeleteConfirm && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/50 p-4">
             <div className="w-full max-w-sm rounded-xl p-6 shadow-xl" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
               <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Delete Ledger?</h3>
               <p className="mt-2 text-xs" style={{ color: 'var(--text-tertiary)' }}>

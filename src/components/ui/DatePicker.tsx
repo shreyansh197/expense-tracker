@@ -112,7 +112,7 @@ export function DatePicker({ value, onChange, month, year }: DatePickerProps) {
         <>
           {/* Mobile: full-screen overlay */}
           <div
-            className="fixed inset-0 z-[70] flex items-center justify-center bg-black/40 p-4 sm:hidden"
+            className="fixed inset-0 z-[200] flex items-center justify-center bg-black/40 p-4 sm:hidden"
             onClick={(e) => {
               if (e.target === e.currentTarget) setOpen(false);
             }}

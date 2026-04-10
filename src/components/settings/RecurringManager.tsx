@@ -188,7 +188,7 @@ export function RecurringManager() {
               title="Edit"
               aria-label="Edit recurring expense"
             >
-              <Pencil size={13} />
+              <Pencil size={14} />
             </button>
             <button
               onClick={() => handleToggle(r.id)}
@@ -213,7 +213,7 @@ export function RecurringManager() {
       {showAdd ? (
         createPortal(
           <div
-            className="fixed inset-0 z-[70] flex items-center justify-center p-4 backdrop-blur-sm"
+            className="fixed inset-0 z-[200] flex items-center justify-center p-4 backdrop-blur-sm"
             style={{ backgroundColor: 'rgba(0,0,0,0.4)' }}
             onClick={(e) => { if (e.target === e.currentTarget) resetForm(); }}
           >

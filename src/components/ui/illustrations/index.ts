@@ -10,3 +10,4 @@ export { SettingsGraphic } from "./SettingsGraphic";
 export { CycleGraphic } from "./CycleGraphic";
 export { SparkGraphic } from "./SparkGraphic";
 export { WavePatternGraphic } from "./WavePatternGraphic";
+export { TrophyIllustration } from "./TrophyIllustration";

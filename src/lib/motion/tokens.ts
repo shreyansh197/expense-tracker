@@ -3,10 +3,12 @@
 // ── Durations (seconds) ──
 
 export const duration = {
+  instant: 0.08,  // micro-feedback, ripple start
   fast: 0.15,     // hover, press, exits
   normal: 0.25,   // fade, toggle, small movement
   emphasis: 0.4,  // page entrance, hero elements
   slow: 0.7,      // progress bars, chart reveals
+  glacial: 0.6,   // full-page transitions, onboarding
   exit: 0.15,     // all exit animations — must be snappy
 } as const;
 
@@ -25,6 +27,8 @@ export const ease = {
   out: [0.22, 1, 0.36, 1] as readonly [number, number, number, number],
   /** Symmetric ease-in-out for expand/collapse, layout shifts */
   inOut: [0.4, 0, 0.2, 1] as readonly [number, number, number, number],
+  /** Snappy ease-in for exits */
+  in: [0.55, 0, 1, 0.45] as readonly [number, number, number, number],
 } as const;
 
 // ── Spring presets (for framer-motion `transition: { type: "spring", ... }`) ──
@@ -34,6 +38,10 @@ export const spring = {
   default: { type: "spring" as const, stiffness: 400, damping: 28 },
   /** Tab indicators, layout shifts */
   stiff: { type: "spring" as const, stiffness: 500, damping: 30 },
+  /** Bouncy — FAB press, celebrations, delight moments */
+  bouncy: { type: "spring" as const, stiffness: 600, damping: 15 },
+  /** Gentle — slow reveals, background elements */
+  gentle: { type: "spring" as const, stiffness: 200, damping: 20 },
 } as const;
 
 // ── Distances (pixels) ──

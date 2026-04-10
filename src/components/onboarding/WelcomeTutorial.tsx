@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { ArrowRight, X } from "lucide-react";
+import { ArrowRight, X, PlusCircle, BarChart2, Settings, Lightbulb, Rocket } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { ObserverCharacter } from "@/components/ui/illustrations/characters";
 
 /* ── Step definitions ─────────────────────────────────────── */
@@ -12,6 +13,7 @@ interface Step {
   selectorDesktop?: string;
   title: string;
   body: string;
+  icon?: LucideIcon;
   /** If true, show a centered card instead of anchored to an element */
   centered?: boolean;
 }
@@ -22,28 +24,33 @@ const STEPS: Step[] = [
     selectorDesktop: '[data-tour="fab-desktop"]',
     title: "Add your first expense",
     body: "Tap this button to log what you spend. Every entry helps ExpenStream track your habits.",
+    icon: PlusCircle,
   },
   {
     selector: '[data-tour="dashboard"]',
     title: "Your spending at a glance",
     body: "Switch months here to browse your spending history. You can also swipe left or right anywhere on the screen to jump between months.",
+    icon: BarChart2,
   },
   {
     selector: '[data-tour="nav-settings"]',
     selectorDesktop: '[data-tour="nav-settings-desktop"]',
     title: "Make it yours",
     body: "Set a monthly budget, customise categories, recurring expenses, and savings goals.",
+    icon: Settings,
   },
   {
     selector: "",
     title: "Pro tips \u2728",
     body: "\u2022 Swipe left / right to switch months\n\u2022 Press Shift + ? to see all keyboard shortcuts\n\u2022 Enable Business Mode in Settings for ledger tracking & invoices\n\u2022 Set a budget in Settings to unlock forecasts & alerts",
+    icon: Lightbulb,
     centered: true,
   },
   {
     selector: "",
     title: "You\u2019re all set!",
     body: "Start tracking your expenses and take control of your finances.",
+    icon: Rocket,
     centered: true,
   },
 ];
@@ -137,7 +144,7 @@ export function WelcomeTutorial({ onComplete }: WelcomeTutorialProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-[200]" aria-modal="true" role="dialog">
+    <div className="fixed inset-0 z-[300]" aria-modal="true" role="dialog">
       {/* Overlay with spotlight cutout */}
       {rect ? (
         <div
@@ -157,7 +164,7 @@ export function WelcomeTutorial({ onComplete }: WelcomeTutorialProps) {
 
       {/* Card — always above overlay */}
       <div
-        className="fixed z-[201] rounded-2xl p-5 shadow-2xl transition-all duration-300"
+        className="fixed z-[301] rounded-2xl p-5 shadow-2xl transition-all duration-300"
         style={{
           background: "var(--surface)",
           border: "1px solid var(--border)",
@@ -181,6 +188,11 @@ export function WelcomeTutorial({ onComplete }: WelcomeTutorialProps) {
         {isLast && (
           <div className="flex justify-center mb-2">
             <ObserverCharacter size={100} />
+          </div>
+        )}
+        {current.icon && !isLast && (
+          <div className="mb-2 flex h-9 w-9 items-center justify-center rounded-xl" style={{ background: 'var(--accent-soft)' }}>
+            <current.icon size={18} style={{ color: 'var(--accent)' }} />
           </div>
         )}
         <h2

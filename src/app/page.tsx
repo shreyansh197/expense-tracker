@@ -34,6 +34,10 @@ const DailyTrendChart = dynamic(
   () => import("@/components/dashboard/DailyTrendChart").then((m) => m.DailyTrendChart),
   { ssr: false },
 );
+const SmartInsights = dynamic(
+  () => import("@/components/dashboard/SmartInsights").then((m) => m.SmartInsights),
+  { ssr: false },
+);
 
 import { useExpenses } from "@/hooks/useExpenses";
 import { useSettings } from "@/hooks/useSettings";
@@ -57,9 +61,12 @@ import { cn } from "@/lib/utils";
 import type { DashboardSectionId, DashboardLayout, Expense } from "@/types";
 import { useCalculationsContext } from "@/contexts/CalculationsContext";
 import type { ReactNode } from "react";
+import { SpendingHeatmap } from "@/components/dashboard/SpendingHeatmap";
+import { SpendingComparison } from "@/components/dashboard/SpendingComparison";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import { useMonthUrlSync } from "@/hooks/useMonthUrlSync";
 import { usePageTitle } from "@/hooks/usePageTitle";
+import { getAllCategories } from "@/lib/categories";
 
 /* ── Lightweight fallback for per-section ErrorBoundary ────── */
 function SectionFallback() {
@@ -306,6 +313,19 @@ function DashboardContent() {
     .sort((a, b) => b.day - a.day || b.createdAt - a.createdAt)
     .slice(0, 5);
 
+  // Previous month expenses — for SmartInsights & SpendingComparison
+  const prevMonth = currentMonth === 1 ? 12 : currentMonth - 1;
+  const prevYear = currentMonth === 1 ? currentYear - 1 : currentYear;
+  const { expenses: prevMonthExpenses } = useExpenses(prevMonth, prevYear);
+  const prevMonthTotal = useMemo(
+    () => prevMonthExpenses.reduce((s, e) => s + e.amount, 0),
+    [prevMonthExpenses],
+  );
+  const allCategories = useMemo(
+    () => getAllCategories(settings.customCategories, settings.hiddenDefaults),
+    [settings.customCategories, settings.hiddenDefaults],
+  );
+
   // Spending streak — consecutive days with at least one expense logged
   const allExpenses = useDexieQuery(
     () => {
@@ -407,7 +427,14 @@ function DashboardContent() {
             <div className="mb-3">
               <div className="flex items-center gap-2">
                 <p className="text-xs sm:text-xs font-medium tracking-wide" style={{ color: 'var(--text-muted)' }}>
-                  {new Date().getHours() < 12 ? "Good morning" : new Date().getHours() < 17 ? "Good afternoon" : "Good evening"}
+                  {(() => {
+                    const h = new Date().getHours();
+                    if (h < 5) return "🌙 Burning the midnight oil";
+                    if (h < 12) return "☀️ Good morning";
+                    if (h < 17) return "👋 Good afternoon";
+                    if (h < 21) return "🌅 Good evening";
+                    return "🌙 Good night";
+                  })()}
                 </p>
                 {streak >= 2 && (
                   <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold" style={{ background: 'var(--warning-soft)', color: 'var(--warning-text)' }}>
@@ -431,7 +458,7 @@ function DashboardContent() {
             <div className="flex shrink-0 items-center gap-2">
               <SyncIndicator />
               <DashboardCustomizer layout={settings.dashboardLayout} onSave={handleSaveLayout} />
-              <div className="relative z-[60] lg:hidden">
+              <div className="relative z-[50] lg:hidden">
                 <QuickHelpButton />
               </div>
             </div>
@@ -447,6 +474,16 @@ function DashboardContent() {
               useUIStore.getState().openAddForm();
             }}
             hasBudget={settings.salary > 0}
+          />
+        )}
+
+        {/* Smart Insights — contextual spending analysis */}
+        {!loading && expenses.length > 0 && (
+          <SmartInsights
+            expenses={expenses}
+            previousMonthExpenses={prevMonthExpenses}
+            salary={effectiveBudget}
+            categories={allCategories}
           />
         )}
 
@@ -492,6 +529,11 @@ function DashboardContent() {
                       : 0
                   }
                 />
+                {prevMonthTotal > 0 && (
+                  <div className="mt-3 flex justify-end">
+                    <SpendingComparison currentTotal={monthlyTotal} previousTotal={prevMonthTotal} />
+                  </div>
+                )}
                 </m.div>
               )}
               </AnimatePresence>
@@ -629,6 +671,15 @@ function DashboardContent() {
                   </div>
                 </RevealOnScroll>
               </div>
+              {/* Spending Heatmap — daily intensity grid */}
+              <RevealOnScroll className="dash-section mt-4" delay={0.15}>
+                <SpendingHeatmap
+                  expenses={expenses}
+                  month={currentMonth}
+                  year={currentYear}
+                  onDayClick={handleDayClick}
+                />
+              </RevealOnScroll>
               </>
               )}
               </AnimatePresence>

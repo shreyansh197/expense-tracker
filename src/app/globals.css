@@ -3,6 +3,32 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
+  /* ── Fluid type scale (320px → 1440px) ── */
+  --text-display: clamp(2.25rem, 1.857rem + 1.964vw, 3.5rem);
+  --text-hero: clamp(2rem, 1.714rem + 1.429vw, 2.75rem);
+  --text-h1: clamp(1.5rem, 1.321rem + 0.893vw, 2rem);
+  --text-h2: clamp(1.25rem, 1.161rem + 0.446vw, 1.5rem);
+  --text-h3: clamp(1.0625rem, 1.007rem + 0.279vw, 1.25rem);
+  --text-h4: clamp(0.9375rem, 0.909rem + 0.143vw, 1.0625rem);
+  --text-body-lg: clamp(0.9375rem, 0.909rem + 0.143vw, 1.0625rem);
+  --text-body: clamp(0.875rem, 0.857rem + 0.089vw, 0.9375rem);
+  --text-body-sm: clamp(0.8125rem, 0.795rem + 0.089vw, 0.875rem);
+  --text-caption-size: clamp(0.75rem, 0.741rem + 0.045vw, 0.8125rem);
+  --text-label: clamp(0.75rem, 0.741rem + 0.045vw, 0.8125rem);
+  --text-overline: clamp(0.6875rem, 0.679rem + 0.045vw, 0.75rem);
+  /* ── Fluid amount sizes ── */
+  --text-amount-hero: clamp(2rem, 1.643rem + 1.786vw, 3rem);
+  --text-amount-large: clamp(1.25rem, 1.107rem + 0.714vw, 1.75rem);
+  --text-amount-medium: clamp(1rem, 0.929rem + 0.357vw, 1.25rem);
+  /* ── Z-index scale ── */
+  --z-base: 0;
+  --z-dropdown: 50;
+  --z-sticky: 100;
+  --z-overlay: 200;
+  --z-modal: 300;
+  --z-toast: 400;
+  --z-tooltip: 500;
+  --z-max: 999;
   /* ── Spacing scale ── */
   --space-1: 0.25rem;
   --space-2: 0.5rem;
@@ -28,8 +54,15 @@
   /* ── Text ── */
   --text-primary: #0F172A;
   --text-secondary: #64748B;
-  --text-tertiary: #6B7B8B;
-  --text-muted: #8B9CAB;
+  --text-tertiary: #576574;
+  --text-muted: #6B7280;
+  --text-inverse: #FFFFFF;
+  /* ── Semantic surfaces ── */
+  --surface-modal: #ffffff;
+  --surface-popover: #ffffff;
+  /* ── Semantic borders ── */
+  --border-strong: #CBD5E1;
+  --border-focus: var(--primary);
   /* ── Radius scale ── */
   --radius-sm: 0.5rem;
   --radius-md: 0.75rem;
@@ -38,6 +71,7 @@
   /* ── Icon sizes ── */
   --icon-xs: 14px;
   --icon-sm: 16px;
+  --icon-base: 18px;
   --icon-md: 20px;
   --icon-lg: 24px;
   /* ── Primary (Brand — Teal) ── */
@@ -160,8 +194,15 @@
   /* ── Text ── */
   --text-primary: #E2E8F0;
   --text-secondary: #94A3B8;
-  --text-tertiary: #708090;
-  --text-muted: #475569;
+  --text-tertiary: #7B8CA0;
+  --text-muted: #64748B;
+  --text-inverse: #0F172A;
+  /* ── Semantic surfaces ── */
+  --surface-modal: #1A2332;
+  --surface-popover: #1E293B;
+  /* ── Semantic borders ── */
+  --border-strong: #475569;
+  --border-focus: var(--primary);
   /* ── Primary (Teal — aligned with light brand) ── */
   --primary: #5EEAD4;
   --primary-soft: rgba(94, 234, 212, 0.12);
@@ -359,8 +400,10 @@ body {
 
 @media (display-mode: standalone) {
   body {
-    padding-top: env(safe-area-inset-top);
-    padding-bottom: env(safe-area-inset-bottom);
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    padding-left: env(safe-area-inset-left, 0px);
+    padding-right: env(safe-area-inset-right, 0px);
   }
 }
 
@@ -514,20 +557,57 @@ button, a {
   pointer-events: none;
   background: radial-gradient(ellipse at top right, var(--hero-glow) 0%, transparent 60%);
 }
+/* Glassmorphic card — frosted glass effect for premium surfaces */
+.card-glass {
+  position: relative;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--surface) 80%, transparent);
+  backdrop-filter: blur(16px) saturate(1.8);
+  -webkit-backdrop-filter: blur(16px) saturate(1.8);
+  border: 1px solid color-mix(in srgb, var(--border-card) 60%, transparent);
+  border-radius: 1.25rem;
+  box-shadow: var(--shadow-md);
+  transition: box-shadow var(--duration-normal) var(--ease-out), border-color var(--duration-normal) var(--ease-out);
+}
+.dark .card-glass {
+  background: color-mix(in srgb, var(--surface) 65%, transparent);
+  border-color: color-mix(in srgb, var(--border-card) 40%, transparent);
+}
+/* Gradient card — for premium dashboard sections */
+.card-gradient {
+  position: relative;
+  overflow: hidden;
+  background: var(--surface);
+  border: 1px solid var(--border-card);
+  border-radius: 1rem;
+  box-shadow: var(--card-shadow);
+}
+.card-gradient::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: var(--gradient-hero);
+  opacity: 0.5;
+}
 
-/* ── Typography scale ──────────────────────────────────────── */
+/* ── Typography scale (fluid clamp) ────────────────────────── */
+.text-display {
+  font-size: var(--text-display);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.035em;
+  color: var(--text-primary);
+}
 .text-page-title {
-  font-size: 1.5rem;
+  font-size: var(--text-h1);
   font-weight: 700;
   line-height: 1.25;
   letter-spacing: -0.03em;
   color: var(--text-primary);
 }
-@media (min-width: 640px) {
-  .text-page-title { font-size: 1.75rem; }
-}
 .text-section-title {
-  font-size: 0.8125rem;
+  font-size: var(--text-overline);
   font-weight: 600;
   line-height: 1.4;
   letter-spacing: 0.04em;
@@ -535,29 +615,56 @@ button, a {
   color: var(--text-secondary);
 }
 .text-card-title {
-  font-size: 0.8125rem;
+  font-size: var(--text-caption-size);
   font-weight: 600;
   line-height: 1.4;
   color: var(--text-secondary);
 }
+.text-body-lg {
+  font-size: var(--text-body-lg);
+  font-weight: 400;
+  line-height: 1.6;
+  color: var(--text-primary);
+}
 .text-body {
-  font-size: 0.875rem;
+  font-size: var(--text-body);
   font-weight: 400;
   line-height: 1.65;
   color: var(--text-primary);
 }
+.text-body-sm {
+  font-size: var(--text-body-sm);
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
 .text-meta {
-  font-size: 0.6875rem;
+  font-size: var(--text-caption-size);
   font-weight: 400;
   line-height: 1.4;
   letter-spacing: 0.02em;
   color: var(--text-tertiary);
 }
 .text-caption {
-  font-size: 0.6875rem;
+  font-size: var(--text-caption-size);
   font-weight: 500;
   line-height: 1.4;
   color: var(--text-tertiary);
+}
+.text-label {
+  font-size: var(--text-label);
+  font-weight: 500;
+  line-height: 1.4;
+  letter-spacing: 0.01em;
+  color: var(--text-secondary);
+}
+.text-overline {
+  font-size: var(--text-overline);
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
 }
 .text-amount {
   font-weight: 600;
@@ -566,7 +673,7 @@ button, a {
   font-feature-settings: "tnum";
 }
 .text-hero-amount {
-  font-size: 2.5rem;
+  font-size: var(--text-amount-hero);
   font-weight: 800;
   line-height: 1.1;
   letter-spacing: -0.035em;
@@ -575,7 +682,7 @@ button, a {
   font-feature-settings: "tnum", "cv01";
 }
 .text-amount-lg {
-  font-size: 1.5rem;
+  font-size: var(--text-amount-large);
   font-weight: 700;
   line-height: 1.15;
   letter-spacing: -0.02em;
@@ -583,7 +690,7 @@ button, a {
   font-feature-settings: "tnum";
 }
 .text-amount-md {
-  font-size: 1.125rem;
+  font-size: var(--text-amount-medium);
   font-weight: 700;
   line-height: 1.2;
   letter-spacing: -0.015em;
@@ -770,6 +877,71 @@ button, a {
 }
 }
 
+/* ── Button loading state ──────────────────────────────────── */
+.btn-loading {
+  position: relative;
+  pointer-events: none;
+  color: transparent !important;
+}
+.btn-loading::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 1.125em;
+  height: 1.125em;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: btn-spin 0.6s linear infinite;
+  color: #ffffff;
+}
+.btn-secondary.btn-loading::after,
+.btn-ghost.btn-loading::after {
+  color: var(--text-secondary);
+}
+@keyframes btn-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Icon animation utilities ──────────────────────────────── */
+.icon-idle {
+  transition: transform 0.2s var(--ease-out), color 0.2s var(--ease-out);
+}
+.icon-idle:hover {
+  transform: scale(1.1);
+}
+.icon-active {
+  transform: scale(0.92);
+  transition: transform 0.1s var(--ease-out);
+}
+.icon-pulse {
+  animation: icon-pulse 1.5s ease-in-out infinite;
+}
+@keyframes icon-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+.icon-spin {
+  animation: btn-spin 0.8s linear infinite;
+}
+.icon-bounce {
+  animation: icon-bounce 0.4s var(--ease-out);
+}
+@keyframes icon-bounce {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.25); }
+  100% { transform: scale(1); }
+}
+.icon-shake {
+  animation: icon-shake 0.4s ease-in-out;
+}
+@keyframes icon-shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-3px); }
+  75% { transform: translateX(3px); }
+}
+
 /* ── Button size modifiers ─────────────────────────────────── */
 .btn-sm {
   padding: 0.3125rem 0.625rem;
@@ -833,6 +1005,19 @@ input[type="password"]::-ms-clear {
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+/* ── Motion tokens (CSS mirrors of JS tokens) ─────────────── */
+:root {
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-in: cubic-bezier(0.55, 0, 1, 0.45);
+  --duration-instant: 80ms;
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --duration-emphasis: 400ms;
+  --duration-slow: 700ms;
+  --duration-glacial: 600ms;
 }
 
 /* ── Content animations ────────────────────────────────────── */
@@ -941,6 +1126,57 @@ input[type="password"]::-ms-clear {
 @keyframes tooltip-enter {
   from { opacity: 0; transform: scale(0.95) translateY(-2px); }
   to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* ── Cross-platform polish ─────────────────────────────────── */
+
+/* Container query support for chart cards */
+.card {
+  container-type: inline-size;
+}
+
+/* Compact chart styles in narrow containers */
+@container (max-width: 320px) {
+  .text-section-title { font-size: 0.8125rem; }
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .dash-section,
+  .fade-in,
+  .icon-pulse,
+  .icon-spin,
+  .icon-bounce,
+  .icon-shake,
+  .animate-float { animation: none !important; }
+  .hover-lift:hover { transform: none; }
+  .press-scale:active { transform: none; }
+  * { transition-duration: 0.01ms !important; }
+}
+
+/* Touch device optimizations */
+@media (pointer: coarse) {
+  /* Ensure minimum 44px touch targets */
+  button, a, [role="button"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  /* Disable hover effects that cause stickiness on touch */
+  .hover-lift:hover { transform: none; box-shadow: var(--card-shadow); }
+}
+
+/* iPhone Dynamic Island safe area */
+@supports (padding-top: env(safe-area-inset-top)) {
+  .zone-header {
+    scroll-margin-top: calc(env(safe-area-inset-top, 0px) + 1rem);
+  }
+}
+
+/* High-DPI screen optimizations */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .card {
+    border-width: 0.5px;
+  }
 }
 
 @keyframes et-icon-scale {

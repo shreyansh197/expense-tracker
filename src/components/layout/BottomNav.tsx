@@ -70,7 +70,7 @@ export function BottomNav() {
         aria-label={isBusiness && isBusinessRoute ? "Add ledger" : "Add expense"}
         title={isBusiness && isBusinessRoute ? "Add ledger (Ctrl+N)" : "Add expense (Ctrl+N)"}
         className={cn(
-          "fixed left-1/2 z-40 flex h-[54px] w-[54px] -translate-x-1/2 items-center justify-center rounded-full text-white transition-colors lg:hidden",
+          "fixed left-1/2 z-[150] flex h-[54px] w-[54px] -translate-x-1/2 items-center justify-center rounded-full text-white transition-colors lg:hidden",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
           accentColor === "emerald"
             ? "text-white shadow-lg"
@@ -90,7 +90,7 @@ export function BottomNav() {
       {/* ─── Nav bar (z-30, below FAB) ─── */}
       <nav
         aria-label="Main navigation"
-        className="fixed bottom-0 left-0 right-0 z-30 border-t lg:hidden"
+        className="fixed bottom-0 left-0 right-0 z-[100] border-t lg:hidden"
         style={{
           paddingBottom: "env(safe-area-inset-bottom)",
           background: 'color-mix(in srgb, var(--surface) 97%, transparent)',
@@ -128,16 +128,28 @@ export function BottomNav() {
                 style={!isActive ? { color: 'var(--text-muted)' } : undefined}
               >
                 {isActive && (
-                  <m.span
-                    layoutId="nav-active-indicator"
-                    className={cn(
-                      "absolute -top-2 h-[3px] w-5 rounded-full",
-                      isBiz ? "bg-[var(--biz-accent)]" : "bg-accent"
-                    )}
-                    transition={springStiff}
-                  />
+                  <>
+                    <m.span
+                      layoutId="nav-active-indicator"
+                      className="absolute -top-2 h-[3px] rounded-full"
+                      style={{
+                        width: 20,
+                        background: isBiz ? 'var(--biz-accent-gradient, var(--biz-accent))' : 'var(--accent-gradient, var(--accent))',
+                      }}
+                      transition={springStiff}
+                    />
+                    <m.span
+                      layoutId="nav-active-bg"
+                      className="absolute inset-x-1 inset-y-0 -z-10 rounded-xl"
+                      style={{
+                        background: isBiz ? 'var(--biz-accent-soft)' : 'var(--accent-soft)',
+                        opacity: 0.5,
+                      }}
+                      transition={springStiff}
+                    />
+                  </>
                 )}
-                <Icon size={22} />
+                <Icon size={20} />
                 <span className="text-caption font-medium">{item.label}</span>
                 {isBiz && !isActive && isBusiness && (
                   <span className="absolute top-1 right-1/4 h-1.5 w-1.5 rounded-full bg-biz" />

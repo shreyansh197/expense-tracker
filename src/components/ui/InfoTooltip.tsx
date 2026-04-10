@@ -69,13 +69,13 @@ export function InfoTooltip({ title, children, className }: InfoTooltipProps) {
         aria-label={`Info: ${title}`}
         type="button"
       >
-        <Info size={13} />
+        <Info size={14} />
       </button>
       {open &&
         createPortal(
           <div
             ref={panelRef}
-            className="fixed z-[9999] rounded-lg border border-[var(--border)] bg-[var(--surface)] p-3 shadow-lg dark:border-[var(--border)] dark:bg-[var(--surface)]"
+            className="fixed z-[500] rounded-lg border border-[var(--border)] bg-[var(--surface)] p-3 shadow-lg dark:border-[var(--border)] dark:bg-[var(--surface)]"
             style={{
               width: pos.width,
               left: pos.left,

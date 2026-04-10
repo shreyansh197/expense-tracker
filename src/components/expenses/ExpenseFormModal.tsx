@@ -112,7 +112,7 @@ export function ExpenseFormModal() {
     <AnimatePresence>
       {showExpenseForm && (
       <m.div
-        className="fixed inset-0 z-[60] flex items-end justify-center backdrop-blur-sm md:items-center"
+        className="fixed inset-0 z-[200] flex items-end justify-center backdrop-blur-sm md:items-center"
         onClick={handleBackdropClick}
         initial={{ backgroundColor: 'rgba(0,0,0,0)' }}
         animate={{ backgroundColor: 'rgba(0,0,0,0.4)' }}

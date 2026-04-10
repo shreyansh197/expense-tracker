@@ -120,7 +120,7 @@ function ConfirmDialogInner({
 
   return (
         <m.div
-          className="fixed inset-0 z-[200] flex items-center justify-center p-4"
+          className="fixed inset-0 z-[300] flex items-center justify-center p-4"
           onClick={(e) => { if (e.target === e.currentTarget) handleCancel(); }}
           role="dialog"
           aria-modal="true"

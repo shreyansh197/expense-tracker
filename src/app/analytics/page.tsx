@@ -214,7 +214,7 @@ function AnalyticsContent() {
             transition={{ delay: 0.05 }}
           >
             <div className="flex items-center gap-1.5">
-              <DollarSign size={13} style={{ color: "var(--text-muted)" }} />
+              <DollarSign size={14} style={{ color: "var(--text-muted)" }} />
               <span className="text-xs uppercase tracking-wider font-semibold" style={{ color: "var(--text-muted)" }}>
                 Avg Monthly
               </span>
@@ -231,7 +231,7 @@ function AnalyticsContent() {
             transition={{ delay: 0.1 }}
           >
             <div className="flex items-center gap-1.5">
-              <MoMIcon size={13} style={{ color: momColor }} />
+              <MoMIcon size={14} style={{ color: momColor }} />
               <span className="text-xs uppercase tracking-wider font-semibold" style={{ color: "var(--text-muted)" }}>
                 vs Last Month
               </span>
@@ -250,7 +250,7 @@ function AnalyticsContent() {
             transition={{ delay: 0.15 }}
           >
             <div className="flex items-center gap-1.5">
-              <Repeat size={13} style={{ color: "var(--text-muted)" }} />
+              <Repeat size={14} style={{ color: "var(--text-muted)" }} />
               <span className="text-xs uppercase tracking-wider font-semibold" style={{ color: "var(--text-muted)" }}>
                 Recurring
               </span>
@@ -270,7 +270,7 @@ function AnalyticsContent() {
             transition={{ delay: 0.2 }}
           >
             <div className="flex items-center gap-1.5">
-              <Zap size={13} style={{ color: anomalies.length > 0 ? "var(--warning)" : "var(--text-muted)" }} />
+              <Zap size={14} style={{ color: anomalies.length > 0 ? "var(--warning)" : "var(--text-muted)" }} />
               <span className="text-xs uppercase tracking-wider font-semibold" style={{ color: "var(--text-muted)" }}>
                 Anomalies
               </span>

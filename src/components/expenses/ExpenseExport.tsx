@@ -94,9 +94,9 @@ export function ExpenseExport({ expenses, month, year }: ExpenseExportProps) {
 
       {showMenu && (
         <>
-          <div className="fixed inset-0 z-40" onClick={() => setShowMenu(false)} />
+          <div className="fixed inset-0 z-[50]" onClick={() => setShowMenu(false)} />
           <div
-            className="absolute right-0 top-full z-50 mt-1 min-w-[160px] rounded-xl border p-2 shadow-lg"
+            className="absolute right-0 top-full z-[50] mt-1 min-w-[160px] rounded-xl border p-2 shadow-lg"
             style={{ background: "var(--surface)", borderColor: "var(--border)" }}
           >
             <button

@@ -65,11 +65,11 @@ export function QuickHelpButton({ variant = "icon" }: { variant?: "icon" | "side
       {open && variant !== "sidebar" && createPortal(
         <>
           <div
-            className="fixed inset-0 z-[9999] bg-black/20 backdrop-blur-[1px] sm:hidden"
+            className="fixed inset-0 z-[450] bg-black/20 backdrop-blur-[1px] sm:hidden"
             onClick={() => setOpen(false)}
           />
           <div
-            className="fixed inset-x-3 top-20 z-[10000] w-auto sm:inset-x-auto sm:w-72 sm:right-6 sm:top-16 rounded-xl border p-4 shadow-xl max-h-[70vh] overflow-y-auto"
+            className="fixed inset-x-3 top-20 z-[500] w-auto sm:inset-x-auto sm:w-72 sm:right-6 sm:top-16 rounded-xl border p-4 shadow-xl max-h-[70vh] overflow-y-auto"
             style={{
               background: "var(--surface)",
               borderColor: "var(--border)",
@@ -120,7 +120,7 @@ export function QuickHelpButton({ variant = "icon" }: { variant?: "icon" | "side
 
       {open && variant === "sidebar" && (
         <div
-          className="absolute z-[9999] bottom-full left-0 mb-2 w-72 rounded-xl border p-4 shadow-xl max-h-[70vh] overflow-y-auto"
+          className="absolute z-[500] bottom-full left-0 mb-2 w-72 rounded-xl border p-4 shadow-xl max-h-[70vh] overflow-y-auto"
           style={{
             background: "var(--surface)",
             borderColor: "var(--border)",

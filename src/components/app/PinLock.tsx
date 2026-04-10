@@ -53,7 +53,7 @@ export function PinLock({ onVerify }: PinLockProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center gap-8 backdrop-blur-xl"
+    <div className="fixed inset-0 z-[999] flex flex-col items-center justify-center gap-8 backdrop-blur-xl"
       style={{ background: "color-mix(in srgb, var(--surface) 95%, transparent)" }}
     >
       {/* Lock icon */}

@@ -422,7 +422,7 @@ export default function SettingsPage() {
 
   return (
     <AppShell>
-        <PageTransition className="relative mx-auto max-w-4xl xl:max-w-6xl space-y-4 sm:space-y-6 p-4 lg:p-6">
+        <PageTransition className="relative mx-auto max-w-4xl xl:max-w-6xl space-y-4 sm:space-y-6 p-4 sm:p-6 lg:p-8">
         <div className="relative flex items-center justify-between mb-4">
           <h1 className="text-page-title">Settings</h1>
           <div className="flex items-center gap-2">
@@ -892,6 +892,23 @@ export default function SettingsPage() {
             className={!isSectionVisible('theme') ? 'hidden' : ''}
           >
             <div className="space-y-4">
+              {/* Live theme preview mini-card */}
+              <div className="rounded-xl border p-3 overflow-hidden" style={{ background: 'var(--surface)', borderColor: 'var(--border-card)' }}>
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="h-8 w-8 rounded-lg flex items-center justify-center" style={{ background: 'var(--accent-soft)' }}>
+                    <Palette size={14} style={{ color: 'var(--accent)' }} />
+                  </div>
+                  <div>
+                    <div className="h-2.5 w-20 rounded-full" style={{ background: 'var(--text-primary)', opacity: 0.8 }} />
+                    <div className="h-2 w-14 rounded-full mt-1" style={{ background: 'var(--text-muted)', opacity: 0.5 }} />
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <div className="h-6 flex-1 rounded-lg" style={{ background: 'var(--surface-secondary)' }} />
+                  <div className="h-6 w-16 rounded-lg" style={{ background: 'var(--primary)', opacity: 0.7 }} />
+                </div>
+              </div>
+
               <div className="grid grid-cols-3 gap-2">
                 {[
                   { value: "light" as const, icon: Sun, label: "Light", swatches: ["#FFFFFF", "#F3F4F6", "#7C3AED", "#111827"] },
