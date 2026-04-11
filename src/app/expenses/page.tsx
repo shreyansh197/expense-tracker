@@ -20,6 +20,7 @@ import { usePageTitle } from "@/hooks/usePageTitle";
 import { useCalculationsContext } from "@/contexts/CalculationsContext";
 import { ExpensesGraphic } from "@/components/ui/illustrations";
 import { ExpenseExport } from "@/components/expenses/ExpenseExport";
+import { useToast } from "@/components/ui/Toast";
 
 type SortOption = "day-desc" | "day-asc" | "amount-desc" | "amount-asc";
 
@@ -43,6 +44,7 @@ function ExpensesShell() {
 function ExpensesContent() {
   usePageTitle("Expenses");
   const { formatCurrency } = useCurrency();
+  const { toast } = useToast();
   useMonthUrlSync();
   const searchParams = useSearchParams();
   const {
@@ -92,6 +94,15 @@ function ExpensesContent() {
   };
 
   const handleClearFilters = () => {
+    const prev = {
+      categories: [...activeCategories],
+      search: searchQuery,
+      localSearch,
+      amountMin,
+      amountMax,
+      dayMin,
+      dayMax,
+    };
     setActiveCategories([]);
     setSearchQuery("");
     setLocalSearch("");
@@ -99,6 +110,18 @@ function ExpensesContent() {
     setAmountMax("");
     setDayMin("");
     setDayMax("");
+    toast("Filters cleared", "info", {
+      label: "Undo",
+      onClick: () => {
+        setActiveCategories(prev.categories);
+        setSearchQuery(prev.search);
+        setLocalSearch(prev.localSearch);
+        setAmountMin(prev.amountMin);
+        setAmountMax(prev.amountMax);
+        setDayMin(prev.dayMin);
+        setDayMax(prev.dayMax);
+      },
+    });
   };
 
   return (
@@ -128,9 +151,9 @@ function ExpensesContent() {
           <div className="pointer-events-none absolute right-10 top-1/2 -translate-y-1/2 sm:right-16">
             <ExpensesGraphic />
           </div>
-          <span className="text-section-title">
+          <h2 className="text-section-title">
             Monthly Total
-          </span>
+          </h2>
           <span className="text-amount text-lg font-bold" style={{ color: 'var(--text-primary)' }}>
             {formatCurrency(monthlyTotal)}
           </span>
@@ -160,7 +183,7 @@ function ExpensesContent() {
             onChange={(e) => { const v = e.target.value as SortOption; setSortBy(v); localStorage.setItem("expenstream-expenses-sort", v); }}
             aria-label="Sort order"
             className="rounded-xl px-3 py-3 text-xs font-medium focus:outline-none focus:ring-2"
-            style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-secondary)' }}
+            style={{ background: sortBy !== "day-desc" ? 'var(--primary-soft)' : 'var(--surface)', border: `1px solid ${sortBy !== "day-desc" ? 'var(--primary)' : 'var(--border)'}`, color: sortBy !== "day-desc" ? 'var(--primary)' : 'var(--text-secondary)' }}
           >
             <option value="day-desc">Newest first</option>
             <option value="day-asc">Oldest first</option>
@@ -186,7 +209,7 @@ function ExpensesContent() {
 
         {/* Filtered count indicator */}
         {(searchQuery || activeCategories.length > 0 || amountMin || amountMax || dayMin || dayMax) && (
-          <p className="px-1 text-xs font-medium" style={{ color: 'var(--text-tertiary)' }}>
+          <p className="px-1 text-xs font-medium" style={{ color: 'var(--text-tertiary)' }} aria-live="polite">
             Filtered results &middot; some expenses may be hidden
           </p>
         )}

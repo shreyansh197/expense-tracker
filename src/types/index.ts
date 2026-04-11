@@ -37,6 +37,8 @@ export interface UserSettings {
   multiCurrencyEnabled?: boolean;
   dismissedRecurringSuggestions?: string[];
   autoRules?: AutoRule[];
+  achievements?: Achievement[];
+  accentColor?: string;
   createdAt: number;
   updatedAt: number;
 }
@@ -183,7 +185,7 @@ export interface RevenueExpectation {
 
 // ── Dashboard Customization ──
 
-export type DashboardSectionId = "kpi" | "alerts" | "subscriptions" | "goals" | "charts" | "recent";
+export type DashboardSectionId = "kpi" | "alerts" | "subscriptions" | "goals" | "charts" | "recent" | "achievements" | "insights";
 
 export interface DashboardSectionConfig {
   id: DashboardSectionId;
@@ -193,4 +195,9 @@ export interface DashboardSectionConfig {
 
 export interface DashboardLayout {
   sections: DashboardSectionConfig[];
+}
+
+export interface Achievement {
+  id: string;
+  unlockedAt: number;
 }

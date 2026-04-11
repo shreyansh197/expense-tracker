@@ -155,6 +155,8 @@ export function RecurringSuggestions() {
                   style={{ color: "var(--text-muted)" }}
                   onMouseEnter={e => { e.currentTarget.style.background = 'var(--success-soft)'; e.currentTarget.style.color = 'var(--success-text)'; }}
                   onMouseLeave={e => { e.currentTarget.style.background = ''; e.currentTarget.style.color = 'var(--text-muted)'; }}
+                  onFocus={e => { e.currentTarget.style.background = 'var(--success-soft)'; e.currentTarget.style.color = 'var(--success-text)'; }}
+                  onBlur={e => { e.currentTarget.style.background = ''; e.currentTarget.style.color = 'var(--text-muted)'; }}
                   aria-label="Add as recurring"
                   title="Add as recurring"
                 >
@@ -166,6 +168,8 @@ export function RecurringSuggestions() {
                   style={{ color: "var(--text-muted)" }}
                   onMouseEnter={e => { e.currentTarget.style.background = 'var(--danger-soft)'; e.currentTarget.style.color = 'var(--danger-text)'; }}
                   onMouseLeave={e => { e.currentTarget.style.background = ''; e.currentTarget.style.color = 'var(--text-muted)'; }}
+                  onFocus={e => { e.currentTarget.style.background = 'var(--danger-soft)'; e.currentTarget.style.color = 'var(--danger-text)'; }}
+                  onBlur={e => { e.currentTarget.style.background = ''; e.currentTarget.style.color = 'var(--text-muted)'; }}
                   aria-label="Dismiss suggestion"
                   title="Dismiss"
                 >

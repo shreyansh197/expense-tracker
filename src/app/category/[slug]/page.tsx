@@ -1,8 +1,9 @@
 "use client";
 
 import { use, useState, useEffect, useMemo } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import dynamic from "next/dynamic";
+import Link from "next/link";
 import { AppShell } from "@/components/layout/AppShell";
 import { useExpenses } from "@/hooks/useExpenses";
 import { usePageTitle } from "@/hooks/usePageTitle";
@@ -27,7 +28,6 @@ const CategoryTrendChart = dynamic(
 export default function CategoryPage({ params }: { params: Promise<{ slug: string }> }) {
   const { formatCurrency } = useCurrency();
   const { slug } = use(params);
-  const router = useRouter();
   const searchParams = useSearchParams();
   const month = parseInt(searchParams.get("month") || `${new Date().getMonth() + 1}`, 10);
   const year = parseInt(searchParams.get("year") || `${new Date().getFullYear()}`, 10);
@@ -123,15 +123,16 @@ export default function CategoryPage({ params }: { params: Promise<{ slug: strin
       <PageTransition className="mx-auto max-w-4xl xl:max-w-6xl space-y-5 sm:space-y-6 p-4 sm:p-6 lg:p-8">
         {/* Header */}
         <div className="flex items-center gap-3">
-          <button
-            onClick={() => router.back()}
+          <Link
+            href="/"
             className="rounded-lg p-2 transition-colors"
             style={{ color: 'var(--text-muted)' }}
             onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--surface-secondary)'; }}
             onMouseLeave={(e) => { e.currentTarget.style.background = ''; }}
+            aria-label="Back to dashboard"
           >
             <ArrowLeft size={20} />
-          </button>
+          </Link>
           <div>
             <h1 className="text-lg font-bold" style={{ color: categoryColor }}>
               {categoryLabel}
@@ -147,7 +148,7 @@ export default function CategoryPage({ params }: { params: Promise<{ slug: strin
         ) : (
         <>
         {/* KPI row */}
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
           <div className="card relative overflow-hidden p-4">
             <div className="absolute inset-x-0 top-0 h-1 rounded-t-2xl" style={{ background: categoryColor }} />
             <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Spent</p>
@@ -184,7 +185,7 @@ export default function CategoryPage({ params }: { params: Promise<{ slug: strin
 
         {/* Enhanced stats */}
         {enhancedStats && (
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             <div className="card p-4">
               <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Avg Transaction</p>
               <p className="mt-1 text-lg font-bold" style={{ color: 'var(--text-primary)' }}>

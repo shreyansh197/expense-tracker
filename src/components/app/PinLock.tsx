@@ -115,6 +115,7 @@ export function PinLock({ onVerify }: PinLockProps) {
                   disabled={checking || pin.length === 0}
                   className="flex h-[72px] w-[72px] items-center justify-center rounded-2xl text-lg transition-all active:scale-92 disabled:opacity-30 hover:bg-[var(--surface-tertiary)]"
                   style={{ background: "var(--surface-secondary)", color: "var(--text-secondary)" }}
+                  aria-label="Delete last digit"
                 >
                   <Delete size={22} />
                 </button>

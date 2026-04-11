@@ -76,7 +76,7 @@ export function LedgerCard({ ledger, totalReceived }: LedgerCardProps) {
 
       {/* Progress bar */}
       <div className="mt-3">
-        <div className="h-2 w-full rounded-full" style={{ background: 'var(--surface-secondary)' }}>
+        <div className="h-2 w-full rounded-full" style={{ background: 'var(--surface-secondary)' }} role="progressbar" aria-valuenow={Math.round(percent)} aria-valuemin={0} aria-valuemax={100} aria-label="Collection progress">
           <div
             className={cn(
               "h-2 rounded-full transition-all duration-500",

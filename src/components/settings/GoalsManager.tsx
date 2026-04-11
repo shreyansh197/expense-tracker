@@ -132,7 +132,7 @@ export function GoalsManager() {
             </span>
             <span className="font-semibold" style={{ color: 'var(--status-ok-text)' }}>{overallPct}%</span>
           </div>
-          <div className="mt-1.5 h-2 w-full overflow-hidden rounded-full" style={{ background: 'var(--surface-secondary)' }}>
+          <div className="mt-1.5 h-2 w-full overflow-hidden rounded-full" style={{ background: 'var(--surface-secondary)' }} role="progressbar" aria-valuenow={overallPct} aria-valuemin={0} aria-valuemax={100} aria-label="Overall savings progress">
             <div
               className="h-full rounded-full transition-all duration-700"
               style={{ width: `${Math.min(overallPct, 100)}%`, backgroundColor: 'var(--success)' }}
@@ -369,7 +369,7 @@ export function GoalsManager() {
                   </div>
                 )}
 
-                <div className="h-2.5 w-full overflow-hidden rounded-full" style={{ background: 'var(--surface-secondary)' }}>
+                <div className="h-2.5 w-full overflow-hidden rounded-full" style={{ background: 'var(--surface-secondary)' }} role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} aria-label={`${g.name} progress`}>
                   <div
                     className="h-full rounded-full transition-all"
                     style={{

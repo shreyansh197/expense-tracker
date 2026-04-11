@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { m, AnimatePresence } from "framer-motion";
+import { m } from "framer-motion";
 import { X, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { DatePicker } from "@/components/ui/DatePicker";
+import { FormError } from "@/components/ui/FormError";
 import type { LedgerInput, LedgerStatus } from "@/types";
 import { useSettings } from "@/hooks/useSettings";
 import { useCurrency } from "@/hooks/useCurrency";
@@ -92,19 +93,7 @@ export function LedgerForm({ initial, onSubmit, onCancel, submitLabel = "Create 
             aria-invalid={amountInvalid || undefined}
           />
         </div>
-        <AnimatePresence>
-          {amountInvalid && (
-            <m.p
-              initial={{ opacity: 0, height: 0, marginTop: 0 }}
-              animate={{ opacity: 1, height: "auto", marginTop: 4 }}
-              exit={{ opacity: 0, height: 0, marginTop: 0 }}
-              transition={{ duration: 0.2 }}
-              className="text-xs font-medium text-err overflow-hidden"
-            >
-              Enter a valid positive amount
-            </m.p>
-          )}
-        </AnimatePresence>
+        <FormError message="Enter a valid positive amount" visible={amountInvalid} />
       </div>
 
       {/* Due Date */}
@@ -133,6 +122,7 @@ export function LedgerForm({ initial, onSubmit, onCancel, submitLabel = "Create 
               onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--surface-secondary)'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
               onMouseLeave={(e) => { e.currentTarget.style.background = ''; e.currentTarget.style.color = 'var(--text-muted)'; }}
               title="Clear date"
+              aria-label="Clear date"
             >
               <X size={16} />
             </button>

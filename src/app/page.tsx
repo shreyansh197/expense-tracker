@@ -63,6 +63,10 @@ import { useCalculationsContext } from "@/contexts/CalculationsContext";
 import type { ReactNode } from "react";
 import { SpendingHeatmap } from "@/components/dashboard/SpendingHeatmap";
 import { SpendingComparison } from "@/components/dashboard/SpendingComparison";
+import { AchievementsCard } from "@/components/dashboard/AchievementsCard";
+import { SpendingInsights } from "@/components/dashboard/SpendingInsights";
+import { useAchievements } from "@/hooks/useAchievements";
+import { useHistoricalData } from "@/hooks/useHistoricalData";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import { useMonthUrlSync } from "@/hooks/useMonthUrlSync";
 import { usePageTitle } from "@/hooks/usePageTitle";
@@ -338,6 +342,12 @@ function DashboardContent() {
   );
   const streak = useMemo(() => getSpendingStreak(allExpenses as Expense[]), [allExpenses]);
 
+  // Achievements system
+  const achievementsData = useAchievements(settings, allExpenses as Expense[], expenses, streak, updateSettings);
+
+  // Historical data for spending insights
+  const historicalData = useHistoricalData(currentMonth, currentYear);
+
   // Budget milestone celebrations — toast at 25%, 50%, 75% savings thresholds (once per month)
   const { toast } = useToast();
   useEffect(() => {
@@ -442,9 +452,9 @@ function DashboardContent() {
                   </span>
                 )}
               </div>
-              <p className="text-xl sm:text-2xl font-semibold tracking-tight" style={{ color: 'var(--text-primary)' }}>
+              <h2 className="text-xl sm:text-2xl font-semibold tracking-tight" style={{ color: 'var(--text-primary)' }}>
                 {user.name.split(" ")[0]}
-              </p>
+              </h2>
               <p className="mt-0.5 text-xs sm:text-xs tracking-wide" style={{ color: 'var(--text-tertiary)' }}>
                 {new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}
               </p>
@@ -735,6 +745,24 @@ function DashboardContent() {
                   </div>
                 )}
               </div>
+              </div>
+            ),
+
+            achievements: () => (
+              <div key="achievements" className="dash-section">
+                <AchievementsCard {...achievementsData} />
+              </div>
+            ),
+
+            insights: () => (
+              <div key="insights" className="dash-section">
+                <SpendingInsights
+                  monthOverMonthChange={historicalData.monthOverMonthChange}
+                  dayOfWeekFactors={historicalData.dayOfWeekFactors}
+                  recurringVsOneTime={historicalData.recurringVsOneTime}
+                  currentMonthCategories={historicalData.currentMonth?.categoryBreakdown ?? {}}
+                  previousMonthCategories={historicalData.months.length >= 2 ? historicalData.months[historicalData.months.length - 2].categoryBreakdown : {}}
+                />
               </div>
             ),
           };

@@ -91,7 +91,7 @@ export function SpendingHeatmap({ expenses, month, year, onDayClick }: SpendingH
             title={`Day ${cell.day}: ${formatCurrency(cell.total)}`}
           >
             <span
-              className="absolute inset-0 flex items-center justify-center text-[9px] font-medium opacity-0 transition-opacity group-hover:opacity-100"
+              className="absolute inset-0 flex items-center justify-center text-[9px] font-medium opacity-30 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100"
               style={{ color: cell.intensity > 0.5 ? "var(--text-inverse)" : "var(--text-secondary)" }}
             >
               {cell.day}

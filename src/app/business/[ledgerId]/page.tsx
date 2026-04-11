@@ -107,6 +107,7 @@ export default function LedgerDetailPage() {
               className="rounded-lg p-2 transition-colors"
               style={{ color: 'var(--text-tertiary)' }}
               title="Edit ledger"
+              aria-label="Edit ledger"
             >
               <Edit3 size={16} />
             </button>
@@ -116,6 +117,7 @@ export default function LedgerDetailPage() {
               onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--danger-soft)'; e.currentTarget.style.color = 'var(--danger-text)'; }}
               onMouseLeave={(e) => { e.currentTarget.style.background = ''; e.currentTarget.style.color = 'var(--text-muted)'; }}
               title="Delete ledger"
+              aria-label="Delete ledger"
             >
               <Trash2 size={16} />
             </button>
@@ -149,7 +151,7 @@ export default function LedgerDetailPage() {
           </div>
 
           {/* Amount breakdown */}
-          <div className="mt-4 grid grid-cols-3 gap-3 pt-4" style={{ borderTop: '1px solid var(--border)' }}>
+          <div className="mt-4 grid grid-cols-1 gap-3 pt-4 sm:grid-cols-3" style={{ borderTop: '1px solid var(--border)' }}>
             <div>
               <p className="text-meta font-medium">Expected</p>
               <p className="text-sm font-bold text-amount" style={{ color: 'var(--text-primary)' }}>{formatCurrency(ledger.expectedAmount)}</p>

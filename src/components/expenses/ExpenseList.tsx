@@ -351,7 +351,7 @@ export function ExpenseList({
             <div className="flex items-center gap-2">
               <button
                 onClick={() => toggleSelectDay(group.expenses)}
-                className="rounded p-0.5 transition-colors"
+                className="rounded p-1.5 transition-colors"
                 style={{ color: 'var(--text-muted)' }}
                 aria-label={`Select all day ${group.day}`}
               >
@@ -511,7 +511,7 @@ function SwipeableExpenseItem({
       >
         <button
           onClick={() => toggleSelect(expense.id)}
-          className="shrink-0 rounded p-0.5 transition-colors"
+          className="shrink-0 rounded p-1.5 transition-colors"
           style={{ color: 'var(--text-muted)' }}
           role="checkbox"
           aria-checked={isSelected}

@@ -13,6 +13,7 @@ import {
   Search,
 } from "lucide-react";
 import { InstallButton } from "@/components/pwa/InstallButton";
+import { AccentColorPicker, applyAccentColor } from "@/components/settings/AccentColorPicker";
 import { useToast } from "@/components/ui/Toast";
 
 import { usePageTitle } from "@/hooks/usePageTitle";
@@ -444,6 +445,7 @@ export default function SettingsPage() {
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full rounded-xl border py-2.5 pl-9 pr-3 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/30"
             style={{ background: 'var(--surface-secondary)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)' }}
+            aria-label="Search settings"
           />
         </div>
 
@@ -613,13 +615,13 @@ export default function SettingsPage() {
               <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: '12px' }}>
                 <label className="mb-1.5 block text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>Month-Specific Budget</label>
                 <div className="flex items-center gap-2 mb-2">
-                  <button onClick={prevBudgetMonth} className="rounded-lg p-1.5 transition-colors hover:opacity-80" style={{ background: 'var(--surface-secondary)' }}>
+                  <button onClick={prevBudgetMonth} className="rounded-lg p-1.5 transition-colors hover:opacity-80" style={{ background: 'var(--surface-secondary)' }} aria-label="Previous month">
                     <ChevronLeft size={16} style={{ color: 'var(--text-secondary)' }} />
                   </button>
                   <span className="min-w-[120px] text-center text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
                     {getMonthName(budgetMonth)} {budgetYear}
                   </span>
-                  <button onClick={nextBudgetMonth} className="rounded-lg p-1.5 transition-colors hover:opacity-80" style={{ background: 'var(--surface-secondary)' }}>
+                  <button onClick={nextBudgetMonth} className="rounded-lg p-1.5 transition-colors hover:opacity-80" style={{ background: 'var(--surface-secondary)' }} aria-label="Next month">
                     <ChevronRight size={16} style={{ color: 'var(--text-secondary)' }} />
                   </button>
                 </div>
@@ -941,6 +943,24 @@ export default function SettingsPage() {
                     </button>
                   );
                 })}
+              </div>
+
+              {/* Install PWA */}
+              <div className="pt-4" style={{ borderTop: '1px solid var(--border)' }}>
+                <div className="flex items-center gap-3 mb-3">
+                  <Palette size={16} style={{ color: 'var(--text-tertiary)' }} />
+                  <div>
+                    <p className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Accent Color</p>
+                    <p className="text-xs" style={{ color: 'var(--text-tertiary)' }}>Customize your theme color</p>
+                  </div>
+                </div>
+                <AccentColorPicker
+                  currentColor={settings.accentColor}
+                  onSelect={(color) => {
+                    updateSettings({ accentColor: color });
+                    applyAccentColor(color);
+                  }}
+                />
               </div>
 
               {/* Install PWA */}
