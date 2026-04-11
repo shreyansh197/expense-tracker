@@ -146,6 +146,8 @@ export async function POST(req: NextRequest) {
             dashboardLayout: data.dashboardLayout ?? undefined,
             dismissedRecurringSuggestions: data.dismissedRecurringSuggestions ?? [],
             autoRules: data.autoRules ?? [],
+            achievements: data.achievements ?? [],
+            accentColor: (data.accentColor as string) ?? undefined,
             version: 1,
           },
           update: {
@@ -168,6 +170,8 @@ export async function POST(req: NextRequest) {
             ...(data.dashboardLayout !== undefined && { dashboardLayout: data.dashboardLayout as Json }),
             ...(data.dismissedRecurringSuggestions !== undefined && { dismissedRecurringSuggestions: data.dismissedRecurringSuggestions as Json }),
             ...(data.autoRules !== undefined && { autoRules: data.autoRules as Json }),
+            ...(data.achievements !== undefined && { achievements: data.achievements as Json }),
+            ...(data.accentColor !== undefined && { accentColor: data.accentColor as string }),
             version: { increment: 1 },
           } as Prisma.WorkspaceSettingsUpdateInput,
         });

@@ -254,6 +254,8 @@ export async function pullChanges(workspaceId?: string): Promise<boolean> {
               multiCurrencyEnabled: s.multiCurrencyEnabled ?? false,
               dismissedRecurringSuggestions: s.dismissedRecurringSuggestions ?? [],
               autoRules: s.autoRules ?? [],
+              achievements: s.achievements ?? [],
+              accentColor: s.accentColor ?? undefined,
               updatedAt: new Date(s.updatedAt as string).getTime(),
             };
             // Only write if settings actually changed (avoids unnecessary
@@ -266,6 +268,8 @@ export async function pullChanges(workspaceId?: string): Promise<boolean> {
               || JSON.stringify(existingSettings.categoryBudgets) !== JSON.stringify(incoming.categoryBudgets)
               || JSON.stringify(existingSettings.recurringExpenses) !== JSON.stringify(incoming.recurringExpenses)
               || JSON.stringify(existingSettings.autoRules) !== JSON.stringify(incoming.autoRules)
+              || JSON.stringify(existingSettings.achievements) !== JSON.stringify(incoming.achievements)
+              || existingSettings.accentColor !== incoming.accentColor
               || existingSettings.rolloverEnabled !== incoming.rolloverEnabled
               || existingSettings.businessMode !== incoming.businessMode
               || existingSettings.multiCurrencyEnabled !== incoming.multiCurrencyEnabled;

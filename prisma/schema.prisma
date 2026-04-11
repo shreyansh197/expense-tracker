@@ -267,6 +267,8 @@ model WorkspaceSettings {
   dashboardLayout     Json?    @map("dashboard_layout") @db.JsonB
   dismissedRecurringSuggestions Json @default("[]") @map("dismissed_recurring_suggestions") @db.JsonB
   autoRules           Json     @default("[]") @map("auto_rules") @db.JsonB
+  achievements        Json     @default("[]") @db.JsonB
+  accentColor         String?  @map("accent_color") @db.VarChar(20)
   version             Int      @default(1)
   updatedAt           DateTime @updatedAt @map("updated_at") @db.Timestamptz
 
