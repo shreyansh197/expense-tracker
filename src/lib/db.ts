@@ -52,6 +52,9 @@ export interface IDBSettings {
   dismissedRecurringSuggestions?: string[];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   autoRules?: any[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  achievements?: any[];
+  accentColor?: string;
   updatedAt: number;
 }
 
