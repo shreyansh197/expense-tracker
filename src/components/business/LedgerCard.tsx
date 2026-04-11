@@ -25,9 +25,9 @@ export function LedgerCard({ ledger, totalReceived }: LedgerCardProps) {
     : 0;
 
   const statusConfig = {
-    active: { icon: Clock, label: "Payment Pending", color: "text-blue-600 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-400" },
+    active: { icon: Clock, label: "Payment Pending", color: "text-[var(--biz-pending-text)] bg-[var(--biz-pending-bg)]" },
     completed: { icon: CheckCircle2, label: "Paid", color: "text-[var(--biz-accent-text)] bg-[var(--biz-accent-soft)]" },
-    cancelled: { icon: XCircle, label: "Cancelled", color: "text-gray-500 bg-gray-100 dark:bg-gray-800 dark:text-gray-400" },
+    cancelled: { icon: XCircle, label: "Cancelled", color: "text-[var(--text-muted)] bg-[var(--surface-secondary)]" },
   };
 
   const status = statusConfig[ledger.status];
@@ -84,7 +84,7 @@ export function LedgerCard({ ledger, totalReceived }: LedgerCardProps) {
                 ? "bg-biz"
                 : isOverdue
                 ? "bg-err"
-                : "bg-blue-500"
+                : "bg-[var(--biz-pending-text)]"
             )}
             style={{ width: `${Math.min(percent, 100)}%` }}
           />

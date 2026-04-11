@@ -208,15 +208,15 @@ export function SecurityCard() {
 
         {twoFAEnabled ? (
           <div className="space-y-3">
-            <div className="flex items-center gap-2 rounded-lg bg-emerald-50 px-3 py-2 dark:bg-emerald-900/20">
-              <div className="h-2 w-2 rounded-full bg-emerald-500" />
-              <span className="text-xs font-medium text-emerald-700 dark:text-emerald-400">2FA is enabled</span>
+            <div className="flex items-center gap-2 rounded-lg px-3 py-2" style={{ background: 'var(--success-soft)' }}>
+              <div className="h-2 w-2 rounded-full" style={{ background: 'var(--success)' }} />
+              <span className="text-xs font-medium" style={{ color: 'var(--success-text)' }}>2FA is enabled</span>
             </div>
 
             {/* Recovery codes display (shown right after enabling) */}
             {recoveryCodes && (
-              <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-800 dark:bg-amber-900/20">
-                <p className="text-xs font-semibold text-amber-800 dark:text-amber-300 mb-2">
+              <div className="rounded-lg border p-3" style={{ borderColor: 'var(--warning-border)', background: 'var(--warning-soft)' }}>
+                <p className="text-xs font-semibold mb-2" style={{ color: 'var(--warning-text)' }}>
                   Save these recovery codes — you won&apos;t see them again!
                 </p>
                 <div className="grid grid-cols-2 gap-1.5 mb-3">
@@ -231,7 +231,8 @@ export function SecurityCard() {
                     navigator.clipboard.writeText(recoveryCodes.join("\n"));
                     toast("Recovery codes copied");
                   }}
-                  className="flex items-center gap-1.5 text-xs font-medium text-amber-700 hover:text-amber-800 dark:text-amber-400"
+                  className="flex items-center gap-1.5 text-xs font-medium"
+                  style={{ color: 'var(--warning-text)' }}
                 >
                   <Copy size={12} />
                   Copy all codes
@@ -257,7 +258,8 @@ export function SecurityCard() {
                   <button
                     onClick={disable2FA}
                     disabled={disableCode.length !== 6 || disabling2FA}
-                    className="rounded-lg bg-red-600 px-3 py-2 text-xs font-medium text-white hover:bg-red-700 disabled:opacity-50"
+                    className="rounded-lg px-3 py-2 text-xs font-medium text-white disabled:opacity-50 transition-colors"
+                    style={{ background: 'var(--danger)' }}
                   >
                     {disabling2FA ? "Disabling..." : "Confirm"}
                   </button>
@@ -272,7 +274,7 @@ export function SecurityCard() {
             ) : (
               <button
                 onClick={() => setShowDisableConfirm(true)}
-                className="text-xs text-red-500 hover:text-red-600 dark:text-red-400"
+                className="text-xs transition-colors" style={{ color: 'var(--danger-text)' }}
               >
                 Disable 2FA
               </button>
@@ -323,7 +325,7 @@ export function SecurityCard() {
                     className="shrink-0 p-1 transition-colors"
                     style={{ color: 'var(--text-muted)' }}
                   >
-                    {copiedSecret ? <CheckCircle2 size={14} className="text-emerald-500" /> : <Copy size={14} />}
+                    {copiedSecret ? <CheckCircle2 size={14} style={{ color: 'var(--success)' }} /> : <Copy size={14} />}
                   </button>
                 </div>
               </div>
@@ -347,7 +349,8 @@ export function SecurityCard() {
                 <button
                   onClick={verify2FA}
                   disabled={verifyCode.length !== 6 || verifying2FA}
-                  className="rounded-lg bg-indigo-600 px-4 py-2 text-xs font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+                  className="rounded-lg px-4 py-2 text-xs font-medium text-white disabled:opacity-50 transition-colors"
+                  style={{ background: 'var(--secondary)' }}
                 >
                   {verifying2FA ? "Verifying..." : "Verify"}
                 </button>
@@ -392,7 +395,8 @@ export function SecurityCard() {
             <button
               onClick={revokeAllSessions}
               disabled={revokingAll}
-              className="text-xs text-red-500 hover:text-red-600 dark:text-red-400 disabled:opacity-50"
+              className="text-xs disabled:opacity-50 transition-colors"
+              style={{ color: 'var(--danger-text)' }}
             >
               {revokingAll ? "Revoking..." : "Revoke all others"}
             </button>
@@ -417,7 +421,7 @@ export function SecurityCard() {
                 <div>
                   <p className="text-xs font-medium" style={{ color: 'var(--text-primary)' }}>
                     {s.deviceName || "Unknown Device"}
-                    {s.isCurrent && <span className="ml-2 text-emerald-500">(current)</span>}
+                    {s.isCurrent && <span className="ml-2" style={{ color: 'var(--success)' }}>(current)</span>}
                   </p>
                   <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
                     Last active: {new Date(s.lastActiveAt).toLocaleDateString()}
@@ -426,7 +430,8 @@ export function SecurityCard() {
                 {!s.isCurrent && (
                   <button
                     onClick={() => revokeSession(s.id)}
-                    className="p-1 text-red-400 hover:text-red-500"
+                    className="p-1 transition-colors"
+                    style={{ color: 'var(--danger)' }}
                   >
                     <Trash2 size={14} />
                   </button>
@@ -462,7 +467,7 @@ export function SecurityCard() {
                 <div>
                   <p className="text-xs font-medium" style={{ color: 'var(--text-primary)' }}>
                     {d.name || "Unnamed Device"}
-                    {d.isCurrent && <span className="ml-2 text-emerald-500">(this device)</span>}
+                    {d.isCurrent && <span className="ml-2" style={{ color: 'var(--success)' }}>(this device)</span>}
                   </p>
                   <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
                     Last active: {new Date(d.lastActiveAt).toLocaleDateString()}
@@ -471,7 +476,8 @@ export function SecurityCard() {
                 {!d.isCurrent && (
                   <button
                     onClick={() => revokeDevice(d.id)}
-                    className="p-1 text-red-400 hover:text-red-500"
+                    className="p-1 transition-colors"
+                    style={{ color: 'var(--danger)' }}
                   >
                     <Trash2 size={14} />
                   </button>

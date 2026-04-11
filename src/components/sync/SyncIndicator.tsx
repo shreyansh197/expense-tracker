@@ -3,7 +3,6 @@
 import { Wifi, WifiOff, RefreshCw, AlertCircle } from "lucide-react";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { useSyncStatus } from "@/hooks/useSyncStatus";
-import { cn } from "@/lib/utils";
 
 export function SyncIndicator() {
   const isOnline = useOnlineStatus();
@@ -14,28 +13,28 @@ export function SyncIndicator() {
   return (
     <div className="flex items-center gap-1.5">
       {effective === "synced" && (
-        <div className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400" title="Synced">
-          <div className="h-2 w-2 rounded-full bg-emerald-500" />
+        <div className="flex items-center gap-1" style={{ color: 'var(--success-text)' }} title="Synced">
+          <div className="h-2 w-2 rounded-full" style={{ background: 'var(--success)' }} />
           <Wifi size={14} />
         </div>
       )}
       {effective === "syncing" && (
-        <div className="flex items-center gap-1 text-indigo-600 dark:text-indigo-400" title="Syncing...">
+        <div className="flex items-center gap-1" style={{ color: 'var(--secondary-text)' }} title="Syncing...">
           <RefreshCw size={14} className="animate-spin" />
         </div>
       )}
       {effective === "offline" && (
-        <div className="flex items-center gap-1 text-slate-400" title="Offline">
+        <div className="flex items-center gap-1" style={{ color: 'var(--text-muted)' }} title="Offline">
           <WifiOff size={14} />
           {pendingCount > 0 && (
-            <span className="ml-0.5 rounded-full bg-amber-500 px-1.5 py-0.5 text-caption font-bold text-white">
+            <span className="ml-0.5 rounded-full px-1.5 py-0.5 text-caption font-bold text-white" style={{ background: 'var(--warning)' }}>
               {pendingCount}
             </span>
           )}
         </div>
       )}
       {effective === "error" && (
-        <div className="flex items-center gap-1 text-red-500" title="Sync error">
+        <div className="flex items-center gap-1" style={{ color: 'var(--danger)' }} title="Sync error">
           <AlertCircle size={14} />
         </div>
       )}
@@ -49,10 +48,7 @@ export function OfflineBanner() {
   if (isOnline) return null;
 
   return (
-    <div className={cn(
-      "flex items-center justify-center gap-2 bg-amber-50 px-3 py-1.5 text-xs font-medium text-amber-700",
-      "dark:bg-amber-900/30 dark:text-amber-400"
-    )}>
+    <div className="flex items-center justify-center gap-2 px-3 py-1.5 text-xs font-medium" style={{ background: 'var(--warning-soft)', color: 'var(--warning-text)' }}>
       <WifiOff size={12} />
       You&apos;re offline — changes will sync when reconnected
     </div>

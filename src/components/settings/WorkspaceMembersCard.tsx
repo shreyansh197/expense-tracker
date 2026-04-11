@@ -140,7 +140,7 @@ export function WorkspaceMembersCard() {
                   style={{ background: 'var(--surface-secondary)' }}
                 >
                   <div className="flex items-center gap-3">
-                    <RoleIcon size={14} className={m.role === "OWNER" ? "text-amber-500" : m.role === "ADMIN" ? "text-blue-500" : ""} style={m.role !== "OWNER" && m.role !== "ADMIN" ? { color: 'var(--text-muted)' } : undefined} />
+                    <RoleIcon size={14} style={{ color: m.role === 'OWNER' ? 'var(--warning-text)' : m.role === 'ADMIN' ? 'var(--info-text)' : 'var(--text-muted)' }} />
                     <div>
                       <p className="text-xs font-medium" style={{ color: 'var(--text-primary)' }}>
                         {m.name || m.email}
@@ -152,7 +152,8 @@ export function WorkspaceMembersCard() {
                   {m.role !== "OWNER" && m.id !== user?.id && (
                     <button
                       onClick={() => removeMember(m.id)}
-                      className="p-1 text-red-400 hover:text-red-500"
+                      className="p-1 transition-colors"
+                      style={{ color: 'var(--danger)' }}
                     >
                       <Trash2 size={14} />
                     </button>
@@ -183,23 +184,26 @@ export function WorkspaceMembersCard() {
           <button
             onClick={createInvite}
             disabled={creatingInvite}
-            className="rounded-lg bg-indigo-600 px-4 py-2 text-xs font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+            className="rounded-lg px-4 py-2 text-xs font-medium text-white disabled:opacity-50 transition-colors"
+            style={{ background: 'var(--secondary)' }}
           >
             {creatingInvite ? "Creating..." : "Create Invite Link"}
           </button>
         </div>
 
         {inviteLink && (
-          <div className="mt-3 flex items-center gap-2 rounded-lg bg-indigo-50 px-3 py-2 dark:bg-indigo-900/20">
+          <div className="mt-3 flex items-center gap-2 rounded-lg px-3 py-2" style={{ background: 'var(--secondary-soft)' }}>
             <input
               type="text"
               readOnly
               value={inviteLink}
-              className="flex-1 bg-transparent text-xs text-indigo-700 dark:text-indigo-400 truncate"
+              className="flex-1 bg-transparent text-xs truncate"
+              style={{ color: 'var(--secondary-text)' }}
             />
             <button
               onClick={copyInviteLink}
-              className="p-1 text-indigo-500 hover:text-indigo-600"
+              className="p-1 transition-colors"
+              style={{ color: 'var(--secondary-text)' }}
             >
               {copiedInvite ? <Check size={14} /> : <Copy size={14} />}
             </button>
@@ -228,7 +232,8 @@ export function WorkspaceMembersCard() {
                 </div>
                 <button
                   onClick={() => revokeInvite(inv.id)}
-                  className="p-1 text-red-400 hover:text-red-500"
+                  className="p-1 transition-colors"
+                  style={{ color: 'var(--danger)' }}
                 >
                   <Trash2 size={14} />
                 </button>

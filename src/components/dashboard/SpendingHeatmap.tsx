@@ -69,7 +69,7 @@ export function SpendingHeatmap({ expenses, month, year, onDayClick }: SpendingH
       <div className="grid grid-cols-7 gap-[3px] mb-[3px]">
         {dayLabels.map((d, i) => (
           <div key={i} className="flex items-center justify-center">
-            <span className="text-[10px] font-medium" style={{ color: "var(--text-muted)" }}>{d}</span>
+            <span className="text-overline font-medium" style={{ color: "var(--text-muted)" }}>{d}</span>
           </div>
         ))}
       </div>
@@ -92,7 +92,7 @@ export function SpendingHeatmap({ expenses, month, year, onDayClick }: SpendingH
           >
             <span
               className="absolute inset-0 flex items-center justify-center text-[9px] font-medium opacity-0 transition-opacity group-hover:opacity-100"
-              style={{ color: cell.intensity > 0.5 ? "#fff" : "var(--text-secondary)" }}
+              style={{ color: cell.intensity > 0.5 ? "var(--text-inverse)" : "var(--text-secondary)" }}
             >
               {cell.day}
             </span>

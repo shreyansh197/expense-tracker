@@ -90,11 +90,11 @@ export function DataAccountManagement({ onScrollToExport }: DataAccountManagemen
     <div className="space-y-5">
       {/* ─── Delete Workspace Data ─── */}
       {isOwner && (
-        <div className="border-t border-red-100 pt-5 dark:border-red-900/30">
+        <div className="border-t pt-5" style={{ borderColor: 'var(--danger-border)' }}>
           <div className="flex items-start gap-3">
-            <AlertTriangle className="mt-0.5 shrink-0 text-red-500" size={18} />
+            <AlertTriangle className="mt-0.5 shrink-0" size={18} style={{ color: 'var(--danger)' }} />
             <div className="flex-1">
-              <h3 className="text-sm font-semibold text-red-700 dark:text-red-400 mb-1">
+              <h3 className="text-sm font-semibold mb-1" style={{ color: 'var(--danger-text)' }}>
                 {COPY.deleteWorkspaceTitle}
               </h3>
               <p className="text-xs mb-3" style={{ color: 'var(--text-secondary)' }}>
@@ -114,7 +114,8 @@ export function DataAccountManagement({ onScrollToExport }: DataAccountManagemen
                 <button
                   disabled={deleting}
                   onClick={handleDeleteWorkspaceData}
-                  className="flex items-center gap-2 rounded-lg border border-red-600 px-4 py-2 text-xs font-medium text-red-600 hover:bg-red-600 hover:text-white disabled:opacity-50 transition-colors dark:border-red-500 dark:text-red-400 dark:hover:bg-red-600 dark:hover:text-white"
+                  className="flex items-center gap-2 rounded-lg border px-4 py-2 text-xs font-medium disabled:opacity-50 transition-colors"
+                  style={{ borderColor: 'var(--danger)', color: 'var(--danger-text)' }}
                 >
                   <Trash2 size={14} />
                   {deleting ? "Deleting..." : COPY.confirmDeleteCta}

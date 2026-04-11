@@ -43,10 +43,12 @@ export default function LedgerDetailPage() {
     return (
       <AppShell>
         <div className="flex flex-col items-center justify-center gap-4 p-8">
-          <p className="text-sm text-slate-500">Ledger not found</p>
+          <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Ledger not found</p>
           <button
             onClick={() => router.push("/business")}
-            className="text-sm text-emerald-600 hover:text-emerald-700"
+            className="text-sm" style={{ color: 'var(--biz-accent-text)' }}
+            onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--biz-accent-hover)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--biz-accent-text)'; }}
           >
             Back to Business
           </button>
@@ -79,9 +81,9 @@ export default function LedgerDetailPage() {
   };
 
   const statusConfig = {
-    active: { icon: Clock, label: "Active", color: "text-blue-600 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-400" },
-    completed: { icon: CheckCircle2, label: "Completed", color: "text-emerald-600 bg-emerald-50 dark:bg-emerald-900/30 dark:text-emerald-400" },
-    cancelled: { icon: XCircle, label: "Cancelled", color: "text-slate-500 bg-slate-100 dark:bg-slate-800 dark:text-slate-400" },
+    active: { icon: Clock, label: "Active", color: "text-[var(--biz-pending-text)] bg-[var(--biz-pending-bg)]" },
+    completed: { icon: CheckCircle2, label: "Completed", color: "text-[var(--biz-accent-text)] bg-[var(--biz-accent-soft)]" },
+    cancelled: { icon: XCircle, label: "Cancelled", color: "text-[var(--text-muted)] bg-[var(--surface-secondary)]" },
   };
   const status = statusConfig[ledger.status];
   const StatusIcon = status.icon;
@@ -110,7 +112,9 @@ export default function LedgerDetailPage() {
             </button>
             <button
               onClick={() => setShowDeleteConfirm(true)}
-              className="rounded-lg p-2 text-slate-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20"
+              className="rounded-lg p-2 transition-colors" style={{ color: 'var(--text-muted)' }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--danger-soft)'; e.currentTarget.style.color = 'var(--danger-text)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = ''; e.currentTarget.style.color = 'var(--text-muted)'; }}
               title="Delete ledger"
             >
               <Trash2 size={16} />
@@ -130,7 +134,7 @@ export default function LedgerDetailPage() {
                   {status.label}
                 </span>
                 {isOverdue && (
-                  <span className="flex items-center gap-0.5 rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium text-red-600 dark:bg-red-900/30 dark:text-red-400">
+                  <span className="flex items-center gap-0.5 rounded-full px-2 py-0.5 text-xs font-medium" style={{ background: 'var(--danger-soft)', color: 'var(--danger-text)' }}>
                     <AlertTriangle size={12} />
                     Overdue
                   </span>
@@ -152,11 +156,11 @@ export default function LedgerDetailPage() {
             </div>
             <div>
               <p className="text-meta font-medium">Received</p>
-              <p className="text-sm font-bold text-amount text-emerald-600 dark:text-emerald-400">{formatCurrency(totalReceived)}</p>
+              <p className="text-sm font-bold text-amount" style={{ color: 'var(--biz-accent-text)' }}>{formatCurrency(totalReceived)}</p>
             </div>
             <div>
               <p className="text-meta font-medium">Remaining</p>
-              <p className={cn("text-sm font-bold text-amount", remaining <= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-amber-600 dark:text-amber-400")}>
+              <p className="text-sm font-bold text-amount" style={{ color: remaining <= 0 ? 'var(--biz-accent-text)' : 'var(--warning-text)' }}>
                 {formatCurrency(Math.max(0, remaining))}
               </p>
             </div>
@@ -169,10 +173,10 @@ export default function LedgerDetailPage() {
                 className={cn(
                   "h-2 rounded-full transition-all duration-500",
                   totalReceived >= ledger.expectedAmount
-                    ? "bg-emerald-500"
+                    ? "bg-[var(--biz-accent)]"
                     : isOverdue
-                    ? "bg-red-500"
-                    : "bg-blue-500"
+                    ? "bg-[var(--danger)]"
+                    : "bg-[var(--biz-pending-text)]"
                 )}
                 style={{ width: `${Math.min((totalReceived / ledger.expectedAmount) * 100, 100)}%` }}
               />
@@ -196,16 +200,18 @@ export default function LedgerDetailPage() {
 
           {/* Fully paid prompt */}
           {isFullyPaid && (
-            <div className="mt-4 flex items-center gap-3 rounded-lg bg-emerald-50 p-3 dark:bg-emerald-900/20">
-              <CheckCircle2 size={18} className="text-emerald-600 dark:text-emerald-400" />
+            <div className="mt-4 flex items-center gap-3 rounded-lg p-3" style={{ background: 'var(--biz-accent-soft)' }}>
+              <CheckCircle2 size={18} style={{ color: 'var(--biz-accent-text)' }} />
               <div className="flex-1">
-                <p className="text-xs font-medium text-emerald-700 dark:text-emerald-400">
+                <p className="text-xs font-medium" style={{ color: 'var(--biz-accent-text)' }}>
                   Payment complete! Mark this ledger as completed?
                 </p>
               </div>
               <button
                 onClick={() => completeLedger(ledger.id)}
-                className="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-emerald-700"
+                className="rounded-lg px-3 py-1.5 text-xs font-medium text-white" style={{ background: 'var(--biz-accent)' }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--biz-accent-hover)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--biz-accent)'; }}
               >
                 Complete
               </button>
@@ -250,7 +256,8 @@ export default function LedgerDetailPage() {
             {ledger.status === "active" && (
               <button
                 onClick={() => setShowPaymentForm(!showPaymentForm)}
-                className="flex items-center gap-1 text-xs font-medium text-emerald-600 hover:text-emerald-700 dark:text-emerald-400"
+                className="flex items-center gap-1 text-xs font-medium transition-colors"
+                style={{ color: 'var(--biz-accent-text)' }}
               >
                 <PlusCircle size={14} />
                 Log Payment
@@ -294,7 +301,8 @@ export default function LedgerDetailPage() {
               <div className="mt-4 flex gap-2">
                 <button
                   onClick={handleDelete}
-                  className="flex-1 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
+                  className="flex-1 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors"
+                  style={{ background: 'var(--danger)' }}
                 >
                   Delete
                 </button>

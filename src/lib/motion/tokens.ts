@@ -67,6 +67,6 @@ export const scale = {
 export const MAX_STAGGER_ITEMS = 12;
 
 /** Compute a capped stagger delay for an item index */
-export function staggerDelay(index: number, delayPerItem = stagger.tight): number {
+export function staggerDelay(index: number, delayPerItem: number = stagger.tight): number {
   return Math.min(index * delayPerItem, MAX_STAGGER_ITEMS * delayPerItem);
 }

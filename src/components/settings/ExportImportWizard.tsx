@@ -262,7 +262,8 @@ export function ExportImportWizard() {
           <button
             onClick={handleExportAll}
             disabled={expenses.length === 0}
-            className="flex items-center gap-2 rounded-lg border border-indigo-200 px-3 py-2 text-sm font-medium text-indigo-700 hover:bg-indigo-50 disabled:opacity-40 dark:border-indigo-800 dark:text-indigo-400 dark:hover:bg-indigo-900/20"
+            className="flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium disabled:opacity-40 transition-colors"
+            style={{ borderColor: 'var(--secondary-border)', color: 'var(--secondary-text)' }}
           >
             <Download size={14} />
             Full Backup
@@ -286,7 +287,7 @@ export function ExportImportWizard() {
         {!preview && !importResult && (
           <button
             onClick={() => fileRef.current?.click()}
-            className="flex items-center gap-2 rounded-lg border border-dashed px-4 py-3 text-sm font-medium w-full justify-center transition-colors hover:border-indigo-400 hover:text-indigo-600 dark:hover:border-indigo-600 dark:hover:text-indigo-400"
+            className="flex items-center gap-2 rounded-lg border border-dashed px-4 py-3 text-sm font-medium w-full justify-center transition-colors"
             style={{ borderColor: 'var(--border)', color: 'var(--text-secondary)' }}
           >
             <Upload size={16} />
@@ -310,7 +311,7 @@ export function ExportImportWizard() {
                 </thead>
                 <tbody className="divide-y" style={{ '--tw-divide-opacity': 1, borderColor: 'var(--border-subtle)' } as React.CSSProperties}>
                   {preview.slice(0, 20).map((row, i) => (
-                    <tr key={i} className={row.error ? "bg-red-50/50 dark:bg-red-900/10" : ""}>
+                    <tr key={i} className={row.error ? "" : ""} style={row.error ? { background: 'var(--danger-soft)' } : undefined}>
                       <td className="px-2 py-1.5" style={{ color: 'var(--text-primary)' }}>{row.day}</td>
                       <td className="px-2 py-1.5" style={{ color: 'var(--text-primary)' }}>
                         {catMap[row.category]?.label || row.category}
@@ -321,9 +322,9 @@ export function ExportImportWizard() {
                       <td className="px-2 py-1.5 max-w-[120px] truncate" style={{ color: 'var(--text-secondary)' }}>{row.remark}</td>
                       <td className="px-2 py-1.5 text-center">
                         {row.error ? (
-                          <AlertTriangle size={12} className="inline text-red-500" />
+                          <AlertTriangle size={12} className="inline" style={{ color: 'var(--danger)' }} />
                         ) : (
-                          <Check size={12} className="inline text-emerald-500" />
+                          <Check size={12} className="inline" style={{ color: 'var(--success)' }} />
                         )}
                       </td>
                     </tr>
@@ -353,7 +354,8 @@ export function ExportImportWizard() {
                 <button
                   onClick={handleImportConfirm}
                   disabled={importing || preview.filter((r) => !r.error).length === 0}
-                  className="rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-40"
+                  className="rounded-lg px-3 py-1.5 text-sm font-medium text-white disabled:opacity-40 transition-colors"
+                  style={{ background: 'var(--secondary)' }}
                 >
                   {importing ? "Importing..." : `Import ${preview.filter((r) => !r.error).length} rows`}
                 </button>
@@ -364,7 +366,7 @@ export function ExportImportWizard() {
 
         {/* Result */}
         {importResult && (
-          <div className="flex items-center gap-2 rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400">
+          <div className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm" style={{ background: 'var(--success-soft)', color: 'var(--success-text)' }}>
             <Check size={16} />
             Imported {importResult.success} expenses
             {importResult.failed > 0 && `, ${importResult.failed} failed`}

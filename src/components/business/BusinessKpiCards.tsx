@@ -26,8 +26,8 @@ export function BusinessKpiCards({
       label: "Total Expected",
       value: formatCurrency(totalExpected),
       icon: Banknote,
-      color: "text-gray-600 dark:text-gray-400",
-      bg: "bg-gray-50 dark:bg-gray-800",
+      color: "text-[var(--text-secondary)]",
+      bg: "bg-[var(--surface-secondary)]",
     },
     {
       label: "Total Received",
@@ -43,20 +43,20 @@ export function BusinessKpiCards({
       color: collectionPercent >= 80
         ? "text-[var(--biz-accent-text)]"
         : collectionPercent >= 50
-        ? "text-blue-600 dark:text-blue-400"
+        ? "text-[var(--biz-pending-text)]"
         : "text-[var(--warning-text)]",
       bg: collectionPercent >= 80
         ? "bg-[var(--biz-accent-soft)]"
         : collectionPercent >= 50
-        ? "bg-blue-50 dark:bg-blue-900/20"
+        ? "bg-[var(--biz-pending-bg)]"
         : "bg-[var(--warning-soft)]",
     },
     {
       label: "Active",
       value: activeCount.toString(),
       icon: Clock,
-      color: "text-blue-600 dark:text-blue-400",
-      bg: "bg-blue-50 dark:bg-blue-900/20",
+      color: "text-[var(--biz-pending-text)]",
+      bg: "bg-[var(--biz-pending-bg)]",
     },
     ...(overdueCount > 0
       ? [{

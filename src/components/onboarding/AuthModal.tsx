@@ -288,12 +288,12 @@ function MobileAuthPage({ children }: { children: React.ReactNode }) {
           <div className="flex-1 flex flex-col justify-center">
             {children}
           </div>
-          <p className="mt-4 text-center text-xs text-slate-400 dark:text-slate-600">
+          <p className="mt-4 text-center text-xs" style={{ color: 'var(--text-muted)' }}>
             By continuing, you agree to our Terms of Service.
           </p>
-          <div className="mt-3 flex items-center justify-center gap-4 text-slate-400 dark:text-slate-500">
-            <span className="flex items-center gap-1 text-[0.65rem]"><Lock size={10} /> 256-bit encrypted</span>
-            <span className="flex items-center gap-1 text-[0.65rem]"><ShieldCheck size={10} /> No credit card needed</span>
+          <div className="mt-3 flex items-center justify-center gap-4" style={{ color: 'var(--text-muted)' }}>
+            <span className="flex items-center gap-1 text-overline"><Lock size={10} /> 256-bit encrypted</span>
+            <span className="flex items-center gap-1 text-overline"><ShieldCheck size={10} /> No credit card needed</span>
           </div>
         </div>
       </div>
@@ -324,8 +324,8 @@ function DesktopAuthPage({ children }: { children: React.ReactNode }) {
             By continuing, you agree to our Terms of Service.
           </p>
           <div className="mt-3 flex items-center justify-center gap-4" style={{ color: 'var(--text-muted)' }}>
-            <span className="flex items-center gap-1 text-[0.65rem]"><Lock size={10} /> 256-bit encrypted</span>
-            <span className="flex items-center gap-1 text-[0.65rem]"><ShieldCheck size={10} /> No credit card needed</span>
+            <span className="flex items-center gap-1 text-overline"><Lock size={10} /> 256-bit encrypted</span>
+            <span className="flex items-center gap-1 text-overline"><ShieldCheck size={10} /> No credit card needed</span>
           </div>
         </div>
       </div>
@@ -470,18 +470,18 @@ export function AuthModal({
       <AuthPage>
         <button
           onClick={() => { setMode("login"); setError(""); setForgotSent(false); }}
-          className="mb-6 flex items-center gap-1.5 text-sm text-slate-400 hover:text-slate-700 dark:text-slate-500 dark:hover:text-slate-300 transition-colors"
+          className="mb-6 flex items-center gap-1.5 text-sm text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
         >
           <ArrowLeft className="h-4 w-4" /> Back to Sign In
         </button>
 
-        <div className="mb-1 flex h-11 w-11 items-center justify-center rounded-2xl bg-[#eef0ff] dark:bg-[rgba(123,135,255,0.15)] ring-1 ring-[#c7cbff] dark:ring-[#4C5CFF]/40">
-          <Mail className="h-5 w-5 text-[#4C5CFF] dark:text-[#7B87FF]" />
+        <div className="mb-1 flex h-11 w-11 items-center justify-center rounded-2xl" style={{ background: 'var(--secondary-soft)', boxShadow: 'inset 0 0 0 1px var(--secondary-border)' }}>
+          <Mail className="h-5 w-5" style={{ color: 'var(--secondary-text)' }} />
         </div>
-        <h2 className="mt-3 text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+        <h2 className="mt-3 text-2xl font-bold tracking-tight" style={{ color: 'var(--text-primary)' }}>
           Forgot password?
         </h2>
-        <p className="mt-1.5 text-sm text-slate-500 dark:text-slate-400 mb-7">
+        <p className="mt-1.5 text-sm mb-7" style={{ color: 'var(--text-secondary)' }}>
           {forgotSent
             ? "Check your inbox for a password reset link."
             : "Enter your email and we\u2019ll send you a reset link."}
@@ -509,7 +509,7 @@ export function AuthModal({
             className="space-y-3.5"
           >
             <div className="relative">
-              <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 dark:text-slate-500" />
+              <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4" style={{ color: 'var(--text-muted)' }} />
               <input
                 type="email"
                 placeholder="Email address"
@@ -554,18 +554,18 @@ export function AuthModal({
       <AuthPage>
         <button
           onClick={() => { setMode("login"); setError(""); setPendingChallengeToken(null); setTotpCode(""); }}
-          className="mb-6 flex items-center gap-1.5 text-sm text-slate-400 hover:text-slate-700 dark:text-slate-500 dark:hover:text-slate-300 transition-colors"
+          className="mb-6 flex items-center gap-1.5 text-sm text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
         >
           <ArrowLeft className="h-4 w-4" /> Back
         </button>
 
-        <div className="mb-1 flex h-11 w-11 items-center justify-center rounded-2xl bg-[#eef0ff] dark:bg-[rgba(123,135,255,0.15)] ring-1 ring-[#c7cbff] dark:ring-[#4C5CFF]/40">
-          <Shield className="h-5 w-5 text-[#4C5CFF] dark:text-[#7B87FF]" />
+        <div className="mb-1 flex h-11 w-11 items-center justify-center rounded-2xl" style={{ background: 'var(--secondary-soft)', boxShadow: 'inset 0 0 0 1px var(--secondary-border)' }}>
+          <Shield className="h-5 w-5" style={{ color: 'var(--secondary-text)' }} />
         </div>
-        <h2 className="mt-3 text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+        <h2 className="mt-3 text-2xl font-bold tracking-tight" style={{ color: 'var(--text-primary)' }}>
           Two-Factor Auth
         </h2>
-        <p className="mt-1.5 text-sm text-slate-500 dark:text-slate-400 mb-7">
+        <p className="mt-1.5 text-sm mb-7" style={{ color: 'var(--text-secondary)' }}>
           Enter the 6-digit code from your authenticator app.
         </p>
 
@@ -603,7 +603,7 @@ export function AuthModal({
             Verify &amp; Sign In
           </button>
 
-          <p className="text-center text-xs text-slate-400 dark:text-slate-600">
+          <p className="text-center text-xs" style={{ color: 'var(--text-muted)' }}>
             You can also use a recovery code
           </p>
         </div>
@@ -619,16 +619,16 @@ export function AuthModal({
         <div className="mb-1 flex h-11 w-11 items-center justify-center rounded-2xl bg-[#e6f9f7] dark:bg-[rgba(96,165,250,0.15)] ring-1 ring-[#b2ece6] dark:ring-[#3B82F6]/40">
           <Sparkles className="h-5 w-5" style={{ color: 'var(--primary)' }} />
         </div>
-        <h2 className="mt-3 text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+        <h2 className="mt-3 text-2xl font-bold tracking-tight" style={{ color: 'var(--text-primary)' }}>
           Set your budget
         </h2>
-        <p className="mt-1.5 text-sm text-slate-500 dark:text-slate-400 mb-7">
+        <p className="mt-1.5 text-sm mb-7" style={{ color: 'var(--text-secondary)' }}>
           Enter your monthly income or budget. You can change this anytime in Settings.
         </p>
 
         <div className="relative mb-5">
           <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center gap-1">
-            <span className="text-lg font-semibold text-slate-400">{symbol}</span>
+            <span className="text-lg font-semibold" style={{ color: 'var(--text-muted)' }}>{symbol}</span>
           </div>
           <input
             type="number"
@@ -660,7 +660,7 @@ export function AuthModal({
         {salary && (
           <button onClick={() => handleSalarySubmit()} className="hidden" aria-hidden />
         )}
-        <p className="text-center text-xs text-slate-400 dark:text-slate-600 mt-3">
+        <p className="text-center text-xs mt-3" style={{ color: 'var(--text-muted)' }}>
           You&apos;re all set — this is the last step!
         </p>
       </AuthPage>
@@ -673,10 +673,10 @@ export function AuthModal({
     return (
       <AuthPage>
         <div className="mb-1">
-          <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+          <h2 className="text-2xl font-bold tracking-tight" style={{ color: 'var(--text-primary)' }}>
             Welcome to ExpenStream
           </h2>
-          <p className="mt-1.5 text-sm text-slate-500 dark:text-slate-400">
+          <p className="mt-1.5 text-sm" style={{ color: 'var(--text-secondary)' }}>
             Track expenses, set budgets, and take control.
           </p>
         </div>
@@ -685,17 +685,17 @@ export function AuthModal({
           {/* Google — prominent secondary */}
           <button
             onClick={() => { window.location.href = "/api/auth/google"; }}
-            className="group relative flex w-full items-center gap-3.5 rounded-2xl border-2 border-slate-200 bg-white px-4 py-3.5 text-left transition-all hover:border-slate-300 hover:shadow-lg hover:shadow-slate-100 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] dark:border-slate-700 dark:bg-slate-800/60 dark:hover:border-slate-600 dark:hover:shadow-none"
+            className="group relative flex w-full items-center gap-3.5 rounded-2xl border-2 border-[var(--border)] bg-[var(--surface)] px-4 py-3.5 text-left transition-all hover:border-[var(--border-strong)] hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)]"
             style={{ animation: "sp-card-in 0.4s ease both", animationDelay: "0.05s" }}
           >
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white shadow-sm border border-slate-100 dark:bg-slate-900 dark:border-slate-700">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl shadow-sm border" style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>
               <GoogleIcon className="h-5 w-5" />
             </div>
             <div className="flex-1 min-w-0">
-              <div className="text-sm font-semibold text-slate-900 dark:text-white">Continue with Google</div>
-              <div className="text-xs text-slate-400 dark:text-slate-500">Sign in or create account instantly</div>
+              <div className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Continue with Google</div>
+              <div className="text-xs" style={{ color: 'var(--text-muted)' }}>Sign in or create account instantly</div>
             </div>
-            <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-slate-400 transition-colors dark:text-slate-600 dark:group-hover:text-slate-400" />
+            <ChevronRight className="h-4 w-4 opacity-50 group-hover:opacity-80 transition-opacity" style={{ color: 'var(--text-muted)' }} />
           </button>
 
           {/* OR divider */}
@@ -725,7 +725,7 @@ export function AuthModal({
             </div>
             <div className="flex-1 min-w-0">
               <div className="font-semibold text-base leading-tight">Create Account</div>
-              <div className="text-xs text-teal-100/80 mt-0.5">Start fresh with a new workspace</div>
+              <div className="text-xs text-white/70 mt-0.5">Start fresh with a new workspace</div>
             </div>
             <ChevronRight className="h-4 w-4 opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" />
           </button>
@@ -733,17 +733,17 @@ export function AuthModal({
           {/* Sign In — secondary */}
           <button
             onClick={() => setMode("login")}
-            className="group relative flex w-full items-center gap-4 rounded-2xl border-2 border-slate-200 bg-white px-4 py-3.5 text-left transition-all hover:border-[color-mix(in_srgb,var(--primary)_30%,white)] hover:shadow-md hover:shadow-[color-mix(in_srgb,var(--primary)_8%,white)] hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] dark:border-slate-700 dark:bg-slate-800/60 dark:hover:border-[color-mix(in_srgb,var(--primary)_40%,transparent)] dark:hover:shadow-none"
+            className="group relative flex w-full items-center gap-4 rounded-2xl border-2 border-[var(--border)] bg-[var(--surface)] px-4 py-3.5 text-left transition-all hover:border-[color-mix(in_srgb,var(--primary)_30%,var(--surface))] hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)]"
             style={{ animation: "sp-card-in 0.4s ease both", animationDelay: "0.19s" }}
           >
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#eef0ff] transition-colors group-hover:bg-[#dde0ff] dark:bg-[rgba(123,135,255,0.12)] dark:group-hover:bg-[rgba(123,135,255,0.2)]">
-              <LogIn className="h-5 w-5 text-[#4C5CFF] dark:text-[#7B87FF]" />
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition-colors" style={{ background: 'var(--secondary-soft)' }}>
+              <LogIn className="h-5 w-5" style={{ color: 'var(--secondary-text)' }} />
             </div>
             <div className="flex-1 min-w-0">
-              <div className="text-base font-semibold text-slate-900 dark:text-white leading-tight">Sign In</div>
-              <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Access your existing account</div>
+              <div className="text-base font-semibold leading-tight" style={{ color: 'var(--text-primary)' }}>Sign In</div>
+              <div className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>Access your existing account</div>
             </div>
-            <ChevronRight className="h-4 w-4 text-slate-300 group-hover:translate-x-0.5 transition-all dark:text-slate-600" style={{ '--tw-group-hover-color': 'var(--primary)' } as React.CSSProperties} />
+            <ChevronRight className="h-4 w-4 opacity-50 group-hover:opacity-80 group-hover:translate-x-0.5 transition-all" style={{ color: 'var(--text-muted)' }} />
           </button>
         </div>
       </AuthPage>
@@ -758,15 +758,15 @@ export function AuthModal({
     <AuthPage>
       <button
         onClick={() => { setMode("choose"); setError(""); }}
-        className="mb-6 flex items-center gap-1.5 text-sm text-slate-400 hover:text-slate-700 dark:text-slate-500 dark:hover:text-slate-300 transition-colors"
+        className="mb-6 flex items-center gap-1.5 text-sm text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
       >
         <ArrowLeft className="h-4 w-4" /> Back
       </button>
 
-      <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+      <h2 className="text-2xl font-bold tracking-tight" style={{ color: 'var(--text-primary)' }}>
         {isRegister ? "Create account" : "Welcome back"}
       </h2>
-      <p className="mt-1.5 text-sm text-slate-500 dark:text-slate-400 mb-7">
+      <p className="mt-1.5 text-sm mb-7" style={{ color: 'var(--text-secondary)' }}>
         {isRegister
           ? "Set up your ExpenStream account in seconds"
           : "Sign in to continue tracking your finances"}
@@ -778,7 +778,7 @@ export function AuthModal({
       >
         {isRegister && (
           <div className="relative">
-            <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 dark:text-slate-500" />
+            <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4" style={{ color: 'var(--text-muted)' }} />
             <input
               type="text"
               placeholder="Name (optional)"
@@ -791,7 +791,7 @@ export function AuthModal({
         )}
 
         <div className="relative">
-          <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 dark:text-slate-500" />
+          <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4" style={{ color: 'var(--text-muted)' }} />
           <input
             type="email"
             placeholder="Email address"
@@ -804,7 +804,7 @@ export function AuthModal({
         </div>
 
         <div className="relative">
-          <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 dark:text-slate-500" />
+          <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4" style={{ color: 'var(--text-muted)' }} />
           <input
             type={showPassword ? "text" : "password"}
             placeholder={isRegister ? "Min 8 characters" : "Password"}
@@ -818,7 +818,7 @@ export function AuthModal({
             type="button"
             tabIndex={-1}
             onClick={() => setShowPassword((v) => !v)}
-            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 transition-colors"
+            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
             aria-label={showPassword ? "Hide password" : "Show password"}
           >
             {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -858,7 +858,7 @@ export function AuthModal({
           {isRegister ? "Create Account" : "Sign In"}
         </button>
 
-        <p className="text-center text-xs text-slate-500 dark:text-slate-400 pt-1">
+        <p className="text-center text-xs pt-1" style={{ color: 'var(--text-muted)' }}>
           {isRegister ? (
             <>
               Already have an account?{" "}

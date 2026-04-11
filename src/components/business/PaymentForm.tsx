@@ -54,7 +54,7 @@ export function PaymentForm({ ledgerId, onSubmit, onCancel }: PaymentFormProps) 
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 rounded-xl p-5" style={{ background: 'var(--surface-secondary)', border: '1px solid var(--border)' }}>
-      <h4 className="text-xs font-semibold text-emerald-700 dark:text-emerald-400">Log Payment</h4>
+      <h4 className="text-xs font-semibold" style={{ color: 'var(--biz-accent-text)' }}>Log Payment</h4>
 
       <div className="grid grid-cols-2 gap-4">
         {/* Amount */}
@@ -132,7 +132,7 @@ export function PaymentForm({ ledgerId, onSubmit, onCancel }: PaymentFormProps) 
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           placeholder="Optional note..."
-          className="w-full rounded-xl px-2 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+          className="w-full rounded-xl px-2 py-2.5 text-sm focus:outline-none focus:ring-2"
           style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
         />
       </div>
@@ -142,7 +142,8 @@ export function PaymentForm({ ledgerId, onSubmit, onCancel }: PaymentFormProps) 
         <m.button
           type="submit"
           disabled={submitting || !amount}
-          className="flex-1 rounded-xl bg-emerald-600 px-3 py-2.5 text-xs font-semibold text-white shadow-sm shadow-emerald-600/20 hover:bg-emerald-700 active:scale-[0.97] disabled:opacity-50"
+          className="flex-1 rounded-xl px-3 py-2.5 text-xs font-semibold text-white shadow-sm active:scale-[0.97] disabled:opacity-50 transition-colors"
+          style={{ background: 'var(--biz-accent)', boxShadow: '0 1px 3px var(--focus-ring-biz)' }}
           whileTap={{ scale: 0.95 }}
         >
           {submitting ? "Saving..." : "Log Payment"}

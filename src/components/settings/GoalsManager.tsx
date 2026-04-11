@@ -221,9 +221,9 @@ export function GoalsManager() {
                   onClick={() => setColor(c)}
                   title={c}
                   className={`h-5 w-5 shrink-0 rounded-full border-2 transition-all hover:scale-110 ${
-                    color === c ? "border-slate-900 scale-110 dark:border-white" : "border-transparent"
+                    color === c ? "scale-110" : "border-transparent"
                   }`}
-                  style={{ backgroundColor: c }}
+                  style={{ backgroundColor: c, borderColor: color === c ? 'var(--text-primary)' : 'transparent' }}
                 />
               ))}
             </div>

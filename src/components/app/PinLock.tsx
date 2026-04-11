@@ -54,7 +54,7 @@ export function PinLock({ onVerify }: PinLockProps) {
 
   return (
     <div className="fixed inset-0 z-[999] flex flex-col items-center justify-center gap-8 backdrop-blur-xl"
-      style={{ background: "color-mix(in srgb, var(--surface) 95%, transparent)" }}
+      style={{ background: "color-mix(in srgb, var(--surface) 95%, transparent)", paddingTop: "env(safe-area-inset-top, 0px)", paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
     >
       {/* Lock icon */}
       <div
@@ -80,7 +80,7 @@ export function PinLock({ onVerify }: PinLockProps) {
             key={i}
             className={`h-3.5 w-3.5 rounded-full transition-all duration-200 ${
               error
-                ? "bg-red-500"
+                ? "bg-[var(--danger)]"
                 : i < pin.length
                   ? "bg-[var(--accent)] scale-125"
                   : ""

@@ -126,9 +126,9 @@ export function RecurringManager() {
     <div className="space-y-3">
       {/* Totals bar */}
       {recurring.length > 0 && (
-        <div className="flex items-center justify-between rounded-lg bg-indigo-50 px-3 py-2 dark:bg-indigo-900/20">
+        <div className="flex items-center justify-between rounded-lg px-3 py-2" style={{ background: 'var(--secondary-soft)' }}>
           <div className="text-xs" style={{ color: 'var(--text-secondary)' }}>
-            Active: <span className="font-semibold text-indigo-700 dark:text-indigo-400">{formatCurrency(activeTotal)}</span>/mo
+            Active: <span className="font-semibold" style={{ color: 'var(--secondary-text)' }}>{formatCurrency(activeTotal)}</span>/mo
             {activeTotal !== totalAll && (
               <span className="ml-2" style={{ color: 'var(--text-muted)' }}>
                 (Total incl. paused: {formatCurrency(totalAll)})
@@ -283,7 +283,8 @@ export function RecurringManager() {
               <div className="flex gap-2 pt-1">
                 <button
                   onClick={handleSave}
-                  className="rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700"
+                  className="rounded-lg px-4 py-2.5 text-sm font-medium text-white transition-colors"
+                style={{ background: 'var(--secondary)' }}
                 >
                   {editId ? "Update" : "Add"}
                 </button>
@@ -304,7 +305,8 @@ export function RecurringManager() {
       ) : (
         <button
           onClick={() => setShowAdd(true)}
-          className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium text-indigo-600 hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-900/30"
+          className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors"
+          style={{ color: 'var(--secondary-text)' }}
         >
           <Plus size={14} />
           Add Recurring

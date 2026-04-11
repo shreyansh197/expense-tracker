@@ -191,8 +191,8 @@ export function AccountCard() {
                 unoptimized
               />
             ) : (
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900/30">
-                <User size={18} className="text-indigo-600 dark:text-indigo-400" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-full" style={{ background: 'var(--secondary-soft)' }}>
+                <User size={18} style={{ color: 'var(--secondary-text)' }} />
               </div>
             )}
           </button>
@@ -200,7 +200,8 @@ export function AccountCard() {
           <button
             onClick={() => setShowAvatarPopup(!showAvatarPopup)}
             disabled={avatarUploading}
-            className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-indigo-600 text-white shadow-sm transition-colors hover:bg-indigo-700"
+            className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full text-white shadow-sm transition-colors"
+            style={{ background: 'var(--secondary)' }}
           >
             {avatarUploading ? <Loader2 size={10} className="animate-spin" /> : <Camera size={10} />}
           </button>
@@ -239,7 +240,8 @@ export function AccountCard() {
                 <button
                   onClick={handleAvatarRemove}
                   disabled={avatarUploading}
-                  className="flex w-full items-center gap-2.5 px-3 py-2 text-xs font-medium text-red-600 transition-colors dark:text-red-400 disabled:opacity-50"
+                  className="flex w-full items-center gap-2.5 px-3 py-2 text-xs font-medium transition-colors disabled:opacity-50"
+                  style={{ color: 'var(--danger-text)' }}
                   onMouseEnter={e => { if (!avatarUploading) e.currentTarget.style.background = 'var(--surface-secondary)'; }}
                   onMouseLeave={e => { e.currentTarget.style.background = ''; }}
                 >
@@ -286,7 +288,8 @@ export function AccountCard() {
         {!showPwForm ? (
           <button
             onClick={() => setShowPwForm(true)}
-            className="text-xs font-medium text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 transition-colors"
+            className="text-xs font-medium transition-colors"
+            style={{ color: 'var(--secondary-text)' }}
           >
             Change password
           </button>
@@ -331,7 +334,8 @@ export function AccountCard() {
               <button
                 onClick={handlePasswordChange}
                 disabled={pwSaving}
-                className="rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+                className="rounded-lg px-3 py-1.5 text-xs font-medium text-white disabled:opacity-50 transition-colors"
+                style={{ background: 'var(--secondary)' }}
               >
                 {pwSaving ? "Saving..." : "Save"}
               </button>
@@ -373,7 +377,7 @@ export function AccountCard() {
 
       {/* Delete Account */}
       <div className="pt-4" style={{ borderTop: '1px solid var(--border)' }}>
-        <p className="mb-2 text-xs font-medium uppercase tracking-wider text-red-500">Danger Zone</p>
+        <p className="mb-2 text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--danger-text)' }}>Danger Zone</p>
         <p className="mb-3 text-xs" style={{ color: 'var(--text-secondary)' }}>
           Permanently delete your account, all workspaces, expenses, and settings. This cannot be undone.
         </p>
@@ -407,7 +411,8 @@ export function AccountCard() {
             }
           }}
           disabled={deleting}
-          className="flex w-full items-center justify-center gap-2 rounded-lg border border-red-200 px-4 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-900/20 transition-colors disabled:opacity-50"
+          className="flex w-full items-center justify-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-medium transition-colors disabled:opacity-50"
+          style={{ borderColor: 'var(--danger-border)', color: 'var(--danger-text)' }}
         >
           <Trash2 size={16} />
           {deleting ? "Deleting..." : "Delete Account"}

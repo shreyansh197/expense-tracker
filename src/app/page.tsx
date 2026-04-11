@@ -436,7 +436,7 @@ function DashboardContent() {
                   })()}
                 </p>
                 {streak >= 2 && (
-                  <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold" style={{ background: 'var(--warning-soft)', color: 'var(--warning-text)' }}>
+                  <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-overline font-semibold" style={{ background: 'var(--warning-soft)', color: 'var(--warning-text)' }}>
                     <Flame size={10} />
                     {streak}d streak
                   </span>
@@ -685,10 +685,12 @@ function DashboardContent() {
                   )}
                 </div>
                 {recentExpenses.length === 0 ? (
-                  <div className="flex flex-col items-center gap-2 py-6">
-                    <Wallet size={32} className="text-brand opacity-60" />
+                  <div className="flex flex-col items-center gap-2 py-8">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl" style={{ background: 'var(--surface-secondary)' }}>
+                      <Wallet size={24} style={{ color: 'var(--text-muted)' }} />
+                    </div>
                     <p className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>No expenses this month</p>
-                    <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Your recent spending will show up here</p>
+                    <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Tap <PlusCircle size={12} className="inline" /> to add your first expense</p>
                   </div>
                 ) : (
                   <div className="space-y-0.5">
@@ -706,7 +708,7 @@ function DashboardContent() {
                           </div>
                           <div className="min-w-0">
                             <div className="flex items-center gap-1.5">
-                              {e.isRecurring && <Repeat className="shrink-0 h-3 w-3 text-blue-500" />}
+                              {e.isRecurring && <Repeat className="shrink-0 h-3 w-3" style={{ color: 'var(--info-text)' }} />}
                               <p className="text-meta">
                                 {e.day} {getMonthName(currentMonth).slice(0, 3)}
                               </p>

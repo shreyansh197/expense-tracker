@@ -191,7 +191,7 @@ export function AutoRulesManager() {
           className={`flex items-center gap-3 rounded-lg px-3 py-2.5 ${rule.enabled ? "" : "opacity-60"}`}
           style={{ background: 'var(--surface-secondary)', border: '1px solid var(--border-subtle)' }}
         >
-          <Zap size={14} className={rule.enabled ? "text-amber-500" : ""} style={!rule.enabled ? { color: 'var(--text-muted)' } : undefined} />
+          <Zap size={14} style={{ color: rule.enabled ? 'var(--warning)' : 'var(--text-muted)' }} />
           <div className="flex-1 min-w-0">
             <p className="truncate text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
               {rule.name}
@@ -375,7 +375,8 @@ export function AutoRulesManager() {
             <button
               onClick={handleAdd}
               disabled={!name.trim() || !condValue.trim()}
-              className="rounded-lg bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-40"
+              className="rounded-lg px-3 py-2 text-sm font-medium text-white disabled:opacity-40 transition-colors"
+              style={{ background: 'var(--secondary)' }}
             >
               {editingId ? "Update Rule" : "Create Rule"}
             </button>
@@ -393,7 +394,8 @@ export function AutoRulesManager() {
       ) : (
         <button
           onClick={() => setShowForm(true)}
-          className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium text-indigo-600 hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-900/30"
+          className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors"
+          style={{ color: 'var(--secondary-text)' }}
         >
           <Plus size={14} />
           Add Rule

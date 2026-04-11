@@ -52,7 +52,7 @@ export function SpendingComparison({ currentTotal, previousTotal, className }: S
     >
       <Icon size={12} />
       <span>{isFlat ? "Flat" : `${absPct}%`}</span>
-      <span className="hidden sm:inline text-[10px] opacity-75">vs prev</span>
+      <span className="hidden sm:inline text-overline opacity-75">vs prev</span>
     </div>
   );
 }

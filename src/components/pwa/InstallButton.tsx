@@ -40,7 +40,7 @@ export function InstallButton() {
 
   if (installed) {
     return (
-      <p className="text-sm text-emerald-600 dark:text-emerald-400 font-medium">
+      <p className="text-sm font-medium" style={{ color: 'var(--success-text)' }}>
         ✓ App is installed
       </p>
     );
@@ -61,7 +61,8 @@ export function InstallButton() {
     return (
       <button
         onClick={handleInstall}
-        className="flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700"
+        className="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors"
+        style={{ background: 'var(--secondary)' }}
       >
         <Download size={16} />
         Install App

@@ -141,8 +141,10 @@ export function LedgerForm({ initial, onSubmit, onCancel, submitLabel = "Create 
           <button
             type="button"
             onClick={() => setDueDate(new Date().toISOString().split("T")[0])}
-            className="w-full rounded-lg border border-dashed px-3 py-2.5 text-sm hover:border-emerald-400 hover:text-emerald-600 dark:hover:border-emerald-500 dark:hover:text-emerald-400"
+            className="w-full rounded-lg border border-dashed px-3 py-2.5 text-sm transition-colors"
             style={{ borderColor: 'var(--border)', background: 'var(--surface)', color: 'var(--text-muted)' }}
+            onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--biz-accent)'; e.currentTarget.style.color = 'var(--biz-accent-text)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--text-muted)'; }}
           >
             + Set due date
           </button>
@@ -193,10 +195,10 @@ export function LedgerForm({ initial, onSubmit, onCancel, submitLabel = "Create 
             {tags.map((tag) => (
               <span
                 key={tag}
-                className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-xs text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
+                className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs" style={{ background: 'var(--biz-accent-soft)', color: 'var(--biz-accent-text)' }}
               >
                 {tag}
-                <button type="button" onClick={() => setTags(tags.filter((t) => t !== tag))} className="hover:text-red-500">
+                <button type="button" onClick={() => setTags(tags.filter((t) => t !== tag))} className="transition-colors" style={{ color: 'var(--danger-text)' }}>
                   <X size={12} />
                 </button>
               </span>
@@ -222,7 +224,9 @@ export function LedgerForm({ initial, onSubmit, onCancel, submitLabel = "Create 
         <m.button
           type="submit"
           disabled={submitting || !name.trim() || !expectedAmount}
-          className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-emerald-700 disabled:opacity-50"
+          className="flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium text-white shadow-sm disabled:opacity-50" style={{ background: 'var(--biz-accent)' }}
+          onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--biz-accent-hover)'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--biz-accent)'; }}
           whileTap={{ scale: 0.97 }}
         >
           {submitting && <Loader2 size={16} className="animate-spin" />}

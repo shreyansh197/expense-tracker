@@ -391,7 +391,7 @@ export default function SettingsPage() {
     if (!visibleSections || visibleSections.size === 0) return;
     const firstMatch = sectionIndex.find(s => visibleSections.has(s.id));
     if (firstMatch) setActiveZone(firstMatch.zone);
-  }, [visibleSections, sectionIndex]);
+  }, [visibleSections, sectionIndex, setActiveZone]);
 
   // IntersectionObserver for mobile scroll tracking (desktop uses tab switching)
   useEffect(() => {
@@ -488,7 +488,7 @@ export default function SettingsPage() {
               }
             >
               <span className="block text-xs font-semibold">{z.label}</span>
-              <span className="block text-[10px] font-normal opacity-70">{z.description}</span>
+              <span className="block text-overline font-normal opacity-70">{z.description}</span>
             </button>
           ))}
         </div>
@@ -507,7 +507,7 @@ export default function SettingsPage() {
             icon={<LinkIcon size={18} />}
             title="Account"
             description="Manage your account and workspaces"
-            iconColor="bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400"
+            iconColor="bg-[var(--info-soft)] text-[var(--info-text)]"
           >
             <AccountCard />
           </AccordionSection>}
@@ -518,7 +518,7 @@ export default function SettingsPage() {
             icon={<Shield size={18} />}
             title="Security"
             description="Two-factor auth, sessions, and devices"
-            iconColor="bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400"
+            iconColor="bg-[var(--danger-soft)] text-[var(--danger-text)]"
           >
             <SecurityCard />
             {/* ─── PIN Lock ─── */}
@@ -531,7 +531,7 @@ export default function SettingsPage() {
             icon={<Users size={18} />}
             title="Workspace Members"
             description="Invite people and manage access"
-            iconColor="bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400"
+            iconColor="bg-[var(--accent-soft)] text-[var(--accent)]"
           >
             <WorkspaceMembersCard />
           </AccordionSection>}
@@ -678,7 +678,7 @@ export default function SettingsPage() {
                 : "Set up automatic monthly expenses"
             }
             badge={recurringCount > 0 ? recurringCount : undefined}
-            iconColor="bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400"
+            iconColor="bg-[var(--info-soft)] text-[var(--info-text)]"
             className={!isSectionVisible('recurring') ? 'hidden' : ''}
           >
             <Suspense fallback={<LazyFallback />}><RecurringManager /></Suspense>
@@ -710,7 +710,7 @@ export default function SettingsPage() {
                 aria-checked={settings.rolloverEnabled ?? false}
                 onClick={() => updateSettings({ rolloverEnabled: !settings.rolloverEnabled })}
                 className={`relative h-6 w-11 rounded-full transition-colors ${
-                  settings.rolloverEnabled ? "bg-brand" : "bg-slate-300 dark:bg-slate-600"
+                  settings.rolloverEnabled ? "bg-brand" : "bg-[var(--border-strong)]"
                 }`}
               >
                 <span
@@ -761,7 +761,7 @@ export default function SettingsPage() {
             icon={<Zap size={18} />}
             title="Smart Rules"
             description="Auto-assign categories based on patterns"
-            iconColor="bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400"
+            iconColor="bg-[var(--warning-soft)] text-[var(--warning-text)]"
             className={!isSectionVisible('rules') ? 'hidden' : ''}
           >
             <Suspense fallback={<LazyFallback />}><AutoRulesManager /></Suspense>
@@ -773,7 +773,7 @@ export default function SettingsPage() {
             icon={<Download size={18} />}
             title="Export & Import"
             description="Backup, export, or import data"
-            iconColor="bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400"
+            iconColor="bg-[var(--info-soft)] text-[var(--info-text)]"
             className={!isSectionVisible('export-import') ? 'hidden' : ''}
           >
             <Suspense fallback={<LazyFallback />}><ExportImportWizard /></Suspense>
@@ -813,7 +813,7 @@ export default function SettingsPage() {
                 aria-checked={settings.businessMode ?? false}
                 onClick={() => updateSettings({ businessMode: !settings.businessMode })}
                 className={`relative h-6 w-11 rounded-full transition-colors ${
-                  settings.businessMode ? "bg-biz" : "bg-slate-300 dark:bg-slate-600"
+                  settings.businessMode ? "bg-biz" : "bg-[var(--border-strong)]"
                 }`}
               >
                 <span
@@ -846,7 +846,7 @@ export default function SettingsPage() {
             icon={<Globe size={18} />}
             title="Multi-Currency"
             description={settings.multiCurrencyEnabled ? "Per-expense currency active" : "All expenses in base currency"}
-            iconColor="bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400"
+            iconColor="bg-[var(--info-soft)] text-[var(--info-text)]"
             className={!isSectionVisible('multi-currency') ? 'hidden' : ''}
             headerRight={
               <button
@@ -854,7 +854,7 @@ export default function SettingsPage() {
                 aria-checked={settings.multiCurrencyEnabled ?? false}
                 onClick={() => updateSettings({ multiCurrencyEnabled: !settings.multiCurrencyEnabled })}
                 className={`relative h-6 w-11 rounded-full transition-colors ${
-                  settings.multiCurrencyEnabled ? "bg-brand" : "bg-slate-300 dark:bg-slate-600"
+                  settings.multiCurrencyEnabled ? "bg-brand" : "bg-[var(--border-strong)]"
                 }`}
               >
                 <span
@@ -872,8 +872,8 @@ export default function SettingsPage() {
                   : "Enable to track expenses in multiple currencies. Rates are fetched automatically and cached for offline use."}
               </p>
               {settings.multiCurrencyEnabled && (
-                <div className="rounded-lg bg-blue-50 p-3 dark:bg-blue-900/20">
-                  <p className="text-xs font-medium text-blue-700 dark:text-blue-400">
+                <div className="rounded-lg p-3" style={{ background: 'var(--info-soft)' }}>
+                  <p className="text-xs font-medium" style={{ color: 'var(--info-text)' }}>
                     A currency picker now appears in the expense form. Conversions use your base currency ({settings.currency}) for all totals.
                   </p>
                 </div>
@@ -888,7 +888,7 @@ export default function SettingsPage() {
             icon={<Palette size={18} />}
             title="Appearance"
             description={`${theme.charAt(0).toUpperCase() + theme.slice(1)} mode`}
-            iconColor="bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400"
+            iconColor="bg-[var(--accent-soft)] text-[var(--accent)]"
             className={!isSectionVisible('theme') ? 'hidden' : ''}
           >
             <div className="space-y-4">

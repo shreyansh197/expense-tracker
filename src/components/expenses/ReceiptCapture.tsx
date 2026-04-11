@@ -117,7 +117,7 @@ export function ReceiptCapture({ onExtracted, onClose }: ReceiptCaptureProps) {
 
       {/* Error */}
       {error && (
-        <div className="rounded-lg bg-red-50 p-3 text-xs text-red-700 dark:bg-red-900/20 dark:text-red-400">
+        <div className="rounded-lg p-3 text-xs" style={{ background: 'var(--danger-soft)', color: 'var(--danger-text)' }}>
           {error}
         </div>
       )}
@@ -219,11 +219,7 @@ export function ReceiptCapture({ onExtracted, onClose }: ReceiptCaptureProps) {
             )}
             <div className="flex items-center justify-between">
               <span className="text-xs font-medium" style={{ color: "var(--text-tertiary)" }}>Confidence</span>
-              <span className={`text-xs font-medium ${
-                result.confidence >= 70 ? "text-green-600 dark:text-green-400"
-                  : result.confidence >= 40 ? "text-amber-600 dark:text-amber-400"
-                    : "text-red-600 dark:text-red-400"
-              }`}>
+              <span className={`text-xs font-medium`} style={{ color: result.confidence >= 70 ? 'var(--success-text)' : result.confidence >= 40 ? 'var(--warning-text)' : 'var(--danger-text)' }}>
                 {Math.round(result.confidence)}%
               </span>
             </div>

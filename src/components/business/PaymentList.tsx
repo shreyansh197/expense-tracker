@@ -22,11 +22,11 @@ const methodLabels: Record<PaymentMethod, string> = {
 };
 
 const methodColors: Record<PaymentMethod, string> = {
-  bank_transfer: "bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400",
-  upi: "bg-violet-50 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400",
-  cash: "bg-emerald-50 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400",
-  cheque: "bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400",
-  other: "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400",
+  bank_transfer: "bg-[var(--biz-pending-bg)] text-[var(--biz-pending-text)]",
+  upi: "bg-[var(--biz-upi-bg)] text-[var(--biz-upi-text)]",
+  cash: "bg-[var(--biz-cash-bg)] text-[var(--biz-cash-text)]",
+  cheque: "bg-[var(--biz-cheque-bg)] text-[var(--biz-cheque-text)]",
+  other: "bg-[var(--biz-other-bg)] text-[var(--biz-other-text)]",
 };
 
 interface PaymentWithRunning extends Payment {
@@ -100,16 +100,16 @@ function PaymentDetailModal({
         </div>
 
         {/* Amount hero */}
-        <div className="mx-5 mb-4 flex items-center gap-3 rounded-xl bg-emerald-50 px-4 py-3 dark:bg-emerald-900/20">
+        <div className="mx-5 mb-4 flex items-center gap-3 rounded-xl px-4 py-3" style={{ background: 'var(--biz-accent-soft)' }}>
           <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${colorClass}`}>
             <Icon size={20} />
           </div>
           <div>
-            <p className="text-xl font-bold text-emerald-700 dark:text-emerald-400">
+            <p className="text-xl font-bold" style={{ color: 'var(--biz-accent-text)' }}>
               {formatCurrency(payment.amount)}
             </p>
             {payment.method && (
-              <p className="text-xs text-emerald-600/70 dark:text-emerald-500">
+              <p className="text-xs" style={{ color: 'var(--biz-accent-text)', opacity: 0.7 }}>
                 via {methodLabels[payment.method]}
               </p>
             )}
@@ -153,7 +153,8 @@ function PaymentDetailModal({
         <div className="px-5 pb-6 pt-4">
           <button
             onClick={handleDelete}
-            className="flex w-full items-center justify-center gap-2 rounded-xl border border-red-200 py-2.5 text-sm font-medium text-red-500 transition hover:bg-red-50 dark:border-red-800 dark:hover:bg-red-900/20"
+            className="flex w-full items-center justify-center gap-2 rounded-xl border py-2.5 text-sm font-medium transition"
+            style={{ borderColor: 'var(--danger-border)', color: 'var(--danger-text)' }}
           >
             <Trash2 size={15} />
             Delete Payment
@@ -212,9 +213,13 @@ export function PaymentList({ payments, onDelete }: PaymentListProps) {
 
   if (payments.length === 0) {
     return (
-      <p className="py-6 text-center text-xs" style={{ color: 'var(--text-tertiary)' }}>
-        No payments logged yet
-      </p>
+      <div className="flex flex-col items-center gap-2 py-8">
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: 'var(--surface-secondary)' }}>
+          <CreditCard size={20} style={{ color: 'var(--text-muted)' }} />
+        </div>
+        <p className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>No payments logged yet</p>
+        <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Payments will appear here once recorded</p>
+      </div>
     );
   }
 

@@ -44,7 +44,7 @@ export default function AuthCompletePage() {
   return (
     <div className="flex min-h-screen items-center justify-center" style={{ background: 'var(--background)' }}>
       <div className="flex flex-col items-center gap-4">
-        <div className="h-10 w-10 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
+        <div className="h-10 w-10 animate-spin rounded-full border-2 border-t-transparent" style={{ borderColor: 'var(--primary)', borderTopColor: 'transparent' }} />
         <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Signing you in…</p>
       </div>
     </div>

@@ -13,14 +13,14 @@ export function SuccessFlash({ onComplete }: { onComplete?: () => void }) {
       <div className="relative flex items-center justify-center">
         {/* Expanding ring */}
         <m.div
-          className="absolute h-16 w-16 rounded-full border-2 border-emerald-400"
+          className="absolute h-16 w-16 rounded-full border-2" style={{ borderColor: 'var(--success)' }}
           initial={{ scale: 0.6, opacity: 0.8 }}
           animate={{ scale: 2.2, opacity: 0 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
         />
         {/* Circle + check */}
         <m.div
-          className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500 text-white shadow-lg"
+          className="flex h-16 w-16 items-center justify-center rounded-full text-white shadow-lg" style={{ background: 'var(--success)' }}
           initial={{ scale: 0 }}
           animate={{ scale: [0, 1.15, 1] }}
           transition={{ duration: 0.4, times: [0, 0.6, 1], ease: "easeOut" }}
