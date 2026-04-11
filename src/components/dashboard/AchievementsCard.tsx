@@ -63,7 +63,7 @@ export function AchievementsCard({ achievements, newlyUnlocked, persistNew, unlo
       </div>
 
       {/* Badge grid */}
-      <div className="grid grid-cols-5 gap-2 sm:gap-3">
+      <div className="grid grid-cols-3 gap-2 sm:grid-cols-5 sm:gap-3">
         {achievements.map(({ def, unlocked, unlockedAt }) => {
           const isCelebrated = celebratedId === def.id;
           return (
@@ -83,7 +83,7 @@ export function AchievementsCard({ achievements, newlyUnlocked, persistNew, unlo
                 {def.icon}
               </span>
               <span
-                className="line-clamp-1 text-[10px] font-medium leading-tight"
+                className="line-clamp-2 text-[10px] font-medium leading-tight sm:line-clamp-1"
                 style={{ color: unlocked ? "var(--text-secondary)" : "var(--text-muted)" }}
               >
                 {def.name}

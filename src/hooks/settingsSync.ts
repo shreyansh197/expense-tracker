@@ -46,6 +46,8 @@ export async function pushToApi(s: UserSettings) {
     multiCurrencyEnabled: s.multiCurrencyEnabled ?? false,
     dismissedRecurringSuggestions: s.dismissedRecurringSuggestions ?? [],
     autoRules: s.autoRules ?? [],
+    achievements: s.achievements ?? [],
+    accentColor: s.accentColor,
   };
 
   await db.settings.put({
@@ -93,6 +95,8 @@ export async function loadSettingsFromIDB(): Promise<UserSettings | null> {
       multiCurrencyEnabled: s.multiCurrencyEnabled ?? false,
       dismissedRecurringSuggestions: s.dismissedRecurringSuggestions ?? [],
       autoRules: s.autoRules ?? [],
+      achievements: s.achievements ?? [],
+      accentColor: s.accentColor,
       createdAt: Date.now(),
       updatedAt: s.updatedAt,
     };
@@ -144,6 +148,8 @@ export async function _fetchSettingsFromApi(): Promise<UserSettings | null> {
       multiCurrencyEnabled: s.multiCurrencyEnabled ?? false,
       dismissedRecurringSuggestions: s.dismissedRecurringSuggestions ?? [],
       autoRules: s.autoRules ?? [],
+      achievements: s.achievements ?? [],
+      accentColor: s.accentColor ?? undefined,
       createdAt: Date.now(),
       updatedAt: new Date(s.updatedAt).getTime(),
     };
@@ -169,6 +175,8 @@ export async function _fetchSettingsFromApi(): Promise<UserSettings | null> {
       multiCurrencyEnabled: settings.multiCurrencyEnabled ?? false,
       dismissedRecurringSuggestions: settings.dismissedRecurringSuggestions ?? [],
       autoRules: settings.autoRules ?? [],
+      achievements: settings.achievements ?? [],
+      accentColor: settings.accentColor,
       updatedAt: settings.updatedAt,
     });
 
