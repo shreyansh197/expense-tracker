@@ -8,6 +8,8 @@ import { useCurrency } from "@/hooks/useCurrency";
 import { useToast } from "@/components/ui/Toast";
 import { useConfirm } from "@/components/ui/ConfirmDialog";
 import { Plus, Trash2, ToggleLeft, ToggleRight, Pencil, X, ArrowUpDown } from "lucide-react";
+import { FormError } from "@/components/ui/FormError";
+import { CategorySelector } from "@/components/expenses/CategorySelector";
 
 import type { RecurringExpense, CategoryId } from "@/types";
 
@@ -29,6 +31,7 @@ export function RecurringManager() {
   const [day, setDay] = useState("1");
   const [remark, setRemark] = useState("");
   const [sortKey, setSortKey] = useState<SortKey>("day");
+  const [formError, setFormError] = useState("");
 
   const resetForm = () => {
     setCategory(allCategories[0]?.id || "miscellaneous");
@@ -37,19 +40,21 @@ export function RecurringManager() {
     setRemark("");
     setEditId(null);
     setShowAdd(false);
+    setFormError("");
   };
 
   const handleSave = () => {
     const parsedAmount = parseFloat(amount);
     const parsedDay = parseInt(day, 10);
     if (isNaN(parsedAmount) || parsedAmount <= 0) {
-      toast("Enter a valid amount", "error");
+      setFormError("Enter a valid amount");
       return;
     }
     if (isNaN(parsedDay) || parsedDay < 1 || parsedDay > 28) {
-      toast("Day must be 1-28", "error");
+      setFormError("Day must be 1-28");
       return;
     }
+    setFormError("");
 
     if (editId) {
       // Edit existing
@@ -230,23 +235,11 @@ export function RecurringManager() {
                   <X size={16} />
                 </button>
               </div>
-              <div className="flex flex-wrap gap-1.5">
-                {allCategories.map((cat) => (
-                  <button
-                    key={cat.id}
-                    type="button"
-                    onClick={() => setCategory(cat.id)}
-                    className={`rounded-full px-2.5 py-1 text-xs font-medium transition-all ${
-                      category === cat.id
-                        ? "text-white shadow-sm"
-                        : ""
-                    }`}
-                    style={category !== cat.id ? { background: 'var(--surface-hover)', color: 'var(--text-secondary)' } : category === cat.id ? { backgroundColor: cat.color } : undefined}
-                  >
-                    {cat.label}
-                  </button>
-                ))}
-              </div>
+              <CategorySelector
+                categories={allCategories}
+                selected={category}
+                onSelect={(id) => setCategory(id)}
+              />
               <div className="grid grid-cols-2 gap-2">
                 <div>
                   <label className="form-label">Amount ({symbol})</label>
@@ -280,6 +273,7 @@ export function RecurringManager() {
                 maxLength={100}
                 className="form-input"
               />
+              <FormError message={formError} visible={!!formError} />
               <div className="flex gap-2 pt-1">
                 <button
                   onClick={handleSave}

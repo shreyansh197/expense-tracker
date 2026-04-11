@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { Trash2, Banknote, CreditCard, Smartphone, FileText, HelpCircle, X, Hash, StickyNote, Calendar, TrendingUp } from "lucide-react";
 import { useCurrency } from "@/hooks/useCurrency";
+import { useConfirm } from "@/components/ui/ConfirmDialog";
 import type { Payment, PaymentMethod } from "@/types";
 
 const methodIcons: Record<PaymentMethod, typeof Banknote> = {
@@ -58,9 +59,17 @@ function PaymentDetailModal({
 }) {
   const Icon = payment.method ? methodIcons[payment.method] : HelpCircle;
   const { formatCurrency } = useCurrency();
+  const { confirm } = useConfirm();
   const colorClass = payment.method ? methodColors[payment.method] : methodColors.other;
 
-  function handleDelete() {
+  async function handleDelete() {
+    const ok = await confirm({
+      title: "Delete payment?",
+      message: `This will permanently remove this ${formatCurrency(payment.amount)} payment.`,
+      confirmLabel: "Delete",
+      variant: "danger",
+    });
+    if (!ok) return;
     onDelete(payment.id);
     onClose();
   }

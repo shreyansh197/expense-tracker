@@ -6,6 +6,7 @@ import { useSettings } from "@/hooks/useSettings";
 import { getAllCategories } from "@/lib/categories";
 import { useToast } from "@/components/ui/Toast";
 import { useConfirm } from "@/components/ui/ConfirmDialog";
+import { FormError } from "@/components/ui/FormError";
 import { useCurrency } from "@/hooks/useCurrency";
 import type { AutoRule } from "@/types";
 
@@ -84,6 +85,7 @@ export function AutoRulesManager() {
   const [condValue2, setCondValue2] = useState("");
   const [actionType, setActionType] = useState<"set_category" | "flag">("set_category");
   const [actionValue, setActionValue] = useState<string>(allCategories[0]?.id || "");
+  const [formError, setFormError] = useState("");
 
   const resetForm = () => {
     setName("");
@@ -95,11 +97,12 @@ export function AutoRulesManager() {
     setActionValue(allCategories[0]?.id || "");
     setEditingId(null);
     setShowForm(false);
+    setFormError("");
   };
 
   const handleAdd = () => {
     if (!name.trim()) {
-      toast("Fill in all fields", "error");
+      setFormError("Fill in all fields");
       return;
     }
     // is_recurring needs no value; between needs both values; other fields need condValue
@@ -107,13 +110,14 @@ export function AutoRulesManager() {
       // value is "true"/"false", always valid
     } else if (condOp === "between") {
       if (!condValue.trim() || !condValue2.trim()) {
-        toast("Fill in both range values", "error");
+        setFormError("Fill in both range values");
         return;
       }
     } else if (!condValue.trim()) {
-      toast("Fill in all fields", "error");
+      setFormError("Fill in all fields");
       return;
     }
+    setFormError("");
 
     const finalValue = condField === "is_recurring"
       ? condValue || "true"
@@ -211,6 +215,7 @@ export function AutoRulesManager() {
             className="rounded p-2 flex items-center justify-center transition-colors"
             style={{ color: 'var(--text-muted)' }}
             title="Edit rule"
+            aria-label="Edit rule"
           >
             <Pencil size={13} />
           </button>
@@ -229,6 +234,7 @@ export function AutoRulesManager() {
             onClick={() => handleDelete(rule.id)}
             className="rounded p-2 flex items-center justify-center transition-colors hover:bg-err-soft hover:text-err"
             style={{ color: 'var(--text-muted)' }}
+            aria-label="Delete rule"
           >
             <Trash2 size={14} />
           </button>
@@ -371,6 +377,7 @@ export function AutoRulesManager() {
               </select>
             )}
           </div>
+          <FormError message={formError} visible={!!formError} />
           <div className="flex gap-2">
             <button
               onClick={handleAdd}

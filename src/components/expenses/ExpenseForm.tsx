@@ -9,6 +9,8 @@ import { useUIStore } from "@/stores/uiStore";
 import { useToast } from "@/components/ui/Toast";
 import { DatePicker } from "@/components/ui/DatePicker";
 import { ReceiptCapture } from "@/components/expenses/ReceiptCapture";
+import { CategorySelector } from "@/components/expenses/CategorySelector";
+import { FormError } from "@/components/ui/FormError";
 import { useSettings } from "@/hooks/useSettings";
 import { useCurrency } from "@/hooks/useCurrency";
 import { useAutoRules } from "@/components/settings/AutoRulesManager";
@@ -335,51 +337,16 @@ export function ExpenseForm({
       </AnimatePresence>
 
       {/* Category Selector — teal zone */}
-      <div className="-mx-1 rounded-xl p-3" style={{ background: 'var(--section-teal)' }}>
-        <label className="form-label mb-2 uppercase">
-          Category {!category && submitted && <span className="text-err normal-case">— please select</span>}
-        </label>
-        <div className="flex max-h-40 flex-wrap gap-2 overflow-y-auto" role="radiogroup" aria-label="Select category">
-          {allCategories.map((cat) => (
-            <m.button
-              key={cat.id}
-              type="button"
-              onClick={() => {
-                if (category === cat.id) {
-                  // Deselect — allow user to override auto-applied category
-                  setCategory("");
-                  setAutoApplied(false);
-                  setManualOverride(true);
-                } else {
-                  setCategory(cat.id);
-                  setAutoApplied(false);
-                  setManualOverride(true);
-                }
-              }}
-              role="radio"
-              aria-checked={category === cat.id}
-              className={cn(
-                "rounded-full px-3 py-2 sm:py-1.5 text-xs font-medium transition-all",
-                category === cat.id
-                  ? "text-white shadow-sm"
-                  : ""
-              )}
-              style={
-                category === cat.id
-                  ? { backgroundColor: cat.color }
-                  : { background: 'var(--surface-secondary)', color: 'var(--text-secondary)' }
-              }
-              onMouseEnter={category !== cat.id ? (e: React.MouseEvent<HTMLButtonElement>) => { e.currentTarget.style.background = 'var(--surface-tertiary)'; } : undefined}
-              onMouseLeave={category !== cat.id ? (e: React.MouseEvent<HTMLButtonElement>) => { e.currentTarget.style.background = 'var(--surface-secondary)'; } : undefined}
-              whileTap={{ scale: 0.92 }}
-              animate={category === cat.id ? { scale: [1, 1.08, 1] } : {}}
-              transition={{ duration: 0.2 }}
-            >
-              {cat.label}
-            </m.button>
-          ))}
-        </div>
-      </div>
+      <CategorySelector
+        categories={allCategories}
+        selected={category}
+        onSelect={(id) => {
+          setCategory(id);
+          setAutoApplied(false);
+          setManualOverride(true);
+        }}
+        showError={!category && submitted}
+      />
 
       {/* Amount */}
       <div>
@@ -398,19 +365,7 @@ export function ExpenseForm({
           required
           aria-invalid={amountInvalid || undefined}
         />
-        <AnimatePresence>
-          {amountInvalid && (
-            <m.p
-              initial={{ opacity: 0, height: 0, marginTop: 0 }}
-              animate={{ opacity: 1, height: "auto", marginTop: 4 }}
-              exit={{ opacity: 0, height: 0, marginTop: 0 }}
-              transition={{ duration: 0.2 }}
-              className="text-xs font-medium text-err overflow-hidden"
-            >
-              Enter a valid positive amount
-            </m.p>
-          )}
-        </AnimatePresence>
+        <FormError message="Enter a valid positive amount" visible={amountInvalid} />
       </div>
 
       {/* Date chip — visible when "More options" is collapsed */}
@@ -515,19 +470,7 @@ export function ExpenseForm({
       </AnimatePresence>
 
       {/* Error */}
-      <AnimatePresence>
-        {error && (
-          <m.p
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.2 }}
-            className="text-xs font-medium text-err overflow-hidden"
-          >
-            {error}
-          </m.p>
-        )}
-      </AnimatePresence>
+      <FormError message={error} visible={!!error} />
 
       {/* Submit */}
       <m.button

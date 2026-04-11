@@ -275,11 +275,12 @@ export function CategoryManager() {
                 key={c}
                 type="button"
                 onClick={() => setNewColor(c)}
-                className="h-6 w-6 rounded-full border-2 transition-all"
+                className="h-7 w-7 rounded-full border-2 transition-all"
                 style={{
                   backgroundColor: c,
-                  borderColor: newColor === c ? "#1d4ed8" : "transparent",
+                  borderColor: newColor === c ? "var(--secondary)" : "transparent",
                 }}
+                aria-label={`Select color ${c}`}
               />
             ))}
           </div>
@@ -396,18 +397,19 @@ function CategoryRow({
                 type="button"
                 onClick={() => onEditColor(c)}
                 title={c}
-                className="h-4 w-4 rounded-full border transition-all hover:scale-110"
+                className="h-5 w-5 rounded-full border transition-all hover:scale-110"
                 style={{
                   backgroundColor: c,
-                  borderColor: editColor === c ? "#1d4ed8" : "transparent",
+                  borderColor: editColor === c ? "var(--secondary)" : "transparent",
                 }}
+                aria-label={`Select color ${c}`}
               />
             ))}
           </div>
-          <button onClick={onSaveEdit} className="rounded p-0.5 transition-colors" style={{ color: 'var(--success-text)' }}>
+          <button onClick={onSaveEdit} className="rounded p-2 transition-colors" style={{ color: 'var(--success-text)' }} aria-label="Save edit">
             <Check size={14} />
           </button>
-          <button onClick={onCancelEdit} className="rounded p-0.5 transition-colors" style={{ color: 'var(--text-muted)' }}>
+          <button onClick={onCancelEdit} className="rounded p-2 transition-colors" style={{ color: 'var(--text-muted)' }} aria-label="Cancel edit">
             <X size={14} />
           </button>
         </div>

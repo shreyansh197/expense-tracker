@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, startTransition } from "react";
 import { authFetch } from "@/lib/authClient";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useToast } from "@/components/ui/Toast";
+import { useConfirm } from "@/components/ui/ConfirmDialog";
 import { Shield, Key, Smartphone, Trash2, Plus, Loader2, Copy, CheckCircle2 } from "lucide-react";
 import Image from "next/image";
 import QRCode from "qrcode";
@@ -29,6 +30,7 @@ interface DeviceItem {
 export function SecurityCard() {
   const { isAuthenticated } = useAuth();
   const { toast } = useToast();
+  const { confirm } = useConfirm();
 
   const [sessions, setSessions] = useState<SessionItem[]>([]);
   const [devices, setDevices] = useState<DeviceItem[]>([]);
@@ -82,6 +84,13 @@ export function SecurityCard() {
   };
 
   const revokeAllSessions = async () => {
+    const ok = await confirm({
+      title: "Revoke all sessions?",
+      message: "This will sign out all other devices. You'll stay signed in on this device.",
+      confirmLabel: "Revoke all",
+      variant: "danger",
+    });
+    if (!ok) return;
     setRevokingAll(true);
     try {
       const res = await authFetch("/api/sessions", { method: "DELETE" });
@@ -324,6 +333,7 @@ export function SecurityCard() {
                     }}
                     className="shrink-0 p-1 transition-colors"
                     style={{ color: 'var(--text-muted)' }}
+                    aria-label="Copy secret key"
                   >
                     {copiedSecret ? <CheckCircle2 size={14} style={{ color: 'var(--success)' }} /> : <Copy size={14} />}
                   </button>

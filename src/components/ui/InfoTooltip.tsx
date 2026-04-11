@@ -65,7 +65,7 @@ export function InfoTooltip({ title, children, className }: InfoTooltipProps) {
     <span className={cn("relative inline-flex", className)} ref={btnRef}>
       <button
         onClick={() => setOpen((v) => !v)}
-        className="rounded-full p-0.5 text-[var(--text-muted)] hover:text-[var(--text-secondary)] hover:bg-[var(--surface-secondary)] dark:hover:text-[var(--text-secondary)] dark:hover:bg-[var(--surface-secondary)] transition-colors"
+        className="rounded-full p-1.5 text-[var(--text-muted)] hover:text-[var(--text-secondary)] hover:bg-[var(--surface-secondary)] dark:hover:text-[var(--text-secondary)] dark:hover:bg-[var(--surface-secondary)] transition-colors"
         aria-label={`Info: ${title}`}
         type="button"
       >

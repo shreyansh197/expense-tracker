@@ -32,6 +32,8 @@ const SECTION_LABELS: Record<DashboardSectionId, string> = {
   goals: "Savings Goals",
   charts: "Charts (Category + Daily Trend)",
   recent: "Recent Expenses",
+  achievements: "Achievements",
+  insights: "Spending Insights",
 };
 
 export const DEFAULT_SECTIONS: DashboardSectionConfig[] = [
@@ -41,6 +43,8 @@ export const DEFAULT_SECTIONS: DashboardSectionConfig[] = [
   { id: "goals", visible: true, order: 3 },
   { id: "charts", visible: true, order: 4 },
   { id: "recent", visible: true, order: 5 },
+  { id: "achievements", visible: true, order: 6 },
+  { id: "insights", visible: true, order: 7 },
 ];
 
 function getSections(layout?: DashboardLayout): DashboardSectionConfig[] {
