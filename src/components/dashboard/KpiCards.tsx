@@ -111,7 +111,7 @@ export function KpiCards({
             <Settings size={14} style={{ color: 'var(--warning)' }} />
             <span>Set a monthly budget to unlock forecasts and alerts</span>
           </div>
-          <Link href="/settings#budget" className="shrink-0 rounded-lg px-3 py-1 text-xs font-semibold transition-colors" style={{ background: 'var(--warning)', color: '#fff' }}>
+          <Link href="/settings#budget" className="shrink-0 rounded-lg px-3 py-1 text-xs font-semibold transition-colors" style={{ background: 'var(--warning)', color: 'var(--text-inverse)' }}>
             Set Budget
           </Link>
         </m.div>
@@ -124,7 +124,7 @@ export function KpiCards({
       >
         <div className="flex items-center justify-between">
           <div className={cn("flex items-center gap-2 text-sm font-medium", sc.text)}>
-            {status !== "safe" ? <ShieldAlert size={15} className={status === "danger" ? "animate-pulse" : ""} /> : isOverspent ? <AlertTriangle size={15} /> : <PiggyBank size={15} />}
+            {status !== "safe" ? <ShieldAlert size={15} className={status === "danger" ? "icon-pulse" : ""} /> : isOverspent ? <AlertTriangle size={15} /> : <PiggyBank size={15} />}
             <span>{isOverspent ? "Ahead of plan" : "You still have"}</span>
           </div>
           {daysRemaining > 0 && (
@@ -134,7 +134,7 @@ export function KpiCards({
             </span>
           )}
         </div>
-        <p className={cn("text-hero-amount mt-2", sc.text)}>
+        <p className={cn("text-hero-amount mt-2 min-w-0 truncate", sc.text)}>
           <AnimatedNumber value={Math.abs(remaining)} format={formatCurrency} />
         </p>
         <p className="mt-2.5 text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
@@ -167,7 +167,7 @@ export function KpiCards({
         <div className="rounded-xl p-3 sm:p-3.5" style={{ background: 'var(--surface-secondary)' }}>
           <p className="text-meta font-medium">Daily Pace</p>
           <p className={cn(
-            "text-amount-md mt-1",
+            "text-amount-md mt-1 min-w-0 truncate",
             paceToStayUnder <= 0 ? "text-[var(--danger-text)]"
               : paceExceeded ? "text-[var(--warning-text)]" : ""
           )} style={paceToStayUnder > 0 && !paceExceeded ? { color: 'var(--text-primary)' } : undefined}>

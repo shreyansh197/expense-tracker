@@ -24,11 +24,11 @@ export function LedgerProgressRing({
 
   const color =
     percent >= 100
-      ? "text-emerald-500"
+      ? "text-[var(--biz-accent-text)]"
       : percent >= 50
-      ? "text-blue-500"
+      ? "text-[var(--biz-pending-text)]"
       : percent > 0
-      ? "text-amber-500"
+      ? "text-[var(--warning-text)]"
       : "";
 
   return (

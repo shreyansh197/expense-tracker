@@ -133,7 +133,7 @@ export default function CategoryPage({ params }: { params: Promise<{ slug: strin
             <ArrowLeft size={20} />
           </button>
           <div>
-            <h1 className="text-lg font-bold text-slate-900 dark:text-white" style={{ color: categoryColor }}>
+            <h1 className="text-lg font-bold" style={{ color: categoryColor }}>
               {categoryLabel}
             </h1>
             <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
@@ -151,7 +151,7 @@ export default function CategoryPage({ params }: { params: Promise<{ slug: strin
           <div className="card relative overflow-hidden p-4">
             <div className="absolute inset-x-0 top-0 h-1 rounded-t-2xl" style={{ background: categoryColor }} />
             <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Spent</p>
-            <p className={`mt-1 text-xl font-bold ${isOverBudget ? "text-red-500" : ""}`} style={!isOverBudget ? { color: 'var(--text-primary)' } : undefined}>
+            <p className="mt-1 text-xl font-bold" style={{ color: isOverBudget ? 'var(--danger-text)' : 'var(--text-primary)' }}>
               {formatCurrency(categoryTotal)}
             </p>
             {categoryBudget ? (

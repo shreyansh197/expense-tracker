@@ -154,7 +154,7 @@ export function AccordionSection({
               <span
                 className={cn(
                   "rounded-full px-1.5 py-0.5 text-caption font-semibold",
-                  badgeColor || "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-400"
+                  badgeColor || "bg-[var(--secondary-soft)] text-[var(--secondary-text)]"
                 )}
               >
                 {badge}

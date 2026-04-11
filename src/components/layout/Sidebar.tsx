@@ -60,7 +60,7 @@ export function Sidebar() {
           ExpenStream
         </span>
         {settings.businessMode && (
-          <span className="ml-1 hidden xl:inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider" style={{ background: 'var(--biz-accent-soft)', color: 'var(--biz-accent-text)' }}>
+          <span className="ml-1 hidden xl:inline-flex items-center rounded-full px-2 py-0.5 text-overline font-semibold uppercase tracking-wider" style={{ background: 'var(--biz-accent-soft)', color: 'var(--biz-accent-text)' }}>
             Biz
           </span>
         )}
@@ -176,8 +176,8 @@ export function Sidebar() {
             {user.avatarUrl ? (
               <Image src={user.avatarUrl} alt="" width={24} height={24} className="h-6 w-6 rounded-full object-cover" unoptimized />
             ) : (
-              <div className="flex h-6 w-6 items-center justify-center rounded-full bg-amber-100 dark:bg-blue-900/30">
-                <User size={12} className="text-amber-600 dark:text-blue-400" />
+              <div className="flex h-6 w-6 items-center justify-center rounded-full" style={{ background: 'var(--warning-soft)' }}>
+                <User size={12} style={{ color: 'var(--warning-text)' }} />
               </div>
             )}
             <span className="hidden xl:inline truncate text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>

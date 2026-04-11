@@ -22,7 +22,7 @@ export function TagBreakdown({ data }: TagBreakdownProps) {
             <div key={item.tag} className="space-y-1">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-caption font-medium text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
+                  <span className="rounded-full px-2 py-0.5 text-caption font-medium" style={{ background: 'var(--biz-accent-soft)', color: 'var(--biz-accent-text)' }}>
                     {item.tag}
                   </span>
                   <span className="text-xs" style={{ color: 'var(--text-tertiary)' }}>{item.count} ledger{item.count !== 1 ? "s" : ""}</span>
@@ -33,8 +33,7 @@ export function TagBreakdown({ data }: TagBreakdownProps) {
               </div>
               <div className="h-2 w-full rounded-full" style={{ background: 'var(--surface-secondary)' }}>
                 <div
-                  className="h-2 rounded-full bg-emerald-500 transition-all duration-500"
-                  style={{ width: `${Math.min(percent, 100)}%` }}
+                  className="h-2 rounded-full transition-all duration-500" style={{ background: 'var(--biz-accent)', width: `${Math.min(percent, 100)}%` }}
                 />
               </div>
             </div>

@@ -182,7 +182,7 @@ export function CSVImport() {
         />
         <label
           htmlFor="csv-import"
-          className="flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed px-4 py-3 text-sm font-medium transition-colors hover:border-indigo-400 hover:bg-indigo-50 hover:text-indigo-600 dark:hover:border-indigo-600 dark:hover:bg-indigo-900/20 dark:hover:text-indigo-400"
+          className="flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed px-4 py-3 text-sm font-medium transition-colors"
           style={{ borderColor: 'var(--border)', color: 'var(--text-secondary)' }}
         >
           <Upload size={16} />
@@ -202,13 +202,13 @@ export function CSVImport() {
                 {preview.length} rows
               </span>
               {validCount > 0 && (
-                <span className="flex items-center gap-1 text-emerald-600">
+                <span className="flex items-center gap-1" style={{ color: 'var(--success-text)' }}>
                   <Check size={12} />
                   {validCount} valid
                 </span>
               )}
               {errorCount > 0 && (
-                <span className="flex items-center gap-1 text-red-500">
+                <span className="flex items-center gap-1" style={{ color: 'var(--danger-text)' }}>
                   <AlertTriangle size={12} />
                   {errorCount} errors
                 </span>
@@ -234,7 +234,7 @@ export function CSVImport() {
                 {preview.slice(0, 50).map((row, i) => (
                   <tr
                     key={i}
-                    className={row.error ? "bg-red-50/50 dark:bg-red-900/10" : ""}
+                    style={row.error ? { background: 'var(--danger-soft)' } : undefined}
                   >
                     <td className="px-3 py-1.5" style={{ color: 'var(--text-primary)' }}>{row.day}</td>
                     <td className="px-3 py-1.5" style={{ color: 'var(--text-primary)' }}>{row.category}</td>
@@ -244,9 +244,9 @@ export function CSVImport() {
                     <td className="max-w-[120px] truncate px-3 py-1.5" style={{ color: 'var(--text-muted)' }}>{row.remark}</td>
                     <td className="px-3 py-1.5">
                       {row.error ? (
-                        <span className="text-red-500">{row.error}</span>
+                        <span style={{ color: 'var(--danger-text)' }}>{row.error}</span>
                       ) : (
-                        <Check size={12} className="text-emerald-500" />
+                        <Check size={12} style={{ color: 'var(--success)' }} />
                       )}
                     </td>
                   </tr>
@@ -273,7 +273,8 @@ export function CSVImport() {
             <button
               onClick={handleImport}
               disabled={importing || validCount === 0}
-              className="rounded-lg bg-indigo-600 px-4 py-2 text-xs font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+              className="rounded-lg px-4 py-2 text-xs font-medium text-white disabled:opacity-50 transition-colors"
+              style={{ background: 'var(--secondary)' }}
             >
               {importing ? "Importing..." : `Import ${validCount} Expense${validCount !== 1 ? "s" : ""}`}
             </button>
@@ -283,7 +284,7 @@ export function CSVImport() {
 
       {/* Result */}
       {result && (
-        <div className="flex items-center gap-2 rounded-lg bg-emerald-50 px-4 py-3 text-xs text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400">
+        <div className="flex items-center gap-2 rounded-lg px-4 py-3 text-xs" style={{ background: 'var(--success-soft)', color: 'var(--success-text)' }}>
           <Check size={14} />
           Imported {result.success} expense{result.success !== 1 ? "s" : ""}.
           {result.failed > 0 && ` ${result.failed} failed.`}

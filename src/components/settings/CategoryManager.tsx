@@ -229,7 +229,8 @@ export function CategoryManager() {
       {(settings.hiddenDefaults?.length ?? 0) > 0 && (
         <button
           onClick={handleRestoreDefaults}
-          className="flex items-center gap-1.5 text-xs font-medium text-indigo-600 hover:text-indigo-700 dark:text-indigo-400"
+          className="flex items-center gap-1.5 text-xs font-medium hover:opacity-80"
+          style={{ color: 'var(--secondary-text)' }}
         >
           <RotateCcw size={12} />
           Restore {settings.hiddenDefaults.length} hidden default
@@ -239,7 +240,7 @@ export function CategoryManager() {
 
       {/* Add category form */}
       {showAdd ? (
-        <div className="rounded-lg border border-slate-100 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-800/50">
+        <div className="rounded-lg border p-3" style={{ borderColor: 'var(--border)', background: 'var(--surface-secondary)' }}>
           <div className="flex gap-2">
             <input
               type="text"
@@ -249,18 +250,21 @@ export function CategoryManager() {
               onKeyDown={(e) => { if (e.key === "Enter") handleAdd(); if (e.key === "Escape") setShowAdd(false); }}
               maxLength={30}
               autoFocus
-              className="flex-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+              className="flex-1 rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2"
+              style={{ borderColor: 'var(--border)', background: 'var(--surface)', color: 'var(--text-primary)', '--tw-ring-color': 'var(--secondary-soft)' } as React.CSSProperties}
             />
             <button
               onClick={handleAdd}
               disabled={!newName.trim()}
-              className="rounded-lg bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-40"
+              className="rounded-lg px-3 py-2 text-sm font-medium text-white disabled:opacity-40 transition-colors"
+              style={{ background: 'var(--secondary)' }}
             >
               Add
             </button>
             <button
               onClick={() => setShowAdd(false)}
-              className="rounded-lg px-2 py-2 text-sm text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"
+              className="rounded-lg px-2 py-2 text-sm transition-colors"
+              style={{ color: 'var(--text-muted)' }}
             >
               <X size={16} />
             </button>
@@ -283,14 +287,15 @@ export function CategoryManager() {
       ) : (
         <button
           onClick={() => setShowAdd(true)}
-          className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium text-indigo-600 hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-900/30"
+          className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors"
+          style={{ color: 'var(--secondary-text)' }}
         >
           <Plus size={14} />
           Add Category
         </button>
       )}
 
-      <p className="text-xs text-slate-400">
+      <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
         Tap the budget amount to set per-category spending limits. Drag custom categories to reorder.
       </p>
     </div>
@@ -356,7 +361,7 @@ function CategoryRow({
     <div
       className={`flex items-center gap-2 rounded-lg px-2 py-2 transition-colors ${
         isDragging ? "opacity-50" : ""
-      } ${isDragOver ? "bg-indigo-50 dark:bg-indigo-900/20" : "hover:bg-slate-50 dark:hover:bg-slate-800/50"}`}
+      } ${isDragOver ? "bg-[var(--secondary-soft)]" : "hover:bg-[var(--surface-secondary)]"}`}
       draggable={draggable}
       onDragStart={draggable ? onDragStart : undefined}
       onDragOver={draggable ? (e) => { e.preventDefault(); onDragOver(); } : undefined}
@@ -364,7 +369,7 @@ function CategoryRow({
       onDragEnd={draggable ? onDragEnd : undefined}
     >
       {draggable && (
-        <GripVertical size={14} className="shrink-0 cursor-grab text-slate-300 dark:text-slate-600" />
+        <GripVertical size={14} className="shrink-0 cursor-grab" style={{ color: 'var(--text-muted)' }} />
       )}
 
       <div
@@ -381,7 +386,8 @@ function CategoryRow({
             onKeyDown={(e) => { if (e.key === "Enter") onSaveEdit(); if (e.key === "Escape") onCancelEdit(); }}
             maxLength={30}
             autoFocus
-            className="flex-1 rounded border border-slate-200 bg-white px-2 py-1 text-sm text-slate-900 focus:border-indigo-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+            className="flex-1 rounded border px-2 py-1 text-sm focus:outline-none"
+            style={{ borderColor: 'var(--border)', background: 'var(--surface)', color: 'var(--text-primary)' }}
           />
           <div className="flex flex-wrap gap-0.5 max-w-[120px]">
             {PRESET_COLORS.slice(0, 12).map((c) => (
@@ -398,23 +404,23 @@ function CategoryRow({
               />
             ))}
           </div>
-          <button onClick={onSaveEdit} className="rounded p-0.5 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/30">
+          <button onClick={onSaveEdit} className="rounded p-0.5 transition-colors" style={{ color: 'var(--success-text)' }}>
             <Check size={14} />
           </button>
-          <button onClick={onCancelEdit} className="rounded p-0.5 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
+          <button onClick={onCancelEdit} className="rounded p-0.5 transition-colors" style={{ color: 'var(--text-muted)' }}>
             <X size={14} />
           </button>
         </div>
       ) : (
         <>
-          <span className="flex-1 text-sm text-slate-700 dark:text-slate-300">
+          <span className="flex-1 text-sm" style={{ color: 'var(--text-primary)' }}>
             {cat.label}
           </span>
 
           {/* Budget display/edit */}
           {isBudgetEditing ? (
             <div className="flex items-center gap-1">
-              <span className="text-xs text-slate-400">{symbol}</span>
+              <span className="text-xs" style={{ color: 'var(--text-muted)' }}>{symbol}</span>
               <input
                 type="number"
                 min="0"
@@ -422,16 +428,18 @@ function CategoryRow({
                 onChange={(e) => onBudgetChange(e.target.value)}
                 onKeyDown={(e) => { if (e.key === "Enter") onBudgetSave(); if (e.key === "Escape") onBudgetCancel(); }}
                 autoFocus
-                className="w-20 rounded border border-slate-200 bg-white px-2 py-0.5 text-xs text-right text-slate-900 focus:border-indigo-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                className="w-20 rounded border px-2 py-0.5 text-xs text-right focus:outline-none"
+                style={{ borderColor: 'var(--border)', background: 'var(--surface)', color: 'var(--text-primary)' }}
               />
-              <button onClick={onBudgetSave} className="rounded px-1.5 py-0.5 text-xs font-medium text-indigo-600 hover:bg-indigo-50 dark:text-indigo-400">
+              <button onClick={onBudgetSave} className="rounded px-1.5 py-0.5 text-xs font-medium transition-colors" style={{ color: 'var(--secondary-text)' }}>
                 Save
               </button>
             </div>
           ) : (
             <button
               onClick={onBudgetStart}
-              className="text-xs font-medium text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400"
+              className="text-xs font-medium transition-colors hover:opacity-80"
+              style={{ color: 'var(--text-muted)' }}
             >
               {budget ? formatCurrency(budget) : "Set limit"}
             </button>
@@ -440,7 +448,8 @@ function CategoryRow({
           {isCustom && (
             <button
               onClick={onStartEdit}
-              className="rounded p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+              className="rounded p-1 transition-colors hover:opacity-80"
+              style={{ color: 'var(--text-muted)' }}
               aria-label={`Edit ${cat.label}`}
             >
               <Pencil size={12} />

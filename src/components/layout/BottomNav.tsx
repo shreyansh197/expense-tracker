@@ -149,7 +149,7 @@ export function BottomNav() {
                     />
                   </>
                 )}
-                <Icon size={20} />
+                <Icon size={20} strokeWidth={isActive ? 2.2 : 1.5} className="transition-all" />
                 <span className="text-caption font-medium">{item.label}</span>
                 {isBiz && !isActive && isBusiness && (
                   <span className="absolute top-1 right-1/4 h-1.5 w-1.5 rounded-full bg-biz" />

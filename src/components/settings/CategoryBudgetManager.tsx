@@ -73,7 +73,8 @@ export function CategoryBudgetManager() {
                 />
                 <button
                   onClick={() => handleSave(cat.id)}
-                  className="rounded px-2 py-1 text-xs font-medium text-indigo-600 hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-900/30"
+                  className="rounded px-2 py-1 text-xs font-medium transition-colors"
+                  style={{ color: 'var(--secondary-text)' }}
                 >
                   Save
                 </button>
@@ -81,7 +82,7 @@ export function CategoryBudgetManager() {
             ) : (
               <button
                 onClick={() => handleStartEdit(cat.id)}
-                className="text-xs font-medium hover:text-indigo-600 dark:hover:text-indigo-400"
+                className="text-xs font-medium transition-colors"
                 style={{ color: 'var(--text-muted)' }}
               >
                 {budget ? formatCurrency(budget) : "Set limit"}

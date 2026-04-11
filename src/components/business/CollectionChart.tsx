@@ -19,7 +19,7 @@ function CollectionTooltip({ active, payload, label }: {
       <p className="mb-1 font-semibold" style={{ color: 'var(--text-primary)' }}>{label}</p>
       {payload.map((p) => (
         <div key={p.dataKey} className="flex justify-between gap-4">
-          <span className={p.dataKey === "received" ? "text-emerald-600 dark:text-emerald-400" : ""} style={p.dataKey !== "received" ? { color: 'var(--text-secondary)' } : undefined}>
+          <span className={p.dataKey === "received" ? "" : ""} style={{ color: p.dataKey === "received" ? 'var(--biz-accent-text)' : 'var(--text-secondary)' }}>
             {p.dataKey === "received" ? "Received" : "Expected"}
           </span>
           <span className="font-medium" style={{ color: 'var(--text-primary)' }}>

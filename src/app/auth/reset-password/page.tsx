@@ -73,10 +73,10 @@ function ResetPasswordForm() {
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl" style={{ background: 'var(--success-soft)', boxShadow: 'inset 0 0 0 1px var(--goal-achieved-border)' }}>
             <CheckCircle2 className="h-6 w-6" style={{ color: 'var(--success-text)' }} />
           </div>
-          <h2 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">
+          <h2 className="text-xl font-bold tracking-tight" style={{ color: 'var(--text-primary)' }}>
             Password Reset!
           </h2>
-          <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+          <p className="mt-2 text-sm" style={{ color: 'var(--text-secondary)' }}>
             Your password has been updated successfully. You can now sign in with your new password.
           </p>
           <button
@@ -97,19 +97,19 @@ function ResetPasswordForm() {
   return (
     <div className="flex min-h-screen items-center justify-center px-4" style={{ background: "var(--background)" }}>
       <div className="w-full max-w-sm rounded-2xl p-8 shadow-xl" style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
-        <div className="mb-1 flex h-11 w-11 items-center justify-center rounded-2xl bg-[#eef0ff] dark:bg-[rgba(123,135,255,0.15)] ring-1 ring-[#c7cbff] dark:ring-[#4C5CFF]/40">
-          <KeyRound className="h-5 w-5 text-[#4C5CFF] dark:text-[#7B87FF]" />
+        <div className="mb-1 flex h-11 w-11 items-center justify-center rounded-2xl" style={{ background: 'var(--secondary-soft)', boxShadow: 'inset 0 0 0 1px var(--secondary-border)' }}>
+          <KeyRound className="h-5 w-5" style={{ color: 'var(--secondary-text)' }} />
         </div>
-        <h2 className="mt-3 text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+        <h2 className="mt-3 text-2xl font-bold tracking-tight" style={{ color: 'var(--text-primary)' }}>
           Set new password
         </h2>
-        <p className="mt-1.5 text-sm text-slate-500 dark:text-slate-400 mb-7">
+        <p className="mt-1.5 text-sm mb-7" style={{ color: 'var(--text-secondary)' }}>
           Enter your new password below. Must be at least 8 characters.
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-3.5">
           <div className="relative">
-            <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 dark:text-slate-500" />
+            <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4" style={{ color: 'var(--text-muted)' }} />
             <input
               type={showPassword ? "text" : "password"}
               placeholder="New password"
@@ -124,7 +124,9 @@ function ResetPasswordForm() {
               type="button"
               tabIndex={-1}
               onClick={() => setShowPassword((v) => !v)}
-              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 transition-colors"
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 transition-colors" style={{ color: 'var(--text-muted)' }}
+              onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--text-secondary)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-muted)'; }}
               aria-label={showPassword ? "Hide password" : "Show password"}
             >
               {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -132,7 +134,7 @@ function ResetPasswordForm() {
           </div>
 
           <div className="relative">
-            <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 dark:text-slate-500" />
+            <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4" style={{ color: 'var(--text-muted)' }} />
             <input
               type={showPassword ? "text" : "password"}
               placeholder="Confirm new password"
@@ -166,7 +168,7 @@ function ResetPasswordForm() {
           </button>
         </form>
 
-        <p className="text-center text-xs text-slate-500 dark:text-slate-400 pt-4">
+        <p className="text-center text-xs pt-4" style={{ color: 'var(--text-secondary)' }}>
           Remember your password?{" "}
           <button
             type="button"
@@ -186,7 +188,7 @@ export default function ResetPasswordPage() {
   return (
     <Suspense fallback={
       <div className="flex min-h-screen items-center justify-center" style={{ background: "var(--background)" }}>
-        <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
+        <Loader2 className="h-6 w-6 animate-spin" style={{ color: 'var(--text-muted)' }} />
       </div>
     }>
       <ResetPasswordForm />
