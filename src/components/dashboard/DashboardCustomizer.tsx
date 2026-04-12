@@ -97,11 +97,11 @@ function SortableItem({ section, onToggle }: { section: DashboardSectionConfig; 
 
       <button
         onClick={() => onToggle(section.id)}
-        className="rounded-lg p-1.5 transition-colors"
+        className="flex h-11 w-11 items-center justify-center rounded-lg transition-colors"
         style={{ color: section.visible ? "var(--primary)" : "var(--text-muted)" }}
         aria-label={section.visible ? "Hide section" : "Show section"}
       >
-        {section.visible ? <Eye size={16} /> : <EyeOff size={16} />}
+        {section.visible ? <Eye size={18} /> : <EyeOff size={18} />}
       </button>
     </div>
   );
@@ -160,7 +160,7 @@ export function DashboardCustomizer({ layout, onSave }: DashboardCustomizerProps
       {/* Trigger button */}
       <button
         onClick={() => { setSections(getSections(layout)); setOpen(true); }}
-        className="rounded-lg p-2 transition-colors"
+        className="flex h-11 w-11 items-center justify-center rounded-lg transition-colors"
         style={{ color: "var(--text-secondary)", background: "var(--surface-secondary)" }}
         onMouseEnter={e => { e.currentTarget.style.background = 'var(--surface-hover)'; }}
         onMouseLeave={e => { e.currentTarget.style.background = 'var(--surface-secondary)'; }}
@@ -187,7 +187,7 @@ export function DashboardCustomizer({ layout, onSave }: DashboardCustomizerProps
             {/* Panel */}
             <m.div
               className="fixed right-0 top-0 z-[201] flex h-full w-full max-w-sm flex-col shadow-2xl"
-              style={{ background: "var(--surface)" }}
+              style={{ background: "var(--surface)", paddingTop: "env(safe-area-inset-top, 0px)", paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
               initial={{ x: "100%" }}
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
@@ -203,8 +203,9 @@ export function DashboardCustomizer({ layout, onSave }: DashboardCustomizerProps
                 </h2>
                 <button
                   onClick={() => setOpen(false)}
-                  className="rounded-lg p-1.5 transition-colors"
+                  className="flex h-11 w-11 items-center justify-center rounded-lg transition-colors hover:bg-[var(--surface-secondary)]"
                   style={{ color: "var(--text-muted)" }}
+                  aria-label="Close customizer"
                 >
                   <X size={18} />
                 </button>
@@ -247,6 +248,7 @@ export function DashboardCustomizer({ layout, onSave }: DashboardCustomizerProps
                   onClick={handleReset}
                   className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium transition-colors"
                   style={{ color: "var(--text-secondary)" }}
+                  aria-label="Reset dashboard to default layout"
                 >
                   <RotateCcw size={14} />
                   Reset
@@ -254,6 +256,7 @@ export function DashboardCustomizer({ layout, onSave }: DashboardCustomizerProps
                 <button
                   onClick={handleSave}
                   className="btn-primary btn-md"
+                  aria-label="Save dashboard layout"
                 >
                   Save Layout
                 </button>

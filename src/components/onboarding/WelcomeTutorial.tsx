@@ -144,7 +144,7 @@ export function WelcomeTutorial({ onComplete }: WelcomeTutorialProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-[300]" aria-modal="true" role="dialog">
+    <div className="fixed inset-0 z-[300]" aria-modal="true" role="dialog" style={{ paddingTop: 'env(safe-area-inset-top, 0px)', paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
       {/* Overlay with spotlight cutout */}
       {rect ? (
         <div

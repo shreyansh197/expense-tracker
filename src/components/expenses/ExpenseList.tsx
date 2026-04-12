@@ -335,7 +335,7 @@ export function ExpenseList({
             </button>
             <button
               onClick={() => setSelectedIds(new Set())}
-              className="rounded-lg p-1.5 text-brand hover:bg-brand-soft"
+              className="flex h-11 w-11 items-center justify-center rounded-lg text-brand hover:bg-brand-soft"
               aria-label="Clear selection"
             >
               <X size={14} />
@@ -351,7 +351,7 @@ export function ExpenseList({
             <div className="flex items-center gap-2">
               <button
                 onClick={() => toggleSelectDay(group.expenses)}
-                className="rounded p-1.5 transition-colors"
+                className="flex h-11 w-11 items-center justify-center rounded-lg transition-colors"
                 style={{ color: 'var(--text-muted)' }}
                 aria-label={`Select all day ${group.day}`}
               >
@@ -511,7 +511,7 @@ function SwipeableExpenseItem({
       >
         <button
           onClick={() => toggleSelect(expense.id)}
-          className="shrink-0 rounded p-1.5 transition-colors"
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg transition-colors"
           style={{ color: 'var(--text-muted)' }}
           role="checkbox"
           aria-checked={isSelected}
@@ -553,19 +553,19 @@ function SwipeableExpenseItem({
         <div className="flex items-center gap-1 opacity-100 lg:opacity-0 lg:transition-opacity lg:group-hover:opacity-100">
           <button
             onClick={() => openEditForm(expense.id)}
-            className="rounded-lg p-1.5 transition-colors hover:bg-[var(--surface-secondary)] hover:text-[var(--text-secondary)]"
+            className="flex h-11 w-11 items-center justify-center rounded-lg transition-colors hover:bg-[var(--surface-secondary)] hover:text-[var(--text-secondary)]"
             style={{ color: 'var(--text-muted)' }}
             aria-label="Edit expense"
           >
-            <Edit3 size={14} />
+            <Edit3 size={16} />
           </button>
           <button
             onClick={() => handleDelete(expense.id)}
-            className="rounded-lg p-1.5 transition-colors hover:bg-err-soft hover:text-err"
+            className="flex h-11 w-11 items-center justify-center rounded-lg transition-colors hover:bg-err-soft hover:text-err"
             style={{ color: 'var(--text-muted)' }}
             aria-label="Delete expense"
           >
-            <Trash2 size={14} />
+            <Trash2 size={16} />
           </button>
         </div>
       </div>

@@ -23,10 +23,29 @@ interface Particle {
   opacity: number;
 }
 
-const COLORS = [
+const FALLBACK_COLORS = [
   "#7C3AED", "#0D9488", "#F59E0B", "#EF4444", "#10B981",
   "#4C5CFF", "#EC4899", "#06B6D4", "#F97316", "#8B5CF6",
 ];
+
+/** Resolve confetti palette from CSS tokens with hardcoded fallbacks. */
+function getConfettiColors(): string[] {
+  if (typeof window === "undefined") return FALLBACK_COLORS;
+  const s = getComputedStyle(document.documentElement);
+  const get = (v: string, fb: string) => s.getPropertyValue(v).trim() || fb;
+  return [
+    get("--accent", "#7C3AED"),
+    get("--primary", "#0D9488"),
+    get("--warning", "#F59E0B"),
+    get("--danger", "#EF4444"),
+    get("--success", "#10B981"),
+    get("--secondary", "#4C5CFF"),
+    "#EC4899", // decorative pink
+    "#06B6D4", // decorative cyan
+    "#F97316", // decorative orange
+    "#8B5CF6", // decorative purple
+  ];
+}
 
 /**
  * Lightweight canvas-based confetti burst for celebrations.
@@ -39,6 +58,7 @@ export function Confetti({ active, duration = 2500, particleCount = 60 }: Confet
   const rafRef = useRef<number>(0);
 
   const createParticles = useCallback(() => {
+    const colors = getConfettiColors();
     const particles: Particle[] = [];
     for (let i = 0; i < particleCount; i++) {
       particles.push({
@@ -46,7 +66,7 @@ export function Confetti({ active, duration = 2500, particleCount = 60 }: Confet
         y: window.innerHeight / 2 - 100,
         vx: (Math.random() - 0.5) * 12,
         vy: -(Math.random() * 10 + 5),
-        color: COLORS[Math.floor(Math.random() * COLORS.length)],
+        color: colors[Math.floor(Math.random() * colors.length)],
         size: Math.random() * 6 + 3,
         rotation: Math.random() * 360,
         rotationSpeed: (Math.random() - 0.5) * 10,
@@ -109,7 +129,7 @@ export function Confetti({ active, duration = 2500, particleCount = 60 }: Confet
     <canvas
       ref={canvasRef}
       className="pointer-events-none fixed inset-0"
-      style={{ zIndex: 9999 }}
+      style={{ zIndex: "var(--z-confetti)" as unknown as number }}
       aria-hidden="true"
     />
   );

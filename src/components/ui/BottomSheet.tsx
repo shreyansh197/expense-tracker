@@ -109,6 +109,7 @@ export function BottomSheet({ open, onClose, children, label, className }: Botto
             style={{
               background: "var(--surface)",
               border: "1px solid var(--border)",
+              paddingBottom: "env(safe-area-inset-bottom, 0px)",
               transform: dragY > 0 ? `translateY(${dragY}px)` : undefined,
               opacity: dragY > 0 ? Math.max(1 - dragY / 300, 0.5) : 1,
             }}

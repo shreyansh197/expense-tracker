@@ -8,6 +8,7 @@ import { useConfirm } from "@/components/ui/ConfirmDialog";
 import { Shield, Key, Smartphone, Trash2, Plus, Loader2, Copy, CheckCircle2 } from "lucide-react";
 import Image from "next/image";
 import QRCode from "qrcode";
+import { SkeletonSessionsList } from "@/components/ui/Skeleton";
 
 interface SessionItem {
   id: string;
@@ -50,6 +51,7 @@ export function SecurityCard() {
   const [showDisableConfirm, setShowDisableConfirm] = useState(false);
   const [disableCode, setDisableCode] = useState("");
   const [disabling2FA, setDisabling2FA] = useState(false);
+  const [qrError, setQrError] = useState(false);
 
   const fetchSessions = useCallback(async () => {
     startTransition(() => setLoadingSessions(true));
@@ -129,8 +131,9 @@ export function SecurityCard() {
           color: { dark: "#1e293b", light: "#ffffff" },
         });
         setQrDataUrl(url);
+        setQrError(false);
       } catch {
-        // QR generation failed — user can still use manual entry
+        setQrError(true);
       }
     }
   };
@@ -309,6 +312,11 @@ export function SecurityCard() {
                   />
                 </div>
               </div>
+            ) : qrError ? (
+              <div className="flex h-[200px] flex-col items-center justify-center gap-2 rounded-xl" style={{ background: 'var(--surface-secondary)' }}>
+                <p className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>QR code could not be generated</p>
+                <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Use the manual entry code below instead</p>
+              </div>
             ) : (
               <div className="flex h-[200px] items-center justify-center rounded-xl" style={{ background: 'var(--surface-secondary)' }}>
                 <Loader2 size={20} className="animate-spin" style={{ color: 'var(--text-muted)' }} />
@@ -414,10 +422,7 @@ export function SecurityCard() {
         </div>
 
         {loadingSessions ? (
-          <div className="flex items-center gap-2 text-xs" style={{ color: 'var(--text-muted)' }}>
-            <Loader2 size={14} className="animate-spin" />
-            Loading...
-          </div>
+          <SkeletonSessionsList />
         ) : sessions.length === 0 ? (
           <p className="text-xs" style={{ color: 'var(--text-muted)' }}>No active sessions</p>
         ) : (
@@ -460,10 +465,7 @@ export function SecurityCard() {
         </div>
 
         {loadingDevices ? (
-          <div className="flex items-center gap-2 text-xs" style={{ color: 'var(--text-muted)' }}>
-            <Loader2 size={14} className="animate-spin" />
-            Loading...
-          </div>
+          <SkeletonSessionsList />
         ) : devices.length === 0 ? (
           <p className="text-xs" style={{ color: 'var(--text-muted)' }}>No linked devices</p>
         ) : (

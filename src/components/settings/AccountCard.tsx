@@ -8,6 +8,7 @@ import { useConfirm } from "@/components/ui/ConfirmDialog";
 import { useToast } from "@/components/ui/Toast";
 import { authFetch, clearAuthState, setAuthState, getAuthState } from "@/lib/authClient";
 import { User, Trash2, Camera, Eye, EyeOff, Loader2, X, ImagePlus } from "lucide-react";
+import { Skeleton } from "@/components/ui/Skeleton";
 
 const ALL_LOCAL_STORAGE_KEYS = [
   // Current keys
@@ -181,7 +182,9 @@ export function AccountCard() {
             onClick={() => avatarSrc ? setShowFullPhoto(true) : setShowAvatarPopup(true)}
             className="block rounded-full transition-opacity hover:opacity-80"
           >
-            {avatarSrc ? (
+            {avatarUploading ? (
+              <Skeleton className="h-10 w-10 rounded-full" />
+            ) : avatarSrc ? (
               <Image
                 src={avatarSrc}
                 alt={user.name}

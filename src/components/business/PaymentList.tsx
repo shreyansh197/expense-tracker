@@ -86,7 +86,7 @@ function PaymentDetailModal({
       <div
         className="fixed bottom-0 left-0 right-0 z-[201] rounded-t-2xl shadow-2xl
                     sm:bottom-auto sm:left-1/2 sm:top-1/2 sm:w-full sm:max-w-sm sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-2xl"
-        style={{ background: 'var(--surface)', animation: 'et-screen-in 0.22s ease both' }}
+        style={{ background: 'var(--surface)', paddingBottom: 'env(safe-area-inset-bottom, 0px)', animation: 'et-screen-in 0.22s ease both' }}
       >
         {/* Handle bar (mobile) */}
         <div className="flex justify-center pt-3 sm:hidden">

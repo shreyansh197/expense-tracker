@@ -32,7 +32,7 @@ export function SplashScreen() {
       style={{
         position: "fixed",
         inset: 0,
-        zIndex: 9999,
+        zIndex: "var(--z-splash)" as unknown as number,
         background: BG,
         display: "flex",
         alignItems: "center",

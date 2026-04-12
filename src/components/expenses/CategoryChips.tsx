@@ -79,7 +79,7 @@ export function CategoryChips() {
             aria-pressed={activeCategories.length > 0 && activeCategories.includes(cat.id)}
             whileTap={{ scale: scale.tapChip }}
             className={cn(
-              "shrink-0 rounded-full px-3 py-1 text-xs font-medium transition-all",
+              "shrink-0 rounded-full px-3.5 py-2 text-xs font-medium transition-all",
               isActive
                 ? "text-white"
                 : ""

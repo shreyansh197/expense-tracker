@@ -84,9 +84,10 @@ export function ExpenseExport({ expenses, month, year }: ExpenseExportProps) {
     <div className="relative">
       <button
         onClick={() => setShowMenu(!showMenu)}
-        className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium transition-colors hover:bg-[var(--surface-secondary)]"
+        className="flex items-center gap-1.5 rounded-lg px-3 py-2.5 text-xs font-medium transition-colors hover:bg-[var(--surface-secondary)] min-h-[44px]"
         style={{ color: "var(--text-secondary)" }}
         title="Export expenses"
+        aria-label="Export expenses"
       >
         <Download size={14} />
         <span className="hidden sm:inline">Export</span>
@@ -101,16 +102,18 @@ export function ExpenseExport({ expenses, month, year }: ExpenseExportProps) {
           >
             <button
               onClick={exportCSV}
-              className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-[var(--surface-secondary)]"
+              className="flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors hover:bg-[var(--surface-secondary)] min-h-[44px]"
               style={{ color: "var(--text-primary)" }}
+              aria-label="Export as CSV"
             >
               <FileDown size={14} />
               Export as CSV
             </button>
             <button
               onClick={exportJSON}
-              className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-[var(--surface-secondary)]"
+              className="flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors hover:bg-[var(--surface-secondary)] min-h-[44px]"
               style={{ color: "var(--text-primary)" }}
+              aria-label="Export as JSON"
             >
               <FileDown size={14} />
               Export as JSON

@@ -2,6 +2,8 @@
 
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { useCurrency } from "@/hooks/useCurrency";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { BarChart3 } from "lucide-react";
 
 interface CollectionChartProps {
   data: { month: string; received: number; expected: number }[];
@@ -33,7 +35,16 @@ function CollectionTooltip({ active, payload, label }: {
 
 export function CollectionChart({ data }: CollectionChartProps) {
   const { symbol } = useCurrency();
-  if (data.length === 0) return null;
+  if (data.length === 0) return (
+    <div className="card p-5">
+      <h3 className="text-card-title mb-3">Monthly Collections</h3>
+      <EmptyState
+        icon={BarChart3}
+        title="No collection data"
+        description="Collection history will appear here once payments are recorded."
+      />
+    </div>
+  );
 
   const hasAnyReceived = data.some((d) => d.received > 0);
   const formatted = data.map((d) => ({
@@ -52,15 +63,15 @@ export function CollectionChart({ data }: CollectionChartProps) {
       <ResponsiveContainer width="100%" height={220}>
         <BarChart data={formatted} margin={{ top: 5, right: 5, left: -10, bottom: 5 }}>
           <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="label" tick={{ fontSize: 11 }} />
-          <YAxis tick={{ fontSize: 11 }} tickFormatter={(v: number) => `${symbol}${(v / 1000).toFixed(0)}k`} />
+          <XAxis dataKey="label" tick={{ fontSize: 12 }} />
+          <YAxis tick={{ fontSize: 12 }} tickFormatter={(v: number) => `${symbol}${(v / 1000).toFixed(0)}k`} />
           <Tooltip content={<CollectionTooltip />} />
           <Legend
             formatter={(value) => {
               const color = value === "received" ? "var(--success)" : "var(--text-tertiary)";
               return <span style={{ color }}>{value === "received" ? "Received" : "Expected"}</span>;
             }}
-            wrapperStyle={{ fontSize: 11 }}
+            wrapperStyle={{ fontSize: 12 }}
           />
           <Bar dataKey="expected" fill="var(--surface-tertiary)" radius={[4, 4, 0, 0]} isAnimationActive={true} animationBegin={100} animationDuration={600} animationEasing="ease-out" />
           <Bar dataKey="received" fill="var(--success)" radius={[4, 4, 0, 0]} isAnimationActive={true} animationBegin={200} animationDuration={600} animationEasing="ease-out" />

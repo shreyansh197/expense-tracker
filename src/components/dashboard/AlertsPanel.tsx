@@ -197,10 +197,10 @@ export function AlertsPanel({
           {alert.action && (
             <button
               onClick={alert.action}
-              className="shrink-0 mt-0.5 opacity-60 hover:opacity-100 transition-opacity"
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg opacity-60 hover:opacity-100 hover:bg-[var(--surface-secondary)] transition-all"
               aria-label="View details"
             >
-              <ArrowRight size={14} />
+              <ArrowRight size={16} />
             </button>
           )}
         </m.div>
@@ -208,7 +208,7 @@ export function AlertsPanel({
       {!expanded && hiddenCount > 0 && (
         <button
           onClick={() => setExpanded(true)}
-          className="flex w-full items-center justify-center gap-1 rounded-lg py-2 text-xs font-medium transition-colors hover:bg-[var(--surface-secondary)]"
+          className="flex w-full items-center justify-center gap-1 rounded-lg py-3 text-xs font-medium transition-colors hover:bg-[var(--surface-secondary)]"
           style={{ color: 'var(--text-tertiary)' }}
         >
           Show {hiddenCount} more

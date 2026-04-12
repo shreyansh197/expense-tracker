@@ -1,6 +1,8 @@
 "use client";
 
 import { useCurrency } from "@/hooks/useCurrency";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { Tag } from "lucide-react";
 
 interface TagBreakdownProps {
   data: { tag: string; expected: number; received: number; count: number }[];
@@ -8,7 +10,16 @@ interface TagBreakdownProps {
 
 export function TagBreakdown({ data }: TagBreakdownProps) {
   const { formatCurrency } = useCurrency();
-  if (data.length === 0) return null;
+  if (data.length === 0) return (
+    <div className="card p-5">
+      <h3 className="text-card-title mb-3">By Tag</h3>
+      <EmptyState
+        icon={Tag}
+        title="No tags yet"
+        description="Tag your business ledgers to see breakdowns here."
+      />
+    </div>
+  );
 
   return (
     <div className="card p-5">

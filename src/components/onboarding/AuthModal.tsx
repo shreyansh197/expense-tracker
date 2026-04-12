@@ -25,9 +25,9 @@ import {
 import { useAuth } from "@/components/providers/AuthProvider";
 
 // ── Fixed palette for hero panels (never changes with theme) ──
-const SP_BG   = "linear-gradient(135deg, #0a0f1e 0%, #0d1340 45%, #130a2e 100%)";
-const SP_CYAN = "#22d3ee";
-const SP_VIOLET = "#a78bfa";
+const SP_BG   = "var(--auth-hero-bg)";
+const SP_CYAN = "var(--auth-hero-cyan)";
+const SP_VIOLET = "var(--auth-hero-violet)";
 const SP_INDIGO = "var(--primary)";
 
 /* ── Google G color-mark SVG ──────────────────────────────── */
@@ -54,33 +54,33 @@ const FEATURES = [
     icon: PieChart,
     title: "Visual Analytics",
     desc: "Beautiful charts and category breakdowns at a glance",
-    border: `rgba(167,139,250,0.3)`,
+    border: "color-mix(in srgb, var(--auth-hero-violet) 30%, transparent)",
     iconColor: SP_VIOLET,
-    iconBg: "rgba(167,139,250,0.15)",
+    iconBg: "color-mix(in srgb, var(--auth-hero-violet) 15%, transparent)",
   },
   {
     icon: TrendingUp,
     title: "Budget Tracking",
     desc: "Auto-rollover budgets with real-time remaining alerts",
-    border: `rgba(34,211,238,0.3)`,
+    border: "color-mix(in srgb, var(--auth-hero-cyan) 30%, transparent)",
     iconColor: SP_CYAN,
-    iconBg: "rgba(34,211,238,0.15)",
+    iconBg: "color-mix(in srgb, var(--auth-hero-cyan) 15%, transparent)",
   },
   {
     icon: Shield,
     title: "Secure by Default",
     desc: "Two-factor auth, encrypted sessions & device management",
-    border: `rgba(99,102,241,0.3)`,
+    border: "color-mix(in srgb, var(--primary) 30%, transparent)",
     iconColor: SP_INDIGO,
-    iconBg: "rgba(99,102,241,0.15)",
+    iconBg: "color-mix(in srgb, var(--primary) 15%, transparent)",
   },
   {
     icon: Smartphone,
     title: "Works Everywhere",
     desc: "Full PWA support — install as an app on any device",
-    border: `rgba(167,139,250,0.25)`,
+    border: "color-mix(in srgb, var(--auth-hero-violet) 25%, transparent)",
     iconColor: SP_VIOLET,
-    iconBg: "rgba(167,139,250,0.12)",
+    iconBg: "color-mix(in srgb, var(--auth-hero-violet) 12%, transparent)",
   },
 ];
 
@@ -91,20 +91,20 @@ function FloatingOrbs() {
       <div style={{
         position: "absolute", top: "-10%", left: "-8%",
         width: 420, height: 420, borderRadius: "50%",
-        background: `radial-gradient(circle, rgba(34,211,238,0.20) 0%, transparent 70%)`,
+        background: `radial-gradient(circle, color-mix(in srgb, var(--auth-hero-cyan) 20%, transparent) 0%, transparent 70%)`,
         animation: "sp-orb 8s ease-in-out infinite",
       }} />
       <div style={{
         position: "absolute", top: "35%", right: "-12%",
         width: 360, height: 360, borderRadius: "50%",
-        background: `radial-gradient(circle, rgba(167,139,250,0.18) 0%, transparent 70%)`,
+        background: `radial-gradient(circle, color-mix(in srgb, var(--auth-hero-violet) 18%, transparent) 0%, transparent 70%)`,
         animation: "sp-orb 10s ease-in-out infinite",
         animationDelay: "2s",
       }} />
       <div style={{
         position: "absolute", bottom: "-12%", left: "20%",
         width: 400, height: 400, borderRadius: "50%",
-        background: `radial-gradient(circle, rgba(99,102,241,0.16) 0%, transparent 70%)`,
+        background: `radial-gradient(circle, color-mix(in srgb, var(--primary) 16%, transparent) 0%, transparent 70%)`,
         animation: "sp-orb 9s ease-in-out infinite",
         animationDelay: "4s",
       }} />
@@ -146,7 +146,7 @@ function DesktopHeroPanel() {
               position: "relative",
               width: 44, height: 44, borderRadius: 12,
               overflow: "hidden",
-              boxShadow: `0 4px 20px rgba(99,102,241,0.4)`,
+              boxShadow: "0 4px 20px color-mix(in srgb, var(--primary) 40%, transparent)",
             }}>
               <Image src="/icons/icon-192.png" alt="ExpenStream" width={44} height={44} style={{ display: "block", width: "100%", height: "100%" }} />
             </div>
@@ -257,7 +257,7 @@ function MobileAuthPage({ children }: { children: React.ReactNode }) {
             position: "relative",
             width: 56, height: 56, borderRadius: 16,
             overflow: "hidden",
-            boxShadow: `0 6px 24px rgba(99,102,241,0.5)`,
+            boxShadow: "0 6px 24px color-mix(in srgb, var(--primary) 50%, transparent)",
           }}>
             <Image src="/icons/icon-192.png" alt="ExpenStream" width={56} height={56} style={{ display: "block", width: "100%", height: "100%" }} />
           </div>
@@ -312,8 +312,8 @@ function DesktopAuthPage({ children }: { children: React.ReactNode }) {
       <div className="relative flex flex-1 items-center justify-center px-16 py-10" style={{ background: 'var(--background)' }}>
         {/* Subtle decorative orbs — use Tailwind so they follow theme */}
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
-          <div className="absolute -top-24 right-10 h-60 w-60 rounded-full bg-[#e6f9f7] blur-3xl dark:bg-[rgba(96,165,250,0.08)]" />
-          <div className="absolute -bottom-20 -left-10 h-48 w-48 rounded-full bg-[#fff3ee] blur-3xl dark:bg-[rgba(255,138,101,0.06)]" />
+          <div className="absolute -top-24 right-10 h-60 w-60 rounded-full blur-3xl" style={{ backgroundColor: "var(--auth-orb-1)" }} />
+          <div className="absolute -bottom-20 -left-10 h-48 w-48 rounded-full blur-3xl" style={{ backgroundColor: "var(--auth-orb-2)" }} />
         </div>
 
         <div className="relative z-10 w-full max-w-sm" style={{ animation: "sp-form-in 0.45s ease both" }}>
@@ -616,7 +616,7 @@ export function AuthModal({
   if (showSalary) {
     return (
       <AuthPage>
-        <div className="mb-1 flex h-11 w-11 items-center justify-center rounded-2xl bg-[#e6f9f7] dark:bg-[rgba(96,165,250,0.15)] ring-1 ring-[#b2ece6] dark:ring-[#3B82F6]/40">
+        <div className="mb-1 flex h-11 w-11 items-center justify-center rounded-2xl ring-1" style={{ backgroundColor: "var(--auth-badge-bg)", boxShadow: "inset 0 0 0 1px var(--auth-badge-ring)" }}>
           <Sparkles className="h-5 w-5" style={{ color: 'var(--primary)' }} />
         </div>
         <h2 className="mt-3 text-2xl font-bold tracking-tight" style={{ color: 'var(--text-primary)' }}>

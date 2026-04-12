@@ -184,8 +184,8 @@ export function DailyTrendChart({ dailyTotals, stackedDailyTotals, activeCategor
                   onKeyDown={(e) => { if ((e.key === "Enter" || e.key === " ") && onBarClick) { e.preventDefault(); onBarClick(d.day); } }}
                   role={onBarClick ? "button" : undefined}
                 >
-                  <td className="py-1.5" style={{ color: 'var(--text-primary)' }}>{d.day}</td>
-                  <td className="py-1.5 text-right font-medium" style={{ color: 'var(--text-primary)' }}>
+                  <td className="py-3" style={{ color: 'var(--text-primary)' }}>{d.day}</td>
+                  <td className="py-3 text-right font-medium" style={{ color: 'var(--text-primary)' }}>
                     {formatCurrency(d.total)}
                   </td>
                 </tr>
@@ -213,13 +213,13 @@ export function DailyTrendChart({ dailyTotals, stackedDailyTotals, activeCategor
               <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="var(--border-subtle)" strokeOpacity={0.5} />
               <XAxis
                 dataKey="day"
-                tick={{ fontSize: 10, fill: "var(--text-muted)" }}
+                tick={{ fontSize: 12, fill: "var(--text-muted)" }}
                 axisLine={false}
                 tickLine={false}
                 interval={4}
               />
               <YAxis
-                tick={{ fontSize: 10, fill: "var(--text-muted)" }}
+                tick={{ fontSize: 12, fill: "var(--text-muted)" }}
                 axisLine={false}
                 tickLine={false}
                 tickFormatter={(v: number) => (v >= 1000 ? `${v / 1000}K` : `${v}`)}
@@ -270,13 +270,13 @@ export function DailyTrendChart({ dailyTotals, stackedDailyTotals, activeCategor
               <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="var(--border-subtle)" strokeOpacity={0.5} />
               <XAxis
                 dataKey="day"
-                tick={{ fontSize: 10, fill: "var(--text-muted)" }}
+                tick={{ fontSize: 12, fill: "var(--text-muted)" }}
                 axisLine={false}
                 tickLine={false}
                 interval={4}
               />
               <YAxis
-                tick={{ fontSize: 10, fill: "var(--text-muted)" }}
+                tick={{ fontSize: 12, fill: "var(--text-muted)" }}
                 axisLine={false}
                 tickLine={false}
                 tickFormatter={(v: number) => (v >= 1000 ? `${v / 1000}K` : `${v}`)}
@@ -287,13 +287,13 @@ export function DailyTrendChart({ dailyTotals, stackedDailyTotals, activeCategor
                 labelFormatter={(label: string) => `Day ${label}`}
                 contentStyle={{
                   borderRadius: "12px",
-                  border: "1px solid var(--chart-tooltip-border, #e5e7eb)",
+                  border: "1px solid var(--chart-tooltip-border)",
                   fontSize: "12px",
                   padding: "8px 12px",
-                  backgroundColor: "var(--chart-tooltip-bg, #fff)",
-                  color: "var(--chart-tooltip-fg, #111827)",
+                  backgroundColor: "var(--chart-tooltip-bg)",
+                  color: "var(--chart-tooltip-fg)",
                 }}
-                labelStyle={{ color: "var(--chart-tooltip-fg, #111827)" }}
+                labelStyle={{ color: "var(--chart-tooltip-fg)" }}
                 itemStyle={{ color: "var(--primary)" }}
               />
               {paceTarget && paceTarget > 0 && (
@@ -306,7 +306,7 @@ export function DailyTrendChart({ dailyTotals, stackedDailyTotals, activeCategor
                   label={{
                     value: `Target`,
                     position: "insideTopRight",
-                    fontSize: 10,
+                    fontSize: 12,
                     fill: "var(--text-muted)",
                     fontWeight: 500,
                   }}

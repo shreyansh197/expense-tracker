@@ -208,7 +208,8 @@ export function FilterPanel({
                 </button>
                 <button
                   onClick={() => setShowSaveInput(false)}
-                  className="rounded p-2 flex items-center justify-center transition-colors hover:bg-[var(--surface-secondary)]" style={{ color: 'var(--text-muted)' }}
+                  className="flex h-11 w-11 items-center justify-center rounded-lg transition-colors hover:bg-[var(--surface-secondary)]" style={{ color: 'var(--text-muted)' }}
+                  aria-label="Cancel save"
                 >
                   <X size={14} />
                 </button>
@@ -247,9 +248,10 @@ export function FilterPanel({
                     </button>
                     <button
                       onClick={() => handleDeleteFilter(f.id)}
-                      className="rounded p-0.5 transition-colors hover:text-[var(--danger)]" style={{ color: 'var(--text-muted)' }}
+                      className="flex items-center justify-center rounded-lg p-2 transition-colors hover:text-[var(--danger)] hover:bg-[var(--danger-soft)]" style={{ color: 'var(--text-muted)' }}
+                      aria-label={`Delete filter ${f.name}`}
                     >
-                      <Trash2 size={12} />
+                      <Trash2 size={14} />
                     </button>
                   </div>
                 ))}

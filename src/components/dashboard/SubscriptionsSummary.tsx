@@ -106,6 +106,8 @@ export function SubscriptionsSummary() {
         <button
           onClick={() => setExpanded((v) => !v)}
           className="flex items-center gap-1 cursor-pointer text-xs font-medium text-data-text hover:text-data-hover transition-colors"
+          aria-expanded={expanded}
+          aria-label={expanded ? "Collapse recurring expenses" : "Expand recurring expenses"}
         >
           <m.span
             animate={{ rotate: expanded ? 180 : 0 }}

@@ -85,13 +85,13 @@ export function SpendingHeatmap({ expenses, month, year, onDayClick }: SpendingH
           <button
             key={cell.day}
             onClick={() => onDayClick?.(cell.day)}
-            className="group relative aspect-square rounded-sm transition-transform duration-100 hover:scale-110 active:scale-95"
+            className="group relative aspect-square min-h-[44px] min-w-[44px] rounded-sm transition-transform duration-100 hover:scale-110 active:scale-95"
             style={{ background: getColor(cell.intensity, cell.total) }}
             aria-label={`Day ${cell.day}: ${formatCurrency(cell.total)}`}
             title={`Day ${cell.day}: ${formatCurrency(cell.total)}`}
           >
             <span
-              className="absolute inset-0 flex items-center justify-center text-[9px] font-medium opacity-30 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100"
+              className="absolute inset-0 flex items-center justify-center text-xs font-medium opacity-30 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100"
               style={{ color: cell.intensity > 0.5 ? "var(--text-inverse)" : "var(--text-secondary)" }}
             >
               {cell.day}

@@ -151,7 +151,7 @@ export function RecurringSuggestions() {
               <div className="flex items-center gap-1">
                 <button
                   onClick={() => handleAccept(s)}
-                  className="rounded-lg p-1.5 transition-colors"
+                  className="flex h-11 w-11 items-center justify-center rounded-lg transition-colors"
                   style={{ color: "var(--text-muted)" }}
                   onMouseEnter={e => { e.currentTarget.style.background = 'var(--success-soft)'; e.currentTarget.style.color = 'var(--success-text)'; }}
                   onMouseLeave={e => { e.currentTarget.style.background = ''; e.currentTarget.style.color = 'var(--text-muted)'; }}
@@ -160,11 +160,11 @@ export function RecurringSuggestions() {
                   aria-label="Add as recurring"
                   title="Add as recurring"
                 >
-                  <Plus size={14} />
+                  <Plus size={16} />
                 </button>
                 <button
                   onClick={() => handleDismiss(s.key)}
-                  className="rounded-lg p-1.5 transition-colors"
+                  className="flex h-11 w-11 items-center justify-center rounded-lg transition-colors"
                   style={{ color: "var(--text-muted)" }}
                   onMouseEnter={e => { e.currentTarget.style.background = 'var(--danger-soft)'; e.currentTarget.style.color = 'var(--danger-text)'; }}
                   onMouseLeave={e => { e.currentTarget.style.background = ''; e.currentTarget.style.color = 'var(--text-muted)'; }}
@@ -173,7 +173,7 @@ export function RecurringSuggestions() {
                   aria-label="Dismiss suggestion"
                   title="Dismiss"
                 >
-                  <X size={14} />
+                  <X size={16} />
                 </button>
               </div>
             </div>

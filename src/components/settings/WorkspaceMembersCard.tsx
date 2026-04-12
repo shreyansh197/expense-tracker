@@ -4,7 +4,8 @@ import { useState, useEffect, useCallback, startTransition } from "react";
 import { authFetch, getActiveWorkspaceId } from "@/lib/authClient";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useToast } from "@/components/ui/Toast";
-import { Copy, Check, UserPlus, Users, Trash2, Loader2, Crown, ShieldCheck, User } from "lucide-react";
+import { Copy, Check, UserPlus, Users, Trash2, Crown, ShieldCheck, User } from "lucide-react";
+import { SkeletonMembersList } from "@/components/ui/Skeleton";
 
 interface Member {
   id: string;
@@ -125,10 +126,7 @@ export function WorkspaceMembersCard() {
         </div>
 
         {loading ? (
-          <div className="flex items-center gap-2 text-xs" style={{ color: 'var(--text-muted)' }}>
-            <Loader2 size={14} className="animate-spin" />
-            Loading...
-          </div>
+          <SkeletonMembersList />
         ) : (
           <div className="space-y-2">
             {members.map((m) => {

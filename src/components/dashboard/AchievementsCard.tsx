@@ -83,13 +83,13 @@ export function AchievementsCard({ achievements, newlyUnlocked, persistNew, unlo
                 {def.icon}
               </span>
               <span
-                className="text-[10px] font-medium leading-tight sm:line-clamp-1"
+                className="text-xs font-medium leading-tight sm:line-clamp-1"
                 style={{ color: unlocked ? "var(--text-secondary)" : "var(--text-muted)" }}
               >
                 {def.name}
               </span>
               <span
-                className="line-clamp-2 text-[9px] leading-tight sm:hidden"
+                className="line-clamp-2 text-xs leading-tight sm:hidden"
                 style={{ color: "var(--text-muted)" }}
               >
                 {def.description}

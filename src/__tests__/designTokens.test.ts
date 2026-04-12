@@ -531,3 +531,155 @@ describe("status surface tokens", () => {
     }
   });
 });
+
+// =========== Font size minimum: no sub-12px typography ===========
+
+describe("typography tokens — minimum font size", () => {
+  test("--text-overline clamp min is >= 0.75rem (12px)", () => {
+    const match = cssContent.match(/--text-overline:\s*clamp\(([^,]+)/);
+    expect(match).not.toBeNull();
+    const minRem = parseFloat(match![1]);
+    expect(minRem).toBeGreaterThanOrEqual(0.75);
+  });
+
+  test("all typography clamp tokens have min >= 0.625rem (10px)", () => {
+    const clampMatches = cssContent.matchAll(/--text-[\w-]+:\s*clamp\(([^)]+)\)/g);
+    for (const m of clampMatches) {
+      const minValue = parseFloat(m[1]);
+      expect(minValue).toBeGreaterThanOrEqual(0.625);
+    }
+  });
+});
+
+// =========== Radius tokens: no drift values ===========
+
+describe("radius tokens — no drift values in utilities", () => {
+  test("segmented-control uses var(--radius-md) not hardcoded", () => {
+    const segmented = cssContent.match(/\.segmented-control\s*\{[^}]*\}/);
+    expect(segmented).not.toBeNull();
+    expect(segmented![0]).toContain("var(--radius-md)");
+    expect(segmented![0]).not.toContain("0.625rem");
+  });
+
+  test("btn-ghost uses var(--radius-md) not hardcoded", () => {
+    const btnGhost = cssContent.match(/\.btn-ghost\s*\{[^}]*\}/);
+    expect(btnGhost).not.toBeNull();
+    expect(btnGhost![0]).toContain("var(--radius-md)");
+    expect(btnGhost![0]).not.toContain("0.625rem");
+  });
+});
+
+// =========== Card padding tokens ===========
+
+describe("card padding tokens", () => {
+  test("--card-padding token exists", () => {
+    expect(cssContent).toMatch(/--card-padding\s*:/);
+  });
+
+  test("--card-padding-sm token exists", () => {
+    expect(cssContent).toMatch(/--card-padding-sm\s*:/);
+  });
+});
+
+// =========== Breakpoint verification: clamp() at 7 viewports ===========
+
+describe("breakpoint verification — clamp() tokens at key viewports", () => {
+  /** Evaluate a clamp(min, preferred, max) at a given viewport width */
+  function evaluateClamp(clampStr: string, viewportPx: number): number {
+    const match = clampStr.match(/clamp\(\s*([^,]+),\s*([^,]+),\s*([^)]+)\)/);
+    if (!match) return NaN;
+    const min = parseFloat(match[1]) * 16; // rem → px
+    const max = parseFloat(match[3]) * 16;
+    // Preferred is like "0.857rem + 0.089vw"
+    const prefParts = match[2].trim().split(/\s*\+\s*/);
+    let preferred = 0;
+    for (const part of prefParts) {
+      if (part.includes("rem")) preferred += parseFloat(part) * 16;
+      else if (part.includes("vw")) preferred += (parseFloat(part) / 100) * viewportPx;
+    }
+    return Math.min(Math.max(preferred, min), max);
+  }
+
+  const clampTokens: [string, string][] = [];
+  const clampPattern = /--(text-[\w-]+):\s*(clamp\([^)]+\))/g;
+  let m;
+  while ((m = clampPattern.exec(cssContent)) !== null) {
+    clampTokens.push([m[1], m[2]]);
+  }
+
+  const viewports = [320, 375, 390, 430, 768, 1024, 1440];
+
+  test("all clamp tokens are found", () => {
+    expect(clampTokens.length).toBeGreaterThanOrEqual(12);
+  });
+
+  for (const vw of viewports) {
+    test(`all typography tokens produce valid sizes at ${vw}px`, () => {
+      for (const [name, clamp] of clampTokens) {
+        const px = evaluateClamp(clamp, vw);
+        expect(px).not.toBeNaN();
+        expect(px).toBeGreaterThan(0);
+      }
+    });
+  }
+
+  test("320px (min viewport) produces at least the clamp minimum for all tokens", () => {
+    for (const [name, clamp] of clampTokens) {
+      const match = clamp.match(/clamp\(\s*([^,]+)/);
+      const minRem = parseFloat(match![1]);
+      const computed = evaluateClamp(clamp, 320);
+      expect(computed).toBeGreaterThanOrEqual(minRem * 16 - 0.01);
+    }
+  });
+
+  test("1440px (max viewport) produces at most the clamp maximum for all tokens", () => {
+    for (const [name, clamp] of clampTokens) {
+      const parts = clamp.match(/clamp\(\s*([^,]+),\s*([^,]+),\s*([^)]+)\)/);
+      expect(parts).not.toBeNull();
+      const maxRem = parseFloat(parts![3]);
+      const computed = evaluateClamp(clamp, 1440);
+      expect(computed).toBeLessThanOrEqual(maxRem * 16 + 0.01);
+    }
+  });
+
+  test("0px viewport does not produce negative font sizes", () => {
+    for (const [name, clamp] of clampTokens) {
+      const px = evaluateClamp(clamp, 0);
+      expect(px).toBeGreaterThan(0);
+    }
+  });
+});
+
+// =========== No fixed widths exceeding 320px (mobile overflow risk) ===========
+
+describe("breakpoint verification — no overflow at 320px", () => {
+  const fs = require("fs");
+  const path = require("path");
+
+  function findTsxFiles(dir: string): string[] {
+    const files: string[] = [];
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const full = path.join(dir, entry.name);
+      if (entry.isDirectory()) files.push(...findTsxFiles(full));
+      else if (entry.name.endsWith(".tsx")) files.push(full);
+    }
+    return files;
+  }
+
+  const componentDir = path.resolve(__dirname, "..", "components");
+  const allFiles = findTsxFiles(componentDir);
+
+  test("no component uses fixed w-[Npx] where N > 320", () => {
+    for (const file of allFiles) {
+      const content = fs.readFileSync(file, "utf-8");
+      const matches = content.match(/w-\[(\d+)px\]/g) || [];
+      for (const match of matches) {
+        const px = parseInt(match.match(/\d+/)![0]);
+        if (px > 320) {
+          const relPath = path.relative(path.resolve(__dirname, ".."), file);
+          fail(`${relPath} has ${match} which may overflow at 320px viewport`);
+        }
+      }
+    }
+  });
+});

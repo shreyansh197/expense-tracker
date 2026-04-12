@@ -289,3 +289,35 @@ describe("staggerDelay", () => {
     }
   });
 });
+
+// =========== CSS easing token consistency ===========
+
+describe("CSS easing tokens — no hardcoded cubic-bezier in globals.css", () => {
+  const CSS_PATH = require("path").resolve(__dirname, "../app/globals.css");
+  const cssContent = require("fs").readFileSync(CSS_PATH, "utf-8");
+
+  test("--ease-out is defined with cubic-bezier value", () => {
+    expect(cssContent).toMatch(/--ease-out:\s*cubic-bezier\(/);
+  });
+
+  test("no literal cubic-bezier(0.22, 1, 0.36, 1) outside token definition", () => {
+    const lines = cssContent.split("\n");
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      if (line.includes("cubic-bezier(0.22, 1, 0.36, 1)")) {
+        // Only allowed in the --ease-out definition itself
+        expect(line).toMatch(/--ease-out\s*:/);
+      }
+    }
+  });
+
+  test("card transitions use var(--ease-out)", () => {
+    const cardBlock = cssContent.match(/\.card\s*\{[^}]*\}/);
+    expect(cardBlock).not.toBeNull();
+    expect(cardBlock![0]).toContain("var(--ease-out)");
+  });
+
+  test("prefers-reduced-motion overrides transitions", () => {
+    expect(cssContent).toContain("prefers-reduced-motion");
+  });
+});

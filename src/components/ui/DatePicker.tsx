@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { Calendar, ChevronLeft, ChevronRight, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -97,6 +97,8 @@ export function DatePicker({ value, onChange, month, year }: DatePickerProps) {
       <button
         type="button"
         onClick={handleToggleOpen}
+        aria-label={`Select date, currently ${displayDate}`}
+        aria-expanded={open}
         className={cn(
           "flex w-full items-center gap-2 rounded-lg border px-3 py-2.5 text-sm font-medium transition-all",
           open && "border-[var(--secondary)] ring-2 ring-[var(--secondary)]/20"
@@ -187,6 +189,32 @@ function CalendarGrid({
   onClose?: () => void;
 }) {
   const monthName = MONTH_NAMES[viewMonth - 1];
+  const gridRef = useRef<HTMLDivElement>(null);
+
+  const handleGridKeyDown = useCallback((e: React.KeyboardEvent) => {
+    const target = e.target as HTMLElement;
+    const day = parseInt(target.textContent || "", 10);
+    if (isNaN(day)) return;
+
+    let nextDay = day;
+    switch (e.key) {
+      case "ArrowRight": nextDay = day + 1; break;
+      case "ArrowLeft": nextDay = day - 1; break;
+      case "ArrowDown": nextDay = day + 7; break;
+      case "ArrowUp": nextDay = day - 7; break;
+      case "Home": nextDay = 1; break;
+      case "End": nextDay = getDaysInMonth(viewMonth, viewYear); break;
+      default: return;
+    }
+    e.preventDefault();
+
+    const maxDay = getDaysInMonth(viewMonth, viewYear);
+    if (nextDay < 1) { onPrev(); return; }
+    if (nextDay > maxDay) { onNext(); return; }
+
+    const btn = gridRef.current?.querySelector(`button[aria-label="${MONTH_NAMES[viewMonth - 1]} ${nextDay}, ${viewYear}"]`) as HTMLElement | null;
+    btn?.focus();
+  }, [viewMonth, viewYear, onPrev, onNext]);
 
   return (
     <>
@@ -248,7 +276,7 @@ function CalendarGrid({
       </div>
 
       {/* Day grid */}
-      <div className="grid grid-cols-7 gap-0.5">
+      <div className="grid grid-cols-7 gap-0.5" ref={gridRef} role="grid" onKeyDown={handleGridKeyDown}>
         {cells.map((day, i) =>
           day === null ? (
             <div key={`blank-${i}`} className="h-11" />
@@ -257,6 +285,8 @@ function CalendarGrid({
               key={day}
               type="button"
               onClick={() => onSelect(day)}
+              aria-label={`${MONTH_NAMES[viewMonth - 1]} ${day}, ${viewYear}`}
+              aria-pressed={day === value}
               className={cn(
                 "flex h-11 w-full items-center justify-center rounded-lg text-sm font-medium transition-all",
                 day === value
@@ -287,6 +317,7 @@ function CalendarGrid({
           style={{ background: 'var(--surface-secondary)' }}
           onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--surface-hover)'; }}
           onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--surface-secondary)'; }}
+          aria-label="Jump to today"
         >
           Today ({todayDay})
         </button>

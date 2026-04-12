@@ -172,3 +172,83 @@ describe("motion barrel export", () => {
     expect(src).toContain("./variants");
   });
 });
+
+// =========== Safe area completeness ===========
+
+describe("safe area inset contracts", () => {
+  test("BottomNav uses env(safe-area-inset-bottom)", () => {
+    const src = readComponent("components/layout/BottomNav.tsx");
+    expect(src).toContain("safe-area-inset-bottom");
+  });
+
+  test("BottomSheet uses env(safe-area-inset-bottom)", () => {
+    const src = readComponent("components/ui/BottomSheet.tsx");
+    expect(src).toContain("safe-area-inset-bottom");
+  });
+
+  test("Toast uses env(safe-area-inset-bottom)", () => {
+    const src = readComponent("components/ui/Toast.tsx");
+    expect(src).toContain("safe-area-inset-bottom");
+  });
+
+  test("PaymentList uses env(safe-area-inset-bottom)", () => {
+    const src = readComponent("components/business/PaymentList.tsx");
+    expect(src).toContain("safe-area-inset-bottom");
+  });
+
+  test("DashboardCustomizer uses env(safe-area-inset-top) and bottom", () => {
+    const src = readComponent("components/dashboard/DashboardCustomizer.tsx");
+    expect(src).toContain("safe-area-inset-top");
+    expect(src).toContain("safe-area-inset-bottom");
+  });
+
+  test("WelcomeTutorial uses env(safe-area-inset-top) and bottom", () => {
+    const src = readComponent("components/onboarding/WelcomeTutorial.tsx");
+    expect(src).toContain("safe-area-inset-top");
+    expect(src).toContain("safe-area-inset-bottom");
+  });
+
+  test("AuthModal uses env(safe-area-inset-bottom)", () => {
+    const src = readComponent("components/onboarding/AuthModal.tsx");
+    expect(src).toContain("safe-area-inset-bottom");
+  });
+
+  test("OfflineScreen uses env(safe-area-inset-top)", () => {
+    const src = readComponent("components/app/OfflineScreen.tsx");
+    expect(src).toContain("safe-area-inset-top");
+  });
+});
+
+// =========== Touch target contracts ===========
+
+describe("touch target contracts — critical regression guards", () => {
+  test("FilterPanel delete button is not p-0.5 (was 12px)", () => {
+    const src = readComponent("components/expenses/FilterPanel.tsx");
+    // Must NOT have the original p-0.5 on the delete button
+    expect(src).not.toMatch(/className="[^"]*p-0\.5[^"]*"[^>]*aria-label="Clear/);
+  });
+
+  test("SavingsGoalsWidget close button is not h-7 w-7 (was 28px)", () => {
+    const src = readComponent("components/dashboard/SavingsGoalsWidget.tsx");
+    expect(src).not.toMatch(/h-7 w-7/);
+  });
+});
+
+// =========== aria-label contracts ===========
+
+describe("aria-label contracts — interactive elements", () => {
+  test("DatePicker trigger has aria-expanded", () => {
+    const src = readComponent("components/ui/DatePicker.tsx");
+    expect(src).toContain("aria-expanded={open}");
+  });
+
+  test("CategoryTrendChart has role=img", () => {
+    const src = readComponent("components/dashboard/CategoryTrendChart.tsx");
+    expect(src).toContain('role="img"');
+  });
+
+  test("SubscriptionsSummary toggle has aria-expanded", () => {
+    const src = readComponent("components/dashboard/SubscriptionsSummary.tsx");
+    expect(src).toContain("aria-expanded={expanded}");
+  });
+});

@@ -70,7 +70,7 @@ export function OfflineScreen() {
         top: 0,
         left: 0,
         right: 0,
-        zIndex: 9998,
+        zIndex: "var(--z-splash)" as unknown as number,
         padding: "0 12px",
         paddingTop: "env(safe-area-inset-top, 0px)",
         animation: "et-banner-in 0.3s ease both",

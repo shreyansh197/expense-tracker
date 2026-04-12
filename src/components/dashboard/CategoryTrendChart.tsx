@@ -24,18 +24,18 @@ export function CategoryTrendChart({
   formatCurrency,
 }: CategoryTrendChartProps) {
   return (
-    <div className="h-[160px] w-full">
+    <div className="h-[160px] w-full" role="img" aria-label={`${categoryLabel} spending trend chart`}>
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={trendData} barSize={28}>
           <CartesianGrid vertical={false} />
           <XAxis
             dataKey="label"
-            tick={{ fontSize: 11 }}
+            tick={{ fontSize: 12 }}
             axisLine={false}
             tickLine={false}
           />
           <YAxis
-            tick={{ fontSize: 10 }}
+            tick={{ fontSize: 12 }}
             axisLine={false}
             tickLine={false}
             tickFormatter={(v: number) => (v >= 1000 ? `${v / 1000}K` : `${v}`)}
@@ -45,13 +45,13 @@ export function CategoryTrendChart({
             formatter={(value: number) => [formatCurrency(value), categoryLabel]}
             contentStyle={{
               borderRadius: "12px",
-              border: "1px solid var(--chart-tooltip-border, #e5e7eb)",
+              border: "1px solid var(--chart-tooltip-border)",
               fontSize: "12px",
               padding: "8px 12px",
-              backgroundColor: "var(--chart-tooltip-bg, #fff)",
-              color: "var(--chart-tooltip-fg, #111827)",
+              backgroundColor: "var(--chart-tooltip-bg)",
+              color: "var(--chart-tooltip-fg)",
             }}
-            labelStyle={{ color: "var(--chart-tooltip-fg, #111827)" }}
+            labelStyle={{ color: "var(--chart-tooltip-fg)" }}
           />
           <Bar dataKey="total" fill={categoryColor} radius={[4, 4, 0, 0]} />
         </BarChart>

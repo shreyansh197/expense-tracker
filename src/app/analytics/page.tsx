@@ -553,7 +553,7 @@ function AnalyticsContent() {
                       {history.months.map((md) => (
                         <span
                           key={`label-${md.year}-${md.month}`}
-                          className="flex-1 text-center text-[9px]"
+                          className="flex-1 text-center text-xs"
                           style={{ color: "var(--text-muted)" }}
                         >
                           {md.label.split(" ")[0]}

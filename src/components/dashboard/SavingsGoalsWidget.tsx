@@ -115,7 +115,7 @@ export function SavingsGoalsWidget() {
                 </div>
                 <button
                   onClick={handleCancel}
-                  className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-colors hover:bg-[var(--surface-secondary)]"
+                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg transition-colors hover:bg-[var(--surface-secondary)]"
                   style={{ color: "var(--text-muted)" }}
                   aria-label="Close"
                 >
@@ -189,10 +189,10 @@ export function SavingsGoalsWidget() {
                   style={{
                     background: fundMode === "add"
                       ? "linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%)"
-                      : "linear-gradient(135deg, #ef4444 0%, #dc2626 100%)",
+                      : "linear-gradient(135deg, var(--danger) 0%, var(--danger-text) 100%)",
                     boxShadow: fundMode === "add"
                       ? "0 4px 12px color-mix(in srgb, var(--primary) 30%, transparent)"
-                      : "0 4px 12px rgba(239,68,68,0.3)",
+                      : "0 4px 12px color-mix(in srgb, var(--danger) 30%, transparent)",
                   }}
                 >
                   {fundMode === "add" ? "Add Funds" : "Remove Funds"}
@@ -269,7 +269,7 @@ export function SavingsGoalsWidget() {
                   transform="rotate(-90 20 20)"
                   style={{ transition: 'stroke-dasharray 0.5s ease' }}
                 />
-                <text x="20" y="20" textAnchor="middle" dominantBaseline="central" fill={g.color} fontSize="9" fontWeight="700">{Math.round(pct)}%</text>
+                <text x="20" y="20" textAnchor="middle" dominantBaseline="central" fill={g.color} fontSize="10" fontWeight="700">{Math.round(pct)}%</text>
               </svg>
               {/* Goal details */}
               <div className="min-w-0 flex-1 space-y-1.5">
@@ -303,7 +303,7 @@ export function SavingsGoalsWidget() {
                         setFundAmount("");
                         setFundMode("add");
                       }}
-                      className="rounded-md bg-ok-soft px-2 py-0.5 text-xs font-medium text-ok-text transition-colors hover:bg-ok-soft-hover"
+                      className="rounded-md bg-ok-soft px-3 py-1.5 text-xs font-medium text-ok-text transition-colors hover:bg-ok-soft-hover min-h-[44px] flex items-center"
                     >
                       + Add
                     </button>

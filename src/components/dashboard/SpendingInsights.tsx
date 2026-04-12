@@ -150,14 +150,14 @@ export function SpendingInsights({
             >
               <div className="mb-1.5 flex items-center gap-1.5">
                 <Icon size={13} style={{ color: "var(--text-muted)" }} />
-                <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
+                <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
                   {insight.label}
                 </span>
               </div>
               <p className="text-lg font-bold leading-tight" style={{ color: sentimentColors[insight.sentiment] }}>
                 {insight.value}
               </p>
-              <p className="mt-0.5 text-[11px] leading-snug" style={{ color: "var(--text-secondary)" }}>
+              <p className="mt-0.5 text-xs leading-snug" style={{ color: "var(--text-secondary)" }}>
                 {insight.detail}
               </p>
             </m.div>

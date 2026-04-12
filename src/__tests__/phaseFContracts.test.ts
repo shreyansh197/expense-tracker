@@ -434,3 +434,47 @@ describe("Providers — AccentColorEffect integration", () => {
     expect(src).toContain("<AccentColorEffect");
   });
 });
+
+// =========== Empty state contracts ===========
+
+describe("empty state contracts", () => {
+  test("CollectionChart imports EmptyState", () => {
+    const src = readComponent("components/business/CollectionChart.tsx");
+    expect(src).toMatch(/import.*EmptyState/);
+  });
+
+  test("CollectionChart does not return bare null for empty data", () => {
+    const src = readComponent("components/business/CollectionChart.tsx");
+    expect(src).not.toMatch(/data\.length === 0\)\s*return\s*null/);
+  });
+
+  test("TagBreakdown imports EmptyState", () => {
+    const src = readComponent("components/business/TagBreakdown.tsx");
+    expect(src).toMatch(/import.*EmptyState/);
+  });
+
+  test("TagBreakdown does not return bare null for empty data", () => {
+    const src = readComponent("components/business/TagBreakdown.tsx");
+    expect(src).not.toMatch(/data\.length === 0\)\s*return\s*null/);
+  });
+});
+
+// =========== Loading state contracts ===========
+
+describe("loading state contracts", () => {
+  test("Skeleton.tsx exports SkeletonSessionsList", () => {
+    const src = readComponent("components/ui/Skeleton.tsx");
+    expect(src).toContain("export function SkeletonSessionsList");
+  });
+
+  test("Skeleton.tsx exports SkeletonMembersList", () => {
+    const src = readComponent("components/ui/Skeleton.tsx");
+    expect(src).toContain("export function SkeletonMembersList");
+  });
+
+  test("AccountCard uses Skeleton for avatar during upload", () => {
+    const src = readComponent("components/settings/AccountCard.tsx");
+    expect(src).toContain("<Skeleton");
+    expect(src).toContain("avatarUploading");
+  });
+});
