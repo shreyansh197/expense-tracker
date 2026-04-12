@@ -31,6 +31,7 @@ const SECTION_LABELS: Record<DashboardSectionId, string> = {
   subscriptions: "Recurring Expenses",
   goals: "Savings Goals",
   charts: "Charts (Category + Daily Trend)",
+  heatmap: "Spending Heatmap",
   recent: "Recent Expenses",
   achievements: "Achievements",
   insights: "Spending Insights",
@@ -42,9 +43,10 @@ export const DEFAULT_SECTIONS: DashboardSectionConfig[] = [
   { id: "subscriptions", visible: true, order: 2 },
   { id: "goals", visible: true, order: 3 },
   { id: "charts", visible: true, order: 4 },
-  { id: "recent", visible: true, order: 5 },
-  { id: "achievements", visible: true, order: 6 },
-  { id: "insights", visible: true, order: 7 },
+  { id: "heatmap", visible: true, order: 5 },
+  { id: "recent", visible: true, order: 6 },
+  { id: "achievements", visible: true, order: 7 },
+  { id: "insights", visible: true, order: 8 },
 ];
 
 function getSections(layout?: DashboardLayout): DashboardSectionConfig[] {

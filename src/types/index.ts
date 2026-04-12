@@ -185,7 +185,7 @@ export interface RevenueExpectation {
 
 // ── Dashboard Customization ──
 
-export type DashboardSectionId = "kpi" | "alerts" | "subscriptions" | "goals" | "charts" | "recent" | "achievements" | "insights";
+export type DashboardSectionId = "kpi" | "alerts" | "subscriptions" | "goals" | "charts" | "heatmap" | "recent" | "achievements" | "insights";
 
 export interface DashboardSectionConfig {
   id: DashboardSectionId;

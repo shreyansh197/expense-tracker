@@ -660,18 +660,23 @@ function DashboardContent() {
                   );
                 })()}
               </div>
-              <RevealOnScroll className="dash-section mt-4" delay={0.15}>
-                <SpendingHeatmap
-                  expenses={expenses}
-                  month={currentMonth}
-                  year={currentYear}
-                  onDayClick={handleDayClick}
-                />
-              </RevealOnScroll>
               </>
               )}
               </AnimatePresence>
               </div>
+            ),
+
+            heatmap: () => (
+              expenses.length > 0 ? (
+                <RevealOnScroll className="dash-section" delay={0.15}>
+                  <SpendingHeatmap
+                    expenses={expenses}
+                    month={currentMonth}
+                    year={currentYear}
+                    onDayClick={handleDayClick}
+                  />
+                </RevealOnScroll>
+              ) : null
             ),
 
             recent: () => (

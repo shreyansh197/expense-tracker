@@ -6,12 +6,33 @@ import { HelpCircle, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SHORTCUTS } from "@/hooks/useKeyboardShortcuts";
 
-const TIPS = [
-  "Swipe left / right to switch months",
-  "Enable Business Mode for ledger tracking",
+const COMMON_TIPS = [
   "Set a budget to unlock forecasts & alerts",
-  "Tap the + button to add expenses quickly",
+  "Enable Business Mode for ledger tracking",
+  "Customize your dashboard layout via the ⚙ icon",
+  "Choose an accent color in Settings → Appearance",
+  "Track achievements by staying under budget",
 ];
+
+const TOUCH_TIPS = [
+  "Swipe left / right to switch months",
+  "Tap the + button to add expenses quickly",
+  "Pull down on the dashboard to refresh data",
+  "Long-press an expense to edit or delete it",
+  "Use the bottom nav to switch between pages",
+  "Install as an app from your browser menu",
+];
+
+const DESKTOP_TIPS = [
+  "Use Ctrl+K (⌘K on Mac) to focus the search bar",
+  "Press Ctrl+N (⌘N on Mac) to add a new expense",
+  "Press Shift+? to see all keyboard shortcuts",
+];
+
+function getIsTouch() {
+  if (typeof window === "undefined") return false;
+  return "ontouchstart" in window || navigator.maxTouchPoints > 0;
+}
 
 export function QuickHelpButton({ variant = "icon" }: { variant?: "icon" | "sidebar" }) {
   const [open, setOpen] = useState(false);
@@ -41,7 +62,9 @@ export function QuickHelpButton({ variant = "icon" }: { variant?: "icon" | "side
   const handlerRef = useRef<((e: MouseEvent | TouchEvent) => void) | null>(null);
 
   const isMac = typeof navigator !== "undefined" && navigator.platform.includes("Mac");
+  const isTouch = getIsTouch();
   const shortcuts = SHORTCUTS.filter((s) => (isMac ? !s.ctrl : !s.meta));
+  const tips = [...COMMON_TIPS, ...(isTouch ? TOUCH_TIPS : DESKTOP_TIPS)];
 
   return (
     <div className="relative" ref={ref}>
@@ -86,7 +109,7 @@ export function QuickHelpButton({ variant = "icon" }: { variant?: "icon" | "side
           </div>
 
           <ul className="space-y-1.5">
-            {TIPS.map((tip, i) => (
+            {tips.map((tip, i) => (
               <li key={i} className="flex items-center gap-2 text-xs leading-relaxed" style={{ color: "var(--text-secondary)" }}>
                 <span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: 'var(--secondary)' }} />
                 {tip}
@@ -94,6 +117,7 @@ export function QuickHelpButton({ variant = "icon" }: { variant?: "icon" | "side
             ))}
           </ul>
 
+          {!isTouch && (
           <div className="mt-3 border-t pt-3" style={{ borderColor: "var(--border)" }}>
             <h4 className="mb-2 text-xs font-bold uppercase tracking-wider" style={{ color: "var(--text-primary)" }}>
               Keyboard Shortcuts
@@ -109,10 +133,13 @@ export function QuickHelpButton({ variant = "icon" }: { variant?: "icon" | "side
               ))}
             </div>
           </div>
+          )}
 
+          {!isTouch && (
           <p className="mt-3 text-center text-xs" style={{ color: "var(--text-secondary)" }}>
             Press <kbd className="rounded border px-1 py-0.5 font-mono" style={{ borderColor: "var(--border)", background: "var(--surface-secondary)", color: "var(--text-primary)" }}>Shift + ?</kbd> for full shortcuts panel
           </p>
+          )}
         </div>
         </>,
         document.body,
@@ -137,7 +164,7 @@ export function QuickHelpButton({ variant = "icon" }: { variant?: "icon" | "side
           </div>
 
           <ul className="space-y-1.5">
-            {TIPS.map((tip, i) => (
+            {tips.map((tip, i) => (
               <li key={i} className="flex items-center gap-2 text-xs leading-relaxed" style={{ color: "var(--text-secondary)" }}>
                 <span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: 'var(--secondary)' }} />
                 {tip}
@@ -145,6 +172,7 @@ export function QuickHelpButton({ variant = "icon" }: { variant?: "icon" | "side
             ))}
           </ul>
 
+          {!isTouch && (
           <div className="mt-3 border-t pt-3" style={{ borderColor: "var(--border)" }}>
             <h4 className="mb-2 text-xs font-bold uppercase tracking-wider" style={{ color: "var(--text-primary)" }}>
               Keyboard Shortcuts
@@ -160,10 +188,13 @@ export function QuickHelpButton({ variant = "icon" }: { variant?: "icon" | "side
               ))}
             </div>
           </div>
+          )}
 
+          {!isTouch && (
           <p className="mt-3 text-center text-xs" style={{ color: "var(--text-secondary)" }}>
             Press <kbd className="rounded border px-1 py-0.5 font-mono" style={{ borderColor: "var(--border)", background: "var(--surface-secondary)", color: "var(--text-primary)" }}>Shift + ?</kbd> for full shortcuts panel
           </p>
+          )}
         </div>
       )}
     </div>
