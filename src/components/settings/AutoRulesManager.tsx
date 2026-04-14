@@ -206,7 +206,9 @@ export function AutoRulesManager() {
                 ? (rule.condition.value === "true" ? "= yes" : "= no")
                 : rule.condition.operator === "between"
                   ? `between ${rule.condition.value.replace(",", " and ")}`
-                  : `${rule.condition.operator.replace(/_/g, " ")} "${rule.condition.value}"`}{" "}
+                  : rule.condition.field === "remark" && rule.condition.operator === "contains" && rule.condition.value.includes(",")
+                    ? `contains any of: ${rule.condition.value.split(",").map(k => k.trim()).filter(Boolean).map(k => `"${k}"`).join(", ")}`
+                    : `${rule.condition.operator.replace(/_/g, " ")} "${rule.condition.value}"`}{" "}
               → {rule.action.type === "set_category" ? catMap[rule.action.value]?.label || rule.action.value : "Flag"}
             </p>
           </div>
@@ -341,19 +343,27 @@ export function AutoRulesManager() {
                 />
               </div>
             ) : (
-              <input
-                type={condField === "amount" || condField === "day_of_month" ? "number" : "text"}
-                inputMode={condField === "amount" || condField === "day_of_month" ? "decimal" : undefined}
-                style={condField === "amount" || condField === "day_of_month" ? { fontSize: "16px" } : undefined}
-                placeholder={
-                  condField === "amount" ? `${symbol} amount`
-                  : condField === "day_of_month" ? "Day (1-31)"
-                  : "keyword"
-                }
-                value={condValue}
-                onChange={(e) => setCondValue(e.target.value)}
-                className="form-input rounded px-2 py-1.5 text-xs w-full"
-              />
+              <div className="space-y-1">
+                <input
+                  type={condField === "amount" || condField === "day_of_month" ? "number" : "text"}
+                  inputMode={condField === "amount" || condField === "day_of_month" ? "decimal" : undefined}
+                  style={condField === "amount" || condField === "day_of_month" ? { fontSize: "16px" } : undefined}
+                  placeholder={
+                    condField === "amount" ? `${symbol} amount`
+                    : condField === "day_of_month" ? "Day (1-31)"
+                    : condOp === "contains" ? "e.g. swiggy, zomato, food"
+                    : "keyword"
+                  }
+                  value={condValue}
+                  onChange={(e) => setCondValue(e.target.value)}
+                  className="form-input rounded px-2 py-1.5 text-xs w-full"
+                />
+                {condField === "remark" && condOp === "contains" && (
+                  <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                    Enter one keyword or multiple keywords separated by commas. The rule triggers if any keyword is found in the remark.
+                  </p>
+                )}
+              </div>
             )}
           </div>
           <div className="grid grid-cols-2 gap-2">

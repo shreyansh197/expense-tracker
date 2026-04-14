@@ -110,7 +110,11 @@ export function ExpenseForm({
       if (field === "remark" && remark.trim()) {
         const rv = remark.toLowerCase();
         const cv = value.toLowerCase();
-        if (operator === "contains") match = rv.includes(cv);
+        if (operator === "contains") {
+          // Support comma-separated keywords: match if ANY keyword is found in the remark
+          const keywords = cv.split(",").map((k) => k.trim()).filter(Boolean);
+          match = keywords.length > 0 && keywords.some((kw) => rv.includes(kw));
+        }
         else if (operator === "equals") match = rv === cv;
         else if (operator === "starts_with") match = rv.startsWith(cv);
         else if (operator === "ends_with") match = rv.endsWith(cv);
