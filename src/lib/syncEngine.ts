@@ -260,6 +260,9 @@ export async function pullChanges(workspaceId?: string): Promise<boolean> {
             };
             // Only write if settings actually changed (avoids unnecessary
             // Dexie observable triggers → re-renders → onSyncPull loops)
+            const hasPendingSettingsMutation = pendingMutations.some(
+              m => m.table === "workspace_settings"
+            );
             const settingsChanged = !existingSettings
               || existingSettings.salary !== incoming.salary
               || existingSettings.currency !== incoming.currency
@@ -269,11 +272,20 @@ export async function pullChanges(workspaceId?: string): Promise<boolean> {
               || JSON.stringify(existingSettings.recurringExpenses) !== JSON.stringify(incoming.recurringExpenses)
               || JSON.stringify(existingSettings.autoRules) !== JSON.stringify(incoming.autoRules)
               || JSON.stringify(existingSettings.achievements) !== JSON.stringify(incoming.achievements)
+              || JSON.stringify(existingSettings.monthlyBudgets) !== JSON.stringify(incoming.monthlyBudgets)
               || existingSettings.accentColor !== incoming.accentColor
               || existingSettings.rolloverEnabled !== incoming.rolloverEnabled
               || existingSettings.businessMode !== incoming.businessMode
               || existingSettings.multiCurrencyEnabled !== incoming.multiCurrencyEnabled;
-            if (settingsChanged) {
+            if (hasPendingSettingsMutation) {
+              // Local settings mutations are queued but not yet pushed — do not
+              // overwrite IDB with potentially stale server data before the push.
+              syncLog("pull", "Skipping settings write — pending settings mutation in queue");
+            } else if (existingSettings && existingSettings.updatedAt > incoming.updatedAt) {
+              // IDB is already newer than what the server sent (e.g. push failed
+              // mid-cycle). Preserve local state and let onSyncPull re-push it.
+              syncLog("pull", `Skipping settings write — IDB is newer (IDB=${existingSettings.updatedAt}, server=${incoming.updatedAt})`);
+            } else if (settingsChanged) {
               syncLog("pull", "Settings changed — writing to IDB");
               await db.settings.put(incoming);
               didWrite = true;

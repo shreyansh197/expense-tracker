@@ -232,9 +232,12 @@ export function _syncFromIDB() {
       // Timestamps equal — use content hash to detect actual differences
       const { settingsContentHash } = await import("./settingsStore");
       if (settingsContentHash(remote) !== settingsContentHash(local)) {
-        // Content differs at same timestamp — prefer remote (server as source of truth)
-        saveLocal(remote);
-        _setShared(remote);
+        // Content differs at the same timestamp. Prefer local over remote to
+        // guard against an old cached app version that pushed settings without
+        // newer fields (e.g. autoRules, monthlyBudgets), wiping them on the
+        // server. Push local back to repair any server-side data loss.
+        if (_settings.updatedAt < localTs) _setShared(local);
+        pushToApi(local);
       }
       // Hashes match → already in sync, no action needed
     }

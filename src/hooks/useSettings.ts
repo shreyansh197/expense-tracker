@@ -113,9 +113,12 @@ export function useSettings() {
           // Timestamps equal — use content hash tiebreaker
           const { settingsContentHash } = await import("./settingsStore");
           if (settingsContentHash(remote) !== settingsContentHash(local)) {
-            // Content differs at same timestamp — prefer remote (server as source of truth)
-            saveLocal(remote);
-            _setShared(remote);
+            // Content differs at the same timestamp. Prefer local over remote to
+            // guard against an old cached app version that pushed settings without
+            // newer fields (e.g. autoRules, monthlyBudgets), wiping them on the
+            // server. Push local back to repair any server-side data loss.
+            if (_settings.updatedAt < localTs) _setShared(local);
+            guardedPush(local);
           } else if (remote.salary > 0 && local.salary === 0) {
             saveLocal(remote);
             _setShared(remote);
