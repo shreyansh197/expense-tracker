@@ -223,8 +223,17 @@ export function _syncFromIDB() {
     const remoteTs = remote.updatedAt || 0;
 
     if (remoteTs > localTs) {
-      localStorage.setItem(storageKeyForUser(userIdAtCallTime), JSON.stringify(remote));
-      _setShared(remote);
+      // Remote is newer for scalar fields, but always union collection fields
+      // so items added locally (e.g. smart rules) are never discarded by a
+      // server overwrite that contained empty arrays (old cached SW scenario).
+      const { mergeSettingsForConflict, settingsContentHash } = await import("./settingsStore");
+      const merged = mergeSettingsForConflict(local, remote);
+      localStorage.setItem(storageKeyForUser(userIdAtCallTime), JSON.stringify(merged));
+      _setShared(merged);
+      // If merge rescued local-only items, push back to repair the server
+      if (settingsContentHash(merged) !== settingsContentHash(remote)) {
+        pushToApi(merged);
+      }
     } else if (localTs > remoteTs && localTs > 0) {
       if (_settings.updatedAt < localTs) _setShared(local);
       pushToApi(local);
@@ -232,12 +241,9 @@ export function _syncFromIDB() {
       // Timestamps equal — use content hash to detect actual differences
       const { settingsContentHash } = await import("./settingsStore");
       if (settingsContentHash(remote) !== settingsContentHash(local)) {
-        // Content differs at the same timestamp. Prefer local over remote to
-        // guard against an old cached app version that pushed settings without
-        // newer fields (e.g. autoRules, monthlyBudgets), wiping them on the
-        // server. Push local back to repair any server-side data loss.
-        if (_settings.updatedAt < localTs) _setShared(local);
-        pushToApi(local);
+        // Content differs at the same timestamp — prefer remote (server is truth)
+        localStorage.setItem(storageKeyForUser(userIdAtCallTime), JSON.stringify(remote));
+        _setShared(remote);
       }
       // Hashes match → already in sync, no action needed
     }

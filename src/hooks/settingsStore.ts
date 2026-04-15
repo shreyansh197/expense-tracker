@@ -40,6 +40,43 @@ export const DEFAULT_SETTINGS: UserSettings = {
 };
 
 /**
+ * Merge two settings objects for conflict resolution.
+ *
+ * Scalar fields (salary, currency, etc.): whichever version has the higher
+ * `updatedAt` wins (falls back to `remote` on a tie).
+ * Collection fields (autoRules, recurringExpenses, etc.): union of both so
+ * that items added on another device are never silently discarded.
+ * The merged result is safe to push back to the server to repair any
+ * server-side data loss (e.g. old cached app pushed empty arrays).
+ */
+export function mergeSettingsForConflict(
+  local: UserSettings,
+  remote: UserSettings,
+): UserSettings {
+  // Scalar winner: the side with the higher updatedAt; remote wins on tie
+  const winner = local.updatedAt > remote.updatedAt ? local : remote;
+
+  // Union by id: remote items are the base, local overrides where IDs match
+  const mergeById = <T extends { id: string }>(localArr: T[], remoteArr: T[]): T[] => {
+    const map = new Map<string, T>();
+    for (const item of remoteArr) map.set(item.id, item);
+    for (const item of localArr) map.set(item.id, item); // local wins same ID
+    return Array.from(map.values());
+  };
+  return {
+    ...winner,
+    autoRules: mergeById(local.autoRules ?? [], remote.autoRules ?? []),
+    recurringExpenses: mergeById(local.recurringExpenses ?? [], remote.recurringExpenses ?? []),
+    savedFilters: mergeById(local.savedFilters ?? [], remote.savedFilters ?? []),
+    goals: mergeById(local.goals ?? [], remote.goals ?? []),
+    customCategories: mergeById(local.customCategories ?? [], remote.customCategories ?? []),
+    // Merge record fields: remote provides base, local overrides same key
+    categoryBudgets: { ...remote.categoryBudgets, ...local.categoryBudgets },
+    monthlyBudgets: { ...(remote.monthlyBudgets ?? {}), ...(local.monthlyBudgets ?? {}) },
+  };
+}
+
+/**
  * Cheap content hash (djb2) for settings comparison — excludes timestamps.
  * Returns a numeric hash; only used for equality checks, not security.
  */
