@@ -223,17 +223,12 @@ export function _syncFromIDB() {
     const remoteTs = remote.updatedAt || 0;
 
     if (remoteTs > localTs) {
-      // Remote is newer for scalar fields, but always union collection fields
-      // so items added locally (e.g. smart rules) are never discarded by a
-      // server overwrite that contained empty arrays (old cached SW scenario).
-      const { mergeSettingsForConflict, settingsContentHash } = await import("./settingsStore");
-      const merged = mergeSettingsForConflict(local, remote);
-      localStorage.setItem(storageKeyForUser(userIdAtCallTime), JSON.stringify(merged));
-      _setShared(merged);
-      // If merge rescued local-only items, push back to repair the server
-      if (settingsContentHash(merged) !== settingsContentHash(remote)) {
-        pushToApi(merged);
-      }
+      // Remote is newer — take it as-is (pure LWW).
+      // Do NOT merge collection fields here: mergeById cannot distinguish
+      // "intentionally deleted" from "never added" without tombstones,
+      // causing deleted rules to be resurrected from stale local state.
+      localStorage.setItem(storageKeyForUser(userIdAtCallTime), JSON.stringify(remote));
+      _setShared(remote);
     } else if (localTs > remoteTs && localTs > 0) {
       if (_settings.updatedAt < localTs) _setShared(local);
       pushToApi(local);
