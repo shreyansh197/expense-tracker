@@ -30,14 +30,20 @@ function markApplied(key: string) {
   localStorage.setItem(APPLIED_KEY, JSON.stringify([...set]));
 }
 
+// Module-level in-flight set: survives React remounts and StrictMode
+// double-invocations. Prevents concurrent effect runs from both
+// passing the IDB check and writing the same recurring expense twice.
+const _inFlight = new Set<string>();
+
 export function useRecurringExpenses(month: number, year: number) {
   const { settings } = useSettings();
-  const { addExpense, expenses, loading } = useExpenses(month, year);
+  const { addExpense, loading } = useExpenses(month, year);
   const { toast } = useToast();
-  const appliedRef = useRef(false);
+  // Stable ref to addExpense so it never triggers the effect dependency
+  const addExpenseRef = useRef(addExpense);
+  useEffect(() => { addExpenseRef.current = addExpense; }, [addExpense]);
 
   useEffect(() => {
-    if (appliedRef.current) return;
     if (loading) return;
     const recurring = settings.recurringExpenses || [];
     const active = recurring.filter((r: RecurringExpense) => r.active);
@@ -54,42 +60,43 @@ export function useRecurringExpenses(month: number, year: number) {
 
     const candidates = active.filter((r: RecurringExpense) => {
       const key = getAppliedKey(r.id, month, year);
-      return r.day <= today && !applied.has(key);
+      return r.day <= today && !applied.has(key) && !_inFlight.has(key);
     });
 
     if (candidates.length === 0) return;
 
-    appliedRef.current = true;
+    // Claim all candidates atomically before any async work
+    for (const r of candidates) {
+      _inFlight.add(getAppliedKey(r.id, month, year));
+    }
 
-    // Apply recurring expenses — query IDB directly each iteration to
-    // avoid stale-closure duplicates when multiple candidates are processed.
     (async () => {
       let appliedCount = 0;
       for (const r of candidates) {
         try {
           const key = getAppliedKey(r.id, month, year);
 
-          // Mark applied BEFORE writing to prevent re-entry from effect re-runs
+          // Mark applied in localStorage BEFORE writing to IDB to prevent
+          // re-entry from any effect re-run triggered by the IDB write
           markApplied(key);
 
-          // Fresh IDB check — authoritative, not a stale React snapshot
+          // Authoritative IDB check — guards against a second device or tab
+          // that already wrote the expense before our localStorage was set
           const wid = getActiveWorkspaceId();
-          const freshExpenses = wid
-            ? await db.expenses
-                .where("[workspaceId+month+year]")
-                .equals([wid, month, year])
-                .toArray()
-            : expenses;
+          if (wid) {
+            const freshExpenses = await db.expenses
+              .where("[workspaceId+month+year]")
+              .equals([wid, month, year])
+              .toArray();
 
-          const alreadyExists = freshExpenses.some(
-            (e) => e.recurringId === r.id && !e.deletedAt
-          );
+            const alreadyExists = freshExpenses.some(
+              (e) => e.recurringId === r.id && !e.deletedAt
+            );
 
-          if (alreadyExists) {
-            continue;
+            if (alreadyExists) continue;
           }
 
-          await addExpense({
+          await addExpenseRef.current({
             category: r.category,
             amount: r.amount,
             day: r.day,
@@ -102,11 +109,17 @@ export function useRecurringExpenses(month: number, year: number) {
           appliedCount++;
         } catch {
           // Silently fail — will retry next time
+        } finally {
+          _inFlight.delete(getAppliedKey(r.id, month, year));
         }
       }
       if (appliedCount > 0) {
         toast(`Applied ${appliedCount} recurring expense${appliedCount > 1 ? "s" : ""}`);
       }
     })();
-  }, [settings.recurringExpenses, month, year, addExpense, expenses, loading, toast]);
+  // Intentionally omit `addExpense` and `expenses` — addExpense is accessed
+  // via stable ref, and including `expenses` would re-fire after every IDB
+  // write causing duplicates. `loading` is kept so we don't run before data loads.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [settings.recurringExpenses, month, year, loading, toast]);
 }
