@@ -44,10 +44,10 @@ export const DEFAULT_SETTINGS: UserSettings = {
  *
  * Scalar fields (salary, currency, etc.): whichever version has the higher
  * `updatedAt` wins (falls back to `remote` on a tie).
- * Collection fields (autoRules, recurringExpenses, etc.): union of both so
- * that items added on another device are never silently discarded.
- * The merged result is safe to push back to the server to repair any
- * server-side data loss (e.g. old cached app pushed empty arrays).
+ * Collection fields (autoRules, recurringExpenses, etc.): only add items from
+ * the OTHER side that are genuinely new (not present in the winner). Items
+ * absent from the winner are treated as intentional deletions and are NOT
+ * resurrected from the other side.
  */
 export function mergeSettingsForConflict(
   local: UserSettings,
@@ -55,24 +55,27 @@ export function mergeSettingsForConflict(
 ): UserSettings {
   // Scalar winner: the side with the higher updatedAt; remote wins on tie
   const winner = local.updatedAt > remote.updatedAt ? local : remote;
+  const other  = local.updatedAt > remote.updatedAt ? remote : local;
 
-  // Union by id: remote items are the base, local overrides where IDs match
-  const mergeById = <T extends { id: string }>(localArr: T[], remoteArr: T[]): T[] => {
-    const map = new Map<string, T>();
-    for (const item of remoteArr) map.set(item.id, item);
-    for (const item of localArr) map.set(item.id, item); // local wins same ID
-    return Array.from(map.values());
+  // Only add items from `other` that do NOT appear in `winner` at all.
+  // This preserves cross-device additions while respecting deletions made
+  // on the winning device.
+  const mergeById = <T extends { id: string }>(winnerArr: T[], otherArr: T[]): T[] => {
+    const winnerIds = new Set(winnerArr.map(i => i.id));
+    const additions = otherArr.filter(i => !winnerIds.has(i.id));
+    return [...winnerArr, ...additions];
   };
+
   return {
     ...winner,
-    autoRules: mergeById(local.autoRules ?? [], remote.autoRules ?? []),
-    recurringExpenses: mergeById(local.recurringExpenses ?? [], remote.recurringExpenses ?? []),
-    savedFilters: mergeById(local.savedFilters ?? [], remote.savedFilters ?? []),
-    goals: mergeById(local.goals ?? [], remote.goals ?? []),
-    customCategories: mergeById(local.customCategories ?? [], remote.customCategories ?? []),
-    // Merge record fields: remote provides base, local overrides same key
-    categoryBudgets: { ...remote.categoryBudgets, ...local.categoryBudgets },
-    monthlyBudgets: { ...(remote.monthlyBudgets ?? {}), ...(local.monthlyBudgets ?? {}) },
+    autoRules: mergeById(winner.autoRules ?? [], other.autoRules ?? []),
+    recurringExpenses: mergeById(winner.recurringExpenses ?? [], other.recurringExpenses ?? []),
+    savedFilters: mergeById(winner.savedFilters ?? [], other.savedFilters ?? []),
+    goals: mergeById(winner.goals ?? [], other.goals ?? []),
+    customCategories: mergeById(winner.customCategories ?? [], other.customCategories ?? []),
+    // Record fields: winner's keys take precedence; other only fills in missing keys
+    categoryBudgets: { ...other.categoryBudgets, ...winner.categoryBudgets },
+    monthlyBudgets: { ...(other.monthlyBudgets ?? {}), ...(winner.monthlyBudgets ?? {}) },
   };
 }
 
