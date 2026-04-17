@@ -10,6 +10,7 @@ export const duration = {
   slow: 0.7,      // progress bars, chart reveals
   glacial: 0.6,   // full-page transitions, onboarding
   exit: 0.15,     // all exit animations — must be snappy
+  narrative: 1.2, // scroll-story transitions, signature moments
 } as const;
 
 // ── Stagger delays (seconds) ──
@@ -42,6 +43,8 @@ export const spring = {
   bouncy: { type: "spring" as const, stiffness: 600, damping: 15 },
   /** Gentle — slow reveals, background elements */
   gentle: { type: "spring" as const, stiffness: 200, damping: 20 },
+  /** Water — fluid bottom sheet, spending stream, liquid effects */
+  water: { type: "spring" as const, stiffness: 120, damping: 14 },
 } as const;
 
 // ── Distances (pixels) ──

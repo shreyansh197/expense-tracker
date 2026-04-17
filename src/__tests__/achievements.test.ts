@@ -58,8 +58,8 @@ function getCheck(id: string) {
 // =========== FUNCTIONAL TESTS ===========
 
 describe("Achievement definitions — functional", () => {
-  test("ACHIEVEMENT_DEFS has exactly 10 definitions", () => {
-    expect(ACHIEVEMENT_DEFS).toHaveLength(10);
+  test("ACHIEVEMENT_DEFS has exactly 7 definitions", () => {
+    expect(ACHIEVEMENT_DEFS).toHaveLength(7);
   });
 
   test("all definitions have unique IDs", () => {
@@ -75,11 +75,6 @@ describe("Achievement definitions — functional", () => {
       expect(def.icon).toBeTruthy();
       expect(typeof def.check).toBe("function");
     }
-  });
-
-  test("first_step: unlocks at 1 expense", () => {
-    const check = getCheck("first_step");
-    expect(check({ totalExpenses: 1, streak: 0, uniqueCategoriesThisMonth: 0, goalCount: 0, completedGoals: 0, activeRecurring: 0, consecutiveMonthsUnderBudget: 0 })).toBe(true);
   });
 
   test("week_warrior: unlocks at 7-day streak", () => {
@@ -102,11 +97,6 @@ describe("Achievement definitions — functional", () => {
     expect(check({ totalExpenses: 0, streak: 0, uniqueCategoriesThisMonth: 0, goalCount: 0, completedGoals: 0, activeRecurring: 0, consecutiveMonthsUnderBudget: 3 })).toBe(true);
   });
 
-  test("category_king: unlocks at 5 unique categories", () => {
-    const check = getCheck("category_king");
-    expect(check({ totalExpenses: 5, streak: 0, uniqueCategoriesThisMonth: 5, goalCount: 0, completedGoals: 0, activeRecurring: 0, consecutiveMonthsUnderBudget: 0 })).toBe(true);
-  });
-
   test("goal_setter: unlocks when 1 goal exists", () => {
     const check = getCheck("goal_setter");
     expect(check({ totalExpenses: 0, streak: 0, uniqueCategoriesThisMonth: 0, goalCount: 1, completedGoals: 0, activeRecurring: 0, consecutiveMonthsUnderBudget: 0 })).toBe(true);
@@ -121,21 +111,11 @@ describe("Achievement definitions — functional", () => {
     const check = getCheck("recurring_pro");
     expect(check({ totalExpenses: 0, streak: 0, uniqueCategoriesThisMonth: 0, goalCount: 0, completedGoals: 0, activeRecurring: 3, consecutiveMonthsUnderBudget: 0 })).toBe(true);
   });
-
-  test("data_driven: unlocks at 100 expenses", () => {
-    const check = getCheck("data_driven");
-    expect(check({ totalExpenses: 100, streak: 0, uniqueCategoriesThisMonth: 0, goalCount: 0, completedGoals: 0, activeRecurring: 0, consecutiveMonthsUnderBudget: 0 })).toBe(true);
-  });
 });
 
 // =========== NEGATIVE TESTS ===========
 
 describe("Achievement definitions — negative", () => {
-  test("first_step: does NOT unlock at 0 expenses", () => {
-    const check = getCheck("first_step");
-    expect(check({ totalExpenses: 0, streak: 0, uniqueCategoriesThisMonth: 0, goalCount: 0, completedGoals: 0, activeRecurring: 0, consecutiveMonthsUnderBudget: 0 })).toBe(false);
-  });
-
   test("week_warrior: does NOT unlock at 6-day streak", () => {
     const check = getCheck("week_warrior");
     expect(check({ totalExpenses: 6, streak: 6, uniqueCategoriesThisMonth: 1, goalCount: 0, completedGoals: 0, activeRecurring: 0, consecutiveMonthsUnderBudget: 0 })).toBe(false);
@@ -151,11 +131,6 @@ describe("Achievement definitions — negative", () => {
     expect(check({ totalExpenses: 0, streak: 0, uniqueCategoriesThisMonth: 0, goalCount: 0, completedGoals: 0, activeRecurring: 0, consecutiveMonthsUnderBudget: 2 })).toBe(false);
   });
 
-  test("category_king: does NOT unlock at 4 categories", () => {
-    const check = getCheck("category_king");
-    expect(check({ totalExpenses: 4, streak: 0, uniqueCategoriesThisMonth: 4, goalCount: 0, completedGoals: 0, activeRecurring: 0, consecutiveMonthsUnderBudget: 0 })).toBe(false);
-  });
-
   test("goal_crusher: does NOT unlock when no goals completed", () => {
     const check = getCheck("goal_crusher");
     expect(check({ totalExpenses: 0, streak: 0, uniqueCategoriesThisMonth: 0, goalCount: 5, completedGoals: 0, activeRecurring: 0, consecutiveMonthsUnderBudget: 0 })).toBe(false);
@@ -164,11 +139,6 @@ describe("Achievement definitions — negative", () => {
   test("recurring_pro: does NOT unlock at 2 recurring", () => {
     const check = getCheck("recurring_pro");
     expect(check({ totalExpenses: 0, streak: 0, uniqueCategoriesThisMonth: 0, goalCount: 0, completedGoals: 0, activeRecurring: 2, consecutiveMonthsUnderBudget: 0 })).toBe(false);
-  });
-
-  test("data_driven: does NOT unlock at 99 expenses", () => {
-    const check = getCheck("data_driven");
-    expect(check({ totalExpenses: 99, streak: 0, uniqueCategoriesThisMonth: 0, goalCount: 0, completedGoals: 0, activeRecurring: 0, consecutiveMonthsUnderBudget: 0 })).toBe(false);
   });
 
   test("no achievement unlocks with all zeros", () => {
@@ -181,25 +151,15 @@ describe("Achievement definitions — negative", () => {
 // =========== BOUNDARY TESTS ===========
 
 describe("Achievement definitions — boundary", () => {
-  test("first_step: exactly at boundary (1)", () => {
-    const check = getCheck("first_step");
-    expect(check({ totalExpenses: 1, streak: 0, uniqueCategoriesThisMonth: 0, goalCount: 0, completedGoals: 0, activeRecurring: 0, consecutiveMonthsUnderBudget: 0 })).toBe(true);
-  });
-
-  test("data_driven: exactly at boundary (100)", () => {
-    const check = getCheck("data_driven");
-    expect(check({ totalExpenses: 100, streak: 0, uniqueCategoriesThisMonth: 0, goalCount: 0, completedGoals: 0, activeRecurring: 0, consecutiveMonthsUnderBudget: 0 })).toBe(true);
-  });
-
-  test("data_driven: exceeds boundary (500)", () => {
-    const check = getCheck("data_driven");
-    expect(check({ totalExpenses: 500, streak: 0, uniqueCategoriesThisMonth: 0, goalCount: 0, completedGoals: 0, activeRecurring: 0, consecutiveMonthsUnderBudget: 0 })).toBe(true);
+  test("week_warrior: exactly at boundary (7)", () => {
+    const check = getCheck("week_warrior");
+    expect(check({ totalExpenses: 7, streak: 7, uniqueCategoriesThisMonth: 0, goalCount: 0, completedGoals: 0, activeRecurring: 0, consecutiveMonthsUnderBudget: 0 })).toBe(true);
   });
 
   test("all achievements unlock simultaneously with max values", () => {
     const ctx = { totalExpenses: 1000, streak: 365, uniqueCategoriesThisMonth: 10, goalCount: 5, completedGoals: 3, activeRecurring: 5, consecutiveMonthsUnderBudget: 12 };
     const unlocked = ACHIEVEMENT_DEFS.filter((d) => d.check(ctx));
-    expect(unlocked).toHaveLength(10);
+    expect(unlocked).toHaveLength(7);
   });
 
   test("week_warrior unlocks before monthly_master at streak=7", () => {
@@ -274,7 +234,7 @@ describe("Achievement definitions — performance", () => {
     const originalLength = ACHIEVEMENT_DEFS.length;
     // Attempting to modify shouldn't affect the exported array in a real module
     expect(ACHIEVEMENT_DEFS.length).toBe(originalLength);
-    expect(originalLength).toBe(10);
+    expect(originalLength).toBe(7);
   });
 });
 

@@ -1,80 +1,40 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { ArrowRight, X, PlusCircle, BarChart2, Settings, Lightbulb, Rocket } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
-import { ObserverCharacter } from "@/components/ui/illustrations/characters";
+import { useState, useEffect } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { ArrowRight, X } from "lucide-react";
+import { ClearingScene } from "@/components/ui/illustrations/terrain/ClearingScene";
 
-/* ── Step definitions ─────────────────────────────────────── */
+/* ── 4-Screen "Arrival" Flow ─────────────────────────────── */
 
-interface Step {
-  /** querySelector to find the target element — desktop variant used at lg+ */
-  selector: string;
-  selectorDesktop?: string;
-  title: string;
-  body: string;
-  icon?: LucideIcon;
-  /** If true, show a centered card instead of anchored to an element */
-  centered?: boolean;
-}
-
-const STEPS: Step[] = [
+const SCREENS = [
   {
-    selector: '[data-tour="fab"]',
-    selectorDesktop: '[data-tour="fab-desktop"]',
-    title: "Add your first expense",
-    body: "Tap this button to log what you spend. Every entry helps ExpenStream track your habits.",
-    icon: PlusCircle,
+    title: "Welcome to\nthe clearing.",
+    body: "A calm place to understand where your money goes.",
+    illustration: true,
   },
   {
-    selector: '[data-tour="dashboard"]',
-    title: "Your spending at a glance",
-    body: "Switch months here to browse your spending history. You can also swipe left or right anywhere on the screen to jump between months.",
-    icon: BarChart2,
+    title: "Drop a stone.",
+    body: "Each expense is a stone dropped into the stream. Tap the button below to log what you spend.",
+    tips: ["Swipe months to browse history", "Set a budget to unlock forecasts"],
   },
   {
-    selector: '[data-tour="nav-settings"]',
-    selectorDesktop: '[data-tour="nav-settings-desktop"]',
-    title: "Make it yours",
-    body: "Set a monthly budget, customise categories, recurring expenses, and savings goals.",
-    icon: Settings,
+    title: "Explore the\noverlook.",
+    body: "Charts and patterns emerge as your stream of expenses grows. The more you track, the clearer the view.",
+    tips: ["Categories colour your spending", "Recurring expenses are detected automatically"],
   },
   {
-    selector: "",
-    title: "Pro tips \u2728",
-    body: "\u2022 Swipe left / right to switch months\n\u2022 Press Shift + ? to see all keyboard shortcuts\n\u2022 Enable Business Mode in Settings for ledger tracking & invoices\n\u2022 Set a budget in Settings to unlock forecasts & alerts",
-    icon: Lightbulb,
-    centered: true,
+    title: "Your clearing\nawaits.",
+    body: "Start tracking and make this space yours.",
+    final: true,
   },
-  {
-    selector: "",
-    title: "You\u2019re all set!",
-    body: "Start tracking your expenses and take control of your finances.",
-    icon: Rocket,
-    centered: true,
-  },
-];
+] as const;
 
-/* ── Helpers ──────────────────────────────────────────────── */
-
-const PAD = 8; // spotlight padding around the target
-
-interface Rect {
-  top: number;
-  left: number;
-  width: number;
-  height: number;
-}
-
-function getTargetRect(step: Step): Rect | null {
-  if (step.centered) return null;
-  const isDesktop = window.innerWidth >= 1024;
-  const sel = isDesktop && step.selectorDesktop ? step.selectorDesktop : step.selector;
-  const el = document.querySelector(sel);
-  if (!el) return null;
-  const r = el.getBoundingClientRect();
-  return { top: r.top - PAD, left: r.left - PAD, width: r.width + PAD * 2, height: r.height + PAD * 2 };
-}
+const slideVariants = {
+  enter: (dir: number) => ({ x: dir > 0 ? 80 : -80, opacity: 0 }),
+  center: { x: 0, opacity: 1 },
+  exit: (dir: number) => ({ x: dir > 0 ? -80 : 80, opacity: 0 }),
+};
 
 /* ── Component ────────────────────────────────────────────── */
 
@@ -83,161 +43,180 @@ interface WelcomeTutorialProps {
 }
 
 export function WelcomeTutorial({ onComplete }: WelcomeTutorialProps) {
-  const [step, setStep] = useState(0);
-  const [rect, setRect] = useState<Rect | null>(null);
-  const current = STEPS[step];
-  const isLast = step === STEPS.length - 1;
+  const [screen, setScreen] = useState(-1); // -1 = splash
+  const [dir, setDir] = useState(1);
+  const isLast = screen === SCREENS.length - 1;
 
-  const measure = useCallback(() => {
-    setRect(getTargetRect(STEPS[step]));
-  }, [step]);
-
-  // Measure on step change + scroll/resize
+  // Splash auto-advance after 2s
   useEffect(() => {
-    const frame = requestAnimationFrame(() => measure());
-    window.addEventListener("scroll", measure, true);
-    window.addEventListener("resize", measure);
-    return () => {
-      cancelAnimationFrame(frame);
-      window.removeEventListener("scroll", measure, true);
-      window.removeEventListener("resize", measure);
-    };
-  }, [measure]);
+    if (screen !== -1) return;
+    const t = setTimeout(() => { setDir(1); setScreen(0); }, 2000);
+    return () => clearTimeout(t);
+  }, [screen]);
 
-  // Skip step if target element is missing (e.g. FAB hidden on settings page)
-  useEffect(() => {
-    if (current.centered) return;
-    const isDesktop = window.innerWidth >= 1024;
-    const sel = isDesktop && current.selectorDesktop ? current.selectorDesktop : current.selector;
-    if (!document.querySelector(sel)) {
-      const id = requestAnimationFrame(() => {
-        if (isLast) onComplete();
-        else setStep((s) => s + 1);
-      });
-      return () => cancelAnimationFrame(id);
-    }
-  }, [step, current, isLast, onComplete]);
+  const next = () => {
+    if (isLast) { onComplete(); return; }
+    setDir(1);
+    setScreen((s) => s + 1);
+  };
+  const back = () => { setDir(-1); setScreen((s) => Math.max(0, s - 1)); };
 
-  /* ── Card positioning ───────────────────────────────────── */
-  const cardWidth = Math.min(320, (typeof window !== "undefined" ? window.innerWidth : 360) - 32);
-
-  const cardStyle: React.CSSProperties = {};
-  if (rect) {
-    const targetCenterY = rect.top + rect.height / 2;
-    const aboveCenter = targetCenterY < window.innerHeight / 2;
-    if (aboveCenter) {
-      cardStyle.top = Math.min(rect.top + rect.height + 16, window.innerHeight - 200);
-    } else {
-      cardStyle.bottom = Math.max(window.innerHeight - rect.top + 16, 16);
-    }
-    let left = rect.left + rect.width / 2 - cardWidth / 2;
-    left = Math.max(16, Math.min(left, window.innerWidth - cardWidth - 16));
-    cardStyle.left = left;
-    cardStyle.width = cardWidth;
+  /* ── Splash screen ─────────────────────────────────────── */
+  if (screen === -1) {
+    return (
+      <div className="fixed inset-0 z-[300] flex items-center justify-center" style={{ background: "var(--es-chalk, #FAF7F2)" }}>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          className="text-center"
+        >
+          <div className="flex justify-center gap-2 mb-6" aria-hidden="true">
+            {[0, 1, 2].map((i) => (
+              <motion.span
+                key={i}
+                className="block w-2.5 h-2.5 rounded-full"
+                style={{ background: "var(--es-moss, #3D5A3E)" }}
+                initial={{ opacity: 0.3, scale: 0.8 }}
+                animate={{ opacity: [0.3, 0.8, 0.3], scale: [0.8, 1.15, 0.8] }}
+                transition={{ duration: 2, delay: i * 0.35, repeat: Infinity, ease: "easeInOut" }}
+              />
+            ))}
+          </div>
+          <h1 className="font-display italic text-2xl" style={{ color: "var(--text-primary)" }}>
+            ExpenStream
+          </h1>
+        </motion.div>
+      </div>
+    );
   }
 
-  const centeredStyle: React.CSSProperties = {
-    top: "50%",
-    left: "50%",
-    transform: "translate(-50%, -50%)",
-    width: cardWidth,
-  };
+  const current = SCREENS[screen];
 
   return (
-    <div className="fixed inset-0 z-[300]" aria-modal="true" role="dialog" style={{ paddingTop: 'env(safe-area-inset-top, 0px)', paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
-      {/* Overlay with spotlight cutout */}
-      {rect ? (
-        <div
-          className="fixed rounded-xl transition-all duration-300 ease-out"
-          style={{
-            top: rect.top,
-            left: rect.left,
-            width: rect.width,
-            height: rect.height,
-            boxShadow: "0 0 0 9999px rgba(0,0,0,0.6)",
-            pointerEvents: "none",
-          }}
-        />
-      ) : (
-        <div className="fixed inset-0 bg-black/60" />
-      )}
+    <div
+      className="fixed inset-0 z-[300] flex flex-col"
+      aria-modal="true"
+      role="dialog"
+      style={{
+        background: "var(--es-chalk, #FAF7F2)",
+        paddingTop: "env(safe-area-inset-top, 0px)",
+        paddingBottom: "env(safe-area-inset-bottom, 0px)",
+      }}
+    >
+      {/* Skip button */}
+      <div className="flex justify-end p-4">
+        <button
+          onClick={onComplete}
+          className="rounded-lg p-2 min-h-11 min-w-11 flex items-center justify-center"
+          style={{ color: "var(--text-muted)" }}
+          aria-label="Skip onboarding"
+        >
+          <X size={16} />
+        </button>
+      </div>
 
-      {/* Card — always above overlay */}
-      <div
-        className="fixed z-[301] rounded-2xl p-5 shadow-2xl transition-all duration-300"
-        style={{
-          background: "var(--surface)",
-          border: "1px solid var(--border)",
-          ...(rect ? cardStyle : centeredStyle),
-        }}
-      >
-        {/* Close / Skip */}
-        <div className="flex justify-end">
-          <button
-            onClick={onComplete}
-            className="rounded-lg p-2 min-h-11 min-w-11 flex items-center justify-center transition-colors"
-            style={{ color: "var(--text-muted)" }}
-            aria-label="Skip tutorial"
+      {/* Content area */}
+      <div className="flex-1 flex flex-col items-center justify-center px-8 overflow-hidden">
+        <AnimatePresence mode="wait" custom={dir}>
+          <motion.div
+            key={screen}
+            custom={dir}
+            variants={slideVariants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={{ duration: 0.35, ease: "easeInOut" }}
+            className="w-full max-w-sm text-center"
           >
-            <X size={16} />
-          </button>
-        </div>
+            {/* Illustration on first screen */}
+            {"illustration" in current && current.illustration && (
+              <div className="mb-8 flex justify-center">
+                <ClearingScene className="w-48 h-48 opacity-80" />
+              </div>
+            )}
 
-        {/* Content */}
-        {/* Onboarding exception: higher character prominence allowed */}
-        {isLast && (
-          <div className="flex justify-center mb-2">
-            <ObserverCharacter size={100} />
-          </div>
-        )}
-        {current.icon && !isLast && (
-          <div className="mb-2 flex h-9 w-9 items-center justify-center rounded-xl" style={{ background: 'var(--accent-soft)' }}>
-            <current.icon size={18} style={{ color: 'var(--accent)' }} />
-          </div>
-        )}
-        <h2
-          className="text-base font-bold"
-          style={{ color: "var(--text-primary)" }}
-        >
-          {current.title}
-        </h2>
-        <p
-          className="mt-1.5 whitespace-pre-line text-sm leading-relaxed"
-          style={{ color: "var(--text-secondary)" }}
-        >
-          {current.body}
-        </p>
+            {/* Final screen dots */}
+            {"final" in current && current.final && (
+              <div className="flex justify-center gap-2 mb-6" aria-hidden="true">
+                {[0, 1, 2].map((i) => (
+                  <span
+                    key={i}
+                    className="block w-2.5 h-2.5 rounded-full"
+                    style={{ background: "var(--es-moss, #3D5A3E)", opacity: 0.6 }}
+                  />
+                ))}
+              </div>
+            )}
 
-        {/* Dots */}
-        <div className="mt-4 flex justify-center gap-1.5">
-          {STEPS.map((_, i) => (
+            <h2
+              className="font-display italic whitespace-pre-line"
+              style={{ color: "var(--text-primary)", fontSize: "1.5rem", lineHeight: 1.25 }}
+            >
+              {current.title}
+            </h2>
+
+            <p
+              className="mt-3 text-sm leading-relaxed font-body-terrain"
+              style={{ color: "var(--text-secondary)" }}
+            >
+              {current.body}
+            </p>
+
+            {/* Tips */}
+            {"tips" in current && current.tips && (
+              <div className="mt-5 grid grid-cols-1 gap-2">
+                {current.tips.map((tip) => (
+                  <div
+                    key={tip}
+                    className="rounded-2xl px-4 py-3 text-left text-xs leading-snug font-body-terrain"
+                    style={{
+                      background: "var(--surface, rgba(61,90,62,0.04))",
+                      border: "1px solid var(--border, rgba(61,90,62,0.08))",
+                      color: "var(--text-secondary)",
+                    }}
+                  >
+                    {tip}
+                  </div>
+                ))}
+              </div>
+            )}
+          </motion.div>
+        </AnimatePresence>
+      </div>
+
+      {/* Bottom: dots + buttons */}
+      <div className="px-8 pb-8">
+        {/* Step dots */}
+        <div className="flex justify-center gap-1.5 mb-5">
+          {SCREENS.map((_, i) => (
             <div
               key={i}
               className="h-1.5 rounded-full transition-all duration-300"
               style={{
-                width: i === step ? 20 : 6,
-                background: i === step ? "var(--accent)" : "var(--border)",
+                width: i === screen ? 20 : 6,
+                background: i === screen ? "var(--es-moss, #3D5A3E)" : "var(--border)",
               }}
             />
           ))}
         </div>
 
-        {/* Actions */}
-        <div className="mt-4 flex gap-2">
-          {step > 0 && (
+        <div className="flex gap-2">
+          {screen > 0 && (
             <button
-              onClick={() => setStep((s) => s - 1)}
-              className="flex-1 rounded-xl px-4 py-2.5 text-sm font-medium transition-colors"
+              onClick={back}
+              className="flex-1 rounded-full px-4 py-3 text-sm font-medium transition-colors"
               style={{ background: "var(--surface-secondary)", color: "var(--text-secondary)" }}
             >
               Back
             </button>
           )}
           <button
-            onClick={() => (isLast ? onComplete() : setStep((s) => s + 1))}
-            className="btn-primary btn-md flex flex-1 items-center justify-center gap-1.5"
+            onClick={next}
+            className="flex flex-1 items-center justify-center gap-1.5 rounded-full px-4 py-3 text-sm font-medium text-white transition-all active:scale-95"
+            style={{ background: "var(--es-moss, #3D5A3E)" }}
           >
-            {isLast ? "Get Started" : "Next"}
+            {isLast ? "Enter the clearing" : screen === 0 ? "Begin" : "Next"}
             {!isLast && <ArrowRight size={14} />}
           </button>
         </div>

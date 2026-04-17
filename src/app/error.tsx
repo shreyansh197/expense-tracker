@@ -2,7 +2,8 @@
 
 import { useEffect } from "react";
 import * as Sentry from "@sentry/nextjs";
-import { AlertTriangle, RefreshCw } from "lucide-react";
+import Link from "next/link";
+import { FallenLog } from "@/components/ui/illustrations/terrain/FallenLog";
 
 export default function GlobalError({
   error,
@@ -16,33 +17,43 @@ export default function GlobalError({
   }, [error]);
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-4 p-6 text-center">
-      <div
-        className="flex h-14 w-14 items-center justify-center rounded-full"
-        style={{ background: "var(--danger-soft)" }}
-      >
-        <AlertTriangle size={28} style={{ color: "var(--danger)" }} />
+    <div
+      className="flex min-h-screen flex-col items-center justify-center gap-6 p-8 text-center"
+      style={{ background: "var(--es-chalk, #FAF7F2)" }}
+    >
+      <FallenLog className="w-32 h-32 opacity-70" />
+
+      <div className="space-y-2">
+        <h1
+          className="font-display italic text-2xl"
+          style={{ color: "var(--text-primary)" }}
+        >
+          Something shifted underfoot.
+        </h1>
+        <p
+          className="max-w-xs text-sm font-body-terrain"
+          style={{ color: "var(--text-secondary)" }}
+        >
+          An unexpected error occurred. Your data is safe — this was a momentary stumble.
+        </p>
       </div>
-      <h2
-        className="text-lg font-semibold"
-        style={{ color: "var(--text-primary)" }}
-      >
-        Something went wrong
-      </h2>
-      <p className="max-w-sm text-sm" style={{ color: "var(--text-secondary)" }}>
-        An unexpected error occurred. Please try again.
-      </p>
-      <button
-        onClick={reset}
-        className="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors"
-        style={{
-          background: "var(--surface-secondary)",
-          color: "var(--text-primary)",
-        }}
-      >
-        <RefreshCw size={14} />
-        Try Again
-      </button>
+
+      <div className="flex items-center gap-3">
+        <button
+          onClick={reset}
+          className="rounded-full px-5 py-2.5 text-sm font-medium text-white transition-all active:scale-95"
+          style={{ background: "var(--es-moss, #3D5A3E)" }}
+        >
+          Try again
+        </button>
+        <Link
+          href="/"
+          className="rounded-full px-5 py-2.5 text-sm font-medium transition-all hover:opacity-70"
+          style={{ color: "var(--text-secondary)" }}
+        >
+          Head back
+        </Link>
+      </div>
     </div>
   );
 }

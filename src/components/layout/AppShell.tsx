@@ -21,6 +21,9 @@ import { usePinLock } from "@/hooks/usePinLock";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { PullToRefreshIndicator } from "@/components/ui/PullToRefreshIndicator";
 import { OfflineBanner } from "@/components/sync/SyncIndicator";
+import { useBudgetHealthBg } from "@/hooks/useBudgetHealthBg";
+import { WatcherConstellation } from "@/components/ui/WatcherConstellation";
+import { useWatcher } from "@/hooks/useWatcher";
 
 function AppShellInner({ children }: { children: React.ReactNode }) {
   const [showShortcuts, setShowShortcuts] = useState(false);
@@ -28,6 +31,12 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
   useKeyboardShortcuts(() => setShowShortcuts(true));
   const { nextMonth, prevMonth } = useUIStore();
   const { toast } = useToast();
+
+  // Ambient background health drift
+  useBudgetHealthBg();
+
+  // Watcher ambient AI
+  const { insight, dismiss } = useWatcher();
 
   // Pull-to-refresh: reload current page data
   const handleRefresh = useCallback(async () => {
@@ -106,6 +115,7 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
             </main>
           </div>
           <BottomNav />
+          <WatcherConstellation insight={insight} onDismiss={dismiss} />
         </CalculationsProvider>
       </ErrorBoundary>
       <ExpenseFormModal />

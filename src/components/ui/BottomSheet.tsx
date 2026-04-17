@@ -15,9 +15,11 @@ interface BottomSheetProps {
   label?: string;
   /** Extra className for the sheet panel */
   className?: string;
+  /** Spring preset for entrance animation (default: spring.default) */
+  springPreset?: { type: "spring"; stiffness: number; damping: number };
 }
 
-export function BottomSheet({ open, onClose, children, label, className }: BottomSheetProps) {
+export function BottomSheet({ open, onClose, children, label, className, springPreset }: BottomSheetProps) {
   const [dragY, setDragY] = useState(0);
   const dragStartRef = useRef<number | null>(null);
   const closingRef = useRef(false);
@@ -114,7 +116,7 @@ export function BottomSheet({ open, onClose, children, label, className }: Botto
               opacity: dragY > 0 ? Math.max(1 - dragY / 300, 0.5) : 1,
             }}
             initial={{ opacity: 0, y: 40, scale: 0.97 }}
-            animate={{ opacity: 1, y: 0, scale: 1, transition: spring.default }}
+            animate={{ opacity: 1, y: 0, scale: 1, transition: springPreset ?? spring.default }}
             exit={{ opacity: 0, y: 20, scale: 0.97, transition: { duration: duration.exit, ease: "easeIn" } }}
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}

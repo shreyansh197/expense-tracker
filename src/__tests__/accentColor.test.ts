@@ -36,8 +36,8 @@ function setupDOM() {
 // =========== ACCENT_PRESETS DATA INTEGRITY ===========
 
 describe("ACCENT_PRESETS — data integrity", () => {
-  test("has exactly 8 presets", () => {
-    expect(ACCENT_PRESETS).toHaveLength(8);
+  test("has exactly 9 presets", () => {
+    expect(ACCENT_PRESETS).toHaveLength(9);
   });
 
   test("all presets have unique IDs", () => {
@@ -56,8 +56,8 @@ describe("ACCENT_PRESETS — data integrity", () => {
     }
   });
 
-  test("first preset is purple (default)", () => {
-    expect(ACCENT_PRESETS[0].id).toBe("purple");
+  test("first preset is moss (default)", () => {
+    expect(ACCENT_PRESETS[0].id).toBe("moss");
   });
 
   test("all accent colors are valid hex colors", () => {
@@ -103,19 +103,19 @@ describe("applyAccentColor — functional", () => {
   test("applies dark-mode accent color when dark class is present", () => {
     const { styleProps, classList } = setupDOM();
     classList.add("dark");
-    applyAccentColor("teal");
-    const teal = ACCENT_PRESETS.find((p) => p.id === "teal")!;
-    expect(styleProps.get("--accent")).toBe(teal.accentDark);
-    expect(styleProps.get("--accent-soft")).toBe(teal.softDark);
+    applyAccentColor("clay");
+    const clay = ACCENT_PRESETS.find((p) => p.id === "clay")!;
+    expect(styleProps.get("--accent")).toBe(clay.accentDark);
+    expect(styleProps.get("--accent-soft")).toBe(clay.softDark);
   });
 
-  test("removes overrides for purple (default)", () => {
+  test("removes overrides for moss (default)", () => {
     const { styleProps } = setupDOM();
     // First set a custom color
     applyAccentColor("rose");
     expect(styleProps.has("--accent")).toBe(true);
-    // Then reset to purple
-    applyAccentColor("purple");
+    // Then reset to moss
+    applyAccentColor("moss");
     expect(styleProps.has("--accent")).toBe(false);
     expect(styleProps.has("--accent-soft")).toBe(false);
   });
@@ -129,7 +129,7 @@ describe("applyAccentColor — functional", () => {
     expect(styleProps.has("--accent-soft")).toBe(false);
   });
 
-  test("applies all 8 preset colors without error", () => {
+  test("applies all 9 preset colors without error", () => {
     setupDOM();
     for (const preset of ACCENT_PRESETS) {
       expect(() => applyAccentColor(preset.id)).not.toThrow();

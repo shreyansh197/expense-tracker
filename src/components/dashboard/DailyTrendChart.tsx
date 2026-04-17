@@ -1,17 +1,10 @@
 "use client";
 
-import { useState } from "react";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  ResponsiveContainer,
-  Tooltip,
-  CartesianGrid,
-  ReferenceLine,
-  Cell,
-} from "recharts";
+import { useState, useMemo } from "react";
+import { scaleBand, scaleLinear } from "@visx/scale";
+import { Group } from "@visx/group";
+import { Bar } from "@visx/shape";
+import { ParentSize } from "@visx/responsive";
 import { Table2, BarChart3, Layers, TrendingUp } from "lucide-react";
 import { buildCategoryMap } from "@/lib/categories";
 import { cn } from "@/lib/utils";
@@ -31,35 +24,134 @@ interface DailyTrendChartProps {
   headerLeft?: ReactNode;
 }
 
-function StackedTooltip({ active, payload, label, catMap }: {
-  active?: boolean;
-  payload?: Array<{ dataKey: string; value: number; color: string }>;
-  label?: string;
-  catMap: Record<string, { label: string; color: string }>;
+const MARGIN = { top: 8, right: 4, bottom: 24, left: 4 };
+
+function SimpleBarChart({ data, onBarClick, paceTarget, width, height }: {
+  data: DailyTotal[];
+  onBarClick?: (day: number) => void;
+  paceTarget?: number;
+  width: number;
+  height: number;
 }) {
-  const { formatCurrency } = useCurrency();
-  if (!active || !payload?.length) return null;
-  const total = payload.reduce((sum, p) => sum + (p.value || 0), 0);
-  const nonZero = payload.filter((p) => p.value > 0);
+  const innerW = width - MARGIN.left - MARGIN.right;
+  const innerH = height - MARGIN.top - MARGIN.bottom;
+
+  const xScale = useMemo(
+    () => scaleBand<number>({ domain: data.map((d) => d.day), range: [0, innerW], padding: 0.2 }),
+    [data, innerW],
+  );
+  const maxVal = Math.max(...data.map((d) => d.total), paceTarget ?? 0, 1);
+  const yScale = useMemo(
+    () => scaleLinear<number>({ domain: [0, maxVal], range: [innerH, 0] }),
+    [maxVal, innerH],
+  );
+
+  const today = new Date().getDate();
 
   return (
-    <div className="rounded-xl px-3 py-2 shadow-lg text-xs" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
-      <p className="font-semibold mb-1" style={{ color: 'var(--text-primary)' }}>Day {label}</p>
-      {nonZero.map((p) => (
-        <div key={p.dataKey} className="flex justify-between gap-4">
-          <span style={{ color: p.color }}>
-            {catMap[p.dataKey]?.label || p.dataKey}
-          </span>
-          <span className="font-medium" style={{ color: 'var(--text-primary)' }}>{formatCurrency(p.value)}</span>
-        </div>
-      ))}
-      {nonZero.length > 1 && (
-        <div className="mt-1 pt-1 flex justify-between gap-4 font-semibold" style={{ borderTop: '1px solid var(--border)' }}>
-          <span style={{ color: 'var(--text-secondary)' }}>Total</span>
-          <span style={{ color: 'var(--text-primary)' }}>{formatCurrency(total)}</span>
-        </div>
-      )}
-    </div>
+    <svg width={width} height={height}>
+      <Group left={MARGIN.left} top={MARGIN.top}>
+        {paceTarget && paceTarget > 0 && (
+          <line
+            x1={0} y1={yScale(paceTarget)} x2={innerW} y2={yScale(paceTarget)}
+            stroke="var(--warning)" strokeDasharray="6 4" strokeWidth={1.5} opacity={0.6}
+          />
+        )}
+        {data.map((d) => {
+          const barH = innerH - (yScale(d.total) ?? 0);
+          const x = xScale(d.day) ?? 0;
+          const isToday = d.day === today;
+          return (
+            <Group key={d.day}>
+              <Bar
+                x={x}
+                y={innerH - barH}
+                width={xScale.bandwidth()}
+                height={Math.max(barH, 0)}
+                rx={3}
+                fill={isToday ? "var(--es-moss)" : "var(--es-sage, var(--primary))"}
+                opacity={isToday ? 1 : 0.6}
+                style={{ cursor: onBarClick ? "pointer" : undefined }}
+                onClick={() => onBarClick?.(d.day)}
+              />
+              {d.day % 5 === 1 && (
+                <text
+                  x={x + xScale.bandwidth() / 2}
+                  y={innerH + 14}
+                  textAnchor="middle"
+                  fill="var(--text-muted)"
+                  fontSize={9}
+                >
+                  {d.day}
+                </text>
+              )}
+            </Group>
+          );
+        })}
+      </Group>
+    </svg>
+  );
+}
+
+function StackedBarChart({ data, catKeys, catMap, onBarClick, width, height }: {
+  data: StackedDailyTotal[];
+  catKeys: string[];
+  catMap: Record<string, { label: string; color: string }>;
+  onBarClick?: (day: number) => void;
+  width: number;
+  height: number;
+}) {
+  const innerW = width - MARGIN.left - MARGIN.right;
+  const innerH = height - MARGIN.top - MARGIN.bottom;
+
+  const xScale = useMemo(
+    () => scaleBand<number>({ domain: data.map((d) => d.day), range: [0, innerW], padding: 0.2 }),
+    [data, innerW],
+  );
+  const maxVal = Math.max(...data.map((d) => d.total), 1);
+
+  return (
+    <svg width={width} height={height}>
+      <Group left={MARGIN.left} top={MARGIN.top}>
+        {data.map((d) => {
+          const x = xScale(d.day) ?? 0;
+          let cumY = innerH;
+          return (
+            <Group key={d.day}>
+              {catKeys.map((cat) => {
+                const val = (d[cat] as number) || 0;
+                if (val <= 0) return null;
+                const barH = (val / maxVal) * innerH;
+                cumY -= barH;
+                return (
+                  <Bar
+                    key={cat}
+                    x={x}
+                    y={cumY}
+                    width={xScale.bandwidth()}
+                    height={barH}
+                    fill={catMap[cat]?.color || "var(--es-sage)"}
+                    style={{ cursor: onBarClick ? "pointer" : undefined }}
+                    onClick={() => onBarClick?.(d.day)}
+                  />
+                );
+              })}
+              {d.day % 5 === 1 && (
+                <text
+                  x={x + xScale.bandwidth() / 2}
+                  y={innerH + 14}
+                  textAnchor="middle"
+                  fill="var(--text-muted)"
+                  fontSize={9}
+                >
+                  {d.day}
+                </text>
+              )}
+            </Group>
+          );
+        })}
+      </Group>
+    </svg>
   );
 }
 
@@ -199,50 +291,16 @@ export function DailyTrendChart({ dailyTotals, stackedDailyTotals, activeCategor
             Stacked bar chart showing daily spending by category. {tableDays.length} days with spending.
             Switch to Table view for full details.
           </p>
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart
+          <ParentSize>{({ width, height }) => (
+            <StackedBarChart
               data={stackedDailyTotals}
-              barSize={8}
-              onClick={(state) => {
-                if (state?.activePayload?.[0]?.payload && onBarClick) {
-                  onBarClick(state.activePayload[0].payload.day);
-                }
-              }}
-              style={{ cursor: onBarClick ? "pointer" : undefined }}
-            >
-              <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="var(--border-subtle)" strokeOpacity={0.5} />
-              <XAxis
-                dataKey="day"
-                tick={{ fontSize: 12, fill: "var(--text-muted)" }}
-                axisLine={false}
-                tickLine={false}
-                interval={4}
-              />
-              <YAxis
-                tick={{ fontSize: 12, fill: "var(--text-muted)" }}
-                axisLine={false}
-                tickLine={false}
-                tickFormatter={(v: number) => (v >= 1000 ? `${v / 1000}K` : `${v}`)}
-                width={35}
-              />
-              <Tooltip
-                content={<StackedTooltip catMap={catMap as Record<string, { label: string; color: string }>} />}
-              />
-              {catKeys.map((cat) => (
-                <Bar
-                  key={cat}
-                  dataKey={cat}
-                  stackId="stack"
-                  fill={catMap[cat]?.color || "var(--category-fallback)"}
-                  radius={[0, 0, 0, 0]}
-                  isAnimationActive={true}
-                  animationBegin={100}
-                  animationDuration={600}
-                  animationEasing="ease-out"
-                />
-              ))}
-            </BarChart>
-          </ResponsiveContainer>
+              catKeys={catKeys}
+              catMap={catMap as Record<string, { label: string; color: string }>}
+              onBarClick={onBarClick}
+              width={width}
+              height={height}
+            />
+          )}</ParentSize>
         </div>
       ) : (
         <div className="flex-1 min-h-[180px] w-full">
@@ -250,88 +308,15 @@ export function DailyTrendChart({ dailyTotals, stackedDailyTotals, activeCategor
             Bar chart showing daily spending. {tableDays.length} days with spending totalling {formatCurrency(grandTotal)}.
             Switch to Table view for full details.
           </p>
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart
+          <ParentSize>{({ width, height }) => (
+            <SimpleBarChart
               data={dailyTotals}
-              barSize={8}
-              onClick={(state) => {
-                if (state?.activePayload?.[0]?.payload && onBarClick) {
-                  onBarClick(state.activePayload[0].payload.day);
-                }
-              }}
-              style={{ cursor: onBarClick ? "pointer" : undefined }}
-            >
-              <defs>
-                <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="var(--primary)" stopOpacity={0.9} />
-                  <stop offset="100%" stopColor="var(--primary)" stopOpacity={0.4} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="var(--border-subtle)" strokeOpacity={0.5} />
-              <XAxis
-                dataKey="day"
-                tick={{ fontSize: 12, fill: "var(--text-muted)" }}
-                axisLine={false}
-                tickLine={false}
-                interval={4}
-              />
-              <YAxis
-                tick={{ fontSize: 12, fill: "var(--text-muted)" }}
-                axisLine={false}
-                tickLine={false}
-                tickFormatter={(v: number) => (v >= 1000 ? `${v / 1000}K` : `${v}`)}
-                width={35}
-              />
-              <Tooltip
-                formatter={(value: number) => [formatCurrency(value), "Spent"]}
-                labelFormatter={(label: string) => `Day ${label}`}
-                contentStyle={{
-                  borderRadius: "12px",
-                  border: "1px solid var(--chart-tooltip-border)",
-                  fontSize: "12px",
-                  padding: "8px 12px",
-                  backgroundColor: "var(--chart-tooltip-bg)",
-                  color: "var(--chart-tooltip-fg)",
-                }}
-                labelStyle={{ color: "var(--chart-tooltip-fg)" }}
-                itemStyle={{ color: "var(--primary)" }}
-              />
-              {paceTarget && paceTarget > 0 && (
-                <ReferenceLine
-                  y={paceTarget}
-                  stroke="var(--warning)"
-                  strokeDasharray="6 4"
-                  strokeWidth={1.5}
-                  strokeOpacity={0.6}
-                  label={{
-                    value: `Target`,
-                    position: "insideTopRight",
-                    fontSize: 12,
-                    fill: "var(--text-muted)",
-                    fontWeight: 500,
-                  }}
-                />
-              )}
-              <Bar
-                dataKey="total"
-                fill="url(#barGradient)"
-                radius={[4, 4, 0, 0]}
-                isAnimationActive={true}
-                animationBegin={100}
-                animationDuration={600}
-                animationEasing="ease-out"
-              >
-                {dailyTotals.map((entry) => (
-                  <Cell
-                    key={entry.day}
-                    fill={entry.day === new Date().getDate() ? "var(--primary)" : "url(#barGradient)"}
-                    strokeWidth={entry.day === new Date().getDate() ? 1.5 : 0}
-                    stroke={entry.day === new Date().getDate() ? "var(--primary)" : "none"}
-                  />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+              onBarClick={onBarClick}
+              paceTarget={paceTarget}
+              width={width}
+              height={height}
+            />
+          )}</ParentSize>
         </div>
       )}
     </div>

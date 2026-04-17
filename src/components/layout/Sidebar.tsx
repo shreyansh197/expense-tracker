@@ -15,18 +15,18 @@ import { useCurrency } from "@/hooks/useCurrency";
 import { useCalculationsContext } from "@/contexts/CalculationsContext";
 
 const personalNav = [
-  { href: "/", icon: IconDashboard, label: "Dashboard" },
-  { href: "/expenses", icon: List, label: "Expenses" },
-  { href: "/analytics", icon: IconAnalytics, label: "Analytics" },
-  { href: "/settings", icon: IconSettings, label: "Settings" },
+  { href: "/", icon: IconDashboard, label: "The Clearing" },
+  { href: "/expenses", icon: List, label: "Stream Bed" },
+  { href: "/analytics", icon: IconAnalytics, label: "Overlook" },
+  { href: "/settings", icon: IconSettings, label: "Workshop" },
 ];
 
 const businessNav = [
-  { href: "/", icon: IconDashboard, label: "Dashboard" },
-  { href: "/business", icon: IconBusiness, label: "Business" },
-  { href: "/expenses", icon: List, label: "Expenses" },
-  { href: "/analytics", icon: IconAnalytics, label: "Analytics" },
-  { href: "/settings", icon: IconSettings, label: "Settings" },
+  { href: "/", icon: IconDashboard, label: "The Clearing" },
+  { href: "/business", icon: IconBusiness, label: "Trading Post" },
+  { href: "/expenses", icon: List, label: "Stream Bed" },
+  { href: "/analytics", icon: IconAnalytics, label: "Overlook" },
+  { href: "/settings", icon: IconSettings, label: "Workshop" },
 ];
 
 export function Sidebar() {

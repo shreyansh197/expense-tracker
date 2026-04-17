@@ -9,9 +9,10 @@ interface AccentColorPickerProps {
 }
 
 export const ACCENT_PRESETS = [
+  { id: "moss", label: "Moss", accent: "#3D5A3E", accentDark: "#8FAF8B", soft: "#C8D9C4", softDark: "rgba(143,175,139,0.14)" },
+  { id: "clay", label: "Clay", accent: "#B5654A", accentDark: "#D4906A", soft: "#F5E6DF", softDark: "rgba(212,144,106,0.14)" },
   { id: "purple", label: "Purple", accent: "#7C3AED", accentDark: "#A78BFA", soft: "#EDE9FE", softDark: "rgba(167,139,250,0.14)" },
   { id: "blue", label: "Blue", accent: "#2563EB", accentDark: "#60A5FA", soft: "#DBEAFE", softDark: "rgba(96,165,250,0.14)" },
-  { id: "teal", label: "Teal", accent: "#0D9488", accentDark: "#2DD4BF", soft: "#CCFBF1", softDark: "rgba(45,212,191,0.14)" },
   { id: "green", label: "Green", accent: "#16A34A", accentDark: "#4ADE80", soft: "#DCFCE7", softDark: "rgba(74,222,128,0.14)" },
   { id: "orange", label: "Orange", accent: "#EA580C", accentDark: "#FB923C", soft: "#FFEDD5", softDark: "rgba(251,146,60,0.14)" },
   { id: "rose", label: "Rose", accent: "#E11D48", accentDark: "#FB7185", soft: "#FFE4E6", softDark: "rgba(251,113,133,0.14)" },
@@ -68,8 +69,8 @@ export function AccentColorPicker({ currentColor, onSelect }: AccentColorPickerP
 export function applyAccentColor(colorId: string | undefined) {
   if (typeof document === "undefined") return;
   const preset = ACCENT_PRESETS.find((p) => p.id === colorId);
-  if (!preset || preset.id === "purple") {
-    // Remove overrides — use default CSS values
+  if (!preset || preset.id === "moss") {
+    // Remove overrides — use default CSS values (moss is the default terrain accent)
     document.documentElement.style.removeProperty("--accent");
     document.documentElement.style.removeProperty("--accent-soft");
     return;

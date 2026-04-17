@@ -208,3 +208,119 @@ export const successPulse: Variants = {
     transition: { duration: duration.emphasis, ease: ease.out },
   },
 };
+
+// ── Breath — ambient aliveness for hero surfaces ──
+// Apply to: Budget Hero card, Horizon strip, FAB (subtle)
+// Rule: never more than 3 breathing elements at once
+// prefers-reduced-motion: use the static variant instead
+
+export const breathVariant: Variants = {
+  animate: {
+    y: [0, -2, 0],
+    transition: {
+      duration: 4,
+      ease: "easeInOut",
+      repeat: Infinity,
+      repeatType: "loop",
+    },
+  },
+};
+
+// Reduced-motion safe version — no movement, just opacity drift
+export const breathVariantReduced: Variants = {
+  animate: {
+    opacity: [1, 0.92, 1],
+    transition: {
+      duration: 4,
+      ease: "easeInOut",
+      repeat: Infinity,
+      repeatType: "loop",
+    },
+  },
+};
+
+// ── Terrain reveal (organic entrance with slight rotation) ──
+
+export const terrainReveal: Variants = {
+  initial: { opacity: 0, y: distance.md, scale: 0.95, rotate: -1 },
+  animate: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    rotate: 0,
+    transition: spring.gentle,
+  },
+  exit: {
+    opacity: 0,
+    transition: { duration: duration.exit },
+  },
+};
+
+// ── Stone settle (KPI cards dropping into place) ──
+
+export const stoneSettle: Variants = {
+  initial: { opacity: 0, y: -8 },
+  animate: {
+    opacity: 1,
+    y: 0,
+    transition: spring.bouncy,
+  },
+};
+
+// ── Water ripple (concentric ring expand + fade) ──
+
+export const waterRipple: Variants = {
+  initial: { scale: 0.6, opacity: 0.6 },
+  animate: {
+    scale: [0.6, 1.4],
+    opacity: [0.6, 0],
+    transition: {
+      duration: duration.slow,
+      ease: ease.out,
+    },
+  },
+};
+
+// ── Stream flow (continuous horizontal translate for SpendingStream) ──
+
+export const streamFlow: Variants = {
+  animate: {
+    x: [0, -200],
+    transition: {
+      duration: 8,
+      ease: "linear",
+      repeat: Infinity,
+      repeatType: "loop",
+    },
+  },
+};
+
+// ── Particle burst (for Money Echo — individual particle trajectory) ──
+
+export const particleBurst: Variants = {
+  initial: { opacity: 1, scale: 1 },
+  animate: (custom: { x: number; y: number }) => ({
+    x: custom.x,
+    y: custom.y,
+    opacity: 0,
+    scale: 0.3,
+    transition: {
+      duration: duration.slow,
+      ease: ease.out,
+    },
+  }),
+};
+
+// ── Bottom sheet entrance ──
+
+export const bottomSheet: Variants = {
+  initial: { y: "100%" },
+  animate: {
+    y: 0,
+    transition: spring.water,
+  },
+  exit: {
+    y: "100%",
+    transition: { duration: duration.normal, ease: ease.in },
+  },
+};

@@ -18,18 +18,18 @@ const springStiff = spring.stiff;
 /* ── NAV LINKS (no Add — FAB handles that) ────────────────── */
 
 const personalLinks = [
-  { href: "/", icon: IconDashboard, label: "Dashboard" },
-  { href: "/expenses", icon: List, label: "Expenses" },
-  { href: "/analytics", icon: IconAnalytics, label: "Analytics" },
-  { href: "/settings", icon: IconSettings, label: "Settings" },
+  { href: "/", icon: IconDashboard, label: "Home" },
+  { href: "/expenses", icon: List, label: "Stream" },
+  { href: "/analytics", icon: IconAnalytics, label: "Overlook" },
+  { href: "/settings", icon: IconSettings, label: "Workshop" },
 ];
 
 const businessLinks = [
   { href: "/", icon: IconDashboard, label: "Home" },
-  { href: "/business", icon: IconBusiness, label: "Business" },
-  { href: "/expenses", icon: List, label: "Expenses" },
-  { href: "/analytics", icon: IconAnalytics, label: "Analytics" },
-  { href: "/settings", icon: IconSettings, label: "Settings" },
+  { href: "/business", icon: IconBusiness, label: "Trading" },
+  { href: "/expenses", icon: List, label: "Stream" },
+  { href: "/analytics", icon: IconAnalytics, label: "Overlook" },
+  { href: "/settings", icon: IconSettings, label: "Workshop" },
 ];
 
 /* ── NAV BAR HEIGHT (px) ──────────────────────────────────── */
@@ -78,9 +78,12 @@ export function BottomNav() {
         )}
         style={{
           bottom: `calc(${NAV_HEIGHT}px + env(safe-area-inset-bottom, 0px) + 12px)`,
-          ...(accentColor === "emerald" ? { background: 'var(--biz-accent)', boxShadow: '0 10px 15px -3px var(--focus-ring-biz)' } : {}),
+          ...(accentColor === "emerald"
+            ? { background: 'var(--biz-accent)', boxShadow: '0 10px 15px -3px var(--focus-ring-biz), inset 0 0 12px rgba(52,211,153,0.25)' }
+            : { background: 'var(--es-moss)', boxShadow: '0 8px 20px -4px rgba(61,90,62,0.35), inset 0 0 12px rgba(61,90,62,0.2)' }),
         }}
         initial={false}
+        whileHover={{ scaleX: 1.08, scaleY: 0.96, transition: { duration: 0.15 } }}
         whileTap={{ scale: 0.88 }}
       >
         <Plus size={24} strokeWidth={2.5} />
@@ -128,29 +131,27 @@ export function BottomNav() {
                 style={!isActive ? { color: 'var(--text-muted)' } : undefined}
               >
                 {isActive && (
-                  <>
-                    <m.span
-                      layoutId="nav-active-indicator"
-                      className="absolute -top-2 h-[3px] rounded-full"
-                      style={{
-                        width: 20,
-                        background: isBiz ? 'var(--biz-accent-gradient, var(--biz-accent))' : 'var(--accent-gradient, var(--accent))',
-                      }}
-                      transition={springStiff}
-                    />
-                    <m.span
-                      layoutId="nav-active-bg"
-                      className="absolute inset-x-1 inset-y-0 -z-10 rounded-xl"
-                      style={{
-                        background: isBiz ? 'var(--biz-accent-soft)' : 'var(--accent-soft)',
-                        opacity: 0.5,
-                      }}
-                      transition={springStiff}
-                    />
-                  </>
+                  <m.span
+                    layoutId="nav-pill"
+                    className="absolute inset-1 -z-[1] rounded-2xl"
+                    style={{
+                      background: isBiz
+                        ? 'var(--biz-accent-soft)'
+                        : 'color-mix(in srgb, var(--es-moss, #3D5A3E) 12%, transparent)',
+                    }}
+                    transition={springStiff}
+                  />
                 )}
-                <Icon size={20} strokeWidth={isActive ? 2.2 : 1.5} className="transition-all" />
-                <span className="text-caption font-medium">{item.label}</span>
+                <Icon
+                  size={20}
+                  strokeWidth={isActive ? 2.2 : 1.5}
+                  className="transition-all"
+                />
+                <span
+                  className="text-[10px] font-medium leading-tight"
+                >
+                  {item.label}
+                </span>
                 {isBiz && !isActive && isBusiness && (
                   <span className="absolute top-1 right-1/4 h-1.5 w-1.5 rounded-full bg-biz" />
                 )}

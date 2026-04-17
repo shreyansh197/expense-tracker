@@ -24,8 +24,8 @@ interface Particle {
 }
 
 const FALLBACK_COLORS = [
-  "#7C3AED", "#0D9488", "#F59E0B", "#EF4444", "#10B981",
-  "#4C5CFF", "#EC4899", "#06B6D4", "#F97316", "#8B5CF6",
+  "#B5654A", "#3D5A3E", "#F59E0B", "#EF4444", "#10B981",
+  "#2D6A4F", "#EC4899", "#06B6D4", "#F97316", "#D4906A",
 ];
 
 /** Resolve confetti palette from CSS tokens with hardcoded fallbacks. */
@@ -34,16 +34,16 @@ function getConfettiColors(): string[] {
   const s = getComputedStyle(document.documentElement);
   const get = (v: string, fb: string) => s.getPropertyValue(v).trim() || fb;
   return [
-    get("--accent", "#7C3AED"),
-    get("--primary", "#0D9488"),
+    get("--accent", "#B5654A"),
+    get("--primary", "#3D5A3E"),
     get("--warning", "#F59E0B"),
     get("--danger", "#EF4444"),
     get("--success", "#10B981"),
-    get("--secondary", "#4C5CFF"),
+    get("--secondary", "#2D6A4F"),
     "#EC4899", // decorative pink
     "#06B6D4", // decorative cyan
     "#F97316", // decorative orange
-    "#8B5CF6", // decorative purple
+    "#D4906A", // decorative dust
   ];
 }
 

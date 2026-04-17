@@ -24,16 +24,13 @@ interface AchievementContext {
 }
 
 export const ACHIEVEMENT_DEFS: AchievementDef[] = [
-  { id: "first_step", name: "First Step", description: "Log your first expense", icon: "👣", check: (ctx) => ctx.totalExpenses >= 1 },
   { id: "week_warrior", name: "Week Warrior", description: "7-day logging streak", icon: "🔥", check: (ctx) => ctx.streak >= 7 },
   { id: "monthly_master", name: "Monthly Master", description: "30-day logging streak", icon: "⭐", check: (ctx) => ctx.streak >= 30 },
   { id: "budget_hero", name: "Budget Hero", description: "Finish a month under budget", icon: "🛡️", check: (ctx) => ctx.consecutiveMonthsUnderBudget >= 1 },
   { id: "triple_crown", name: "Triple Crown", description: "3 months under budget in a row", icon: "👑", check: (ctx) => ctx.consecutiveMonthsUnderBudget >= 3 },
-  { id: "category_king", name: "Category King", description: "Use 5+ categories in a month", icon: "🏷️", check: (ctx) => ctx.uniqueCategoriesThisMonth >= 5 },
   { id: "goal_setter", name: "Goal Setter", description: "Create your first savings goal", icon: "🎯", check: (ctx) => ctx.goalCount >= 1 },
   { id: "goal_crusher", name: "Goal Crusher", description: "Complete a savings goal", icon: "💪", check: (ctx) => ctx.completedGoals >= 1 },
   { id: "recurring_pro", name: "Recurring Pro", description: "Set up 3+ recurring expenses", icon: "🔄", check: (ctx) => ctx.activeRecurring >= 3 },
-  { id: "data_driven", name: "Data Driven", description: "Log 100 total expenses", icon: "📊", check: (ctx) => ctx.totalExpenses >= 100 },
 ];
 
 // ── Helpers ──

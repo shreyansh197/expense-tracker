@@ -53,8 +53,8 @@ describe("empty states — components render EmptyState for empty data", () => {
 describe("empty states — boundary: single item", () => {
   test("CollectionChart renders chart container when data has items", () => {
     const src = readComponent("components/business/CollectionChart.tsx");
-    // After the empty check, the component should render a ResponsiveContainer
-    expect(src).toContain("ResponsiveContainer");
+    // After the empty check, the component should render a chart (visx ParentSize or ResponsiveContainer)
+    expect(src).toMatch(/ParentSize|ResponsiveContainer/);
   });
 
   test("TagBreakdown renders tag items when data has items", () => {

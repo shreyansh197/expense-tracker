@@ -33,66 +33,66 @@ export function AchievementsCard({ achievements, newlyUnlocked, persistNew, unlo
   return (
     <div className="card p-5">
       <Confetti active={showConfetti} />
-      <div className="mb-4 flex items-center justify-between">
+      {/* Counter — large JetBrains Mono fraction, no progress bar */}
+      <div className="mb-4 flex items-end justify-between">
         <div className="flex items-center gap-2">
           <Award size={16} style={{ color: "var(--accent)" }} />
           <h3 className="text-section-title">Achievements</h3>
         </div>
-        <span className="text-xs font-semibold tabular-nums" style={{ color: "var(--text-muted)" }}>
-          {unlockedCount}/{totalCount}
-        </span>
+        <div className="text-right">
+          <span className="font-numeric text-2xl font-semibold leading-none tabular-nums" style={{ color: "var(--text-primary)" }}>
+            {unlockedCount}
+          </span>
+          <span className="font-numeric text-sm" style={{ color: "var(--text-muted)" }}>
+            {" "}/ {totalCount}
+          </span>
+          <p className="mt-0.5 font-display italic text-xs" style={{ color: "var(--text-muted)" }}>
+            {totalCount - unlockedCount} more to discover
+          </p>
+        </div>
       </div>
 
-      {/* Progress bar */}
-      <div
-        className="mb-4 h-1.5 w-full overflow-hidden rounded-full"
-        style={{ background: "var(--surface-secondary)" }}
-        role="progressbar"
-        aria-valuenow={unlockedCount}
-        aria-valuemin={0}
-        aria-valuemax={totalCount}
-        aria-label={`${unlockedCount} of ${totalCount} achievements unlocked`}
-      >
-        <m.div
-          className="h-full rounded-full"
-          style={{ background: "var(--accent)" }}
-          initial={{ width: 0 }}
-          animate={{ width: `${(unlockedCount / totalCount) * 100}%` }}
-          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-        />
-      </div>
-
-      {/* Badge grid — 2-col on mobile (with description), 5-col on sm+ */}
+      {/* Badge grid — 2-col on mobile, 5-col on sm+ */}
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-5 sm:gap-3">
         {achievements.map(({ def, unlocked, unlockedAt }) => {
           const isCelebrated = celebratedId === def.id;
           return (
             <m.div
               key={def.id}
-              className="flex flex-col items-center gap-1 rounded-xl p-2 text-center transition-colors"
+              className="flex flex-col items-center gap-1 rounded-xl p-2 text-center transition-all"
               style={{
-                background: unlocked ? "var(--surface-secondary)" : "transparent",
-                opacity: unlocked ? 1 : 0.4,
+                background: unlocked ? "var(--surface-secondary)" : "var(--surface-secondary)",
+                filter: unlocked ? undefined : "grayscale(1)",
+                opacity: unlocked ? 1 : 0.35,
               }}
-              initial={isCelebrated ? { scale: 0.5 } : false}
-              animate={isCelebrated ? { scale: [0.5, 1.2, 1] } : undefined}
+              initial={isCelebrated ? { scale: 0.8 } : false}
+              animate={isCelebrated ? { scale: [0.8, 1.2, 1.0] } : undefined}
               transition={isCelebrated ? { duration: 0.5, ease: [0.22, 1, 0.36, 1] } : undefined}
-              title={unlocked ? `${def.name} — unlocked ${new Date(unlockedAt).toLocaleDateString()}` : `${def.name} — ${def.description}`}
+              title={unlocked
+                ? `${def.name} — unlocked ${new Date(unlockedAt).toLocaleDateString()}`
+                : `${def.name} — ???`}
             >
-              <span className="text-xl leading-none" role="img" aria-label={def.name}>
+              <span
+                className="text-xl leading-none"
+                role="img"
+                aria-label={unlocked ? def.name : "Locked achievement"}
+                style={unlocked ? {
+                  filter: `drop-shadow(0 2px 6px color-mix(in srgb, currentColor 40%, transparent))`,
+                } : undefined}
+              >
                 {def.icon}
               </span>
               <span
-                className="text-xs font-medium leading-tight sm:line-clamp-1"
+                className="text-xs font-medium leading-tight sm:line-clamp-1 font-display italic"
                 style={{ color: unlocked ? "var(--text-secondary)" : "var(--text-muted)" }}
               >
-                {def.name}
+                {unlocked ? def.name : "???"}
               </span>
               <span
                 className="line-clamp-2 text-xs leading-tight sm:hidden"
                 style={{ color: "var(--text-muted)" }}
               >
-                {def.description}
+                {unlocked ? def.description : "Keep going to discover this"}
               </span>
             </m.div>
           );

@@ -69,10 +69,10 @@ export default function InvitePage() {
   if (error) {
     return (
       <div className="flex min-h-screen items-center justify-center p-4">
-        <div className="w-full max-w-sm rounded-2xl p-6 shadow-xl text-center" style={{ background: 'var(--surface)' }}>
-          <XCircle className="mx-auto h-12 w-12 mb-4" style={{ color: 'var(--danger)' }} />
-          <h2 className="text-lg font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
-            Invite Not Available
+        <div className="w-full max-w-sm card-terrain rounded-2xl p-6">
+        <XCircle className="mx-auto h-10 w-10 mb-4" style={{ color: 'var(--danger)' }} />
+          <h2 className="font-display italic text-xl mb-2 text-center" style={{ color: 'var(--text-primary)' }}>
+            Invite unavailable.
           </h2>
           <p className="text-sm mb-6" style={{ color: 'var(--text-secondary)' }}>
             {error}
@@ -104,10 +104,10 @@ export default function InvitePage() {
   if (accepted) {
     return (
       <div className="flex min-h-screen items-center justify-center p-4">
-        <div className="w-full max-w-sm rounded-2xl p-6 shadow-xl text-center" style={{ background: 'var(--surface)' }}>
-          <CheckCircle2 className="mx-auto h-12 w-12 mb-4" style={{ color: 'var(--success)' }} />
-          <h2 className="text-lg font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
-            Joined Successfully!
+        <div className="w-full max-w-sm card-terrain rounded-2xl p-6 text-center">
+          <CheckCircle2 className="mx-auto h-10 w-10 mb-4" style={{ color: 'var(--es-moss)' }} />
+          <h2 className="font-display italic text-xl mb-2" style={{ color: 'var(--text-primary)' }}>
+            Joined.
           </h2>
           <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
             Redirecting to {preview.workspaceName}...
@@ -121,13 +121,13 @@ export default function InvitePage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center p-4">
-      <div className="w-full max-w-sm rounded-2xl p-6 shadow-xl" style={{ background: 'var(--surface)' }}>
-        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-data-soft mx-auto mb-4">
-          <Users className="h-7 w-7 text-data" />
+      <div className="w-full max-w-sm card-terrain rounded-2xl p-6">
+        <div className="flex h-12 w-12 items-center justify-center rounded-full mx-auto mb-4" style={{ background: 'var(--es-chalk)', border: '1px solid var(--border)' }}>
+          <Users className="h-6 w-6" style={{ color: 'var(--es-moss)' }} />
         </div>
 
-        <h2 className="text-center text-lg font-bold mb-1" style={{ color: 'var(--text-primary)' }}>
-          You&apos;re Invited!
+        <h2 className="text-center font-display italic text-2xl mb-1" style={{ color: 'var(--text-primary)' }}>
+          You&apos;re invited.
         </h2>
         <p className="text-center text-sm mb-6" style={{ color: 'var(--text-secondary)' }}>
           {preview.invitedBy} invited you to join
@@ -146,7 +146,8 @@ export default function InvitePage() {
         <button
           onClick={handleAccept}
           disabled={accepting}
-          className="w-full rounded-xl bg-data py-3 text-base font-semibold text-white hover:bg-data-hover disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
+          className="w-full rounded-full py-3 text-base font-semibold text-white disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
+          style={{ background: 'var(--es-moss)' }}
         >
           {accepting && <Loader2 className="h-4 w-4 animate-spin" />}
           {isAuthenticated ? "Accept Invite" : "Sign In to Accept"}

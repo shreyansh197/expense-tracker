@@ -19,7 +19,7 @@ interface CategorySelectorProps {
 
 export function CategorySelector({ categories, selected, onSelect, showError }: CategorySelectorProps) {
   return (
-    <div className="-mx-1 rounded-xl p-3" style={{ background: 'var(--section-teal)' }}>
+    <div className="-mx-1 rounded-xl p-3" style={{ background: 'var(--section-moss)' }}>
       <label className="form-label mb-2 uppercase">
         Category {showError && <span className="text-err normal-case">— please select</span>}
       </label>
@@ -38,7 +38,12 @@ export function CategorySelector({ categories, selected, onSelect, showError }: 
             style={
               selected === cat.id
                 ? { backgroundColor: cat.color }
-                : { background: 'var(--surface-secondary)', color: 'var(--text-secondary)' }
+                : {
+                    background: 'var(--surface-secondary)',
+                    color: 'var(--text-secondary)',
+                    opacity: selected ? 0.2 : 1,
+                    transition: 'opacity 0.2s ease',
+                  }
             }
             onMouseEnter={selected !== cat.id ? (e: React.MouseEvent<HTMLButtonElement>) => { e.currentTarget.style.background = 'var(--surface-tertiary)'; } : undefined}
             onMouseLeave={selected !== cat.id ? (e: React.MouseEvent<HTMLButtonElement>) => { e.currentTarget.style.background = 'var(--surface-secondary)'; } : undefined}

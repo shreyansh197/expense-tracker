@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useMemo } from "react";
+import { Suspense, useMemo, useState } from "react";
 import { AppShell } from "@/components/layout/AppShell";
 import { MonthSwitcher } from "@/components/layout/MonthSwitcher";
 import { SyncIndicator } from "@/components/sync/SyncIndicator";
@@ -24,10 +24,11 @@ import {
   BarChart3,
   DollarSign,
   Award,
+  ChevronDown,
 } from "lucide-react";
-import { ReflectiveCharacter } from "@/components/ui/illustrations/characters";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { ChartIllustration } from "@/components/ui/illustrations";
+import { FogOverlook } from "@/components/ui/illustrations/terrain";
+import { ChronicleView } from "@/components/dashboard/ChronicleView";
 
 export default function AnalyticsPage() {
   return (
@@ -49,10 +50,11 @@ function AnalyticsShell() {
 const DAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 function AnalyticsContent() {
-  usePageTitle("Analytics");
+  usePageTitle("The Overlook");
   useMonthUrlSync();
+  const [deepCoreOpen, setDeepCoreOpen] = useState(false);
   const { currentMonth, currentYear } = useUIStore();
-  const { effectiveBudget, anomalies } = useCalculationsContext();
+  const { effectiveBudget } = useCalculationsContext();
   const { settings } = useSettings();
   const { formatCurrency, formatCurrencyCompact } = useCurrency();
   const history = useHistoricalData(currentMonth, currentYear, 6);
@@ -64,12 +66,11 @@ function AnalyticsContent() {
 
   const maxMonthTotal = Math.max(...history.months.map((m) => m.total), 1);
 
-  // Top 6 categories across all months for the trends section
   const topCats = useMemo(() => {
     return history.topCategoriesAllTime.slice(0, 6);
   }, [history.topCategoriesAllTime]);
 
-  // Cumulative daily spend for current month burn chart
+  // Cumulative daily spend for burn chart
   const cumulativeData = useMemo(() => {
     if (!history.currentMonth) return [];
     const { expenses } = history.currentMonth;
@@ -95,7 +96,6 @@ function AnalyticsContent() {
     1,
   );
 
-  const maxWeekTotal = Math.max(...history.spendingByWeek.map((w) => w.total), 1);
   const maxDayFactor = Math.max(...Object.values(history.dayOfWeekFactors), 1);
 
   const MoMIcon =
@@ -117,67 +117,59 @@ function AnalyticsContent() {
           : "var(--text-secondary)";
 
   return (
-      <PageTransition className="relative mx-auto min-h-[80vh] max-w-4xl xl:max-w-6xl space-y-5 sm:space-y-6 p-4 sm:p-6 lg:p-8">
-        {/* Header */}
-        <div className="zone-header space-y-3 relative overflow-hidden">
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <h1 className="text-page-title">Analytics</h1>
-              <p className="text-xs mt-0.5" style={{ color: "var(--text-tertiary)" }}>
-                Deep dive into your spending patterns
-              </p>
-            </div>
-            <div className="shrink-0 flex items-center gap-2">
-              <SyncIndicator />
-            </div>
+      <PageTransition className="relative mx-auto min-h-[80vh] max-w-4xl xl:max-w-6xl space-y-5 p-4 sm:p-6 lg:p-8">
+        {/* ─── Overlook Header ─── */}
+        <div className="flex items-center justify-between gap-3">
+          <h1 className="font-display italic text-2xl" style={{ color: 'var(--text-primary)' }}>The Overlook</h1>
+          <div className="flex items-center gap-2">
+            <SyncIndicator />
           </div>
-          {/* ReflectiveCharacter — awareness/pause archetype */}
-          <div className="pointer-events-none absolute right-4 top-1 opacity-30 sm:opacity-60 scale-75 sm:scale-100 origin-top-right">
-            <ReflectiveCharacter size={72} />
-          </div>
-          <MonthSwitcher />
         </div>
+        <MonthSwitcher />
 
-        {/* Empty state when no spending data exists */}
+        {/* Empty state */}
         {history.months.length === 0 ? (
           <EmptyState
             icon={BarChart3}
-            illustration={<ChartIllustration size={140} />}
-            title="No analytics yet"
-            description="Start adding expenses to see spending trends, patterns, and insights here."
+            illustration={<FogOverlook />}
+            title="Clear skies ahead"
+            description="Start adding expenses to see your terrain unfold — trends, patterns, and insights will appear here."
           />
         ) : (
         <>
-        {/* Monthly Spending Trend */}
+
+        {/* ─── 1. RidgeLine Hero (6-month terrain ridge) ─── */}
         <m.div
-          className="card p-5"
+          className="card-terrain p-5"
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
         >
-          <div className="flex items-center gap-2 mb-4">
-            <BarChart3 size={16} style={{ color: "var(--color-accent)" }} />
-            <h3 className="text-section-title">Monthly Spending Trend</h3>
+          <div className="flex items-center gap-2 mb-3">
+            <BarChart3 size={16} style={{ color: "var(--es-moss)" }} />
+            <h3 className="text-sm font-semibold uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
+              6-Month Ridge
+            </h3>
           </div>
-          <div className="space-y-2">
+          <div className="mt-3 space-y-2">
             {history.months.map((md) => {
               const pct = (md.total / maxMonthTotal) * 100;
               const isCurrent = md.month === currentMonth && md.year === currentYear;
               return (
                 <div key={`${md.year}-${md.month}`} className="flex items-center gap-3">
                   <span
-                    className="w-16 shrink-0 text-xs font-medium text-right"
+                    className="w-14 shrink-0 text-xs font-medium text-right"
                     style={{ color: isCurrent ? "var(--text-primary)" : "var(--text-tertiary)" }}
                   >
                     {md.label}
                   </span>
-                  <div className="relative flex-1 h-6 rounded-md overflow-hidden" style={{ background: "var(--bg-secondary)" }}>
+                  <div className="relative flex-1 h-5 rounded-lg overflow-hidden" style={{ background: "var(--surface-secondary)" }}>
                     <div
-                      className="h-full rounded-md transition-all duration-500"
+                      className="h-full rounded-lg transition-all duration-500"
                       style={{
                         width: `${Math.max(pct, 1)}%`,
-                        background: isCurrent ? "var(--color-accent)" : "var(--text-muted)",
-                        opacity: isCurrent ? 1 : 0.5,
+                        background: isCurrent ? "var(--es-moss)" : "var(--es-sage, var(--text-muted))",
+                        opacity: isCurrent ? 1 : 0.4,
                       }}
                     />
                     {effectiveBudget > 0 && md.total > 0 && (
@@ -185,13 +177,13 @@ function AnalyticsContent() {
                         className="absolute top-0 h-full w-0.5"
                         style={{
                           left: `${Math.min((effectiveBudget / maxMonthTotal) * 100, 100)}%`,
-                          background: "var(--danger)",
+                          background: "var(--es-clay, var(--danger))",
                           opacity: 0.7,
                         }}
                       />
                     )}
                   </div>
-                  <span className="w-20 shrink-0 text-xs font-mono text-right" style={{ color: "var(--text-secondary)" }}>
+                  <span className="w-20 shrink-0 text-xs font-numeric font-semibold tabular-nums text-right" style={{ color: "var(--text-secondary)" }}>
                     {formatCurrencyCompact(md.total)}
                   </span>
                 </div>
@@ -200,43 +192,43 @@ function AnalyticsContent() {
           </div>
           {effectiveBudget > 0 && (
             <p className="text-xs mt-2" style={{ color: "var(--text-muted)" }}>
-              Red line = budget ({formatCurrencyCompact(effectiveBudget)})
+              Marker = budget ({formatCurrencyCompact(effectiveBudget)})
             </p>
           )}
         </m.div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        {/* ─── 2. Weather Cards (budget health, pace, biggest move) ─── */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <m.div
-            className="card p-4 flex flex-col gap-1"
+            className="card-stone p-4 flex flex-col gap-1"
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.05 }}
           >
             <div className="flex items-center gap-1.5">
               <DollarSign size={14} style={{ color: "var(--text-muted)" }} />
-              <span className="text-xs uppercase tracking-wider font-semibold" style={{ color: "var(--text-muted)" }}>
+              <span className="text-[10px] uppercase tracking-wider font-semibold" style={{ color: "var(--text-muted)" }}>
                 Avg Monthly
               </span>
             </div>
-            <span className="text-lg font-bold" style={{ color: "var(--text-primary)" }}>
+            <span className="text-lg font-bold font-numeric" style={{ color: "var(--text-primary)" }}>
               {formatCurrencyCompact(history.avgMonthlySpend)}
             </span>
           </m.div>
 
           <m.div
-            className="card p-4 flex flex-col gap-1"
+            className="card-stone p-4 flex flex-col gap-1"
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
           >
             <div className="flex items-center gap-1.5">
               <MoMIcon size={14} style={{ color: momColor }} />
-              <span className="text-xs uppercase tracking-wider font-semibold" style={{ color: "var(--text-muted)" }}>
+              <span className="text-[10px] uppercase tracking-wider font-semibold" style={{ color: "var(--text-muted)" }}>
                 vs Last Month
               </span>
             </div>
-            <span className="text-lg font-bold" style={{ color: momColor }}>
+            <span className="text-lg font-bold font-numeric" style={{ color: momColor }}>
               {history.monthOverMonthChange !== null
                 ? `${history.monthOverMonthChange > 0 ? "+" : ""}${history.monthOverMonthChange.toFixed(1)}%`
                 : "—"}
@@ -244,18 +236,18 @@ function AnalyticsContent() {
           </m.div>
 
           <m.div
-            className="card p-4 flex flex-col gap-1"
+            className="card-stone p-4 flex flex-col gap-1"
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.15 }}
           >
             <div className="flex items-center gap-1.5">
               <Repeat size={14} style={{ color: "var(--text-muted)" }} />
-              <span className="text-xs uppercase tracking-wider font-semibold" style={{ color: "var(--text-muted)" }}>
+              <span className="text-[10px] uppercase tracking-wider font-semibold" style={{ color: "var(--text-muted)" }}>
                 Recurring
               </span>
             </div>
-            <span className="text-lg font-bold" style={{ color: "var(--text-primary)" }}>
+            <span className="text-lg font-bold font-numeric" style={{ color: "var(--text-primary)" }}>
               {formatCurrencyCompact(history.recurringVsOneTime.recurring)}
             </span>
             <span className="text-xs" style={{ color: "var(--text-tertiary)" }}>
@@ -264,38 +256,41 @@ function AnalyticsContent() {
           </m.div>
 
           <m.div
-            className="card p-4 flex flex-col gap-1"
+            className="card-stone p-4 flex flex-col gap-1"
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
           >
             <div className="flex items-center gap-1.5">
-              <Zap size={14} style={{ color: anomalies.length > 0 ? "var(--warning)" : "var(--text-muted)" }} />
-              <span className="text-xs uppercase tracking-wider font-semibold" style={{ color: "var(--text-muted)" }}>
-                Anomalies
+              <Zap size={14} style={{ color: "var(--text-muted)" }} />
+              <span className="text-[10px] uppercase tracking-wider font-semibold" style={{ color: "var(--text-muted)" }}>
+                Top Category
               </span>
             </div>
-            <span className="text-lg font-bold" style={{ color: anomalies.length > 0 ? "var(--warning)" : "var(--text-primary)" }}>
-              {anomalies.length}
+            <span className="text-lg font-bold font-numeric" style={{ color: "var(--text-primary)" }}>
+              {topCats.length > 0
+                ? (catMap[topCats[0].category]?.label ?? topCats[0].category)
+                : "—"}
             </span>
             <span className="text-xs" style={{ color: "var(--text-tertiary)" }}>
-              unusual spikes
+              {topCats.length > 0 ? `${formatCurrencyCompact(topCats[0].total)} all-time` : "no data"}
             </span>
           </m.div>
         </div>
 
-        {/* Day-of-Week Pattern + Top Expenses */}
+        {/* ─── 3. Strata — Day-of-Week + Biggest Expenses ─── */}
         <div className="grid gap-4 md:grid-cols-2">
-          {/* Day of Week */}
           <m.div
-            className="card p-5"
+            className="card-terrain p-5"
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.25 }}
           >
             <div className="flex items-center gap-2 mb-4">
-              <Calendar size={16} style={{ color: "var(--color-accent)" }} />
-              <h3 className="text-section-title">Day-of-Week Pattern</h3>
+              <Calendar size={16} style={{ color: "var(--es-moss)" }} />
+              <h3 className="text-sm font-semibold uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
+                Day-of-Week Pattern
+              </h3>
             </div>
             <div className="flex items-end gap-2 h-28">
               {DAY_LABELS.map((label, i) => {
@@ -305,18 +300,18 @@ function AnalyticsContent() {
                   <div key={label} className="flex-1 flex flex-col items-center gap-1">
                     <div className="w-full relative" style={{ height: "80px" }}>
                       <div
-                        className="absolute bottom-0 w-full rounded-t-sm transition-all duration-500"
+                        className="absolute bottom-0 w-full rounded-t-md transition-all duration-500"
                         style={{
                           height: `${Math.max(pct, 4)}%`,
-                          background: factor >= 1.2 ? "var(--danger)" : factor >= 0.8 ? "var(--color-accent)" : "var(--text-muted)",
-                          opacity: factor >= 0.8 ? 0.9 : 0.4,
+                          background: factor >= 1.2 ? "var(--es-clay)" : factor >= 0.8 ? "var(--es-moss)" : "var(--es-sage)",
+                          opacity: factor >= 0.8 ? 0.85 : 0.35,
                         }}
                       />
                     </div>
                     <span className="text-xs font-medium" style={{ color: "var(--text-tertiary)" }}>
                       {label}
                     </span>
-                    <span className="text-xs font-mono" style={{ color: "var(--text-muted)" }}>
+                    <span className="text-xs font-numeric" style={{ color: "var(--text-muted)" }}>
                       {factor.toFixed(1)}x
                     </span>
                   </div>
@@ -328,16 +323,17 @@ function AnalyticsContent() {
             </p>
           </m.div>
 
-          {/* Top 5 Biggest Expenses */}
           <m.div
-            className="card p-5"
+            className="card-terrain p-5"
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
           >
             <div className="flex items-center gap-2 mb-4">
-              <Award size={16} style={{ color: "var(--color-accent)" }} />
-              <h3 className="text-section-title">Biggest Expenses This Month</h3>
+              <Award size={16} style={{ color: "var(--es-moss)" }} />
+              <h3 className="text-sm font-semibold uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
+                Biggest This Month
+              </h3>
             </div>
             {history.biggestExpenses.length === 0 ? (
               <p className="text-xs" style={{ color: "var(--text-muted)" }}>
@@ -350,9 +346,9 @@ function AnalyticsContent() {
                   return (
                     <div key={e.id} className="flex items-center gap-3">
                       <span
-                        className="w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
+                        className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0"
                         style={{
-                          background: cat?.bgColor || "var(--bg-secondary)",
+                          background: cat?.bgColor || "var(--surface-secondary)",
                           color: cat?.color || "var(--text-muted)",
                         }}
                       >
@@ -362,11 +358,11 @@ function AnalyticsContent() {
                         <p className="text-xs font-medium truncate" style={{ color: "var(--text-primary)" }}>
                           {e.remark || cat?.label || e.category}
                         </p>
-                        <p className="text-xs" style={{ color: "var(--text-tertiary)" }}>
+                        <p className="text-[10px]" style={{ color: "var(--text-tertiary)" }}>
                           {cat?.label || e.category} · Day {e.day}
                         </p>
                       </div>
-                      <span className="text-sm font-bold shrink-0" style={{ color: cat?.color || "var(--text-primary)" }}>
+                      <span className="text-sm font-bold font-numeric shrink-0" style={{ color: cat?.color || "var(--text-primary)" }}>
                         {formatCurrency(e.amount)}
                       </span>
                     </div>
@@ -377,195 +373,167 @@ function AnalyticsContent() {
           </m.div>
         </div>
 
-        {/* Cumulative Burn Chart */}
+        {/* ─── 4. Chronicle Section (inline) ─── */}
         <m.div
-          className="card p-5"
+          className="card-parchment p-5"
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.35 }}
         >
-          <div className="flex items-center gap-2 mb-4">
-            <TrendingUp size={16} style={{ color: "var(--color-accent)" }} />
-            <h3 className="text-section-title">Cumulative Spending</h3>
-          </div>
-          {cumulativeData.length === 0 ? (
-            <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-              No spending data to chart yet
-            </p>
-          ) : (
-            <div className="relative">
-              <svg viewBox="0 0 400 160" className="w-full h-auto" preserveAspectRatio="xMidYMid meet">
-                {/* Grid lines */}
-                {[0, 0.25, 0.5, 0.75, 1].map((frac) => (
-                  <line
-                    key={frac}
-                    x1="40"
-                    y1={140 - frac * 120}
-                    x2="390"
-                    y2={140 - frac * 120}
-                    stroke="var(--border-primary)"
-                    strokeWidth="0.5"
-                    strokeDasharray="3 3"
-                  />
-                ))}
-                {/* Budget line */}
-                {effectiveBudget > 0 && (
-                  <line
-                    x1="40"
-                    y1={140 - (effectiveBudget / maxCumulative) * 120}
-                    x2="390"
-                    y2={140 - (effectiveBudget / maxCumulative) * 120}
-                    stroke="var(--danger)"
-                    strokeWidth="1"
-                    strokeDasharray="5 3"
-                    opacity="0.7"
-                  />
+          <h3 className="text-sm font-semibold uppercase tracking-wider mb-3" style={{ color: "var(--text-muted)" }}>
+            Chronicle
+          </h3>
+          <ChronicleView />
+        </m.div>
+
+        {/* ─── 5. Deep Core (expandable) ─── */}
+        <m.div
+          className="card-terrain overflow-hidden"
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+        >
+          <button
+            type="button"
+            onClick={() => setDeepCoreOpen((v) => !v)}
+            className="flex w-full items-center justify-between p-5 text-left"
+          >
+            <h3 className="text-sm font-semibold uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
+              Deep Core
+            </h3>
+            <m.span
+              animate={{ rotate: deepCoreOpen ? 180 : 0 }}
+              transition={{ duration: 0.2 }}
+              style={{ color: "var(--text-muted)", display: "inline-flex" }}
+            >
+              <ChevronDown size={16} />
+            </m.span>
+          </button>
+
+          {deepCoreOpen && (
+            <div className="px-5 pb-5 space-y-5">
+              {/* Cumulative Burn Chart */}
+              <div>
+                <div className="flex items-center gap-2 mb-3">
+                  <TrendingUp size={14} style={{ color: "var(--es-moss)" }} />
+                  <h4 className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
+                    Cumulative Spending
+                  </h4>
+                </div>
+                {cumulativeData.length === 0 ? (
+                  <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+                    No spending data to chart yet
+                  </p>
+                ) : (
+                  <div className="relative">
+                    <svg viewBox="0 0 400 160" className="w-full h-auto" preserveAspectRatio="xMidYMid meet">
+                      {[0, 0.25, 0.5, 0.75, 1].map((frac) => (
+                        <line
+                          key={frac}
+                          x1="40" y1={140 - frac * 120} x2="390" y2={140 - frac * 120}
+                          stroke="var(--border)" strokeWidth="0.5" strokeDasharray="3 3"
+                        />
+                      ))}
+                      {effectiveBudget > 0 && (
+                        <line
+                          x1="40" y1={140 - (effectiveBudget / maxCumulative) * 120}
+                          x2="390" y2={140 - (effectiveBudget / maxCumulative) * 120}
+                          stroke="var(--es-clay)" strokeWidth="1" strokeDasharray="5 3" opacity="0.7"
+                        />
+                      )}
+                      <path
+                        d={`M40,140 ${cumulativeData
+                          .map((d) => {
+                            const x = 40 + ((d.day - 1) / Math.max(cumulativeData.length - 1, 1)) * 350;
+                            const y = 140 - (d.cumulative / maxCumulative) * 120;
+                            return `L${x},${y}`;
+                          })
+                          .join(" ")} L${40 + ((cumulativeData.length - 1) / Math.max(cumulativeData.length - 1, 1)) * 350},140 Z`}
+                        fill="var(--es-moss)" opacity="0.12"
+                      />
+                      <path
+                        d={cumulativeData
+                          .map((d, i) => {
+                            const x = 40 + ((d.day - 1) / Math.max(cumulativeData.length - 1, 1)) * 350;
+                            const y = 140 - (d.cumulative / maxCumulative) * 120;
+                            return `${i === 0 ? "M" : "L"}${x},${y}`;
+                          })
+                          .join(" ")}
+                        fill="none" stroke="var(--es-moss)" strokeWidth="2"
+                      />
+                      <text x="36" y="143" textAnchor="end" fill="var(--text-muted)" fontSize="8">0</text>
+                      <text x="36" y={143 - 120} textAnchor="end" fill="var(--text-muted)" fontSize="8">
+                        {formatCurrencyCompact(maxCumulative)}
+                      </text>
+                      <text x="40" y="155" textAnchor="middle" fill="var(--text-muted)" fontSize="8">1</text>
+                      <text x="390" y="155" textAnchor="middle" fill="var(--text-muted)" fontSize="8">
+                        {cumulativeData.length}
+                      </text>
+                    </svg>
+                  </div>
                 )}
-                {/* Area fill */}
-                <path
-                  d={`M40,140 ${cumulativeData
-                    .map((d) => {
-                      const x = 40 + ((d.day - 1) / Math.max(cumulativeData.length - 1, 1)) * 350;
-                      const y = 140 - (d.cumulative / maxCumulative) * 120;
-                      return `L${x},${y}`;
-                    })
-                    .join(" ")} L${40 + ((cumulativeData.length - 1) / Math.max(cumulativeData.length - 1, 1)) * 350},140 Z`}
-                  fill="var(--color-accent)"
-                  opacity="0.12"
-                />
-                {/* Line */}
-                <path
-                  d={cumulativeData
-                    .map((d, i) => {
-                      const x = 40 + ((d.day - 1) / Math.max(cumulativeData.length - 1, 1)) * 350;
-                      const y = 140 - (d.cumulative / maxCumulative) * 120;
-                      return `${i === 0 ? "M" : "L"}${x},${y}`;
-                    })
-                    .join(" ")}
-                  fill="none"
-                  stroke="var(--color-accent)"
-                  strokeWidth="2"
-                />
-                {/* Y-axis labels */}
-                <text x="36" y="143" textAnchor="end" fill="var(--text-muted)" fontSize="8">
-                  0
-                </text>
-                <text x="36" y={143 - 120} textAnchor="end" fill="var(--text-muted)" fontSize="8">
-                  {formatCurrencyCompact(maxCumulative)}
-                </text>
-                {/* X-axis */}
-                <text x="40" y="155" textAnchor="middle" fill="var(--text-muted)" fontSize="8">
-                  1
-                </text>
-                <text x="390" y="155" textAnchor="middle" fill="var(--text-muted)" fontSize="8">
-                  {cumulativeData.length}
-                </text>
-              </svg>
-              {effectiveBudget > 0 && (
-                <p className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>
-                  Dashed red line = budget limit
-                </p>
+              </div>
+
+              {/* Category Trends */}
+              {topCats.length > 0 && (
+                <div>
+                  <h4 className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: "var(--text-muted)" }}>
+                    Category Trends
+                  </h4>
+                  <div className="space-y-4">
+                    {topCats.map(({ category }) => {
+                      const cat = catMap[category];
+                      const monthValues = history.months.map((md) => md.categoryBreakdown[category] || 0);
+                      const catMax = Math.max(...monthValues, 1);
+                      return (
+                        <div key={category}>
+                          <div className="flex items-center justify-between mb-1.5">
+                            <span className="text-xs font-medium" style={{ color: cat?.color || "var(--text-primary)" }}>
+                              {cat?.label || category}
+                            </span>
+                            <span className="text-xs font-numeric" style={{ color: "var(--text-muted)" }}>
+                              {formatCurrencyCompact(monthValues[monthValues.length - 1])} this month
+                            </span>
+                          </div>
+                          <div className="flex items-end gap-1 h-8">
+                            {history.months.map((md, j) => {
+                              const val = monthValues[j];
+                              const h = (val / catMax) * 100;
+                              return (
+                                <div
+                                  key={`${md.year}-${md.month}`}
+                                  className="flex-1 rounded-t-md transition-all duration-500"
+                                  style={{
+                                    height: `${Math.max(h, 3)}%`,
+                                    background: cat?.color || "var(--text-muted)",
+                                    opacity: j === history.months.length - 1 ? 0.9 : 0.3,
+                                  }}
+                                  title={`${md.label}: ${formatCurrency(val)}`}
+                                />
+                              );
+                            })}
+                          </div>
+                          <div className="flex gap-1 mt-0.5">
+                            {history.months.map((md) => (
+                              <span
+                                key={`label-${md.year}-${md.month}`}
+                                className="flex-1 text-center text-[9px]"
+                                style={{ color: "var(--text-muted)" }}
+                              >
+                                {md.label.split(" ")[0]}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
               )}
             </div>
           )}
         </m.div>
 
-        {/* Weekly Breakdown */}
-        {history.spendingByWeek.length > 0 && (
-          <m.div
-            className="card p-5"
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-          >
-            <h3 className="text-section-title mb-3">Weekly Breakdown</h3>
-            <div className="space-y-2">
-              {history.spendingByWeek.map((w) => {
-                const pct = (w.total / maxWeekTotal) * 100;
-                return (
-                  <div key={w.week} className="flex items-center gap-3">
-                    <span className="w-14 shrink-0 text-xs font-medium" style={{ color: "var(--text-tertiary)" }}>
-                      Week {w.week}
-                    </span>
-                    <div className="flex-1 h-5 rounded overflow-hidden" style={{ background: "var(--bg-secondary)" }}>
-                      <div
-                        className="h-full rounded transition-all duration-500"
-                        style={{
-                          width: `${Math.max(pct, 2)}%`,
-                          background: "var(--color-accent)",
-                          opacity: 0.75,
-                        }}
-                      />
-                    </div>
-                    <span className="w-20 shrink-0 text-xs font-mono text-right" style={{ color: "var(--text-secondary)" }}>
-                      {formatCurrencyCompact(w.total)}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          </m.div>
-        )}
-
-        {/* Category Trends Across Months */}
-        {topCats.length > 0 && (
-          <m.div
-            className="card p-5"
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.45 }}
-          >
-            <h3 className="text-section-title mb-4">Category Trends</h3>
-            <div className="space-y-4">
-              {topCats.map(({ category }) => {
-                const cat = catMap[category];
-                const monthValues = history.months.map((md) => md.categoryBreakdown[category] || 0);
-                const catMax = Math.max(...monthValues, 1);
-                return (
-                  <div key={category}>
-                    <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-xs font-medium" style={{ color: cat?.color || "var(--text-primary)" }}>
-                        {cat?.label || category}
-                      </span>
-                      <span className="text-xs font-mono" style={{ color: "var(--text-muted)" }}>
-                        {formatCurrencyCompact(monthValues[monthValues.length - 1])} this month
-                      </span>
-                    </div>
-                    <div className="flex items-end gap-1 h-8">
-                      {history.months.map((md, j) => {
-                        const val = monthValues[j];
-                        const h = (val / catMax) * 100;
-                        return (
-                          <div
-                            key={`${md.year}-${md.month}`}
-                            className="flex-1 rounded-t-sm transition-all duration-500"
-                            style={{
-                              height: `${Math.max(h, 3)}%`,
-                              background: cat?.color || "var(--text-muted)",
-                              opacity: j === history.months.length - 1 ? 0.9 : 0.35,
-                            }}
-                            title={`${md.label}: ${formatCurrency(val)}`}
-                          />
-                        );
-                      })}
-                    </div>
-                    <div className="flex gap-1 mt-0.5">
-                      {history.months.map((md) => (
-                        <span
-                          key={`label-${md.year}-${md.month}`}
-                          className="flex-1 text-center text-xs"
-                          style={{ color: "var(--text-muted)" }}
-                        >
-                          {md.label.split(" ")[0]}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </m.div>
-        )}
         </>
         )}
       </PageTransition>

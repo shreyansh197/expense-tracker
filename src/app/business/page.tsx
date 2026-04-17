@@ -5,6 +5,7 @@ import dynamic from "next/dynamic";
 import { AppShell } from "@/components/layout/AppShell";
 import { PlusCircle, Search, Briefcase, ArrowRightLeft } from "lucide-react";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { EmptyShopCounter } from "@/components/ui/illustrations/terrain";
 import { useLedgers } from "@/hooks/useLedgers";
 import { usePayments } from "@/hooks/usePayments";
 import { useAllPayments } from "@/hooks/useAllPayments";
@@ -26,8 +27,7 @@ import { SyncIndicator } from "@/components/sync/SyncIndicator";
 import { BusinessExport } from "@/components/business/BusinessExport";
 import { SkeletonBusinessKpi, SkeletonLedgerList } from "@/components/ui/Skeleton";
 import { PageTransition } from "@/components/ui/PageTransition";
-import { WalletIllustration, BusinessGraphic } from "@/components/ui/illustrations";
-import { BuilderCharacter } from "@/components/ui/illustrations/characters";
+import { BusinessGraphic } from "@/components/ui/illustrations";
 import { m, AnimatePresence } from "framer-motion";
 import type { LedgerInput, Ledger } from "@/types";
 
@@ -135,19 +135,14 @@ export default function BusinessPage() {
   return (
     <AppShell>
       <PageTransition className="relative mx-auto min-h-[80vh] max-w-5xl xl:max-w-7xl space-y-6 p-4 sm:p-6 lg:p-8">
-        {/* Header + KPIs — emerald zone */}
-        <div className="section-zone section-emerald space-y-6 relative overflow-hidden">
-        {/* BuilderCharacter — growth archetype */}
-        <div className="pointer-events-none absolute right-4 top-2 opacity-30 sm:opacity-50 scale-[0.6] sm:scale-75 lg:scale-100 origin-top-right">
-          <BuilderCharacter size={90} />
-        </div>
+        {/* Header + KPIs — The Counting House */}
+        <div className="space-y-6 relative overflow-hidden">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <BusinessGraphic />
-            <div>
-              <h1 className="text-page-title">Business</h1>
-              <p className="text-meta mt-0.5">{ledgers.length} ledger{ledgers.length !== 1 ? "s" : ""}</p>
-            </div>
+          <div>
+            <h1 className="font-display italic text-2xl" style={{ color: 'var(--text-primary)' }}>The Trading Post</h1>
+            <p className="font-mono text-sm tabular-nums mt-0.5" style={{ color: 'var(--es-moss)' }}>
+              {stats.totalReceived.toLocaleString()} <span style={{ color: 'var(--text-muted)', fontFamily: 'inherit' }}>/ {stats.totalExpected.toLocaleString()}</span>
+            </p>
           </div>
           <div className="flex items-center gap-3">
             <SyncIndicator />
@@ -167,7 +162,7 @@ export default function BusinessPage() {
 
         {/* Add Form */}
         {showForm && (
-          <div className="card p-5">
+          <div className="card-stone p-5">
             <LedgerForm onSubmit={handleAddLedger} onCancel={() => setShowForm(false)} />
           </div>
         )}
@@ -191,9 +186,9 @@ export default function BusinessPage() {
         </AnimatePresence>
         </div>
 
-        {/* Analytics — teal zone */}
+        {/* Analytics */}
         {!loading && ledgers.length > 0 && (
-          <div className="section-zone section-teal">
+          <div>
           <div className="grid gap-4 lg:grid-cols-2">
             <RevealOnScroll>
               <CollectionChart data={stats.monthlyCollections} />
@@ -214,8 +209,8 @@ export default function BusinessPage() {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search ledgers..."
-                className="w-full rounded-xl py-2.5 pl-9 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--focus-ring-biz)]"
+                placeholder="Search ledgers…"
+                className="w-full rounded-full py-2.5 pl-9 pr-3 text-sm focus:outline-none focus:ring-2"
                 style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
               />
             </div>
@@ -243,10 +238,10 @@ export default function BusinessPage() {
           <EmptyState
             icon={Briefcase}
             secondaryIcon={ArrowRightLeft}
-            illustration={<WalletIllustration />}
-            title="Ready to track payments"
+            illustration={<EmptyShopCounter />}
+            title="Open for business"
             description="Track client payments, freelance projects, or business receivables. Create your first ledger to get started."
-            action={{ label: "Create Your First Ledger", onClick: () => setShowForm(true), color: "emerald" }}
+            action={{ label: "Create First Ledger", onClick: () => setShowForm(true), color: "emerald" }}
           />
         ) : (
           <LedgerListWithTotals

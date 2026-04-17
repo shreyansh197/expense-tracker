@@ -12,6 +12,7 @@ import { useConfirm } from "@/components/ui/ConfirmDialog";
 import { EmptyState } from "@/components/ui/EmptyState";
 
 import { ReceiptIllustration } from "@/components/ui/illustrations";
+import { StillWater } from "@/components/ui/illustrations/terrain";
 import { filterExpenses, groupByDay } from "@/lib/filters";
 import { formatCurrency as fmtCurrency } from "@/lib/utils";
 import { fetchRates, convert, getFallbackRates } from "@/lib/exchangeRates";
@@ -138,6 +139,7 @@ export function ExpenseList({
 }: ExpenseListProps) {
   const openEditForm = useUIStore((s) => s.openEditForm);
   const openAddForm = useUIStore((s) => s.openAddForm);
+  const { currentMonth, currentYear } = useUIStore();
   const { formatCurrency } = useCurrency();
   const { settings } = useSettings();
   const baseCurrency = settings.currency || "INR";
@@ -216,6 +218,33 @@ export function ExpenseList({
   }, [multiCurrency, baseCurrency, rates]);
 
   const grouped = useMemo(() => groupByDay(filtered, sortBy), [filtered, sortBy]);
+
+  // Category median map for the ↑ ambient signal
+  const categoryMedians = useMemo(() => {
+    const byCategory: Record<string, number[]> = {};
+    for (const e of filtered) {
+      if (!byCategory[e.category]) byCategory[e.category] = [];
+      byCategory[e.category].push(e.amount);
+    }
+    const result: Record<string, number> = {};
+    for (const [cat, amounts] of Object.entries(byCategory)) {
+      const sorted = [...amounts].sort((a, b) => a - b);
+      const mid = Math.floor(sorted.length / 2);
+      result[cat] = sorted.length % 2 === 0 ? (sorted[mid - 1] + sorted[mid]) / 2 : sorted[mid];
+    }
+    return result;
+  }, [filtered]);
+
+  // Day-age: 0=today, 1=yesterday, 2=older (for current month/year)
+  const getDayAge = useCallback((day: number): 0 | 1 | 2 => {
+    const today = new Date();
+    const isCurrentPeriod = currentMonth === today.getMonth() + 1 && currentYear === today.getFullYear();
+    if (!isCurrentPeriod) return 2;
+    if (day === today.getDate()) return 0;
+    const yesterday = new Date(today); yesterday.setDate(today.getDate() - 1);
+    if (day === yesterday.getDate()) return 1;
+    return 2;
+  }, [currentMonth, currentYear]);
 
   // Flatten for pagination count
   const totalCount = useMemo(() => {
@@ -301,16 +330,16 @@ export function ExpenseList({
     return (
       <EmptyState
         icon={hasFilters ? Receipt : Wallet}
-        illustration={<ReceiptIllustration />}
-        title={hasFilters ? "No expenses found" : "No expenses yet"}
+        illustration={hasFilters ? <ReceiptIllustration /> : <StillWater />}
+        title={hasFilters ? "No stones found" : "Still waters"}
         description={
           hasFilters
             ? searchQuery
-              ? `No results for "${searchQuery}". Try a different search term or adjust filters.`
+              ? `No results for "${searchQuery}". Try a different search or adjust filters.`
               : "Try adjusting your filters or search terms."
-            : "Track where your money goes \u2014 add your first expense to see insights here."
+            : "Your stream bed is empty — drop your first stone to see it here."
         }
-        action={!hasFilters ? { label: "Add an Expense", onClick: openAddForm } : undefined}
+        action={!hasFilters ? { label: "Drop a Stone", onClick: openAddForm } : undefined}
       />
     );
   }
@@ -346,13 +375,16 @@ export function ExpenseList({
 
       {paginatedGroups.map((group, gIdx) => (
         <div key={group.day}>
-          {/* Day header */}
-          <div className="sticky top-0 z-[5] mb-2 flex items-center justify-between rounded-lg px-1 py-1.5 backdrop-blur-sm" style={{ background: 'color-mix(in srgb, var(--background) 90%, transparent)' }}>
+          {/* Day header — Lora italic with terracotta underline */}
+          <div
+            className="sticky top-0 z-[5] mb-2 flex items-center justify-between px-1 py-1.5 backdrop-blur-sm"
+            style={{ background: "color-mix(in srgb, var(--background) 90%, transparent)" }}
+          >
             <div className="flex items-center gap-2">
               <button
                 onClick={() => toggleSelectDay(group.expenses)}
                 className="flex h-11 w-11 items-center justify-center rounded-lg transition-colors"
-                style={{ color: 'var(--text-muted)' }}
+                style={{ color: "var(--text-muted)" }}
                 aria-label={`Select all day ${group.day}`}
               >
                 {group.expenses.every((e) => selectedIds.has(e.id)) ? (
@@ -361,11 +393,33 @@ export function ExpenseList({
                   <Square size={14} />
                 )}
               </button>
-              <span className="text-xs font-bold uppercase tracking-wide" style={{ color: 'var(--text-tertiary)' }}>
-                Day {group.day}
-              </span>
+              <div className="flex flex-col">
+                <span
+                  className="font-display italic text-base leading-tight"
+                  style={{ color: "var(--text-primary)" }}
+                >
+                  {(() => {
+                    const today = new Date();
+                    const todayDay = today.getDate(), todayMonth = today.getMonth() + 1, todayYear = today.getFullYear();
+                    if (group.day === todayDay && currentMonth === todayMonth && currentYear === todayYear) return "Today";
+                    const yesterday = new Date(today); yesterday.setDate(today.getDate() - 1);
+                    if (group.day === yesterday.getDate() && currentMonth === yesterday.getMonth() + 1 && currentYear === yesterday.getFullYear()) return "Yesterday";
+                    const d = new Date(currentYear, currentMonth - 1, group.day);
+                    const dayName = d.toLocaleString("en", { weekday: "long" });
+                    const diffDays = Math.round((today.getTime() - d.getTime()) / 86400000);
+                    return diffDays <= 6 ? `Last ${dayName}` : d.toLocaleString("en", { month: "short", day: "numeric" });
+                  })()}
+                </span>
+                <div
+                  className="mt-0.5 rounded-full"
+                  style={{ height: 1, width: 24, background: "var(--es-clay, #B5654A)", opacity: 0.6 }}
+                />
+              </div>
             </div>
-            <span className="text-amount text-xs font-semibold" style={{ color: 'var(--text-secondary)' }}>
+            <span
+              className="font-numeric text-xs font-semibold tabular-nums"
+              style={{ color: "var(--text-secondary)" }}
+            >
               {formatCurrency(group.expenses.reduce((s, e) => s + toBase(e), 0))}
             </span>
           </div>
@@ -387,6 +441,8 @@ export function ExpenseList({
                 multiCurrency={multiCurrency}
                 rates={rates}
                 swipeHint={!swipeHintShown && gIdx === 0 && idx === 0}
+                dayAge={getDayAge(group.day)}
+                categoryMedian={categoryMedians[expense.category]}
               />
             ))}
             </AnimatePresence>
@@ -422,6 +478,8 @@ function SwipeableExpenseItem({
   multiCurrency,
   rates,
   swipeHint = false,
+  dayAge = 2,
+  categoryMedian,
 }: {
   expense: Expense;
   idx: number;
@@ -434,6 +492,8 @@ function SwipeableExpenseItem({
   multiCurrency: boolean;
   rates: Record<string, number> | null;
   swipeHint?: boolean;
+  dayAge?: 0 | 1 | 2;
+  categoryMedian?: number;
 }) {
   const deleteCallback = useCallback(() => { handleDelete(expense.id); }, [handleDelete, expense.id]);
   const { offsetX, deleting, onTouchStart, onTouchMove, onTouchEnd, snapBack, confirmDelete } = useSwipeToDelete(deleteCallback);
@@ -441,6 +501,15 @@ function SwipeableExpenseItem({
   const isSelected = selectedIds.has(expense.id);
   const absOffset = Math.abs(offsetX);
   const isRevealing = absOffset > 10;
+
+  // Stream aging visual properties (Part III.4 Expense Stream spec)
+  const streamOpacity = dayAge === 0 ? 1 : dayAge === 1 ? 0.9 : 0.75;
+  const streamBorderLeft = dayAge === 0
+    ? '3px solid var(--es-clay, #B5654A)'
+    : dayAge === 1
+    ? '3px solid var(--es-sage, #8FAF8B)'
+    : '2px solid var(--es-vellum, #E8E0D0)';
+  const isHighSpend = categoryMedian !== undefined && categoryMedian > 0 && expense.amount > categoryMedian * 2;
   const isFullSwipe = absOffset >= FULL_DELETE_THRESHOLD;
   const isDragging = absOffset > 0 && absOffset < 9000;
 
@@ -503,6 +572,8 @@ function SwipeableExpenseItem({
             ? 'color-mix(in srgb, var(--brand) 10%, var(--surface))'
             : 'var(--surface)',
           borderColor: isSelected ? undefined : 'var(--border)',
+          borderLeft: isSelected ? undefined : streamBorderLeft,
+          opacity: streamOpacity,
           transform: `translateX(${offsetX > -9000 ? offsetX : -window.innerWidth}px)`,
           transition: isDragging ? 'none' : 'transform 0.3s cubic-bezier(0.22, 1, 0.36, 1)',
           willChange: isRevealing ? 'transform' : undefined,
@@ -527,7 +598,7 @@ function SwipeableExpenseItem({
           <div className="flex items-center gap-2">
             <CategoryBadge category={expense.category} />
             {expense.isRecurring && (
-              <span className="text-data-text" aria-label="Recurring">
+              <span aria-label="Recurring" style={{ color: 'var(--es-mist, #C8D9C4)' }}>
                 <Repeat size={10} />
               </span>
             )}
@@ -539,11 +610,16 @@ function SwipeableExpenseItem({
           </div>
         </div>
         <div className="flex flex-col items-end">
-          <span className="text-amount text-base font-bold" style={{ color: 'var(--text-primary)' }}>
-            {multiCurrency && expense.currency && expense.currency !== baseCurrency
-              ? fmtCurrency(expense.amount, expense.currency)
-              : formatCurrency(expense.amount)}
-          </span>
+          <div className="flex items-center gap-1">
+            {isHighSpend && (
+              <span className="text-[10px] font-bold leading-none" style={{ color: 'var(--es-clay, #B5654A)' }} aria-label="Above usual">↑</span>
+            )}
+            <span className="text-amount text-base font-bold font-numeric" style={{ color: 'var(--text-primary)' }}>
+              {multiCurrency && expense.currency && expense.currency !== baseCurrency
+                ? fmtCurrency(expense.amount, expense.currency)
+                : formatCurrency(expense.amount)}
+            </span>
+          </div>
           {multiCurrency && expense.currency && expense.currency !== baseCurrency && (
             <span className="text-xs text-amount" style={{ color: 'var(--text-muted)' }}>
               ≈ {fmtCurrency(convert(expense.amount, expense.currency, baseCurrency, rates ?? getFallbackRates(baseCurrency)), baseCurrency)}

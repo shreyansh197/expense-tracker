@@ -1,20 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import {
-  PieChart,
-  Pie,
-  Cell,
-  Sector,
-  ResponsiveContainer,
-  Tooltip,
-} from "recharts";
 import { Table2, PieChart as PieChartIcon, BarChart3 } from "lucide-react";
 import { buildCategoryMap } from "@/lib/categories";
 import { useCurrency } from "@/hooks/useCurrency";
 import { useSettings } from "@/hooks/useSettings";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ChartIllustration } from "@/components/ui/illustrations";
+import { DonutChart } from "@/components/ui/charts";
 import type { CategoryTotal, Expense } from "@/types";
 import type { ReactNode } from "react";
 
@@ -24,35 +17,6 @@ interface CategoryChartProps {
   categoryBudgets?: Record<string, number>;
   expenses?: Expense[];
   headerLeft?: ReactNode;
-}
-
-function CustomTooltip({ active, payload, total, budgets, expenseCountMap }: {
-  active?: boolean;
-  payload?: Array<{ name: string; value: number; payload: { slug: string; color: string } }>;
-  total: number;
-  budgets: Record<string, number>;
-  expenseCountMap: Record<string, number>;
-}) {
-  const { formatCurrency } = useCurrency();
-  if (!active || !payload?.[0]) return null;
-  const item = payload[0];
-  const pct = total > 0 ? Math.round((item.value / total) * 100) : 0;
-  const budget = budgets[item.payload.slug];
-  const count = expenseCountMap[item.payload.slug] || 0;
-
-  return (
-    <div className="rounded-xl px-3 py-2 shadow-lg text-xs" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
-      <p className="font-semibold" style={{ color: 'var(--text-primary)' }}>{item.name}</p>
-      <p style={{ color: 'var(--text-secondary)' }}>
-        {formatCurrency(item.value)} · {pct}% · {count} txn{count !== 1 ? "s" : ""}
-      </p>
-      {budget && (
-        <p className={item.value > budget ? "mt-0.5" : "mt-0.5"} style={item.value > budget ? { color: 'var(--danger)' } : { color: 'var(--text-muted)' }}>
-          Budget: {formatCurrency(budget)} ({Math.round((item.value / budget) * 100)}%)
-        </p>
-      )}
-    </div>
-  );
 }
 
 export function CategoryChart({ categoryTotals, onCategoryClick, categoryBudgets, expenses, headerLeft }: CategoryChartProps) {
@@ -186,60 +150,16 @@ export function CategoryChart({ categoryTotals, onCategoryClick, categoryBudgets
           </table>
         </div>
       ) : (
-        <div className="h-[220px] w-full">
+        <div className="flex items-center justify-center py-4">
           {/* Screen reader: summarize data in chart view */}
           <p className="sr-only">
             {data.map((d) => `${d.name}: ${formatCurrency(d.value)}`).join(". ")}. Switch to Table view for full details.
           </p>
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <defs>
-                <filter id="pieGlow">
-                  <feGaussianBlur stdDeviation="2" result="blur" />
-                  <feComposite in="SourceGraphic" in2="blur" operator="over" />
-                </filter>
-              </defs>
-              <Pie
-                data={data}
-                cx="50%"
-                cy="50%"
-                innerRadius={55}
-                outerRadius={85}
-                paddingAngle={3}
-                dataKey="value"
-                stroke="none"
-                isAnimationActive={true}
-                animationBegin={100}
-                animationDuration={900}
-                animationEasing="ease-out"
-                activeShape={(props: unknown) => {
-                  const p = props as Record<string, number>;
-                  return (
-                    <Sector
-                      {...(props as Record<string, unknown>)}
-                      innerRadius={p.innerRadius - 2}
-                      outerRadius={p.outerRadius + 4}
-                    />
-                  );
-                }}
-                style={{ cursor: onCategoryClick ? "pointer" : undefined }}
-                onClick={(_, idx) => onCategoryClick?.(data[idx].slug)}
-              >
-                {data.map((entry, idx) => (
-                  <Cell key={idx} fill={entry.color} />
-                ))}
-              </Pie>
-              <Tooltip
-                content={
-                  <CustomTooltip
-                    total={total}
-                    budgets={budgets}
-                    expenseCountMap={expenseCountMap}
-                  />
-                }
-              />
-            </PieChart>
-          </ResponsiveContainer>
+          <DonutChart
+            data={data.map((d) => ({ value: d.value, color: d.color, label: d.name }))}
+            size={200}
+            thickness={30}
+          />
         </div>
       )}
     </div>

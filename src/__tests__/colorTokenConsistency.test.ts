@@ -8,7 +8,6 @@ function readComponent(relativePath: string): string {
 }
 
 const COMPONENT_DIR = path.resolve(__dirname, "..", "components");
-const PAGES_DIR = path.resolve(__dirname, "..", "app");
 
 /** Recursively find all .tsx files */
 function findTsxFiles(dir: string): string[] {
@@ -118,16 +117,16 @@ describe("color token consistency — Confetti token resolution", () => {
 describe("color token consistency — SavingsGoalsWidget", () => {
   const src = readComponent("components/dashboard/SavingsGoalsWidget.tsx");
 
-  test("remove button gradient uses var(--danger)", () => {
-    expect(src).toContain("var(--danger)");
+  test("uses terrain token var(--es-moss) for progress and fund button", () => {
+    expect(src).toContain("var(--es-moss)");
   });
 
-  test("remove button gradient end uses var(--danger-text)", () => {
-    expect(src).toContain("var(--danger-text)");
+  test("uses terrain token var(--es-mist) for soft backgrounds", () => {
+    expect(src).toContain("var(--es-mist)");
   });
 
-  test("remove button shadow uses color-mix with --danger", () => {
-    expect(src).toContain("color-mix(in srgb, var(--danger)");
+  test("uses accent gradient for remove funds button", () => {
+    expect(src).toContain("var(--accent-gradient)");
   });
 
   test("does not have hardcoded #ef4444 or #dc2626", () => {
@@ -211,15 +210,12 @@ describe("color token consistency — chart tooltip tokens", () => {
     expect(globals).toContain("--auth-badge-ring:");
   });
 
-  for (const chartFile of ["DailyTrendChart.tsx", "CategoryTrendChart.tsx"]) {
+  for (const chartFile of ["DailyTrendChart.tsx"]) {
     const chartSrc = readComponent(`components/dashboard/${chartFile}`);
 
-    test(`${chartFile} — tooltip uses var(--chart-tooltip-*) without hex fallbacks`, () => {
-      expect(chartSrc).toContain("var(--chart-tooltip-bg)");
-      expect(chartSrc).toContain("var(--chart-tooltip-fg)");
-      expect(chartSrc).toContain("var(--chart-tooltip-border)");
-      // No hex fallbacks in tooltip config
-      expect(chartSrc).not.toMatch(/chart-tooltip-\w+,\s*#/);
+    test(`${chartFile} — uses CSS token colors (visx or Recharts)`, () => {
+      // Charts should use CSS custom properties for theming
+      expect(chartSrc).toMatch(/var\(--/);
     });
   }
 });

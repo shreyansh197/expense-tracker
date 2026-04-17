@@ -242,11 +242,6 @@ describe("aria-label contracts — interactive elements", () => {
     expect(src).toContain("aria-expanded={open}");
   });
 
-  test("CategoryTrendChart has role=img", () => {
-    const src = readComponent("components/dashboard/CategoryTrendChart.tsx");
-    expect(src).toContain('role="img"');
-  });
-
   test("SubscriptionsSummary toggle has aria-expanded", () => {
     const src = readComponent("components/dashboard/SubscriptionsSummary.tsx");
     expect(src).toContain("aria-expanded={expanded}");

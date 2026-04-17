@@ -1,7 +1,10 @@
 "use client";
 
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
-import { useCurrency } from "@/hooks/useCurrency";
+import { useMemo } from "react";
+import { scaleBand, scaleLinear } from "@visx/scale";
+import { Group } from "@visx/group";
+import { Bar } from "@visx/shape";
+import { ParentSize } from "@visx/responsive";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { BarChart3 } from "lucide-react";
 
@@ -9,35 +12,79 @@ interface CollectionChartProps {
   data: { month: string; received: number; expected: number }[];
 }
 
-function CollectionTooltip({ active, payload, label }: {
-  active?: boolean;
-  payload?: Array<{ dataKey: string; value: number }>;
-  label?: string;
-}) {
-  const { formatCurrency } = useCurrency();
-  if (!active || !payload?.length) return null;
+const MARGIN = { top: 12, right: 8, bottom: 28, left: 8 };
+
+function Chart({ data, width, height }: { data: CollectionChartProps["data"]; width: number; height: number }) {
+  const formatted = useMemo(
+    () => data.map((d) => ({
+      ...d,
+      label: new Date(d.month + "-01").toLocaleDateString(undefined, { month: "short" }),
+    })),
+    [data],
+  );
+
+  const innerW = width - MARGIN.left - MARGIN.right;
+  const innerH = height - MARGIN.top - MARGIN.bottom;
+
+  const xScale = useMemo(
+    () => scaleBand<string>({ domain: formatted.map((d) => d.label), range: [0, innerW], padding: 0.3 }),
+    [formatted, innerW],
+  );
+
+  const maxVal = Math.max(...formatted.map((d) => Math.max(d.expected, d.received)), 1);
+  const yScale = useMemo(
+    () => scaleLinear<number>({ domain: [0, maxVal], range: [innerH, 0] }),
+    [maxVal, innerH],
+  );
+
+  const barWidth = (xScale.bandwidth() - 2) / 2;
+
   return (
-    <div className="rounded-xl px-3 py-2 text-xs shadow-lg" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
-      <p className="mb-1 font-semibold" style={{ color: 'var(--text-primary)' }}>{label}</p>
-      {payload.map((p) => (
-        <div key={p.dataKey} className="flex justify-between gap-4">
-          <span className={p.dataKey === "received" ? "" : ""} style={{ color: p.dataKey === "received" ? 'var(--biz-accent-text)' : 'var(--text-secondary)' }}>
-            {p.dataKey === "received" ? "Received" : "Expected"}
-          </span>
-          <span className="font-medium" style={{ color: 'var(--text-primary)' }}>
-            {formatCurrency(p.value)}
-          </span>
-        </div>
-      ))}
-    </div>
+    <svg width={width} height={height}>
+      <Group left={MARGIN.left} top={MARGIN.top}>
+        {formatted.map((d) => {
+          const x = xScale(d.label) ?? 0;
+          const expectedH = innerH - (yScale(d.expected) ?? 0);
+          const receivedH = innerH - (yScale(d.received) ?? 0);
+          return (
+            <Group key={d.label}>
+              <Bar
+                x={x}
+                y={innerH - expectedH}
+                width={barWidth}
+                height={expectedH}
+                rx={3}
+                fill="var(--surface-tertiary)"
+              />
+              <Bar
+                x={x + barWidth + 2}
+                y={innerH - receivedH}
+                width={barWidth}
+                height={receivedH}
+                rx={3}
+                fill="var(--success)"
+              />
+              <text
+                x={x + xScale.bandwidth() / 2}
+                y={innerH + 16}
+                textAnchor="middle"
+                fill="var(--text-muted)"
+                fontSize={10}
+              >
+                {d.label}
+              </text>
+            </Group>
+          );
+        })}
+      </Group>
+    </svg>
   );
 }
 
 export function CollectionChart({ data }: CollectionChartProps) {
-  const { symbol } = useCurrency();
   if (data.length === 0) return (
-    <div className="card p-5">
-      <h3 className="text-card-title mb-3">Monthly Collections</h3>
+    <div className="card-stone p-5">
+      <h3 className="text-sm font-semibold uppercase tracking-wider mb-3" style={{ color: "var(--text-muted)" }}>Monthly Collections</h3>
       <EmptyState
         icon={BarChart3}
         title="No collection data"
@@ -46,37 +93,24 @@ export function CollectionChart({ data }: CollectionChartProps) {
     </div>
   );
 
-  const hasAnyReceived = data.some((d) => d.received > 0);
-  const formatted = data.map((d) => ({
-    ...d,
-    label: new Date(d.month + "-01").toLocaleDateString(undefined, { month: "short" }),
-  }));
-
   return (
-    <div className="card p-5">
-      <h3 className="text-card-title mb-3">
+    <div className="card-stone p-5">
+      <h3 className="text-sm font-semibold uppercase tracking-wider mb-3" style={{ color: "var(--text-muted)" }}>
         Monthly Collections
       </h3>
-      {!hasAnyReceived && (
-        <p className="text-meta mb-2">No payments received yet — grey bars show expected amounts.</p>
-      )}
-      <ResponsiveContainer width="100%" height={220}>
-        <BarChart data={formatted} margin={{ top: 5, right: 5, left: -10, bottom: 5 }}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="label" tick={{ fontSize: 12 }} />
-          <YAxis tick={{ fontSize: 12 }} tickFormatter={(v: number) => `${symbol}${(v / 1000).toFixed(0)}k`} />
-          <Tooltip content={<CollectionTooltip />} />
-          <Legend
-            formatter={(value) => {
-              const color = value === "received" ? "var(--success)" : "var(--text-tertiary)";
-              return <span style={{ color }}>{value === "received" ? "Received" : "Expected"}</span>;
-            }}
-            wrapperStyle={{ fontSize: 12 }}
-          />
-          <Bar dataKey="expected" fill="var(--surface-tertiary)" radius={[4, 4, 0, 0]} isAnimationActive={true} animationBegin={100} animationDuration={600} animationEasing="ease-out" />
-          <Bar dataKey="received" fill="var(--success)" radius={[4, 4, 0, 0]} isAnimationActive={true} animationBegin={200} animationDuration={600} animationEasing="ease-out" />
-        </BarChart>
-      </ResponsiveContainer>
+      <div className="flex items-center gap-4 mb-2">
+        <div className="flex items-center gap-1.5">
+          <span className="inline-block h-2 w-2 rounded-full" style={{ background: "var(--surface-tertiary)" }} />
+          <span className="text-[10px]" style={{ color: "var(--text-muted)" }}>Expected</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <span className="inline-block h-2 w-2 rounded-full" style={{ background: "var(--success)" }} />
+          <span className="text-[10px]" style={{ color: "var(--text-muted)" }}>Received</span>
+        </div>
+      </div>
+      <div style={{ height: 200 }}>
+        <ParentSize>{({ width, height }) => <Chart data={data} width={width} height={height} />}</ParentSize>
+      </div>
     </div>
   );
 }

@@ -1,5 +1,6 @@
-const CACHE_NAME = "expenstream-icons-1530e2f9";
+const CACHE_NAME = "expenstream-icons-0131e2e5";
 const SHELL_CACHE = "expenstream-shell-v1";
+const FONT_CACHE = "expenstream-fonts-v1";
 
 const PRECACHE_URLS = [
   "/icons/icon-192.png",
@@ -7,6 +8,15 @@ const PRECACHE_URLS = [
   "/icons/apple-touch-icon.png",
   "/icons/favicon-32.png",
   "/manifest.json",
+];
+
+// Google Font CSS entries to precache on install — triggers font file download
+// next/font/google self-hosts woff2 under /_next/static/media/ (covered by static handler)
+// These external endpoints are kept as insurance for legacy offline scenarios
+const FONT_PRECACHE_URLS = [
+  "https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,700;1,400;1,500;1,700&display=swap",
+  "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap",
+  "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap",
 ];
 
 // App shell: HTML entry point for offline navigation
@@ -17,13 +27,23 @@ self.addEventListener("install", (event) => {
     Promise.all([
       caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE_URLS)),
       caches.open(SHELL_CACHE).then((cache) => cache.addAll(SHELL_URLS)),
+      // Precache font CSS so terrain fonts are available offline from first launch
+      caches.open(FONT_CACHE).then((cache) =>
+        Promise.allSettled(
+          FONT_PRECACHE_URLS.map((url) =>
+            fetch(url, { mode: "cors" }).then((res) => {
+              if (res.ok) return cache.put(url, res);
+            }),
+          ),
+        ),
+      ),
     ]),
   );
   self.skipWaiting();
 });
 
 self.addEventListener("activate", (event) => {
-  const keepCaches = new Set([CACHE_NAME, SHELL_CACHE]);
+  const keepCaches = new Set([CACHE_NAME, SHELL_CACHE, FONT_CACHE]);
   event.waitUntil(
     caches
       .keys()
@@ -75,6 +95,26 @@ self.addEventListener("fetch", (event) => {
           return response;
         })
         .catch(() => caches.match(request).then((r) => r || caches.match("/"))),
+    );
+    return;
+  }
+
+  // Google Fonts: cache-first so terrain fonts (Lora, Jakarta, JBMono) work offline
+  if (
+    url.hostname === "fonts.googleapis.com" ||
+    url.hostname === "fonts.gstatic.com"
+  ) {
+    event.respondWith(
+      caches.match(request).then((cached) => {
+        if (cached) return cached;
+        return fetch(request).then((response) => {
+          if (response.ok) {
+            const clone = response.clone();
+            caches.open(FONT_CACHE).then((cache) => cache.put(request, clone));
+          }
+          return response;
+        });
+      }),
     );
     return;
   }

@@ -1,27 +1,57 @@
-"use client";
+﻿"use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState, useCallback, useEffect, Suspense, useMemo } from "react";
+import { useState, useEffect, Suspense, useMemo } from "react";
 import dynamic from "next/dynamic";
 import { m, AnimatePresence } from "framer-motion";
 import { AppShell } from "@/components/layout/AppShell";
 import { MonthSwitcher } from "@/components/layout/MonthSwitcher";
 import { SyncIndicator } from "@/components/sync/SyncIndicator";
-import { KpiCards } from "@/components/dashboard/KpiCards";
-import { AlertsPanel } from "@/components/dashboard/AlertsPanel";
-import { SubscriptionsSummary } from "@/components/dashboard/SubscriptionsSummary";
 import { RecurringSuggestions } from "@/components/dashboard/RecurringSuggestions";
-import { SavingsGoalsWidget } from "@/components/dashboard/SavingsGoalsWidget";
-import { DashboardCustomizer, getVisibleSections } from "@/components/dashboard/DashboardCustomizer";
 import { RevealOnScroll } from "@/components/motion/RevealOnScroll";
-import { staggerLoose, fadeUp } from "@/lib/motion/variants";
+import { stoneSettle } from "@/lib/motion/variants";
 import { SkeletonKpiCards, SkeletonChart } from "@/components/ui/Skeleton";
 import { PageTransition } from "@/components/ui/PageTransition";
-import { ChartIllustration, HeaderGraphic, SparkGraphic, WavePatternGraphic } from "@/components/ui/illustrations";
-import { ObserverCharacter } from "@/components/ui/illustrations/characters";
-import { Trophy, Wallet } from "lucide-react";
+import { SpendingStream } from "@/components/dashboard/SpendingStream";
+import { SpendingPulse } from "@/components/dashboard/SpendingPulse";
+import { SavingsGoalsWidget } from "@/components/dashboard/SavingsGoalsWidget";
+import { NarrativeInsight } from "@/components/dashboard/NarrativeInsight";
+import { ClearingScene } from "@/components/ui/illustrations/terrain/ClearingScene";
+import { Repeat, PlusCircle, ChevronDown, Flame, TrendingUp, AlertTriangle, Leaf, Coffee, Sunrise } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
-// Lazy-load heavy chart components (recharts ~200KB)
+import { useExpenses } from "@/hooks/useExpenses";
+import { useSettings } from "@/hooks/useSettings";
+import { useRecurringExpenses } from "@/hooks/useRecurringExpenses";
+import { useUIStore } from "@/stores/uiStore";
+import { getMonthName } from "@/lib/utils";
+import { useCurrency } from "@/hooks/useCurrency";
+import { getSpendingStreak } from "@/lib/calculations";
+import { useDexieQuery } from "@/hooks/useDexieQuery";
+import { db } from "@/lib/db";
+import { getActiveWorkspaceId } from "@/lib/authClient";
+import { useAuth } from "@/components/providers/AuthProvider";
+import { useToast } from "@/components/ui/Toast";
+import { cn } from "@/lib/utils";
+import type { Expense } from "@/types";
+import { useCalculationsContext } from "@/contexts/CalculationsContext";
+import { useAchievements } from "@/hooks/useAchievements";
+import { useHistoricalData } from "@/hooks/useHistoricalData";
+import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
+import { useMonthUrlSync } from "@/hooks/useMonthUrlSync";
+import { usePageTitle } from "@/hooks/usePageTitle";
+import { getAllCategories } from "@/lib/categories";
+
+/* â”€â”€ Lightweight fallback for per-section ErrorBoundary â”€â”€â”€â”€â”€â”€ */
+function SectionFallback() {
+  return (
+    <div className="card-stone flex items-center justify-center gap-2 py-8 text-xs" style={{ color: 'var(--text-muted)' }}>
+      <span>This section couldn&apos;t load.</span>
+    </div>
+  );
+}
+
+// Lazy-load heavy charts (only in "Dig Deeper" expandable)
 const CategoryChart = dynamic(
   () => import("@/components/dashboard/CategoryChart").then((m) => m.CategoryChart),
   { ssr: false },
@@ -30,231 +60,6 @@ const CategoryLegend = dynamic(
   () => import("@/components/dashboard/CategoryChart").then((m) => m.CategoryLegend),
   { ssr: false },
 );
-const DailyTrendChart = dynamic(
-  () => import("@/components/dashboard/DailyTrendChart").then((m) => m.DailyTrendChart),
-  { ssr: false },
-);
-const SmartInsights = dynamic(
-  () => import("@/components/dashboard/SmartInsights").then((m) => m.SmartInsights),
-  { ssr: false },
-);
-
-import { useExpenses } from "@/hooks/useExpenses";
-import { useSettings } from "@/hooks/useSettings";
-import { useRecurringExpenses } from "@/hooks/useRecurringExpenses";
-import { useUIStore } from "@/stores/uiStore";
-import { getMonthName } from "@/lib/utils";
-import { formatCurrency as fmtCurrency } from "@/lib/utils";
-import { convert, getFallbackRates } from "@/lib/exchangeRates";
-import { useCurrency } from "@/hooks/useCurrency";
-import { getSpendingStreak } from "@/lib/calculations";
-import { useDexieQuery } from "@/hooks/useDexieQuery";
-import { db } from "@/lib/db";
-import { getActiveWorkspaceId } from "@/lib/authClient";
-import { CategoryDot } from "@/components/expenses/CategoryChips";
-import { QuickHelpButton } from "@/components/ui/QuickHelpButton";
-import { useAuth } from "@/components/providers/AuthProvider";
-import { useToast } from "@/components/ui/Toast";
-import { Repeat, PlusCircle, Target, BarChart3, Sparkles, ChevronDown, Check, ArrowRight, Flame } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
-import { cn } from "@/lib/utils";
-import type { DashboardSectionId, DashboardLayout, Expense } from "@/types";
-import { useCalculationsContext } from "@/contexts/CalculationsContext";
-import type { ReactNode } from "react";
-import { SpendingHeatmap } from "@/components/dashboard/SpendingHeatmap";
-import { SpendingComparison } from "@/components/dashboard/SpendingComparison";
-import { AchievementsCard } from "@/components/dashboard/AchievementsCard";
-import { SpendingInsights } from "@/components/dashboard/SpendingInsights";
-import { useAchievements } from "@/hooks/useAchievements";
-import { useHistoricalData } from "@/hooks/useHistoricalData";
-import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
-import { useMonthUrlSync } from "@/hooks/useMonthUrlSync";
-import { usePageTitle } from "@/hooks/usePageTitle";
-import { getAllCategories } from "@/lib/categories";
-
-/* ── Lightweight fallback for per-section ErrorBoundary ────── */
-function SectionFallback() {
-  return (
-    <div className="card flex items-center justify-center gap-2 py-8 text-xs" style={{ color: 'var(--text-muted)' }}>
-      <span>This section failed to load.</span>
-    </div>
-  );
-}
-
-/* ── Collapsible section for mobile dashboard ───────────────── */
-function CollapsibleSection({ id, title, children }: { id: string; title: string; children: React.ReactNode }) {
-  const storageKey = `expenstream-dash-${id}`;
-  const [open, setOpen] = useState(() => {
-    if (typeof window === "undefined") return true;
-    const stored = localStorage.getItem(storageKey);
-    return stored === null ? true : stored === "true";
-  });
-
-  const toggle = useCallback(() => {
-    setOpen((prev) => {
-      localStorage.setItem(storageKey, String(!prev));
-      return !prev;
-    });
-  }, [storageKey]);
-
-  return (
-    <div className="dash-section">
-      <button
-        onClick={toggle}
-        className="flex w-full items-center justify-between rounded-lg px-1 py-2 text-xs font-semibold uppercase tracking-wider lg:hidden"
-        style={{ color: 'var(--text-tertiary)' }}
-        aria-expanded={open}
-      >
-        <span>{title}</span>
-        <ChevronDown size={18} className={cn("transition-transform duration-300", open && "rotate-180")} />
-      </button>
-      <div className={cn(
-        "transition-all duration-300 ease-in-out lg:block",
-        open ? "block opacity-100" : "hidden opacity-0 lg:block lg:opacity-100"
-      )}>
-        {children}
-      </div>
-    </div>
-  );
-}
-
-/* ── Onboarding step ──────────────────────────────────────── */
-function OnboardingStep({
-  done,
-  icon: Icon,
-  title,
-  subtitle,
-  color,
-}: {
-  done: boolean;
-  icon: LucideIcon;
-  title: string;
-  subtitle: string;
-  color: string;
-}) {
-  const colorMap: Record<string, { bg: string; text: string; ring: string }> = {
-    indigo: { bg: "bg-data-soft", text: "text-data-text", ring: "ring-data-border" },
-    emerald: { bg: "bg-brand-soft", text: "text-brand", ring: "ring-brand-border" },
-    amber: { bg: "bg-coral-soft", text: "text-coral", ring: "ring-coral-border" },
-  };
-  const c = colorMap[color] ?? colorMap.indigo;
-
-  return (
-    <div className={cn(
-      "relative flex items-center gap-3.5 rounded-xl p-3.5 transition-all duration-200",
-      done ? "opacity-50" : ""
-    )} style={{ background: 'var(--surface-secondary)' }}>
-      {/* Step indicator */}
-      <div className={cn(
-        "flex h-9 w-9 shrink-0 items-center justify-center rounded-xl transition-all",
-        done ? "bg-[var(--goal-achieved-bg)]" : c.bg
-      )}>
-        {done ? (
-          <Check size={16} className="text-ok" strokeWidth={2.5} />
-        ) : (
-          <Icon size={16} className={c.text} />
-        )}
-      </div>
-      <div className="min-w-0 flex-1">
-        <p className={cn("text-sm font-semibold leading-tight", done && "line-through")} style={{ color: 'var(--text-primary)' }}>
-          {title}
-        </p>
-        <p className="mt-0.5 text-xs leading-relaxed" style={{ color: 'var(--text-tertiary)' }}>
-          {subtitle}
-        </p>
-      </div>
-    </div>
-  );
-}
-
-function WelcomeCard({ onAddExpense, hasBudget }: { onAddExpense: () => void; hasBudget: boolean }) {
-  const stepsCompleted = hasBudget ? 1 : 0;
-  const totalSteps = 3;
-
-  return (
-    <m.div
-      className="dash-section relative overflow-hidden rounded-2xl"
-      style={{ background: 'var(--surface)', border: '1px solid var(--border-card)', boxShadow: 'var(--card-shadow)' }}
-      initial={{ opacity: 0, y: 16, scale: 0.98 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-    >
-      {/* Gradient accent bar */}
-      <div className="h-1" style={{ background: 'var(--accent-gradient)' }} />
-
-      <div className="relative p-5 sm:p-7">
-        {/* Header */}
-        <m.div
-          className="flex items-start gap-3"
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.15, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-        >
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl" style={{ background: 'var(--accent-soft)' }}>
-            <Sparkles size={18} style={{ color: 'var(--accent)' }} />
-          </div>
-          <div>
-            <h2 className="text-lg font-bold tracking-tight sm:text-xl" style={{ color: 'var(--text-primary)' }}>
-              Welcome to ExpenStream
-            </h2>
-            <p className="mt-0.5 text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
-              Get set up in a few quick steps.
-            </p>
-          </div>
-        </m.div>
-
-        {/* Progress indicator */}
-        <div className="mt-5 flex items-center gap-3">
-          <div className="h-1.5 flex-1 overflow-hidden rounded-full" style={{ background: 'var(--surface-secondary)' }}>
-            <m.div
-              className="h-full rounded-full"
-              style={{ background: 'var(--accent-gradient)' }}
-              initial={{ width: 0 }}
-              animate={{ width: `${(stepsCompleted / totalSteps) * 100}%` }}
-              transition={{ delay: 0.4, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-            />
-          </div>
-          <span className="text-xs font-bold text-amount" style={{ color: 'var(--text-tertiary)' }}>
-            {stepsCompleted}/{totalSteps}
-          </span>
-        </div>
-
-        {/* Steps */}
-        <m.div
-          className="mt-4 grid gap-2 sm:grid-cols-3"
-          initial="hidden"
-          animate="visible"
-          variants={{ visible: { transition: { staggerChildren: 0.1, delayChildren: 0.3 } } }}
-        >
-          {[
-            { done: hasBudget, icon: Target, color: "indigo" as const, title: "Set your budget", subtitle: "Settings → Monthly Budget" },
-            { done: false, icon: PlusCircle, color: "emerald" as const, title: "Add first expense", subtitle: "Track where your money goes" },
-            { done: false, icon: BarChart3, color: "amber" as const, title: "Explore insights", subtitle: "Charts & alerts appear automatically" },
-          ].map((step) => (
-            <m.div key={step.title} variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] } } }}>
-              <OnboardingStep {...step} />
-            </m.div>
-          ))}
-        </m.div>
-
-        {/* CTA */}
-        <m.button
-          onClick={onAddExpense}
-          className="group mt-5 flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold text-white shadow-lg transition-all duration-200 hover:shadow-xl sm:w-auto sm:px-8"
-          style={{ background: 'var(--accent-gradient)' }}
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-          whileTap={{ scale: 0.97 }}
-        >
-          <PlusCircle size={16} strokeWidth={2.5} />
-          Add Your First Expense
-          <ArrowRight size={14} className="transition-transform duration-200 group-hover:translate-x-0.5" />
-        </m.button>
-      </div>
-    </m.div>
-  );
-}
 
 export default function DashboardPage() {
   return (
@@ -264,7 +69,6 @@ export default function DashboardPage() {
   );
 }
 
-/** Thin wrapper so DashboardContent renders INSIDE AppShell / CalculationsProvider */
 function DashboardShell() {
   return (
     <AppShell>
@@ -283,7 +87,6 @@ function DashboardContent() {
   const { settings, updateSettings } = useSettings();
   const { user } = useAuth();
 
-  // Reset to present month when navigating to dashboard without explicit URL params
   useEffect(() => {
     if (!searchParams.get("m") && !searchParams.get("y")) {
       const now = new Date();
@@ -292,10 +95,7 @@ function DashboardContent() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Sync month/year ↔ URL search params (?m=4&y=2026)
   useMonthUrlSync();
-
-  // Auto-apply recurring expenses for current month
   useRecurringExpenses(currentMonth, currentYear);
 
   const {
@@ -305,32 +105,24 @@ function DashboardContent() {
     avgDaily,
     categoryTotals,
     dailyTotals,
-    stackedDailyTotals,
     daysRemaining,
+    daysInMonth,
     paceToStayUnder,
     forecast,
-    anomalies,
     effectiveBudget,
   } = useCalculationsContext();
 
-  const recentExpenses = [...expenses]
-    .sort((a, b) => b.day - a.day || b.createdAt - a.createdAt)
-    .slice(0, 5);
-
-  // Previous month expenses — for SmartInsights & SpendingComparison
+  // Previous month for comparisons
   const prevMonth = currentMonth === 1 ? 12 : currentMonth - 1;
   const prevYear = currentMonth === 1 ? currentYear - 1 : currentYear;
   const { expenses: prevMonthExpenses } = useExpenses(prevMonth, prevYear);
-  const prevMonthTotal = useMemo(
-    () => prevMonthExpenses.reduce((s, e) => s + e.amount, 0),
-    [prevMonthExpenses],
-  );
+
   const allCategories = useMemo(
     () => getAllCategories(settings.customCategories, settings.hiddenDefaults),
     [settings.customCategories, settings.hiddenDefaults],
   );
 
-  // Spending streak — consecutive days with at least one expense logged
+  // Spending streak
   const allExpenses = useDexieQuery(
     () => {
       const wid = getActiveWorkspaceId();
@@ -342,13 +134,13 @@ function DashboardContent() {
   );
   const streak = useMemo(() => getSpendingStreak(allExpenses as Expense[]), [allExpenses]);
 
-  // Achievements system
+  // Achievements
   const achievementsData = useAchievements(settings, allExpenses as Expense[], expenses, streak, updateSettings);
 
-  // Historical data for spending insights
-  const historicalData = useHistoricalData(currentMonth, currentYear);
+  // Historical data for narrative insights
+  useHistoricalData(currentMonth, currentYear);
 
-  // Budget milestone celebrations — toast at 25%, 50%, 75% savings thresholds (once per month)
+  // Budget milestone celebrations
   const { toast } = useToast();
   useEffect(() => {
     if (!effectiveBudget || effectiveBudget <= 0 || loading) return;
@@ -364,417 +156,491 @@ function DashboardContent() {
         const msgs: Record<number, string> = {
           25: `25% of budget saved — nice start!`,
           50: `Halfway there — 50% saved this month!`,
-          75: `75% saved — outstanding discipline! 🏆`,
+          75: `75% saved — outstanding discipline!`,
         };
         toast(msgs[m], "success");
-        break; // only one toast per render cycle
+        break;
       }
     }
   }, [effectiveBudget, monthlyTotal, currentMonth, currentYear, loading, toast]);
 
-  // Welcome card: only show for truly new users, dismiss permanently once any expense exists
-  const WELCOME_KEY = "expenstream-welcome-dismissed";
-  const [welcomeDismissed, setWelcomeDismissed] = useState(() => {
-    if (typeof window === "undefined") return true;
-    return localStorage.getItem(WELCOME_KEY) === "true";
-  });
+  // "Dig Deeper" expandable state
+  const [digDeeperOpen, setDigDeeperOpen] = useState(false);
 
-  // Persist dismissal when user adds their first expense (derived, no cascading setState)
-  if (!welcomeDismissed && expenses.length > 0) {
-    localStorage.setItem(WELCOME_KEY, "true");
-    setWelcomeDismissed(true);
-  }
+  // Narrative insights â€” generated from calculations context
+  const narrativeInsights = useMemo(() => {
+    const insights: Array<{ text: string; type: "tip" | "warning" | "positive" | "neutral"; sparkData?: number[]; icon: LucideIcon }> = [];
+    const active = expenses.filter((e) => !e.deletedAt);
+    if (active.length === 0) return insights;
 
-  const showWelcome = !loading && !welcomeDismissed && expenses.length === 0;
+    const today = new Date().getDate();
 
-  const [chartTab, setChartTab] = useState<"category" | "daily">("category");
+    // Category spike detection
+    if (prevMonthExpenses.length > 0) {
+      const catTotals = new Map<string, number>();
+      const prevCatTotals = new Map<string, number>();
+      for (const e of active) catTotals.set(e.category, (catTotals.get(e.category) ?? 0) + e.amount);
+      for (const e of prevMonthExpenses.filter((e) => !e.deletedAt))
+        prevCatTotals.set(e.category, (prevCatTotals.get(e.category) ?? 0) + e.amount);
 
-  const visibleSections = getVisibleSections(settings.dashboardLayout);
+      const dayRatio = daysInMonth / Math.max(today, 1);
+      for (const [cat, amount] of catTotals) {
+        const prevAmt = prevCatTotals.get(cat);
+        if (prevAmt && prevAmt > 0) {
+          const projectedPct = ((amount * dayRatio - prevAmt) / prevAmt) * 100;
+          if (projectedPct > 30) {
+            const catMeta = allCategories.find((c) => c.id === cat);
+            const name = catMeta?.label ?? cat;
+            insights.push({
+              text: `${name} is up ${Math.round(projectedPct)}% compared to last month.`,
+              type: "warning",
+              icon: AlertTriangle,
+              sparkData: dailyTotals
+                .filter((dt) => dt.day <= today)
+                .map((dt) => active.filter((e) => e.day === dt.day && e.category === cat).reduce((s, e) => s + e.amount, 0)),
+            });
+            break;
+          }
+        }
+      }
+    }
 
-  const handleSaveLayout = useCallback((layout: DashboardLayout) => {
-    updateSettings({ dashboardLayout: layout });
-  }, [updateSettings]);
+    // Budget pace insight
+    if (effectiveBudget > 0 && today > 5) {
+      const projected = avgDaily * daysInMonth;
+      if (projected < effectiveBudget * 0.7) {
+        const savings = effectiveBudget - projected;
+        insights.push({
+          text: `On track to save ${formatCurrency(Math.round(savings))} this month — keep it up!`,
+          type: "positive",
+          icon: TrendingUp,
+        });
+      } else if (forecast.projectedRemaining < 0) {
+        insights.push({
+          text: `At current pace, spending may run ${formatCurrency(Math.abs(Math.round(forecast.projectedRemaining)))} past budget — consider slowing down.`,
+          type: "tip",
+          icon: AlertTriangle,
+        });
+      }
+    }
+
+    // Spending slowdown (from SmartInsights — merged)
+    if (prevMonthExpenses.length > 0) {
+      const prevTotal = prevMonthExpenses.filter((e) => !e.deletedAt).reduce((s, e) => s + e.amount, 0);
+      const currentTotal = active.reduce((s, e) => s + e.amount, 0);
+      if (prevTotal > 0 && currentTotal < prevTotal * 0.7 && today > 15) {
+        insights.push({
+          text: `You've spent ${Math.round((1 - currentTotal / prevTotal) * 100)}% less than last month — lighter footprint.`,
+          type: "positive",
+          icon: Leaf,
+        });
+      }
+    }
+
+    // New month tip (from SmartInsights — merged)
+    if (today <= 5 && effectiveBudget > 0 && insights.length === 0) {
+      insights.push({
+        text: `Fresh month ahead — ${formatCurrency(effectiveBudget)} to pace across ${daysInMonth} days.`,
+        type: "neutral",
+        icon: Sunrise,
+      });
+    }
+
+    // Recurring coming up
+    const recurringExpenses = settings.recurringExpenses ?? [];
+    if (recurringExpenses.length > 0) {
+      const upcomingTotal = recurringExpenses.reduce((s, r) => s + r.amount, 0);
+      if (upcomingTotal > 0) {
+        insights.push({
+          text: `${formatCurrency(upcomingTotal)} in recurring bills across ${recurringExpenses.length} subscription${recurringExpenses.length !== 1 ? "s" : ""}.`,
+          type: "neutral",
+          icon: Repeat,
+        });
+      }
+    }
+
+    // Monthly reflection — last 3 days of month
+    if (today >= daysInMonth - 2 && active.length > 0) {
+      const topCat = [...new Map<string, number>()].length === 0 ? null : (() => {
+        const cats = new Map<string, number>();
+        for (const e of active) cats.set(e.category, (cats.get(e.category) ?? 0) + e.amount);
+        let maxCat = "";
+        let maxAmt = 0;
+        for (const [c, a] of cats) { if (a > maxAmt) { maxCat = c; maxAmt = a; } }
+        const meta = allCategories.find((c) => c.id === maxCat);
+        return meta?.label ?? maxCat;
+      })();
+      const budgetNote = effectiveBudget > 0
+        ? remaining >= 0
+          ? ` with ${formatCurrency(remaining)} to spare`
+          : ` — ${formatCurrency(Math.abs(remaining))} past your target`
+        : "";
+      insights.push({
+        text: `Month wrapping up — ${formatCurrency(monthlyTotal)} spent${topCat ? `, mostly on ${topCat}` : ""}${budgetNote}.`,
+        type: remaining >= 0 ? "positive" : "tip",
+        icon: Flame,
+      });
+    }
+
+    return insights.slice(0, 3);
+  }, [expenses, prevMonthExpenses, effectiveBudget, avgDaily, daysInMonth, forecast, settings.recurringExpenses, dailyTotals, allCategories, formatCurrency, monthlyTotal, remaining]);
+
+  // Top category for stone marker
+  const topCategory = useMemo(() => {
+    if (categoryTotals.length === 0) return null;
+    const sorted = [...categoryTotals].sort((a, b) => b.total - a.total);
+    const top = sorted[0];
+    const meta = allCategories.find((c) => c.id === top.category);
+    return { slug: top.category, label: meta?.label ?? top.category, emoji: meta?.icon ?? "📦", total: top.total };
+  }, [categoryTotals, allCategories]);
 
   const handleCategoryClick = (categorySlug: string) => {
     router.push(`/category/${encodeURIComponent(categorySlug)}?month=${currentMonth}&year=${currentYear}`);
   };
 
-  const handleDayClick = (day: number) => {
-    const { setActiveCategories, setSearchQuery } = useUIStore.getState();
-    setActiveCategories([]);
-    setSearchQuery("");
-    router.push(`/expenses?m=${currentMonth}&y=${currentYear}&day=${day}`);
-  };
+  const dailyValues = useMemo(
+    () => dailyTotals.map((d) => d.total),
+    [dailyTotals],
+  );
+
+  // Today's total — for "Quiet day" hero descriptor
+  const todayTotal = useMemo(() => {
+    const today = new Date().getDate();
+    const todayDt = dailyTotals.find((d) => d.day === today);
+    return todayDt?.total ?? 0;
+  }, [dailyTotals]);
+
+  // Today's transaction count — for SpendingPulse
+  const todayCount = useMemo(() => {
+    const today = new Date().getDate();
+    return expenses.filter((e) => !e.deletedAt && e.day === today).length;
+  }, [expenses]);
+
+  // Yesterday's last expense — for quick repeat
+  const yesterdayExpense = useMemo(() => {
+    const yesterday = new Date().getDate() - 1;
+    if (yesterday < 1) return null;
+    const active = expenses.filter((e) => !e.deletedAt && e.day === yesterday);
+    if (active.length === 0) return null;
+    const last = active[active.length - 1];
+    const meta = allCategories.find((c) => c.id === last.category);
+    return { amount: last.amount, category: last.category, remark: last.remark || "", label: meta?.label ?? last.category };
+  }, [expenses, allCategories]);
 
   return (
-        <PageTransition className="relative mx-auto min-h-[80vh] max-w-4xl xl:max-w-6xl space-y-5 sm:space-y-6 p-4 sm:p-6 lg:p-8">
-        {/* Header — hero zone */}
-        <m.div
-          className="zone-header dash-section relative z-40 overflow-hidden rounded-2xl p-5 sm:p-6"
-          style={{
-            background: 'var(--surface)',
-            backgroundImage: 'var(--gradient-hero)',
-            border: '1px solid var(--border-card)',
-            boxShadow: 'var(--shadow-sm)',
-          }}
-          initial={{ opacity: 0, y: -8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-        >
-          {/* Abstract decorative graphic — desktop only */}
-          <div className="pointer-events-none absolute right-3 top-3 sm:right-5 sm:top-3">
-            <HeaderGraphic />
-          </div>
-          {/* Character illustration — ObserverCharacter for calm presence (density: max 1 character + 1 art per section) */}
-          <div className="pointer-events-none absolute right-16 bottom-3 opacity-40 sm:opacity-70 scale-75 sm:scale-100 origin-bottom-right">
-            <ObserverCharacter size={80} />
-          </div>
+    <PageTransition className="relative mx-auto min-h-[80vh] max-w-4xl xl:max-w-5xl space-y-5 p-4 sm:p-6 lg:p-8">
 
-          <h1 className="sr-only">Dashboard</h1>
+      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+          1. CANOPY HEADER â€” month name + sync
+          â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
+      <m.header
+        className="flex items-center justify-between"
+        initial={{ opacity: 0, y: -6 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+      >
+        <div className="min-w-0 flex-1">
+          <MonthSwitcher />
+        </div>
+        <div className="flex shrink-0 items-center gap-2">
+          <SyncIndicator />
+          {streak >= 2 && (
+            <span
+              className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold"
+              style={{ background: "var(--warning-soft)", color: "var(--warning-text)" }}
+            >
+              <Flame size={10} />
+              {streak}d
+            </span>
+          )}
+        </div>
+      </m.header>
 
-          {user?.name && (
-            <div className="mb-3">
-              <div className="flex items-center gap-2">
-                <p className="text-xs sm:text-xs font-medium tracking-wide" style={{ color: 'var(--text-muted)' }}>
+      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+          2. HERO ZONE â€” total spent + spending stream
+          â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
+      <ErrorBoundary fallback={<SectionFallback />}>
+        <AnimatePresence mode="wait">
+          {loading ? (
+            <m.div key="hero-skeleton" initial={{ opacity: 0.6 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+              <SkeletonKpiCards />
+            </m.div>
+          ) : expenses.length === 0 ? (
+            /* Empty state â€” the clearing awaits */
+            <m.div
+              key="hero-empty"
+              className="card-terrain flex flex-col items-center p-8 text-center"
+              initial={{ opacity: 0, scale: 0.97 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <ClearingScene className="mx-auto mb-4 w-48 sm:w-56" />
+              <h2 className="font-display italic text-lg" style={{ color: "var(--text-primary)" }}>
+                Your clearing awaits
+              </h2>
+              <p className="mt-1 text-sm" style={{ color: "var(--text-secondary)" }}>
+                Add your first expense to watch the stream flow.
+              </p>
+              <m.button
+                onClick={() => useUIStore.getState().openAddForm()}
+                className="mt-5 inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold text-white"
+                style={{ background: "var(--accent-gradient)" }}
+                whileTap={{ scale: 0.96 }}
+              >
+                <PlusCircle size={16} />
+                Add First Expense
+              </m.button>
+            </m.div>
+          ) : (
+            <m.div
+              key="hero-content"
+              className="card-terrain relative overflow-hidden p-5 sm:p-6"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+            >
+              {/* Greeting */}
+              {user?.name && (
+                <p className="mb-1 text-xs font-medium tracking-wide" style={{ color: "var(--text-muted)" }}>
                   {(() => {
                     const h = new Date().getHours();
-                    if (h < 5) return "🌙 Burning the midnight oil";
-                    if (h < 12) return "☀️ Good morning";
-                    if (h < 17) return "👋 Good afternoon";
-                    if (h < 21) return "🌅 Good evening";
-                    return "🌙 Good night";
-                  })()}
+                    if (h < 5) return "Burning the midnight oil";
+                    if (h < 12) return "Good morning";
+                    if (h < 17) return "Good afternoon";
+                    if (h < 21) return "Good evening";
+                    return "Good night";
+                  })()}, {user.name.split(" ")[0]}
                 </p>
-                {streak >= 2 && (
-                  <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-overline font-semibold" style={{ background: 'var(--warning-soft)', color: 'var(--warning-text)' }}>
-                    <Flame size={10} />
-                    {streak}d streak
-                  </span>
+              )}
+
+              {/* Hero amount */}
+              <m.p
+                layoutId="monthly-total"
+                className="font-display text-hero-amount leading-none"
+                style={{ color: "var(--text-primary)" }}
+              >
+                {formatCurrency(monthlyTotal)}
+              </m.p>
+
+              <p className="mt-1 text-sm" style={{ color: "var(--text-secondary)" }}>
+                {effectiveBudget > 0
+                  ? remaining >= 0
+                    ? `${formatCurrency(remaining)} remaining`
+                    : `${formatCurrency(Math.abs(remaining))} past budget`
+                  : `spent in ${getMonthName(currentMonth)}`}
+                {daysRemaining > 0 && effectiveBudget > 0 && (
+                  <span style={{ color: "var(--text-muted)" }}> · {daysRemaining}d left</span>
                 )}
-              </div>
-              <h2 className="text-xl sm:text-2xl font-semibold tracking-tight" style={{ color: 'var(--text-primary)' }}>
-                {user.name.split(" ")[0]}
-              </h2>
-              <p className="mt-0.5 text-xs sm:text-xs tracking-wide" style={{ color: 'var(--text-tertiary)' }}>
-                {new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}
               </p>
-            </div>
-          )}
-          <div data-tour="dashboard" className="flex items-center justify-between gap-2">
-            <div className="min-w-0 shrink-1">
-              <MonthSwitcher />
-            </div>
-            <div className="flex shrink-0 items-center gap-2">
-              <SyncIndicator />
-              <DashboardCustomizer layout={settings.dashboardLayout} onSave={handleSaveLayout} />
-              <div className="relative z-[50] lg:hidden">
-                <QuickHelpButton />
-              </div>
-            </div>
-          </div>
-        </m.div>
 
-        {/* Welcome Card for first-time users */}
-        {showWelcome && (
-          <WelcomeCard
-            onAddExpense={() => {
-              localStorage.setItem(WELCOME_KEY, "true");
-              setWelcomeDismissed(true);
-              useUIStore.getState().openAddForm();
-            }}
-            hasBudget={settings.salary > 0}
-          />
-        )}
-
-        {/* Smart Insights — contextual spending analysis */}
-        {!loading && expenses.length > 0 && (
-          <SmartInsights
-            expenses={expenses}
-            previousMonthExpenses={prevMonthExpenses}
-            salary={effectiveBudget}
-            categories={allCategories}
-          />
-        )}
-
-        {/* ── Dashboard sections rendered in user-customized order ── */}
-        <m.div initial="initial" animate="animate" variants={staggerLoose} className="space-y-5 sm:space-y-6">
-        {visibleSections.map((sectionId) => {
-          const renderer: Record<DashboardSectionId, () => ReactNode> = {
-            kpi: () => (
-              <AnimatePresence mode="wait" key="kpi">
-                {loading ? (
-                  <m.div key="kpi-skeleton" className="dash-section" initial={{ opacity: 0.6 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
-                    <SkeletonKpiCards />
-                  </m.div>
-                ) : (
-                  <m.div key="kpi-content" className="dash-section" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
-                  {/* vs last month comparison — inline with section */}
-                  {prevMonthTotal > 0 && (
-                    <div className="mb-2 flex items-center gap-2">
-                      <span className="text-xs font-medium" style={{ color: 'var(--text-muted)' }}>This month</span>
-                      <SpendingComparison currentTotal={monthlyTotal} previousTotal={prevMonthTotal} />
-                    </div>
+              {/* Quiet day acknowledgment + quick repeat */}
+              {todayTotal === 0 && (
+                <div className="mt-1.5 flex items-center gap-3">
+                  <p className="flex items-center gap-1.5 text-xs" style={{ color: "var(--text-muted)" }}>
+                    <Coffee size={12} />
+                    <span>Quiet day so far</span>
+                  </p>
+                  {yesterdayExpense && (
+                    <button
+                      onClick={() => useUIStore.getState().openAddForm({
+                        amount: yesterdayExpense.amount,
+                        category: yesterdayExpense.category,
+                        remark: yesterdayExpense.remark,
+                      })}
+                      className="rounded-lg px-2.5 py-1 text-xs font-medium transition-colors"
+                      style={{ background: "var(--surface-secondary)", color: "var(--text-secondary)" }}
+                    >
+                      Same as yesterday · {yesterdayExpense.label}
+                    </button>
                   )}
-                  {/* Trophy: month ended under budget */}
-                  {daysRemaining === 0 && remaining >= 0 && effectiveBudget > 0 && (
-                    <div className="mb-3 flex items-center gap-3 rounded-xl border p-3" style={{ borderColor: 'var(--goal-achieved-border)', background: 'var(--goal-achieved-bg)' }}>
-                      <Trophy size={28} className="shrink-0" style={{ color: 'var(--success)' }} />
-                      <div>
-                        <p className="text-sm font-semibold" style={{ color: 'var(--goal-achieved-text)' }}>Budget Goal Met!</p>
-                        <p className="text-xs" style={{ color: 'var(--goal-achieved-text)', opacity: 0.8 }}>You stayed under budget this month. Great discipline!</p>
-                      </div>
-                    </div>
-                  )}
-                  <KpiCards
-                  monthlyTotal={monthlyTotal}
-                  remaining={remaining}
-                  salary={effectiveBudget}
-                  avgDaily={avgDaily}
+                </div>
+              )}
+
+              {/* Spending Stream */}
+              <div className="mt-3">
+                <SpendingStream
                   budgetUsedPercent={budgetUsedPercent}
-                  daysRemaining={daysRemaining}
-                  paceToStayUnder={paceToStayUnder}
-                  expenseCount={expenses.length}
-                  forecast={forecast}
-                  rolloverAmount={
-                    settings.rolloverEnabled && settings.rolloverHistory
-                      ? (() => {
-                          let pm = currentMonth - 1, py = currentYear;
-                          if (pm <= 0) { pm = 12; py -= 1; }
-                          return settings.rolloverHistory[`${py}-${String(pm).padStart(2, "0")}`] ?? 0;
-                        })()
-                      : 0
-                  }
+                  dailyValues={dailyValues}
+                  daysInMonth={daysInMonth}
                 />
+              </div>
+            </m.div>
+          )}
+        </AnimatePresence>
+      </ErrorBoundary>
+
+      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+          3. STONE MARKERS â€” 2Ã—2 bento grid
+          â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
+      {!loading && expenses.length > 0 && (
+        <m.div
+          className="grid grid-cols-2 gap-3"
+          initial="initial"
+          animate="animate"
+          variants={{ initial: {}, animate: { transition: { staggerChildren: 0.06 } } }}
+        >
+          {/* Budget Pace */}
+          <m.div className="card-stone p-4" variants={stoneSettle}>
+            <p className="text-xs font-medium uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
+              Daily pace
+            </p>
+            <p className="mt-1 font-display text-lg font-bold" style={{ color: "var(--text-primary)" }}>
+              {formatCurrency(Math.round(avgDaily))}
+              <span className="text-xs font-normal" style={{ color: "var(--text-muted)" }}>/day</span>
+            </p>
+            {effectiveBudget > 0 && paceToStayUnder > 0 && (
+              <p className="mt-0.5 text-xs" style={{ color: avgDaily > paceToStayUnder ? "var(--warning)" : "var(--text-tertiary)" }}>
+                target â‰¤ {formatCurrency(Math.round(paceToStayUnder))}
+              </p>
+            )}
+          </m.div>
+
+          {/* Top Category */}
+          <m.div
+            className="card-stone cursor-pointer p-4"
+            variants={stoneSettle}
+            onClick={() => topCategory && handleCategoryClick(topCategory.slug)}
+            role="button"
+            tabIndex={0}
+          >
+            <p className="text-xs font-medium uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
+              Top category
+            </p>
+            {topCategory ? (
+              <>
+                <p className="mt-1 flex items-center gap-1.5 text-lg font-bold" style={{ color: "var(--text-primary)" }}>
+                  <span>{topCategory.emoji}</span>
+                  <span className="truncate">{topCategory.label}</span>
+                </p>
+                <p className="mt-0.5 text-xs" style={{ color: "var(--text-tertiary)" }}>
+                  {formatCurrency(topCategory.total)}
+                </p>
+              </>
+            ) : (
+              <p className="mt-1 text-sm" style={{ color: "var(--text-muted)" }}>â€”</p>
+            )}
+          </m.div>
+
+          {/* Recurring */}
+          <m.div className="card-stone p-4" variants={stoneSettle}>
+            <p className="text-xs font-medium uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
+              Recurring
+            </p>
+            <p className="mt-1 font-display text-lg font-bold" style={{ color: "var(--text-primary)" }}>
+              {(settings.recurringExpenses ?? []).length}
+            </p>
+            <p className="mt-0.5 text-xs" style={{ color: "var(--text-tertiary)" }}>
+              {formatCurrency((settings.recurringExpenses ?? []).reduce((s, r) => s + r.amount, 0))}/mo
+            </p>
+          </m.div>
+
+          {/* Streak / Achievement */}
+          <m.div className="card-stone p-4" variants={stoneSettle}>
+            <p className="text-xs font-medium uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
+              {streak >= 2 ? "Streak" : "Expenses"}
+            </p>
+            <p className="mt-1 font-display text-lg font-bold" style={{ color: "var(--text-primary)" }}>
+              {streak >= 2 ? `${streak} days` : expenses.length}
+            </p>
+            {achievementsData.newlyUnlocked.length > 0 && (
+              <p className="mt-0.5 text-xs" style={{ color: "var(--accent)" }}>
+                🏆 {achievementsData.newlyUnlocked[0]}
+              </p>
+            )}
+          </m.div>
+        </m.div>
+      )}
+
+      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+          4. NARRATIVE RIVER â€” prose insight cards
+          â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
+      {!loading && narrativeInsights.length > 0 && (
+        <div className="space-y-3">
+          {narrativeInsights.map((insight, i) => (
+            <NarrativeInsight
+              key={i}
+              text={insight.text}
+              type={insight.type}
+              icon={insight.icon}
+              sparkData={insight.sparkData}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* Recurring suggestions */}
+      {!loading && <RecurringSuggestions />}
+
+      {/* ═══════════════════════════════════════════════════
+          4b. SPENDING PULSE — daily rhythm heartbeat
+          ═══════════════════════════════════════════════════ */}
+      {!loading && expenses.length > 0 && (
+        <RevealOnScroll>
+          <SpendingPulse
+            dailyValues={dailyValues}
+            todayTotal={todayTotal}
+            avgDaily={avgDaily}
+            todayCount={todayCount}
+          />
+        </RevealOnScroll>
+      )}
+
+      {/* ═══════════════════════════════════════════════════
+          4c. SAVINGS GOALS — fund tracker widget
+          ═══════════════════════════════════════════════════ */}
+      {!loading && (
+        <RevealOnScroll>
+          <SavingsGoalsWidget />
+        </RevealOnScroll>
+      )}
+
+      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+          5. DIG DEEPER â€” expandable charts
+          â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
+      {!loading && expenses.length > 0 && (
+        <RevealOnScroll>
+          <div className="card-terrain overflow-hidden">
+            <button
+              onClick={() => setDigDeeperOpen((o) => !o)}
+              className="flex w-full items-center justify-between p-4 text-sm font-semibold"
+              style={{ color: "var(--text-secondary)" }}
+              aria-expanded={digDeeperOpen}
+            >
+              <span>See full breakdown</span>
+              <ChevronDown
+                size={18}
+                className={cn("transition-transform duration-300", digDeeperOpen && "rotate-180")}
+              />
+            </button>
+
+            <AnimatePresence>
+              {digDeeperOpen && (
+                <m.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                  className="overflow-hidden"
+                >
+                  <div className="border-t p-5" style={{ borderColor: "var(--border-default)" }}>
+                    <Suspense fallback={<SkeletonChart />}>
+                      <CategoryChart
+                        categoryTotals={categoryTotals}
+                        onCategoryClick={handleCategoryClick}
+                        categoryBudgets={settings.categoryBudgets}
+                        expenses={expenses}
+                      />
+                      <div className="mt-4">
+                        <CategoryLegend categoryTotals={categoryTotals} onCategoryClick={handleCategoryClick} categoryBudgets={settings.categoryBudgets} />
+                      </div>
+                    </Suspense>
+                  </div>
                 </m.div>
               )}
-              </AnimatePresence>
-            ),
-
-            alerts: () => (
-              expenses.length > 0 && effectiveBudget > 0 ? (
-                <div key="alerts">
-                <CollapsibleSection id="alerts" title="Insights & Alerts">
-                <div className="space-y-4">
-                <AlertsPanel
-                  categoryTotals={categoryTotals}
-                  categoryBudgets={settings.categoryBudgets}
-                  budgetUsedPercent={budgetUsedPercent}
-                  avgDaily={avgDaily}
-                  paceToStayUnder={paceToStayUnder}
-                  forecast={forecast}
-                  anomalies={anomalies}
-                  onCategoryClick={handleCategoryClick}
-                />
-                {(settings.recurringExpenses ?? []).length > 0 && <SubscriptionsSummary />}
-                </div>
-                </CollapsibleSection>
-                </div>
-              ) : null
-            ),
-
-            subscriptions: () => (
-              <div key="subscriptions" className="space-y-4 sm:space-y-5">
-                {/* Subscriptions shown inside alerts section when budget is set; standalone fallback here */}
-                {!(expenses.length > 0 && effectiveBudget > 0) && (settings.recurringExpenses ?? []).length > 0 && (
-                  <div>
-                  <CollapsibleSection id="subscriptions" title="Recurring Expenses">
-                  <SubscriptionsSummary />
-                  </CollapsibleSection>
-                  </div>
-                )}
-                <RecurringSuggestions />
-              </div>
-            ),
-
-            goals: () => (
-              (settings.goals ?? []).length > 0 ? (
-                <div key="goals">
-                <CollapsibleSection id="goals" title="Savings Goals">
-                <SavingsGoalsWidget />
-                </CollapsibleSection>
-                </div>
-              ) : null
-            ),
-
-            charts: () => (
-              <div key="charts">
-              <AnimatePresence mode="wait">
-                {loading ? (
-                  <m.div key="chart-skeleton" className="dash-section" initial={{ opacity: 0.6 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
-                    <SkeletonChart />
-                  </m.div>
-                ) : expenses.length === 0 ? (
-                <div className="dash-section card relative overflow-hidden p-5">
-                  <div className="flex items-center justify-between">
-                    <h3 className="relative text-section-title mb-4">Spending Insights</h3>
-                    <WavePatternGraphic />
-                  </div>
-                  <div className="relative flex h-[220px] items-center justify-center">
-                    <div className="flex flex-col items-center text-center">
-                      <ChartIllustration size={120} />
-                      <p className="mt-2 text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>Preview</p>
-                      <p className="mt-1 text-xs" style={{ color: 'var(--text-muted)' }}>Your spending charts will appear here</p>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-              <>
-              <div className="dash-section">
-                {(() => {
-                  const tabToggle = (
-                    <div className="segmented-control">
-                      <button data-active={chartTab === "category" ? "true" : undefined} onClick={() => setChartTab("category")}>Categories</button>
-                      <button data-active={chartTab === "daily" ? "true" : undefined} onClick={() => setChartTab("daily")}>Daily</button>
-                    </div>
-                  );
-                  return (
-                <div className="card overflow-hidden p-5">
-                  <AnimatePresence mode="wait" initial={false}>
-                    {chartTab === "category" ? (
-                      <m.div key="cat" initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 8 }} transition={{ duration: 0.2 }}>
-                        <CategoryChart
-                          categoryTotals={categoryTotals}
-                          onCategoryClick={handleCategoryClick}
-                          categoryBudgets={settings.categoryBudgets}
-                          expenses={expenses}
-                          headerLeft={tabToggle}
-                        />
-                        <div className="mt-4">
-                          <CategoryLegend categoryTotals={categoryTotals} onCategoryClick={handleCategoryClick} categoryBudgets={settings.categoryBudgets} />
-                        </div>
-                      </m.div>
-                    ) : (
-                      <m.div key="daily" initial={{ opacity: 0, x: 8 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -8 }} transition={{ duration: 0.2 }}>
-                        <div className="h-[320px]">
-                          <DailyTrendChart
-                            dailyTotals={dailyTotals}
-                            stackedDailyTotals={stackedDailyTotals}
-                            onBarClick={handleDayClick}
-                            headerLeft={tabToggle}
-                          />
-                        </div>
-                      </m.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-                  );
-                })()}
-              </div>
-              </>
-              )}
-              </AnimatePresence>
-              </div>
-            ),
-
-            heatmap: () => (
-              expenses.length > 0 ? (
-                <RevealOnScroll className="dash-section" delay={0.15}>
-                  <SpendingHeatmap
-                    expenses={expenses}
-                    month={currentMonth}
-                    year={currentYear}
-                    onDayClick={handleDayClick}
-                  />
-                </RevealOnScroll>
-              ) : null
-            ),
-
-            recent: () => (
-              <div key="recent">
-              <div className="dash-section card p-5">
-                <div className="mb-4 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                  <h3 className="text-section-title">
-                    Recent Expenses
-                  </h3>
-                  <SparkGraphic />
-                  </div>
-                  {recentExpenses.length > 0 && (
-                    <a
-                      href="/expenses"
-                      className="text-xs font-semibold transition-colors"
-                      style={{ color: 'var(--accent)' }}
-                    >
-                      View All →
-                    </a>
-                  )}
-                </div>
-                {recentExpenses.length === 0 ? (
-                  <div className="flex flex-col items-center gap-2 py-8">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl" style={{ background: 'var(--surface-secondary)' }}>
-                      <Wallet size={24} style={{ color: 'var(--text-muted)' }} />
-                    </div>
-                    <p className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>No expenses this month</p>
-                    <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Tap <PlusCircle size={12} className="inline" /> to add your first expense</p>
-                  </div>
-                ) : (
-                  <div className="space-y-0.5">
-                    {recentExpenses.map((e, idx) => (
-                      <m.div
-                        key={e.id}
-                        className="flex items-center justify-between rounded-xl px-3 py-3 transition-colors hover:bg-[var(--surface-secondary)]"
-                        initial={{ opacity: 0, y: 6 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: idx * 0.04, duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-                      >
-                        <div className="grid min-w-0 flex-1" style={{ gridTemplateColumns: "5.5rem 1fr", gap: "0.75rem", alignItems: "center" }}>
-                          <div className="w-[5.5rem] flex justify-start">
-                            <CategoryDot category={e.category} />
-                          </div>
-                          <div className="min-w-0">
-                            <div className="flex items-center gap-1.5">
-                              {e.isRecurring && <Repeat className="shrink-0 h-3 w-3" style={{ color: 'var(--info-text)' }} />}
-                              <p className="text-meta">
-                                {e.day} {getMonthName(currentMonth).slice(0, 3)}
-                              </p>
-                            </div>
-                            {e.remark && (
-                              <p className="truncate text-xs mt-0.5" style={{ color: 'var(--text-secondary)' }}>
-                                {e.remark}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                        <span className="text-amount ml-3 shrink-0 text-base font-bold" style={{ color: 'var(--text-primary)' }}>
-                          {settings.multiCurrencyEnabled && e.currency && e.currency !== settings.currency
-                            ? fmtCurrency(e.amount, e.currency)
-                            : formatCurrency(e.amount)}
-                        </span>
-                        {settings.multiCurrencyEnabled && e.currency && e.currency !== settings.currency && (
-                          <span className="text-amount ml-3 shrink-0 text-xs" style={{ color: 'var(--text-muted)' }}>
-                            ≈ {fmtCurrency(convert(e.amount, e.currency, settings.currency, getFallbackRates(settings.currency)), settings.currency)}
-                          </span>
-                        )}
-                      </m.div>
-                    ))}
-                  </div>
-                )}
-              </div>
-              </div>
-            ),
-
-            achievements: () => (
-              <div key="achievements" className="dash-section">
-                <AchievementsCard {...achievementsData} />
-              </div>
-            ),
-
-            insights: () => (
-              <div key="insights" className="dash-section">
-                <SpendingInsights
-                  monthOverMonthChange={historicalData.monthOverMonthChange}
-                  dayOfWeekFactors={historicalData.dayOfWeekFactors}
-                  recurringVsOneTime={historicalData.recurringVsOneTime}
-                  currentMonthCategories={historicalData.currentMonth?.categoryBreakdown ?? {}}
-                  previousMonthCategories={historicalData.months.length >= 2 ? historicalData.months[historicalData.months.length - 2].categoryBreakdown : {}}
-                />
-              </div>
-            ),
-          };
-
-          return <m.div key={sectionId} variants={fadeUp}><ErrorBoundary fallback={<SectionFallback />}>{renderer[sectionId]()}</ErrorBoundary></m.div>;
-        })}
-        </m.div>
-      </PageTransition>
+            </AnimatePresence>
+          </div>
+        </RevealOnScroll>
+      )}
+    </PageTransition>
   );
 }

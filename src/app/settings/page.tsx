@@ -30,8 +30,6 @@ const DataAccountManagement = lazy(() => import("@/components/settings/DataAccou
 import { SettingsFooterLogout } from "@/components/settings/SettingsFooterLogout";
 import { usePinLock } from "@/hooks/usePinLock";
 import { PageTransition } from "@/components/ui/PageTransition";
-import { SettingsGraphic } from "@/components/ui/illustrations";
-import { ReflectiveCharacter } from "@/components/ui/illustrations/characters";
 import { fetchRates, getRateInfo, clearRateCache } from "@/lib/exchangeRates";
 
 function LazyFallback() {
@@ -247,7 +245,7 @@ function PinLockSettings() {
 }
 
 export default function SettingsPage() {
-  usePageTitle("Settings");
+  usePageTitle("The Workshop");
   const { settings, updateSettings } = useSettings();
   const { symbol, formatCurrency } = useCurrency();
   const { toast } = useToast();
@@ -328,10 +326,10 @@ export default function SettingsPage() {
   const goalsCount = settings.goals?.length || 0;
 
   const zones = [
-    { id: "zone-account", label: "Account", description: "Profile, security & workspace" },
-    { id: "zone-finances", label: "Finances", description: "Budget, categories & goals" },
-    { id: "zone-automation", label: "Automation", description: "Rules, export & data" },
-    { id: "zone-preferences", label: "Preferences", description: "Theme, currency & mode" },
+    { id: "zone-account", label: "Identity", description: "Profile, security & workspace" },
+    { id: "zone-finances", label: "Ledger", description: "Budget, categories & goals" },
+    { id: "zone-automation", label: "Mechanisms", description: "Rules, export & data" },
+    { id: "zone-preferences", label: "Atmosphere", description: "Theme, currency & mode" },
   ];
   const [activeZone, setActiveZoneRaw] = useState(() => {
     // Check URL hash to pre-select the right zone
@@ -424,27 +422,29 @@ export default function SettingsPage() {
   return (
     <AppShell>
         <PageTransition className="relative mx-auto max-w-4xl xl:max-w-6xl space-y-4 sm:space-y-6 p-4 sm:p-6 lg:p-8">
-        <div className="relative flex items-center justify-between mb-4">
-          <h1 className="text-page-title">Settings</h1>
-          <div className="flex items-center gap-2">
-            {/* ReflectiveCharacter — calm awareness (density: max 1 character + 1 art per section) */}
-            <div className="pointer-events-none opacity-30 sm:opacity-50 scale-75 sm:scale-100 origin-center">
-              <ReflectiveCharacter size={56} />
-            </div>
-            <SettingsGraphic />
-          </div>
+        <div className="relative mb-4 card-terrain p-6 rounded-2xl">
+          {/* Lora italic watermark behind header */}
+          <p
+            className="pointer-events-none absolute inset-0 select-none font-display italic text-6xl font-bold leading-none"
+            style={{ color: "var(--text-primary)", opacity: 0.04, overflow: "hidden" }}
+            aria-hidden="true"
+          >
+            Workshop
+          </p>
+          <h1 className="font-display italic text-2xl sm:text-3xl relative z-10" style={{ color: 'var(--text-primary)' }}>The Workshop</h1>
+          <p className="text-sm mt-1 relative z-10 font-body-terrain" style={{ color: 'var(--text-secondary)' }}>Shape your clearing to fit.</p>
         </div>
 
-        {/* Search bar for quick settings lookup */}
+        {/* Search bar */}
         <div className="relative mb-2">
-          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: 'var(--text-tertiary)' }} />
+          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: 'var(--text-muted)' }} />
           <input
             type="text"
-            placeholder="Search settings…"
+            placeholder="Search the workshop…"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full rounded-xl border py-2.5 pl-9 pr-3 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/30"
-            style={{ background: 'var(--surface-secondary)', borderColor: 'var(--border-subtle)', color: 'var(--text-primary)' }}
+            className="w-full rounded-full border py-2.5 pl-9 pr-3 text-sm transition-colors focus:outline-none focus:ring-2"
+            style={{ background: 'var(--surface)', borderColor: 'var(--border)', color: 'var(--text-primary)' }}
             aria-label="Search settings"
           />
         </div>
@@ -498,9 +498,9 @@ export default function SettingsPage() {
         <SettingsAccordion>
 
           {/* ━━━ YOUR ACCOUNT — indigo zone ━━━ */}
-          <div id="zone-account" role="tabpanel" aria-labelledby="tab-zone-account" className={`section-zone section-indigo space-y-3 scroll-mt-16 ${activeZone !== 'zone-account' ? 'lg:hidden' : ''} ${!isZoneVisible('zone-account') ? 'hidden' : ''}`}>
+          <div id="zone-account" role="tabpanel" aria-labelledby="tab-zone-account" className={`space-y-3 scroll-mt-16 ${activeZone !== 'zone-account' ? 'lg:hidden' : ''} ${!isZoneVisible('zone-account') ? 'hidden' : ''}`}>
           <h3 className="text-xs font-bold uppercase tracking-wider pb-1 px-1" style={{ color: 'var(--text-tertiary)' }}>
-            Your Account
+            Identity
           </h3>
 
           {/* ─── Account & Workspace ─── */}
@@ -540,9 +540,9 @@ export default function SettingsPage() {
           </div>
 
           {/* ━━━ FINANCES — teal zone ━━━ */}
-          <div id="zone-finances" role="tabpanel" aria-labelledby="tab-zone-finances" className={`section-zone section-teal space-y-3 scroll-mt-16 ${activeZone !== 'zone-finances' ? 'lg:hidden' : ''} ${!isZoneVisible('zone-finances') ? 'hidden' : ''}`}>
+          <div id="zone-finances" role="tabpanel" aria-labelledby="tab-zone-finances" className={`space-y-3 scroll-mt-16 ${activeZone !== 'zone-finances' ? 'lg:hidden' : ''} ${!isZoneVisible('zone-finances') ? 'hidden' : ''}`}>
           <h3 className="text-xs font-bold uppercase tracking-wider pt-2 pb-1 px-1" style={{ color: 'var(--text-tertiary)' }}>
-            Finances
+            Ledger
           </h3>
 
           {/* ─── Monthly Budget ─── */}
@@ -752,9 +752,9 @@ export default function SettingsPage() {
           </div>
 
           {/* ━━━ AUTOMATION & DATA — violet zone ━━━ */}
-          <div id="zone-automation" role="tabpanel" aria-labelledby="tab-zone-automation" className={`section-zone section-violet space-y-3 scroll-mt-16 ${activeZone !== 'zone-automation' ? 'lg:hidden' : ''} ${!isZoneVisible('zone-automation') ? 'hidden' : ''}`}>
+          <div id="zone-automation" role="tabpanel" aria-labelledby="tab-zone-automation" className={`space-y-3 scroll-mt-16 ${activeZone !== 'zone-automation' ? 'lg:hidden' : ''} ${!isZoneVisible('zone-automation') ? 'hidden' : ''}`}>
           <h3 className="text-xs font-bold uppercase tracking-wider pt-2 pb-1 px-1" style={{ color: 'var(--text-tertiary)' }}>
-            Automation & Data
+            Mechanisms
           </h3>
 
           {/* ─── Smart Rules ─── */}
@@ -797,9 +797,9 @@ export default function SettingsPage() {
           </div>
 
           {/* ━━━ PREFERENCES — indigo zone ━━━ */}
-          <div id="zone-preferences" role="tabpanel" aria-labelledby="tab-zone-preferences" className={`section-zone section-indigo space-y-3 scroll-mt-16 ${activeZone !== 'zone-preferences' ? 'lg:hidden' : ''} ${!isZoneVisible('zone-preferences') ? 'hidden' : ''}`}>
+          <div id="zone-preferences" role="tabpanel" aria-labelledby="tab-zone-preferences" className={`space-y-3 scroll-mt-16 ${activeZone !== 'zone-preferences' ? 'lg:hidden' : ''} ${!isZoneVisible('zone-preferences') ? 'hidden' : ''}`}>
           <h3 className="text-xs font-bold uppercase tracking-wider pt-2 pb-1 px-1" style={{ color: 'var(--text-tertiary)' }}>
-            Preferences
+            Atmosphere
           </h3>
 
           {/* ─── App Mode ─── */}

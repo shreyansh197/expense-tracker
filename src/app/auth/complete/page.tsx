@@ -42,11 +42,58 @@ export default function AuthCompletePage() {
   }, [router]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center" style={{ background: 'var(--background)' }}>
-      <div className="flex flex-col items-center gap-4">
-        <div className="h-10 w-10 animate-spin rounded-full border-2 border-t-transparent" style={{ borderColor: 'var(--primary)', borderTopColor: 'transparent' }} />
-        <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>Signing you in…</p>
+    <div
+      className="flex min-h-screen flex-col items-center justify-center gap-6"
+      style={{ background: "var(--es-chalk, #FAF7F2)" }}
+    >
+      {/* ExpenStream wordmark */}
+      <p
+        className="font-display italic text-2xl"
+        style={{
+          color: "var(--es-moss, #3D5A3E)",
+          animation: "es-fade-in 0.4s ease forwards",
+        }}
+      >
+        ExpenStream
+      </p>
+
+      {/* Three-dot ambient breath — Watcher signature */}
+      <div className="flex items-center gap-2" aria-label="Signing you in" role="status">
+        {[0, 1, 2].map((i) => (
+          <span
+            key={i}
+            className="block rounded-full"
+            style={{
+              width: 7,
+              height: 7,
+              background: "var(--es-moss, #3D5A3E)",
+              animation: `es-dot-pulse 1.6s ${i * 0.28}s ease-in-out infinite`,
+            }}
+          />
+        ))}
       </div>
+
+      {/* Tagline — delayed fade */}
+      <p
+        className="font-body-terrain text-sm"
+        style={{
+          color: "var(--text-muted)",
+          animation: "es-fade-in 0.5s 0.8s ease both",
+        }}
+      >
+        Getting your space ready.
+      </p>
+
+      <style>{`
+        @keyframes es-fade-in {
+          from { opacity: 0; transform: translateY(4px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes es-dot-pulse {
+          0%, 100% { opacity: 0.3; transform: scale(0.85); }
+          50%       { opacity: 0.8; transform: scale(1.15); }
+        }
+      `}</style>
     </div>
   );
 }

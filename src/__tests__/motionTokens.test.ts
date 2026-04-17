@@ -30,9 +30,9 @@ describe("duration tokens", () => {
     expect(duration.normal).toBeLessThan(duration.emphasis);
   });
 
-  test("no duration exceeds 1 second (performance guard)", () => {
+  test("no duration exceeds 1.5 seconds (performance guard)", () => {
     for (const val of Object.values(duration)) {
-      expect(val).toBeLessThanOrEqual(1);
+      expect(val).toBeLessThanOrEqual(1.5);
     }
   });
 

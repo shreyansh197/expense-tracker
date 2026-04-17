@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { m, AnimatePresence } from "framer-motion";
-import { X, Loader2, Camera, ChevronDown, CalendarDays, CheckCircle2 } from "lucide-react";
+import { Camera, CalendarDays, CheckCircle2, Mic, Delete, ChevronDown } from "lucide-react";
 import { getAllCategories } from "@/lib/categories";
 import { cn, getDaysInMonth, getCurrencySymbol } from "@/lib/utils";
 import { useUIStore } from "@/stores/uiStore";
@@ -15,7 +15,17 @@ import { useSettings } from "@/hooks/useSettings";
 import { useCurrency } from "@/hooks/useCurrency";
 import { useAutoRules } from "@/components/settings/AutoRulesManager";
 import { SUPPORTED_CURRENCIES } from "@/lib/utils";
+import { spring } from "@/lib/motion/tokens";
+import { MoneyEcho } from "@/components/ui/MoneyEcho";
 import type { CategoryId, ExpenseInput, Expense } from "@/types";
+
+/* ─── Keypad keys ─── */
+const KEYPAD_KEYS = [
+  "1", "2", "3",
+  "4", "5", "6",
+  "7", "8", "9",
+  ".", "0", "backspace",
+] as const;
 
 interface ExpenseFormProps {
   onSubmit: (data: ExpenseInput) => Promise<void>;
@@ -35,7 +45,7 @@ export function ExpenseForm({
   month,
   year,
   onClose,
-  closingRef,
+  // closingRef is received from ExpenseFormModal but handled externally
   prefill,
 }: ExpenseFormProps) {
   const storeCloseForm = useUIStore((s) => s.closeForm);
@@ -45,6 +55,23 @@ export function ExpenseForm({
   const { symbol } = useCurrency();
   const allCategories = getAllCategories(settings.customCategories, settings.hiddenDefaults);
   const multiCurrency = settings.multiCurrencyEnabled ?? false;
+
+  // Time-of-day sorted categories
+  const sortedCategories = useMemo(() => {
+    const h = new Date().getHours();
+    const priorityMap: Record<string, number> = h >= 5 && h < 10
+      ? { food: 0, cafe: 1, transport: 2 }
+      : h >= 11 && h < 14
+      ? { food: 0, transport: 1, shopping: 2 }
+      : h >= 18 && h < 23
+      ? { food: 0, entertainment: 1, shopping: 2 }
+      : {};
+    return [...allCategories].sort((a, b) => {
+      const aP = priorityMap[a.id] ?? 99;
+      const bP = priorityMap[b.id] ?? 99;
+      return aP - bP;
+    });
+  }, [allCategories]);
 
   const { rules: autoRules } = useAutoRules();
   const [category, setCategory] = useState<CategoryId>(() => {
@@ -65,23 +92,11 @@ export function ExpenseForm({
   const [error, setError] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [echoTrigger, setEchoTrigger] = useState(0);
   const submittingRef = useRef(false);
-
-  const amountRef = useRef<HTMLInputElement>(null);
-  const closeBtnRef = useRef<HTMLButtonElement>(null);
   const [showScanner, setShowScanner] = useState(false);
   const [showMore, setShowMore] = useState(!!editExpense);
-
-  // Auto-focus amount input on mount — guarded against closing state
-  useEffect(() => {
-    // Small delay to let the modal entrance animation start first,
-    // and check closing flag to prevent focus during exit
-    const id = setTimeout(() => {
-      if (closingRef?.current) return;
-      amountRef.current?.focus();
-    }, 50);
-    return () => clearTimeout(id);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  const remarkRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (editExpense) {
@@ -92,16 +107,13 @@ export function ExpenseForm({
     }
   }, [editExpense]);
 
-  // Apply auto-rules when remark or amount changes (only for new expenses)
+  // Auto-rules
   useEffect(() => {
     if (editExpense || manualOverride) return;
     const enabledRules = autoRules.filter((r) => r.enabled && r.action.type === "set_category");
-    // Sort: exact-match operators (equals) before range operators (less_than, greater_than, etc.)
-    // so "amount equals 25 → transport" wins over "amount < 100 → small expenses"
     const sortedRules = [...enabledRules].sort((a, b) => {
-      const exactOps = ["equals"];
-      const aExact = exactOps.includes(a.condition.operator) ? 0 : 1;
-      const bExact = exactOps.includes(b.condition.operator) ? 0 : 1;
+      const aExact = ["equals"].includes(a.condition.operator) ? 0 : 1;
+      const bExact = ["equals"].includes(b.condition.operator) ? 0 : 1;
       return aExact - bExact;
     });
     for (const rule of sortedRules) {
@@ -111,7 +123,6 @@ export function ExpenseForm({
         const rv = remark.toLowerCase();
         const cv = value.toLowerCase();
         if (operator === "contains") {
-          // Support comma-separated keywords: match if ANY keyword is found in the remark
           const keywords = cv.split(",").map((k) => k.trim()).filter(Boolean);
           match = keywords.length > 0 && keywords.some((kw) => rv.includes(kw));
         }
@@ -146,7 +157,7 @@ export function ExpenseForm({
           }
         }
       } else if (field === "is_recurring") {
-        match = value === "true" ? false : true; // Non-recurring by default for new expenses
+        match = value === "true" ? false : true;
       }
       if (match && allCategories.some((c) => c.id === rule.action.value)) {
         setCategory(rule.action.value as CategoryId);
@@ -154,16 +165,31 @@ export function ExpenseForm({
         return;
       }
     }
-    // If no rule matched and category was auto-applied before, clear it
     if (autoApplied) {
       setCategory("");
       setAutoApplied(false);
     }
   }, [remark, amount, day, autoRules, editExpense, allCategories, autoApplied, manualOverride]);
 
+  /* ─── Keypad handler ─── */
+  const handleKeypadPress = useCallback((key: string) => {
+    if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate(8);
+    setAmount((prev) => {
+      if (key === "backspace") return prev.slice(0, -1);
+      if (key === "." && prev.includes(".")) return prev;
+      // Max 2 decimal places
+      const dotIdx = prev.indexOf(".");
+      if (dotIdx !== -1 && prev.length - dotIdx > 2) return prev;
+      // Limit length
+      if (prev.length >= 10) return prev;
+      return prev + key;
+    });
+    if (submitted) setSubmitted(false);
+  }, [submitted]);
+
   const handleSubmit = useCallback(
-    async (e: React.FormEvent) => {
-      e.preventDefault();
+    async (e?: React.FormEvent) => {
+      e?.preventDefault();
       if (submittingRef.current) return;
       setSubmitted(true);
       setError("");
@@ -173,20 +199,16 @@ export function ExpenseForm({
         setError("Enter a valid positive amount");
         return;
       }
-
       if (parsedAmount > 10_000_000) {
         setError("Amount cannot exceed 10,000,000");
         return;
       }
-
       if (!category) {
         setError("Select a category");
         return;
       }
-
-      const parsedDay = day;
       const maxDay = getDaysInMonth(selectedMonth, selectedYear);
-      if (parsedDay < 1 || parsedDay > maxDay) {
+      if (day < 1 || day > maxDay) {
         setError(`Enter a valid day (1-${maxDay} for this month)`);
         return;
       }
@@ -199,7 +221,7 @@ export function ExpenseForm({
             category,
             amount: parsedAmount,
             currency: multiCurrency ? expenseCurrency : undefined,
-            day: parsedDay,
+            day,
             month: selectedMonth,
             year: selectedYear,
             remark: remark.trim() || undefined,
@@ -209,7 +231,7 @@ export function ExpenseForm({
             category,
             amount: parsedAmount,
             currency: multiCurrency ? expenseCurrency : undefined,
-            day: parsedDay,
+            day,
             month: selectedMonth,
             year: selectedYear,
             remark: remark.trim() || undefined,
@@ -220,11 +242,9 @@ export function ExpenseForm({
         const displaySymbol = multiCurrency && expenseCurrency ? getCurrencySymbol(expenseCurrency) : symbol;
         toast(editExpense ? `${displaySymbol}${parsedAmount} in ${catLabel} updated` : `${displaySymbol}${parsedAmount} added to ${catLabel}`);
         if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate([30, 30, 30]);
-        // Brief success flash before closing
         setShowSuccess(true);
-        setTimeout(() => {
-          closeForm();
-        }, 600);
+        setEchoTrigger((t) => t + 1);
+        setTimeout(() => { closeForm(); }, 600);
       } catch {
         setError("Failed to save expense. Please try again.");
       } finally {
@@ -237,23 +257,21 @@ export function ExpenseForm({
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
-      if (e.key === "Escape") {
-        e.preventDefault();
-        closeForm();
-      }
+      if (e.key === "Escape") { e.preventDefault(); closeForm(); }
     },
     [closeForm]
   );
 
+  const parsedDisplay = amount || "0";
   const amountInvalid = submitted && (amount === "" || isNaN(parseFloat(amount)) || parseFloat(amount) <= 0);
 
   return (
     <form
       onSubmit={handleSubmit}
       onKeyDown={handleKeyDown}
-      className="space-y-4"
+      className="flex flex-col gap-3"
     >
-      {/* Success micro-animation — 3D coin flip */}
+      {/* Success flash */}
       <AnimatePresence>
         {showSuccess && (
           <m.div
@@ -266,51 +284,49 @@ export function ExpenseForm({
           >
             <CheckCircle2 size={18} style={{ color: 'var(--success)' }} />
             <span className="text-xs font-semibold" style={{ color: 'var(--success-text)' }}>
-              {editExpense ? "Updated!" : "Added!"}
+              {editExpense ? "Updated!" : "Stone dropped!"}
             </span>
           </m.div>
         )}
       </AnimatePresence>
 
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>
-          {editExpense ? "Edit Expense" : "Add an Expense"}
-        </h3>
-        <div className="flex items-center gap-1">
-          {!editExpense && (
-            <button
-              type="button"
-              onClick={() => setShowScanner((v) => !v)}
-              className="rounded-lg p-1.5 transition-colors hover:bg-[var(--surface-secondary)]"
-              style={{ color: showScanner ? 'var(--brand)' : 'var(--text-muted)' }}
-              aria-label="Scan receipt"
-              title="Scan receipt"
-            >
-              <Camera size={18} />
-            </button>
-          )}
-          <button
-          ref={closeBtnRef}
-          type="button"
-          onClick={(e) => {
-            e.preventDefault();
-            closeForm();
-          }}
-          onTouchStart={(e) => {
-            // On mobile: fire close IMMEDIATELY on touch start,
-            // before the browser can process focus on any nearby input.
-            // This is the earliest possible moment in the touch event chain.
-            e.preventDefault();
-            closeForm();
-          }}
-          className="rounded-lg p-1.5 transition-colors hover:bg-[var(--surface-secondary)]"
-          style={{ color: 'var(--text-muted)' }}
-          aria-label="Close form"
+      <MoneyEcho trigger={echoTrigger} />
+
+      {/* ─── 1. Amount Hero Display ─── */}
+      <div className="flex flex-col items-center pt-2 pb-1">
+        <span className="text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>
+          {editExpense ? "Edit amount" : "How much?"}
+        </span>
+        <m.div
+          className="flex items-baseline gap-1 mt-1"
+          animate={amountInvalid ? { x: [-4, 4, -4, 4, 0] } : {}}
+          transition={{ duration: 0.3 }}
         >
-          <X size={18} />
-        </button>
-        </div>
+          <span className="text-2xl font-display" style={{ color: 'var(--text-muted)' }}>{symbol}</span>
+          <span
+            className={cn(
+              "text-5xl font-display font-bold tabular-nums tracking-tight transition-colors",
+              amount ? "text-[var(--text-primary)]" : "text-[var(--text-muted)]"
+            )}
+          >
+            {parsedDisplay}
+          </span>
+        </m.div>
+        {/* Receipt scanner chip */}
+        {!editExpense && (
+          <button
+            type="button"
+            onClick={() => setShowScanner((v) => !v)}
+            className="mt-2 flex items-center gap-1 rounded-full px-3 py-1 text-[11px] font-medium transition-colors"
+            style={{
+              background: showScanner ? 'var(--brand-soft)' : 'var(--surface-secondary)',
+              color: showScanner ? 'var(--brand)' : 'var(--text-tertiary)',
+            }}
+          >
+            <Camera size={12} />
+            Scan receipt
+          </button>
+        )}
       </div>
 
       {/* Receipt Scanner */}
@@ -340,9 +356,31 @@ export function ExpenseForm({
         )}
       </AnimatePresence>
 
-      {/* Category Selector — teal zone */}
+      {/* ─── 2. Numeric Keypad ─── */}
+      <div className="grid grid-cols-3 gap-2 px-2" role="group" aria-label="Amount keypad">
+        {KEYPAD_KEYS.map((key) => (
+          <m.button
+            key={key}
+            type="button"
+            whileTap={{ scale: 0.92 }}
+            transition={spring.water}
+            onClick={() => handleKeypadPress(key)}
+            className={cn(
+              "flex items-center justify-center rounded-2xl text-xl font-semibold font-numeric select-none",
+              "h-14 active:bg-[var(--surface-tertiary)] transition-colors",
+              key === "backspace" ? "text-[var(--text-muted)]" : "text-[var(--text-primary)]"
+            )}
+            style={{ background: 'var(--surface-secondary)' }}
+            aria-label={key === "backspace" ? "Delete" : key === "." ? "Decimal point" : key}
+          >
+            {key === "backspace" ? <Delete size={22} /> : key}
+          </m.button>
+        ))}
+      </div>
+
+      {/* ─── 3. Category Grid ─── */}
       <CategorySelector
-        categories={allCategories}
+        categories={sortedCategories}
         selected={category}
         onSelect={(id) => {
           setCategory(id);
@@ -352,55 +390,53 @@ export function ExpenseForm({
         showError={!category && submitted}
       />
 
-      {/* Amount */}
-      <div>
-        <label className="form-label mb-1.5 uppercase">
-          Amount ({symbol})
-        </label>
+      {/* ─── 4. Remark (voice-first) ─── */}
+      <div className="relative">
         <input
-          ref={amountRef}
-          type="number"
-          min="0.01"
-          step="0.01"
-          value={amount}
-          onChange={(e) => { setAmount(e.target.value); if (submitted) setSubmitted(false); }}
-          placeholder="e.g. 500"
-          className={cn("form-input w-full text-lg font-semibold", amountInvalid && "!border-[var(--danger)] !ring-[var(--danger)]/20")}
-          required
-          aria-invalid={amountInvalid || undefined}
+          ref={remarkRef}
+          type="text"
+          value={remark}
+          onChange={(e) => setRemark(e.target.value)}
+          placeholder="Add a note..."
+          maxLength={200}
+          className="form-input w-full pr-10"
         />
-        <FormError message="Enter a valid positive amount" visible={amountInvalid} />
-      </div>
-
-      {/* Date chip — visible when "More options" is collapsed */}
-      {!showMore && (
         <button
           type="button"
-          onClick={() => setShowMore(true)}
-          className="flex items-center gap-1.5 self-start rounded-lg px-3 py-2 sm:py-1.5 text-xs font-medium transition-colors"
-          style={{ background: 'var(--surface-secondary)', color: 'var(--text-secondary)' }}
+          className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-1.5 transition-colors"
+          style={{ color: 'var(--text-muted)' }}
+          aria-label="Voice note"
+          title="Voice input"
         >
-          <CalendarDays size={12} />
-          Day {day}{selectedMonth !== (today.getMonth() + 1) || selectedYear !== today.getFullYear() ? ` · ${selectedMonth}/${selectedYear}` : day === today.getDate() ? " (today)" : ""}
+          <Mic size={18} />
         </button>
-      )}
+      </div>
 
-      {/* More options toggle */}
-      <button
-        type="button"
-        onClick={() => setShowMore((v) => !v)}
-        className="flex w-full items-center justify-center gap-1 rounded-lg py-1.5 text-xs font-medium transition-colors"
-        style={{ color: 'var(--text-tertiary)' }}
-      >
-        {showMore ? "Less options" : "More options (date, note, currency)"}
-        <m.span
-          animate={{ rotate: showMore ? 180 : 0 }}
-          transition={{ duration: 0.2 }}
-          style={{ display: 'inline-flex' }}
+      {/* ─── 5. More options (date, currency) ─── */}
+      <div className="flex items-center gap-2">
+        {!showMore && (
+          <button
+            type="button"
+            onClick={() => setShowMore(true)}
+            className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium transition-colors"
+            style={{ background: 'var(--surface-secondary)', color: 'var(--text-secondary)' }}
+          >
+            <CalendarDays size={12} />
+            Day {day}{selectedMonth !== (today.getMonth() + 1) || selectedYear !== today.getFullYear() ? ` · ${selectedMonth}/${selectedYear}` : day === today.getDate() ? " (today)" : ""}
+          </button>
+        )}
+        <button
+          type="button"
+          onClick={() => setShowMore((v) => !v)}
+          className="flex items-center gap-1 rounded-lg py-1.5 px-2 text-xs font-medium transition-colors"
+          style={{ color: 'var(--text-tertiary)' }}
         >
-          <ChevronDown size={12} />
-        </m.span>
-      </button>
+          {showMore ? "Less" : "More options"}
+          <m.span animate={{ rotate: showMore ? 180 : 0 }} transition={{ duration: 0.2 }} style={{ display: 'inline-flex' }}>
+            <ChevronDown size={12} />
+          </m.span>
+        </button>
+      </div>
 
       <AnimatePresence initial={false}>
         {showMore && (
@@ -409,66 +445,44 @@ export function ExpenseForm({
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-            className="overflow-hidden md:overflow-visible space-y-4"
+            className="overflow-hidden md:overflow-visible space-y-3"
           >
-
-      {/* Currency selector (multi-currency mode only) */}
-      {multiCurrency && (
-        <div>
-          <label className="form-label mb-1.5 uppercase">Currency</label>
-          <div className="flex flex-wrap gap-1.5">
-            {SUPPORTED_CURRENCIES.map((c) => (
-              <button
-                key={c.code}
-                type="button"
-                onClick={() => setExpenseCurrency(c.code)}
-                className={cn(
-                  "rounded-lg px-3 py-1.5 text-xs font-semibold transition-all",
-                  expenseCurrency === c.code
-                    ? "bg-brand-soft text-brand ring-1 ring-brand-border"
-                    : "text-[var(--text-secondary)]"
-                )}
-                style={expenseCurrency !== c.code ? { background: "var(--surface-secondary)" } : undefined}
-              >
-                {c.symbol} {c.code}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Date */}
-      <div>
-        <label className="form-label mb-1.5 uppercase">
-          Date
-        </label>
-        <DatePicker
-          value={day}
-          onChange={(d, m, y) => {
-            setDay(d);
-            if (m !== undefined) setSelectedMonth(m);
-            if (y !== undefined) setSelectedYear(y);
-          }}
-          month={selectedMonth}
-          year={selectedYear}
-        />
-      </div>
-
-      {/* Remark */}
-      <div>
-        <label className="form-label mb-1.5 uppercase">
-          Remark <span style={{ color: 'var(--text-muted)' }}>(optional)</span>
-        </label>
-        <input
-          type="text"
-          value={remark}
-          onChange={(e) => setRemark(e.target.value)}
-          placeholder="Add a note..."
-          maxLength={200}
-          className="form-input w-full"
-        />
-      </div>
-
+            {multiCurrency && (
+              <div>
+                <label className="form-label mb-1.5 uppercase">Currency</label>
+                <div className="flex flex-wrap gap-1.5">
+                  {SUPPORTED_CURRENCIES.map((c) => (
+                    <button
+                      key={c.code}
+                      type="button"
+                      onClick={() => setExpenseCurrency(c.code)}
+                      className={cn(
+                        "rounded-lg px-3 py-1.5 text-xs font-semibold transition-all",
+                        expenseCurrency === c.code
+                          ? "bg-brand-soft text-brand ring-1 ring-brand-border"
+                          : "text-[var(--text-secondary)]"
+                      )}
+                      style={expenseCurrency !== c.code ? { background: "var(--surface-secondary)" } : undefined}
+                    >
+                      {c.symbol} {c.code}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+            <div>
+              <label className="form-label mb-1.5 uppercase">Date</label>
+              <DatePicker
+                value={day}
+                onChange={(d, m, y) => {
+                  setDay(d);
+                  if (m !== undefined) setSelectedMonth(m);
+                  if (y !== undefined) setSelectedYear(y);
+                }}
+                month={selectedMonth}
+                year={selectedYear}
+              />
+            </div>
           </m.div>
         )}
       </AnimatePresence>
@@ -476,19 +490,19 @@ export function ExpenseForm({
       {/* Error */}
       <FormError message={error} visible={!!error} />
 
-      {/* Submit */}
+      {/* ─── 6. Submit ─── */}
       <m.button
         type="submit"
-        disabled={submitting}
+        disabled={submitting || !amount}
         className="btn-primary btn-lg w-full justify-center"
         whileTap={{ scale: 0.97 }}
+        transition={spring.water}
       >
-        {submitting && <Loader2 size={16} className="animate-spin" />}
         {submitting
-          ? "Saving..."
+          ? "Dropping stone..."
           : editExpense
             ? "Update Expense"
-            : "Add Expense"}
+            : "Drop Stone"}
       </m.button>
     </form>
   );

@@ -38,18 +38,6 @@ describe("accessibility contracts — aria-labels", () => {
     });
   });
 
-  describe("CategoryTrendChart", () => {
-    const src = readComponent("components/dashboard/CategoryTrendChart.tsx");
-
-    test("chart container has role=img", () => {
-      expect(src).toContain('role="img"');
-    });
-
-    test("chart container has aria-label", () => {
-      expect(src).toContain("aria-label");
-    });
-  });
-
   describe("DashboardCustomizer", () => {
     const src = readComponent("components/dashboard/DashboardCustomizer.tsx");
 
@@ -127,7 +115,6 @@ describe("accessibility contracts — security", () => {
       "components/expenses/ExpenseExport.tsx",
       "components/dashboard/DashboardCustomizer.tsx",
       "components/ui/DatePicker.tsx",
-      "components/dashboard/CategoryTrendChart.tsx",
     ];
 
     for (const file of files) {

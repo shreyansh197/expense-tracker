@@ -2,7 +2,6 @@
 
 import { use, useState, useEffect, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
-import dynamic from "next/dynamic";
 import Link from "next/link";
 import { AppShell } from "@/components/layout/AppShell";
 import { useExpenses } from "@/hooks/useExpenses";
@@ -18,12 +17,8 @@ import { SkeletonCategoryDetail } from "@/components/ui/Skeleton";
 import { PageTransition } from "@/components/ui/PageTransition";
 import { TargetIllustration } from "@/components/ui/illustrations";
 import { RevealOnScroll } from "@/components/motion/RevealOnScroll";
+import { RidgeLine } from "@/components/ui/RidgeLine";
 import { ArrowLeft } from "lucide-react";
-
-const CategoryTrendChart = dynamic(
-  () => import("@/components/dashboard/CategoryTrendChart").then((m) => m.CategoryTrendChart),
-  { ssr: false },
-);
 
 export default function CategoryPage({ params }: { params: Promise<{ slug: string }> }) {
   const { formatCurrency } = useCurrency();
@@ -118,160 +113,203 @@ export default function CategoryPage({ params }: { params: Promise<{ slug: strin
     fetchTrend();
   }, [month, year, slug, categoryTotal]);
 
+  // Pattern Whisper — pure client-side insight from expense data
+  const patternWhisper = useMemo(() => {
+    if (categoryExpenses.length < 10) return null;
+    const dayOfWeek = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+    const byday: number[] = Array(7).fill(0);
+    const countByDay: number[] = Array(7).fill(0);
+    for (const e of categoryExpenses) {
+      const d = new Date(year, month - 1, e.day).getDay();
+      byday[d] += e.amount;
+      countByDay[d]++;
+    }
+    const maxDay = byday.indexOf(Math.max(...byday));
+    const maxAvg = countByDay[maxDay] > 0 ? byday[maxDay] / countByDay[maxDay] : 0;
+    if (maxAvg === 0) return null;
+    const weekTotal = byday.reduce((a, b) => a + b, 0);
+    const pct = Math.round((byday[maxDay] / weekTotal) * 100);
+    if (pct < 25) return null;
+    return `You spend most here on ${dayOfWeek[maxDay]}s — ${pct}% of your ${meta?.label || slug} spending.`;
+  }, [categoryExpenses, month, year, slug, meta]);
+
   return (
     <AppShell>
       <PageTransition className="mx-auto max-w-4xl xl:max-w-6xl space-y-5 sm:space-y-6 p-4 sm:p-6 lg:p-8">
-        {/* Header */}
-        <div className="flex items-center gap-3">
-          <Link
-            href="/"
-            className="rounded-lg p-2 transition-colors"
-            style={{ color: 'var(--text-muted)' }}
-            onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--surface-secondary)'; }}
-            onMouseLeave={(e) => { e.currentTarget.style.background = ''; }}
-            aria-label="Back to dashboard"
-          >
-            <ArrowLeft size={20} />
-          </Link>
-          <div>
-            <h1 className="text-lg font-bold" style={{ color: categoryColor }}>
-              {categoryLabel}
-            </h1>
-            <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
-              {getMonthName(month)} {year}
-            </p>
-          </div>
-        </div>
+        {/* Back nav */}
+        <Link
+          href="/"
+          className="inline-flex items-center gap-1.5 text-sm transition-opacity hover:opacity-60"
+          style={{ color: "var(--text-muted)" }}
+          aria-label="Back to dashboard"
+        >
+          <ArrowLeft size={16} />
+          Dashboard
+        </Link>
 
         {loading ? (
           <SkeletonCategoryDetail />
         ) : (
         <>
-        {/* KPI row */}
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-          <div className="card relative overflow-hidden p-4">
-            <div className="absolute inset-x-0 top-0 h-1 rounded-t-2xl" style={{ background: categoryColor }} />
-            <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Spent</p>
-            <p className="mt-1 text-xl font-bold" style={{ color: isOverBudget ? 'var(--danger-text)' : 'var(--text-primary)' }}>
-              {formatCurrency(categoryTotal)}
+        {/* Portrait header — category color gradient wash */}
+        <div
+          className="card-terrain relative overflow-hidden px-6 py-7"
+          style={{ background: `color-mix(in srgb, ${categoryColor} 10%, var(--surface))` }}
+        >
+          {/* Category emoji watermark */}
+          <span
+            className="pointer-events-none absolute right-4 top-4 text-7xl leading-none"
+            aria-hidden="true"
+            style={{ opacity: 0.12 }}
+          >
+            {meta?.icon || "💳"}
+          </span>
+
+          <span className="mb-2 block text-3xl leading-none">{meta?.icon || "💳"}</span>
+          <h1
+            className="font-display italic text-2xl leading-tight"
+            style={{ color: "var(--text-primary)" }}
+          >
+            {categoryLabel}
+          </h1>
+          <p className="mt-0.5 font-body-terrain text-sm" style={{ color: "var(--text-secondary)" }}>
+            {getMonthName(month)} {year}
+          </p>
+
+          {/* Inline typographic KPI row */}
+          <div className="mt-5 flex flex-wrap gap-6">
+            <div>
+              <p className="font-numeric text-2xl font-semibold tabular-nums leading-none" style={{ color: "var(--text-primary)" }}>
+                {formatCurrency(categoryTotal)}
+              </p>
+              <p className="mt-0.5 text-xs font-body-terrain" style={{ color: "var(--text-muted)" }}>spent</p>
+            </div>
+            <div>
+              <p className="font-numeric text-2xl font-semibold tabular-nums leading-none" style={{ color: "var(--text-primary)" }}>
+                {expenseCount}
+              </p>
+              <p className="mt-0.5 text-xs font-body-terrain" style={{ color: "var(--text-muted)" }}>transactions</p>
+            </div>
+            <div>
+              <p className="font-numeric text-2xl font-semibold tabular-nums leading-none" style={{ color: "var(--text-primary)" }}>
+                {pctOfTotal}%
+              </p>
+              <p className="mt-0.5 text-xs font-body-terrain" style={{ color: "var(--text-muted)" }}>of monthly total</p>
+            </div>
+          </div>
+
+          {/* Pattern Whisper ambient insight */}
+          {patternWhisper && (
+            <p
+              className="mt-4 font-display italic text-sm"
+              style={{ color: "var(--text-secondary)", opacity: 0.75 }}
+            >
+              {patternWhisper}
             </p>
-            {categoryBudget ? (
-              <div className="mt-2">
-                <div className="h-1.5 rounded-full" style={{ background: 'var(--surface-secondary)' }}>
-                  <div
-                    className={`h-1.5 rounded-full transition-all duration-700 ${isOverBudget ? "bg-err" : budgetPct >= 80 ? "bg-warn" : "bg-ok"}`}
-                    style={{ width: `${Math.min(budgetPct, 100)}%` }}
-                  />
-                </div>
-                <p className="mt-1 text-xs" style={{ color: 'var(--text-muted)' }}>
-                  {budgetPct}% of {formatCurrency(categoryBudget)} budget
-                </p>
+          )}
+
+          {/* Budget progress if set */}
+          {categoryBudget && (
+            <div className="mt-4">
+              <div className="h-1 w-full rounded-full overflow-hidden" style={{ background: "rgba(0,0,0,0.08)" }}>
+                <div
+                  className="h-full rounded-full transition-all duration-700"
+                  style={{
+                    width: `${Math.min(budgetPct, 100)}%`,
+                    background: isOverBudget ? "var(--status-err)" : budgetPct >= 80 ? "var(--status-warn)" : categoryColor,
+                  }}
+                />
               </div>
-            ) : null}
-          </div>
-          <div className="card p-4">
-            <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>% of Total</p>
-            <p className="mt-1 text-xl font-bold" style={{ color: 'var(--text-primary)' }}>
-              {pctOfTotal}%
-            </p>
-          </div>
-          <div className="card p-4">
-            <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Transactions</p>
-            <p className="mt-1 text-xl font-bold" style={{ color: 'var(--text-primary)' }}>
-              {expenseCount}
-            </p>
-          </div>
+              <p className="mt-1 text-xs font-body-terrain" style={{ color: "var(--text-muted)" }}>
+                {budgetPct}% of {formatCurrency(categoryBudget)} budget
+              </p>
+            </div>
+          )}
         </div>
 
-        {/* Enhanced stats */}
+        {/* Enhanced stats — avg/largest/smallest as inline typographic row */}
         {enhancedStats && (
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-            <div className="card p-4">
-              <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Avg Transaction</p>
-              <p className="mt-1 text-lg font-bold" style={{ color: 'var(--text-primary)' }}>
-                {formatCurrency(enhancedStats.avg)}
-              </p>
-            </div>
-            <div className="card p-4">
-              <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Largest</p>
-              <p className="mt-1 text-lg font-bold" style={{ color: 'var(--text-primary)' }}>
-                {formatCurrency(enhancedStats.largest.amount)}
-              </p>
-              {enhancedStats.largest.remark && (
-                <p className="mt-0.5 truncate text-xs" style={{ color: 'var(--text-muted)' }}>{enhancedStats.largest.remark}</p>
-              )}
-            </div>
-            <div className="card p-4">
-              <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Smallest</p>
-              <p className="mt-1 text-lg font-bold" style={{ color: 'var(--text-primary)' }}>
-                {formatCurrency(enhancedStats.smallest.amount)}
-              </p>
-              {enhancedStats.smallest.remark && (
-                <p className="mt-0.5 truncate text-xs" style={{ color: 'var(--text-muted)' }}>{enhancedStats.smallest.remark}</p>
-              )}
-            </div>
+          <div className="flex flex-wrap gap-6 px-1">
+            {[
+              { label: "avg", val: formatCurrency(enhancedStats.avg) },
+              { label: "largest", val: formatCurrency(enhancedStats.largest.amount) },
+              { label: "smallest", val: formatCurrency(enhancedStats.smallest.amount) },
+            ].map(({ label, val }) => (
+              <div key={label}>
+                <p className="font-numeric text-lg font-semibold tabular-nums" style={{ color: "var(--text-primary)" }}>{val}</p>
+                <p className="text-xs font-body-terrain" style={{ color: "var(--text-muted)" }}>{label}</p>
+              </div>
+            ))}
           </div>
         )}
 
-        {/* Monthly trend chart */}
-        <RevealOnScroll className="card p-4">
-          <h3 className="mb-3 text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
-            Monthly Trend
-          </h3>
-          {trendData.some((d) => d.total > 0) ? (
-            <CategoryTrendChart
-              trendData={trendData}
-              categoryLabel={categoryLabel}
-              categoryColor={categoryColor}
-              formatCurrency={formatCurrency}
+        {/* RidgeLine 6-month trend */}
+        {trendData.some((d) => d.total > 0) ? (
+          <RevealOnScroll className="card-terrain p-5">
+            <h3 className="mb-1 font-display italic text-sm" style={{ color: "var(--text-secondary)" }}>
+              6-month trend
+            </h3>
+            <RidgeLine
+              dailyTotals={trendData.map((d, i) => ({ day: i + 1, total: d.total }))}
+              maxDays={6}
+              progress={1}
+              height={56}
             />
-          ) : (
-            <div className="flex flex-col items-center gap-2 py-6">
-              <TargetIllustration size={100} />
-              <p className="text-xs" style={{ color: 'var(--text-muted)' }}>No trend data yet — keep logging expenses to see monthly patterns.</p>
+            <div className="mt-2 flex justify-between">
+              {trendData.map((d) => (
+                <span key={d.month} className="text-xs font-body-terrain" style={{ color: "var(--text-muted)" }}>{d.label}</span>
+              ))}
             </div>
-          )}
-        </RevealOnScroll>
+          </RevealOnScroll>
+        ) : (
+          <div className="flex flex-col items-center gap-2 py-4">
+            <TargetIllustration size={80} />
+            <p className="text-xs font-body-terrain" style={{ color: "var(--text-muted)" }}>
+              No trend data yet — keep logging to see monthly patterns.
+            </p>
+          </div>
+        )}
 
-        {/* Expenses list */}
-        <div className="card p-4">
-          <h3 className="mb-3 text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
-            Expenses in {categoryLabel}
-          </h3>
-          {categoryExpenses.length === 0 ? (
-            <div className="flex flex-col items-center gap-2 py-6">
-              <TargetIllustration size={90} />
-              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-                No expenses in {categoryLabel} this month.
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-1">
-              {categoryExpenses.map((e) => (
+        {/* Clean ledger-style expense rows */}
+        {categoryExpenses.length === 0 ? (
+          <div className="flex flex-col items-center gap-3 py-8">
+            <TargetIllustration size={80} />
+            <p className="font-display italic text-sm" style={{ color: "var(--text-muted)" }}>
+              No expenses in {categoryLabel} this month.
+            </p>
+          </div>
+        ) : (
+          <div>
+            <h3 className="mb-3 px-1 font-display italic text-sm" style={{ color: "var(--text-secondary)" }}>
+              All transactions
+            </h3>
+            <div>
+              {categoryExpenses.map((e, idx) => (
                 <div
                   key={e.id}
-                  className="flex items-center justify-between rounded-lg px-2 py-2 transition-colors"
-                  onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--surface-secondary)'; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.background = ''; }}
+                  className="flex items-center justify-between px-1 py-3 transition-colors"
+                  style={{
+                    borderBottom: idx < categoryExpenses.length - 1 ? "1px solid var(--border)" : undefined,
+                  }}
                 >
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1">
                     {e.remark ? (
-                      <p className="truncate text-sm" style={{ color: 'var(--text-primary)' }}>{e.remark}</p>
+                      <p className="truncate text-sm font-body-terrain" style={{ color: "var(--text-primary)" }}>{e.remark}</p>
                     ) : (
-                      <p className="text-sm italic" style={{ color: 'var(--text-muted)' }}>No remark</p>
+                      <p className="font-display italic text-sm" style={{ color: "var(--text-muted)" }}>No remark</p>
                     )}
-                    <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                      {e.day} {getMonthName(month).slice(0, 3)} {year}
+                    <p className="text-xs font-body-terrain" style={{ color: "var(--text-muted)" }}>
+                      {e.day} {getMonthName(month).slice(0, 3)}
                     </p>
                   </div>
-                  <span className="ml-3 shrink-0 text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
+                  <span className="ml-3 shrink-0 font-numeric text-sm tabular-nums" style={{ color: "var(--text-primary)" }}>
                     {formatCurrency(e.amount)}
                   </span>
                 </div>
               ))}
             </div>
-          )}
-        </div>
+          </div>
+        )}
         </>
         )}
       </PageTransition>

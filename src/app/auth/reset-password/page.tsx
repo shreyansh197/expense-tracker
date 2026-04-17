@@ -69,7 +69,7 @@ function ResetPasswordForm() {
   if (success) {
     return (
       <div className="flex min-h-screen items-center justify-center px-4" style={{ background: "var(--background)" }}>
-        <div className="w-full max-w-sm rounded-2xl p-8 shadow-xl text-center" style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
+        <div className="w-full max-w-sm card-terrain rounded-2xl p-8 shadow-xl text-center">
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl" style={{ background: 'var(--success-soft)', boxShadow: 'inset 0 0 0 1px var(--goal-achieved-border)' }}>
             <CheckCircle2 className="h-6 w-6" style={{ color: 'var(--success-text)' }} />
           </div>
@@ -96,15 +96,15 @@ function ResetPasswordForm() {
 
   return (
     <div className="flex min-h-screen items-center justify-center px-4" style={{ background: "var(--background)" }}>
-      <div className="w-full max-w-sm rounded-2xl p-8 shadow-xl" style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
-        <div className="mb-1 flex h-11 w-11 items-center justify-center rounded-2xl" style={{ background: 'var(--secondary-soft)', boxShadow: 'inset 0 0 0 1px var(--secondary-border)' }}>
-          <KeyRound className="h-5 w-5" style={{ color: 'var(--secondary-text)' }} />
+      <div className="w-full max-w-sm card-terrain rounded-2xl p-8">
+        <div className="mb-1 flex h-10 w-10 items-center justify-center rounded-full" style={{ background: 'var(--es-chalk)', border: '1px solid var(--border)' }}>
+          <KeyRound className="h-5 w-5" style={{ color: 'var(--es-moss)' }} />
         </div>
-        <h2 className="mt-3 text-2xl font-bold tracking-tight" style={{ color: 'var(--text-primary)' }}>
-          Set new password
+        <h2 className="mt-3 font-display italic text-2xl" style={{ color: 'var(--text-primary)' }}>
+          New password.
         </h2>
         <p className="mt-1.5 text-sm mb-7" style={{ color: 'var(--text-secondary)' }}>
-          Enter your new password below. Must be at least 8 characters.
+          Must be at least 8 characters.
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-3.5">
@@ -117,8 +117,8 @@ function ResetPasswordForm() {
               onChange={(e) => setPassword(e.target.value)}
               autoComplete="new-password"
               autoFocus
-              className="w-full rounded-xl py-3.5 pl-10 pr-11 text-sm transition-all focus:outline-none focus:ring-2 [&::-ms-reveal]:hidden [&::-ms-clear]:hidden"
-              style={{ background: "var(--surface-secondary)", border: "1px solid var(--border)", color: "var(--text-primary)", "--tw-ring-color": "var(--primary)" } as React.CSSProperties}
+              className="w-full rounded-full py-3.5 pl-10 pr-11 text-sm transition-all focus:outline-none focus:ring-2"
+              style={{ background: "var(--surface-secondary)", border: "1px solid var(--border)", color: "var(--text-primary)" } as React.CSSProperties}
             />
             <button
               type="button"
@@ -141,8 +141,8 @@ function ResetPasswordForm() {
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               autoComplete="new-password"
-              className="w-full rounded-xl py-3.5 pl-10 pr-4 text-sm transition-all focus:outline-none focus:ring-2 [&::-ms-reveal]:hidden [&::-ms-clear]:hidden"
-              style={{ background: "var(--surface-secondary)", border: "1px solid var(--border)", color: "var(--text-primary)", "--tw-ring-color": "var(--primary)" } as React.CSSProperties}
+              className="w-full rounded-full py-3.5 pl-10 pr-4 text-sm transition-all focus:outline-none focus:ring-2"
+              style={{ background: "var(--surface-secondary)", border: "1px solid var(--border)", color: "var(--text-primary)" } as React.CSSProperties}
               onKeyDown={(e) => { if (e.key === "Enter") handleSubmit(e); }}
             />
           </div>
@@ -157,11 +157,8 @@ function ResetPasswordForm() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-xl py-3.5 text-base font-semibold text-white transition-all hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 flex items-center justify-center gap-2"
-            style={{
-              background: "linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 50%, var(--accent) 100%)",
-              boxShadow: "0 6px 20px color-mix(in srgb, var(--primary) 35%, transparent)",
-            }}
+            className="w-full rounded-full py-3.5 text-base font-semibold text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            style={{ background: 'var(--es-moss)' }}
           >
             {loading && <Loader2 className="h-4 w-4 animate-spin" />}
             Reset Password

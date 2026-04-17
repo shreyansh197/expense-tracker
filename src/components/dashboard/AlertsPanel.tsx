@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { AlertTriangle, ArrowRight, Zap, ChevronDown } from "lucide-react";
 import { m } from "framer-motion";
-import { cn } from "@/lib/utils";
 import { useCurrency } from "@/hooks/useCurrency";
 import { buildCategoryMap } from "@/lib/categories";
 import { useSettings } from "@/hooks/useSettings";
@@ -129,18 +128,20 @@ export function AlertsPanel({
 
   if (alerts.length === 0) {
     return (
-      <div className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm" style={{ background: 'var(--status-ok-bg)', border: '1px solid var(--status-ok-border)' }}>
-        {/* All-clear burst — 3 concentric arcs + check */}
-        <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true" className="shrink-0">
-          <circle cx="14" cy="14" r="13" stroke="var(--status-ok-border)" strokeWidth="1" opacity="0.5" />
-          <circle cx="14" cy="14" r="9" stroke="var(--status-ok-border)" strokeWidth="1" opacity="0.35" />
-          <circle cx="14" cy="14" r="5" fill="var(--status-ok-border)" opacity="0.25" />
-          <path d="M10 14.5l2.5 2.5 5-5" stroke="var(--status-ok-text)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-        <div>
-          <p className="font-medium" style={{ color: 'var(--status-ok-text)' }}>Looking good — no alerts this month</p>
-          <p className="mt-0.5 text-xs" style={{ color: 'var(--text-muted)' }}>We&apos;ll flag anything that needs your attention</p>
+      <div className="flex items-center gap-3 px-1 py-2">
+        {/* Watcher-style three-dot idle state */}
+        <div className="flex items-center gap-1" aria-hidden="true">
+          {[0, 1, 2].map((i) => (
+            <m.span
+              key={i}
+              className="block rounded-full"
+              style={{ width: 6, height: 6, background: 'var(--es-moss)', opacity: 0.5 }}
+              animate={{ opacity: [0.35, 0.7, 0.35], scale: [0.9, 1.1, 0.9] }}
+              transition={{ duration: 2.4, delay: i * 0.4, repeat: Infinity, ease: 'easeInOut' }}
+            />
+          ))}
         </div>
+        <p className="font-display italic text-sm" style={{ color: 'var(--text-secondary)' }}>All quiet.</p>
       </div>
     );
   }
@@ -151,6 +152,7 @@ export function AlertsPanel({
 
   const visibleAlerts = expanded ? alerts : alerts.slice(0, MAX_VISIBLE);
   const hiddenCount = alerts.length - MAX_VISIBLE;
+  // hiddenCount used below — kept for expand logic
 
   return (
     <div className="space-y-2" role="alert" aria-live="polite" aria-label="Budget alerts">
@@ -171,15 +173,15 @@ export function AlertsPanel({
           initial={{ opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.2, delay: i * 0.05, ease: [0.22, 1, 0.36, 1] }}
-          className={cn(
-            "flex items-start gap-3 rounded-xl border-l-[3px] px-4 py-3 text-sm",
-            alert.severity === "critical"
-              ? "border-l-err bg-[var(--status-err-bg)] text-[var(--status-err-text)]"
-              : alert.severity === "warning"
-                ? "border-l-warn bg-[var(--status-warn-bg)] text-[var(--status-warn-text)]"
-                : "border-l-info bg-[var(--info-soft)] text-[var(--info-text)]"
-          )}
-          style={{ borderTop: '1px solid var(--border-subtle)', borderRight: '1px solid var(--border-subtle)', borderBottom: '1px solid var(--border-subtle)' }}
+          className="flex items-start gap-3 rounded-xl px-4 py-3 text-sm"
+          style={{
+            background: alert.severity === 'critical' ? 'var(--status-err-bg)' : alert.severity === 'warning' ? 'var(--status-warn-bg)' : 'var(--surface-secondary)',
+            boxShadow: alert.severity === 'critical'
+              ? 'inset 0 0 0 1px var(--status-err)'
+              : alert.severity === 'warning'
+                ? 'inset 0 0 0 1px var(--status-warn)'
+                : undefined,
+          }}
         >
           {alert.severity === "critical" ? (
             <AlertTriangle size={16} className="mt-0.5 shrink-0" />

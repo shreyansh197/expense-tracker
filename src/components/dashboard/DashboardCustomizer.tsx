@@ -49,6 +49,80 @@ export const DEFAULT_SECTIONS: DashboardSectionConfig[] = [
   { id: "insights", visible: true, order: 8 },
 ];
 
+// ── Time-aware Bento ordering ──────────────────────────────
+
+type TimeContext = "morning" | "afternoon" | "evening" | "night";
+
+/** Returns which part of the day it currently is. */
+export function getTimeContext(): TimeContext {
+  const hour = new Date().getHours();
+  if (hour >= 6 && hour < 10) return "morning";
+  if (hour >= 10 && hour < 19) return "afternoon";
+  if (hour >= 19 && hour < 24) return "evening";
+  return "night";
+}
+
+/** Personal-mode preferred section order by time and health. */
+const PERSONAL_ORDER: Record<TimeContext, DashboardSectionId[]> = {
+  morning:   ["kpi", "subscriptions", "alerts", "recent", "charts", "heatmap", "goals", "achievements", "insights"],
+  afternoon: ["kpi", "alerts", "charts", "recent", "subscriptions", "heatmap", "insights", "goals", "achievements"],
+  evening:   ["recent", "kpi", "charts", "insights", "achievements", "heatmap", "alerts", "goals", "subscriptions"],
+  night:     ["kpi", "recent", "insights", "charts", "heatmap", "alerts", "goals", "subscriptions", "achievements"],
+};
+
+/** Business-mode preferred order — ledger / collection first. */
+const BIZ_ORDER: Record<TimeContext, DashboardSectionId[]> = {
+  morning:   ["kpi", "subscriptions", "alerts", "charts", "recent", "heatmap", "goals", "insights", "achievements"],
+  afternoon: ["kpi", "alerts", "subscriptions", "charts", "heatmap", "recent", "insights", "goals", "achievements"],
+  evening:   ["kpi", "recent", "charts", "alerts", "insights", "heatmap", "subscriptions", "goals", "achievements"],
+  night:     ["kpi", "alerts", "charts", "recent", "subscriptions", "heatmap", "insights", "goals", "achievements"],
+};
+
+/**
+ * Returns an auto-ordered section list based on time of day.
+ * Only applies if the user has NOT manually reordered their layout
+ * (detected by comparing stored order against DEFAULT_SECTIONS order).
+ */
+export function getAutoOrder(
+  layout: DashboardLayout | undefined,
+  isBusiness = false,
+): DashboardSectionConfig[] {
+  const stored = getSections(layout);
+
+  // If user has manually reordered, respect their choice
+  const isDefaultOrder = DEFAULT_SECTIONS.every(
+    (def, i) => stored[i]?.id === def.id,
+  );
+  if (!isDefaultOrder) return stored;
+
+  const ctx = getTimeContext();
+  const priority = isBusiness ? BIZ_ORDER[ctx] : PERSONAL_ORDER[ctx];
+
+  return priority.map((id, order) => {
+    const existing = stored.find((s) => s.id === id);
+    return existing ? { ...existing, order } : { id, visible: true, order };
+  });
+}
+
+/**
+ * Returns only visible section configs in display order (config objects).
+ * Used internally by getAutoOrder.
+ */
+function getVisibleSectionConfigs(layout?: DashboardLayout): DashboardSectionConfig[] {
+  return getSections(layout)
+    .filter((s) => s.visible)
+    .sort((a, b) => a.order - b.order);
+}
+
+/**
+ * Get ordered visible section IDs from dashboard layout.
+ * Returns default order if no custom layout is set.
+ * @deprecated Use getVisibleSections for config objects; this returns IDs only.
+ */
+export function getVisibleSectionIds(layout?: DashboardLayout): DashboardSectionId[] {
+  return getVisibleSectionConfigs(layout).map((s) => s.id);
+}
+
 function getSections(layout?: DashboardLayout): DashboardSectionConfig[] {
   if (!layout?.sections?.length) return DEFAULT_SECTIONS;
   // Ensure all section IDs are present (forward compat)
@@ -272,9 +346,9 @@ export function DashboardCustomizer({ layout, onSave }: DashboardCustomizerProps
 
 /**
  * Get ordered visible section IDs from dashboard layout.
- * Returns default order if no custom layout is set.
+ * Applies time-aware auto-ordering if the user has not manually reordered.
  */
-export function getVisibleSections(layout?: DashboardLayout): DashboardSectionId[] {
-  const sections = getSections(layout);
+export function getVisibleSections(layout?: DashboardLayout, isBusiness = false): DashboardSectionId[] {
+  const sections = getAutoOrder(layout, isBusiness);
   return sections.filter(s => s.visible).map(s => s.id);
 }

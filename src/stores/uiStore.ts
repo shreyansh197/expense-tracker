@@ -11,6 +11,7 @@ interface UIState {
   theme: "light" | "dark" | "system";
   showExpenseForm: boolean;
   editingExpenseId: string | null;
+  formPrefill: { amount?: number; category?: string; remark?: string } | null;
   showLedgerForm: boolean;
   appMode: AppMode;
   activeLedgerId: string | null;
@@ -22,7 +23,7 @@ interface UIState {
   toggleCategory: (cat: CategoryId) => void;
   setSearchQuery: (q: string) => void;
   setTheme: (theme: "light" | "dark" | "system") => void;
-  openAddForm: () => void;
+  openAddForm: (prefill?: { amount?: number; category?: string; remark?: string }) => void;
   openEditForm: (id: string) => void;
   closeForm: () => void;
   openLedgerForm: () => void;
@@ -46,6 +47,7 @@ export const useUIStore = create<UIState>((set) => ({
   theme: "system",
   showExpenseForm: false,
   editingExpenseId: null,
+  formPrefill: null,
   showLedgerForm: false,
   appMode: loadAppMode(),
   activeLedgerId: null,
@@ -84,9 +86,9 @@ export const useUIStore = create<UIState>((set) => ({
   setSearchQuery: (q) => set({ searchQuery: q }),
   setTheme: (theme) => set({ theme }),
 
-  openAddForm: () => set({ showExpenseForm: true, editingExpenseId: null }),
-  openEditForm: (id) => set({ showExpenseForm: true, editingExpenseId: id }),
-  closeForm: () => set({ showExpenseForm: false, editingExpenseId: null }),
+  openAddForm: (prefill) => set({ showExpenseForm: true, editingExpenseId: null, formPrefill: prefill ?? null }),
+  openEditForm: (id) => set({ showExpenseForm: true, editingExpenseId: id, formPrefill: null }),
+  closeForm: () => set({ showExpenseForm: false, editingExpenseId: null, formPrefill: null }),
   openLedgerForm: () => set({ showLedgerForm: true }),
   closeLedgerForm: () => set({ showLedgerForm: false }),
   setAppMode: (mode) => {

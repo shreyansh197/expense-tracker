@@ -48,10 +48,10 @@ export default function DeviceLinkPage() {
   if (error) {
     return (
       <div className="flex min-h-screen items-center justify-center p-4">
-        <div className="w-full max-w-sm rounded-2xl p-6 shadow-xl text-center" style={{ background: 'var(--surface)' }}>
-          <XCircle className="mx-auto h-12 w-12 mb-4" style={{ color: 'var(--danger)' }} />
-          <h2 className="text-lg font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
-            Device Link Failed
+        <div className="w-full max-w-sm card-terrain rounded-2xl p-6">
+          <XCircle className="mx-auto h-10 w-10 mb-4" style={{ color: 'var(--danger)' }} />
+          <h2 className="font-display italic text-xl mb-2 text-center" style={{ color: 'var(--text-primary)' }}>
+            Linking failed.
           </h2>
           <p className="text-sm mb-6" style={{ color: 'var(--text-secondary)' }}>
             {error}
@@ -71,10 +71,10 @@ export default function DeviceLinkPage() {
   if (accepted) {
     return (
       <div className="flex min-h-screen items-center justify-center p-4">
-        <div className="w-full max-w-sm rounded-2xl p-6 shadow-xl text-center" style={{ background: 'var(--surface)' }}>
-          <CheckCircle2 className="mx-auto h-12 w-12 mb-4" style={{ color: 'var(--success)' }} />
-          <h2 className="text-lg font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
-            Device Linked!
+        <div className="w-full max-w-sm card-terrain rounded-2xl p-6 text-center">
+          <CheckCircle2 className="mx-auto h-10 w-10 mb-4" style={{ color: 'var(--es-moss)' }} />
+          <h2 className="font-display italic text-xl mb-2" style={{ color: 'var(--text-primary)' }}>
+            Device linked.
           </h2>
           <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
             Redirecting to dashboard...
@@ -86,10 +86,12 @@ export default function DeviceLinkPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center p-4">
-      <div className="w-full max-w-sm rounded-2xl p-6 shadow-xl text-center" style={{ background: 'var(--surface)' }}>
-        <Smartphone className="mx-auto h-12 w-12 text-data mb-4" />
-        <h2 className="text-lg font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
-          Link This Device
+      <div className="w-full max-w-sm card-terrain rounded-2xl p-6 text-center">
+        <div className="flex h-12 w-12 items-center justify-center rounded-full mx-auto mb-4" style={{ background: 'var(--es-chalk)', border: '1px solid var(--border)' }}>
+          <Smartphone className="h-6 w-6" style={{ color: 'var(--es-moss)' }} />
+        </div>
+        <h2 className="font-display italic text-2xl mb-2" style={{ color: 'var(--text-primary)' }}>
+          Link this device.
         </h2>
         <p className="text-sm mb-6" style={{ color: 'var(--text-secondary)' }}>
           {isAuthenticated
@@ -100,7 +102,8 @@ export default function DeviceLinkPage() {
         {!isAuthenticated && (
           <button
             onClick={handleAccept}
-            className="w-full rounded-xl bg-data py-3 text-base font-semibold text-white hover:bg-data-hover transition-colors"
+            className="w-full rounded-full py-3 text-base font-semibold text-white transition-colors"
+            style={{ background: 'var(--es-moss)' }}
           >
             Sign In to Link
           </button>

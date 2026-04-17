@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { m, AnimatePresence } from "framer-motion";
+import { m, AnimatePresence, useReducedMotion } from "framer-motion";
 import {
   PiggyBank,
   AlertTriangle,
@@ -17,8 +17,10 @@ import { useCurrency } from "@/hooks/useCurrency";
 import { BUDGET_WARNING_THRESHOLD } from "@/lib/constants";
 import { InfoTooltip } from "@/components/ui/InfoTooltip";
 import { AnimatedNumber } from "@/components/ui/AnimatedNumber";
-import type { Forecast } from "@/types";
+import { RidgeLine } from "@/components/ui/RidgeLine";
+import type { Forecast, DailyTotal } from "@/types";
 import { duration, ease, stagger as motionStagger } from "@/lib/motion/tokens";
+import { breathVariant, breathVariantReduced } from "@/lib/motion/variants";
 
 interface KpiCardsProps {
   monthlyTotal: number;
@@ -31,6 +33,12 @@ interface KpiCardsProps {
   expenseCount: number;
   forecast: Forecast;
   rolloverAmount?: number;
+  /** Optional daily totals for the RidgeLine progress bar. */
+  dailyTotals?: DailyTotal[];
+  /** Days in the current month — used to scale the ridge x-axis. */
+  daysInMonth?: number;
+  /** Lora display label shown at the top of the hero card: e.g. "April 2026" */
+  monthLabel?: string;
 }
 
 function getStatusCopy(
@@ -60,7 +68,11 @@ export function KpiCards({
   expenseCount,
   forecast,
   rolloverAmount = 0,
+  dailyTotals = [],
+  daysInMonth = 30,
+  monthLabel,
 }: KpiCardsProps) {
+  const prefersReducedMotion = useReducedMotion();
   const { formatCurrency } = useCurrency();
   const [expanded, setExpanded] = useState(() => {
     if (typeof window === "undefined") return false;
@@ -122,6 +134,20 @@ export function KpiCards({
         className={cn("card-hero relative overflow-hidden rounded-xl border-l-[3px] p-5 sm:p-6", sc.bg)}
         variants={{ hidden: { opacity: 0, y: 12 }, visible: { opacity: 1, y: 0, transition: { duration: duration.emphasis, ease: ease.out } } }}
       >
+        {/* Breath wrapper — y float after entrance, reduced-motion uses opacity drift */}
+        <m.div
+          animate={prefersReducedMotion
+            ? (breathVariantReduced.animate as import("framer-motion").TargetAndTransition)
+            : (breathVariant.animate as import("framer-motion").TargetAndTransition)
+          }
+          style={{ willChange: "transform" }}
+        >
+        {/* Month name — Lora italic */}
+        {monthLabel && (
+          <p className="font-display italic text-sm mb-2 tracking-wide" style={{ color: 'var(--text-muted)', opacity: 0.7 }}>
+            {monthLabel}
+          </p>
+        )}
         <div className="flex items-center justify-between">
           <div className={cn("flex items-center gap-2 text-sm font-medium", sc.text)}>
             {status !== "safe" ? <ShieldAlert size={15} className={status === "danger" ? "icon-pulse" : ""} /> : isOverspent ? <AlertTriangle size={15} /> : <PiggyBank size={15} />}
@@ -134,18 +160,26 @@ export function KpiCards({
             </span>
           )}
         </div>
-        <p className={cn("text-hero-amount mt-2 min-w-0 truncate", sc.text)}>
+        <m.p layoutId="monthly-total" className={cn("text-hero-amount mt-2 min-w-0 truncate", sc.text)}>
           <AnimatedNumber value={Math.abs(remaining)} format={formatCurrency} />
-        </p>
+        </m.p>
         <p className="mt-2.5 text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
           {getStatusCopy(isOverspent, isWarning, daysRemaining, paceToStayUnder, forecastOverBudget, formatCurrency)}
         </p>
-        <div className="mt-3.5 h-1.5 w-full overflow-hidden rounded-full" style={{ background: 'var(--surface-secondary)' }} role="progressbar" aria-valuenow={Math.min(budgetUsedPercent, 100)} aria-valuemin={0} aria-valuemax={100} aria-label="Budget used">
-          <m.div
-            className={cn("h-full rounded-full", isOverspent ? "bg-err" : isWarning ? "bg-warn" : "bg-brand")}
-            initial={{ width: 0 }}
-            animate={{ width: `${Math.min(budgetUsedPercent, 100)}%` }}
-            transition={{ delay: 0.3, duration: duration.slow, ease: ease.out }}
+        <div
+          className="mt-3.5 w-full overflow-hidden rounded-full"
+          role="progressbar"
+          aria-valuenow={Math.min(budgetUsedPercent, 100)}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-label={`Budget used: ${Math.min(budgetUsedPercent, 100)}%`}
+        >
+          <RidgeLine
+            dailyTotals={dailyTotals}
+            maxDays={daysInMonth}
+            progress={budgetUsedPercent / 100}
+            height={36}
+            variant="personal"
           />
         </div>
         <div className="mt-2 flex items-center justify-between text-xs" style={{ color: 'var(--text-tertiary)' }}>
@@ -157,6 +191,7 @@ export function KpiCards({
             Includes +{formatCurrency(rolloverAmount)} rollover from last month
           </p>
         )}
+        </m.div>
       </m.div>
 
       {/* ── SECONDARY: Metric Grid (2×2) ── */}
