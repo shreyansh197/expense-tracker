@@ -271,7 +271,7 @@ export function ExpenseForm({
     <form
       onSubmit={handleSubmit}
       onKeyDown={handleKeyDown}
-      className="flex flex-col gap-3"
+      className="flex flex-col gap-2"
     >
       {/* Success flash */}
       <AnimatePresence>
@@ -295,74 +295,32 @@ export function ExpenseForm({
       <MoneyEcho trigger={echoTrigger} />
 
       {/* ─── 1. Amount Hero Display ─── */}
-      <div className="flex flex-col items-center pt-2 pb-1">
-        <span className="text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>
+      <div className="flex flex-col items-center pt-1">
+        <span className="text-[11px] font-medium uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>
           {editExpense ? "Edit amount" : "How much?"}
         </span>
         <m.div
-          className="flex items-baseline gap-1 mt-1"
+          className="flex items-baseline gap-1"
           animate={amountInvalid ? { x: [-4, 4, -4, 4, 0] } : {}}
           transition={{ duration: 0.3 }}
         >
-          <span className="text-2xl font-display" style={{ color: 'var(--text-muted)' }}>{symbol}</span>
+          <span className="text-xl font-display" style={{ color: 'var(--text-muted)' }}>{symbol}</span>
           <span
             className={cn(
-              "text-5xl font-display font-bold tabular-nums tracking-tight transition-colors",
+              "text-4xl font-display font-bold tabular-nums tracking-tight transition-colors",
               amount ? "text-[var(--text-primary)]" : "text-[var(--text-muted)]"
             )}
           >
             {parsedDisplay}
           </span>
         </m.div>
-        {/* Receipt scanner chip */}
-        {!editExpense && (
-          <button
-            type="button"
-            onClick={() => setShowScanner((v) => !v)}
-            className="mt-2 flex items-center gap-1 rounded-full px-3 py-1 text-[11px] font-medium transition-colors"
-            style={{
-              background: showScanner ? 'var(--brand-soft)' : 'var(--surface-secondary)',
-              color: showScanner ? 'var(--brand)' : 'var(--text-tertiary)',
-            }}
-          >
-            <Camera size={12} />
-            Scan receipt
-          </button>
-        )}
       </div>
-
-      {/* Receipt Scanner */}
-      <AnimatePresence>
-        {showScanner && (
-          <m.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.2 }}
-            className="overflow-hidden rounded-xl border"
-            style={{ borderColor: "var(--border)", background: "var(--surface-secondary)" }}
-          >
-            <div className="p-3">
-              <ReceiptCapture
-                onExtracted={(data) => {
-                  if (data.amount) setAmount(data.amount.toString());
-                  if (data.category) setCategory(data.category);
-                  if (data.remark) setRemark(data.remark);
-                  setShowScanner(false);
-                  setShowMore(true);
-                }}
-                onClose={() => setShowScanner(false)}
-              />
-            </div>
-          </m.div>
-        )}
-      </AnimatePresence>
 
       {/* Error — above keypad so it's visible when keyboard is open */}
       <FormError message={error} visible={!!error} />
 
       {/* ─── 2. Numeric Keypad ─── */}
-      <div className="grid grid-cols-3 gap-3 px-2" role="group" aria-label="Amount keypad">
+      <div className="grid grid-cols-3 gap-2 px-2" role="group" aria-label="Amount keypad">
         {KEYPAD_KEYS.map((key) => (
           <m.button
             key={key}
@@ -371,14 +329,14 @@ export function ExpenseForm({
             transition={spring.water}
             onClick={() => handleKeypadPress(key)}
             className={cn(
-              "flex items-center justify-center rounded-2xl text-xl font-semibold font-numeric select-none",
-              "h-14 active:bg-[var(--surface-tertiary)] transition-colors",
+              "flex items-center justify-center rounded-xl text-lg font-semibold font-numeric select-none",
+              "h-11 active:bg-[var(--surface-tertiary)] transition-colors",
               key === "backspace" ? "text-[var(--text-muted)]" : "text-[var(--text-primary)]"
             )}
             style={{ background: 'var(--surface-secondary)' }}
             aria-label={key === "backspace" ? "Delete" : key === "." ? "Decimal point" : key}
           >
-            {key === "backspace" ? <Delete size={22} /> : key}
+            {key === "backspace" ? <Delete size={20} /> : key}
           </m.button>
         ))}
       </div>
@@ -395,36 +353,13 @@ export function ExpenseForm({
         showError={!category && submitted}
       />
 
-      {/* ─── 4. Remark (voice-first) ─── */}
-      <div className="relative">
-        <input
-          ref={remarkRef}
-          type="text"
-          value={remark}
-          onChange={(e) => setRemark(e.target.value)}
-          onFocus={(e) => { const el = e.target; setTimeout(() => el.scrollIntoView({ behavior: "smooth", block: "center" }), 150); }}
-          placeholder="Add a note..."
-          maxLength={200}
-          className="form-input w-full pr-10"
-        />
-        <button
-          type="button"
-          className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-1.5 transition-colors"
-          style={{ color: 'var(--text-muted)' }}
-          aria-label="Voice note"
-          title="Voice input"
-        >
-          <Mic size={18} />
-        </button>
-      </div>
-
-      {/* ─── 5. More options (date, currency) ─── */}
+      {/* ─── 4. More options (remark, date, scanner, currency) ─── */}
       <div className="flex items-center gap-2">
         {!showMore && (
           <button
             type="button"
             onClick={() => setShowMore(true)}
-            className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium transition-colors"
+            className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors"
             style={{ background: 'var(--surface-secondary)', color: 'var(--text-secondary)' }}
           >
             <CalendarDays size={12} />
@@ -451,8 +386,71 @@ export function ExpenseForm({
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-            className="overflow-hidden md:overflow-visible space-y-3"
+            className="overflow-hidden md:overflow-visible space-y-2"
           >
+            {/* Remark (voice-first) */}
+            <div className="relative">
+              <input
+                ref={remarkRef}
+                type="text"
+                value={remark}
+                onChange={(e) => setRemark(e.target.value)}
+                onFocus={(e) => { const el = e.target; setTimeout(() => el.scrollIntoView({ behavior: "smooth", block: "center" }), 150); }}
+                placeholder="Add a note..."
+                maxLength={200}
+                className="form-input w-full pr-10"
+              />
+              <button
+                type="button"
+                className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-1.5 transition-colors"
+                style={{ color: 'var(--text-muted)' }}
+                aria-label="Voice note"
+                title="Voice input"
+              >
+                <Mic size={18} />
+              </button>
+            </div>
+            {/* Receipt scanner */}
+            {!editExpense && (
+              <>
+                <button
+                  type="button"
+                  onClick={() => setShowScanner((v) => !v)}
+                  className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors"
+                  style={{
+                    background: showScanner ? 'var(--brand-soft)' : 'var(--surface-secondary)',
+                    color: showScanner ? 'var(--brand)' : 'var(--text-tertiary)',
+                  }}
+                >
+                  <Camera size={12} />
+                  Scan receipt
+                </button>
+                <AnimatePresence>
+                  {showScanner && (
+                    <m.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="overflow-hidden rounded-xl border"
+                      style={{ borderColor: "var(--border)", background: "var(--surface-secondary)" }}
+                    >
+                      <div className="p-3">
+                        <ReceiptCapture
+                          onExtracted={(data) => {
+                            if (data.amount) setAmount(data.amount.toString());
+                            if (data.category) setCategory(data.category);
+                            if (data.remark) setRemark(data.remark);
+                            setShowScanner(false);
+                          }}
+                          onClose={() => setShowScanner(false)}
+                        />
+                      </div>
+                    </m.div>
+                  )}
+                </AnimatePresence>
+              </>
+            )}
             {multiCurrency && (
               <div>
                 <label className="form-label mb-1.5 uppercase">Currency</label>
@@ -493,7 +491,7 @@ export function ExpenseForm({
         )}
       </AnimatePresence>
 
-      {/* ─── 6. Submit ─── */}
+      {/* ─── 5. Submit ─── */}
       <m.button
         type="submit"
         disabled={submitting || !amount}

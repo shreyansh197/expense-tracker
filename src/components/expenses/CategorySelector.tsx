@@ -19,11 +19,11 @@ interface CategorySelectorProps {
 
 export function CategorySelector({ categories, selected, onSelect, showError }: CategorySelectorProps) {
   return (
-    <div className="-mx-1 rounded-xl p-3" style={{ background: 'var(--section-moss)' }}>
-      <label className="form-label mb-2 uppercase">
+    <div className="-mx-1 rounded-xl px-3 py-2" style={{ background: 'var(--section-moss)' }}>
+      <label className="form-label mb-1.5 uppercase">
         Category {showError && <span className="text-err normal-case">— please select</span>}
       </label>
-      <div className="flex max-h-40 flex-wrap gap-2 overflow-y-auto" role="radiogroup" aria-label="Select category">
+      <div className="flex max-h-24 flex-wrap gap-1.5 overflow-y-auto" role="radiogroup" aria-label="Select category">
         {categories.map((cat) => (
           <m.button
             key={cat.id}
