@@ -83,7 +83,7 @@ export function BottomNav() {
             : { background: 'var(--es-moss)', boxShadow: '0 8px 20px -4px rgba(61,90,62,0.35), inset 0 0 12px rgba(61,90,62,0.2)' }),
         }}
         initial={false}
-        whileHover={{ scaleX: 1.08, scaleY: 0.96, transition: { duration: 0.15 } }}
+        whileHover={{ scale: 1.06, transition: { duration: 0.15 } }}
         whileTap={{ scale: 0.88 }}
       >
         <Plus size={24} strokeWidth={2.5} />

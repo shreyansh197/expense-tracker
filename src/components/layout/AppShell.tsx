@@ -45,7 +45,8 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
     // Small delay so the spinner feels responsive
     await new Promise((r) => setTimeout(r, 600));
   }, []);
-  const { pulling, pullDistance, refreshing, ready } = usePullToRefresh({ onRefresh: handleRefresh });
+  const formOpen = useUIStore((s) => s.showExpenseForm);
+  const { pulling, pullDistance, refreshing, ready } = usePullToRefresh({ onRefresh: handleRefresh, enabled: !formOpen });
 
   // Listen for 403 workspace access denied from sync engine
   useEffect(() => {

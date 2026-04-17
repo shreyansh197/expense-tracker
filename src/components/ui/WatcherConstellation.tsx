@@ -28,6 +28,9 @@ export function WatcherConstellation({ insight, onDismiss }: WatcherConstellatio
   const dotColor = isBizRoute ? "var(--biz-accent)" : "var(--es-moss)";
   const hasInsight = insight !== null;
 
+  // Hide completely when no insight — avoid confusing idle dots
+  if (!hasInsight && !open) return null;
+
   // Dot positions forming a small equilateral triangle
   const dots = [
     { cx: 12, cy: 4 },  // apex

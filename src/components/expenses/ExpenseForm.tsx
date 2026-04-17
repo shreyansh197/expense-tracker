@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { m, AnimatePresence } from "framer-motion";
-import { Camera, CalendarDays, CheckCircle2, Mic, Delete, ChevronDown } from "lucide-react";
+import { Camera, CalendarDays, CheckCircle2, Mic, MicOff, Delete, ChevronDown } from "lucide-react";
 import { getAllCategories } from "@/lib/categories";
 import { cn, getDaysInMonth, getCurrencySymbol } from "@/lib/utils";
 import { useUIStore } from "@/stores/uiStore";
@@ -17,6 +17,7 @@ import { useAutoRules } from "@/components/settings/AutoRulesManager";
 import { SUPPORTED_CURRENCIES } from "@/lib/utils";
 import { spring } from "@/lib/motion/tokens";
 import { MoneyEcho } from "@/components/ui/MoneyEcho";
+import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
 import type { CategoryId, ExpenseInput, Expense } from "@/types";
 
 /* ─── Keypad keys ─── */
@@ -97,6 +98,15 @@ export function ExpenseForm({
   const [showScanner, setShowScanner] = useState(false);
   const [showMore, setShowMore] = useState(!!editExpense);
   const remarkRef = useRef<HTMLInputElement>(null);
+
+  const voice = useSpeechRecognition(
+    useCallback((transcript: string) => {
+      setRemark((prev) => {
+        const trimmed = prev.trim();
+        return trimmed ? `${trimmed} ${transcript}` : transcript;
+      });
+    }, []),
+  );
 
   useEffect(() => {
     if (editExpense) {
@@ -393,23 +403,33 @@ export function ExpenseForm({
               <input
                 ref={remarkRef}
                 type="text"
-                value={remark}
+                value={voice.listening ? (remark ? `${remark} ${voice.transcript}` : voice.transcript) || remark : remark}
                 onChange={(e) => setRemark(e.target.value)}
                 onFocus={(e) => { const el = e.target; setTimeout(() => el.scrollIntoView({ behavior: "smooth", block: "center" }), 150); }}
-                placeholder="Add a note..."
+                placeholder={voice.listening ? "Listening..." : "Add a note..."}
                 maxLength={200}
-                className="form-input w-full pr-10"
+                readOnly={voice.listening}
+                className={cn("form-input w-full pr-10", voice.listening && "ring-2 ring-[var(--brand)]")}
               />
-              <button
-                type="button"
-                className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-1.5 transition-colors"
-                style={{ color: 'var(--text-muted)' }}
-                aria-label="Voice note"
-                title="Voice input"
-              >
-                <Mic size={18} />
-              </button>
+              {voice.supported && (
+                <button
+                  type="button"
+                  onClick={() => { if (voice.listening) { voice.stop(); } else { voice.start(); } if (!showMore) setShowMore(true); }}
+                  className={cn(
+                    "absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-1.5 transition-colors",
+                    voice.listening && "animate-pulse"
+                  )}
+                  style={{ color: voice.listening ? 'var(--brand)' : 'var(--text-muted)' }}
+                  aria-label={voice.listening ? "Stop voice input" : "Start voice input"}
+                  title={voice.listening ? "Stop listening" : "Voice input"}
+                >
+                  {voice.listening ? <MicOff size={18} /> : <Mic size={18} />}
+                </button>
+              )}
             </div>
+            {voice.error && (
+              <p className="text-xs" style={{ color: 'var(--err)' }}>{voice.error}</p>
+            )}
             {/* Receipt scanner */}
             {!editExpense && (
               <>
