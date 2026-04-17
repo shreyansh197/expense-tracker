@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { m } from "framer-motion";
+import { m, useReducedMotion } from "framer-motion";
 import { Activity, Zap } from "lucide-react";
 import { useCurrency } from "@/hooks/useCurrency";
 
@@ -24,6 +24,7 @@ interface SpendingPulseProps {
  */
 export function SpendingPulse({ dailyValues, todayTotal, avgDaily, todayCount }: SpendingPulseProps) {
   const { formatCurrency } = useCurrency();
+  const shouldReduceMotion = useReducedMotion();
 
   // Last 7 days of data (including today)
   const pulseData = useMemo(() => {
@@ -79,11 +80,11 @@ export function SpendingPulse({ dailyValues, todayTotal, avgDaily, todayCount }:
       <div className="flex items-center justify-between p-4 pb-0">
         <div className="flex items-center gap-2">
           <m.div
-            animate={pulseRate.intensity >= 2
+            animate={!shouldReduceMotion && pulseRate.intensity >= 2
               ? { scale: [1, 1.25, 1], opacity: [0.7, 1, 0.7] }
               : { scale: 1, opacity: 0.7 }
             }
-            transition={pulseRate.intensity >= 2
+            transition={!shouldReduceMotion && pulseRate.intensity >= 2
               ? { duration: 1.2, repeat: Infinity, ease: "easeInOut" }
               : {}
             }
@@ -130,16 +131,15 @@ export function SpendingPulse({ dailyValues, todayTotal, avgDaily, todayCount }:
                       position: "absolute",
                       bottom: 0,
                     }}
-                    initial={{ height: 0 }}
+                    initial={shouldReduceMotion ? false : { height: 0 }}
                     animate={{ height: `${h}%` }}
-                    transition={{
-                      duration: 0.5,
-                      delay: i * 0.06,
-                      ease: [0.22, 1, 0.36, 1],
-                    }}
+                    transition={shouldReduceMotion
+                      ? { duration: 0 }
+                      : { duration: 0.5, delay: i * 0.06, ease: [0.22, 1, 0.36, 1] }
+                    }
                   />
                   {/* Today's glow pulse */}
-                  {isToday && val > 0 && (
+                  {isToday && val > 0 && !shouldReduceMotion && (
                     <m.div
                       className="absolute bottom-0 w-full max-w-[32px] rounded-t-lg"
                       style={{
@@ -172,7 +172,7 @@ export function SpendingPulse({ dailyValues, todayTotal, avgDaily, todayCount }:
               className="absolute w-full border-t border-dashed"
               style={{
                 borderColor: "var(--text-muted)",
-                opacity: 0.3,
+                opacity: 0.5,
                 bottom: `${Math.min((avgDaily / maxVal) * 56, 54) + 16}px`,
               }}
             />

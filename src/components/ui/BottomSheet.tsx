@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useRef, useState, useEffect } from "react";
-import { m, AnimatePresence } from "framer-motion";
+import { m, AnimatePresence, useReducedMotion } from "framer-motion";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { spring, duration } from "@/lib/motion/tokens";
 
@@ -20,6 +20,7 @@ interface BottomSheetProps {
 }
 
 export function BottomSheet({ open, onClose, children, label, className, springPreset }: BottomSheetProps) {
+  const shouldReduceMotion = useReducedMotion();
   const [dragY, setDragY] = useState(0);
   const dragStartRef = useRef<number | null>(null);
   const closingRef = useRef(false);
@@ -115,9 +116,13 @@ export function BottomSheet({ open, onClose, children, label, className, springP
               transform: dragY > 0 ? `translateY(${dragY}px)` : undefined,
               opacity: dragY > 0 ? Math.max(1 - dragY / 300, 0.5) : 1,
             }}
-            initial={{ opacity: 0, y: 40, scale: 0.97 }}
-            animate={{ opacity: 1, y: 0, scale: 1, transition: springPreset ?? spring.default }}
-            exit={{ opacity: 0, y: 20, scale: 0.97, transition: { duration: duration.exit, ease: "easeIn" } }}
+            initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 40, scale: 0.97 }}
+            animate={shouldReduceMotion
+              ? { opacity: 1, transition: { duration: 0.15 } }
+              : { opacity: 1, y: 0, scale: 1, transition: springPreset ?? spring.default }}
+            exit={shouldReduceMotion
+              ? { opacity: 0, transition: { duration: 0.1 } }
+              : { opacity: 0, y: 20, scale: 0.97, transition: { duration: duration.exit, ease: "easeIn" } }}
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}

@@ -253,7 +253,7 @@
   --text-primary: #F0EBE0;
   --text-secondary: #B0A898;
   --text-tertiary: #8A8798;
-  --text-muted: #7A7F96;
+  --text-muted: #9EA3B8;
   --text-inverse: #1A1B2E;
   /* ── Semantic surfaces ── */
   --surface-modal: #2D2E42;
@@ -621,21 +621,21 @@ button, a {
 /* ── Card utility classes ──────────────────────────────────── */
 .card-accent-moss {
   background: var(--surface-accent-moss);
-  border: 1px solid rgba(61, 90, 62, 0.18);
+  border: 1px solid rgba(61, 90, 62, 0.30);
   border-radius: 1rem;
   box-shadow: var(--card-shadow);
   transition: box-shadow 0.25s var(--ease-out), border-color 0.25s var(--ease-out);
 }
 .card-accent-sage {
   background: var(--surface-accent-sage);
-  border: 1px solid rgba(143, 175, 139, 0.18);
+  border: 1px solid rgba(143, 175, 139, 0.30);
   border-radius: 1rem;
   box-shadow: var(--card-shadow);
   transition: box-shadow 0.25s var(--ease-out), border-color 0.25s var(--ease-out);
 }
 .card-accent-coral {
   background: var(--surface-accent-coral);
-  border: 1px solid rgba(181, 101, 74, 0.18);
+  border: 1px solid rgba(181, 101, 74, 0.30);
   border-radius: 1rem;
   box-shadow: var(--card-shadow);
   transition: box-shadow 0.25s var(--ease-out), border-color 0.25s var(--ease-out);

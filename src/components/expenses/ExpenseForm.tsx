@@ -240,7 +240,9 @@ export function ExpenseForm({
         localStorage.setItem("expenstream-last-category", category);
         const catLabel = allCategories.find(c => c.id === category)?.label ?? category;
         const displaySymbol = multiCurrency && expenseCurrency ? getCurrencySymbol(expenseCurrency) : symbol;
-        toast(editExpense ? `${displaySymbol}${parsedAmount} in ${catLabel} updated` : `${displaySymbol}${parsedAmount} added to ${catLabel}`);
+        if (editExpense) {
+          toast(`${displaySymbol}${parsedAmount} in ${catLabel} updated`);
+        }
         if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate([30, 30, 30]);
         setShowSuccess(true);
         setEchoTrigger((t) => t + 1);
@@ -356,8 +358,11 @@ export function ExpenseForm({
         )}
       </AnimatePresence>
 
+      {/* Error — above keypad so it's visible when keyboard is open */}
+      <FormError message={error} visible={!!error} />
+
       {/* ─── 2. Numeric Keypad ─── */}
-      <div className="grid grid-cols-3 gap-2 px-2" role="group" aria-label="Amount keypad">
+      <div className="grid grid-cols-3 gap-3 px-2" role="group" aria-label="Amount keypad">
         {KEYPAD_KEYS.map((key) => (
           <m.button
             key={key}
@@ -397,6 +402,7 @@ export function ExpenseForm({
           type="text"
           value={remark}
           onChange={(e) => setRemark(e.target.value)}
+          onFocus={(e) => { const el = e.target; setTimeout(() => el.scrollIntoView({ behavior: "smooth", block: "center" }), 150); }}
           placeholder="Add a note..."
           maxLength={200}
           className="form-input w-full pr-10"
@@ -486,9 +492,6 @@ export function ExpenseForm({
           </m.div>
         )}
       </AnimatePresence>
-
-      {/* Error */}
-      <FormError message={error} visible={!!error} />
 
       {/* ─── 6. Submit ─── */}
       <m.button

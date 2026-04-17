@@ -44,7 +44,7 @@ export function EchoCard({ echo, onDismiss }: EchoCardProps) {
     if (startY.current === null) return;
     const dy = e.changedTouches[0].clientY - startY.current;
     startY.current = null;
-    if (dy > 40) onDismiss();
+    if (dy > 80) onDismiss();
   };
 
   const getCategoryLabel = (id: string) =>

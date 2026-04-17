@@ -324,3 +324,18 @@ export const bottomSheet: Variants = {
     transition: { duration: duration.normal, ease: ease.in },
   },
 };
+
+// ── Reduced-motion variant factory ──
+// Returns opacity-only transitions for users who prefer reduced motion.
+
+const reducedFade: Variants = {
+  initial: { opacity: 0 },
+  animate: { opacity: 1, transition: { duration: 0.15 } },
+  exit: { opacity: 0, transition: { duration: 0.1 } },
+};
+
+export const stoneSettleReduced: Variants = reducedFade;
+export const fadeUpReduced: Variants = reducedFade;
+export const modalContentReduced: Variants = reducedFade;
+export const pageTransitionReduced: Variants = reducedFade;
+export const terrainRevealReduced: Variants = reducedFade;

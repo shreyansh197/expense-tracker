@@ -20,6 +20,7 @@ interface DragState {
 export function useDragDismiss(config: DragDismissConfig) {
   const { direction = "down", dismissThreshold = 120, onDismiss } = config;
   const dragRef = useRef<DragState | null>(null);
+  const startTimeRef = useRef(0);
   const [offset, setOffset] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
 
@@ -34,6 +35,7 @@ export function useDragDismiss(config: DragDismissConfig) {
       currentY: e.touches[0].clientY,
       isDragging: false,
     };
+    startTimeRef.current = Date.now();
   }, []);
 
   const onTouchMove = useCallback(
@@ -73,8 +75,10 @@ export function useDragDismiss(config: DragDismissConfig) {
     }
 
     const delta = Math.abs(state.currentY - state.startY);
+    const elapsed = Math.max(Date.now() - startTimeRef.current, 1);
+    const velocity = delta / elapsed; // px/ms
 
-    if (delta >= dismissThreshold) {
+    if (delta >= dismissThreshold || velocity > 0.5) {
       onDismiss();
     }
 

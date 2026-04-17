@@ -32,7 +32,7 @@ export function CategorySelector({ categories, selected, onSelect, showError }: 
             role="radio"
             aria-checked={selected === cat.id}
             className={cn(
-              "rounded-full px-3 py-2 sm:py-1.5 text-xs font-medium transition-all",
+              "rounded-full px-3 py-2 sm:py-2.5 text-xs font-medium transition-all",
               selected === cat.id ? "text-white shadow-sm" : ""
             )}
             style={
