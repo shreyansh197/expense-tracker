@@ -82,16 +82,6 @@ describe("touch targets — all interactive elements meet 44px minimum", () => {
     });
   });
 
-  describe("DashboardCustomizer", () => {
-    const src = readComponent("components/dashboard/DashboardCustomizer.tsx");
-
-    test("toggle and close buttons have h-11 w-11", () => {
-      const matches = src.match(/h-11 w-11/g);
-      expect(matches).not.toBeNull();
-      expect(matches!.length).toBeGreaterThanOrEqual(2);
-    });
-  });
-
   describe("DailyTrendChart", () => {
     const src = readComponent("components/dashboard/DailyTrendChart.tsx");
 

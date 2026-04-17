@@ -302,7 +302,7 @@ export function ExpenseForm({
         )}
       </AnimatePresence>
 
-      <MoneyEcho trigger={echoTrigger} />
+      <MoneyEcho trigger={echoTrigger} color={allCategories.find(c => c.id === category)?.color} />
 
       {/* ─── 1. Amount Hero Display ─── */}
       <div className="flex flex-col items-center pt-1">

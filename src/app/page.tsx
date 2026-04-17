@@ -14,8 +14,10 @@ import { SkeletonKpiCards, SkeletonChart } from "@/components/ui/Skeleton";
 import { PageTransition } from "@/components/ui/PageTransition";
 import { SpendingStream } from "@/components/dashboard/SpendingStream";
 import { SpendingPulse } from "@/components/dashboard/SpendingPulse";
+import { SpendingHeatmap } from "@/components/dashboard/SpendingHeatmap";
 import { SavingsGoalsWidget } from "@/components/dashboard/SavingsGoalsWidget";
 import { NarrativeInsight } from "@/components/dashboard/NarrativeInsight";
+import { MonthlyPostcard } from "@/components/dashboard/MonthlyPostcard";
 import { ClearingScene } from "@/components/ui/illustrations/terrain/ClearingScene";
 import { Repeat, PlusCircle, ChevronDown, Flame, TrendingUp, AlertTriangle, Leaf, Coffee, Sunrise } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -344,6 +346,7 @@ function DashboardContent() {
         </div>
         <div className="flex shrink-0 items-center gap-2">
           <SyncIndicator />
+          {!loading && expenses.length > 0 && <MonthlyPostcard />}
           {streak >= 2 && (
             <span
               className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold"
@@ -581,6 +584,19 @@ function DashboardContent() {
             todayTotal={todayTotal}
             avgDaily={avgDaily}
             todayCount={todayCount}
+          />
+        </RevealOnScroll>
+      )}
+
+      {/* ═══════════════════════════════════════════════════
+          4b2. SPENDING HEATMAP — month calendar grid
+          ═══════════════════════════════════════════════════ */}
+      {!loading && expenses.length > 0 && (
+        <RevealOnScroll>
+          <SpendingHeatmap
+            expenses={expenses}
+            month={currentMonth}
+            year={currentYear}
           />
         </RevealOnScroll>
       )}

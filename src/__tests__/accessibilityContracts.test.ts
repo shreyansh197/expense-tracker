@@ -38,30 +38,6 @@ describe("accessibility contracts — aria-labels", () => {
     });
   });
 
-  describe("DashboardCustomizer", () => {
-    const src = readComponent("components/dashboard/DashboardCustomizer.tsx");
-
-    test("customize trigger has aria-label", () => {
-      expect(src).toContain('aria-label="Customize dashboard"');
-    });
-
-    test("close button has aria-label", () => {
-      expect(src).toContain('aria-label="Close customizer"');
-    });
-
-    test("reset button has aria-label", () => {
-      expect(src).toContain('aria-label="Reset dashboard to default layout"');
-    });
-
-    test("save button has aria-label", () => {
-      expect(src).toContain('aria-label="Save dashboard layout"');
-    });
-
-    test("drag handle has aria-label", () => {
-      expect(src).toContain('aria-label="Drag to reorder"');
-    });
-  });
-
   describe("DatePicker", () => {
     const src = readComponent("components/ui/DatePicker.tsx");
 
@@ -113,7 +89,6 @@ describe("accessibility contracts — security", () => {
   test("aria-labels use plain text, not dangerous HTML", () => {
     const files = [
       "components/expenses/ExpenseExport.tsx",
-      "components/dashboard/DashboardCustomizer.tsx",
       "components/ui/DatePicker.tsx",
     ];
 

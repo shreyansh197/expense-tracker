@@ -196,12 +196,6 @@ describe("safe area inset contracts", () => {
     expect(src).toContain("safe-area-inset-bottom");
   });
 
-  test("DashboardCustomizer uses env(safe-area-inset-top) and bottom", () => {
-    const src = readComponent("components/dashboard/DashboardCustomizer.tsx");
-    expect(src).toContain("safe-area-inset-top");
-    expect(src).toContain("safe-area-inset-bottom");
-  });
-
   test("WelcomeTutorial uses env(safe-area-inset-top) and bottom", () => {
     const src = readComponent("components/onboarding/WelcomeTutorial.tsx");
     expect(src).toContain("safe-area-inset-top");

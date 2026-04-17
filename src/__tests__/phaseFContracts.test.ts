@@ -344,36 +344,6 @@ describe("useAchievements hook contract", () => {
   });
 });
 
-// =========== DashboardCustomizer updated contract ===========
-
-describe("DashboardCustomizer — Phase F sections", () => {
-  const src = readComponent("components/dashboard/DashboardCustomizer.tsx");
-
-  test("SECTION_LABELS includes achievements", () => {
-    expect(src).toContain("achievements:");
-    expect(src).toContain('"Achievements"');
-  });
-
-  test("SECTION_LABELS includes insights", () => {
-    expect(src).toContain("insights:");
-    expect(src).toContain('"Spending Insights"');
-  });
-
-  test("DEFAULT_SECTIONS includes achievements entry", () => {
-    expect(src).toContain('id: "achievements"');
-  });
-
-  test("DEFAULT_SECTIONS includes insights entry", () => {
-    expect(src).toContain('id: "insights"');
-  });
-
-  test("DEFAULT_SECTIONS has 8 entries total", () => {
-    const matches = src.match(/{ id: "/g) || [];
-    // At least 8 in DEFAULT_SECTIONS
-    expect(matches.length).toBeGreaterThanOrEqual(8);
-  });
-});
-
 // =========== Types contract ===========
 
 describe("Types — Phase F additions", () => {

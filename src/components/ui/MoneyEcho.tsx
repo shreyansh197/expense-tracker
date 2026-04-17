@@ -18,6 +18,8 @@ interface MoneyEchoProps {
   trigger: number;
   /** Origin point (center of burst) — viewport coords */
   origin?: { x: number; y: number };
+  /** Category color hex — particles will use this instead of default moss */
+  color?: string;
   /** Number of particles */
   count?: number;
   className?: string;
@@ -30,6 +32,7 @@ interface MoneyEchoProps {
 export function MoneyEcho({
   trigger,
   origin,
+  color,
   count = 10,
   className,
 }: MoneyEchoProps) {
@@ -89,7 +92,7 @@ export function MoneyEcho({
                 width: 60,
                 height: 60,
                 borderRadius: "50%",
-                border: "2px solid var(--es-moss, #3D5A3E)",
+                border: `2px solid ${color || "var(--es-moss, #3D5A3E)"}`,
               }}
             />
           )}
@@ -115,7 +118,7 @@ export function MoneyEcho({
               width: 80,
               height: 80,
               borderRadius: "50%",
-              border: "2px solid var(--es-moss, #3D5A3E)",
+              border: `2px solid ${color || "var(--es-moss, #3D5A3E)"}`,
             }}
           />
         )}
@@ -141,7 +144,7 @@ export function MoneyEcho({
               width: p.size,
               height: p.size,
               borderRadius: "50%",
-              background: "var(--es-moss, #3D5A3E)",
+              background: color || "var(--es-moss, #3D5A3E)",
             }}
           />
         );
