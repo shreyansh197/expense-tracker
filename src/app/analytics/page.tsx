@@ -14,13 +14,13 @@ import { useHistoricalData } from "@/hooks/useHistoricalData";
 import { useSettings } from "@/hooks/useSettings";
 import { buildCategoryMap } from "@/lib/categories";
 import { useCurrency } from "@/hooks/useCurrency";
+import { getDaysInMonth } from "@/lib/utils";
 import {
   TrendingUp,
   TrendingDown,
   Minus,
   Repeat,
   Zap,
-  Calendar,
   BarChart3,
   DollarSign,
   Award,
@@ -46,8 +46,6 @@ function AnalyticsShell() {
     </AppShell>
   );
 }
-
-const DAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 function AnalyticsContent() {
   usePageTitle("The Overlook");
@@ -95,8 +93,6 @@ function AnalyticsContent() {
     effectiveBudget,
     1,
   );
-
-  const maxDayFactor = Math.max(...Object.values(history.dayOfWeekFactors), 1);
 
   const MoMIcon =
     history.monthOverMonthChange === null
@@ -278,7 +274,7 @@ function AnalyticsContent() {
           </m.div>
         </div>
 
-        {/* ─── 3. Strata — Day-of-Week + Biggest Expenses ─── */}
+        {/* ─── 3. Strata — Spending Velocity + Biggest Expenses ─── */}
         <div className="grid gap-4 md:grid-cols-2">
           <m.div
             className="card-terrain p-5"
@@ -287,40 +283,69 @@ function AnalyticsContent() {
             transition={{ delay: 0.25 }}
           >
             <div className="flex items-center gap-2 mb-4">
-              <Calendar size={16} style={{ color: "var(--es-moss)" }} />
+              <TrendingUp size={16} style={{ color: "var(--es-moss)" }} />
               <h3 className="text-sm font-semibold uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
-                Day-of-Week Pattern
+                Spending Velocity
               </h3>
             </div>
-            <div className="flex items-end gap-2 h-28">
-              {DAY_LABELS.map((label, i) => {
-                const factor = history.dayOfWeekFactors[i] ?? 0;
-                const pct = (factor / maxDayFactor) * 100;
-                return (
-                  <div key={label} className="flex-1 flex flex-col items-center gap-1">
-                    <div className="w-full relative" style={{ height: "80px" }}>
-                      <div
-                        className="absolute bottom-0 w-full rounded-t-md transition-all duration-500"
-                        style={{
-                          height: `${Math.max(pct, 4)}%`,
-                          background: factor >= 1.2 ? "var(--es-clay)" : factor >= 0.8 ? "var(--es-moss)" : "var(--es-sage)",
-                          opacity: factor >= 0.8 ? 0.85 : 0.35,
-                        }}
-                      />
-                    </div>
-                    <span className="text-xs font-medium" style={{ color: "var(--text-tertiary)" }}>
-                      {label}
-                    </span>
-                    <span className="text-xs font-numeric" style={{ color: "var(--text-muted)" }}>
-                      {factor.toFixed(1)}x
-                    </span>
+            {history.spendingByWeek.length === 0 ? (
+              <p className="text-xs" style={{ color: "var(--text-muted)" }}>Not enough data yet</p>
+            ) : (() => {
+              const weeks = history.spendingByWeek;
+              const maxWeekTotal = Math.max(...weeks.map((w) => w.total), 1);
+              const idealWeekly = effectiveBudget > 0 ? effectiveBudget / Math.ceil(getDaysInMonth(currentMonth, currentYear) / 7) : 0;
+              return (
+                <>
+                  <div className="flex items-end gap-3 h-28">
+                    {weeks.map((w, i) => {
+                      const pct = (w.total / maxWeekTotal) * 100;
+                      const overBudget = idealWeekly > 0 && w.total > idealWeekly;
+                      const prevTotal = i > 0 ? weeks[i - 1].total : null;
+                      const delta = prevTotal !== null && prevTotal > 0 ? ((w.total - prevTotal) / prevTotal) * 100 : null;
+                      return (
+                        <div key={w.week} className="flex-1 flex flex-col items-center gap-1">
+                          <div className="w-full relative" style={{ height: "80px" }}>
+                            <div
+                              className="absolute bottom-0 w-full rounded-t-md transition-all duration-500"
+                              style={{
+                                height: `${Math.max(pct, 4)}%`,
+                                background: overBudget ? "var(--es-clay)" : "var(--es-moss)",
+                                opacity: i === weeks.length - 1 ? 0.9 : 0.45,
+                              }}
+                            />
+                          </div>
+                          <span className="text-xs font-medium" style={{ color: "var(--text-tertiary)" }}>
+                            W{w.week}
+                          </span>
+                          <span className="text-[10px] font-numeric" style={{ color: "var(--text-muted)" }}>
+                            {formatCurrencyCompact(w.total)}
+                          </span>
+                          {delta !== null && (
+                            <span className="text-[9px] font-medium" style={{ color: delta > 10 ? "var(--es-clay)" : delta < -10 ? "var(--success)" : "var(--text-muted)" }}>
+                              {delta > 0 ? "+" : ""}{Math.round(delta)}%
+                            </span>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
-                );
-              })}
-            </div>
-            <p className="text-xs mt-3" style={{ color: "var(--text-muted)" }}>
-              1.0x = average · higher = you spend more on that day
-            </p>
+                  {idealWeekly > 0 && (
+                    <p className="text-xs mt-3" style={{ color: "var(--text-muted)" }}>
+                      Budget pace: {formatCurrencyCompact(idealWeekly)}/week
+                    </p>
+                  )}
+                  {idealWeekly === 0 && weeks.length >= 2 && (
+                    <p className="text-xs mt-3" style={{ color: "var(--text-muted)" }}>
+                      {weeks[weeks.length - 1].total > weeks[weeks.length - 2].total
+                        ? "Pace is rising — spending picked up this week"
+                        : weeks[weeks.length - 1].total < weeks[weeks.length - 2].total * 0.7
+                          ? "Pace slowed — lighter week"
+                          : "Steady pace across weeks"}
+                    </p>
+                  )}
+                </>
+              );
+            })()}
           </m.div>
 
           <m.div

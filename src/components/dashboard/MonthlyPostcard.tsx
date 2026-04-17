@@ -293,11 +293,12 @@ export function MonthlyPostcard() {
     <>
       <button
         onClick={handleOpen}
-        className="flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-semibold transition-colors"
+        className="flex items-center justify-center rounded-xl h-9 w-9 sm:w-auto sm:px-3 sm:gap-2 text-xs font-semibold transition-colors"
         style={{ background: "var(--surface-secondary)", color: "var(--text-secondary)" }}
+        aria-label="Share month summary"
       >
-        <Share2 size={14} />
-        Share month
+        <Share2 size={14} className="shrink-0" />
+        <span className="hidden sm:inline">Share</span>
       </button>
 
       <AnimatePresence>
