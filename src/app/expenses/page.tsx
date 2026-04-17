@@ -133,7 +133,7 @@ function ExpensesContent() {
               <ExpenseExport expenses={expenses} month={currentMonth} year={currentYear} />
               <SyncIndicator />
               <button
-                onClick={openAddForm}
+                onClick={() => openAddForm()}
                 className="hidden items-center gap-2 rounded-full px-4 py-2 text-sm font-medium text-white shadow-sm transition-all active:scale-[0.97] lg:flex"
                 style={{ background: "var(--es-moss, #3D5A3E)" }}
               >
