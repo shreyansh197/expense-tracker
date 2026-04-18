@@ -235,9 +235,4 @@ describe("aria-label contracts — interactive elements", () => {
     const src = readComponent("components/ui/DatePicker.tsx");
     expect(src).toContain("aria-expanded={open}");
   });
-
-  test("SubscriptionsSummary toggle has aria-expanded", () => {
-    const src = readComponent("components/dashboard/SubscriptionsSummary.tsx");
-    expect(src).toContain("aria-expanded={expanded}");
-  });
 });

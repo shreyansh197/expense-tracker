@@ -17,6 +17,14 @@ export interface Expense {
 
 export type ExpenseInput = Omit<Expense, "id" | "createdAt" | "updatedAt" | "deletedAt" | "deviceId">;
 
+export interface NotificationPrefs {
+  enabled: boolean;
+  eveningReminder: boolean;
+  eveningReminderTime: string; // "HH:MM"
+  weeklyDigest: boolean;
+  budgetAlerts: boolean;
+}
+
 export interface UserSettings {
   salary: number;
   currency: string;
@@ -39,6 +47,7 @@ export interface UserSettings {
   autoRules?: AutoRule[];
   achievements?: Achievement[];
   accentColor?: string;
+  notificationPrefs?: NotificationPrefs;
   createdAt: number;
   updatedAt: number;
 }

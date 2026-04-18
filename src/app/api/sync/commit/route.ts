@@ -148,6 +148,7 @@ export async function POST(req: NextRequest) {
             autoRules: data.autoRules ?? [],
             achievements: data.achievements ?? [],
             accentColor: (data.accentColor as string) ?? undefined,
+            notificationPrefs: data.notificationPrefs ?? undefined,
             version: 1,
           },
           update: {
@@ -172,6 +173,7 @@ export async function POST(req: NextRequest) {
             ...(data.autoRules !== undefined && { autoRules: data.autoRules as Json }),
             ...(data.achievements !== undefined && { achievements: data.achievements as Json }),
             ...(data.accentColor !== undefined && { accentColor: data.accentColor as string }),
+            ...(data.notificationPrefs !== undefined && { notificationPrefs: data.notificationPrefs as Json }),
             version: { increment: 1 },
           } as Prisma.WorkspaceSettingsUpdateInput,
         });

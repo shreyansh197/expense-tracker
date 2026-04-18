@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useCallback, useMemo } from "react";
+import { useRef, useState, useCallback, useMemo, useEffect } from "react";
 import { m, AnimatePresence } from "framer-motion";
 import { Share2, Download, X, Check } from "lucide-react";
 import { useCalculationsContext } from "@/contexts/CalculationsContext";
@@ -250,6 +250,13 @@ export function MonthlyPostcard() {
       requestAnimationFrame(drawPostcard);
     });
   }, [drawPostcard]);
+
+  // Listen for external trigger (e.g., from PostcardPrompt)
+  useEffect(() => {
+    const listener = () => handleOpen();
+    window.addEventListener("expenstream:open-postcard", listener);
+    return () => window.removeEventListener("expenstream:open-postcard", listener);
+  }, [handleOpen]);
 
   const handleDownload = useCallback(() => {
     const canvas = canvasRef.current;

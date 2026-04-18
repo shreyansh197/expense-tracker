@@ -149,3 +149,52 @@ self.addEventListener("fetch", (event) => {
       .catch(() => caches.match(request)),
   );
 });
+
+// ─── Web Push Notifications ────────────────────────────────────────────────
+// Push events are sent by the server via the Web Push protocol (VAPID).
+// The SW wakes up to show the notification even if the app is closed.
+
+self.addEventListener("push", (event) => {
+  if (!event.data) return;
+
+  let payload;
+  try {
+    payload = event.data.json();
+  } catch {
+    payload = {
+      title: "ExpenStream",
+      body: event.data.text() || "You have a new notification",
+      icon: "/icons/icon-192.png",
+      data: { url: "/" },
+    };
+  }
+
+  const { title, body, icon, tag, data } = payload;
+
+  event.waitUntil(
+    self.registration.showNotification(title || "ExpenStream", {
+      body: body || "",
+      icon: icon || "/icons/icon-192.png",
+      tag: tag || "expenstream-push",
+      data: data || { url: "/" },
+    }),
+  );
+});
+
+// Handle notification clicks — open/focus the app
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const url = event.notification.data?.url || "/";
+  event.waitUntil(
+    self.clients
+      .matchAll({ type: "window", includeUncontrolled: true })
+      .then((clients) => {
+        for (const client of clients) {
+          if (client.url.includes(self.location.origin) && "focus" in client) {
+            return client.focus();
+          }
+        }
+        return self.clients.openWindow(url);
+      }),
+  );
+});

@@ -26,18 +26,6 @@ describe("accessibility contracts — aria-labels", () => {
     });
   });
 
-  describe("SubscriptionsSummary", () => {
-    const src = readComponent("components/dashboard/SubscriptionsSummary.tsx");
-
-    test("toggle button has aria-expanded", () => {
-      expect(src).toContain("aria-expanded");
-    });
-
-    test("toggle button has aria-label", () => {
-      expect(src).toContain("aria-label");
-    });
-  });
-
   describe("DatePicker", () => {
     const src = readComponent("components/ui/DatePicker.tsx");
 

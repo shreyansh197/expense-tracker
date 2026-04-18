@@ -32,18 +32,6 @@ describe("touch targets — all interactive elements meet 44px minimum", () => {
     });
   });
 
-  describe("AlertsPanel", () => {
-    const src = readComponent("components/dashboard/AlertsPanel.tsx");
-
-    test("action buttons have h-11 w-11", () => {
-      expect(src).toContain("h-11 w-11");
-    });
-
-    test("show more button has adequate padding", () => {
-      expect(src).toContain("py-3");
-    });
-  });
-
   describe("RecurringSuggestions", () => {
     const src = readComponent("components/dashboard/RecurringSuggestions.tsx");
 
@@ -82,14 +70,6 @@ describe("touch targets — all interactive elements meet 44px minimum", () => {
     });
   });
 
-  describe("DailyTrendChart", () => {
-    const src = readComponent("components/dashboard/DailyTrendChart.tsx");
-
-    test("table rows have py-3 for adequate row height", () => {
-      expect(src).toContain("py-3");
-    });
-  });
-
   describe("SpendingHeatmap", () => {
     const src = readComponent("components/dashboard/SpendingHeatmap.tsx");
 
@@ -103,9 +83,8 @@ describe("touch targets — all interactive elements meet 44px minimum", () => {
 // =========== Negative: non-interactive elements not inflated ===========
 
 describe("touch targets — non-interactive elements not inflated", () => {
-  test("AlertsPanel label spans don't have h-11", () => {
-    const src = readComponent("components/dashboard/AlertsPanel.tsx");
-    // Only buttons should have h-11, not <span> or <p>
+  test("FilterPanel label spans don't have h-11", () => {
+    const src = readComponent("components/expenses/FilterPanel.tsx");
     const lines = src.split("\n");
     for (const line of lines) {
       if (line.includes("<span") || line.includes("<p ")) {

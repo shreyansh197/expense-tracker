@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect, Suspense, useMemo } from "react";
@@ -8,16 +8,18 @@ import { AppShell } from "@/components/layout/AppShell";
 import { MonthSwitcher } from "@/components/layout/MonthSwitcher";
 import { SyncIndicator } from "@/components/sync/SyncIndicator";
 import { RecurringSuggestions } from "@/components/dashboard/RecurringSuggestions";
+import { UpcomingStream } from "@/components/dashboard/UpcomingStream";
+import { MonthStartAnchor } from "@/components/dashboard/MonthStartAnchor";
 import { RevealOnScroll } from "@/components/motion/RevealOnScroll";
 import { stoneSettle } from "@/lib/motion/variants";
 import { SkeletonKpiCards, SkeletonChart } from "@/components/ui/Skeleton";
 import { PageTransition } from "@/components/ui/PageTransition";
 import { SpendingStream } from "@/components/dashboard/SpendingStream";
-import { SpendingPulse } from "@/components/dashboard/SpendingPulse";
 import { SpendingHeatmap } from "@/components/dashboard/SpendingHeatmap";
 import { SavingsGoalsWidget } from "@/components/dashboard/SavingsGoalsWidget";
 import { NarrativeInsight } from "@/components/dashboard/NarrativeInsight";
 import { MonthlyPostcard } from "@/components/dashboard/MonthlyPostcard";
+import { PostcardPrompt } from "@/components/dashboard/PostcardPrompt";
 import { ClearingScene } from "@/components/ui/illustrations/terrain/ClearingScene";
 import { Repeat, PlusCircle, ChevronDown, Flame, TrendingUp, AlertTriangle, Leaf, Coffee, Sunrise } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -39,6 +41,7 @@ import type { Expense } from "@/types";
 import { useCalculationsContext } from "@/contexts/CalculationsContext";
 import { useAchievements } from "@/hooks/useAchievements";
 import { useHistoricalData } from "@/hooks/useHistoricalData";
+import { useNotifications } from "@/hooks/useNotifications";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import { useMonthUrlSync } from "@/hooks/useMonthUrlSync";
 import { usePageTitle } from "@/hooks/usePageTitle";
@@ -99,6 +102,7 @@ function DashboardContent() {
 
   useMonthUrlSync();
   useRecurringExpenses(currentMonth, currentYear);
+  useNotifications(currentMonth, currentYear);
 
   const {
     monthlyTotal,
@@ -312,12 +316,6 @@ function DashboardContent() {
     return todayDt?.total ?? 0;
   }, [dailyTotals]);
 
-  // Today's transaction count — for SpendingPulse
-  const todayCount = useMemo(() => {
-    const today = new Date().getDate();
-    return expenses.filter((e) => !e.deletedAt && e.day === today).length;
-  }, [expenses]);
-
   // Yesterday's last expense — for quick repeat
   const yesterdayExpense = useMemo(() => {
     const yesterday = new Date().getDate() - 1;
@@ -472,6 +470,15 @@ function DashboardContent() {
         </AnimatePresence>
       </ErrorBoundary>
 
+      {/* 2b. MONTH START ANCHOR — new month context card */}
+      {!loading && (
+        <MonthStartAnchor
+          prevMonthExpenses={prevMonthExpenses}
+          prevMonthBudget={effectiveBudget}
+          currentBudget={effectiveBudget}
+        />
+      )}
+
       {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
           3. STONE MARKERS â€” 2Ã—2 bento grid
           â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
@@ -554,6 +561,9 @@ function DashboardContent() {
         </m.div>
       )}
 
+
+      {/* 3b. UPCOMING STREAM — forward recurring calendar */}
+      {!loading && <UpcomingStream />}
       {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
           4. NARRATIVE RIVER â€” prose insight cards
           â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
@@ -575,21 +585,7 @@ function DashboardContent() {
       {!loading && <RecurringSuggestions />}
 
       {/* ═══════════════════════════════════════════════════
-          4b. SPENDING PULSE — daily rhythm heartbeat
-          ═══════════════════════════════════════════════════ */}
-      {!loading && expenses.length > 0 && (
-        <RevealOnScroll>
-          <SpendingPulse
-            dailyValues={dailyValues}
-            todayTotal={todayTotal}
-            avgDaily={avgDaily}
-            todayCount={todayCount}
-          />
-        </RevealOnScroll>
-      )}
-
-      {/* ═══════════════════════════════════════════════════
-          4b2. SPENDING HEATMAP — month calendar grid
+          4b. SPENDING HEATMAP — month calendar grid with pulse mood
           ═══════════════════════════════════════════════════ */}
       {!loading && expenses.length > 0 && (
         <RevealOnScroll>
@@ -597,6 +593,8 @@ function DashboardContent() {
             expenses={expenses}
             month={currentMonth}
             year={currentYear}
+            todayTotal={todayTotal}
+            avgDaily={avgDaily}
           />
         </RevealOnScroll>
       )}
@@ -608,6 +606,11 @@ function DashboardContent() {
         <RevealOnScroll>
           <SavingsGoalsWidget />
         </RevealOnScroll>
+      )}
+
+      {/* 4d. POSTCARD PROMPT — end-of-month sharing nudge */}
+      {!loading && expenses.length > 0 && (
+        <PostcardPrompt month={currentMonth} year={currentYear} hasExpenses={expenses.length > 0} />
       )}
 
       {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•

@@ -10,7 +10,7 @@ import {
   Wallet, LinkIcon, Tag, Repeat, TrendingUp, Target, Palette,
   Download, Zap, Sun, Moon, Monitor, Smartphone, Briefcase,
   Shield, Users, Database, Globe, RefreshCw, ChevronLeft, ChevronRight,
-  Search,
+  Search, Bell,
 } from "lucide-react";
 import { InstallButton } from "@/components/pwa/InstallButton";
 import { AccentColorPicker, applyAccentColor } from "@/components/settings/AccentColorPicker";
@@ -28,6 +28,8 @@ const ExportImportWizard = lazy(() => import("@/components/settings/ExportImport
 const AutoRulesManager = lazy(() => import("@/components/settings/AutoRulesManager").then(m => ({ default: m.AutoRulesManager })));
 const DataAccountManagement = lazy(() => import("@/components/settings/DataAccountManagement").then(m => ({ default: m.DataAccountManagement })));
 import { SettingsFooterLogout } from "@/components/settings/SettingsFooterLogout";
+import { NotificationSettings } from "@/components/settings/NotificationSettings";
+import { subscribeToPush, unsubscribeFromPush } from "@/lib/pushSubscription";
 import { usePinLock } from "@/hooks/usePinLock";
 import { PageTransition } from "@/components/ui/PageTransition";
 import { fetchRates, getRateInfo, clearRateCache } from "@/lib/exchangeRates";
@@ -373,6 +375,7 @@ export default function SettingsPage() {
     { id: "data-management", zone: "zone-automation", keywords: "data delete remove workspace reset clear" },
     { id: "app-mode", zone: "zone-preferences", keywords: "mode personal business switch" },
     { id: "multi-currency", zone: "zone-preferences", keywords: "currency multi exchange rate convert" },
+    { id: "notifications", zone: "zone-preferences", keywords: "notifications reminder push alert budget evening weekly digest" },
     { id: "theme", zone: "zone-preferences", keywords: "theme appearance dark light system color" },
   ], []);
 
@@ -882,6 +885,48 @@ export default function SettingsPage() {
               )}
               {settings.multiCurrencyEnabled && <RateSourceInfo baseCurrency={settings.currency} />}
             </div>
+          </AccordionSection>
+
+          {/* ─── Notifications ─── */}
+          <AccordionSection
+            id="notifications"
+            icon={<Bell size={18} />}
+            title="Notifications"
+            description={settings.notificationPrefs?.enabled ? "Reminders active" : "Off"}
+            iconColor="bg-[var(--warning-soft)] text-[var(--warning-text)]"
+            className={!isSectionVisible('notifications') ? 'hidden' : ''}
+            headerRight={
+              <button
+                role="switch"
+                aria-checked={settings.notificationPrefs?.enabled ?? false}
+                onClick={async () => {
+                  const enabled = !settings.notificationPrefs?.enabled;
+                  if (enabled) {
+                    if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
+                      const result = await Notification.requestPermission();
+                      if (result !== 'granted') return;
+                    }
+                    const ok = await subscribeToPush();
+                    if (!ok) return;
+                  } else {
+                    await unsubscribeFromPush();
+                  }
+                  const base = { enabled: false, eveningReminder: true, eveningReminderTime: "21:00", weeklyDigest: false, budgetAlerts: true, ...settings.notificationPrefs };
+                  updateSettings({ notificationPrefs: { ...base, enabled } });
+                }}
+                className={`relative h-6 w-11 rounded-full transition-colors ${
+                  settings.notificationPrefs?.enabled ? "bg-brand" : "bg-[var(--border-strong)]"
+                }`}
+              >
+                <span
+                  className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-transform ${
+                    settings.notificationPrefs?.enabled ? "translate-x-5" : ""
+                  }`}
+                />
+              </button>
+            }
+          >
+            <NotificationSettings />
           </AccordionSection>
 
           {/* ─── Appearance ─── */}

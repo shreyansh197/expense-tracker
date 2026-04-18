@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { Activity, Zap } from "lucide-react";
 import { useCurrency } from "@/hooks/useCurrency";
 import type { Expense } from "@/types";
 
@@ -9,14 +10,37 @@ interface SpendingHeatmapProps {
   month: number;
   year: number;
   onDayClick?: (day: number) => void;
+  /** Today's total spending — used for pulse rate mood */
+  todayTotal?: number;
+  /** Average daily spending — used for pulse rate mood */
+  avgDaily?: number;
 }
 
 /**
  * GitHub-style heatmap grid showing daily spending intensity for the current month.
  * Each cell represents one day, colored by spending intensity relative to the month's average.
  */
-export function SpendingHeatmap({ expenses, month, year, onDayClick }: SpendingHeatmapProps) {
+export function SpendingHeatmap({ expenses, month, year, onDayClick, todayTotal = 0, avgDaily = 0 }: SpendingHeatmapProps) {
   const { formatCurrency } = useCurrency();
+
+  // Pulse rate — spending intensity metaphor (migrated from SpendingPulse)
+  const pulseRate = useMemo(() => {
+    if (avgDaily <= 0) return { label: "Calm", intensity: 0 };
+    const ratio = todayTotal / avgDaily;
+    if (ratio === 0) return { label: "Resting", intensity: 0 };
+    if (ratio < 0.5) return { label: "Calm", intensity: 1 };
+    if (ratio < 1) return { label: "Steady", intensity: 2 };
+    if (ratio < 1.5) return { label: "Active", intensity: 3 };
+    return { label: "Surging", intensity: 4 };
+  }, [todayTotal, avgDaily]);
+
+  const intensityColor = [
+    "var(--es-mist)",     // 0 - resting
+    "var(--es-sage)",     // 1 - calm
+    "var(--es-moss)",     // 2 - steady
+    "var(--es-clay)",     // 3 - active
+    "var(--accent)",      // 4 - surging
+  ][pulseRate.intensity];
 
   const { grid, maxSpend, daysInMonth } = useMemo(() => {
     const d = new Date(year, month, 0).getDate(); // days in month
@@ -51,7 +75,19 @@ export function SpendingHeatmap({ expenses, month, year, onDayClick }: SpendingH
   return (
     <div className="card p-4 sm:p-5">
       <div className="mb-3 flex items-center justify-between">
-        <h3 className="text-card-title">Spending Heatmap</h3>
+        <div className="flex items-center gap-2">
+          <Activity size={15} style={{ color: intensityColor, opacity: 0.7 }} />
+          <h3 className="text-card-title">Spending Heatmap</h3>
+          {todayTotal > 0 && (
+            <span
+              className="flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold"
+              style={{ background: `color-mix(in srgb, ${intensityColor} 15%, transparent)`, color: intensityColor }}
+            >
+              <Zap size={9} />
+              {pulseRate.label}
+            </span>
+          )}
+        </div>
         <div className="flex items-center gap-1.5">
           <span className="text-caption">Less</span>
           {[0, 0.2, 0.45, 0.7, 0.9].map((v, i) => (

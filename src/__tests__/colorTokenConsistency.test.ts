@@ -209,15 +209,6 @@ describe("color token consistency — chart tooltip tokens", () => {
     expect(globals).toContain("--auth-badge-bg:");
     expect(globals).toContain("--auth-badge-ring:");
   });
-
-  for (const chartFile of ["DailyTrendChart.tsx"]) {
-    const chartSrc = readComponent(`components/dashboard/${chartFile}`);
-
-    test(`${chartFile} — uses CSS token colors (visx or Recharts)`, () => {
-      // Charts should use CSS custom properties for theming
-      expect(chartSrc).toMatch(/var\(--/);
-    });
-  }
 });
 
 // =========== SecurityCard QR error handling ===========

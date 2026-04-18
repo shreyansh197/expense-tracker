@@ -48,6 +48,7 @@ export async function pushToApi(s: UserSettings) {
     autoRules: s.autoRules ?? [],
     achievements: s.achievements ?? [],
     accentColor: s.accentColor,
+    notificationPrefs: s.notificationPrefs,
   };
 
   await db.settings.put({
@@ -97,6 +98,7 @@ export async function loadSettingsFromIDB(): Promise<UserSettings | null> {
       autoRules: s.autoRules ?? [],
       achievements: s.achievements ?? [],
       accentColor: s.accentColor,
+      notificationPrefs: s.notificationPrefs,
       createdAt: Date.now(),
       updatedAt: s.updatedAt,
     };
@@ -150,6 +152,7 @@ export async function _fetchSettingsFromApi(): Promise<UserSettings | null> {
       autoRules: s.autoRules ?? [],
       achievements: s.achievements ?? [],
       accentColor: s.accentColor ?? undefined,
+      notificationPrefs: s.notificationPrefs,
       createdAt: Date.now(),
       updatedAt: new Date(s.updatedAt).getTime(),
     };
@@ -177,6 +180,7 @@ export async function _fetchSettingsFromApi(): Promise<UserSettings | null> {
       autoRules: settings.autoRules ?? [],
       achievements: settings.achievements ?? [],
       accentColor: settings.accentColor,
+      notificationPrefs: settings.notificationPrefs,
       updatedAt: settings.updatedAt,
     });
 

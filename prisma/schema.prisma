@@ -269,6 +269,7 @@ model WorkspaceSettings {
   autoRules           Json     @default("[]") @map("auto_rules") @db.JsonB
   achievements        Json     @default("[]") @db.JsonB
   accentColor         String?  @map("accent_color") @db.VarChar(20)
+  notificationPrefs   Json?    @map("notification_prefs") @db.JsonB
   version             Int      @default(1)
   updatedAt           DateTime @updatedAt @map("updated_at") @db.Timestamptz
 
@@ -324,6 +325,22 @@ model BusinessPayment {
   @@index([workspaceId, ledgerId])
   @@index([workspaceId, updatedAt])
   @@map("business_payments")
+}
+
+// ═══════════════════════════  PUSH SUBSCRIPTIONS  ═════════════
+
+model PushSubscription {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId      String   @map("user_id") @db.Uuid
+  workspaceId String   @map("workspace_id") @db.Uuid
+  endpoint    String   @unique @db.Text
+  p256dh      String   @db.Text
+  auth        String   @db.VarChar(64)
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  @@index([userId])
+  @@index([workspaceId])
+  @@map("push_subscriptions")
 }
 
 // ═══════════════════════════  SYNC CURSORS (per device)  ══════

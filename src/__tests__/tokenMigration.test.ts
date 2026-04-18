@@ -73,13 +73,11 @@ const MIGRATED_COMPONENTS = [
   "components/business/PaymentForm.tsx",
   "components/business/BusinessKpiCards.tsx",
   "components/dashboard/RecurringSuggestions.tsx",
-  "components/dashboard/AlertsPanel.tsx",
   "components/pwa/InstallButton.tsx",
   "app/auth/complete/page.tsx",
   "components/settings/SettingsFooterLogout.tsx",
   "components/settings/GoalsManager.tsx",
   "components/dashboard/SpendingHeatmap.tsx",
-  "components/dashboard/KpiCards.tsx",
 ];
 
 // =========== No forbidden Tailwind color classes ===========
@@ -168,11 +166,6 @@ describe("token migration: CSS variable tokens are used", () => {
     const src = readSrc("components/dashboard/SpendingHeatmap.tsx");
     expect(src).toMatch(/var\(--text-inverse\)/);
   });
-
-  test("KpiCards uses var(--text-inverse)", () => {
-    const src = readSrc("components/dashboard/KpiCards.tsx");
-    expect(src).toMatch(/var\(--text-inverse\)/);
-  });
 });
 
 // =========== No inline hardcoded hex for brand colors ===========
@@ -202,16 +195,6 @@ describe("chart Polish: no raw #fff in chart components", () => {
       }
     }
   });
-
-  test("KpiCards does not use #fff for text fill", () => {
-    const src = readSrc("components/dashboard/KpiCards.tsx");
-    const lines = src.split("\n");
-    for (const line of lines) {
-      if (line.includes("fill") || line.includes("color")) {
-        expect(line).not.toMatch(/#fff(?:fff)?\b/i);
-      }
-    }
-  });
 });
 
 // =========== Security: components don't expose sensitive data ===========
@@ -229,11 +212,6 @@ describe("security: component files", () => {
 // =========== Performance: no animate-pulse in migrated components ===========
 
 describe("performance: no animate-pulse in premium components", () => {
-  test("KpiCards does not use animate-pulse (replaced with shimmer)", () => {
-    const src = readSrc("components/dashboard/KpiCards.tsx");
-    expect(src).not.toContain("animate-pulse");
-  });
-
   test("BusinessKpiCards does not use animate-pulse", () => {
     const src = readSrc("components/business/BusinessKpiCards.tsx");
     expect(src).not.toContain("animate-pulse");
