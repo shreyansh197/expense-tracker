@@ -72,12 +72,6 @@ export async function POST(req: NextRequest) {
   }
 
   // Filter to those whose reminderTime matches the current minute in the user's timezone
-  const debugRows = workspaceRows.map((row) => {
-    const time = (row.notification_prefs?.eveningReminderTime as string) || "21:00";
-    const tz = (row.notification_prefs?.timezone as string) || undefined;
-    const localNow = currentTimeIn(tz);
-    return { ws: row.workspace_id.slice(0, 8), time, tz: tz || "none", localNow, match: time === localNow };
-  });
   const matchingWorkspaceIds = workspaceRows
     .filter((row) => {
       const time = (row.notification_prefs?.eveningReminderTime as string) || "21:00";
@@ -88,7 +82,7 @@ export async function POST(req: NextRequest) {
     .map((row) => row.workspace_id);
 
   if (matchingWorkspaceIds.length === 0) {
-    return NextResponse.json({ sent: 0, time: utcTime, debug: { enabledWorkspaces: workspaceRows.length, rows: debugRows } });
+    return NextResponse.json({ sent: 0, time: utcTime });
   }
 
   // Get all push subscriptions for those workspaces
