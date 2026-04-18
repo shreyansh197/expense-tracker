@@ -256,6 +256,7 @@ export async function pullChanges(workspaceId?: string): Promise<boolean> {
               autoRules: s.autoRules ?? [],
               achievements: s.achievements ?? [],
               accentColor: s.accentColor ?? undefined,
+              notificationPrefs: s.notificationPrefs ?? undefined,
               updatedAt: new Date(s.updatedAt as string).getTime(),
             };
             // Only write if settings actually changed (avoids unnecessary
@@ -276,7 +277,8 @@ export async function pullChanges(workspaceId?: string): Promise<boolean> {
               || existingSettings.accentColor !== incoming.accentColor
               || existingSettings.rolloverEnabled !== incoming.rolloverEnabled
               || existingSettings.businessMode !== incoming.businessMode
-              || existingSettings.multiCurrencyEnabled !== incoming.multiCurrencyEnabled;
+              || existingSettings.multiCurrencyEnabled !== incoming.multiCurrencyEnabled
+              || JSON.stringify(existingSettings.notificationPrefs) !== JSON.stringify(incoming.notificationPrefs);
             if (hasPendingSettingsMutation) {
               // Local settings mutations are queued but not yet pushed — do not
               // overwrite IDB with potentially stale server data before the push.
