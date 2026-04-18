@@ -18,6 +18,8 @@ const PUBLIC_PATHS = new Set([
   "/api/auth/google/exchange",
   "/api/invites/preview",   // GET — public preview of invite
   "/api/migrate/sync-code", // POST – legacy migration
+  "/api/push/vapid-key",    // GET — public VAPID key for push subscribe
+  "/api/push/send",         // POST — cron-triggered, secured by CRON_SECRET
 ]);
 
 // Path prefixes that don't require auth
