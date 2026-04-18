@@ -20,7 +20,8 @@ export type ExpenseInput = Omit<Expense, "id" | "createdAt" | "updatedAt" | "del
 export interface NotificationPrefs {
   enabled: boolean;
   eveningReminder: boolean;
-  eveningReminderTime: string; // "HH:MM"
+  eveningReminderTime: string; // "HH:MM" in user's local time
+  timezone?: string; // IANA timezone, e.g. "Asia/Kolkata"
   weeklyDigest: boolean;
   budgetAlerts: boolean;
 }

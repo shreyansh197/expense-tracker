@@ -33,10 +33,25 @@ export async function POST(req: NextRequest) {
   );
 
   const now = new Date();
-  const currentHH = String(now.getHours()).padStart(2, "0");
-  const currentMM = String(now.getMinutes()).padStart(2, "0");
-  const currentTime = `${currentHH}:${currentMM}`;
   const todayStr = now.toISOString().slice(0, 10); // YYYY-MM-DD
+
+  /** Get current HH:MM in a specific IANA timezone (falls back to UTC) */
+  function currentTimeIn(tz?: string): string {
+    try {
+      const parts = new Intl.DateTimeFormat("en-GB", {
+        hour: "2-digit", minute: "2-digit", hour12: false,
+        timeZone: tz || "UTC",
+      }).formatToParts(now);
+      const h = parts.find(p => p.type === "hour")!.value;
+      const m = parts.find(p => p.type === "minute")!.value;
+      return `${h}:${m}`;
+    } catch {
+      // Invalid timezone — fall back to UTC
+      return `${String(now.getUTCHours()).padStart(2, "0")}:${String(now.getUTCMinutes()).padStart(2, "0")}`;
+    }
+  }
+
+  const utcTime = `${String(now.getUTCHours()).padStart(2, "0")}:${String(now.getUTCMinutes()).padStart(2, "0")}`;
 
   // Find all workspace settings where notifications are enabled
   // and the evening reminder time matches the current minute
@@ -56,16 +71,18 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "DB query failed" }, { status: 500 });
   }
 
-  // Filter to those whose reminderTime matches current minute
+  // Filter to those whose reminderTime matches the current minute in the user's timezone
   const matchingWorkspaceIds = workspaceRows
     .filter((row) => {
       const time = (row.notification_prefs?.eveningReminderTime as string) || "21:00";
-      return time === currentTime;
+      const tz = (row.notification_prefs?.timezone as string) || undefined;
+      const localNow = currentTimeIn(tz);
+      return time === localNow;
     })
     .map((row) => row.workspace_id);
 
   if (matchingWorkspaceIds.length === 0) {
-    return NextResponse.json({ sent: 0, time: currentTime });
+    return NextResponse.json({ sent: 0, time: utcTime });
   }
 
   // Get all push subscriptions for those workspaces
@@ -74,7 +91,7 @@ export async function POST(req: NextRequest) {
   });
 
   if (subscriptions.length === 0) {
-    return NextResponse.json({ sent: 0, time: currentTime, workspaces: matchingWorkspaceIds.length });
+    return NextResponse.json({ sent: 0, time: utcTime, workspaces: matchingWorkspaceIds.length });
   }
 
   const payload = JSON.stringify({
@@ -121,12 +138,12 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  console.log(`[push/send] time=${currentTime} sent=${sent} failed=${failed} stale=${staleEndpoints.length}`);
+  console.log(`[push/send] utc=${utcTime} sent=${sent} failed=${failed} stale=${staleEndpoints.length}`);
 
   return NextResponse.json({
     sent,
     failed,
     staleRemoved: staleEndpoints.length,
-    time: currentTime,
+    time: utcTime,
   });
 }

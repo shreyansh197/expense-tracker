@@ -912,7 +912,7 @@ export default function SettingsPage() {
                     await unsubscribeFromPush();
                   }
                   const base = { enabled: false, eveningReminder: true, eveningReminderTime: "21:00", weeklyDigest: false, budgetAlerts: true, ...settings.notificationPrefs };
-                  updateSettings({ notificationPrefs: { ...base, enabled } });
+                  updateSettings({ notificationPrefs: { ...base, enabled, ...(enabled ? { timezone: Intl.DateTimeFormat().resolvedOptions().timeZone } : {}) } });
                 }}
                 className={`relative h-6 w-11 rounded-full transition-colors ${
                   settings.notificationPrefs?.enabled ? "bg-brand" : "bg-[var(--border-strong)]"

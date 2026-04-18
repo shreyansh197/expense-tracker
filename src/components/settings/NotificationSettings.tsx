@@ -60,7 +60,7 @@ export function NotificationSettings() {
         toast("Could not set up push notifications. Try again later.", "error");
         return;
       }
-      updatePrefs({ enabled: true });
+      updatePrefs({ enabled: true, timezone: Intl.DateTimeFormat().resolvedOptions().timeZone });
       toast("Notifications enabled", "success");
     } else {
       await unsubscribeFromPush();
