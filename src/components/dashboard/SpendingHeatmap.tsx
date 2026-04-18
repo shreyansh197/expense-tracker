@@ -77,27 +77,29 @@ export function SpendingHeatmap({ expenses, month, year, onDayClick, todayTotal 
       <div className="mb-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Activity size={15} style={{ color: intensityColor, opacity: 0.7 }} />
-          <h3 className="text-card-title">Spending Heatmap</h3>
+          <h3 className="text-card-title whitespace-nowrap">Spending Heatmap</h3>
+        </div>
+        <div className="flex items-center gap-2">
           {todayTotal > 0 && (
             <span
-              className="flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold"
+              className="flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold whitespace-nowrap"
               style={{ background: `color-mix(in srgb, ${intensityColor} 15%, transparent)`, color: intensityColor }}
             >
               <Zap size={9} />
               {pulseRate.label}
             </span>
           )}
-        </div>
-        <div className="flex items-center gap-1.5">
-          <span className="text-caption">Less</span>
-          {[0, 0.2, 0.45, 0.7, 0.9].map((v, i) => (
-            <div
-              key={i}
-              className="h-3 w-3 rounded-sm"
-              style={{ background: getColor(v, v > 0 ? 1 : 0) }}
-            />
-          ))}
-          <span className="text-caption">More</span>
+          <div className="flex items-center gap-1.5">
+            <span className="text-caption">Less</span>
+            {[0, 0.2, 0.45, 0.7, 0.9].map((v, i) => (
+              <div
+                key={i}
+                className="h-3 w-3 rounded-sm"
+                style={{ background: getColor(v, v > 0 ? 1 : 0) }}
+              />
+            ))}
+            <span className="text-caption">More</span>
+          </div>
         </div>
       </div>
 
