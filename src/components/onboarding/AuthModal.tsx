@@ -84,29 +84,42 @@ const FEATURES = [
   },
 ];
 
-/* ── Animated floating orbs — fixed palette, no CSS vars ─── */
+/* ── Animated floating orbs — terrain palette ─── */
 function FloatingOrbs() {
   return (
     <div style={{ position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none" }}>
+      {/* Slow-moving gradient mesh */}
+      <div style={{
+        position: "absolute", inset: "-50%",
+        background: `
+          radial-gradient(ellipse at 20% 50%, color-mix(in srgb, var(--auth-hero-cyan) 14%, transparent) 0%, transparent 50%),
+          radial-gradient(ellipse at 80% 20%, color-mix(in srgb, var(--auth-hero-violet) 12%, transparent) 0%, transparent 50%),
+          radial-gradient(ellipse at 50% 80%, color-mix(in srgb, var(--es-clay, #B5654A) 10%, transparent) 0%, transparent 50%)
+        `,
+        animation: "sp-mesh 20s ease-in-out infinite alternate",
+      }} />
+      {/* Orb 1 — top-left drift */}
       <div style={{
         position: "absolute", top: "-10%", left: "-8%",
         width: 420, height: 420, borderRadius: "50%",
-        background: `radial-gradient(circle, color-mix(in srgb, var(--auth-hero-cyan) 20%, transparent) 0%, transparent 70%)`,
-        animation: "sp-orb 8s ease-in-out infinite",
+        background: `radial-gradient(circle, color-mix(in srgb, var(--auth-hero-cyan) 22%, transparent) 0%, transparent 70%)`,
+        animation: "sp-orb-drift 12s ease-in-out infinite",
       }} />
+      {/* Orb 2 — mid-right drift */}
       <div style={{
-        position: "absolute", top: "35%", right: "-12%",
+        position: "absolute", top: "30%", right: "-12%",
         width: 360, height: 360, borderRadius: "50%",
-        background: `radial-gradient(circle, color-mix(in srgb, var(--auth-hero-violet) 18%, transparent) 0%, transparent 70%)`,
-        animation: "sp-orb 10s ease-in-out infinite",
+        background: `radial-gradient(circle, color-mix(in srgb, var(--auth-hero-violet) 20%, transparent) 0%, transparent 70%)`,
+        animation: "sp-orb-drift 15s ease-in-out infinite reverse",
         animationDelay: "2s",
       }} />
+      {/* Orb 3 — bottom drift */}
       <div style={{
         position: "absolute", bottom: "-12%", left: "20%",
         width: 400, height: 400, borderRadius: "50%",
-        background: `radial-gradient(circle, color-mix(in srgb, var(--primary) 16%, transparent) 0%, transparent 70%)`,
-        animation: "sp-orb 9s ease-in-out infinite",
-        animationDelay: "4s",
+        background: `radial-gradient(circle, color-mix(in srgb, var(--es-clay, #B5654A) 14%, transparent) 0%, transparent 70%)`,
+        animation: "sp-orb-drift 18s ease-in-out infinite",
+        animationDelay: "5s",
       }} />
     </div>
   );

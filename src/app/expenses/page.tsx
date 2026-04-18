@@ -127,9 +127,11 @@ function ExpensesContent() {
       <PageTransition className="relative mx-auto min-h-[80vh] max-w-4xl xl:max-w-6xl space-y-4 sm:space-y-5 p-4 sm:p-6 lg:p-8">
         {/* Stream Bed Header */}
         <div className="card-terrain p-4 sm:p-5 space-y-3">
-          <div className="flex items-center justify-between gap-4">
-            <MonthSwitcher />
-            <div className="flex items-center gap-3">
+          <div className="flex items-center justify-between gap-2 sm:gap-4">
+            <div className="min-w-0">
+              <MonthSwitcher />
+            </div>
+            <div className="flex items-center gap-2 sm:gap-3 shrink-0">
               <ExpenseExport expenses={expenses} month={currentMonth} year={currentYear} />
               <SyncIndicator />
               <button
