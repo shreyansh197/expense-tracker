@@ -37,15 +37,18 @@ interface AuthContextValue extends AuthState {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
+// Stable server snapshot for useSyncExternalStore (must be referentially stable)
+const SERVER_SNAPSHOT: AuthState = {
+  user: null,
+  tokens: null,
+  workspaces: [] as AuthWorkspace[],
+  activeWorkspaceId: null,
+};
+
 // ── Provider ─────────────────────────────────────────────────
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const state = useSyncExternalStore(subscribeAuth, getAuthState, () => ({
-    user: null,
-    tokens: null,
-    workspaces: [] as AuthWorkspace[],
-    activeWorkspaceId: null,
-  }));
+  const state = useSyncExternalStore(subscribeAuth, getAuthState, () => SERVER_SNAPSHOT);
 
   // Fetch workspace encryption key and store in sessionStorage
   const fetchEncryptionKey = useCallback(async () => {

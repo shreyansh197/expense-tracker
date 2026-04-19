@@ -9,6 +9,7 @@ const cspDirectives = [
   "font-src 'self'",
   "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.frankfurter.dev https://latest.currency-api.pages.dev https://cdn.jsdelivr.net https://*.ingest.sentry.io",
   "frame-ancestors 'none'",
+  "frame-src 'self'",
   "base-uri 'self'",
   "form-action 'self'",
   "object-src 'none'",

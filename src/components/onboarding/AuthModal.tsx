@@ -12,23 +12,14 @@ import {
   Loader2,
   ArrowLeft,
   AlertCircle,
-  TrendingUp,
-  PieChart,
   Shield,
   ShieldCheck,
-  Smartphone,
   Eye,
   EyeOff,
   ChevronRight,
   Sparkles,
 } from "lucide-react";
 import { useAuth } from "@/components/providers/AuthProvider";
-
-// ── Fixed palette for hero panels (never changes with theme) ──
-const SP_BG   = "var(--auth-hero-bg)";
-const SP_CYAN = "var(--auth-hero-cyan)";
-const SP_VIOLET = "var(--auth-hero-violet)";
-const SP_INDIGO = "var(--primary)";
 
 /* ── Google G color-mark SVG ──────────────────────────────── */
 function GoogleIcon({ className }: { className?: string }) {
@@ -48,76 +39,36 @@ interface AuthModalProps {
   inviteToken?: string;
 }
 
-/* ── Feature items for the hero panel ────────────────────── */
-const FEATURES = [
-  {
-    icon: PieChart,
-    title: "Visual Analytics",
-    desc: "Beautiful charts and category breakdowns at a glance",
-    border: "color-mix(in srgb, var(--auth-hero-violet) 30%, transparent)",
-    iconColor: SP_VIOLET,
-    iconBg: "color-mix(in srgb, var(--auth-hero-violet) 15%, transparent)",
-  },
-  {
-    icon: TrendingUp,
-    title: "Budget Tracking",
-    desc: "Auto-rollover budgets with real-time remaining alerts",
-    border: "color-mix(in srgb, var(--auth-hero-cyan) 30%, transparent)",
-    iconColor: SP_CYAN,
-    iconBg: "color-mix(in srgb, var(--auth-hero-cyan) 15%, transparent)",
-  },
-  {
-    icon: Shield,
-    title: "Secure by Default",
-    desc: "Two-factor auth, encrypted sessions & device management",
-    border: "color-mix(in srgb, var(--primary) 30%, transparent)",
-    iconColor: SP_INDIGO,
-    iconBg: "color-mix(in srgb, var(--primary) 15%, transparent)",
-  },
-  {
-    icon: Smartphone,
-    title: "Works Everywhere",
-    desc: "Full PWA support — install as an app on any device",
-    border: "color-mix(in srgb, var(--auth-hero-violet) 25%, transparent)",
-    iconColor: SP_VIOLET,
-    iconBg: "color-mix(in srgb, var(--auth-hero-violet) 12%, transparent)",
-  },
-];
-
-/* ── Animated floating orbs — terrain palette ─── */
-function FloatingOrbs() {
+/* ── Animated orbs background (CSS-driven) ────────────────── */
+function HeroBackground() {
   return (
     <div style={{ position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none" }}>
-      {/* Slow-moving gradient mesh */}
       <div style={{
         position: "absolute", inset: "-50%",
         background: `
-          radial-gradient(ellipse at 20% 50%, color-mix(in srgb, var(--auth-hero-cyan) 14%, transparent) 0%, transparent 50%),
-          radial-gradient(ellipse at 80% 20%, color-mix(in srgb, var(--auth-hero-violet) 12%, transparent) 0%, transparent 50%),
-          radial-gradient(ellipse at 50% 80%, color-mix(in srgb, var(--es-clay, #B5654A) 10%, transparent) 0%, transparent 50%)
+          radial-gradient(ellipse at 20% 50%, color-mix(in srgb, var(--primary) 14%, transparent) 0%, transparent 50%),
+          radial-gradient(ellipse at 80% 20%, color-mix(in srgb, var(--secondary) 12%, transparent) 0%, transparent 50%),
+          radial-gradient(ellipse at 50% 80%, color-mix(in srgb, var(--accent) 10%, transparent) 0%, transparent 50%)
         `,
         animation: "sp-mesh 20s ease-in-out infinite alternate",
       }} />
-      {/* Orb 1 — top-left drift */}
       <div style={{
         position: "absolute", top: "-10%", left: "-8%",
-        width: 420, height: 420, borderRadius: "50%",
-        background: `radial-gradient(circle, color-mix(in srgb, var(--auth-hero-cyan) 22%, transparent) 0%, transparent 70%)`,
+        width: 320, height: 320, borderRadius: "50%",
+        background: "radial-gradient(circle, color-mix(in srgb, var(--primary) 20%, transparent) 0%, transparent 70%)",
         animation: "sp-orb-drift 12s ease-in-out infinite",
       }} />
-      {/* Orb 2 — mid-right drift */}
       <div style={{
         position: "absolute", top: "30%", right: "-12%",
-        width: 360, height: 360, borderRadius: "50%",
-        background: `radial-gradient(circle, color-mix(in srgb, var(--auth-hero-violet) 20%, transparent) 0%, transparent 70%)`,
+        width: 280, height: 280, borderRadius: "50%",
+        background: "radial-gradient(circle, color-mix(in srgb, var(--secondary) 18%, transparent) 0%, transparent 70%)",
         animation: "sp-orb-drift 15s ease-in-out infinite reverse",
         animationDelay: "2s",
       }} />
-      {/* Orb 3 — bottom drift */}
       <div style={{
         position: "absolute", bottom: "-12%", left: "20%",
-        width: 400, height: 400, borderRadius: "50%",
-        background: `radial-gradient(circle, color-mix(in srgb, var(--es-clay, #B5654A) 14%, transparent) 0%, transparent 70%)`,
+        width: 300, height: 300, borderRadius: "50%",
+        background: "radial-gradient(circle, color-mix(in srgb, var(--accent) 12%, transparent) 0%, transparent 70%)",
         animation: "sp-orb-drift 18s ease-in-out infinite",
         animationDelay: "5s",
       }} />
@@ -125,188 +76,135 @@ function FloatingOrbs() {
   );
 }
 
-/* ── Hero / branding panel (desktop only — left side) ───── */
-function DesktopHeroPanel() {
+/* ── Desktop layout — video background + right form ──────── */
+function DesktopAuthPage({ children }: { children: React.ReactNode }) {
   return (
-    <div style={{
-      position: "relative",
-      display: "flex", flexDirection: "column", justifyContent: "space-between",
-      height: "100%", overflow: "hidden",
-      background: SP_BG,
-      padding: "56px 48px",
-      color: "white",
-    }}>
-      <FloatingOrbs />
-
-      {/* Subtle grid overlay */}
-      <div style={{
-        position: "absolute", inset: 0, pointerEvents: "none",
-        backgroundImage: `linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px)`,
-        backgroundSize: "56px 56px",
-      }} />
-
-      {/* Logo + brand */}
-      <div style={{ position: "relative", zIndex: 1 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          {/* Logo with glow ring */}
-          <div style={{ position: "relative" }}>
-            <div style={{
-              position: "absolute", inset: -3, borderRadius: "14px",
-              background: `linear-gradient(135deg, ${SP_INDIGO}, ${SP_CYAN})`,
-              opacity: 0.5, filter: "blur(6px)",
-            }} />
-            <div style={{
-              position: "relative",
-              width: 44, height: 44, borderRadius: 12,
-              overflow: "hidden",
-              boxShadow: "0 4px 20px color-mix(in srgb, var(--primary) 40%, transparent)",
-            }}>
-              <Image src="/icons/icon-192.png" alt="ExpenStream" width={44} height={44} style={{ display: "block", width: "100%", height: "100%" }} />
-            </div>
+    <div className="hidden min-h-screen w-full lg:block" style={{ position: "relative", overflow: "hidden" }}>
+      <video
+        autoPlay
+        muted
+        playsInline
+        style={{
+          position: "absolute", inset: 0,
+          width: "100%", height: "100%",
+          objectFit: "cover", objectPosition: "center 60%",
+        }}
+      >
+        <source src="/ExpenStream.mp4" type="video/mp4" />
+      </video>
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background: "linear-gradient(to right, transparent 35%, rgba(0,0,0,0.5) 65%, rgba(0,0,0,0.7) 100%)",
+        }}
+      />
+      <div className="relative z-10 flex min-h-screen items-center justify-end pr-[6%] py-10">
+        <div className="w-full max-w-sm" style={{ animation: "sp-form-in 0.45s ease both" }}>
+          <div className="card-glass rounded-2xl p-8 shadow-2xl">
+            {children}
           </div>
-          <span style={{ fontSize: "1.25rem", fontWeight: 800, letterSpacing: "-0.03em" }}>
-            ExpenStream
-          </span>
+          <p className="mt-4 text-center text-xs font-medium" style={{ color: "rgba(255,255,255,0.7)" }}>
+            By continuing, you agree to our Terms of Service.
+          </p>
+          <div className="mt-2 flex items-center justify-center gap-4" style={{ color: "rgba(255,255,255,0.5)" }}>
+            <span className="flex items-center gap-1 text-overline"><Lock size={10} /> 256-bit encrypted</span>
+            <span className="flex items-center gap-1 text-overline"><ShieldCheck size={10} /> No credit card needed</span>
+          </div>
         </div>
-
-        <h1 style={{
-          marginTop: 32, fontSize: "2.5rem", fontWeight: 800,
-          letterSpacing: "-0.04em", lineHeight: 1.15,
-        }}>
-          Take control of{" "}
-          <span style={{
-            background: `linear-gradient(90deg, ${SP_CYAN}, ${SP_VIOLET})`,
-            WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
-            backgroundClip: "text",
-          }}>
-            your finances
-          </span>
-        </h1>
-        <p style={{
-          marginTop: 12, fontSize: "0.95rem", lineHeight: 1.7,
-          color: "rgba(255,255,255,0.6)", maxWidth: 380,
-        }}>
-          Track every rupee, set smart budgets, and discover where your money
-          actually goes — all in one elegant app.
-        </p>
       </div>
-
-      {/* Feature grid */}
-      <div style={{
-        position: "relative", zIndex: 1,
-        display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 32,
-      }}>
-        {FEATURES.map((f) => (
-          <div key={f.title} style={{
-            background: "rgba(255,255,255,0.05)",
-            border: `1px solid ${f.border}`,
-            borderRadius: 14,
-            padding: "14px 14px",
-            backdropFilter: "blur(12px)",
-            transition: "background 0.2s",
-          }}>
-            <div style={{
-              width: 32, height: 32,
-              borderRadius: 8,
-              background: f.iconBg,
-              display: "flex", alignItems: "center", justifyContent: "center",
-              marginBottom: 8,
-            }}>
-              <f.icon style={{ width: 15, height: 15, color: f.iconColor }} />
-            </div>
-            <p style={{ fontSize: "0.72rem", fontWeight: 700, color: "rgba(255,255,255,0.9)", marginBottom: 2 }}>
-              {f.title}
-            </p>
-            <p style={{ fontSize: "0.65rem", lineHeight: 1.5, color: "rgba(255,255,255,0.45)" }}>
-              {f.desc}
-            </p>
-          </div>
-        ))}
-      </div>
-
-      <p style={{
-        position: "relative", zIndex: 1,
-        marginTop: 24, fontSize: "0.68rem",
-        color: "rgba(255,255,255,0.25)", letterSpacing: "0.04em",
-      }}>
-        Trusted by thousands · Free forever · Open source
-      </p>
     </div>
   );
 }
 
-/* ── Mobile full-screen layout ──────────────────────────── */
+/* ── Mobile layout — single-screen: brand top + form bottom ── */
 function MobileAuthPage({ children }: { children: React.ReactNode }) {
   return (
-    <div style={{
-      position: "relative",
-      minHeight: "100dvh",
-      background: SP_BG,
-      overflow: "hidden",
-    }} className="flex flex-col lg:hidden">
-      <FloatingOrbs />
+    <div
+      className="flex flex-col lg:hidden"
+      style={{
+        position: "relative",
+        minHeight: "100dvh",
+        background: "var(--background)",
+        overflowY: "auto",
+      }}
+    >
+      <HeroBackground />
 
-      {/* Subtle grid */}
-      <div style={{
-        position: "absolute", inset: 0, pointerEvents: "none",
-        backgroundImage: `linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px)`,
-        backgroundSize: "44px 44px",
-      }} />
-
-      {/* Top branding */}
-      <div style={{
-        position: "relative", zIndex: 1,
-        display: "flex", flexDirection: "column", alignItems: "center",
-        padding: "48px 24px 16px",
-      }}>
-        {/* Logo with glow ring */}
-        <div style={{ position: "relative", marginBottom: 12 }}>
+      {/* ── Brand header ────────────────────────────────── */}
+      <div
+        style={{
+          position: "relative", zIndex: 1,
+          display: "flex", flexDirection: "column",
+          alignItems: "center",
+          paddingTop: "calc(env(safe-area-inset-top, 0px) + 48px)",
+          paddingBottom: 32,
+        }}
+      >
+        {/* Logo with glow */}
+        <div style={{ position: "relative", marginBottom: 20 }}>
           <div style={{
-            position: "absolute", inset: -4, borderRadius: "20px",
-            background: `linear-gradient(135deg, ${SP_INDIGO}, ${SP_CYAN})`,
-            opacity: 0.4, filter: "blur(8px)",
+            position: "absolute", inset: -6, borderRadius: 22,
+            background: "linear-gradient(135deg, var(--primary), var(--accent))",
+            opacity: 0.2, filter: "blur(14px)",
           }} />
           <div style={{
             position: "relative",
             width: 56, height: 56, borderRadius: 16,
             overflow: "hidden",
-            boxShadow: "0 6px 24px color-mix(in srgb, var(--primary) 50%, transparent)",
+            boxShadow: "0 6px 24px color-mix(in srgb, var(--primary) 40%, transparent)",
+            animation: "sp-card-in 0.4s ease both",
           }}>
             <Image src="/icons/icon-192.png" alt="ExpenStream" width={56} height={56} style={{ display: "block", width: "100%", height: "100%" }} />
           </div>
         </div>
-        <h1 style={{
-          fontSize: "1.375rem", fontWeight: 800,
-          letterSpacing: "-0.03em", color: "white",
-        }}>
+
+        {/* Brand name */}
+        <h1
+          style={{
+            fontFamily: "var(--font-display)",
+            fontSize: "1.75rem", fontWeight: 800,
+            letterSpacing: "-0.03em",
+            color: "var(--text-primary)",
+            animation: "sp-card-in 0.4s ease both",
+            animationDelay: "0.08s",
+          }}
+        >
           ExpenStream
         </h1>
-        <p style={{
-          marginTop: 4, fontSize: "0.7rem", letterSpacing: "0.05em",
-          textTransform: "uppercase",
-          background: `linear-gradient(90deg, ${SP_CYAN}, ${SP_VIOLET})`,
-          WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
-          backgroundClip: "text",
-        }}>
-          Spend smarter. Live better.
+
+        {/* Tagline */}
+        <p
+          style={{
+            marginTop: 10, fontSize: "0.9375rem", fontWeight: 500,
+            letterSpacing: "0.01em",
+            color: "var(--text-secondary)",
+            animation: "sp-card-in 0.4s ease both",
+            animationDelay: "0.14s",
+          }}
+        >
+          Smart expense tracking, simplified.
         </p>
       </div>
 
-      {/* Card — theme-aware (white / dark:slate-900) */}
-      <div style={{ position: "relative", zIndex: 1, flex: 1, display: "flex", flexDirection: "column", marginTop: "auto" }}>
+      {/* ── Form card — bottom section ──────────────────── */}
+      <div style={{ position: "relative", zIndex: 1, flex: 1, display: "flex", flexDirection: "column" }}>
+        <div style={{ flex: 1, minHeight: 8 }} />
         <div
-          className="flex-1 flex flex-col rounded-t-3xl px-6 pt-7 pb-8 shadow-2xl shadow-black/30"
-          style={{ background: 'var(--surface)', paddingBottom: 'calc(32px + env(safe-area-inset-bottom, 0px))' }}
+          className="card-terrain rounded-t-3xl px-6 pt-7 pb-8 shadow-2xl"
+          style={{
+            paddingBottom: "calc(32px + env(safe-area-inset-bottom, 0px))",
+            animation: "sp-card-in 0.45s ease both",
+            animationDelay: "0.2s",
+            borderTop: "1px solid var(--border-subtle, var(--border))",
+          }}
         >
-          <div className="flex-1 flex flex-col justify-center">
-            {children}
-          </div>
-          <p className="mt-4 text-center text-xs" style={{ color: 'var(--text-muted)' }}>
+          {children}
+          <p className="mt-4 text-center text-xs font-medium" style={{ color: "var(--text-muted)" }}>
             By continuing, you agree to our Terms of Service.
           </p>
-          <div className="mt-3 flex items-center justify-center gap-4" style={{ color: 'var(--text-muted)' }}>
-            <span className="flex items-center gap-1 text-overline"><Lock size={10} /> 256-bit encrypted</span>
-            <span className="flex items-center gap-1 text-overline"><ShieldCheck size={10} /> No credit card needed</span>
+          <div className="mt-2.5 flex items-center justify-center gap-1.5 text-xs" style={{ color: "var(--text-muted)" }}>
+            <Lock size={12} />
+            <span>Your data is encrypted and secure</span>
           </div>
         </div>
       </div>
@@ -314,44 +212,12 @@ function MobileAuthPage({ children }: { children: React.ReactNode }) {
   );
 }
 
-/* ── Desktop split layout ───────────────────────────────── */
-function DesktopAuthPage({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="hidden min-h-screen w-full lg:flex lg:flex-row">
-      <div className="w-[48%] min-h-screen">
-        <DesktopHeroPanel />
-      </div>
-
-      <div className="relative flex flex-1 items-center justify-center px-16 py-10" style={{ background: 'var(--background)' }}>
-        {/* Subtle decorative orbs — use Tailwind so they follow theme */}
-        <div className="pointer-events-none absolute inset-0 overflow-hidden">
-          <div className="absolute -top-24 right-10 h-60 w-60 rounded-full blur-3xl" style={{ backgroundColor: "var(--auth-orb-1)" }} />
-          <div className="absolute -bottom-20 -left-10 h-48 w-48 rounded-full blur-3xl" style={{ backgroundColor: "var(--auth-orb-2)" }} />
-        </div>
-
-        <div className="relative z-10 w-full max-w-sm" style={{ animation: "sp-form-in 0.45s ease both" }}>
-          <div className="rounded-2xl p-8 shadow-xl" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
-            {children}
-          </div>
-          <p className="mt-4 text-center text-xs" style={{ color: 'var(--text-tertiary)' }}>
-            By continuing, you agree to our Terms of Service.
-          </p>
-          <div className="mt-3 flex items-center justify-center gap-4" style={{ color: 'var(--text-muted)' }}>
-            <span className="flex items-center gap-1 text-overline"><Lock size={10} /> 256-bit encrypted</span>
-            <span className="flex items-center gap-1 text-overline"><ShieldCheck size={10} /> No credit card needed</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ── Combined wrapper (CSS hides one at a time) ─────────── */
+/* ── Combined wrapper — renders both, CSS toggles visibility ── */
 function AuthPage({ children }: { children: React.ReactNode }) {
   return (
     <>
-      <MobileAuthPage>{children}</MobileAuthPage>
       <DesktopAuthPage>{children}</DesktopAuthPage>
+      <MobileAuthPage>{children}</MobileAuthPage>
     </>
   );
 }
@@ -483,7 +349,7 @@ export function AuthModal({
       <AuthPage>
         <button
           onClick={() => { setMode("login"); setError(""); setForgotSent(false); }}
-          className="mb-6 flex items-center gap-1.5 text-sm text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
+          className="mb-6 -ml-2 flex items-center gap-1.5 rounded-lg py-2 pl-2 pr-3 text-sm text-[var(--text-muted)] hover:text-[var(--text-secondary)] hover:bg-[var(--surface-secondary)] transition-colors"
         >
           <ArrowLeft className="h-4 w-4" /> Back to Sign In
         </button>
@@ -507,7 +373,7 @@ export function AuthModal({
             </div>
             <button
               onClick={() => { setMode("login"); setForgotSent(false); setError(""); }}
-              className="w-full rounded-xl py-3.5 text-base font-semibold text-white transition-all hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2"
+              className="w-full rounded-2xl py-4 text-base font-semibold text-white transition-all hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2"
               style={{
                 background: "linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 50%, var(--accent) 100%)",
                 boxShadow: "0 6px 20px color-mix(in srgb, var(--primary) 35%, transparent)",
@@ -530,7 +396,7 @@ export function AuthModal({
                 onChange={(e) => setEmail(e.target.value)}
                 autoComplete="email"
                 autoFocus
-                className="w-full rounded-xl py-3.5 pl-10 pr-4 text-sm transition-all focus:outline-none focus:ring-2"
+                className="w-full rounded-2xl py-4 pl-10 pr-4 text-sm transition-all focus:outline-none focus:ring-2 focus:border-[var(--primary)]"
                 style={{ background: 'var(--surface-secondary)', border: '1px solid var(--border)', color: 'var(--text-primary)', '--tw-ring-color': 'var(--primary)' } as React.CSSProperties}
               />
             </div>
@@ -545,7 +411,7 @@ export function AuthModal({
             <button
               type="submit"
               disabled={loading}
-              className="w-full rounded-xl py-3.5 text-base font-semibold text-white transition-all hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 flex items-center justify-center gap-2"
+              className="w-full rounded-2xl py-4 text-base font-semibold text-white transition-all hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 flex items-center justify-center gap-2"
               style={{
                 background: "linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 50%, var(--accent) 100%)",
                 boxShadow: "0 6px 20px color-mix(in srgb, var(--primary) 35%, transparent)",
@@ -567,7 +433,7 @@ export function AuthModal({
       <AuthPage>
         <button
           onClick={() => { setMode("login"); setError(""); setPendingChallengeToken(null); setTotpCode(""); }}
-          className="mb-6 flex items-center gap-1.5 text-sm text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
+          className="mb-6 -ml-2 flex items-center gap-1.5 rounded-lg py-2 pl-2 pr-3 text-sm text-[var(--text-muted)] hover:text-[var(--text-secondary)] hover:bg-[var(--surface-secondary)] transition-colors"
         >
           <ArrowLeft className="h-4 w-4" /> Back
         </button>
@@ -690,46 +556,22 @@ export function AuthModal({
             Welcome to ExpenStream
           </h2>
           <p className="mt-1.5 text-sm" style={{ color: 'var(--text-secondary)' }}>
-            Track expenses, set budgets, and take control.
+            Your finances, beautifully organized.
           </p>
         </div>
 
         <div className="mt-7 space-y-3">
-          {/* Google — prominent secondary */}
-          <button
-            onClick={() => { window.location.href = "/api/auth/google"; }}
-            className="group relative flex w-full items-center gap-3.5 rounded-2xl border-2 border-[var(--border)] bg-[var(--surface)] px-4 py-3.5 text-left transition-all hover:border-[var(--border-strong)] hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)]"
-            style={{ animation: "sp-card-in 0.4s ease both", animationDelay: "0.05s" }}
-          >
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl shadow-sm border" style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>
-              <GoogleIcon className="h-5 w-5" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Continue with Google</div>
-              <div className="text-xs" style={{ color: 'var(--text-muted)' }}>Sign in or create account instantly</div>
-            </div>
-            <ChevronRight className="h-4 w-4 opacity-50 group-hover:opacity-80 transition-opacity" style={{ color: 'var(--text-muted)' }} />
-          </button>
-
-          {/* OR divider */}
-          <div className="relative flex items-center gap-3">
-            <div className="flex-1" style={{ borderTop: '1px solid var(--border)' }} />
-            <span className="text-xs font-medium uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>or</span>
-            <div className="flex-1" style={{ borderTop: '1px solid var(--border)' }} />
-          </div>
-
-          {/* Create Account — primary CTA */}
+          {/* Create Account — primary CTA (top) */}
           <button
             onClick={() => setMode("register")}
-            className="group relative flex w-full items-center gap-4 rounded-2xl p-4 text-left text-white transition-all hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] overflow-hidden"
+            className="group relative flex w-full items-center gap-4 rounded-2xl p-4 text-left text-white transition-all hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] overflow-hidden"
             style={{
               background: "linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 50%, var(--accent) 100%)",
               boxShadow: "0 8px 24px color-mix(in srgb, var(--primary) 35%, transparent), 0 2px 8px color-mix(in srgb, var(--accent) 20%, transparent)",
               animation: "sp-card-in 0.4s ease both",
-              animationDelay: "0.12s",
+              animationDelay: "0.05s",
             }}
           >
-            {/* Subtle shimmer */}
             <div className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
               style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.08) 0%, transparent 60%)" }}
             />
@@ -738,7 +580,7 @@ export function AuthModal({
             </div>
             <div className="flex-1 min-w-0">
               <div className="font-semibold text-base leading-tight">Create Account</div>
-              <div className="text-xs text-white/70 mt-0.5">Start fresh with a new workspace</div>
+              <div className="text-xs text-white/70 mt-0.5">Start fresh in seconds</div>
             </div>
             <ChevronRight className="h-4 w-4 opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" />
           </button>
@@ -746,8 +588,8 @@ export function AuthModal({
           {/* Sign In — secondary */}
           <button
             onClick={() => setMode("login")}
-            className="group relative flex w-full items-center gap-4 rounded-2xl border-2 border-[var(--border)] bg-[var(--surface)] px-4 py-3.5 text-left transition-all hover:border-[color-mix(in_srgb,var(--primary)_30%,var(--surface))] hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)]"
-            style={{ animation: "sp-card-in 0.4s ease both", animationDelay: "0.19s" }}
+            className="group relative flex w-full items-center gap-4 rounded-2xl border-2 border-[var(--border)] bg-[var(--surface)] px-4 py-3.5 text-left transition-all hover:border-[color-mix(in_srgb,var(--primary)_30%,var(--surface))] hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)]"
+            style={{ animation: "sp-card-in 0.4s ease both", animationDelay: "0.12s" }}
           >
             <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition-colors" style={{ background: 'var(--secondary-soft)' }}>
               <LogIn className="h-5 w-5" style={{ color: 'var(--secondary-text)' }} />
@@ -757,6 +599,29 @@ export function AuthModal({
               <div className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>Access your existing account</div>
             </div>
             <ChevronRight className="h-4 w-4 opacity-50 group-hover:opacity-80 group-hover:translate-x-0.5 transition-all" style={{ color: 'var(--text-muted)' }} />
+          </button>
+
+          {/* OR divider */}
+          <div className="relative flex items-center gap-3">
+            <div className="flex-1" style={{ borderTop: '1px solid var(--border)' }} />
+            <span className="text-xs font-medium uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>or</span>
+            <div className="flex-1" style={{ borderTop: '1px solid var(--border)' }} />
+          </div>
+
+          {/* Google — social option (bottom) */}
+          <button
+            onClick={() => { window.location.href = "/api/auth/google"; }}
+            className="group relative flex w-full items-center gap-3.5 rounded-2xl border-2 border-[var(--border)] bg-[var(--surface)] px-4 py-3.5 text-left transition-all hover:border-[var(--border-strong)] hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)]"
+            style={{ animation: "sp-card-in 0.4s ease both", animationDelay: "0.19s" }}
+          >
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl shadow-sm border" style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>
+              <GoogleIcon className="h-5 w-5" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Continue with Google</div>
+              <div className="text-xs" style={{ color: 'var(--text-muted)' }}>One tap to get started</div>
+            </div>
+            <ChevronRight className="h-4 w-4 opacity-50 group-hover:opacity-80 transition-opacity" style={{ color: 'var(--text-muted)' }} />
           </button>
         </div>
       </AuthPage>
@@ -771,7 +636,7 @@ export function AuthModal({
     <AuthPage>
       <button
         onClick={() => { setMode("choose"); setError(""); }}
-        className="mb-6 flex items-center gap-1.5 text-sm text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
+        className="mb-6 -ml-2 flex items-center gap-1.5 rounded-lg py-2 pl-2 pr-3 text-sm text-[var(--text-muted)] hover:text-[var(--text-secondary)] hover:bg-[var(--surface-secondary)] transition-colors"
       >
         <ArrowLeft className="h-4 w-4" /> Back
       </button>
@@ -797,7 +662,7 @@ export function AuthModal({
               placeholder="Name (optional)"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full rounded-xl py-3.5 pl-10 pr-4 text-sm transition-all focus:outline-none focus:ring-2"
+              className="w-full rounded-2xl py-4 pl-10 pr-4 text-sm transition-all focus:outline-none focus:ring-2 focus:border-[var(--primary)]"
               style={{ background: 'var(--surface-secondary)', border: '1px solid var(--border)', color: 'var(--text-primary)', '--tw-ring-color': 'var(--primary)' } as React.CSSProperties}
             />
           </div>
@@ -811,7 +676,7 @@ export function AuthModal({
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             autoComplete="email"
-            className="w-full rounded-xl py-3.5 pl-10 pr-4 text-sm transition-all focus:outline-none focus:ring-2"
+            className="w-full rounded-2xl py-4 pl-10 pr-4 text-sm transition-all focus:outline-none focus:ring-2 focus:border-[var(--primary)]"
             style={{ background: 'var(--surface-secondary)', border: '1px solid var(--border)', color: 'var(--text-primary)', '--tw-ring-color': 'var(--primary)' } as React.CSSProperties}
           />
         </div>
@@ -824,14 +689,14 @@ export function AuthModal({
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             autoComplete={isRegister ? "new-password" : "current-password"}
-            className="w-full rounded-xl py-3.5 pl-10 pr-11 text-sm transition-all focus:outline-none focus:ring-2 [&::-ms-reveal]:hidden [&::-ms-clear]:hidden [&::-webkit-contacts-auto-fill-button]:hidden [&::-webkit-credentials-auto-fill-button]:hidden"
+            className="w-full rounded-2xl py-4 pl-10 pr-12 text-sm transition-all focus:outline-none focus:ring-2 focus:border-[var(--primary)] [&::-ms-reveal]:hidden [&::-ms-clear]:hidden [&::-webkit-contacts-auto-fill-button]:hidden [&::-webkit-credentials-auto-fill-button]:hidden"
             style={{ background: 'var(--surface-secondary)', border: '1px solid var(--border)', color: 'var(--text-primary)', '--tw-ring-color': 'var(--primary)', WebkitTextSecurity: showPassword ? "none" : undefined } as React.CSSProperties}
           />
           <button
             type="button"
             tabIndex={-1}
             onClick={() => setShowPassword((v) => !v)}
-            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
+            className="absolute right-1.5 top-1/2 -translate-y-1/2 flex h-11 w-11 items-center justify-center rounded-lg text-[var(--text-muted)] hover:text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] transition-colors"
             aria-label={showPassword ? "Hide password" : "Show password"}
           >
             {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -839,11 +704,11 @@ export function AuthModal({
         </div>
 
         {!isRegister && (
-          <div className="flex justify-end -mt-1">
+          <div className="flex justify-end mt-1">
             <button
               type="button"
               onClick={() => { setMode("forgot"); setError(""); setForgotSent(false); }}
-              className="text-xs font-medium hover:underline"
+              className="rounded-lg px-2 py-1 text-xs font-medium hover:underline hover:bg-[var(--surface-secondary)] transition-colors"
               style={{ color: 'var(--primary)' }}
             >
               Forgot password?
@@ -861,7 +726,7 @@ export function AuthModal({
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded-xl py-3.5 text-base font-semibold text-white transition-all hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 flex items-center justify-center gap-2"
+          className="w-full rounded-2xl py-4 text-base font-semibold text-white transition-all hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 flex items-center justify-center gap-2"
           style={{
             background: "linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 50%, var(--accent) 100%)",
             boxShadow: "0 6px 20px color-mix(in srgb, var(--primary) 35%, transparent)",
@@ -892,20 +757,15 @@ export function AuthModal({
         </p>
       </form>
 
-      {/* OR + Google button */}
-      <div className="mt-6 relative flex items-center gap-3">
-        <div className="flex-1" style={{ borderTop: '1px solid var(--border)' }} />
-        <span className="text-xs font-medium uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>or continue with</span>
-        <div className="flex-1" style={{ borderTop: '1px solid var(--border)' }} />
-      </div>
+      {/* Google shortcut */}
       <button
         type="button"
         onClick={() => { window.location.href = "/api/auth/google"; }}
-        className="mt-3 flex w-full items-center justify-center gap-3 rounded-xl py-3 text-sm font-medium transition-all hover:shadow-sm active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)]"
+        className="mt-5 flex w-full items-center justify-center gap-2.5 rounded-2xl py-3.5 text-sm font-medium transition-all hover:shadow-sm hover:border-[var(--border-strong)] active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)]"
         style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-secondary)' }}
       >
         <GoogleIcon className="h-4 w-4" />
-        Google
+        Continue with Google
       </button>
     </AuthPage>
   );
