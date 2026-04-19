@@ -47,11 +47,16 @@ export function useWatcher(): { insight: WatcherInsight | null; dismiss: () => v
   const { currentMonth, currentYear } = useUIStore();
   const { expenses } = useExpenses(currentMonth, currentYear);
 
+  // Only produce "live" insights when viewing the real current month
+  const now = new Date();
+  const isCurrentMonth = currentMonth === now.getMonth() + 1 && currentYear === now.getFullYear();
+
   const streak = useMemo(() => getSpendingStreak(expenses), [expenses]);
 
   // Derive the candidate insight purely from reactive values — no side effects
   const candidateInsight = useMemo<WatcherInsight | null>(() => {
     if (!cooledDown) return null;
+    if (!isCurrentMonth) return null;
 
     // 1. Forecast warning (confident and risky)
     if (
@@ -121,7 +126,7 @@ export function useWatcher(): { insight: WatcherInsight | null; dismiss: () => v
     }
 
     return null;
-  }, [cooledDown, anomalies, forecast, budgetUsedPercent, effectiveBudget, streak, expenses, currentMonth, currentYear]);
+  }, [cooledDown, isCurrentMonth, anomalies, forecast, budgetUsedPercent, effectiveBudget, streak, expenses, currentMonth, currentYear]);
 
   // Suppress the insight only if the user dismissed this exact type
   const insight =

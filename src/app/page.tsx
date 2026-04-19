@@ -146,9 +146,15 @@ function DashboardContent() {
   // Historical data for narrative insights
   useHistoricalData(currentMonth, currentYear);
 
-  // Budget milestone celebrations
+  // Budget milestone celebrations — only for the real current month
   const { toast } = useToast();
+  const isCurrentMonth = useMemo(() => {
+    const now = new Date();
+    return currentMonth === now.getMonth() + 1 && currentYear === now.getFullYear();
+  }, [currentMonth, currentYear]);
+
   useEffect(() => {
+    if (!isCurrentMonth) return;
     if (!effectiveBudget || effectiveBudget <= 0 || loading) return;
     const savedPercent = Math.round(((effectiveBudget - monthlyTotal) / effectiveBudget) * 100);
     if (savedPercent <= 0) return;
@@ -168,7 +174,7 @@ function DashboardContent() {
         break;
       }
     }
-  }, [effectiveBudget, monthlyTotal, currentMonth, currentYear, loading, toast]);
+  }, [effectiveBudget, monthlyTotal, currentMonth, currentYear, loading, toast, isCurrentMonth]);
 
   // "Dig Deeper" expandable state
   const [digDeeperOpen, setDigDeeperOpen] = useState(false);
@@ -179,7 +185,8 @@ function DashboardContent() {
     const active = expenses.filter((e) => !e.deletedAt);
     if (active.length === 0) return insights;
 
-    const today = new Date().getDate();
+    // Time-sensitive insights only make sense for the current month
+    const today = isCurrentMonth ? new Date().getDate() : daysInMonth;
 
     // Category spike detection
     if (prevMonthExpenses.length > 0) {
@@ -289,7 +296,7 @@ function DashboardContent() {
     }
 
     return insights.slice(0, 3);
-  }, [expenses, prevMonthExpenses, effectiveBudget, avgDaily, daysInMonth, forecast, settings.recurringExpenses, dailyTotals, allCategories, formatCurrency, monthlyTotal, remaining]);
+  }, [expenses, prevMonthExpenses, effectiveBudget, avgDaily, daysInMonth, forecast, settings.recurringExpenses, dailyTotals, allCategories, formatCurrency, monthlyTotal, remaining, isCurrentMonth]);
 
   // Top category for stone marker
   const topCategory = useMemo(() => {
