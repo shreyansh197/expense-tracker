@@ -22,6 +22,8 @@ export function CategoryChips() {
   // Long-press state
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [holdingId, setHoldingId] = useState<CategoryId | null>(null);
+  // Peek mode: save previous categories so we can restore on release
+  const peekPrevRef = useRef<CategoryId[] | null>(null);
 
   // Long-press discovery hint (shown once per device)
   const [showLongPressHint, setShowLongPressHint] = useState(false);
@@ -37,27 +39,28 @@ export function CategoryChips() {
     localStorage.setItem("expenstream-longpress-hint-seen", "1");
   }, []);
 
-  const cancelLongPress = useCallback(() => {
+  const releasePeek = useCallback(() => {
     if (longPressTimer.current) {
       clearTimeout(longPressTimer.current);
       longPressTimer.current = null;
     }
+    // If we were peeking, restore previous filter state
+    if (peekPrevRef.current !== null) {
+      setActiveCategories(peekPrevRef.current);
+      peekPrevRef.current = null;
+    }
     setHoldingId(null);
-  }, []);
+  }, [setActiveCategories]);
 
   const startLongPress = useCallback(
     (catId: CategoryId) => {
       setHoldingId(catId);
       longPressTimer.current = setTimeout(() => {
-        // Long press completed — isolate this category
+        // Long press completed — peek at this category
         if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate(30);
-        const isAlreadyIsolated =
-          activeCategories.length === 1 && activeCategories[0] === catId;
-        if (isAlreadyIsolated) {
-          setActiveCategories([]); // release
-        } else {
-          setActiveCategories([catId]); // isolate
-        }
+        // Save current filter state before peeking
+        peekPrevRef.current = [...activeCategories];
+        setActiveCategories([catId]);
         setHoldingId(null);
         longPressTimer.current = null;
         dismissHint();
@@ -78,9 +81,9 @@ export function CategoryChips() {
     if (dx > 10 && dx > dy) {
       isHorizontalSwipe.current = true;
       e.stopPropagation();
-      cancelLongPress();
+      releasePeek();
     }
-  }, [cancelLongPress]);
+  }, [releasePeek]);
 
   const handleTouchEnd = useCallback((e: React.TouchEvent) => {
     if (isHorizontalSwipe.current) {
@@ -88,8 +91,8 @@ export function CategoryChips() {
     }
     touchStartRef.current = null;
     isHorizontalSwipe.current = false;
-    cancelLongPress();
-  }, [cancelLongPress]);
+    releasePeek();
+  }, [releasePeek]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent, index: number) => {
@@ -114,7 +117,7 @@ export function CategoryChips() {
       <div
         ref={containerRef}
         role="group"
-        aria-label="Category filters — long press to isolate"
+        aria-label="Category filters — hold to peek at a category"
         className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide md:flex-wrap md:overflow-visible"
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
@@ -130,10 +133,10 @@ export function CategoryChips() {
               onClick={() => toggleCategory(cat.id)}
               onKeyDown={(e) => handleKeyDown(e, i)}
               onPointerDown={() => startLongPress(cat.id)}
-              onPointerUp={cancelLongPress}
-              onPointerLeave={cancelLongPress}
+              onPointerUp={releasePeek}
+              onPointerLeave={releasePeek}
               aria-pressed={activeCategories.length > 0 && activeCategories.includes(cat.id)}
-              aria-label={`Filter by ${cat.label}${isActive ? " (active)" : ""} — long press to isolate`}
+              aria-label={`Filter by ${cat.label}${isActive ? " (active)" : ""} — hold to peek`}
               whileTap={{ scale: scale.tapChip }}
               animate={isHolding ? { scale: 1.1 } : { scale: 1 }}
               transition={{ type: "spring", stiffness: 400, damping: 20 }}
@@ -173,7 +176,7 @@ export function CategoryChips() {
             style={{ color: "var(--text-muted)" }}
             onClick={dismissHint}
           >
-            Tip: long-press a category to isolate it
+            Tip: hold a category to peek at its expenses
           </m.p>
         )}
       </AnimatePresence>
