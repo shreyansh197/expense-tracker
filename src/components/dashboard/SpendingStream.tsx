@@ -232,15 +232,14 @@ export function SpendingStream({
         const leftPct = (stone.x / VB_W) * 100;
         const pctOfDaily = dailyBudget > 0 ? Math.round((stone.value / dailyBudget) * 100) : null;
         // Clamp tooltip so it doesn't overflow left/right edges
-        const clampedLeft = Math.max(12, Math.min(leftPct, 88));
-        // Shift transform origin based on position
+        // Anchor tooltip transform based on position: left-align near left edge, right-align near right edge
         const translateX = leftPct < 15 ? "0%" : leftPct > 85 ? "-100%" : "-50%";
         return (
           <div
             style={{
               position: "absolute",
               top: -6,
-              left: `${clampedLeft}%`,
+              left: `${leftPct}%`,
               transform: `translate(${translateX}, -100%)`,
               zIndex: 10,
               pointerEvents: "none",

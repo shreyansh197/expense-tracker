@@ -30,18 +30,17 @@ export function SpendingChallenges() {
     [activeChallenges, expenses],
   );
 
-  // Persist evaluations if status/progress changed — use a ref to avoid re-render loops
-  const lastPersistedRef = useRef<string>("");
+  // Only persist when a challenge's STATUS changes (active→completed/failed)
+  // Progress is recomputed from expenses every render, no need to persist it
+  const lastStatusRef = useRef<string>("");
   useEffect(() => {
     if (evaluated.length === 0) return;
-    const key = JSON.stringify(evaluated.map((e) => ({ s: e.status, p: e.progress })));
-    if (key === lastPersistedRef.current) return;
-    // On first render, seed the ref without persisting to avoid overwriting just-started challenges
-    if (lastPersistedRef.current === "") {
-      lastPersistedRef.current = key;
-      return;
-    }
-    lastPersistedRef.current = key;
+    const statusKey = JSON.stringify(evaluated.map((e) => e.status));
+    if (statusKey === lastStatusRef.current) return;
+    const prev = lastStatusRef.current;
+    lastStatusRef.current = statusKey;
+    // Skip the first seed — nothing to persist yet
+    if (prev === "") return;
     updateSettings({ activeChallenges: evaluated });
   }, [evaluated, updateSettings]);
 
@@ -182,8 +181,10 @@ function ChallengeRow({ challenge, template, onAbandon }: {
 }) {
   const [sy, sm, sd] = challenge.endDate.split("-").map(Number);
   const endDate = new Date(sy, sm - 1, sd);
+  endDate.setHours(0, 0, 0, 0);
   const now = new Date();
-  const daysLeft = Math.max(0, Math.ceil((endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
+  now.setHours(0, 0, 0, 0);
+  const daysLeft = Math.max(0, Math.round((endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)) + 1);
 
   return (
     <div className="rounded-lg p-3" style={{ background: "var(--surface-secondary)" }}>
