@@ -279,8 +279,13 @@ export function ExpenseForm({
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
       if (e.key === "Escape") { e.preventDefault(); closeForm(); }
+      // Sync physical keyboard with on-screen keypad
+      if (e.key >= "0" && e.key <= "9") { e.preventDefault(); handleKeypadPress(e.key); }
+      if (e.key === "." || e.key === "Decimal") { e.preventDefault(); handleKeypadPress("."); }
+      if (e.key === "Backspace") { e.preventDefault(); handleKeypadPress("backspace"); }
+      if (e.key === "Enter") { e.preventDefault(); handleSubmit(); }
     },
-    [closeForm]
+    [closeForm, handleKeypadPress, handleSubmit]
   );
 
   const parsedDisplay = amount || "0";
