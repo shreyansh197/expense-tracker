@@ -17,13 +17,15 @@ async function getWorker(): Promise<Worker> {
   if (_initPromise) return _initPromise;
 
   _initPromise = createWorker("eng", 1, {
-    // Use CDN for language data to avoid bundling
     workerPath: "https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/worker.min.js",
     corePath: "https://cdn.jsdelivr.net/npm/tesseract.js-core@5/tesseract-core-simd-lstm.wasm.js",
   }).then((w) => {
     _worker = w;
     _initPromise = null;
     return w;
+  }).catch((err) => {
+    _initPromise = null;
+    throw new Error(`OCR engine failed to load: ${err?.message || err}`);
   });
 
   return _initPromise;

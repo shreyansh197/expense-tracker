@@ -18,6 +18,7 @@ export function ReceiptCapture({ onExtracted, onClose }: ReceiptCaptureProps) {
   const { settings } = useSettings();
   const catMap = buildCategoryMap(settings.customCategories, settings.hiddenDefaults);
   const fileRef = useRef<HTMLInputElement>(null);
+  const cameraRef = useRef<HTMLInputElement>(null);
   const [stage, setStage] = useState<Stage>("idle");
   const [preview, setPreview] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
@@ -65,10 +66,21 @@ export function ReceiptCapture({ onExtracted, onClose }: ReceiptCaptureProps) {
         label: meta.label,
       }));
       const ocrResult = await extractFromReceipt(file, categoryLabels);
+      if (!ocrResult.rawText || ocrResult.rawText.trim().length === 0) {
+        setError("No text detected in the image. Try a clearer photo with good lighting.");
+        setStage("preview");
+        return;
+      }
       setResult(ocrResult);
       setStage("result");
-    } catch {
-      setError("Failed to process receipt. Please try again.");
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error("[ReceiptCapture] OCR failed:", msg);
+      if (msg.includes("network") || msg.includes("fetch") || msg.includes("load")) {
+        setError("Could not load OCR engine — check your internet connection and try again.");
+      } else {
+        setError(`Failed to process receipt: ${msg.slice(0, 100)}`);
+      }
       setStage("preview");
     }
   }, [file, catMap]);
@@ -95,7 +107,9 @@ export function ReceiptCapture({ onExtracted, onClose }: ReceiptCaptureProps) {
     setFile(null);
     setResult(null);
     setError(null);
-    fileRef.current?.click();
+    // Reset file inputs so the same file can be re-selected
+    if (fileRef.current) fileRef.current.value = "";
+    if (cameraRef.current) cameraRef.current.value = "";
   }, []);
 
   return (
@@ -125,19 +139,38 @@ export function ReceiptCapture({ onExtracted, onClose }: ReceiptCaptureProps) {
       {/* Stage: idle — file input */}
       {stage === "idle" && (
         <div className="flex flex-col items-center gap-3">
-          <button
-            onClick={() => fileRef.current?.click()}
-            className="flex h-32 w-full items-center justify-center gap-3 rounded-2xl border-2 border-dashed transition-colors"
-            style={{ borderColor: "var(--border)", color: "var(--text-secondary)" }}
-          >
-            <Camera size={24} />
-            <span className="text-sm font-medium">Take Photo or Choose Image</span>
-          </button>
+          <div className="flex w-full gap-2">
+            <button
+              onClick={() => cameraRef.current?.click()}
+              className="flex h-28 flex-1 flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed transition-colors"
+              style={{ borderColor: "var(--border)", color: "var(--text-secondary)" }}
+            >
+              <Camera size={22} />
+              <span className="text-xs font-medium">Take Photo</span>
+            </button>
+            <button
+              onClick={() => fileRef.current?.click()}
+              className="flex h-28 flex-1 flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed transition-colors"
+              style={{ borderColor: "var(--border)", color: "var(--text-secondary)" }}
+            >
+              <FileImage size={22} />
+              <span className="text-xs font-medium">Upload Image</span>
+            </button>
+          </div>
+          {/* Camera input (with capture) */}
+          <input
+            ref={cameraRef}
+            type="file"
+            accept="image/*"
+            capture="environment"
+            onChange={handleFileChange}
+            className="hidden"
+          />
+          {/* Gallery/file input (no capture) */}
           <input
             ref={fileRef}
             type="file"
             accept="image/*"
-            capture="environment"
             onChange={handleFileChange}
             className="hidden"
           />
