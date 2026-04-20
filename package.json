@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev --webpack",
-    "build": "prisma generate && node scripts/db-push.js && next build",
+    "build": "prisma generate && next build",
+    "db:push": "node scripts/db-push.js",
     "start": "next start",
     "lint": "eslint",
     "test": "jest",
