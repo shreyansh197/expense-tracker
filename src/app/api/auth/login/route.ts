@@ -194,8 +194,22 @@ export async function POST(req: NextRequest) {
   return res;
   } catch (err) {
     console.error("[login]", err);
+    const message = err instanceof Error ? err.message : String(err);
+    const errName = err instanceof Error ? err.constructor.name : "Unknown";
+    if (message.includes("connect") || message.includes("ECONNREFUSED")) {
+      return NextResponse.json(
+        { error: "Database is temporarily unavailable. Please try again." },
+        { status: 503 },
+      );
+    }
+    if (message.includes("JWT_SECRET")) {
+      return NextResponse.json(
+        { error: "Server configuration error: JWT_SECRET is missing or invalid." },
+        { status: 500 },
+      );
+    }
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: `Login failed (${errName}). Please try again later.`, code: errName },
       { status: 500 },
     );
   }

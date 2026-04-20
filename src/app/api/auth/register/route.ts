@@ -162,6 +162,8 @@ export async function POST(req: NextRequest) {
   } catch (err) {
     console.error("[register]", err);
     const message = err instanceof Error ? err.message : String(err);
+    const errName = err instanceof Error ? err.constructor.name : "Unknown";
+
     // Surface safe details for common DB errors
     if (message.includes("connect") || message.includes("ECONNREFUSED")) {
       return NextResponse.json(
@@ -175,8 +177,20 @@ export async function POST(req: NextRequest) {
         { status: 409 },
       );
     }
+    if (message.includes("does not exist") || message.includes("relation") || message.includes("column")) {
+      return NextResponse.json(
+        { error: "Database schema is out of date. Please run migrations." },
+        { status: 500 },
+      );
+    }
+    if (message.includes("JWT_SECRET")) {
+      return NextResponse.json(
+        { error: "Server configuration error: JWT_SECRET is missing or invalid." },
+        { status: 500 },
+      );
+    }
     return NextResponse.json(
-      { error: "Registration failed. Please try again later." },
+      { error: `Registration failed (${errName}). Please try again later.`, code: errName },
       { status: 500 },
     );
   }
