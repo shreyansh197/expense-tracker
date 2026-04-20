@@ -84,14 +84,14 @@ function DesktopAuthPage({ children }: { children: React.ReactNode }) {
         autoPlay
         muted
         playsInline
+        preload="auto"
+        src="/ExpenStream.mp4"
         style={{
           position: "absolute", inset: 0,
           width: "100%", height: "100%",
           objectFit: "cover", objectPosition: "center 60%",
         }}
-      >
-        <source src="/ExpenStream.mp4" type="video/mp4" />
-      </video>
+      />
       <div
         className="pointer-events-none absolute inset-0"
         style={{

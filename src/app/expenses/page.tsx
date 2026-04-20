@@ -171,7 +171,7 @@ function ExpensesContent() {
               placeholder="Search the stream bed…"
               value={localSearch}
               onChange={(e) => handleSearchChange(e.target.value)}
-              className="w-full rounded-2xl py-2.5 pl-9 pr-3 text-sm focus:outline-none focus:ring-2"
+              className="w-full rounded-2xl py-2.5 pl-9 pr-3 text-base sm:text-sm focus:outline-none focus:ring-2"
               style={{
                 background: "var(--surface)",
                 border: "1px solid var(--border)",

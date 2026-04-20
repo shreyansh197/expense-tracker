@@ -158,7 +158,15 @@ export async function GET(req: NextRequest) {
           },
         });
       } else {
-        // 4. Existing user — get primary workspace
+        // 4. Existing user — refresh avatar from Google and get primary workspace
+        if (googleUser.picture && googleUser.picture !== dbUser.avatarUrl) {
+          await tx.user.update({
+            where: { id: dbUser.id },
+            data: { avatarUrl: googleUser.picture },
+          });
+          dbUser = { ...dbUser, avatarUrl: googleUser.picture };
+        }
+
         const membership = await tx.membership.findFirst({
           where: { userId: dbUser.id },
           orderBy: { createdAt: "asc" },
