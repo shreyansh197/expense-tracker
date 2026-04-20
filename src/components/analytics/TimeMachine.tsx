@@ -143,8 +143,9 @@ export function TimeMachine() {
                 <input
                   type="number"
                   min={0}
-                  value={scenario.replacementAmount}
-                  onChange={(e) => setScenario((s) => s ? { ...s, replacementAmount: Math.max(0, Number(e.target.value)) } : null)}
+                  value={scenario.replacementAmount === 0 ? "" : scenario.replacementAmount}
+                  placeholder="0"
+                  onChange={(e) => setScenario((s) => s ? { ...s, replacementAmount: e.target.value === "" ? 0 : Math.max(0, Number(e.target.value)) } : null)}
                   className="w-32 rounded-lg border px-3 py-2 text-base sm:text-sm font-numeric"
                   style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--text-primary)" }}
                 />
