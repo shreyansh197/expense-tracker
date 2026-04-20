@@ -114,8 +114,9 @@ export async function refreshTokens(): Promise<boolean> {
       });
 
       if (!res.ok) {
-        clearAuthState();
-        setAuthState({ user: null, tokens: null, workspaces: [], activeWorkspaceId: null });
+        // Don't clear auth state here — let the caller or heartbeat decide.
+        // Clearing here causes race conditions when multiple requests trigger
+        // refresh simultaneously or during page transitions.
         return false;
       }
 

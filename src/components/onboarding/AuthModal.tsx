@@ -125,7 +125,7 @@ function MobileAuthPage({ children }: { children: React.ReactNode }) {
         position: "relative",
         minHeight: "100dvh",
         background: "var(--background)",
-        overflowY: "auto",
+        overflow: "hidden",
       }}
     >
       <HeroBackground />
@@ -187,7 +187,7 @@ function MobileAuthPage({ children }: { children: React.ReactNode }) {
       </div>
 
       {/* ── Form card — bottom section ──────────────────── */}
-      <div style={{ position: "relative", zIndex: 1, flex: 1, display: "flex", flexDirection: "column" }}>
+      <div style={{ position: "relative", zIndex: 1, flex: 1, display: "flex", flexDirection: "column", overflowY: "auto" }}>
         <div style={{ flex: 1, minHeight: 8 }} />
         <div
           className="card-terrain rounded-t-3xl px-6 pt-7 pb-8 shadow-2xl"
@@ -396,7 +396,7 @@ export function AuthModal({
                 onChange={(e) => setEmail(e.target.value)}
                 autoComplete="email"
                 autoFocus
-                className="w-full rounded-2xl py-4 pl-10 pr-4 text-sm transition-all focus:outline-none focus:ring-2 focus:border-[var(--primary)]"
+                className="w-full rounded-2xl py-4 pl-10 pr-4 text-base sm:text-sm transition-all focus:outline-none focus:ring-2 focus:border-[var(--primary)]"
                 style={{ background: 'var(--surface-secondary)', border: '1px solid var(--border)', color: 'var(--text-primary)', '--tw-ring-color': 'var(--primary)' } as React.CSSProperties}
               />
             </div>
@@ -662,7 +662,7 @@ export function AuthModal({
               placeholder="Name (optional)"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full rounded-2xl py-4 pl-10 pr-4 text-sm transition-all focus:outline-none focus:ring-2 focus:border-[var(--primary)]"
+              className="w-full rounded-2xl py-4 pl-10 pr-4 text-base sm:text-sm transition-all focus:outline-none focus:ring-2 focus:border-[var(--primary)]"
               style={{ background: 'var(--surface-secondary)', border: '1px solid var(--border)', color: 'var(--text-primary)', '--tw-ring-color': 'var(--primary)' } as React.CSSProperties}
             />
           </div>
@@ -676,7 +676,7 @@ export function AuthModal({
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             autoComplete="email"
-            className="w-full rounded-2xl py-4 pl-10 pr-4 text-sm transition-all focus:outline-none focus:ring-2 focus:border-[var(--primary)]"
+            className="w-full rounded-2xl py-4 pl-10 pr-4 text-base sm:text-sm transition-all focus:outline-none focus:ring-2 focus:border-[var(--primary)]"
             style={{ background: 'var(--surface-secondary)', border: '1px solid var(--border)', color: 'var(--text-primary)', '--tw-ring-color': 'var(--primary)' } as React.CSSProperties}
           />
         </div>
@@ -689,7 +689,7 @@ export function AuthModal({
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             autoComplete={isRegister ? "new-password" : "current-password"}
-            className="w-full rounded-2xl py-4 pl-10 pr-12 text-sm transition-all focus:outline-none focus:ring-2 focus:border-[var(--primary)] [&::-ms-reveal]:hidden [&::-ms-clear]:hidden [&::-webkit-contacts-auto-fill-button]:hidden [&::-webkit-credentials-auto-fill-button]:hidden"
+            className="w-full rounded-2xl py-4 pl-10 pr-12 text-base sm:text-sm transition-all focus:outline-none focus:ring-2 focus:border-[var(--primary)] [&::-ms-reveal]:hidden [&::-ms-clear]:hidden [&::-webkit-contacts-auto-fill-button]:hidden [&::-webkit-credentials-auto-fill-button]:hidden"
             style={{ background: 'var(--surface-secondary)', border: '1px solid var(--border)', color: 'var(--text-primary)', '--tw-ring-color': 'var(--primary)', WebkitTextSecurity: showPassword ? "none" : undefined } as React.CSSProperties}
           />
           <button

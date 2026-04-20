@@ -161,8 +161,22 @@ export async function POST(req: NextRequest) {
   return res;
   } catch (err) {
     console.error("[register]", err);
+    const message = err instanceof Error ? err.message : String(err);
+    // Surface safe details for common DB errors
+    if (message.includes("connect") || message.includes("ECONNREFUSED")) {
+      return NextResponse.json(
+        { error: "Database is temporarily unavailable. Please try again." },
+        { status: 503 },
+      );
+    }
+    if (message.includes("unique constraint") || message.includes("duplicate key")) {
+      return NextResponse.json(
+        { error: "An account with this email already exists" },
+        { status: 409 },
+      );
+    }
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: "Registration failed. Please try again later." },
       { status: 500 },
     );
   }

@@ -205,8 +205,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!state.tokens?.accessToken) return;
 
     const INTERVAL_MS = 30_000; // 30 seconds
+    const STARTUP_GRACE_MS = 5_000; // Don't check session within 5s of mount
+    const mountedAt = Date.now();
 
     const checkSession = async () => {
+      // Skip checks during startup grace period to avoid race with page reload after login
+      if (Date.now() - mountedAt < STARTUP_GRACE_MS) return;
       try {
         const res = await authFetch("/api/auth/check");
         if (res.status === 401) {
