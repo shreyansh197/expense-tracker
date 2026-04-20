@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useCallback, useEffect, useRef } from "react";
+import { useMemo, useState, useCallback, useEffect } from "react";
 import { m, AnimatePresence } from "framer-motion";
 import { Trophy, Plus, ChevronRight, Check, X, Info } from "lucide-react";
 import { useSettings } from "@/hooks/useSettings";
@@ -30,19 +30,19 @@ export function SpendingChallenges() {
     [activeChallenges, expenses],
   );
 
-  // Only persist when a challenge's STATUS changes (active→completed/failed)
-  // Progress is recomputed from expenses every render, no need to persist it
-  const lastStatusRef = useRef<string>("");
+  // Persist ONLY when evaluateChallenge transitions a challenge to completed/failed.
+  // Adding new challenges and progress updates are handled elsewhere — this avoids
+  // racing with handleStart or the sync engine.
   useEffect(() => {
-    if (evaluated.length === 0) return;
-    const statusKey = JSON.stringify(evaluated.map((e) => e.status));
-    if (statusKey === lastStatusRef.current) return;
-    const prev = lastStatusRef.current;
-    lastStatusRef.current = statusKey;
-    // Skip the first seed — nothing to persist yet
-    if (prev === "") return;
+    if (evaluated.length === 0 || activeChallenges.length === 0) return;
+    const origMap = new Map(activeChallenges.map((c) => [c.id, c.status]));
+    const hasTerminalTransition = evaluated.some((e) => {
+      const origStatus = origMap.get(e.id);
+      return origStatus === "active" && (e.status === "completed" || e.status === "failed");
+    });
+    if (!hasTerminalTransition) return;
     updateSettings({ activeChallenges: evaluated });
-  }, [evaluated, updateSettings]);
+  }, [evaluated, activeChallenges, updateSettings]);
 
   const active = evaluated.filter((c) => c.status === "active");
   const recent = evaluated.filter((c) => c.status === "completed" || c.status === "failed").slice(-3);
