@@ -21,10 +21,6 @@ interface SpendingStreamProps {
   anomalyDays?: Set<number>;
   /** Monthly budget for tooltip % display */
   effectiveBudget?: number;
-  /** Remaining budget for forecast marker */
-  remaining?: number;
-  /** Days remaining in month */
-  daysRemaining?: number;
   /** Currency formatter */
   formatCurrency?: (n: number) => string;
   className?: string;
@@ -37,8 +33,6 @@ export function SpendingStream({
   dailyBudgetPace = 0,
   anomalyDays,
   effectiveBudget = 0,
-  remaining = 0,
-  daysRemaining = 0,
   formatCurrency,
   className,
 }: SpendingStreamProps) {
@@ -237,13 +231,17 @@ export function SpendingStream({
         if (!stone) return null;
         const leftPct = (stone.x / VB_W) * 100;
         const pctOfDaily = dailyBudget > 0 ? Math.round((stone.value / dailyBudget) * 100) : null;
+        // Clamp tooltip so it doesn't overflow left/right edges
+        const clampedLeft = Math.max(12, Math.min(leftPct, 88));
+        // Shift transform origin based on position
+        const translateX = leftPct < 15 ? "0%" : leftPct > 85 ? "-100%" : "-50%";
         return (
           <div
             style={{
               position: "absolute",
               top: -6,
-              left: `${leftPct}%`,
-              transform: "translate(-50%, -100%)",
+              left: `${clampedLeft}%`,
+              transform: `translate(${translateX}, -100%)`,
               zIndex: 10,
               pointerEvents: "none",
             }}

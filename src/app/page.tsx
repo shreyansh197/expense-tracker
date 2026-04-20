@@ -517,8 +517,6 @@ function DashboardContent() {
                   dailyBudgetPace={paceToStayUnder}
                   anomalyDays={anomalyDays}
                   effectiveBudget={effectiveBudget}
-                  remaining={remaining}
-                  daysRemaining={daysRemaining}
                   formatCurrency={formatCurrency}
                 />
               </div>

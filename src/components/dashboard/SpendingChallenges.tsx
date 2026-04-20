@@ -30,17 +30,20 @@ export function SpendingChallenges() {
     [activeChallenges, expenses],
   );
 
-  // Persist evaluations if status changed — use a ref to avoid re-render loops
+  // Persist evaluations if status/progress changed — use a ref to avoid re-render loops
   const lastPersistedRef = useRef<string>("");
   useEffect(() => {
+    if (evaluated.length === 0) return;
     const key = JSON.stringify(evaluated.map((e) => ({ s: e.status, p: e.progress })));
     if (key === lastPersistedRef.current) return;
-    const hasChanges = evaluated.some((e, i) => e.status !== activeChallenges[i]?.status || e.progress !== activeChallenges[i]?.progress);
-    if (hasChanges) {
+    // On first render, seed the ref without persisting to avoid overwriting just-started challenges
+    if (lastPersistedRef.current === "") {
       lastPersistedRef.current = key;
-      updateSettings({ activeChallenges: evaluated });
+      return;
     }
-  }, [evaluated, activeChallenges, updateSettings]);
+    lastPersistedRef.current = key;
+    updateSettings({ activeChallenges: evaluated });
+  }, [evaluated, updateSettings]);
 
   const active = evaluated.filter((c) => c.status === "active");
   const recent = evaluated.filter((c) => c.status === "completed" || c.status === "failed").slice(-3);

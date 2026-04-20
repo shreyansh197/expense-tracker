@@ -63,7 +63,7 @@ export function CategoryChips() {
         dismissHint();
       }, LONG_PRESS_MS);
     },
-    [activeCategories, setActiveCategories],
+    [activeCategories, setActiveCategories, dismissHint],
   );
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
@@ -138,7 +138,7 @@ export function CategoryChips() {
               animate={isHolding ? { scale: 1.1 } : { scale: 1 }}
               transition={{ type: "spring", stiffness: 400, damping: 20 }}
               className={cn(
-                "relative shrink-0 overflow-hidden rounded-full px-3.5 py-2 text-xs font-medium transition-all",
+                "relative shrink-0 overflow-hidden rounded-full px-3.5 py-2 text-xs font-medium transition-all select-none",
                 isActive ? "text-white" : "",
               )}
               style={{

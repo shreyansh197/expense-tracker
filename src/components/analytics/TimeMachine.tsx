@@ -122,7 +122,7 @@ export function TimeMachine() {
                 });
                 setShowWhatIf(true);
               }}
-              className="mt-1 w-full rounded-lg border px-3 py-2 text-sm"
+              className="mt-1 w-full rounded-lg border px-3 py-2 text-base sm:text-sm"
               style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--text-primary)" }}
             >
               <option value="">Choose a category</option>
@@ -145,7 +145,7 @@ export function TimeMachine() {
                   min={0}
                   value={scenario.replacementAmount}
                   onChange={(e) => setScenario((s) => s ? { ...s, replacementAmount: Math.max(0, Number(e.target.value)) } : null)}
-                  className="w-32 rounded-lg border px-3 py-2 text-sm font-numeric"
+                  className="w-32 rounded-lg border px-3 py-2 text-base sm:text-sm font-numeric"
                   style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--text-primary)" }}
                 />
                 <span className="text-xs" style={{ color: "var(--text-muted)" }}>
