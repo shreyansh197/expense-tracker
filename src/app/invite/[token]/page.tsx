@@ -105,7 +105,7 @@ export default function InvitePage() {
     return (
       <div className="flex min-h-screen items-center justify-center p-4">
         <div className="w-full max-w-sm card-terrain rounded-2xl p-6 text-center">
-          <CheckCircle2 className="mx-auto h-10 w-10 mb-4" style={{ color: 'var(--es-moss)' }} />
+          <CheckCircle2 className="mx-auto h-10 w-10 mb-4" style={{ color: 'var(--accent)' }} />
           <h2 className="font-display italic text-xl mb-2" style={{ color: 'var(--text-primary)' }}>
             Joined.
           </h2>
@@ -123,7 +123,7 @@ export default function InvitePage() {
     <div className="flex min-h-screen items-center justify-center p-4">
       <div className="w-full max-w-sm card-terrain rounded-2xl p-6">
         <div className="flex h-12 w-12 items-center justify-center rounded-full mx-auto mb-4" style={{ background: 'var(--es-chalk)', border: '1px solid var(--border)' }}>
-          <Users className="h-6 w-6" style={{ color: 'var(--es-moss)' }} />
+          <Users className="h-6 w-6" style={{ color: 'var(--accent)' }} />
         </div>
 
         <h2 className="text-center font-display italic text-2xl mb-1" style={{ color: 'var(--text-primary)' }}>
@@ -147,7 +147,7 @@ export default function InvitePage() {
           onClick={handleAccept}
           disabled={accepting}
           className="w-full rounded-full py-3 text-base font-semibold text-white disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
-          style={{ background: 'var(--es-moss)' }}
+          style={{ background: 'var(--accent)' }}
         >
           {accepting && <Loader2 className="h-4 w-4 animate-spin" />}
           {isAuthenticated ? "Accept Invite" : "Sign In to Accept"}

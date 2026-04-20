@@ -68,7 +68,7 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
     touchStart.current = null;
     // Only trigger if horizontal swipe is dominant and >80px
     if (Math.abs(dx) > 80 && Math.abs(dx) > Math.abs(dy) * 1.5) {
-      if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate(50);
+      if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate(30);
       const change = dx > 0 ? prevMonth : nextMonth;
       if (typeof document !== "undefined" && "startViewTransition" in document) {
         (document as unknown as { startViewTransition: (cb: () => void) => void }).startViewTransition(change);
@@ -209,6 +209,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           onComplete={() => {
             setShowTutorial(false);
             localStorage.setItem("expenstream-tutorial-seen", "1");
+          }}
+          onSetup={(currency, budget) => {
+            const updates: Record<string, unknown> = {};
+            if (currency) updates.currency = currency;
+            if (budget > 0) updates.salary = budget;
+            if (Object.keys(updates).length > 0) {
+              updateSettings(updates as Parameters<typeof updateSettings>[0]);
+            }
           }}
         />
       )}

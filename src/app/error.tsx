@@ -42,7 +42,7 @@ export default function GlobalError({
         <button
           onClick={reset}
           className="rounded-full px-5 py-2.5 text-sm font-medium text-white transition-all active:scale-95"
-          style={{ background: "var(--es-moss, #3D5A3E)" }}
+          style={{ background: "var(--accent)" }}
         >
           Try again
         </button>

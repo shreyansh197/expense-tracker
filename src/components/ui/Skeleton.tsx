@@ -224,3 +224,50 @@ export function SkeletonMembersList() {
     </div>
   );
 }
+
+export function SkeletonAnalytics() {
+  return (
+    <div className="space-y-4" role="status" aria-busy="true" aria-label="Loading analytics">
+      {/* Weather cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} className="card-sm p-4">
+            <Skeleton className="mb-2 h-3 w-14" />
+            <Skeleton className="mb-1 h-6 w-20" />
+            <Skeleton className="h-2 w-12" />
+          </div>
+        ))}
+      </div>
+      {/* Two-column strata */}
+      <div className="grid gap-4 md:grid-cols-2">
+        <div className="card p-5">
+          <Skeleton className="mb-4 h-4 w-28" />
+          <div className="flex items-end gap-3 h-28">
+            {[40, 65, 30, 80, 50].map((h, i) => (
+              <Skeleton key={i} className="flex-1 rounded-t-md" style={{ height: `${h}%` }} />
+            ))}
+          </div>
+        </div>
+        <div className="card p-5">
+          <Skeleton className="mb-4 h-4 w-28" />
+          <div className="space-y-3">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="flex items-center gap-3">
+                <Skeleton className="h-5 w-5 rounded-full" />
+                <Skeleton className="h-3 w-32 flex-1" />
+                <Skeleton className="h-4 w-14" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+      {/* Chronicle placeholder */}
+      <div className="card p-5">
+        <Skeleton className="mb-3 h-4 w-20" />
+        <Skeleton className="mb-2 h-3 w-full" />
+        <Skeleton className="mb-2 h-3 w-3/4" />
+        <Skeleton className="h-3 w-1/2" />
+      </div>
+    </div>
+  );
+}

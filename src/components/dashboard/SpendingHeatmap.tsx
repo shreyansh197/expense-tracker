@@ -37,7 +37,7 @@ export function SpendingHeatmap({ expenses, month, year, onDayClick, todayTotal 
   const intensityColor = [
     "var(--es-mist)",     // 0 - resting
     "var(--es-sage)",     // 1 - calm
-    "var(--es-moss)",     // 2 - steady
+    "var(--accent)",     // 2 - steady
     "var(--es-clay)",     // 3 - active
     "var(--accent)",      // 4 - surging
   ][pulseRate.intensity];

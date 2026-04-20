@@ -110,7 +110,7 @@ export function OfflineScreen() {
             You&apos;re offline
           </p>
           <p style={{ fontSize: "0.725rem", color: "var(--text-secondary)", lineHeight: 1.3 }}>
-            Changes will sync when you reconnect
+            You can still log expenses — changes will sync when you reconnect
           </p>
         </div>
 

@@ -27,7 +27,7 @@ export default function NotFound() {
       <Link
         href="/"
         className="rounded-full px-6 py-2.5 text-sm font-medium text-white transition-all active:scale-95 hover:opacity-90"
-        style={{ background: "var(--es-moss, #3D5A3E)" }}
+        style={{ background: "var(--accent)" }}
       >
         Head back
       </Link>

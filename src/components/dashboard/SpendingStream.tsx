@@ -1,11 +1,11 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState, useCallback } from "react";
 import { m, useReducedMotion } from "framer-motion";
 
 /* ── Layout constants ── */
 const VB_W = 360;
-const VB_H = 80;
+const VB_H = 160;
 const PAD_X = 10;
 
 interface SpendingStreamProps {
@@ -15,29 +15,44 @@ interface SpendingStreamProps {
   dailyValues?: number[];
   /** Total days in the month */
   daysInMonth?: number;
+  /** Daily budget pace (budget ÷ days) for baseline line */
+  dailyBudgetPace?: number;
+  /** Anomaly day numbers to highlight */
+  anomalyDays?: Set<number>;
+  /** Monthly budget for tooltip % display */
+  effectiveBudget?: number;
+  /** Remaining budget for forecast marker */
+  remaining?: number;
+  /** Days remaining in month */
+  daysRemaining?: number;
+  /** Currency formatter */
+  formatCurrency?: (n: number) => string;
   className?: string;
 }
 
-/**
- * Signature "Spending Stream" — a layered terrain-water visualization.
- *
- * 4 parallax wave layers · background terrain ridges · log-scaled stones
- * with ripple rings · drifting mist · rising vapor particles.
- *
- * Color blends smoothly from moss → clay → ember as budget usage climbs.
- * Respects prefers-reduced-motion with a beautiful static fallback.
- */
 export function SpendingStream({
   budgetUsedPercent,
   dailyValues = [],
   daysInMonth = 30,
+  dailyBudgetPace = 0,
+  anomalyDays,
+  effectiveBudget = 0,
+  remaining = 0,
+  daysRemaining = 0,
+  formatCurrency,
   className,
 }: SpendingStreamProps) {
   const prefersReduced = useReducedMotion();
   const clamped = Math.min(Math.max(budgetUsedPercent, 0), 120);
+  const [activeStone, setActiveStone] = useState<number | null>(null);
+
+  const fmt = useCallback(
+    (n: number) => (formatCurrency ? formatCurrency(n) : `₹${n.toLocaleString()}`),
+    [formatCurrency],
+  );
 
   /* ── Water geometry ── */
-  const waterHeight = 14 + (clamped / 100) * 40;
+  const waterHeight = 14 + (clamped / 100) * 90;
   const waveY = VB_H - waterHeight;
   const baseOpacity = 0.12 + (clamped / 100) * 0.2;
 
@@ -45,60 +60,61 @@ export function SpendingStream({
   const warningIntensity = clamped > 50 ? Math.min((clamped - 50) / 35, 1) : 0;
   const dangerIntensity = clamped > 80 ? Math.min((clamped - 80) / 30, 1) : 0;
 
+  /* ── Budget horizon line Y position (100% mark) ── */
+  const budgetHorizonY = VB_H - (14 + 90);
+
   /* ── Today marker ── */
   const today = new Date().getDate();
 
-  /* ── Expense stones (log-scaled sizing) ── */
+  /* ── Daily budget baseline Y (mapped into same weight-space as stones) ── */
+  const baselineY = useMemo(() => {
+    if (!dailyBudgetPace || dailyBudgetPace <= 0) return null;
+    const maxVal = Math.max(...dailyValues.filter((v) => v > 0), 1);
+    if (maxVal <= 0) return null;
+    const weight = Math.log2(dailyBudgetPace + 1) / Math.log2(maxVal + 1);
+    const clampedWeight = Math.min(Math.max(weight, 0), 1);
+    return waveY + clampedWeight * 50;
+  }, [dailyBudgetPace, dailyValues, waveY]);
+
+  /* ── Expense stones ── */
   const stones = useMemo(() => {
     const span = VB_W - PAD_X * 2;
+    const maxVal = Math.max(...dailyValues.filter((v) => v > 0), 1);
     return dailyValues
-      .map((v, i) => ({
-        day: i + 1,
-        value: v,
-        x: (i / Math.max(daysInMonth - 1, 1)) * span + PAD_X,
-        isToday: i + 1 === today,
-      }))
+      .map((v, i) => {
+        const weight = v > 0 ? Math.log2(v + 1) / Math.log2(maxVal + 1) : 0;
+        return {
+          day: i + 1,
+          value: v,
+          x: (i / Math.max(daysInMonth - 1, 1)) * span + PAD_X,
+          isToday: i + 1 === today,
+          weight,
+          isAnomaly: anomalyDays?.has(i + 1) ?? false,
+        };
+      })
       .filter((s) => s.value > 0);
-  }, [dailyValues, daysInMonth, today]);
+  }, [dailyValues, daysInMonth, today, anomalyDays]);
 
-  /* ── Top 5 stones by value get ripple rings ── */
-  const topStoneSet = useMemo(() => {
-    const sorted = [...stones].sort((a, b) => b.value - a.value);
-    return new Set(sorted.slice(0, 5).map((s) => s.day));
-  }, [stones]);
-
-  /* ── 4 wave layers (cubic bezier, back → front) ── */
+  /* ── 2 wave layers (back + front — reduced from 4 for clarity) ── */
   const wavePaths = useMemo(() => {
     const y = waveY;
     return [
       {
-        d: `M0,${y + 8} C40,${y + 5} 100,${y + 10} 160,${y + 6} S240,${y + 11} 310,${y + 5} S350,${y + 9} 360,${y + 7} V${VB_H} H0Z`,
-        speed: 20,
-        opacity: 0.3,
-        shift: [-35, 35],
+        d: `M0,${y + 6} C50,${y + 2} 100,${y + 8} 160,${y + 4} S240,${y + 9} 300,${y + 2} S350,${y + 6} 360,${y + 5} V${VB_H} H0Z`,
+        speed: 16,
+        opacity: 0.35,
+        shift: [-40, 30],
       },
       {
-        d: `M0,${y + 4} C60,${y} 100,${y + 6} 160,${y + 2} S240,${y + 7} 300,${y} S350,${y + 4} 360,${y + 3} V${VB_H} H0Z`,
-        speed: 14,
-        opacity: 0.45,
-        shift: [-50, 25],
-      },
-      {
-        d: `M0,${y + 1} C50,${y + 5} 90,${y - 2} 150,${y + 4} S230,${y - 3} 290,${y + 3} S350,${y} 360,${y + 2} V${VB_H} H0Z`,
-        speed: 10,
-        opacity: 0.6,
-        shift: [-45, 30],
-      },
-      {
-        d: `M0,${y - 1} C30,${y - 4} 70,${y + 4} 120,${y - 2} S200,${y + 5} 260,${y - 3} S340,${y + 2} 360,${y} V${VB_H} H0Z`,
-        speed: 7,
-        opacity: 0.8,
-        shift: [-25, 45],
+        d: `M0,${y} C40,${y - 3} 80,${y + 4} 130,${y - 1} S210,${y + 5} 270,${y - 2} S340,${y + 2} 360,${y + 1} V${VB_H} H0Z`,
+        speed: 9,
+        opacity: 0.7,
+        shift: [-30, 40],
       },
     ];
   }, [waveY]);
 
-  /* ── Terrain ridges (static background hills) ── */
+  /* ── Terrain ridges (static background) ── */
   const ridges = useMemo(() => {
     const y = waveY;
     return [
@@ -107,27 +123,52 @@ export function SpendingStream({
     ];
   }, [waveY]);
 
-  /* ── Mist wisps ── */
-  const mists = useMemo(
-    () => [
-      { cx: 80, cy: waveY - 4, rx: 50, ry: 3 },
-      { cx: 220, cy: waveY - 6, rx: 40, ry: 2.5 },
-      { cx: 320, cy: waveY - 3, rx: 35, ry: 2 },
-    ],
-    [waveY],
+  /* ── Gauge marks (right edge) at 50%, 75%, 100% ── */
+  const gaugeMarks = useMemo(() => {
+    return [50, 75, 100].map((pct) => {
+      const h = 14 + (pct / 100) * 90;
+      return { pct, y: VB_H - h };
+    });
+  }, []);
+
+  /* ── Week bands (alternating subtle background) ── */
+  const weekBands = useMemo(() => {
+    const span = VB_W - PAD_X * 2;
+    const dayWidth = span / Math.max(daysInMonth - 1, 1);
+    const bands: { x: number; w: number; week: number }[] = [];
+    let weekStart = 0;
+    for (let d = 0; d < daysInMonth; d++) {
+      if (d > 0 && d % 7 === 0) {
+        const x = PAD_X + weekStart * dayWidth - dayWidth * 0.5;
+        const w = (d - weekStart) * dayWidth;
+        bands.push({ x, w, week: Math.floor(weekStart / 7) });
+        weekStart = d;
+      }
+    }
+    const x = PAD_X + weekStart * dayWidth - dayWidth * 0.5;
+    const w = (daysInMonth - weekStart) * dayWidth + dayWidth * 0.5;
+    bands.push({ x, w, week: Math.floor(weekStart / 7) });
+    return bands;
+  }, [daysInMonth]);
+
+  /* ── Stone color: sage → moss → clay by weight, accent for anomalies ── */
+  const stoneColor = useCallback(
+    (weight: number, isAnomaly: boolean) => {
+      if (isAnomaly) return "var(--accent)";
+      if (weight < 0.4) return "var(--secondary)";
+      if (weight < 0.7) return "var(--primary)";
+      return "var(--accent-deep)";
+    },
+    [],
   );
 
-  /* ── Rising vapor dots ── */
-  const vapors = useMemo(
-    () => [
-      { cx: 55, sy: waveY, r: 1.2 },
-      { cx: 125, sy: waveY + 2, r: 1 },
-      { cx: 195, sy: waveY - 1, r: 1.3 },
-      { cx: 275, sy: waveY + 1, r: 0.8 },
-      { cx: 340, sy: waveY, r: 1.1 },
-    ],
-    [waveY],
-  );
+  const handleStoneEnter = useCallback((day: number) => {
+    setActiveStone(day);
+  }, []);
+
+  const handleStoneLeave = useCallback(() => {
+    setActiveStone(null);
+  }, []);
 
   /* ═══════════════════════════════════════════════════════
      Reduced-motion fallback — static gradient bar + stones
@@ -143,7 +184,8 @@ export function SpendingStream({
       <div
         className={className}
         style={{ position: "relative", height: 12, borderRadius: 6 }}
-        role="presentation"
+        role="img"
+        aria-label={`Spending stream: ${Math.round(clamped)}% of budget used`}
       >
         <div
           style={{
@@ -167,9 +209,9 @@ export function SpendingStream({
               key={s.day}
               cx={s.x}
               cy={6}
-              r={Math.min(1 + Math.log2(s.value + 1) * 0.4, 2.5)}
-              fill="var(--text-primary)"
-              opacity={s.isToday ? 0.4 : 0.2}
+              r={Math.min(1.5 + Math.log2(s.value + 1) * 0.5, 3.5)}
+              fill={stoneColor(s.weight, s.isAnomaly)}
+              opacity={s.isToday ? 0.5 : 0.35}
             />
           ))}
         </svg>
@@ -180,12 +222,59 @@ export function SpendingStream({
   /* ═══════════════════════════════════════════════════
      Full visualization — layered terrain-water scene
      ═══════════════════════════════════════════════════ */
+  const dailyBudget = effectiveBudget > 0 ? effectiveBudget / daysInMonth : 0;
+
   return (
     <div
       className={className}
-      style={{ overflow: "hidden", height: VB_H, position: "relative" }}
-      role="presentation"
+      style={{ position: "relative" }}
+      role="img"
+      aria-label={`Spending stream: ${Math.round(clamped)}% of budget used`}
     >
+      {/* Active stone tooltip — HTML above SVG, never clipped */}
+      {activeStone !== null && (() => {
+        const stone = stones.find((s) => s.day === activeStone);
+        if (!stone) return null;
+        const leftPct = (stone.x / VB_W) * 100;
+        const pctOfDaily = dailyBudget > 0 ? Math.round((stone.value / dailyBudget) * 100) : null;
+        return (
+          <div
+            style={{
+              position: "absolute",
+              top: -6,
+              left: `${leftPct}%`,
+              transform: "translate(-50%, -100%)",
+              zIndex: 10,
+              pointerEvents: "none",
+            }}
+          >
+            <div
+              className="rounded-lg px-2.5 py-1.5 text-xs font-semibold whitespace-nowrap"
+              style={{
+                background: "var(--surface)",
+                border: "1px solid var(--border)",
+                color: "var(--text-primary)",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.12)",
+              }}
+            >
+              <div>Day {stone.day}: {fmt(stone.value)}</div>
+              {pctOfDaily !== null && (
+                <div
+                  style={{
+                    fontSize: 10,
+                    color: pctOfDaily > 100 ? "var(--accent)" : "var(--text-muted)",
+                    marginTop: 1,
+                  }}
+                >
+                  {pctOfDaily}% of daily budget
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      })()}
+
+      <div style={{ overflow: "hidden", height: VB_H }}>
       <svg
         viewBox={`0 0 ${VB_W} ${VB_H}`}
         preserveAspectRatio="none"
@@ -194,16 +283,14 @@ export function SpendingStream({
         aria-hidden="true"
       >
         <defs>
-          {/* Base water gradient — moss/sage blend */}
+          {/* Base water gradient — simplified 2-tone */}
           <linearGradient id="ss-base" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stopColor="var(--primary)" stopOpacity={baseOpacity * 0.7} />
-            <stop offset="25%" stopColor="var(--secondary)" stopOpacity={baseOpacity * 0.9} />
-            <stop offset="50%" stopColor="var(--primary)" stopOpacity={baseOpacity} />
-            <stop offset="75%" stopColor="var(--secondary)" stopOpacity={baseOpacity * 0.9} />
-            <stop offset="100%" stopColor="var(--primary)" stopOpacity={baseOpacity * 0.7} />
+            <stop offset="0%" stopColor="var(--primary)" stopOpacity={baseOpacity * 0.8} />
+            <stop offset="50%" stopColor="var(--secondary)" stopOpacity={baseOpacity} />
+            <stop offset="100%" stopColor="var(--primary)" stopOpacity={baseOpacity * 0.8} />
           </linearGradient>
 
-          {/* Warning overlay (clay) — fades in above 50 % */}
+          {/* Warning overlay (clay) — fades in above 50% */}
           <linearGradient id="ss-warn" x1="0" y1="0" x2="1" y2="0">
             <stop offset="0%" stopColor="var(--accent)" stopOpacity={0} />
             <stop offset="30%" stopColor="var(--accent)" stopOpacity={warningIntensity * 0.25} />
@@ -211,7 +298,7 @@ export function SpendingStream({
             <stop offset="100%" stopColor="var(--accent)" stopOpacity={0} />
           </linearGradient>
 
-          {/* Danger overlay (ember) — fades in above 80 % */}
+          {/* Danger overlay (ember) — fades in above 80% */}
           <linearGradient id="ss-danger" x1="0" y1="0" x2="1" y2="0">
             <stop offset="0%" stopColor="var(--danger)" stopOpacity={0} />
             <stop offset="40%" stopColor="var(--danger)" stopOpacity={dangerIntensity * 0.3} />
@@ -219,13 +306,13 @@ export function SpendingStream({
             <stop offset="100%" stopColor="var(--danger)" stopOpacity={0} />
           </linearGradient>
 
-          {/* Vertical depth tint — darker towards the bottom */}
+          {/* Vertical depth tint */}
           <linearGradient id="ss-depth" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="var(--primary)" stopOpacity={0.02} />
             <stop offset="100%" stopColor="var(--primary)" stopOpacity={baseOpacity * 0.4} />
           </linearGradient>
 
-          {/* Top-edge fade mask — seamless blend into card above */}
+          {/* Top-edge fade mask */}
           <linearGradient id="ss-fade" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="white" stopOpacity={0} />
             <stop offset="12%" stopColor="white" stopOpacity={1} />
@@ -237,29 +324,35 @@ export function SpendingStream({
 
           {/* Stone drop-shadow */}
           <filter id="ss-shadow" x="-50%" y="-50%" width="200%" height="200%">
-            <feDropShadow dx="0" dy="0.5" stdDeviation="1" floodOpacity="0.3" />
+            <feDropShadow dx="0" dy="0.5" stdDeviation="0.8" floodOpacity="0.25" />
           </filter>
 
-          {/* Organic wave distortion (front wave only) */}
-          <filter id="ss-organic" x="-5%" y="-5%" width="110%" height="110%">
-            <feTurbulence
-              type="fractalNoise"
-              baseFrequency="0.02"
-              numOctaves={1}
-              seed={3}
-              result="noise"
-            />
-            <feDisplacementMap
-              in="SourceGraphic"
-              in2="noise"
-              scale={1.5}
-              xChannelSelector="R"
-              yChannelSelector="G"
-            />
+          {/* Anomaly glow */}
+          <filter id="ss-anomaly-glow" x="-100%" y="-100%" width="300%" height="300%">
+            <feGaussianBlur stdDeviation="2.5" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
           </filter>
         </defs>
 
         <g mask="url(#ss-mask)">
+          {/* ── Week bands (subtle alternating background) ── */}
+          {weekBands.map((band) => (
+            band.week % 2 === 1 ? (
+              <rect
+                key={band.week}
+                x={band.x}
+                y={0}
+                width={band.w}
+                height={VB_H}
+                fill="var(--primary)"
+                opacity={0.03}
+              />
+            ) : null
+          ))}
+
           {/* ── Terrain ridges (static background hills) ── */}
           <path d={ridges[0]} fill="var(--primary)" opacity={0.06} />
           <path d={ridges[1]} fill="var(--primary)" opacity={0.10} />
@@ -273,7 +366,58 @@ export function SpendingStream({
             fill="url(#ss-depth)"
           />
 
-          {/* ── 4 wave layers (back → front) ── */}
+          {/* ── Budget horizon line (dashed, at 100% mark) ── */}
+          <line
+            x1={PAD_X}
+            x2={VB_W - PAD_X}
+            y1={budgetHorizonY}
+            y2={budgetHorizonY}
+            stroke="var(--danger)"
+            strokeWidth={0.5}
+            strokeDasharray="4 3"
+            opacity={0.35}
+          />
+
+          {/* ── Daily budget baseline (calm dashed line) ── */}
+          {baselineY !== null && (
+            <line
+              x1={PAD_X}
+              x2={VB_W - PAD_X}
+              y1={baselineY}
+              y2={baselineY}
+              stroke="var(--secondary)"
+              strokeWidth={0.8}
+              strokeDasharray="6 4"
+              opacity={0.5}
+            />
+          )}
+
+          {/* ── Right-edge gauge marks (50%, 75%, 100%) ── */}
+          {gaugeMarks.map((g) => (
+            <g key={g.pct}>
+              <line
+                x1={VB_W - 6}
+                x2={VB_W}
+                y1={g.y}
+                y2={g.y}
+                stroke="var(--text-muted)"
+                strokeWidth={0.5}
+                opacity={0.4}
+              />
+              <text
+                x={VB_W - 8}
+                y={g.y + 2}
+                textAnchor="end"
+                fontSize={5.5}
+                fill="var(--text-muted)"
+                opacity={0.6}
+              >
+                {g.pct}%
+              </text>
+            </g>
+          ))}
+
+          {/* ── 2 wave layers (back + front) ── */}
           {wavePaths.map((w, i) => (
             <m.path
               key={`wave-${i}`}
@@ -282,20 +426,19 @@ export function SpendingStream({
               opacity={w.opacity}
               animate={{ x: [w.shift[0], w.shift[1], w.shift[0]] }}
               transition={{ duration: w.speed, ease: "linear", repeat: Infinity }}
-              filter={i === 3 ? "url(#ss-organic)" : undefined}
             />
           ))}
 
           {/* ── Color overlays (clay / ember) ── */}
           {warningIntensity > 0 && (
             <m.path
-              d={wavePaths[2].d}
+              d={wavePaths[0].d}
               fill="url(#ss-warn)"
               animate={{
-                x: [wavePaths[2].shift[0], wavePaths[2].shift[1], wavePaths[2].shift[0]],
+                x: [wavePaths[0].shift[0], wavePaths[0].shift[1], wavePaths[0].shift[0]],
               }}
               transition={{
-                duration: wavePaths[2].speed,
+                duration: wavePaths[0].speed,
                 ease: "linear",
                 repeat: Infinity,
               }}
@@ -303,30 +446,52 @@ export function SpendingStream({
           )}
           {dangerIntensity > 0 && (
             <m.path
-              d={wavePaths[3].d}
+              d={wavePaths[1].d}
               fill="url(#ss-danger)"
               animate={{
-                x: [wavePaths[3].shift[0], wavePaths[3].shift[1], wavePaths[3].shift[0]],
+                x: [wavePaths[1].shift[0], wavePaths[1].shift[1], wavePaths[1].shift[0]],
               }}
               transition={{
-                duration: wavePaths[3].speed,
+                duration: wavePaths[1].speed,
                 ease: "linear",
                 repeat: Infinity,
               }}
             />
           )}
 
-          {/* ── Expense stones + ripples ── */}
+          {/* ── Expense stones (weight-positioned, drifting) ── */}
           {stones.map((stone) => {
-            const r = Math.min(1.5 + Math.log2(stone.value + 1) * 0.6, 4.5);
-            const hasRipple = topStoneSet.has(stone.day);
+            const r = Math.min(1.5 + Math.log2(stone.value + 1) * 0.7, 5);
+            const rx = r * 0.65;
+            const ry = r;
+            const isActive = activeStone === stone.day;
+            const stoneY = waveY + stone.weight * 50;
+            const bobAmp = 1.2 - stone.weight * 0.8;
+            const bobDuration = 3 + (stone.day % 4) * 0.8;
+            const driftAmp = 1 - stone.weight * 0.5;
+            const fill = stoneColor(stone.weight, stone.isAnomaly);
             return (
-              <g key={stone.day}>
-                {/* Today glow pulse (behind stone) */}
+              <m.g
+                key={stone.day}
+                style={{ cursor: "pointer" }}
+                onPointerEnter={() => handleStoneEnter(stone.day)}
+                onPointerLeave={handleStoneLeave}
+                animate={{
+                  x: [0, driftAmp, -driftAmp * 0.6, 0],
+                  y: [0, -bobAmp, bobAmp * 0.4, 0],
+                }}
+                transition={{
+                  duration: bobDuration,
+                  ease: "easeInOut",
+                  repeat: Infinity,
+                  delay: (stone.day % 7) * 0.3,
+                }}
+              >
+                {/* Today glow pulse */}
                 {stone.isToday && (
                   <m.circle
                     cx={stone.x}
-                    cy={waveY + 8}
+                    cy={stoneY}
                     r={r + 3}
                     fill="var(--accent)"
                     initial={{ opacity: 0.3 }}
@@ -339,87 +504,40 @@ export function SpendingStream({
                   />
                 )}
 
-                {/* Concentric ripple rings (top 5 stones) */}
-                {hasRipple && (
-                  <g transform={`translate(${stone.x}, ${waveY + 8})`}>
-                    <m.circle
-                      r={r + 6}
-                      fill="none"
-                      stroke="var(--primary)"
-                      strokeWidth={0.5}
-                      initial={{ scale: 0.4, opacity: 0.25 }}
-                      animate={{ scale: 1, opacity: 0 }}
-                      transition={{
-                        duration: 3.5,
-                        ease: "easeOut",
-                        repeat: Infinity,
-                        delay: (stone.day % 5) * 0.6,
-                      }}
-                    />
-                    <m.circle
-                      r={r + 12}
-                      fill="none"
-                      stroke="var(--primary)"
-                      strokeWidth={0.3}
-                      initial={{ scale: 0.3, opacity: 0.15 }}
-                      animate={{ scale: 1, opacity: 0 }}
-                      transition={{
-                        duration: 4.5,
-                        ease: "easeOut",
-                        repeat: Infinity,
-                        delay: (stone.day % 5) * 0.6 + 0.8,
-                      }}
-                    />
-                  </g>
+                {/* Anomaly glow ring */}
+                {stone.isAnomaly && !stone.isToday && (
+                  <ellipse
+                    cx={stone.x}
+                    cy={stoneY}
+                    rx={rx + 3}
+                    ry={ry + 3}
+                    fill="var(--accent)"
+                    opacity={0.15}
+                    filter="url(#ss-anomaly-glow)"
+                  />
                 )}
 
-                {/* Stone body */}
-                <circle
+                {/* Stone body — ellipse pebble with lift on hover */}
+                <m.ellipse
                   cx={stone.x}
-                  cy={waveY + 8}
-                  r={r}
-                  fill="var(--text-primary)"
-                  opacity={0.2}
+                  cy={stoneY}
+                  rx={rx}
+                  ry={ry}
+                  fill={fill}
+                  opacity={isActive ? 0.55 : 0.38}
                   filter="url(#ss-shadow)"
+                  animate={isActive ? { y: -2 } : { y: 0 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
                 />
-              </g>
+              </m.g>
             );
           })}
 
-          {/* ── Mist wisps (slow horizontal drift) ── */}
-          {mists.map((mi, i) => (
-            <m.ellipse
-              key={`mist-${i}`}
-              cx={mi.cx}
-              cy={mi.cy}
-              rx={mi.rx}
-              ry={mi.ry}
-              fill="var(--surface)"
-              opacity={0.08}
-              animate={{ cx: [mi.cx - 25, mi.cx + 25, mi.cx - 25] }}
-              transition={{ duration: 16 + i * 4, ease: "linear", repeat: Infinity }}
-            />
-          ))}
-
-          {/* ── Vapor particles (rising from surface) ── */}
-          {vapors.map((v, i) => (
-            <m.circle
-              key={`vapor-${i}`}
-              cx={v.cx}
-              r={v.r}
-              fill="var(--secondary)"
-              initial={{ cy: v.sy, opacity: 0.15 }}
-              animate={{ cy: v.sy - 16, opacity: 0 }}
-              transition={{
-                duration: 4 + i,
-                ease: "easeOut",
-                repeat: Infinity,
-                delay: i * 1.4,
-              }}
-            />
-          ))}
+          {/* ── Forecast end marker ── */}
         </g>
       </svg>
+      </div>
+
     </div>
   );
 }

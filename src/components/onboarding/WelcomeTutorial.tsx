@@ -1,34 +1,47 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowRight, X } from "lucide-react";
 import { ClearingScene } from "@/components/ui/illustrations/terrain/ClearingScene";
+import { SUPPORTED_CURRENCIES } from "@/lib/utils";
 
-/* ── 4-Screen "Arrival" Flow ─────────────────────────────── */
+/* ── 5-Screen Onboarding Flow ────────────────────────────── */
 
-const SCREENS = [
+const CONTENT_SCREENS = [
   {
-    title: "Welcome to\nthe clearing.",
+    key: "welcome",
+    title: "Welcome to\nExpenStream.",
     body: "A calm place to understand where your money goes.",
     illustration: true,
   },
   {
-    title: "Drop a stone.",
-    body: "Each expense is a stone dropped into the stream. Tap the button below to log what you spend.",
-    tips: ["Swipe months to browse history", "Set a budget to unlock forecasts"],
+    key: "log",
+    title: "Log an expense.",
+    body: "Tap the + button to record what you spend. It takes seconds.",
+    tips: ["Swipe left or right to browse months", "Set a budget to unlock forecasts"],
   },
   {
-    title: "Explore the\noverlook.",
-    body: "Charts and patterns emerge as your stream of expenses grows. The more you track, the clearer the view.",
+    key: "setup",
+    title: "Quick setup.",
+    body: "Choose your currency and set a monthly budget. You can always change these later in Settings.",
+    interactive: true,
+  },
+  {
+    key: "insights",
+    title: "See your\ninsights.",
+    body: "Charts and patterns emerge as your spending history grows. The more you track, the clearer the picture.",
     tips: ["Categories colour your spending", "Recurring expenses are detected automatically"],
   },
   {
-    title: "Your clearing\nawaits.",
+    key: "done",
+    title: "You're all set.",
     body: "Start tracking and make this space yours.",
     final: true,
   },
 ] as const;
+
+const TOTAL_SCREENS = CONTENT_SCREENS.length;
 
 const slideVariants = {
   enter: (dir: number) => ({ x: dir > 0 ? 80 : -80, opacity: 0 }),
@@ -40,12 +53,15 @@ const slideVariants = {
 
 interface WelcomeTutorialProps {
   onComplete: () => void;
+  onSetup?: (currency: string, budget: number) => void;
 }
 
-export function WelcomeTutorial({ onComplete }: WelcomeTutorialProps) {
+export function WelcomeTutorial({ onComplete, onSetup }: WelcomeTutorialProps) {
   const [screen, setScreen] = useState(-1); // -1 = splash
   const [dir, setDir] = useState(1);
-  const isLast = screen === SCREENS.length - 1;
+  const [currency, setCurrency] = useState("INR");
+  const [budgetInput, setBudgetInput] = useState("");
+  const isLast = screen === TOTAL_SCREENS - 1;
 
   // Splash auto-advance after 2s
   useEffect(() => {
@@ -54,8 +70,15 @@ export function WelcomeTutorial({ onComplete }: WelcomeTutorialProps) {
     return () => clearTimeout(t);
   }, [screen]);
 
+  const commitSetup = useCallback(() => {
+    const budget = parseFloat(budgetInput) || 0;
+    onSetup?.(currency, budget);
+  }, [currency, budgetInput, onSetup]);
+
   const next = () => {
-    if (isLast) { onComplete(); return; }
+    if (isLast) { commitSetup(); onComplete(); return; }
+    // Persist setup when leaving the setup screen
+    if (CONTENT_SCREENS[screen]?.key === "setup") commitSetup();
     setDir(1);
     setScreen((s) => s + 1);
   };
@@ -76,7 +99,7 @@ export function WelcomeTutorial({ onComplete }: WelcomeTutorialProps) {
               <motion.span
                 key={i}
                 className="block w-2.5 h-2.5 rounded-full"
-                style={{ background: "var(--es-moss, #3D5A3E)" }}
+                style={{ background: "var(--accent)" }}
                 initial={{ opacity: 0.3, scale: 0.8 }}
                 animate={{ opacity: [0.3, 0.8, 0.3], scale: [0.8, 1.15, 0.8] }}
                 transition={{ duration: 2, delay: i * 0.35, repeat: Infinity, ease: "easeInOut" }}
@@ -91,7 +114,8 @@ export function WelcomeTutorial({ onComplete }: WelcomeTutorialProps) {
     );
   }
 
-  const current = SCREENS[screen];
+  const current = CONTENT_SCREENS[screen];
+  const currencyMeta = SUPPORTED_CURRENCIES.find((c) => c.code === currency) ?? SUPPORTED_CURRENCIES[0];
 
   return (
     <div
@@ -143,7 +167,7 @@ export function WelcomeTutorial({ onComplete }: WelcomeTutorialProps) {
                   <span
                     key={i}
                     className="block w-2.5 h-2.5 rounded-full"
-                    style={{ background: "var(--es-moss, #3D5A3E)", opacity: 0.6 }}
+                    style={{ background: "var(--accent)", opacity: 0.6 }}
                   />
                 ))}
               </div>
@@ -162,6 +186,66 @@ export function WelcomeTutorial({ onComplete }: WelcomeTutorialProps) {
             >
               {current.body}
             </p>
+
+            {/* Interactive setup screen */}
+            {"interactive" in current && current.interactive && (
+              <div className="mt-6 space-y-5 text-left">
+                {/* Currency selector */}
+                <div>
+                  <label className="text-xs font-semibold uppercase tracking-wider mb-2 block" style={{ color: "var(--text-tertiary)" }}>
+                    Currency
+                  </label>
+                  <div className="flex gap-2">
+                    {SUPPORTED_CURRENCIES.map((c) => (
+                      <button
+                        key={c.code}
+                        onClick={() => setCurrency(c.code)}
+                        className="flex-1 rounded-xl px-3 py-2.5 text-sm font-medium transition-all"
+                        style={{
+                          background: currency === c.code ? "var(--accent)" : "var(--surface-secondary)",
+                          color: currency === c.code ? "#fff" : "var(--text-secondary)",
+                          border: currency === c.code ? "1px solid transparent" : "1px solid var(--border)",
+                        }}
+                      >
+                        {c.symbol} {c.code}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Budget input */}
+                <div>
+                  <label className="text-xs font-semibold uppercase tracking-wider mb-2 block" style={{ color: "var(--text-tertiary)" }}>
+                    Monthly budget
+                  </label>
+                  <div className="relative">
+                    <span
+                      className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-medium"
+                      style={{ color: "var(--text-muted)" }}
+                    >
+                      {currencyMeta.symbol}
+                    </span>
+                    <input
+                      type="number"
+                      inputMode="decimal"
+                      value={budgetInput}
+                      onChange={(e) => setBudgetInput(e.target.value)}
+                      placeholder="e.g. 50000"
+                      className="w-full rounded-xl py-3 pl-9 pr-3 text-sm focus:outline-none focus:ring-2"
+                      style={{
+                        background: "var(--surface)",
+                        border: "1px solid var(--border)",
+                        color: "var(--text-primary)",
+                      }}
+                      aria-label="Monthly budget amount"
+                    />
+                  </div>
+                  <p className="mt-1.5 text-xs" style={{ color: "var(--text-muted)" }}>
+                    Optional — you can skip this and set it later.
+                  </p>
+                </div>
+              </div>
+            )}
 
             {/* Tips */}
             {"tips" in current && current.tips && (
@@ -189,13 +273,13 @@ export function WelcomeTutorial({ onComplete }: WelcomeTutorialProps) {
       <div className="px-8 pb-8">
         {/* Step dots */}
         <div className="flex justify-center gap-1.5 mb-5">
-          {SCREENS.map((_, i) => (
+          {CONTENT_SCREENS.map((_, i) => (
             <div
               key={i}
               className="h-1.5 rounded-full transition-all duration-300"
               style={{
                 width: i === screen ? 20 : 6,
-                background: i === screen ? "var(--es-moss, #3D5A3E)" : "var(--border)",
+                background: i === screen ? "var(--accent)" : "var(--border)",
               }}
             />
           ))}
@@ -214,9 +298,9 @@ export function WelcomeTutorial({ onComplete }: WelcomeTutorialProps) {
           <button
             onClick={next}
             className="flex flex-1 items-center justify-center gap-1.5 rounded-full px-4 py-3 text-sm font-medium text-white transition-all active:scale-95"
-            style={{ background: "var(--es-moss, #3D5A3E)" }}
+            style={{ background: "var(--accent)" }}
           >
-            {isLast ? "Enter the clearing" : screen === 0 ? "Begin" : "Next"}
+            {isLast ? "Get started" : screen === 0 ? "Begin" : "Next"}
             {!isLast && <ArrowRight size={14} />}
           </button>
         </div>

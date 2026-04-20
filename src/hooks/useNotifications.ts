@@ -4,7 +4,10 @@ import { useEffect, useRef } from "react";
 import { useSettings } from "@/hooks/useSettings";
 import { useCalculationsContext } from "@/contexts/CalculationsContext";
 import { subscribeToPush, unsubscribeFromPush } from "@/lib/pushSubscription";
-import type { NotificationPrefs } from "@/types";
+import { evaluateSmartNudges, markNudgeSent } from "@/lib/smartNudges";
+import { getSpendingStreak } from "@/lib/calculations";
+import { buildCategoryMap } from "@/lib/categories";
+import type { Expense, NotificationPrefs } from "@/types";
 
 const LAST_BUDGET_ALERT_KEY = "expenstream-last-budget-alert";
 
@@ -17,10 +20,11 @@ const LAST_BUDGET_ALERT_KEY = "expenstream-last-budget-alert";
  * 2. Budget milestone alerts — stay in the hook because they need live
  *    calculation data from the React tree (fires in-tab only).
  */
-export function useNotifications(month: number, year: number) {
+export function useNotifications(month: number, year: number, expenses?: Expense[]) {
   const { settings } = useSettings();
-  const { budgetUsedPercent, monthlyTotal, effectiveBudget } = useCalculationsContext();
+  const { budgetUsedPercent, monthlyTotal, effectiveBudget, remaining } = useCalculationsContext();
   const subscribedRef = useRef(false);
+  const nudgeCheckedRef = useRef("");
 
   const prefs = settings.notificationPrefs as Partial<NotificationPrefs> | undefined;
 
@@ -72,6 +76,43 @@ export function useNotifications(month: number, year: number) {
       }
     }
   }, [prefs?.enabled, prefs?.budgetAlerts, budgetUsedPercent, effectiveBudget, monthlyTotal, month, year]);
+
+  // Smart nudges (in-tab, max 3/week)
+  useEffect(() => {
+    const smartEnabled = (prefs as { smartNudges?: boolean } | undefined)?.smartNudges;
+    if (!smartEnabled || !expenses || expenses.length < 10) return;
+    if (typeof Notification === "undefined" || Notification.permission !== "granted") return;
+
+    // Only check once per hour
+    const hourKey = `${new Date().toISOString().slice(0, 13)}`;
+    if (nudgeCheckedRef.current === hourKey) return;
+    nudgeCheckedRef.current = hourKey;
+
+    const catMap = buildCategoryMap(settings.customCategories ?? [], settings.hiddenDefaults ?? []);
+    const categoryLabels: Record<string, string> = {};
+    for (const [id, meta] of Object.entries(catMap)) {
+      categoryLabels[id] = meta.label;
+    }
+
+    const streak = getSpendingStreak(expenses);
+    const nudge = evaluateSmartNudges({
+      allExpenses: expenses,
+      budgetRemaining: remaining,
+      currentStreak: streak,
+      categoryLabels,
+      formatCurrency: formatSimple,
+    });
+
+    if (nudge) {
+      new Notification("ExpenStream", {
+        body: nudge.body,
+        icon: "/icons/icon-192.png",
+        tag: nudge.id,
+        silent: false,
+      });
+      markNudgeSent(nudge.id);
+    }
+  }, [prefs, expenses, settings.customCategories, settings.hiddenDefaults, remaining]);
 }
 
 function formatSimple(n: number): string {

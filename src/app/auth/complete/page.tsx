@@ -50,7 +50,7 @@ export default function AuthCompletePage() {
       <p
         className="font-display italic text-2xl"
         style={{
-          color: "var(--es-moss, #3D5A3E)",
+          color: "var(--accent)",
           animation: "es-fade-in 0.4s ease forwards",
         }}
       >
@@ -66,7 +66,7 @@ export default function AuthCompletePage() {
             style={{
               width: 7,
               height: 7,
-              background: "var(--es-moss, #3D5A3E)",
+              background: "var(--accent)",
               animation: `es-dot-pulse 1.6s ${i * 0.28}s ease-in-out infinite`,
             }}
           />

@@ -24,6 +24,7 @@ export interface NotificationPrefs {
   timezone?: string; // IANA timezone, e.g. "Asia/Kolkata"
   weeklyDigest: boolean;
   budgetAlerts: boolean;
+  smartNudges?: boolean; // context-aware tips based on spending patterns
 }
 
 export interface UserSettings {
@@ -47,6 +48,7 @@ export interface UserSettings {
   dismissedRecurringSuggestions?: string[];
   autoRules?: AutoRule[];
   achievements?: Achievement[];
+  activeChallenges?: Challenge[];
   accentColor?: string;
   notificationPrefs?: NotificationPrefs;
   createdAt: number;
@@ -210,4 +212,14 @@ export interface DashboardLayout {
 export interface Achievement {
   id: string;
   unlockedAt: number;
+}
+
+export interface Challenge {
+  id: string;
+  templateId: string;
+  startDate: string;  // "YYYY-MM-DD"
+  endDate: string;    // "YYYY-MM-DD"
+  status: "active" | "completed" | "failed" | "abandoned";
+  progress: number;   // 0-100
+  completedAt?: number;
 }

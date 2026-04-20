@@ -92,7 +92,7 @@ export function MoneyEcho({
                 width: 60,
                 height: 60,
                 borderRadius: "50%",
-                border: `2px solid ${color || "var(--es-moss, #3D5A3E)"}`,
+                border: `2px solid ${color || "var(--accent)"}`,
               }}
             />
           )}
@@ -118,7 +118,7 @@ export function MoneyEcho({
               width: 80,
               height: 80,
               borderRadius: "50%",
-              border: `2px solid ${color || "var(--es-moss, #3D5A3E)"}`,
+              border: `2px solid ${color || "var(--accent)"}`,
             }}
           />
         )}
@@ -144,7 +144,7 @@ export function MoneyEcho({
               width: p.size,
               height: p.size,
               borderRadius: "50%",
-              background: color || "var(--es-moss, #3D5A3E)",
+              background: color || "var(--accent)",
             }}
           />
         );

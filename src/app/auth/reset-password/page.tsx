@@ -98,7 +98,7 @@ function ResetPasswordForm() {
     <div className="flex min-h-screen items-center justify-center px-4" style={{ background: "var(--background)" }}>
       <div className="w-full max-w-sm card-terrain rounded-2xl p-8">
         <div className="mb-1 flex h-10 w-10 items-center justify-center rounded-full" style={{ background: 'var(--es-chalk)', border: '1px solid var(--border)' }}>
-          <KeyRound className="h-5 w-5" style={{ color: 'var(--es-moss)' }} />
+          <KeyRound className="h-5 w-5" style={{ color: 'var(--accent)' }} />
         </div>
         <h2 className="mt-3 font-display italic text-2xl" style={{ color: 'var(--text-primary)' }}>
           New password.
@@ -158,7 +158,7 @@ function ResetPasswordForm() {
             type="submit"
             disabled={loading}
             className="w-full rounded-full py-3.5 text-base font-semibold text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-            style={{ background: 'var(--es-moss)' }}
+            style={{ background: 'var(--accent)' }}
           >
             {loading && <Loader2 className="h-4 w-4 animate-spin" />}
             Reset Password

@@ -19,17 +19,17 @@ const springStiff = spring.stiff;
 
 const personalLinks = [
   { href: "/", icon: IconDashboard, label: "Home" },
-  { href: "/expenses", icon: List, label: "Stream" },
-  { href: "/analytics", icon: IconAnalytics, label: "Overlook" },
-  { href: "/settings", icon: IconSettings, label: "Workshop" },
+  { href: "/expenses", icon: List, label: "Expenses" },
+  { href: "/analytics", icon: IconAnalytics, label: "Analytics" },
+  { href: "/settings", icon: IconSettings, label: "Settings" },
 ];
 
 const businessLinks = [
   { href: "/", icon: IconDashboard, label: "Home" },
-  { href: "/business", icon: IconBusiness, label: "Trading" },
-  { href: "/expenses", icon: List, label: "Stream" },
-  { href: "/analytics", icon: IconAnalytics, label: "Overlook" },
-  { href: "/settings", icon: IconSettings, label: "Workshop" },
+  { href: "/business", icon: IconBusiness, label: "Business" },
+  { href: "/expenses", icon: List, label: "Expenses" },
+  { href: "/analytics", icon: IconAnalytics, label: "Analytics" },
+  { href: "/settings", icon: IconSettings, label: "Settings" },
 ];
 
 /* ── NAV BAR HEIGHT (px) ──────────────────────────────────── */
@@ -52,7 +52,7 @@ export function BottomNav() {
   const accentColor = isBusiness && isBusinessRoute ? "emerald" : "blue";
 
   const handleFabClick = () => {
-    if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate(50);
+    if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate(30);
     if (isBusiness && isBusinessRoute) {
       openLedgerForm();
     } else {
@@ -80,7 +80,7 @@ export function BottomNav() {
           bottom: `calc(${NAV_HEIGHT}px + env(safe-area-inset-bottom, 0px) + 12px)`,
           ...(accentColor === "emerald"
             ? { background: 'var(--biz-accent)', boxShadow: '0 10px 15px -3px var(--focus-ring-biz), inset 0 0 12px rgba(52,211,153,0.25)' }
-            : { background: 'var(--es-moss)', boxShadow: '0 8px 20px -4px rgba(61,90,62,0.35), inset 0 0 12px rgba(61,90,62,0.2)' }),
+            : { background: 'var(--accent)', boxShadow: '0 8px 20px -4px var(--focus-ring), inset 0 0 12px var(--focus-ring)' }),
         }}
         initial={false}
         whileHover={{ scale: 1.06, transition: { duration: 0.15 } }}
@@ -137,7 +137,7 @@ export function BottomNav() {
                     style={{
                       background: isBiz
                         ? 'var(--biz-accent-soft)'
-                        : 'color-mix(in srgb, var(--es-moss, #3D5A3E) 12%, transparent)',
+                        : 'color-mix(in srgb, var(--accent) 12%, transparent)',
                     }}
                     transition={springStiff}
                   />

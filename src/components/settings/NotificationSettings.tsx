@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Bell, BellOff, Clock, TrendingUp, Target } from "lucide-react";
+import { Bell, BellOff, Clock, TrendingUp, Target, Sparkles } from "lucide-react";
 import { useSettings } from "@/hooks/useSettings";
 import { useToast } from "@/components/ui/Toast";
 import { subscribeToPush, unsubscribeFromPush } from "@/lib/pushSubscription";
@@ -182,6 +182,34 @@ export function NotificationSettings() {
               </div>
               <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
                 Alert when you cross 75% or 100% of budget
+              </p>
+            </div>
+          </div>
+
+          {/* Smart Nudges */}
+          <div className="flex items-start gap-3 rounded-lg p-3" style={{ background: "var(--surface-secondary)" }}>
+            <Sparkles size={16} className="mt-0.5 shrink-0" style={{ color: "var(--text-muted)" }} />
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>Smart nudges</p>
+                <button
+                  role="switch"
+                  aria-checked={prefs.enabled && (prefs.smartNudges ?? false)}
+                  disabled={!prefs.enabled}
+                  onClick={() => updatePrefs({ smartNudges: !(prefs.smartNudges ?? false) })}
+                  className={`relative h-5 w-9 rounded-full transition-colors ${
+                    prefs.enabled && prefs.smartNudges ? "bg-brand" : "bg-[var(--border-strong)]"
+                  } ${!prefs.enabled ? "opacity-40" : ""}`}
+                >
+                  <span
+                    className={`absolute top-0.5 left-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${
+                      prefs.enabled && prefs.smartNudges ? "translate-x-4" : ""
+                    }`}
+                  />
+                </button>
+              </div>
+              <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
+                Context-aware tips based on your spending patterns (max 3/week)
               </p>
             </div>
           </div>

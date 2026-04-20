@@ -331,15 +331,15 @@ export function ExpenseList({
       <EmptyState
         icon={hasFilters ? Receipt : Wallet}
         illustration={hasFilters ? <ReceiptIllustration /> : <StillWater />}
-        title={hasFilters ? "No stones found" : "Still waters"}
+        title={hasFilters ? "No results found" : "No expenses yet"}
         description={
           hasFilters
             ? searchQuery
               ? `No results for "${searchQuery}". Try a different search or adjust filters.`
               : "Try adjusting your filters or search terms."
-            : "Your stream bed is empty — drop your first stone to see it here."
+            : "No expenses yet — add your first one to see it here."
         }
-        action={!hasFilters ? { label: "Drop a Stone", onClick: openAddForm } : undefined}
+        action={!hasFilters ? { label: "Add Expense", onClick: openAddForm } : undefined}
       />
     );
   }
@@ -450,18 +450,35 @@ export function ExpenseList({
         </div>
       ))}
 
-      {/* Pagination */}
+      {/* Infinite scroll sentinel */}
       {hasMore && (
-        <div className="flex justify-center pt-4">
-          <button
-            onClick={() => setVisibleCount((v) => v + PAGE_SIZE)}
-            className="rounded-xl px-5 py-2.5 text-xs font-semibold transition-all hover:bg-[var(--surface-hover)]"
-            style={{ background: 'var(--surface-secondary)', color: 'var(--text-secondary)' }}
-          >
-            Show more ({totalCount - visibleCount} remaining)
-          </button>
-        </div>
+        <InfiniteScrollSentinel onIntersect={() => setVisibleCount((v) => v + PAGE_SIZE)} />
       )}
+    </div>
+  );
+}
+
+function InfiniteScrollSentinel({ onIntersect }: { onIntersect: () => void }) {
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  const onIntersectRef = useRef(onIntersect);
+  onIntersectRef.current = onIntersect;
+
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) onIntersectRef.current();
+      },
+      { rootMargin: "200px" },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div ref={sentinelRef} className="flex justify-center py-4">
+      <span className="text-xs" style={{ color: "var(--text-muted)" }}>Loading more…</span>
     </div>
   );
 }
@@ -502,13 +519,9 @@ function SwipeableExpenseItem({
   const absOffset = Math.abs(offsetX);
   const isRevealing = absOffset > 10;
 
-  // Stream aging visual properties (Part III.4 Expense Stream spec)
-  const streamOpacity = dayAge === 0 ? 1 : dayAge === 1 ? 0.9 : 0.75;
-  const streamBorderLeft = dayAge === 0
-    ? '3px solid var(--es-clay, #B5654A)'
-    : dayAge === 1
-    ? '3px solid var(--es-sage, #8FAF8B)'
-    : '2px solid var(--es-vellum, #E8E0D0)';
+  // Stream aging visual properties — uniform opacity for readability
+  const streamOpacity = 1;
+  const streamBorderLeft = '3px solid var(--es-clay, #B5654A)';
   const isHighSpend = categoryMedian !== undefined && categoryMedian > 0 && expense.amount > categoryMedian * 2;
   const isFullSwipe = absOffset >= FULL_DELETE_THRESHOLD;
   const isDragging = absOffset > 0 && absOffset < 9000;

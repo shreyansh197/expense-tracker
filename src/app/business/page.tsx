@@ -139,8 +139,8 @@ export default function BusinessPage() {
         <div className="space-y-6 relative overflow-hidden">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="font-display italic text-2xl" style={{ color: 'var(--text-primary)' }}>The Trading Post</h1>
-            <p className="font-mono text-sm tabular-nums mt-0.5" style={{ color: 'var(--es-moss)' }}>
+            <h1 className="font-display italic text-2xl" style={{ color: 'var(--text-primary)' }}>Business</h1>
+            <p className="font-mono text-sm tabular-nums mt-0.5" style={{ color: 'var(--accent)' }}>
               {stats.totalReceived.toLocaleString()} <span style={{ color: 'var(--text-muted)', fontFamily: 'inherit' }}>/ {stats.totalExpected.toLocaleString()}</span>
             </p>
           </div>

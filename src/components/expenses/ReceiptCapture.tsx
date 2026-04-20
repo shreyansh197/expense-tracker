@@ -223,6 +223,16 @@ export function ReceiptCapture({ onExtracted, onClose }: ReceiptCaptureProps) {
                 {Math.round(result.confidence)}%
               </span>
             </div>
+            {result.confidence < 40 && (
+              <p className="text-[10px] mt-1" style={{ color: "var(--danger-text)" }}>
+                Low confidence — consider retaking the photo with better lighting
+              </p>
+            )}
+            {result.confidence >= 40 && result.confidence < 70 && (
+              <p className="text-[10px] mt-1" style={{ color: "var(--warning-text)" }}>
+                Review the amount before using — some details may be inaccurate
+              </p>
+            )}
           </div>
 
           {/* Actions */}

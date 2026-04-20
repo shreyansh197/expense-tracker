@@ -269,7 +269,7 @@ export function CategoryManager() {
               <X size={16} />
             </button>
           </div>
-          <div className="mt-2 flex flex-wrap gap-1.5">
+          <div className="mt-2 flex flex-wrap gap-1.5 items-center">
             {PRESET_COLORS.map((c) => (
               <button
                 key={c}
@@ -283,6 +283,15 @@ export function CategoryManager() {
                 aria-label={`Select color ${c}`}
               />
             ))}
+            {/* Live preview */}
+            {newName.trim() && (
+              <span
+                className="ml-2 rounded-full px-2.5 py-1 text-[10px] font-medium"
+                style={{ backgroundColor: newColor + "20", color: newColor }}
+              >
+                {newName.trim()}
+              </span>
+            )}
           </div>
         </div>
       ) : (
@@ -390,7 +399,7 @@ function CategoryRow({
             className="flex-1 rounded border px-2 py-1 text-sm focus:outline-none"
             style={{ borderColor: 'var(--border)', background: 'var(--surface)', color: 'var(--text-primary)' }}
           />
-          <div className="flex flex-wrap gap-0.5 max-w-[120px]">
+          <div className="flex flex-wrap gap-0.5 max-w-[120px] items-center">
             {PRESET_COLORS.slice(0, 12).map((c) => (
               <button
                 key={c}
@@ -406,6 +415,13 @@ function CategoryRow({
               />
             ))}
           </div>
+          {/* Live preview chip */}
+          <span
+            className="rounded-full px-2 py-0.5 text-[10px] font-medium"
+            style={{ backgroundColor: editColor + "20", color: editColor }}
+          >
+            {editName || cat.label}
+          </span>
           <button onClick={onSaveEdit} className="rounded p-2 transition-colors" style={{ color: 'var(--success-text)' }} aria-label="Save edit">
             <Check size={14} />
           </button>

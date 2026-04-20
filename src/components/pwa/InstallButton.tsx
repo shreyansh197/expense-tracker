@@ -62,7 +62,7 @@ export function InstallButton() {
       <button
         onClick={handleInstall}
         className="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors"
-        style={{ background: 'var(--es-moss, var(--secondary))' }}
+        style={{ background: 'var(--accent)' }}
       >
         <Download size={16} />
         Add ExpenStream to your home screen

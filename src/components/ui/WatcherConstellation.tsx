@@ -25,7 +25,7 @@ export function WatcherConstellation({ insight, onDismiss }: WatcherConstellatio
   const isBizRoute = pathname.startsWith("/business");
   const popoverRef = useRef<HTMLDivElement>(null);
 
-  const dotColor = isBizRoute ? "var(--biz-accent)" : "var(--es-moss)";
+  const dotColor = isBizRoute ? "var(--biz-accent)" : "var(--accent)";
   const hasInsight = insight !== null;
 
   // Hide completely when no insight — avoid confusing idle dots

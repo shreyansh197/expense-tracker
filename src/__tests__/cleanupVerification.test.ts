@@ -140,19 +140,15 @@ describe("Dashboard page uses new components", () => {
     expect(dashboardSrc).toContain("PostcardPrompt");
   });
 
-  test("TC-CLEAN-005-04: imports SpendingHeatmap", () => {
-    expect(dashboardSrc).toContain("SpendingHeatmap");
-  });
-
   test("TC-CLEAN-005-05: imports useNotifications", () => {
     expect(dashboardSrc).toContain("useNotifications");
   });
 
-  test("TC-CLEAN-005-06: passes todayTotal to SpendingHeatmap", () => {
+  test("TC-CLEAN-005-06: passes todayTotal", () => {
     expect(dashboardSrc).toContain("todayTotal");
   });
 
-  test("TC-CLEAN-005-07: passes avgDaily to SpendingHeatmap", () => {
+  test("TC-CLEAN-005-07: passes avgDaily", () => {
     expect(dashboardSrc).toContain("avgDaily");
   });
 });

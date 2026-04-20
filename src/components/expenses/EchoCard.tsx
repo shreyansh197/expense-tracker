@@ -97,7 +97,7 @@ export function EchoCard({ echo, onDismiss }: EchoCardProps) {
           {/* Header */}
           <p
             className="text-xs font-medium uppercase tracking-widest"
-            style={{ color: "var(--es-moss)", fontFamily: "var(--font-body)" }}
+            style={{ color: "var(--accent)", fontFamily: "var(--font-body)" }}
           >
             Echo · {getCategoryLabel(echo.category)}
           </p>

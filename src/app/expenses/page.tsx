@@ -137,10 +137,10 @@ function ExpensesContent() {
               <button
                 onClick={() => openAddForm()}
                 className="hidden items-center gap-2 rounded-full px-4 py-2 text-sm font-medium text-white shadow-sm transition-all active:scale-[0.97] lg:flex"
-                style={{ background: "var(--es-moss, #3D5A3E)" }}
+                style={{ background: "var(--accent)" }}
               >
                 <PlusCircle size={15} />
-                Drop a Stone
+                Add Expense
               </button>
             </div>
           </div>
@@ -148,7 +148,7 @@ function ExpensesContent() {
           <div className="flex items-baseline gap-2">
             <span
               className="font-numeric text-3xl sm:text-4xl font-bold tabular-nums"
-              style={{ color: "var(--es-moss, #3D5A3E)", letterSpacing: "-0.03em" }}
+              style={{ color: "var(--accent)", letterSpacing: "-0.03em" }}
             >
               {formatCurrency(monthlyTotal)}
             </span>
@@ -168,7 +168,7 @@ function ExpensesContent() {
             />
             <input
               type="text"
-              placeholder="Search the stream bed…"
+              placeholder="Search expenses…"
               value={localSearch}
               onChange={(e) => handleSearchChange(e.target.value)}
               className="w-full rounded-2xl py-2.5 pl-9 pr-3 text-base sm:text-sm focus:outline-none focus:ring-2"

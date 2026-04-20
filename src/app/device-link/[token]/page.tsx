@@ -72,7 +72,7 @@ export default function DeviceLinkPage() {
     return (
       <div className="flex min-h-screen items-center justify-center p-4">
         <div className="w-full max-w-sm card-terrain rounded-2xl p-6 text-center">
-          <CheckCircle2 className="mx-auto h-10 w-10 mb-4" style={{ color: 'var(--es-moss)' }} />
+          <CheckCircle2 className="mx-auto h-10 w-10 mb-4" style={{ color: 'var(--accent)' }} />
           <h2 className="font-display italic text-xl mb-2" style={{ color: 'var(--text-primary)' }}>
             Device linked.
           </h2>
@@ -88,7 +88,7 @@ export default function DeviceLinkPage() {
     <div className="flex min-h-screen items-center justify-center p-4">
       <div className="w-full max-w-sm card-terrain rounded-2xl p-6 text-center">
         <div className="flex h-12 w-12 items-center justify-center rounded-full mx-auto mb-4" style={{ background: 'var(--es-chalk)', border: '1px solid var(--border)' }}>
-          <Smartphone className="h-6 w-6" style={{ color: 'var(--es-moss)' }} />
+          <Smartphone className="h-6 w-6" style={{ color: 'var(--accent)' }} />
         </div>
         <h2 className="font-display italic text-2xl mb-2" style={{ color: 'var(--text-primary)' }}>
           Link this device.
@@ -103,7 +103,7 @@ export default function DeviceLinkPage() {
           <button
             onClick={handleAccept}
             className="w-full rounded-full py-3 text-base font-semibold text-white transition-colors"
-            style={{ background: 'var(--es-moss)' }}
+            style={{ background: 'var(--accent)' }}
           >
             Sign In to Link
           </button>

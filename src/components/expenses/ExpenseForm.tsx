@@ -18,6 +18,9 @@ import { SUPPORTED_CURRENCIES } from "@/lib/utils";
 import { spring } from "@/lib/motion/tokens";
 import { MoneyEcho } from "@/components/ui/MoneyEcho";
 import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
+import { useCalculationsContext } from "@/contexts/CalculationsContext";
+import { useMerchantIndex } from "@/hooks/useMerchantIndex";
+import { useExpenses } from "@/hooks/useExpenses";
 import type { CategoryId, ExpenseInput, Expense } from "@/types";
 
 /* ─── Keypad keys ─── */
@@ -54,6 +57,10 @@ export function ExpenseForm({
   const { toast } = useToast();
   const { settings } = useSettings();
   const { symbol } = useCurrency();
+  const { categoryTotals } = useCalculationsContext();
+  const { currentMonth, currentYear } = useUIStore();
+  const { expenses: allExpenses } = useExpenses(currentMonth, currentYear);
+  const { search: searchMerchants } = useMerchantIndex(allExpenses);
   const allCategories = getAllCategories(settings.customCategories, settings.hiddenDefaults);
   const multiCurrency = settings.multiCurrencyEnabled ?? false;
 
@@ -88,6 +95,8 @@ export function ExpenseForm({
   const [selectedMonth, setSelectedMonth] = useState(editExpense ? month : today.getMonth() + 1);
   const [selectedYear, setSelectedYear] = useState(editExpense ? year : today.getFullYear());
   const [remark, setRemark] = useState(editExpense?.remark || prefill?.remark || "");
+  const [remarkSuggestions, setRemarkSuggestions] = useState<ReturnType<typeof searchMerchants>>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const [expenseCurrency, setExpenseCurrency] = useState(editExpense?.currency || settings.currency || "INR");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -183,7 +192,7 @@ export function ExpenseForm({
 
   /* ─── Keypad handler ─── */
   const handleKeypadPress = useCallback((key: string) => {
-    if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate(8);
+    if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate(10);
     setAmount((prev) => {
       if (key === "backspace") return prev.slice(0, -1);
       if (key === "." && prev.includes(".")) return prev;
@@ -253,7 +262,7 @@ export function ExpenseForm({
         if (editExpense) {
           toast(`${displaySymbol}${parsedAmount} in ${catLabel} updated`);
         }
-        if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate([30, 30, 30]);
+        if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate([20, 30, 20]);
         setShowSuccess(true);
         setEchoTrigger((t) => t + 1);
         setTimeout(() => { closeForm(); }, 600);
@@ -296,7 +305,7 @@ export function ExpenseForm({
           >
             <CheckCircle2 size={18} style={{ color: 'var(--success)' }} />
             <span className="text-xs font-semibold" style={{ color: 'var(--success-text)' }}>
-              {editExpense ? "Updated!" : "Stone dropped!"}
+              {editExpense ? "Updated!" : "Expense added!"}
             </span>
           </m.div>
         )}
@@ -361,9 +370,91 @@ export function ExpenseForm({
           setManualOverride(true);
         }}
         showError={!category && submitted}
+        categoryBudgets={settings.categoryBudgets}
+        categoryTotals={categoryTotals}
+        currencySymbol={symbol}
       />
 
-      {/* ─── 4. More options (remark, date, scanner, currency) ─── */}
+      {/* ─── 4. Remark (always visible) with typeahead ─── */}
+      <div className="relative">
+        <input
+          ref={remarkRef}
+          type="text"
+          value={voice.listening ? (remark ? `${remark} ${voice.transcript}` : voice.transcript) || remark : remark}
+          onChange={(e) => {
+            const val = e.target.value;
+            setRemark(val);
+            const matches = searchMerchants(val);
+            setRemarkSuggestions(matches);
+            setShowSuggestions(matches.length > 0);
+          }}
+          onFocus={(e) => {
+            const el = e.target;
+            setTimeout(() => el.scrollIntoView({ behavior: "smooth", block: "center" }), 150);
+            if (remark.length >= 2) {
+              const matches = searchMerchants(remark);
+              setRemarkSuggestions(matches);
+              setShowSuggestions(matches.length > 0);
+            }
+          }}
+          onBlur={() => { setTimeout(() => setShowSuggestions(false), 200); }}
+          placeholder={voice.listening ? "Listening..." : "Add a note..."}
+          maxLength={200}
+          readOnly={voice.listening}
+          autoComplete="off"
+          className={cn("form-input w-full pr-10", voice.listening && "ring-2 ring-[var(--brand)]")}
+        />
+        {voice.supported && (
+          <button
+            type="button"
+            onClick={() => { if (voice.listening) { voice.stop(); } else { voice.start(); } }}
+            className={cn(
+              "absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-1.5 transition-colors",
+              voice.listening && "animate-pulse"
+            )}
+            style={{ color: voice.listening ? 'var(--brand)' : 'var(--text-muted)' }}
+            aria-label={voice.listening ? "Stop voice input" : "Start voice input"}
+            title={voice.listening ? "Stop listening" : "Voice input"}
+          >
+            {voice.listening ? <MicOff size={18} /> : <Mic size={18} />}
+          </button>
+        )}
+
+        {/* Typeahead dropdown */}
+        {showSuggestions && remarkSuggestions.length > 0 && (
+          <div
+            className="absolute left-0 right-0 top-full z-20 mt-1 overflow-hidden rounded-xl border shadow-lg"
+            style={{ background: "var(--surface)", borderColor: "var(--border)" }}
+          >
+            {remarkSuggestions.map((s) => {
+              const catMeta = allCategories.find((c) => c.id === s.category);
+              return (
+                <button
+                  key={s.remark}
+                  type="button"
+                  className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm transition-colors hover:bg-[var(--surface-secondary)]"
+                  onMouseDown={(e) => {
+                    e.preventDefault(); // prevent blur
+                    setRemark(s.remark);
+                    if (!manualOverride) setCategory(s.category);
+                    setShowSuggestions(false);
+                  }}
+                >
+                  <span style={{ color: "var(--text-primary)" }}>{s.remark}</span>
+                  <span className="text-xs" style={{ color: "var(--text-muted)" }}>
+                    {catMeta?.label ?? s.category} · ~{symbol}{s.medianAmount.toLocaleString()}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </div>
+      {voice.error && (
+        <p className="text-xs" style={{ color: 'var(--err)' }}>{voice.error}</p>
+      )}
+
+      {/* ─── 5. More options (date, scanner, currency) ─── */}
       <div className="flex items-center gap-2">
         {!showMore && (
           <button
@@ -398,38 +489,6 @@ export function ExpenseForm({
             transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
             className="overflow-hidden md:overflow-visible space-y-2"
           >
-            {/* Remark (voice-first) */}
-            <div className="relative">
-              <input
-                ref={remarkRef}
-                type="text"
-                value={voice.listening ? (remark ? `${remark} ${voice.transcript}` : voice.transcript) || remark : remark}
-                onChange={(e) => setRemark(e.target.value)}
-                onFocus={(e) => { const el = e.target; setTimeout(() => el.scrollIntoView({ behavior: "smooth", block: "center" }), 150); }}
-                placeholder={voice.listening ? "Listening..." : "Add a note..."}
-                maxLength={200}
-                readOnly={voice.listening}
-                className={cn("form-input w-full pr-10", voice.listening && "ring-2 ring-[var(--brand)]")}
-              />
-              {voice.supported && (
-                <button
-                  type="button"
-                  onClick={() => { if (voice.listening) { voice.stop(); } else { voice.start(); } if (!showMore) setShowMore(true); }}
-                  className={cn(
-                    "absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-1.5 transition-colors",
-                    voice.listening && "animate-pulse"
-                  )}
-                  style={{ color: voice.listening ? 'var(--brand)' : 'var(--text-muted)' }}
-                  aria-label={voice.listening ? "Stop voice input" : "Start voice input"}
-                  title={voice.listening ? "Stop listening" : "Voice input"}
-                >
-                  {voice.listening ? <MicOff size={18} /> : <Mic size={18} />}
-                </button>
-              )}
-            </div>
-            {voice.error && (
-              <p className="text-xs" style={{ color: 'var(--err)' }}>{voice.error}</p>
-            )}
             {/* Receipt scanner */}
             {!editExpense && (
               <>

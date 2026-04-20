@@ -1,11 +1,13 @@
 "use client";
 
-import { useMemo } from "react";
-import { m } from "framer-motion";
+import { useMemo, useState } from "react";
+import { m, useInView } from "framer-motion";
+import { useRef } from "react";
 import { useCalculationsContext } from "@/contexts/CalculationsContext";
 import { useSettings } from "@/hooks/useSettings";
 import { useCurrency } from "@/hooks/useCurrency";
 import { useHistoricalData } from "@/hooks/useHistoricalData";
+import { Confetti } from "@/components/motion/Confetti";
 import { useUIStore } from "@/stores/uiStore";
 import { buildCategoryMap } from "@/lib/categories";
 import { getMonthName } from "@/lib/utils";
@@ -45,6 +47,19 @@ export function ChronicleView() {
   const { formatCurrency } = useCurrency();
   const { expenses } = useExpenses(currentMonth, currentYear);
   const history = useHistoricalData(currentMonth, currentYear, 2);
+
+  // Confetti: trigger when user finished under budget
+  const isUnderBudget = effectiveBudget > 0 && monthlyTotal < effectiveBudget;
+  const [confettiFired, setConfettiFired] = useState(false);
+  const heroRef = useRef<HTMLElement>(null);
+  const heroInView = useInView(heroRef, { once: true, amount: 0.5 });
+
+  // Fire confetti once when hero scrolls into view and under budget
+  const shouldConfetti = isUnderBudget && heroInView && !confettiFired;
+  if (shouldConfetti && !confettiFired) {
+    // defer to avoid setState-during-render
+    setTimeout(() => setConfettiFired(true), 0);
+  }
 
   const catMap = useMemo(
     () => buildCategoryMap(settings.customCategories, settings.hiddenDefaults),
@@ -154,8 +169,11 @@ export function ChronicleView() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
     >
+      {/* Confetti burst when under budget */}
+      <Confetti active={confettiFired} />
+
       {/* ── Month heading ── */}
-      <header>
+      <header ref={heroRef}>
         <h1
           className="text-4xl"
           style={{
@@ -170,7 +188,7 @@ export function ChronicleView() {
         </h1>
         <div
           className="mt-1 h-px w-16"
-          style={{ background: "var(--es-moss)", opacity: 0.4 }}
+          style={{ background: "var(--accent)", opacity: 0.4 }}
         />
       </header>
 
@@ -223,7 +241,7 @@ export function ChronicleView() {
         <section className="space-y-4">
           <SectionLabel>Where It Went</SectionLabel>
           <ul className="space-y-2.5">
-            {topCategories.map((cat) => {
+            {topCategories.map((cat, catIdx) => {
               const label = categoryLabels[cat.category] ?? cat.category;
               const pct = Math.round((cat.total / monthlyTotal) * 100);
               const barWidth = `${Math.round((cat.total / maxCategoryTotal) * 100)}%`;
@@ -247,13 +265,13 @@ export function ChronicleView() {
                     className="h-1 w-full overflow-hidden rounded-full"
                     style={{ background: "var(--es-mist)" }}
                   >
-                    <div
+                    <m.div
                       className="h-full rounded-full"
-                      style={{
-                        width: barWidth,
-                        background: "var(--es-moss)",
-                        transition: "width 0.6s ease",
-                      }}
+                      style={{ background: "var(--accent)" }}
+                      initial={{ width: 0 }}
+                      whileInView={{ width: barWidth }}
+                      viewport={{ once: true, amount: 0.5 }}
+                      transition={{ duration: 0.6, delay: catIdx * 0.08, ease: [0.22, 1, 0.36, 1] }}
                     />
                   </div>
                 </li>
@@ -295,7 +313,7 @@ export function ChronicleView() {
                     style={{
                       height: barH,
                       width: "100%",
-                      background: dayTotal === 0 ? "var(--border)" : "var(--es-moss)",
+                      background: dayTotal === 0 ? "var(--border)" : "var(--accent)",
                       borderRadius: 2,
                       opacity: dayTotal === 0 ? 0.3 : 0.8,
                       transition: "height 0.4s ease",
@@ -372,7 +390,7 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
     <p
       className="text-xs font-semibold uppercase tracking-widest"
-      style={{ color: "var(--es-moss)", fontFamily: "var(--font-body)" }}
+      style={{ color: "var(--accent)", fontFamily: "var(--font-body)" }}
     >
       {children}
     </p>

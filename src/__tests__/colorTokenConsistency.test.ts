@@ -117,12 +117,12 @@ describe("color token consistency — Confetti token resolution", () => {
 describe("color token consistency — SavingsGoalsWidget", () => {
   const src = readComponent("components/dashboard/SavingsGoalsWidget.tsx");
 
-  test("uses terrain token var(--es-moss) for progress and fund button", () => {
-    expect(src).toContain("var(--es-moss)");
+  test("uses accent token var(--accent) for progress and fund button", () => {
+    expect(src).toContain("var(--accent)");
   });
 
-  test("uses terrain token var(--es-mist) for soft backgrounds", () => {
-    expect(src).toContain("var(--es-mist)");
+  test("uses accent-soft token for soft backgrounds", () => {
+    expect(src).toContain("var(--accent-soft)");
   });
 
   test("uses accent gradient for remove funds button", () => {

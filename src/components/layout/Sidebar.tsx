@@ -15,18 +15,18 @@ import { useCurrency } from "@/hooks/useCurrency";
 import { useCalculationsContext } from "@/contexts/CalculationsContext";
 
 const personalNav = [
-  { href: "/", icon: IconDashboard, label: "The Clearing" },
-  { href: "/expenses", icon: List, label: "Stream Bed" },
-  { href: "/analytics", icon: IconAnalytics, label: "Overlook" },
-  { href: "/settings", icon: IconSettings, label: "Workshop" },
+  { href: "/", icon: IconDashboard, label: "Home" },
+  { href: "/expenses", icon: List, label: "Expenses" },
+  { href: "/analytics", icon: IconAnalytics, label: "Analytics" },
+  { href: "/settings", icon: IconSettings, label: "Settings" },
 ];
 
 const businessNav = [
-  { href: "/", icon: IconDashboard, label: "The Clearing" },
-  { href: "/business", icon: IconBusiness, label: "Trading Post" },
-  { href: "/expenses", icon: List, label: "Stream Bed" },
-  { href: "/analytics", icon: IconAnalytics, label: "Overlook" },
-  { href: "/settings", icon: IconSettings, label: "Workshop" },
+  { href: "/", icon: IconDashboard, label: "Home" },
+  { href: "/business", icon: IconBusiness, label: "Business" },
+  { href: "/expenses", icon: List, label: "Expenses" },
+  { href: "/analytics", icon: IconAnalytics, label: "Analytics" },
+  { href: "/settings", icon: IconSettings, label: "Settings" },
 ];
 
 export function Sidebar() {
@@ -138,7 +138,7 @@ export function Sidebar() {
         <m.button
           data-tour="fab-desktop"
           onClick={() => {
-            if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate(50);
+            if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate(30);
             if (isBusinessRoute) {
               useUIStore.getState().openLedgerForm();
             } else {

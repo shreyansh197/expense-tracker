@@ -15,11 +15,14 @@ import { stoneSettle } from "@/lib/motion/variants";
 import { SkeletonKpiCards, SkeletonChart } from "@/components/ui/Skeleton";
 import { PageTransition } from "@/components/ui/PageTransition";
 import { SpendingStream } from "@/components/dashboard/SpendingStream";
-import { SpendingHeatmap } from "@/components/dashboard/SpendingHeatmap";
+import { SpendingForecastCalendar } from "@/components/analytics/SpendingForecastCalendar";
 import { SavingsGoalsWidget } from "@/components/dashboard/SavingsGoalsWidget";
 import { NarrativeInsight } from "@/components/dashboard/NarrativeInsight";
 import { MonthlyPostcard } from "@/components/dashboard/MonthlyPostcard";
 import { PostcardPrompt } from "@/components/dashboard/PostcardPrompt";
+import { InstallBanner } from "@/components/pwa/InstallBanner";
+import { MoneyDnaCard } from "@/components/dashboard/MoneyDnaCard";
+import { SpendingChallenges } from "@/components/dashboard/SpendingChallenges";
 import { ClearingScene } from "@/components/ui/illustrations/terrain/ClearingScene";
 import { Repeat, PlusCircle, ChevronDown, Flame, TrendingUp, AlertTriangle, Leaf, Coffee, Sunrise } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -102,7 +105,7 @@ function DashboardContent() {
 
   useMonthUrlSync();
   useRecurringExpenses(currentMonth, currentYear);
-  useNotifications(currentMonth, currentYear);
+  useNotifications(currentMonth, currentYear, expenses);
 
   const {
     monthlyTotal,
@@ -116,7 +119,13 @@ function DashboardContent() {
     paceToStayUnder,
     forecast,
     effectiveBudget,
+    anomalies,
   } = useCalculationsContext();
+
+  const anomalyDays = useMemo(
+    () => new Set(anomalies.map((a) => a.expense.day)),
+    [anomalies],
+  );
 
   // Previous month for comparisons
   const prevMonth = currentMonth === 1 ? 12 : currentMonth - 1;
@@ -178,6 +187,7 @@ function DashboardContent() {
 
   // "Dig Deeper" expandable state
   const [digDeeperOpen, setDigDeeperOpen] = useState(false);
+  const [moreInsightsOpen, setMoreInsightsOpen] = useState(false);
 
   // Narrative insights â€” generated from calculations context
   const narrativeInsights = useMemo(() => {
@@ -364,6 +374,9 @@ function DashboardContent() {
         </div>
       </m.header>
 
+      {/* Install banner */}
+      <InstallBanner />
+
       {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
           2. HERO ZONE â€” total spent + spending stream
           â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
@@ -384,10 +397,10 @@ function DashboardContent() {
             >
               <ClearingScene className="mx-auto mb-4 w-48 sm:w-56" />
               <h2 className="font-display italic text-lg" style={{ color: "var(--text-primary)" }}>
-                Your clearing awaits
+                Start tracking
               </h2>
               <p className="mt-1 text-sm" style={{ color: "var(--text-secondary)" }}>
-                Add your first expense to watch the stream flow.
+                Add your first expense to see your spending insights.
               </p>
               <m.button
                 onClick={() => useUIStore.getState().openAddForm()}
@@ -441,6 +454,37 @@ function DashboardContent() {
                 )}
               </p>
 
+              {/* Budget progress bar */}
+              {effectiveBudget > 0 && (
+                <div className="mt-3">
+                  <div className="relative h-1.5 w-full rounded-full overflow-hidden" style={{ background: "var(--border)" }} role="progressbar" aria-valuenow={Math.min(Math.round(budgetUsedPercent), 100)} aria-valuemin={0} aria-valuemax={100} aria-label="Budget used">
+                    <m.div
+                      className="h-full rounded-full"
+                      style={{
+                        background: budgetUsedPercent > 100 ? "var(--danger)" : budgetUsedPercent > 80 ? "var(--warning)" : "var(--accent)",
+                      }}
+                      initial={{ width: 0 }}
+                      animate={{ width: `${Math.min(budgetUsedPercent, 100)}%` }}
+                      transition={{ delay: 0.2, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+                    />
+                    {/* 75% milestone marker */}
+                    <div className="absolute top-0 bottom-0 w-px" style={{ left: "75%", background: "var(--text-muted)", opacity: 0.4 }} />
+                  </div>
+                  <div className="mt-1 flex justify-between text-xs" style={{ color: "var(--text-muted)" }}>
+                    <span>
+                      {Math.round(budgetUsedPercent)}% used
+                      {budgetUsedPercent >= 100 && (
+                        <span style={{ color: "var(--danger)" }}> — over budget</span>
+                      )}
+                      {budgetUsedPercent >= 75 && budgetUsedPercent < 100 && (
+                        <span style={{ color: "var(--warning)" }}> — nearing limit</span>
+                      )}
+                    </span>
+                    <span>{formatCurrency(effectiveBudget)} budget</span>
+                  </div>
+                </div>
+              )}
+
               {/* Quiet day acknowledgment + quick repeat */}
               {todayTotal === 0 && (
                 <div className="mt-1.5 flex items-center gap-3">
@@ -470,6 +514,12 @@ function DashboardContent() {
                   budgetUsedPercent={budgetUsedPercent}
                   dailyValues={dailyValues}
                   daysInMonth={daysInMonth}
+                  dailyBudgetPace={paceToStayUnder}
+                  anomalyDays={anomalyDays}
+                  effectiveBudget={effectiveBudget}
+                  remaining={remaining}
+                  daysRemaining={daysRemaining}
+                  formatCurrency={formatCurrency}
                 />
               </div>
             </m.div>
@@ -483,9 +533,23 @@ function DashboardContent() {
           prevMonthExpenses={prevMonthExpenses}
           prevMonthBudget={effectiveBudget}
           currentBudget={effectiveBudget}
+          currentMonthTotal={monthlyTotal}
         />
       )}
-
+      {/* 2c. NARRATIVE INSIGHTS — promoted to appear early */}
+      {!loading && narrativeInsights.length > 0 && (
+        <div className="space-y-3">
+          {narrativeInsights.map((insight, i) => (
+            <NarrativeInsight
+              key={i}
+              text={insight.text}
+              type={insight.type}
+              icon={insight.icon}
+              sparkData={insight.sparkData}
+            />
+          ))}
+        </div>
+      )}
       {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
           3. STONE MARKERS â€” 2Ã—2 bento grid
           â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
@@ -571,53 +635,55 @@ function DashboardContent() {
 
       {/* 3b. UPCOMING STREAM — forward recurring calendar */}
       {!loading && <UpcomingStream />}
-      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-          4. NARRATIVE RIVER â€” prose insight cards
-          â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
-      {!loading && narrativeInsights.length > 0 && (
-        <div className="space-y-3">
-          {narrativeInsights.map((insight, i) => (
-            <NarrativeInsight
-              key={i}
-              text={insight.text}
-              type={insight.type}
-              icon={insight.icon}
-              sparkData={insight.sparkData}
-            />
-          ))}
-        </div>
-      )}
+
+      {/* 3c. MONEY DNA — spending personality */}
+      {!loading && expenses.length >= 5 && <MoneyDnaCard />}
+
+      {/* 3d. SPENDING CHALLENGES — gamified sprints */}
+      {!loading && <SpendingChallenges />}
 
       {/* Recurring suggestions */}
       {!loading && <RecurringSuggestions />}
 
       {/* ═══════════════════════════════════════════════════
-          4b. SPENDING HEATMAP — month calendar grid with pulse mood
+          4b. MORE INSIGHTS — collapsible secondary sections
           ═══════════════════════════════════════════════════ */}
       {!loading && expenses.length > 0 && (
-        <RevealOnScroll>
-          <SpendingHeatmap
-            expenses={expenses}
-            month={currentMonth}
-            year={currentYear}
-            todayTotal={todayTotal}
-            avgDaily={avgDaily}
-          />
-        </RevealOnScroll>
-      )}
+        <>
+          <button
+            onClick={() => setMoreInsightsOpen((o) => !o)}
+            className="flex w-full items-center justify-between rounded-xl px-4 py-3 text-sm font-semibold transition-colors"
+            style={{ background: "var(--surface-secondary)", color: "var(--text-secondary)" }}
+            aria-expanded={moreInsightsOpen}
+          >
+            <span>More insights</span>
+            <ChevronDown
+              size={18}
+              className={cn("transition-transform duration-300", moreInsightsOpen && "rotate-180")}
+            />
+          </button>
+          <AnimatePresence initial={false}>
+            {moreInsightsOpen && (
+              <m.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                className="overflow-hidden space-y-4"
+              >
+                <RevealOnScroll>
+                  <SpendingForecastCalendar />
+                </RevealOnScroll>
 
-      {/* ═══════════════════════════════════════════════════
-          4c. SAVINGS GOALS — fund tracker widget
-          ═══════════════════════════════════════════════════ */}
-      {!loading && (
-        <RevealOnScroll>
-          <SavingsGoalsWidget />
-        </RevealOnScroll>
-      )}
+                <RevealOnScroll>
+                  <SavingsGoalsWidget />
+                </RevealOnScroll>
 
-      {/* 4d. POSTCARD PROMPT — end-of-month sharing nudge */}
-      {!loading && expenses.length > 0 && (
-        <PostcardPrompt month={currentMonth} year={currentYear} hasExpenses={expenses.length > 0} />
+                <PostcardPrompt month={currentMonth} year={currentYear} hasExpenses={expenses.length > 0} />
+              </m.div>
+            )}
+          </AnimatePresence>
+        </>
       )}
 
       {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•

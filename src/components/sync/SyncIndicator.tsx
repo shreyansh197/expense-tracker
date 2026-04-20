@@ -50,7 +50,7 @@ export function OfflineBanner() {
   return (
     <div className="flex items-center justify-center gap-2 px-3 py-1.5 text-xs font-medium" style={{ background: 'var(--warning-soft)', color: 'var(--warning-text)' }}>
       <WifiOff size={12} />
-      You&apos;re offline — changes will sync when reconnected
+      You&apos;re offline — you can still log expenses. Changes sync when you reconnect.
     </div>
   );
 }

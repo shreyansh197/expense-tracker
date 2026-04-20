@@ -76,7 +76,7 @@ export function RidgeLine({
   const uid = useId().replace(/:/g, "");
   const gradId = `ridge-grad-${uid}`;
   const clipId = `ridge-clip-${uid}`;
-  const fillColor = variant === "business" ? "var(--biz-accent)" : "var(--es-moss)";
+  const fillColor = variant === "business" ? "var(--biz-accent)" : "var(--accent)";
   const fillColorEnd = variant === "business" ? "var(--biz-accent-soft)" : "var(--es-sage)";
   const bgColor = "var(--es-mist)";
 

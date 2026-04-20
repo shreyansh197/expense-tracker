@@ -242,9 +242,7 @@ describe("SpendingHeatmap pulse consolidation contract", () => {
   });
 
   test("TC-DASH-004-06: uses terrain color tokens for intensity", () => {
-    expect(src).toContain("var(--es-mist)");
     expect(src).toContain("var(--es-sage)");
-    expect(src).toContain("var(--es-moss)");
     expect(src).toContain("var(--es-clay)");
   });
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useMemo, useState } from "react";
+import { Suspense, useMemo, useState, useCallback } from "react";
 import { AppShell } from "@/components/layout/AppShell";
 import { MonthSwitcher } from "@/components/layout/MonthSwitcher";
 import { SyncIndicator } from "@/components/sync/SyncIndicator";
@@ -14,7 +14,7 @@ import { useHistoricalData } from "@/hooks/useHistoricalData";
 import { useSettings } from "@/hooks/useSettings";
 import { buildCategoryMap } from "@/lib/categories";
 import { useCurrency } from "@/hooks/useCurrency";
-import { getDaysInMonth } from "@/lib/utils";
+import { getDaysInMonth, getMonthName } from "@/lib/utils";
 import {
   TrendingUp,
   TrendingDown,
@@ -25,10 +25,13 @@ import {
   DollarSign,
   Award,
   ChevronDown,
+  Share2,
 } from "lucide-react";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { FogOverlook } from "@/components/ui/illustrations/terrain";
 import { ChronicleView } from "@/components/dashboard/ChronicleView";
+import { TimeMachine } from "@/components/analytics/TimeMachine";
+import { CategorySeasons } from "@/components/analytics/CategorySeasons";
 
 export default function AnalyticsPage() {
   return (
@@ -48,11 +51,11 @@ function AnalyticsShell() {
 }
 
 function AnalyticsContent() {
-  usePageTitle("The Overlook");
+  usePageTitle("Analytics");
   useMonthUrlSync();
   const [deepCoreOpen, setDeepCoreOpen] = useState(false);
   const { currentMonth, currentYear } = useUIStore();
-  const { effectiveBudget } = useCalculationsContext();
+  const { effectiveBudget, anomalies } = useCalculationsContext();
   const { settings } = useSettings();
   const { formatCurrency, formatCurrencyCompact } = useCurrency();
   const history = useHistoricalData(currentMonth, currentYear, 6);
@@ -67,6 +70,35 @@ function AnalyticsContent() {
   const topCats = useMemo(() => {
     return history.topCategoriesAllTime.slice(0, 6);
   }, [history.topCategoriesAllTime]);
+
+  // Share analytics summary
+  const handleShareAnalytics = useCallback(async () => {
+    const currentMd = history.currentMonth;
+    const monthLabel = getMonthName(currentMonth);
+    const total = currentMd ? formatCurrencyCompact(currentMd.expenses.reduce((s, e) => s + e.amount, 0)) : "0";
+    const topCat = topCats.length > 0 ? catMap[topCats[0].category]?.label || topCats[0].category : "none";
+    const mom = history.monthOverMonthChange !== null ? `${history.monthOverMonthChange > 0 ? "+" : ""}${history.monthOverMonthChange.toFixed(1)}%` : "N/A";
+
+    const text = [
+      `📊 ${monthLabel} ${currentYear} Spending Summary`,
+      `Total: ${total}`,
+      `Top category: ${topCat}`,
+      `vs Last month: ${mom}`,
+      `Avg monthly: ${formatCurrencyCompact(history.avgMonthlySpend)}`,
+      `Recurring: ${formatCurrencyCompact(history.recurringVsOneTime.recurring)}`,
+    ].join("\n");
+
+    if (typeof navigator !== "undefined" && navigator.share) {
+      try {
+        await navigator.share({ text });
+        return;
+      } catch { /* user cancelled or not supported */ }
+    }
+    // Fallback: copy to clipboard
+    if (typeof navigator !== "undefined" && navigator.clipboard) {
+      await navigator.clipboard.writeText(text);
+    }
+  }, [history, currentMonth, currentYear, formatCurrencyCompact, topCats, catMap]);
 
   // Cumulative daily spend for burn chart
   const cumulativeData = useMemo(() => {
@@ -116,8 +148,20 @@ function AnalyticsContent() {
       <PageTransition className="relative mx-auto min-h-[80vh] max-w-4xl xl:max-w-6xl space-y-5 p-4 sm:p-6 lg:p-8">
         {/* ─── Overlook Header ─── */}
         <div className="flex items-center justify-between gap-3">
-          <h1 className="font-display italic text-2xl" style={{ color: 'var(--text-primary)' }}>The Overlook</h1>
+          <h1 className="font-display italic text-2xl" style={{ color: 'var(--text-primary)' }}>Analytics</h1>
           <div className="flex items-center gap-2">
+            {history.months.length > 0 && (
+              <button
+                type="button"
+                onClick={handleShareAnalytics}
+                className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors"
+                style={{ color: "var(--text-muted)" }}
+                aria-label="Share analytics summary"
+              >
+                <Share2 size={14} />
+                <span className="hidden sm:inline">Share</span>
+              </button>
+            )}
             <SyncIndicator />
           </div>
         </div>
@@ -142,7 +186,7 @@ function AnalyticsContent() {
           transition={{ duration: 0.3 }}
         >
           <div className="flex items-center gap-2 mb-3">
-            <BarChart3 size={16} style={{ color: "var(--es-moss)" }} />
+            <BarChart3 size={16} style={{ color: "var(--accent)" }} />
             <h3 className="text-sm font-semibold uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
               6-Month Ridge
             </h3>
@@ -164,7 +208,7 @@ function AnalyticsContent() {
                       className="h-full rounded-lg transition-all duration-500"
                       style={{
                         width: `${Math.max(pct, 1)}%`,
-                        background: isCurrent ? "var(--es-moss)" : "var(--es-sage, var(--text-muted))",
+                        background: isCurrent ? "var(--accent)" : "var(--es-sage, var(--text-muted))",
                         opacity: isCurrent ? 1 : 0.4,
                       }}
                     />
@@ -283,7 +327,7 @@ function AnalyticsContent() {
             transition={{ delay: 0.25 }}
           >
             <div className="flex items-center gap-2 mb-4">
-              <TrendingUp size={16} style={{ color: "var(--es-moss)" }} />
+              <TrendingUp size={16} style={{ color: "var(--accent)" }} />
               <h3 className="text-sm font-semibold uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
                 Spending Velocity
               </h3>
@@ -309,7 +353,7 @@ function AnalyticsContent() {
                               className="absolute bottom-0 w-full rounded-t-md transition-all duration-500"
                               style={{
                                 height: `${Math.max(pct, 4)}%`,
-                                background: overBudget ? "var(--es-clay)" : "var(--es-moss)",
+                                background: overBudget ? "var(--es-clay)" : "var(--accent)",
                                 opacity: i === weeks.length - 1 ? 0.9 : 0.45,
                               }}
                             />
@@ -355,7 +399,7 @@ function AnalyticsContent() {
             transition={{ delay: 0.3 }}
           >
             <div className="flex items-center gap-2 mb-4">
-              <Award size={16} style={{ color: "var(--es-moss)" }} />
+              <Award size={16} style={{ color: "var(--accent)" }} />
               <h3 className="text-sm font-semibold uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
                 Biggest This Month
               </h3>
@@ -411,6 +455,12 @@ function AnalyticsContent() {
           <ChronicleView />
         </m.div>
 
+        {/* ─── 4b. Time Machine — What If scenarios ─── */}
+        <TimeMachine />
+
+        {/* ─── 4c. Category Seasons — Annual Rhythm ─── */}
+        <CategorySeasons />
+
         {/* ─── 5. Deep Core (expandable) ─── */}
         <m.div
           className="card-terrain overflow-hidden"
@@ -440,7 +490,7 @@ function AnalyticsContent() {
               {/* Cumulative Burn Chart */}
               <div>
                 <div className="flex items-center gap-2 mb-3">
-                  <TrendingUp size={14} style={{ color: "var(--es-moss)" }} />
+                  <TrendingUp size={14} style={{ color: "var(--accent)" }} />
                   <h4 className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
                     Cumulative Spending
                   </h4>
@@ -474,7 +524,7 @@ function AnalyticsContent() {
                             return `L${x},${y}`;
                           })
                           .join(" ")} L${40 + ((cumulativeData.length - 1) / Math.max(cumulativeData.length - 1, 1)) * 350},140 Z`}
-                        fill="var(--es-moss)" opacity="0.12"
+                        fill="var(--accent)" opacity="0.12"
                       />
                       <path
                         d={cumulativeData
@@ -484,7 +534,7 @@ function AnalyticsContent() {
                             return `${i === 0 ? "M" : "L"}${x},${y}`;
                           })
                           .join(" ")}
-                        fill="none" stroke="var(--es-moss)" strokeWidth="2"
+                        fill="none" stroke="var(--accent)" strokeWidth="2"
                       />
                       <text x="36" y="143" textAnchor="end" fill="var(--text-muted)" fontSize="8">0</text>
                       <text x="36" y={143 - 120} textAnchor="end" fill="var(--text-muted)" fontSize="8">
@@ -499,60 +549,43 @@ function AnalyticsContent() {
                 )}
               </div>
 
-              {/* Category Trends */}
-              {topCats.length > 0 && (
+              {/* Anomaly Detection */}
+              {anomalies.length > 0 && (
                 <div>
-                  <h4 className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: "var(--text-muted)" }}>
-                    Category Trends
-                  </h4>
-                  <div className="space-y-4">
-                    {topCats.map(({ category }) => {
-                      const cat = catMap[category];
-                      const monthValues = history.months.map((md) => md.categoryBreakdown[category] || 0);
-                      const catMax = Math.max(...monthValues, 1);
+                  <div className="flex items-center gap-2 mb-3">
+                    <Zap size={14} style={{ color: "var(--es-clay)" }} />
+                    <h4 className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
+                      Unusual Spending
+                    </h4>
+                  </div>
+                  <div className="space-y-2">
+                    {anomalies.slice(0, 5).map((a) => {
+                      const e = a.expense;
+                      const cat = catMap[e.category];
                       return (
-                        <div key={category}>
-                          <div className="flex items-center justify-between mb-1.5">
-                            <span className="text-xs font-medium" style={{ color: cat?.color || "var(--text-primary)" }}>
-                              {cat?.label || category}
-                            </span>
-                            <span className="text-xs font-numeric" style={{ color: "var(--text-muted)" }}>
-                              {formatCurrencyCompact(monthValues[monthValues.length - 1])} this month
-                            </span>
+                        <div key={e.id} className="flex items-center gap-3 rounded-lg px-3 py-2" style={{ background: "var(--surface-secondary)" }}>
+                          <div
+                            className="w-2 h-2 rounded-full shrink-0"
+                            style={{ background: a.zScore >= 4 ? "var(--es-clay)" : "var(--warning, #EAB308)" }}
+                          />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-medium truncate" style={{ color: "var(--text-primary)" }}>
+                              {e.remark || cat?.label || e.category}
+                            </p>
+                            <p className="text-[10px]" style={{ color: "var(--text-tertiary)" }}>
+                              {cat?.label || e.category} · Day {e.day} · {a.zScore.toFixed(1)}σ above avg
+                            </p>
                           </div>
-                          <div className="flex items-end gap-1 h-8">
-                            {history.months.map((md, j) => {
-                              const val = monthValues[j];
-                              const h = (val / catMax) * 100;
-                              return (
-                                <div
-                                  key={`${md.year}-${md.month}`}
-                                  className="flex-1 rounded-t-md transition-all duration-500"
-                                  style={{
-                                    height: `${Math.max(h, 3)}%`,
-                                    background: cat?.color || "var(--text-muted)",
-                                    opacity: j === history.months.length - 1 ? 0.9 : 0.3,
-                                  }}
-                                  title={`${md.label}: ${formatCurrency(val)}`}
-                                />
-                              );
-                            })}
-                          </div>
-                          <div className="flex gap-1 mt-0.5">
-                            {history.months.map((md) => (
-                              <span
-                                key={`label-${md.year}-${md.month}`}
-                                className="flex-1 text-center text-[9px]"
-                                style={{ color: "var(--text-muted)" }}
-                              >
-                                {md.label.split(" ")[0]}
-                              </span>
-                            ))}
-                          </div>
+                          <span className="text-sm font-bold font-numeric shrink-0" style={{ color: "var(--es-clay)" }}>
+                            {formatCurrency(e.amount)}
+                          </span>
                         </div>
                       );
                     })}
                   </div>
+                  <p className="text-[10px] mt-2" style={{ color: "var(--text-muted)" }}>
+                    Expenses significantly above your typical pattern
+                  </p>
                 </div>
               )}
             </div>

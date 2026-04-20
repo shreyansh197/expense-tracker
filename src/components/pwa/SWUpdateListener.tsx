@@ -12,8 +12,16 @@ export function SWUpdateListener() {
       if (shown.current) return;
       shown.current = true;
       toast("A new version is available", "info", {
-        label: "Refresh",
-        onClick: () => window.location.reload(),
+        label: "Update",
+        onClick: () => {
+          if ("serviceWorker" in navigator) {
+            navigator.serviceWorker.ready.then((reg) => {
+              reg.waiting?.postMessage({ type: "SKIP_WAITING" });
+            });
+          }
+          // Fallback: reload after a short delay if controllerchange doesn't fire
+          setTimeout(() => window.location.reload(), 1000);
+        },
       });
     }
 

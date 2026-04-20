@@ -145,7 +145,7 @@ export function SavingsGoalsWidget() {
                   onClick={() => setFundMode("add")}
                   className="flex-1 py-2.5 text-xs font-medium transition-colors"
                   style={fundMode === "add"
-                    ? { background: "var(--es-mist)", color: "var(--es-moss)" }
+                    ? { background: "var(--accent-soft)", color: "var(--accent)" }
                     : { color: "var(--text-muted)" }
                   }
                 >
@@ -211,14 +211,14 @@ export function SavingsGoalsWidget() {
       {/* Header */}
       <div className="flex items-center justify-between p-4 pb-0">
         <div className="flex items-center gap-2">
-          <Target size={15} style={{ color: "var(--es-moss)" }} />
+          <Target size={15} style={{ color: "var(--accent)" }} />
           <h3 className="text-sm font-semibold uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
             Savings Goals
           </h3>
         </div>
         <span
           className="rounded-full px-2.5 py-0.5 text-xs font-bold font-numeric"
-          style={{ background: "var(--es-mist)", color: "var(--es-moss)" }}
+          style={{ background: "var(--accent-soft)", color: "var(--accent)" }}
         >
           {overallPct}%
         </span>
@@ -229,7 +229,7 @@ export function SavingsGoalsWidget() {
         <div className="h-1.5 w-full overflow-hidden rounded-full" style={{ background: "var(--surface-secondary)" }} role="progressbar" aria-valuenow={Math.min(overallPct, 100)} aria-valuemin={0} aria-valuemax={100} aria-label="Overall savings progress">
           <m.div
             className="h-full rounded-full"
-            style={{ backgroundColor: "var(--es-moss)" }}
+            style={{ backgroundColor: "var(--accent)" }}
             initial={{ width: 0 }}
             animate={{ width: `${Math.min(overallPct, 100)}%` }}
             transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
@@ -277,7 +277,7 @@ export function SavingsGoalsWidget() {
                     {g.name}
                   </span>
                   {isComplete ? (
-                    <span className="shrink-0 flex items-center gap-1 text-xs font-semibold" style={{ color: "var(--es-moss)" }}>
+                    <span className="shrink-0 flex items-center gap-1 text-xs font-semibold" style={{ color: "var(--accent)" }}>
                       <Sparkles size={12} /> Done
                     </span>
                   ) : (
@@ -288,7 +288,7 @@ export function SavingsGoalsWidget() {
                         setFundMode("add");
                       }}
                       className="shrink-0 rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors min-h-[44px]"
-                      style={{ background: "var(--es-mist)", color: "var(--es-moss)" }}
+                      style={{ background: "var(--accent-soft)", color: "var(--accent)" }}
                     >
                       + Fund
                     </button>

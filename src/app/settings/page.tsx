@@ -247,7 +247,7 @@ function PinLockSettings() {
 }
 
 export default function SettingsPage() {
-  usePageTitle("The Workshop");
+  usePageTitle("Settings");
   const { settings, updateSettings } = useSettings();
   const { symbol, formatCurrency } = useCurrency();
   const { toast } = useToast();
@@ -328,10 +328,10 @@ export default function SettingsPage() {
   const goalsCount = settings.goals?.length || 0;
 
   const zones = [
-    { id: "zone-account", label: "Identity", description: "Profile, security & workspace" },
-    { id: "zone-finances", label: "Ledger", description: "Budget, categories & goals" },
-    { id: "zone-automation", label: "Mechanisms", description: "Rules, export & data" },
-    { id: "zone-preferences", label: "Atmosphere", description: "Theme, currency & mode" },
+    { id: "zone-account", label: "Account", description: "Profile, security & workspace" },
+    { id: "zone-finances", label: "Budget & Categories", description: "Budget, categories & goals" },
+    { id: "zone-automation", label: "Data & Automation", description: "Rules, export & data" },
+    { id: "zone-preferences", label: "Appearance", description: "Theme, currency & mode" },
   ];
   const [activeZone, setActiveZoneRaw] = useState(() => {
     // Check URL hash to pre-select the right zone
@@ -432,10 +432,10 @@ export default function SettingsPage() {
             style={{ color: "var(--text-primary)", opacity: 0.04, overflow: "hidden" }}
             aria-hidden="true"
           >
-            Workshop
+            Settings
           </p>
-          <h1 className="font-display italic text-2xl sm:text-3xl relative z-10" style={{ color: 'var(--text-primary)' }}>The Workshop</h1>
-          <p className="text-sm mt-1 relative z-10 font-body-terrain" style={{ color: 'var(--text-secondary)' }}>Shape your clearing to fit.</p>
+          <h1 className="font-display italic text-2xl sm:text-3xl relative z-10" style={{ color: 'var(--text-primary)' }}>Settings</h1>
+          <p className="text-sm mt-1 relative z-10 font-body-terrain" style={{ color: 'var(--text-secondary)' }}>Customize your experience.</p>
         </div>
 
         {/* Search bar */}
@@ -443,7 +443,7 @@ export default function SettingsPage() {
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: 'var(--text-muted)' }} />
           <input
             type="text"
-            placeholder="Search the workshop…"
+            placeholder="Search settings…"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full rounded-full border py-2.5 pl-9 pr-3 text-sm transition-colors focus:outline-none focus:ring-2"

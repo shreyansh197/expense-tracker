@@ -198,3 +198,10 @@ self.addEventListener("notificationclick", (event) => {
       }),
   );
 });
+
+// ─── Skip Waiting on demand (triggered from UpdateBanner) ──────────────────
+self.addEventListener("message", (event) => {
+  if (event.data && event.data.type === "SKIP_WAITING") {
+    self.skipWaiting();
+  }
+});

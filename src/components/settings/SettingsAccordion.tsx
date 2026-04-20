@@ -130,10 +130,12 @@ export function AccordionSection({
         className
       )}
     >
-      <button
-        type="button"
+      <div
+        role="button"
+        tabIndex={0}
         id={`header-${id}`}
         onClick={() => !alwaysOpen && toggle(id)}
+        onKeyDown={(e) => { if (!alwaysOpen && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); toggle(id); } }}
         className={cn(
           "flex w-full items-center gap-3 px-4 py-3.5 text-left",
           !alwaysOpen && "cursor-pointer",
@@ -180,7 +182,7 @@ export function AccordionSection({
             style={{ color: 'var(--text-tertiary)' }}
           />
         )}
-      </button>
+      </div>
       <AnimatePresence initial={false}>
       {isOpen && (
       <m.div
