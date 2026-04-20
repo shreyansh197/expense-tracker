@@ -136,7 +136,7 @@ export default function BusinessPage() {
     <AppShell>
       <PageTransition className="relative mx-auto min-h-[80vh] max-w-5xl xl:max-w-7xl space-y-6 p-4 sm:p-6 lg:p-8">
         {/* Header + KPIs — The Counting House */}
-        <div className="space-y-6 relative overflow-hidden">
+        <div className="space-y-6 relative">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="font-display italic text-2xl" style={{ color: 'var(--text-primary)' }}>Business</h1>
