@@ -89,18 +89,19 @@ export function SpendingStream({
       .filter((s) => s.value > 0);
   }, [dailyValues, daysInMonth, today, anomalyDays]);
 
-  /* ── 2 wave layers (back + front — reduced from 4 for clarity) ── */
+  /* ── 2 wave layers (back + front — extended beyond edges for seamless animation) ── */
   const wavePaths = useMemo(() => {
     const y = waveY;
+    // Extend paths from -80 to 440 so the shift animation never exposes edges
     return [
       {
-        d: `M0,${y + 6} C50,${y + 2} 100,${y + 8} 160,${y + 4} S240,${y + 9} 300,${y + 2} S350,${y + 6} 360,${y + 5} V${VB_H} H0Z`,
+        d: `M-80,${y + 6} C-30,${y + 2} 20,${y + 8} 80,${y + 4} S160,${y + 9} 220,${y + 2} S280,${y + 6} 340,${y + 5} S400,${y + 3} 440,${y + 7} V${VB_H} H-80Z`,
         speed: 16,
         opacity: 0.35,
         shift: [-40, 30],
       },
       {
-        d: `M0,${y} C40,${y - 3} 80,${y + 4} 130,${y - 1} S210,${y + 5} 270,${y - 2} S340,${y + 2} 360,${y + 1} V${VB_H} H0Z`,
+        d: `M-80,${y} C-40,${y - 3} 0,${y + 4} 50,${y - 1} S130,${y + 5} 190,${y - 2} S260,${y + 2} 320,${y + 1} S390,${y - 1} 440,${y + 3} V${VB_H} H-80Z`,
         speed: 9,
         opacity: 0.7,
         shift: [-30, 40],
