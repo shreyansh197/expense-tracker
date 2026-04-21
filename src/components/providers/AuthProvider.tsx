@@ -197,6 +197,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [state.tokens?.accessToken, fetchEncryptionKey]);
 
+  // ── Sync profile (avatar, name) on first load ─────────────
+  useEffect(() => {
+    if (!state.tokens?.accessToken) return;
+    let cancelled = false;
+    const syncProfile = async () => {
+      try {
+        const res = await authFetch("/api/auth/check");
+        if (cancelled) return;
+        if (res.ok) {
+          const data = await res.json().catch(() => null);
+          if (data?.user) {
+            const current = getAuthState().user;
+            if (current && (current.avatarUrl !== data.user.avatarUrl || current.name !== data.user.name)) {
+              setAuthState({ user: { ...current, name: data.user.name, avatarUrl: data.user.avatarUrl } });
+            }
+          }
+        }
+      } catch { /* non-fatal */ }
+    };
+    syncProfile();
+    return () => { cancelled = true; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.tokens?.accessToken]);
+
   // ── Session heartbeat: detect revoked sessions ────────────
   const logoutRef = useRef(logout);
   useEffect(() => { logoutRef.current = logout; });
@@ -205,12 +229,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!state.tokens?.accessToken) return;
 
     const INTERVAL_MS = 30_000; // 30 seconds
-    const STARTUP_GRACE_MS = 5_000; // Don't check session within 5s of mount
-    const mountedAt = Date.now();
 
     const checkSession = async () => {
-      // Skip checks during startup grace period to avoid race with page reload after login
-      if (Date.now() - mountedAt < STARTUP_GRACE_MS) return;
       try {
         const res = await authFetch("/api/auth/check");
         if (res.status === 401) {
