@@ -115,14 +115,46 @@ export function useWatcher(): { insight: WatcherInsight | null; dismiss: () => v
       }
     }
 
-    // 6. Quiet day encouragement (no expenses today)
+    // 6. Quiet day encouragement (no expenses today — rotate messages by day-of-month)
     const today = new Date().getDate();
     const todaySpend = expenses.filter((e) => !e.deletedAt && e.day === today);
     if (expenses.length > 0 && todaySpend.length === 0) {
+      const quietMessages = [
+        "No spending logged today — a quiet day is a powerful day.",
+        "Nothing spent today yet — sometimes stillness is the best strategy.",
+        "Zero logged today — your wallet thanks you.",
+        "A pause in spending can be just as telling as a spike.",
+        "Clean slate today — every unspent day builds momentum.",
+      ];
       return {
         type: "streak",
-        text: "No spending logged today — a quiet day is a powerful day.",
+        text: quietMessages[today % quietMessages.length],
       };
+    }
+
+    // 7. Daily spend summary (there IS spending today)
+    if (todaySpend.length > 0) {
+      const todayTotal = todaySpend.reduce((s, e) => s + e.amount, 0);
+      const active = expenses.filter((e) => !e.deletedAt);
+      const totalMonth = active.reduce((s, e) => s + e.amount, 0);
+      if (totalMonth > 0) {
+        const pct = Math.round((todayTotal / totalMonth) * 100);
+        if (pct > 30) {
+          return {
+            type: "anomaly",
+            text: `Today's spend is ${pct}% of your total this month — a heavy day.`,
+          };
+        }
+      }
+      const avgDaily = active.length > 0
+        ? active.reduce((s, e) => s + e.amount, 0) / new Date().getDate()
+        : 0;
+      if (avgDaily > 0 && todayTotal > avgDaily * 1.5) {
+        return {
+          type: "anomaly",
+          text: `You've spent ${Math.round(todayTotal).toLocaleString()} today — above your daily average of ${Math.round(avgDaily).toLocaleString()}.`,
+        };
+      }
     }
 
     return null;

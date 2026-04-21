@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useCallback } from "react";
+import { useMemo, useRef, useCallback, useEffect } from "react";
 import type { Achievement, Expense, UserSettings } from "@/types";
 
 // ── Achievement definitions ──
@@ -145,6 +145,11 @@ export function useAchievements(
     const newAchievements: Achievement[] = newlyUnlocked.map((id) => ({ id, unlockedAt: now }));
     updateSettings({ achievements: [...persisted, ...newAchievements] });
   }, [newlyUnlocked, persisted, updateSettings]);
+
+  // Auto-persist newly unlocked achievements
+  useEffect(() => {
+    if (newlyUnlocked.length > 0) persistNew();
+  }, [newlyUnlocked, persistNew]);
 
   return {
     achievements: statuses,

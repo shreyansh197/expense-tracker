@@ -20,7 +20,9 @@ import { MoneyEcho } from "@/components/ui/MoneyEcho";
 import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
 import { useCalculationsContext } from "@/contexts/CalculationsContext";
 import { useMerchantIndex } from "@/hooks/useMerchantIndex";
-import { useExpenses } from "@/hooks/useExpenses";
+import { useDexieQuery } from "@/hooks/useDexieQuery";
+import { db } from "@/lib/db";
+import { getActiveWorkspaceId } from "@/lib/authClient";
 import type { CategoryId, ExpenseInput, Expense } from "@/types";
 
 /* ─── Keypad keys ─── */
@@ -58,9 +60,26 @@ export function ExpenseForm({
   const { settings } = useSettings();
   const { symbol } = useCurrency();
   const { categoryTotals } = useCalculationsContext();
-  const { currentMonth, currentYear } = useUIStore();
-  const { expenses: allExpenses } = useExpenses(currentMonth, currentYear);
-  const { search: searchMerchants } = useMerchantIndex(allExpenses);
+
+  // Use ALL workspace expenses for merchant typeahead (not just current month)
+  const wid = getActiveWorkspaceId();
+  const EMPTY_EXPENSES: Expense[] = useMemo(() => [], []);
+  const allWorkspaceExpenses = useDexieQuery(
+    async () => {
+      if (!wid) return EMPTY_EXPENSES;
+      const rows = await db.expenses.where("workspaceId").equals(wid).toArray();
+      return rows.filter(r => !r.deletedAt).map(r => ({
+        id: r.id, category: r.category as CategoryId, amount: r.amount,
+        currency: r.currency, day: r.day, month: r.month, year: r.year,
+        remark: r.remark, isRecurring: r.isRecurring ?? false,
+        recurringId: r.recurringId, createdAt: r.createdAt,
+        updatedAt: r.updatedAt, deletedAt: null, deviceId: "",
+      })) as Expense[];
+    },
+    [wid],
+    EMPTY_EXPENSES,
+  );
+  const { search: searchMerchants } = useMerchantIndex(allWorkspaceExpenses);
   const allCategories = getAllCategories(settings.customCategories, settings.hiddenDefaults);
   const multiCurrency = settings.multiCurrencyEnabled ?? false;
 
@@ -176,7 +195,8 @@ export function ExpenseForm({
           }
         }
       } else if (field === "is_recurring") {
-        match = value === "true" ? false : true;
+        // Cannot evaluate during manual entry — skip this condition
+        match = false;
       }
       if (match && allCategories.some((c) => c.id === rule.action.value)) {
         setCategory(rule.action.value as CategoryId);
