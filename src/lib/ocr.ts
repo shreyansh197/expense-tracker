@@ -16,10 +16,7 @@ async function getWorker(): Promise<Worker> {
   if (_worker) return _worker;
   if (_initPromise) return _initPromise;
 
-  _initPromise = createWorker("eng", 1, {
-    workerPath: "https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/worker.min.js",
-    corePath: "https://cdn.jsdelivr.net/npm/tesseract.js-core@5/tesseract-core-simd-lstm.wasm.js",
-  }).then((w) => {
+  _initPromise = createWorker("eng", 1).then((w) => {
     _worker = w;
     _initPromise = null;
     return w;

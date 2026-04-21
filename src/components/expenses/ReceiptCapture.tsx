@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useCallback, useEffect } from "react";
-import { Camera, Loader2, RotateCcw, Check, X, FileImage } from "lucide-react";
+import { Loader2, RotateCcw, Check, X, FileImage } from "lucide-react";
 import Image from "next/image";
 import { extractFromReceipt, terminateOcr, type OcrResult } from "@/lib/ocr";
 import { useSettings } from "@/hooks/useSettings";
@@ -18,7 +18,6 @@ export function ReceiptCapture({ onExtracted, onClose }: ReceiptCaptureProps) {
   const { settings } = useSettings();
   const catMap = buildCategoryMap(settings.customCategories, settings.hiddenDefaults);
   const fileRef = useRef<HTMLInputElement>(null);
-  const cameraRef = useRef<HTMLInputElement>(null);
   const [stage, setStage] = useState<Stage>("idle");
   const [preview, setPreview] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
@@ -107,9 +106,8 @@ export function ReceiptCapture({ onExtracted, onClose }: ReceiptCaptureProps) {
     setFile(null);
     setResult(null);
     setError(null);
-    // Reset file inputs so the same file can be re-selected
+    // Reset file input so the same file can be re-selected
     if (fileRef.current) fileRef.current.value = "";
-    if (cameraRef.current) cameraRef.current.value = "";
   }, []);
 
   return (
@@ -139,34 +137,14 @@ export function ReceiptCapture({ onExtracted, onClose }: ReceiptCaptureProps) {
       {/* Stage: idle — file input */}
       {stage === "idle" && (
         <div className="flex flex-col items-center gap-3">
-          <div className="flex w-full gap-2">
-            <button
-              onClick={() => cameraRef.current?.click()}
-              className="flex h-28 flex-1 flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed transition-colors"
-              style={{ borderColor: "var(--border)", color: "var(--text-secondary)" }}
-            >
-              <Camera size={22} />
-              <span className="text-xs font-medium">Take Photo</span>
-            </button>
-            <button
-              onClick={() => fileRef.current?.click()}
-              className="flex h-28 flex-1 flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed transition-colors"
-              style={{ borderColor: "var(--border)", color: "var(--text-secondary)" }}
-            >
-              <FileImage size={22} />
-              <span className="text-xs font-medium">Upload Image</span>
-            </button>
-          </div>
-          {/* Camera input (with capture) */}
-          <input
-            ref={cameraRef}
-            type="file"
-            accept="image/*"
-            capture="environment"
-            onChange={handleFileChange}
-            className="hidden"
-          />
-          {/* Gallery/file input (no capture) */}
+          <button
+            onClick={() => fileRef.current?.click()}
+            className="flex h-28 w-full flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed transition-colors"
+            style={{ borderColor: "var(--border)", color: "var(--text-secondary)" }}
+          >
+            <FileImage size={22} />
+            <span className="text-xs font-medium">Upload Image</span>
+          </button>
           <input
             ref={fileRef}
             type="file"
