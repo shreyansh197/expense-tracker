@@ -1,4 +1,19 @@
-import { createWorker, type Worker } from "tesseract.js";
+// Tesseract.js is loaded from CDN to guarantee the browser bundle is used.
+// Next.js 16 Turbopack doesn't handle the package.json "browser" field map,
+// so the npm import resolves to the Node.js worker which fails in the browser.
+
+const TESSERACT_CDN = "https://cdn.jsdelivr.net/npm/tesseract.js@7.0.0/dist/tesseract.min.js";
+
+interface TesseractGlobal {
+  createWorker: (langs: string, oem?: number) => Promise<TesseractWorker>;
+}
+
+interface TesseractWorker {
+  recognize: (image: File | Blob | string) => Promise<{
+    data: { text: string; confidence: number };
+  }>;
+  terminate: () => Promise<void>;
+}
 
 export interface OcrResult {
   amount?: number;
@@ -8,21 +23,40 @@ export interface OcrResult {
   confidence: number; // 0–100
 }
 
-let _worker: Worker | null = null;
-let _initPromise: Promise<Worker> | null = null;
+/** Load Tesseract.js from CDN (cached after first load). */
+function loadTesseractCDN(): Promise<TesseractGlobal> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const win = window as any;
+  if (win.Tesseract) return Promise.resolve(win.Tesseract as TesseractGlobal);
+
+  return new Promise((resolve, reject) => {
+    const script = document.createElement("script");
+    script.src = TESSERACT_CDN;
+    script.async = true;
+    script.onload = () => {
+      if (win.Tesseract) resolve(win.Tesseract as TesseractGlobal);
+      else reject(new Error("Tesseract global not found after script load"));
+    };
+    script.onerror = () => reject(new Error("Failed to load Tesseract.js from CDN"));
+    document.head.appendChild(script);
+  });
+}
+
+let _worker: TesseractWorker | null = null;
+let _initPromise: Promise<TesseractWorker> | null = null;
 
 /** Lazy-initialize Tesseract worker (heavy — only loaded when needed). */
-async function getWorker(): Promise<Worker> {
+async function getWorker(): Promise<TesseractWorker> {
   if (_worker) return _worker;
   if (_initPromise) return _initPromise;
 
-  _initPromise = createWorker("eng", 1, {
-    workerPath: "https://cdn.jsdelivr.net/npm/tesseract.js@v7.0.0/dist/worker.min.js",
-  }).then((w) => {
+  _initPromise = (async () => {
+    const Tesseract = await loadTesseractCDN();
+    const w = await Tesseract.createWorker("eng", 1);
     _worker = w;
     _initPromise = null;
     return w;
-  }).catch((err) => {
+  })().catch((err) => {
     _initPromise = null;
     throw new Error(`OCR engine failed to load: ${err?.message || err}`);
   });
