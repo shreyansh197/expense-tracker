@@ -120,6 +120,16 @@ async function gen() {
   );
   fs.writeFileSync(swPath, sw);
   console.log("Updated sw.js CACHE_NAME");
+
+  // Update layout.tsx icon URLs with cache-busting query
+  const layoutPath = path.join("src", "app", "layout.tsx");
+  let layout = fs.readFileSync(layoutPath, "utf-8");
+  layout = layout.replace(
+    /\/icons\/(favicon-32|icon-192|icon-512|apple-touch-icon)\.png(\?v=[a-f0-9]+)?/g,
+    (_, name) => `/icons/${name}.png?v=${iconHash}`,
+  );
+  fs.writeFileSync(layoutPath, layout);
+  console.log("Updated layout.tsx icon versions");
 }
 
 gen().catch((err) => {
