@@ -8,7 +8,7 @@ const cspDirectives = [
   "img-src 'self' data: blob: https://lh3.googleusercontent.com",
   "font-src 'self'",
   "worker-src 'self' blob: https://cdn.jsdelivr.net",
-  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.frankfurter.dev https://latest.currency-api.pages.dev https://cdn.jsdelivr.net https://*.ingest.sentry.io https://tessdata.projectnaptha.com",
+  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.frankfurter.dev https://latest.currency-api.pages.dev https://cdn.jsdelivr.net https://*.ingest.sentry.io https://tessdata.projectnaptha.com https://lh3.googleusercontent.com",
   "frame-ancestors 'none'",
   "frame-src 'self'",
   "base-uri 'self'",
