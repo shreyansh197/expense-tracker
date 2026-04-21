@@ -10,7 +10,7 @@ interface AccentColorPickerProps {
 }
 
 export const ACCENT_PRESETS = [
-  { id: "moss",   label: "Moss",   accent: "#3D5A3E", accentDark: "#8FAF8B", soft: "#C8D9C4", softDark: "rgba(143,175,139,0.14)", hover: "#2D6A4F", hoverDark: "#A3C4A0", deep: "#2B4A2C", deepDark: "#6D8F6A", border: "#8FAF8B", borderDark: "rgba(143,175,139,0.35)" },
+  { id: "moss",   label: "Moss",   accent: "#2D6B5A", accentDark: "#7BAF9E", soft: "#BDD9D0", softDark: "rgba(123,175,158,0.14)", hover: "#1B5B4A", hoverDark: "#A3C4A0", deep: "#1A4A3C", deepDark: "#5A9680", border: "#7BAF9E", borderDark: "rgba(123,175,158,0.35)" },
   { id: "clay",   label: "Clay",   accent: "#B5654A", accentDark: "#D4906A", soft: "#F5E6DF", softDark: "rgba(212,144,106,0.14)", hover: "#A0583F", hoverDark: "#C07A55", deep: "#8B4A34", deepDark: "#A0583F", border: "#D4906A", borderDark: "rgba(212,144,106,0.35)" },
   { id: "purple", label: "Purple", accent: "#7C3AED", accentDark: "#A78BFA", soft: "#EDE9FE", softDark: "rgba(167,139,250,0.14)", hover: "#6D28D9", hoverDark: "#C4B5FD", deep: "#5B21B6", deepDark: "#7C3AED", border: "#A78BFA", borderDark: "rgba(167,139,250,0.35)" },
   { id: "blue",   label: "Blue",   accent: "#2563EB", accentDark: "#60A5FA", soft: "#DBEAFE", softDark: "rgba(96,165,250,0.14)", hover: "#1D4ED8", hoverDark: "#93C5FD", deep: "#1E40AF", deepDark: "#2563EB", border: "#60A5FA", borderDark: "rgba(96,165,250,0.35)" },

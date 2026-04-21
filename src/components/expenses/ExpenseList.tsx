@@ -611,7 +611,7 @@ function SwipeableExpenseItem({
           <div className="flex items-center gap-2">
             <CategoryBadge category={expense.category} />
             {expense.isRecurring && (
-              <span aria-label="Recurring" style={{ color: 'var(--es-mist, #C8D9C4)' }}>
+              <span aria-label="Recurring" style={{ color: 'var(--es-mist, #BDD9D0)' }}>
                 <Repeat size={10} />
               </span>
             )}

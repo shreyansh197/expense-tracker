@@ -144,8 +144,8 @@ function MobileAuthPage({ children }: { children: React.ReactNode }) {
         <div style={{ position: "relative", marginBottom: 20 }}>
           <div style={{
             position: "absolute", inset: -6, borderRadius: 22,
-            background: "linear-gradient(135deg, var(--primary), var(--accent))",
-            opacity: 0.2, filter: "blur(14px)",
+            background: "linear-gradient(135deg, #059397, var(--primary))",
+            opacity: 0.25, filter: "blur(14px)",
           }} />
           <div style={{
             position: "relative",
@@ -566,8 +566,8 @@ export function AuthModal({
             onClick={() => setMode("register")}
             className="group relative flex w-full items-center gap-4 rounded-2xl p-4 text-left text-white transition-all hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] overflow-hidden"
             style={{
-              background: "linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 50%, var(--accent) 100%)",
-              boxShadow: "0 8px 24px color-mix(in srgb, var(--primary) 35%, transparent), 0 2px 8px color-mix(in srgb, var(--accent) 20%, transparent)",
+              background: "linear-gradient(135deg, #059397 0%, var(--primary) 50%, var(--primary-hover) 100%)",
+              boxShadow: "0 8px 24px color-mix(in srgb, var(--primary) 40%, transparent), 0 2px 8px color-mix(in srgb, var(--primary-hover) 25%, transparent)",
               animation: "sp-card-in 0.4s ease both",
               animationDelay: "0.05s",
             }}
@@ -728,8 +728,8 @@ export function AuthModal({
           disabled={loading}
           className="w-full rounded-2xl py-4 text-base font-semibold text-white transition-all hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 flex items-center justify-center gap-2"
           style={{
-            background: "linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 50%, var(--accent) 100%)",
-            boxShadow: "0 6px 20px color-mix(in srgb, var(--primary) 35%, transparent)",
+            background: "linear-gradient(135deg, #059397 0%, var(--primary) 50%, var(--primary-hover) 100%)",
+            boxShadow: "0 6px 20px color-mix(in srgb, var(--primary) 40%, transparent)",
           }}
         >
           {loading && <Loader2 className="h-4 w-4 animate-spin" />}

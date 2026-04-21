@@ -90,7 +90,7 @@ export function MonthlyPostcard() {
     // Draw terrain ridge waves at bottom
     ctx.save();
     ctx.globalAlpha = 0.12;
-    ctx.fillStyle = "#3D5A3E";
+    ctx.fillStyle = "#2D6B5A";
     ctx.beginPath();
     ctx.moveTo(0, H);
     for (let x = 0; x <= W; x += 10) {
@@ -101,7 +101,7 @@ export function MonthlyPostcard() {
     ctx.closePath();
     ctx.fill();
 
-    ctx.fillStyle = "#8FAF8B";
+    ctx.fillStyle = "#7BAF9E";
     ctx.beginPath();
     ctx.moveTo(0, H);
     for (let x = 0; x <= W; x += 10) {
@@ -120,7 +120,7 @@ export function MonthlyPostcard() {
     ctx.fillText(`${getMonthName(currentMonth)} ${currentYear}`, 80, 160);
 
     // Divider line
-    ctx.fillStyle = "#3D5A3E";
+    ctx.fillStyle = "#2D6B5A";
     ctx.globalAlpha = 0.4;
     ctx.fillRect(80, 185, 80, 2);
     ctx.globalAlpha = 1;
@@ -133,7 +133,7 @@ export function MonthlyPostcard() {
     // Budget context
     if (effectiveBudget > 0) {
       const remaining = effectiveBudget - monthlyTotal;
-      ctx.fillStyle = remaining >= 0 ? "#2D6A4F" : "#C0392B";
+      ctx.fillStyle = remaining >= 0 ? "#1B5B4A" : "#C0392B";
       ctx.font = "500 32px system-ui, sans-serif";
       ctx.fillText(
         remaining >= 0
@@ -178,7 +178,7 @@ export function MonthlyPostcard() {
       const y = barStartY + 50 + i * 90;
       const meta = catMap[cat.category];
       const label = meta?.label ?? cat.category;
-      const color = meta?.color ?? "#8FAF8B";
+      const color = meta?.color ?? "#7BAF9E";
       const barW = Math.max((cat.total / maxCatTotal) * barMaxWidth, 20);
 
       // Category label
@@ -213,7 +213,7 @@ export function MonthlyPostcard() {
       const x = 80 + ((dt.day - 1) / (daysInMonth - 1)) * chartW;
       const h = (dt.total / maxDay) * chartH;
       const barW = Math.max(chartW / daysInMonth - 2, 3);
-      ctx.fillStyle = "#3D5A3E";
+      ctx.fillStyle = "#2D6B5A";
       ctx.globalAlpha = dt.total > 0 ? 0.5 : 0.08;
       roundRect(ctx, x, chartY + 20 + (chartH - h), barW, Math.max(h, 2), 2);
       ctx.fill();
@@ -221,7 +221,7 @@ export function MonthlyPostcard() {
     ctx.globalAlpha = 1;
 
     // Watermark
-    ctx.fillStyle = "#3D5A3E";
+    ctx.fillStyle = "#2D6B5A";
     ctx.globalAlpha = 0.25;
     ctx.font = "500 22px system-ui, sans-serif";
     ctx.textAlign = "right";
@@ -231,7 +231,7 @@ export function MonthlyPostcard() {
     // Three dots watermark (terrain signature)
     const dotCx = W - 210;
     const dotCy = H - 44;
-    ctx.fillStyle = "#3D5A3E";
+    ctx.fillStyle = "#2D6B5A";
     ctx.globalAlpha = 0.25;
     [[0, -6], [-6, 4], [6, 4]].forEach(([dx, dy]) => {
       ctx.beginPath();

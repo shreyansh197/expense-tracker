@@ -79,14 +79,14 @@
   --icon-base: 18px;
   --icon-md: 20px;
   --icon-lg: 24px;
-  /* ── Primary (Brand — Moss) ── */
-  --primary: #3D5A3E;
-  --primary-soft: #C8D9C4;
-  --primary-gradient: linear-gradient(135deg, #3D5A3E, #2D6A4F);
-  /* ── Secondary (Structure — Sage) ── */
-  --secondary: #8FAF8B;
-  --secondary-soft: #EBF2EA;
-  --secondary-gradient: linear-gradient(135deg, #8FAF8B, #3D5A3E);
+  /* ── Primary (Brand — Teal-Moss) ── */
+  --primary: #2D6B5A;
+  --primary-soft: #BDD9D0;
+  --primary-gradient: linear-gradient(135deg, #2D6B5A, #1B5B4A);
+  /* ── Secondary (Structure — Sage-Teal) ── */
+  --secondary: #7BAF9E;
+  --secondary-soft: #E6F2EE;
+  --secondary-gradient: linear-gradient(135deg, #7BAF9E, #2D6B5A);
   /* ── Accent (CTA — Clay) ── */
   --accent: #B5654A;
   --accent-soft: #F5E6DF;
@@ -95,21 +95,21 @@
   --accent-border: #D4906A;
   --accent-gradient: linear-gradient(135deg, #B5654A, #A0583F);
   /* ── Primary derived ── */
-  --primary-hover: #2D6A4F;
-  --primary-border: #8FAF8B;
-  --primary-text: #3D5A3E;
+  --primary-hover: #1B5B4A;
+  --primary-border: #7BAF9E;
+  --primary-text: #2D6B5A;
   /* ── Secondary derived ── */
-  --secondary-text: #3D5A3E;
-  --secondary-hover: #2D6A4F;
-  --secondary-border: #8FAF8B;
+  --secondary-text: #2D6B5A;
+  --secondary-hover: #1B5B4A;
+  --secondary-border: #7BAF9E;
   /* ── Info (Neutral Accent — Blue) ── */
   --info: #42A5F5;
   --info-soft: #e8f4fd;
   /* ── Semantic ── */
-  --success: #2D6A4F;
-  --success-soft: #C8D9C4;
-  --success-text: #2D6A4F;
-  --success-hover: #2D6A4F;
+  --success: #1B5B4A;
+  --success-soft: #BDD9D0;
+  --success-text: #1B5B4A;
+  --success-hover: #1B5B4A;
   --success-soft-hover: rgba(200, 217, 196, 0.8);
   --warning: #C17A2E;
   --warning-soft: #FBF0E0;
@@ -119,25 +119,25 @@
   --danger-soft: #FAE8E8;
   --danger-text: #C0392B;
   --danger-border: #F0B8B4;
-  --info-text: #2D6A4F;
-  --info-border: #8FAF8B;
+  --info-text: #1B5B4A;
+  --info-border: #7BAF9E;
   /* ── Status surfaces (semantic feedback) ── */
-  --status-ok-bg: #EAF2EA;
-  --status-ok-border: #8FAF8B;
-  --status-ok-text: #2D6A4F;
+  --status-ok-bg: #E4F2ED;
+  --status-ok-border: #7BAF9E;
+  --status-ok-text: #1B5B4A;
   --status-warn-bg: #FBF0E0;
   --status-warn-border: #DEB98A;
   --status-warn-text: #C17A2E;
   --status-err-bg: #FAE8E8;
   --status-err-border: #F0B8B4;
   --status-err-text: #C0392B;
-  /* ── Business mode accent (Emerald / canopy) ── */
-  --biz-accent: #2D6A4F;
-  --biz-accent-soft: #C8D9C4;
-  --biz-accent-hover: #1E5038;
-  --biz-accent-border: #8FAF8B;
-  --biz-accent-text: #2D6A4F;
-  --biz-accent-gradient: linear-gradient(135deg, #2D6A4F, #3D5A3E);
+  /* ── Business mode accent (Teal-Canopy) ── */
+  --biz-accent: #1B5B4A;
+  --biz-accent-soft: #BDD9D0;
+  --biz-accent-hover: #144A3C;
+  --biz-accent-border: #7BAF9E;
+  --biz-accent-text: #1B5B4A;
+  --biz-accent-gradient: linear-gradient(135deg, #1B5B4A, #2D6B5A);
   /* ── Business status: pending (Blue) ── */
   --biz-pending-bg: #EFF6FF;
   --biz-pending-text: #42A5F5;
@@ -153,12 +153,12 @@
   --biz-other-text: var(--text-secondary);
   /* ── Interactive state tokens ── */
   --focus-ring: rgba(181, 101, 74, 0.2);
-  --focus-ring-biz: rgba(45, 106, 79, 0.2);
+  --focus-ring-biz: rgba(27, 91, 74, 0.2);
   --disabled-opacity: 0.4;
   /* ── Goal / achievement tokens ── */
-  --goal-achieved-bg: #EAF2EA;
-  --goal-achieved-text: #2D6A4F;
-  --goal-achieved-border: #8FAF8B;
+  --goal-achieved-bg: #E4F2ED;
+  --goal-achieved-text: #1B5B4A;
+  --goal-achieved-border: #7BAF9E;
   --goal-warning-bg: #FBF0E0;
   --goal-warning-text: #C17A2E;
   --goal-exceeded-bg: #FAE8E8;
@@ -169,18 +169,18 @@
   /* ── Quiet grouping surface ── */
   --surface-quiet: rgba(0, 0, 0, 0.015);
   /* ── Section zone washes (subtle tinted backgrounds) ── */
-  --section-moss: rgba(61, 90, 62, 0.04);
-  --section-sage: rgba(143, 175, 139, 0.04);
+  --section-moss: rgba(45, 107, 90, 0.04);
+  --section-sage: rgba(123, 175, 158, 0.04);
   --section-clay: rgba(181, 101, 74, 0.04);
-  --section-emerald: rgba(45, 106, 79, 0.04);
-  --section-mint: rgba(143, 175, 139, 0.04);
+  --section-emerald: rgba(27, 91, 74, 0.04);
+  --section-mint: rgba(123, 175, 158, 0.04);
   /* ── Accent card surfaces (themed tints) ── */
-  --surface-accent-moss: #C8D9C4;
-  --surface-accent-sage: #EBF2EA;
+  --surface-accent-moss: #BDD9D0;
+  --surface-accent-sage: #E6F2EE;
   --surface-accent-coral: #F5E6DF;
   /* ── Hero gradient ── */
-  --gradient-hero: linear-gradient(135deg, rgba(61, 90, 62, 0.08) 0%, rgba(181, 101, 74, 0.06) 60%, rgba(197, 187, 173, 0.04) 100%);
-  --hero-glow: rgba(61, 90, 62, 0.04);
+  --gradient-hero: linear-gradient(135deg, rgba(45, 107, 90, 0.08) 0%, rgba(181, 101, 74, 0.06) 60%, rgba(197, 187, 173, 0.04) 100%);
+  --hero-glow: rgba(45, 107, 90, 0.04);
   /* ── Elevation (3-level shadow system) ── */
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.07), 0 1px 2px rgba(0, 0, 0, 0.04);
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.04);
@@ -196,25 +196,25 @@
   /* ── Auth hero (fixed dark palette — terrain-inspired) ── */
   --auth-hero-bg: linear-gradient(135deg, #1A1B2E 0%, #2D3A2E 45%, #1A2A1E 100%);
   --auth-hero-cyan: #5EEAD4;
-  --auth-hero-violet: #8FAF8B;
+  --auth-hero-violet: #7BAF9E;
   /* ── Auth decorative orbs (theme-switched) ── */
-  --auth-orb-1: #EAF0E8;
+  --auth-orb-1: #E4F0EB;
   --auth-orb-2: #F5E6DF;
-  --auth-badge-bg: #EAF0E8;
-  --auth-badge-ring: #8FAF8B;
+  --auth-badge-bg: #E4F0EB;
+  --auth-badge-ring: #7BAF9E;
   /* ── Living Terrain 2026 — Personal (warm organic) ── */
   --es-obsidian: #1A1B2E;
   --es-charcoal: #2D2E40;
   --es-chalk: #FAF7F2;
   --es-parchment: #F0EBE0;
   --es-vellum: #E8E0D0;
-  --es-moss: #3D5A3E;
-  --es-sage: #8FAF8B;
-  --es-mist: #C8D9C4;
+  --es-moss: #2D6B5A;
+  --es-sage: #7BAF9E;
+  --es-mist: #BDD9D0;
   --es-clay: #B5654A;
   --es-dust: #D4906A;
   --es-sand: #E8C99A;
-  --es-canopy: #2D6A4F;
+  --es-canopy: #1B5B4A;
   --es-harvest: #C17A2E;
   --es-ember: #C0392B;
   /* ── Living Terrain 2026 — Business (cool professional) ── */
@@ -261,14 +261,14 @@
   /* ── Semantic borders ── */
   --border-strong: #4D4E68;
   --border-focus: var(--primary);
-  /* ── Primary (Sage — light terrain for dark mode) ── */
-  --primary: #8FAF8B;
-  --primary-soft: rgba(143, 175, 139, 0.15);
-  --primary-gradient: linear-gradient(135deg, #8FAF8B, #6E9669);
-  /* ── Secondary (Mist) ── */
-  --secondary: #C8D9C4;
-  --secondary-soft: rgba(200, 217, 196, 0.12);
-  --secondary-gradient: linear-gradient(135deg, #C8D9C4, #8FAF8B);
+  /* ── Primary (Sage-Teal — light terrain for dark mode) ── */
+  --primary: #7BAF9E;
+  --primary-soft: rgba(123, 175, 158, 0.15);
+  --primary-gradient: linear-gradient(135deg, #7BAF9E, #5A9680);
+  /* ── Secondary (Mist-Teal) ── */
+  --secondary: #BDD9D0;
+  --secondary-soft: rgba(189, 217, 208, 0.12);
+  --secondary-gradient: linear-gradient(135deg, #BDD9D0, #7BAF9E);
   /* ── Accent (Dust — lighter clay for dark mode) ── */
   --accent: #D4906A;
   --accent-soft: rgba(212, 144, 106, 0.15);
@@ -277,13 +277,13 @@
   --accent-border: rgba(212, 144, 106, 0.35);
   --accent-gradient: linear-gradient(135deg, #D4906A, #C07A55);
   /* ── Primary derived ── */
-  --primary-hover: #6E9669;
-  --primary-border: rgba(143, 175, 139, 0.35);
-  --primary-text: #8FAF8B;
+  --primary-hover: #5A9680;
+  --primary-border: rgba(123, 175, 158, 0.35);
+  --primary-text: #7BAF9E;
   /* ── Secondary derived ── */
-  --secondary-text: #C8D9C4;
-  --secondary-hover: #8FAF8B;
-  --secondary-border: rgba(200, 217, 196, 0.3);
+  --secondary-text: #BDD9D0;
+  --secondary-hover: #7BAF9E;
+  --secondary-border: rgba(189, 217, 208, 0.3);
   /* ── Info (Cyan) ── */
   --info: #67E8F9;
   --info-soft: rgba(103, 232, 249, 0.12);
@@ -291,7 +291,7 @@
   --success: #6EB88A;
   --success-soft: rgba(110, 184, 138, 0.15);
   --success-text: #A8D5B5;
-  --success-hover: #2D6A4F;
+  --success-hover: #1B5B4A;
   --success-soft-hover: rgba(110, 184, 138, 0.25);
   --warning: #E8A44E;
   --warning-soft: rgba(232, 164, 78, 0.15);
@@ -301,11 +301,11 @@
   --danger-soft: rgba(224, 92, 80, 0.15);
   --danger-text: #F0A09A;
   --danger-border: rgba(224, 92, 80, 0.3);
-  --info-text: #8FAF8B;
-  --info-border: rgba(143, 175, 139, 0.3);
+  --info-text: #7BAF9E;
+  --info-border: rgba(123, 175, 158, 0.3);
   /* ── Status surfaces (semantic feedback) ── */
   --status-ok-bg: rgba(110, 184, 138, 0.12);
-  --status-ok-border: rgba(143, 175, 139, 0.3);
+  --status-ok-border: rgba(123, 175, 158, 0.3);
   --status-ok-text: #A8D5B5;
   --status-warn-bg: rgba(232, 164, 78, 0.12);
   --status-warn-border: rgba(232, 164, 78, 0.3);
@@ -319,7 +319,7 @@
   --biz-accent-hover: #A8D5B5;
   --biz-accent-border: rgba(110, 184, 138, 0.3);
   --biz-accent-text: #6EB88A;
-  --biz-accent-gradient: linear-gradient(135deg, #6EB88A, #8FAF8B);
+  --biz-accent-gradient: linear-gradient(135deg, #6EB88A, #7BAF9E);
   /* ── Interactive state tokens ── */
   --focus-ring: rgba(212, 144, 106, 0.25);
   --focus-ring-biz: rgba(110, 184, 138, 0.25);
@@ -327,7 +327,7 @@
   /* ── Goal / achievement tokens ── */
   --goal-achieved-bg: rgba(110, 184, 138, 0.12);
   --goal-achieved-text: #A8D5B5;
-  --goal-achieved-border: rgba(143, 175, 139, 0.3);
+  --goal-achieved-border: rgba(123, 175, 158, 0.3);
   --goal-warning-bg: rgba(232, 164, 78, 0.12);
   --goal-warning-text: #F0C87A;
   --goal-exceeded-bg: rgba(224, 92, 80, 0.12);
@@ -351,18 +351,18 @@
   /* ── Quiet grouping surface ── */
   --surface-quiet: rgba(255, 255, 255, 0.02);
   /* ── Section zone washes ── */
-  --section-moss: rgba(143, 175, 139, 0.05);
-  --section-sage: rgba(200, 217, 196, 0.05);
+  --section-moss: rgba(123, 175, 158, 0.05);
+  --section-sage: rgba(189, 217, 208, 0.05);
   --section-clay: rgba(212, 144, 106, 0.05);
   --section-emerald: rgba(110, 184, 138, 0.05);
-  --section-mint: rgba(143, 175, 139, 0.05);
+  --section-mint: rgba(123, 175, 158, 0.05);
   /* ── Accent card surfaces (themed tints) ── */
-  --surface-accent-moss: rgba(143, 175, 139, 0.12);
-  --surface-accent-sage: rgba(200, 217, 196, 0.12);
+  --surface-accent-moss: rgba(123, 175, 158, 0.12);
+  --surface-accent-sage: rgba(189, 217, 208, 0.12);
   --surface-accent-coral: rgba(212, 144, 106, 0.12);
   /* ── Hero gradient ── */
-  --gradient-hero: linear-gradient(135deg, rgba(143, 175, 139, 0.10) 0%, rgba(212, 144, 106, 0.08) 60%, rgba(61, 90, 62, 0.05) 100%);
-  --hero-glow: rgba(143, 175, 139, 0.05);
+  --gradient-hero: linear-gradient(135deg, rgba(123, 175, 158, 0.10) 0%, rgba(212, 144, 106, 0.08) 60%, rgba(45, 107, 90, 0.05) 100%);
+  --hero-glow: rgba(123, 175, 158, 0.05);
   /* ── Elevation (3-level shadow system) ── */
   --shadow-sm: 0 1px 4px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.15);
   --shadow-md: 0 4px 18px rgba(0, 0, 0, 0.4), 0 2px 4px rgba(0, 0, 0, 0.2);
@@ -374,10 +374,10 @@
   --chart-tooltip-fg: #E2E8F0;
   --chart-tooltip-border: #1E2D4A;
   /* ── Auth decorative orbs ── */
-  --auth-orb-1: rgba(143, 175, 139, 0.1);
+  --auth-orb-1: rgba(123, 175, 158, 0.1);
   --auth-orb-2: rgba(212, 144, 106, 0.08);
-  --auth-badge-bg: rgba(143, 175, 139, 0.15);
-  --auth-badge-ring: rgba(143, 175, 139, 0.4);
+  --auth-badge-bg: rgba(123, 175, 158, 0.15);
+  --auth-badge-ring: rgba(123, 175, 158, 0.4);
   /* ── Living Terrain 2026 — Dark overrides ── */
   --es-chalk: #09101C;
   --es-parchment: #111827;

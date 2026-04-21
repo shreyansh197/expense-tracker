@@ -27,7 +27,7 @@ async function gen() {
     if (s.pad > 0) {
       // Maskable: solid background + centred icon (no clipping for safe zone)
       const bgSvg = Buffer.from(
-        `<svg xmlns="http://www.w3.org/2000/svg" width="${s.size}" height="${s.size}"><rect width="${s.size}" height="${s.size}" fill="#0a0f1e"/></svg>`,
+        `<svg xmlns="http://www.w3.org/2000/svg" width="${s.size}" height="${s.size}"><rect width="${s.size}" height="${s.size}" fill="#012641"/></svg>`,
       );
       const iconResized = await sharp(svgBuf)
         .resize(inner, inner)
