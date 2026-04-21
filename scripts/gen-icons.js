@@ -77,22 +77,9 @@ async function gen() {
   icoDir.writeUInt32LE(faviconPng.length, 8); // image size
   icoDir.writeUInt32LE(22, 12); // offset (6 + 16 = 22)
   const ico = Buffer.concat([icoHeader, icoDir, faviconPng]);
-  // Write into src/app/ so Next.js serves it at /favicon.ico
-  fs.writeFileSync(path.join("src", "app", "favicon.ico"), ico);
-  console.log("Generated src/app/favicon.ico");
-
-  // Copy icon.png and apple-icon.png into src/app/ for Next.js metadata
-  await sharp(svgBuf)
-    .resize(192, 192)
-    .png()
-    .toFile(path.join("src", "app", "icon.png"));
-  console.log("Generated src/app/icon.png");
-
-  await sharp(svgBuf)
-    .resize(180, 180)
-    .png()
-    .toFile(path.join("src", "app", "apple-icon.png"));
-  console.log("Generated src/app/apple-icon.png");
+  // Write into public/ so it's served at /favicon.ico
+  fs.writeFileSync(path.join("public", "favicon.ico"), ico);
+  console.log("Generated public/favicon.ico");
 
   // Write icon version hash for cache-busting
   fs.writeFileSync(
@@ -125,8 +112,8 @@ async function gen() {
   const layoutPath = path.join("src", "app", "layout.tsx");
   let layout = fs.readFileSync(layoutPath, "utf-8");
   layout = layout.replace(
-    /\/icons\/(favicon-32|icon-192|icon-512|apple-touch-icon)\.png(\?v=[a-f0-9]+)?/g,
-    (_, name) => `/icons/${name}.png?v=${iconHash}`,
+    /\/(favicon\.ico|icons\/(favicon-32|icon-192|icon-512|apple-touch-icon)\.png)(\?v=[a-f0-9]+)?/g,
+    (_, file) => `/${file.split("?")[0]}?v=${iconHash}`,
   );
   fs.writeFileSync(layoutPath, layout);
   console.log("Updated layout.tsx icon versions");
