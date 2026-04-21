@@ -5,7 +5,7 @@ const fs = require("fs");
 const path = require("path");
 const iconsDir = "public/icons";
 
-const svgBuf = fs.readFileSync(path.join(iconsDir, "expenstream-icon.svg"));
+const svgBuf = fs.readFileSync(path.join(iconsDir, "es.png"));
 const iconHash = crypto
   .createHash("md5")
   .update(svgBuf)

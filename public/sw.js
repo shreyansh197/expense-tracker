@@ -1,4 +1,4 @@
-const CACHE_NAME = "expenstream-icons-0131e2e5";
+const CACHE_NAME = "expenstream-icons-74b974f1";
 const SHELL_CACHE = "expenstream-shell-v1";
 const FONT_CACHE = "expenstream-fonts-v1";
 
