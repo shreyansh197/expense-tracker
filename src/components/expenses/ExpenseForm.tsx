@@ -344,26 +344,39 @@ export function ExpenseForm({
       <FormError message={error} visible={!!error} />
 
       {/* ─── 2. Numeric Keypad ─── */}
-      <div className="grid grid-cols-3 gap-2 px-2" role="group" aria-label="Amount keypad">
-        {KEYPAD_KEYS.map((key) => (
-          <m.button
-            key={key}
-            type="button"
-            whileTap={{ scale: 0.92 }}
-            transition={spring.water}
-            onClick={() => handleKeypadPress(key)}
-            className={cn(
-              "flex items-center justify-center rounded-xl text-lg font-semibold font-numeric select-none",
-              "h-11 active:bg-[var(--surface-tertiary)] transition-colors",
-              key === "backspace" ? "text-[var(--text-muted)]" : "text-[var(--text-primary)]"
-            )}
-            style={{ background: 'var(--surface-secondary)' }}
-            aria-label={key === "backspace" ? "Delete" : key === "." ? "Decimal point" : key}
+      <AnimatePresence initial={false}>
+        {!showScanner && (
+          <m.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+            className="overflow-hidden"
           >
-            {key === "backspace" ? <Delete size={20} /> : key}
-          </m.button>
-        ))}
-      </div>
+            <div className={cn("grid grid-cols-3 gap-1.5 px-2", showMore ? "gap-1" : "gap-2")} role="group" aria-label="Amount keypad">
+              {KEYPAD_KEYS.map((key) => (
+                <m.button
+                  key={key}
+                  type="button"
+                  whileTap={{ scale: 0.92 }}
+                  transition={spring.water}
+                  onClick={() => handleKeypadPress(key)}
+                  className={cn(
+                    "flex items-center justify-center rounded-xl font-semibold font-numeric select-none",
+                    "active:bg-[var(--surface-tertiary)] transition-all",
+                    showMore ? "h-9 text-base" : "h-11 text-lg",
+                    key === "backspace" ? "text-[var(--text-muted)]" : "text-[var(--text-primary)]"
+                  )}
+                  style={{ background: 'var(--surface-secondary)' }}
+                  aria-label={key === "backspace" ? "Delete" : key === "." ? "Decimal point" : key}
+                >
+                  {key === "backspace" ? <Delete size={showMore ? 18 : 20} /> : key}
+                </m.button>
+              ))}
+            </div>
+          </m.div>
+        )}
+      </AnimatePresence>
 
       {/* ─── 3. Category Grid ─── */}
       <CategorySelector
