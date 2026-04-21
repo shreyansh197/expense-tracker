@@ -7,6 +7,7 @@ const PRECACHE_URLS = [
   "/icons/icon-512.png",
   "/icons/apple-touch-icon.png",
   "/icons/favicon-32.png",
+  "/favicon.ico",
   "/manifest.json",
 ];
 
@@ -67,8 +68,12 @@ self.addEventListener("fetch", (event) => {
 
   const url = new URL(request.url);
 
-  // Network-first for icons and manifest so PWA icon updates propagate
-  if (url.pathname.startsWith("/icons/") || url.pathname === "/manifest.json") {
+  // Network-first for icons, favicon, and manifest so PWA icon updates propagate
+  if (
+    url.pathname.startsWith("/icons/") ||
+    url.pathname === "/manifest.json" ||
+    url.pathname === "/favicon.ico"
+  ) {
     event.respondWith(
       fetch(request)
         .then((response) => {
