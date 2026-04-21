@@ -118,6 +118,7 @@ export function ReceiptCapture({ onExtracted, onClose }: ReceiptCaptureProps) {
           Scan Receipt
         </h3>
         <button
+          type="button"
           onClick={cleanup}
           className="rounded-lg p-1.5 transition-colors"
           style={{ color: "var(--text-muted)" }}
@@ -138,6 +139,7 @@ export function ReceiptCapture({ onExtracted, onClose }: ReceiptCaptureProps) {
       {stage === "idle" && (
         <div className="flex flex-col items-center gap-3">
           <button
+            type="button"
             onClick={() => fileRef.current?.click()}
             className="flex h-28 w-full flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed transition-colors"
             style={{ borderColor: "var(--border)", color: "var(--text-secondary)" }}
@@ -174,6 +176,7 @@ export function ReceiptCapture({ onExtracted, onClose }: ReceiptCaptureProps) {
           </div>
           <div className="flex gap-2">
             <button
+              type="button"
               onClick={handleRetry}
               className="flex flex-1 items-center justify-center gap-2 rounded-xl py-2.5 text-xs font-medium transition-colors"
               style={{ background: "var(--surface-secondary)", color: "var(--text-secondary)" }}
@@ -182,6 +185,7 @@ export function ReceiptCapture({ onExtracted, onClose }: ReceiptCaptureProps) {
               Retake
             </button>
             <button
+              type="button"
               onClick={handleProcess}
               className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-brand py-2.5 text-xs font-semibold text-white transition-colors"
             >
@@ -249,6 +253,7 @@ export function ReceiptCapture({ onExtracted, onClose }: ReceiptCaptureProps) {
           {/* Actions */}
           <div className="flex gap-2">
             <button
+              type="button"
               onClick={handleRetry}
               className="flex flex-1 items-center justify-center gap-2 rounded-xl py-2.5 text-xs font-medium transition-colors"
               style={{ background: "var(--surface-secondary)", color: "var(--text-secondary)" }}
@@ -257,6 +262,7 @@ export function ReceiptCapture({ onExtracted, onClose }: ReceiptCaptureProps) {
               Retry
             </button>
             <button
+              type="button"
               onClick={handleUse}
               className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-brand py-2.5 text-xs font-semibold text-white transition-colors"
             >

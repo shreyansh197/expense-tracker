@@ -279,6 +279,9 @@ export function ExpenseForm({
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
       if (e.key === "Escape") { e.preventDefault(); closeForm(); }
+      // Skip keypad handling when typing in an input or textarea
+      const tag = (e.target as HTMLElement).tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
       // Sync physical keyboard with on-screen keypad
       if (e.key >= "0" && e.key <= "9") { e.preventDefault(); handleKeypadPress(e.key); }
       if (e.key === "." || e.key === "Decimal") { e.preventDefault(); handleKeypadPress("."); }
