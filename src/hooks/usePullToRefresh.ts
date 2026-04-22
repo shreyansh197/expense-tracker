@@ -21,22 +21,41 @@ export function usePullToRefresh({ onRefresh, enabled = true }: UsePullToRefresh
   const startX = useRef<number | null>(null);
   const directionLocked = useRef<"vertical" | "horizontal" | null>(null);
 
+  /** Return the scroll offset of the nearest scrollable ancestor (or the main content area). */
+  const getScrollTop = useCallback((target: EventTarget | null): number => {
+    const el = (target as HTMLElement)?.closest("[data-pull-scroll]") as HTMLElement | null;
+    if (el) return el.scrollTop;
+    // The app uses a fixed-height layout — window never scrolls.
+    // The real scroll container is <main id="main-content">.
+    const main = document.getElementById("main-content");
+    return main ? main.scrollTop : window.scrollY;
+  }, []);
+
   const handleTouchStart = useCallback(
     (e: TouchEvent) => {
       if (!enabled || refreshing) return;
-      const scrollable = (e.target as HTMLElement)?.closest("[data-pull-scroll]") as HTMLElement | null;
-      const scrollTop = scrollable ? scrollable.scrollTop : window.scrollY;
-      if (scrollTop > 5) return; // Only trigger at top
+      if (getScrollTop(e.target) > 0) return; // Only at the very top
       startY.current = e.touches[0].clientY;
       startX.current = e.touches[0].clientX;
       directionLocked.current = null;
     },
-    [enabled, refreshing],
+    [enabled, refreshing, getScrollTop],
   );
 
   const handleTouchMove = useCallback(
     (e: TouchEvent) => {
       if (startY.current === null || startX.current === null || refreshing) return;
+
+      // If the container is no longer at the top, cancel the gesture
+      if (getScrollTop(e.target) > 0) {
+        startY.current = null;
+        startX.current = null;
+        directionLocked.current = null;
+        setPulling(false);
+        setPullDistance(0);
+        return;
+      }
+
       const dy = e.touches[0].clientY - startY.current;
       const dx = e.touches[0].clientX - startX.current;
 
@@ -58,7 +77,7 @@ export function usePullToRefresh({ onRefresh, enabled = true }: UsePullToRefresh
         setPullDistance(distance);
       }
     },
-    [refreshing],
+    [refreshing, getScrollTop],
   );
 
   const handleTouchEnd = useCallback(async () => {

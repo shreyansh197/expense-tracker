@@ -129,7 +129,11 @@ export async function pullChanges(workspaceId?: string): Promise<boolean> {
   await _initReady;
 
   const wid = workspaceId ?? getActiveWorkspaceId();
-  if (!wid || !isAuthenticated()) return false;
+  if (!wid || !isAuthenticated()) {
+    // No sync possible — resolve the gate so local-only recurring can proceed
+    if (_firstPullResolve) { _firstPullResolve(); _firstPullResolve = null; }
+    return false;
+  }
 
   // Ensure migration has completed before pulling — prevents race where a
   // realtime/broadcast-triggered pull deletes temp- records before migration
@@ -382,6 +386,8 @@ export async function pullChanges(workspaceId?: string): Promise<boolean> {
     return await promise;
   } finally {
     _pullInFlight.delete(wid);
+    // Resolve the first-pull gate so recurring instantiation can proceed
+    if (_firstPullResolve) { _firstPullResolve(); _firstPullResolve = null; }
   }
 }
 
@@ -747,6 +753,15 @@ let _initReady: Promise<void> = Promise.resolve();
 // Flag: first pull for each workspace always does a full sync (ignores cursor)
 let _firstPullDone = false;
 
+// Promise gate: resolves after the first pullChanges completes (or if user is offline/unauthenticated)
+let _firstPullResolve: (() => void) | null = null;
+let _firstPullPromise: Promise<void> = new Promise((r) => { _firstPullResolve = r; });
+
+/** Wait until the initial sync pull has completed. Resolves immediately if already done. */
+export function waitForFirstPull(): Promise<void> {
+  return _firstPullPromise;
+}
+
 export function startSyncEngine() {
   if (typeof window === "undefined" || _started) return;
   _started = true;
@@ -808,6 +823,8 @@ export function stopSyncEngine() {
   _migrated = false;
   _pushInFlight = false;
   _firstPullDone = false;
+  _firstPullResolve = null;
+  _firstPullPromise = new Promise((r) => { _firstPullResolve = r; });
   _lastPushAt = 0;
   _initReady = Promise.resolve();
   _setSyncPhase("idle");

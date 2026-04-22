@@ -6,6 +6,7 @@ import { useExpenses } from "@/hooks/useExpenses";
 import { useToast } from "@/components/ui/Toast";
 import { db } from "@/lib/db";
 import { getActiveWorkspaceId } from "@/lib/authClient";
+import { waitForFirstPull } from "@/lib/syncEngine";
 import type { RecurringExpense } from "@/types";
 
 const APPLIED_KEY = "expenstream-recurring-applied";
@@ -71,6 +72,11 @@ export function useRecurringExpenses(month: number, year: number) {
     }
 
     (async () => {
+      // Wait for the initial sync pull to complete before checking IDB.
+      // This prevents creating duplicate recurring expenses on a fresh device
+      // where IDB is empty but the server already has them.
+      await waitForFirstPull();
+
       let appliedCount = 0;
       for (const r of candidates) {
         try {
@@ -120,6 +126,5 @@ export function useRecurringExpenses(month: number, year: number) {
   // Intentionally omit `addExpense` and `expenses` — addExpense is accessed
   // via stable ref, and including `expenses` would re-fire after every IDB
   // write causing duplicates. `loading` is kept so we don't run before data loads.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [settings.recurringExpenses, month, year, loading, toast]);
 }
