@@ -4,6 +4,8 @@ import { useRef, useCallback, useState, useEffect } from "react";
 
 const PULL_THRESHOLD = 80;
 const MAX_PULL = 120;
+/** Minimum vertical distance before we lock direction */
+const DIRECTION_LOCK = 12;
 
 interface UsePullToRefreshOptions {
   onRefresh: () => Promise<void> | void;
@@ -16,7 +18,8 @@ export function usePullToRefresh({ onRefresh, enabled = true }: UsePullToRefresh
   const [pullDistance, setPullDistance] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
   const startY = useRef<number | null>(null);
-  const startScrollTop = useRef(0);
+  const startX = useRef<number | null>(null);
+  const directionLocked = useRef<"vertical" | "horizontal" | null>(null);
 
   const handleTouchStart = useCallback(
     (e: TouchEvent) => {
@@ -25,15 +28,30 @@ export function usePullToRefresh({ onRefresh, enabled = true }: UsePullToRefresh
       const scrollTop = scrollable ? scrollable.scrollTop : window.scrollY;
       if (scrollTop > 5) return; // Only trigger at top
       startY.current = e.touches[0].clientY;
-      startScrollTop.current = scrollTop;
+      startX.current = e.touches[0].clientX;
+      directionLocked.current = null;
     },
     [enabled, refreshing],
   );
 
   const handleTouchMove = useCallback(
     (e: TouchEvent) => {
-      if (startY.current === null || refreshing) return;
+      if (startY.current === null || startX.current === null || refreshing) return;
       const dy = e.touches[0].clientY - startY.current;
+      const dx = e.touches[0].clientX - startX.current;
+
+      // Lock direction once we pass the threshold
+      if (!directionLocked.current) {
+        if (Math.abs(dy) >= DIRECTION_LOCK || Math.abs(dx) >= DIRECTION_LOCK) {
+          directionLocked.current = Math.abs(dy) > Math.abs(dx) ? "vertical" : "horizontal";
+        }
+        // Not enough movement yet — don't do anything
+        return;
+      }
+
+      // If locked horizontal, ignore entirely
+      if (directionLocked.current === "horizontal") return;
+
       if (dy > 10) {
         const distance = Math.min(dy * 0.5, MAX_PULL);
         setPulling(true);
@@ -46,6 +64,8 @@ export function usePullToRefresh({ onRefresh, enabled = true }: UsePullToRefresh
   const handleTouchEnd = useCallback(async () => {
     if (!pulling) {
       startY.current = null;
+      startX.current = null;
+      directionLocked.current = null;
       return;
     }
     if (pullDistance >= PULL_THRESHOLD) {
@@ -60,6 +80,8 @@ export function usePullToRefresh({ onRefresh, enabled = true }: UsePullToRefresh
     setPulling(false);
     setPullDistance(0);
     startY.current = null;
+    startX.current = null;
+    directionLocked.current = null;
   }, [pulling, pullDistance, onRefresh]);
 
   useEffect(() => {

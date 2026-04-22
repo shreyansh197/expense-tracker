@@ -235,17 +235,6 @@ export function ExpenseList({
     return result;
   }, [filtered]);
 
-  // Day-age: 0=today, 1=yesterday, 2=older (for current month/year)
-  const getDayAge = useCallback((day: number): 0 | 1 | 2 => {
-    const today = new Date();
-    const isCurrentPeriod = currentMonth === today.getMonth() + 1 && currentYear === today.getFullYear();
-    if (!isCurrentPeriod) return 2;
-    if (day === today.getDate()) return 0;
-    const yesterday = new Date(today); yesterday.setDate(today.getDate() - 1);
-    if (day === yesterday.getDate()) return 1;
-    return 2;
-  }, [currentMonth, currentYear]);
-
   // Flatten for pagination count
   const totalCount = useMemo(() => {
     let c = 0;
@@ -441,7 +430,6 @@ export function ExpenseList({
                 multiCurrency={multiCurrency}
                 rates={rates}
                 swipeHint={!swipeHintShown && gIdx === 0 && idx === 0}
-                dayAge={getDayAge(group.day)}
                 categoryMedian={categoryMedians[expense.category]}
               />
             ))}
@@ -461,7 +449,7 @@ export function ExpenseList({
 function InfiniteScrollSentinel({ onIntersect }: { onIntersect: () => void }) {
   const sentinelRef = useRef<HTMLDivElement>(null);
   const onIntersectRef = useRef(onIntersect);
-  onIntersectRef.current = onIntersect;
+  useEffect(() => { onIntersectRef.current = onIntersect; });
 
   useEffect(() => {
     const el = sentinelRef.current;
@@ -495,7 +483,6 @@ function SwipeableExpenseItem({
   multiCurrency,
   rates,
   swipeHint = false,
-  dayAge = 2,
   categoryMedian,
 }: {
   expense: Expense;
@@ -509,7 +496,6 @@ function SwipeableExpenseItem({
   multiCurrency: boolean;
   rates: Record<string, number> | null;
   swipeHint?: boolean;
-  dayAge?: 0 | 1 | 2;
   categoryMedian?: number;
 }) {
   const deleteCallback = useCallback(() => { handleDelete(expense.id); }, [handleDelete, expense.id]);

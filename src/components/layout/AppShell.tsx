@@ -20,6 +20,7 @@ import { PinLock } from "@/components/app/PinLock";
 import { usePinLock } from "@/hooks/usePinLock";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { PullToRefreshIndicator } from "@/components/ui/PullToRefreshIndicator";
+import { pullChanges } from "@/lib/syncEngine";
 import { OfflineBanner } from "@/components/sync/SyncIndicator";
 import { useBudgetHealthBg } from "@/hooks/useBudgetHealthBg";
 import { WatcherConstellation } from "@/components/ui/WatcherConstellation";
@@ -38,12 +39,13 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
   // Watcher ambient AI
   const { insight, dismiss } = useWatcher();
 
-  // Pull-to-refresh: reload current page data
+  // Pull-to-refresh: sync data from server + reload local state
   const handleRefresh = useCallback(async () => {
     if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate(30);
+    // Pull latest from server (sync engine)
+    await pullChanges().catch(() => {});
+    // Notify any listening components to re-read local DB
     window.dispatchEvent(new CustomEvent("pull-to-refresh"));
-    // Small delay so the spinner feels responsive
-    await new Promise((r) => setTimeout(r, 600));
   }, []);
   const formOpen = useUIStore((s) => s.showExpenseForm);
   const { pulling, pullDistance, refreshing, ready } = usePullToRefresh({ onRefresh: handleRefresh, enabled: !formOpen });

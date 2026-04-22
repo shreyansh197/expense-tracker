@@ -218,7 +218,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
     syncProfile();
     return () => { cancelled = true; };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.tokens?.accessToken]);
 
   // ── Session heartbeat: detect revoked sessions ────────────
