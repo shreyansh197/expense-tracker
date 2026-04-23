@@ -229,14 +229,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const INTERVAL_MS = 30_000; // 30 seconds
 
+    let consecutive401 = 0;
+
     const checkSession = async () => {
       try {
         const res = await authFetch("/api/auth/check");
         if (res.status === 401) {
-          // Session was revoked — force logout
-          clearAuthState();
-          setAuthState({ user: null, tokens: null, workspaces: [], activeWorkspaceId: null });
+          // authFetch already attempted token refresh. If still 401, the
+          // session is likely revoked — but require 2 consecutive failures
+          // to avoid clearing auth on transient server errors.
+          consecutive401++;
+          if (consecutive401 >= 2) {
+            clearAuthState();
+            setAuthState({ user: null, tokens: null, workspaces: [], activeWorkspaceId: null });
+          }
         } else if (res.ok) {
+          consecutive401 = 0;
           // Sync user profile (avatar, name) from server
           const data = await res.json().catch(() => null);
           if (data?.user) {
