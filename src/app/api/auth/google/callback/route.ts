@@ -286,13 +286,13 @@ export async function GET(req: NextRequest) {
   } catch (err) {
     console.error("[google/callback]", err);
     const message = err instanceof Error ? err.message : String(err);
-    const errName = err instanceof Error ? err.constructor.name : "unknown";
     // Encode error details into redirect so the user can see what went wrong
     const detail = encodeURIComponent(
       message.includes("JWT_SECRET") ? "jwt_config" :
       message.includes("connect") || message.includes("ECONNREFUSED") ? "db_unavailable" :
       message.includes("does not exist") || message.includes("column") ? "db_schema" :
-      errName
+      message.includes("No workspace") ? "no_workspace" :
+      message.slice(0, 80)
     );
     return NextResponse.redirect(`${baseUrl}/?error=oauth_internal&detail=${detail}`);
   }
