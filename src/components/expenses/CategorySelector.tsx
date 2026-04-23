@@ -1,5 +1,6 @@
 "use client";
 
+import { useCallback, useRef } from "react";
 import { m } from "framer-motion";
 import { cn } from "@/lib/utils";
 import {
@@ -41,9 +42,21 @@ interface CategorySelectorProps {
 }
 
 export function CategorySelector({ categories, selected, onSelect, showError, categoryBudgets, categoryTotals, currencySymbol }: CategorySelectorProps) {
+  const gridRef = useRef<HTMLDivElement>(null);
   // Build a lookup of spent per category
   const spentMap = new Map<string, number>();
   categoryTotals?.forEach((ct) => spentMap.set(ct.category, ct.total));
+
+  const handleGridKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+    e.preventDefault();
+    const buttons = Array.from(gridRef.current?.querySelectorAll<HTMLButtonElement>("[role=radio]") ?? []);
+    const idx = buttons.findIndex((b) => b === document.activeElement);
+    const next = e.key === "ArrowRight"
+      ? buttons[(idx + 1) % buttons.length]
+      : buttons[(idx - 1 + buttons.length) % buttons.length];
+    next?.focus();
+  }, []);
 
   // Compute budget remaining for the selected category
   const selectedBudget = selected && categoryBudgets?.[selected] ? categoryBudgets[selected] : 0;
@@ -57,7 +70,7 @@ export function CategorySelector({ categories, selected, onSelect, showError, ca
       <label className="form-label mb-1.5 uppercase">
         Category {showError && <span className="text-err normal-case">— please select</span>}
       </label>
-      <div className="flex max-h-36 flex-wrap gap-1.5 overflow-y-auto" role="radiogroup" aria-label="Select category">
+      <div ref={gridRef} onKeyDown={handleGridKeyDown} className="flex max-h-36 flex-wrap gap-1.5 overflow-y-auto" role="radiogroup" aria-label="Select category">
         {categories.map((cat) => {
           const budget = categoryBudgets?.[cat.id] ?? 0;
           const spent = spentMap.get(cat.id) ?? 0;

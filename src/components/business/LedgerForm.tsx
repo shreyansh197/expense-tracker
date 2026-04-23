@@ -9,6 +9,7 @@ import { FormError } from "@/components/ui/FormError";
 import type { LedgerInput, LedgerStatus } from "@/types";
 import { useSettings } from "@/hooks/useSettings";
 import { useCurrency } from "@/hooks/useCurrency";
+import { useToast } from "@/components/ui/Toast";
 
 interface LedgerFormProps {
   initial?: Partial<LedgerInput>;
@@ -20,6 +21,7 @@ interface LedgerFormProps {
 export function LedgerForm({ initial, onSubmit, onCancel, submitLabel = "Create a Ledger" }: LedgerFormProps) {
   const { symbol } = useCurrency();
   const { settings } = useSettings();
+  const { toast } = useToast();
   const [name, setName] = useState(initial?.name ?? "");
   const [expectedAmount, setExpectedAmount] = useState(initial?.expectedAmount?.toString() ?? "");
   const [dueDate, setDueDate] = useState(initial?.dueDate ? initial.dueDate.split("T")[0] : "");
@@ -54,6 +56,8 @@ export function LedgerForm({ initial, onSubmit, onCancel, submitLabel = "Create 
         tags,
         notes: notes.trim(),
       });
+    } catch {
+      toast("Failed to save ledger. Please try again.", "error");
     } finally {
       setSubmitting(false);
     }
@@ -188,7 +192,7 @@ export function LedgerForm({ initial, onSubmit, onCancel, submitLabel = "Create 
                 className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs" style={{ background: 'var(--biz-accent-soft)', color: 'var(--biz-accent-text)' }}
               >
                 {tag}
-                <button type="button" onClick={() => setTags(tags.filter((t) => t !== tag))} className="transition-colors" style={{ color: 'var(--danger-text)' }}>
+                <button type="button" onClick={() => setTags(tags.filter((t) => t !== tag))} className="-mr-1 flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full transition-colors" style={{ color: 'var(--danger-text)' }}>
                   <X size={12} />
                 </button>
               </span>

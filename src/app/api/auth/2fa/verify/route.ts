@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/server/prisma";
-import { requireAuth, jsonError } from "@/lib/server/guards";
+import { requireAuth, jsonError , getClientIp} from "@/lib/server/guards";
 import { verifyTotp, generateRecoveryCodes } from "@/lib/server/totp";
 import { audit } from "@/lib/server/audit";
 import { hashIp, hashToken } from "@/lib/server/tokens";
@@ -8,7 +8,7 @@ import { totpVerifySchema } from "@/lib/validators";
 import { rateLimit } from "@/lib/server/rateLimit";
 
 export async function POST(req: NextRequest) {
-  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+  const ip = getClientIp(req);
   const rl = rateLimit(`2fa-enable:${hashIp(ip)}`, 5, 60_000);
   if (!rl.ok) {
     return NextResponse.json(
@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
       entityId: auth.userId,
       action: "user.2fa_enable",
       ipHash: hashIp(
-        req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown",
+        getClientIp(req),
       ),
     });
 

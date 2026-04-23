@@ -29,7 +29,7 @@ export const changePasswordSchema = z.object({
 
 export const profileUpdateSchema = z.object({
   name: z.string().max(120).optional(),
-  avatarUrl: z.string().max(500_000).nullable().optional(),
+  avatarUrl: z.string().url().max(2048).nullable().optional(),
 });
 
 export const passkeyLoginOptionsSchema = z.object({
@@ -106,7 +106,7 @@ const expenseMutationData = z.object({
   isRecurring: z.boolean().optional(),
   recurringId: z.string().max(64).nullable().optional(),
   deletedAt: z.string().nullable().optional(),
-}).passthrough();
+});
 
 const settingsMutationData = z.object({
   salary: z.number().min(0).optional(),
@@ -128,7 +128,7 @@ const settingsMutationData = z.object({
   dashboardLayout: z.unknown().optional(),
   dismissedRecurringSuggestions: z.array(z.unknown()).optional(),
   autoRules: z.array(z.unknown()).optional(),
-}).passthrough();
+});
 
 const ledgerMutationData = z.object({
   id: z.string().uuid().optional(),
@@ -140,7 +140,7 @@ const ledgerMutationData = z.object({
   tags: z.array(z.unknown()).optional(),
   notes: z.string().max(2000).optional(),
   deletedAt: z.string().nullable().optional(),
-}).passthrough();
+});
 
 const paymentMutationData = z.object({
   id: z.string().uuid().optional(),
@@ -151,7 +151,7 @@ const paymentMutationData = z.object({
   reference: z.string().max(255).nullable().optional(),
   notes: z.string().max(2000).nullable().optional(),
   deletedAt: z.string().nullable().optional(),
-}).passthrough();
+});
 
 const expenseMutation = z.object({
   table: z.literal("expenses"),

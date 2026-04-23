@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/server/prisma";
-import { requireAuth, jsonError } from "@/lib/server/guards";
+import { requireAuth, jsonError , getClientIp} from "@/lib/server/guards";
 import { audit } from "@/lib/server/audit";
 import { hashIp } from "@/lib/server/tokens";
 
@@ -9,7 +9,7 @@ export async function DELETE(req: NextRequest) {
   if (!auth) return jsonError("Unauthorized", 401);
 
   const ipHash = hashIp(
-    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown",
+    getClientIp(req),
   );
 
   // Audit before deletion (user row will be cascade-deleted)

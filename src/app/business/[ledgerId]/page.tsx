@@ -20,12 +20,14 @@ import { PaymentForm } from "@/components/business/PaymentForm";
 import { PaymentList } from "@/components/business/PaymentList";
 import { LedgerForm } from "@/components/business/LedgerForm";
 import { useCurrency } from "@/hooks/useCurrency";
+import { useConfirm } from "@/components/ui/ConfirmDialog";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/Skeleton";
 import type { PaymentInput, LedgerInput } from "@/types";
 
 export default function LedgerDetailPage() {
   const { formatCurrency } = useCurrency();
+  const { confirm } = useConfirm();
   const params = useParams();
   const router = useRouter();
   const ledgerId = params.ledgerId as string;
@@ -35,7 +37,6 @@ export default function LedgerDetailPage() {
 
   const [showPaymentForm, setShowPaymentForm] = useState(false);
   const [showEditForm, setShowEditForm] = useState(false);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const ledger = ledgers.find((l) => l.id === ledgerId);
 
@@ -76,6 +77,13 @@ export default function LedgerDetailPage() {
   };
 
   const handleDelete = async () => {
+    const ok = await confirm({
+      title: "Delete Ledger?",
+      message: `This will remove "${ledger.name}" and all its payments. This action cannot be undone.`,
+      confirmLabel: "Delete",
+      variant: "danger",
+    });
+    if (!ok) return;
     await deleteLedger(ledger.id);
     router.push("/business");
   };
@@ -112,7 +120,7 @@ export default function LedgerDetailPage() {
               <Edit3 size={16} />
             </button>
             <button
-              onClick={() => setShowDeleteConfirm(true)}
+              onClick={handleDelete}
               className="rounded-lg p-2 transition-colors" style={{ color: 'var(--text-muted)' }}
               onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--danger-soft)'; e.currentTarget.style.color = 'var(--danger-text)'; }}
               onMouseLeave={(e) => { e.currentTarget.style.background = ''; e.currentTarget.style.color = 'var(--text-muted)'; }}
@@ -291,34 +299,6 @@ export default function LedgerDetailPage() {
             <PaymentList payments={payments} onDelete={deletePayment} />
           )}
         </div>
-
-        {/* Delete Confirm */}
-        {showDeleteConfirm && (
-          <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/50 p-4">
-            <div className="w-full max-w-sm rounded-xl p-6 shadow-xl" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
-              <h3 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Delete Ledger?</h3>
-              <p className="mt-2 text-xs" style={{ color: 'var(--text-tertiary)' }}>
-                This will remove &quot;{ledger.name}&quot; and all its payments. This action cannot be undone.
-              </p>
-              <div className="mt-4 flex gap-2">
-                <button
-                  onClick={handleDelete}
-                  className="flex-1 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors"
-                  style={{ background: 'var(--danger)' }}
-                >
-                  Delete
-                </button>
-                <button
-                  onClick={() => setShowDeleteConfirm(false)}
-                  className="rounded-lg px-4 py-2 text-sm font-medium transition-colors"
-                  style={{ background: 'var(--surface-secondary)', color: 'var(--text-secondary)' }}
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </AppShell>
   );

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/server/prisma";
-import { requireAuth, requireWorkspaceAdmin, jsonError } from "@/lib/server/guards";
+import { requireAuth, requireWorkspaceAdmin, jsonError , getClientIp} from "@/lib/server/guards";
 import { generateSecureToken, hashToken, hashIp } from "@/lib/server/tokens";
 import { audit } from "@/lib/server/audit";
 import { createInviteSchema } from "@/lib/validators";
@@ -54,7 +54,7 @@ export async function POST(req: NextRequest, { params }: Params) {
     action: "invite.create",
     meta: { role: parsed.data.role, expiresInMinutes: parsed.data.expiresInMinutes },
     ipHash: hashIp(
-      req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown",
+      getClientIp(req),
     ),
   });
 

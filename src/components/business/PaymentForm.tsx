@@ -4,6 +4,7 @@ import { useState } from "react";
 import { m } from "framer-motion";
 import { DatePicker } from "@/components/ui/DatePicker";
 import { useCurrency } from "@/hooks/useCurrency";
+import { useToast } from "@/components/ui/Toast";
 import type { PaymentInput, PaymentMethod } from "@/types";
 
 const PAYMENT_METHODS: { value: PaymentMethod; label: string }[] = [
@@ -22,6 +23,7 @@ interface PaymentFormProps {
 
 export function PaymentForm({ ledgerId, onSubmit, onCancel }: PaymentFormProps) {
   const { symbol } = useCurrency();
+  const { toast } = useToast();
   const [amount, setAmount] = useState("");
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   const [method, setMethod] = useState<PaymentMethod>("bank_transfer");
@@ -47,6 +49,8 @@ export function PaymentForm({ ledgerId, onSubmit, onCancel }: PaymentFormProps) 
       setAmount("");
       setReference("");
       setNotes("");
+    } catch {
+      toast("Failed to save payment. Please try again.", "error");
     } finally {
       setSubmitting(false);
     }

@@ -9,16 +9,17 @@ import { SHORTCUTS } from "@/hooks/useKeyboardShortcuts";
 const COMMON_TIPS = [
   "Set a budget to unlock forecasts & alerts",
   "Enable Business Mode for ledger tracking",
-  "Customize your dashboard layout via the ⚙ icon",
   "Choose an accent color in Settings → Appearance",
   "Track achievements by staying under budget",
+  "Search settings by keyword to find any option fast",
+  "PIN lock protects your app — brute-force lockout kicks in after 3 wrong attempts",
 ];
 
 const TOUCH_TIPS = [
   "Swipe left / right to switch months",
   "Tap the + button to add expenses quickly",
   "Pull down on the dashboard to refresh data",
-  "Long-press an expense to edit or delete it",
+  "Swipe an expense left to delete it",
   "Use the bottom nav to switch between pages",
   "Install as an app from your browser menu",
 ];
@@ -27,11 +28,71 @@ const DESKTOP_TIPS = [
   "Use Ctrl+K (⌘K on Mac) to focus the search bar",
   "Press Ctrl+N (⌘N on Mac) to add a new expense",
   "Press Shift+? to see all keyboard shortcuts",
+  "Arrow keys navigate the spending stream chart, accent color picker & category grid",
+  "Tab to the echo card after adding an expense, then Esc to dismiss",
 ];
 
 function getIsTouch() {
   if (typeof window === "undefined") return false;
   return "ontouchstart" in window || navigator.maxTouchPoints > 0;
+}
+
+function HelpPanelContent({
+  tips,
+  shortcuts,
+  isTouch,
+  onClose,
+}: {
+  tips: string[];
+  shortcuts: { label: string; description: string }[];
+  isTouch: boolean;
+  onClose: () => void;
+}) {
+  return (
+    <>
+      <div className="mb-3 flex items-center justify-between">
+        <h3 className="text-xs font-bold uppercase tracking-wider" style={{ color: "var(--text-primary)" }}>
+          Quick Tips
+        </h3>
+        <button onClick={onClose} style={{ color: "var(--text-muted)" }} className="transition-colors hover:opacity-80">
+          <X size={14} />
+        </button>
+      </div>
+
+      <ul className="space-y-1.5">
+        {tips.map((tip, i) => (
+          <li key={i} className="flex items-center gap-2 text-xs leading-relaxed" style={{ color: "var(--text-secondary)" }}>
+            <span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: "var(--secondary)" }} />
+            {tip}
+          </li>
+        ))}
+      </ul>
+
+      {!isTouch && (
+        <div className="mt-3 border-t pt-3" style={{ borderColor: "var(--border)" }}>
+          <h4 className="mb-2 text-xs font-bold uppercase tracking-wider" style={{ color: "var(--text-primary)" }}>
+            Keyboard Shortcuts
+          </h4>
+          <div className="space-y-1">
+            {shortcuts.map((s, i) => (
+              <div key={i} className="flex items-center justify-between text-xs">
+                <span style={{ color: "var(--text-secondary)" }}>{s.description}</span>
+                <kbd className="rounded border px-1.5 py-0.5 font-mono text-caption" style={{ borderColor: "var(--border)", color: "var(--text-secondary)", background: "var(--surface-secondary)" }}>
+                  {s.label}
+                </kbd>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {!isTouch && (
+        <p className="mt-3 text-center text-xs" style={{ color: "var(--text-secondary)" }}>
+          Press <kbd className="rounded border px-1 py-0.5 font-mono" style={{ borderColor: "var(--border)", background: "var(--surface-secondary)", color: "var(--text-primary)" }}>Shift + ?</kbd> for full shortcuts panel
+        </p>
+      )}
+    </>
+  );
 }
 
 export function QuickHelpButton({ variant = "icon" }: { variant?: "icon" | "sidebar" }) {
@@ -40,7 +101,6 @@ export function QuickHelpButton({ variant = "icon" }: { variant?: "icon" | "side
 
   useEffect(() => {
     if (!open) return;
-    // Small delay so the touch/click that opened the popup doesn't immediately close it
     const timerId = setTimeout(() => {
       const handler = (e: MouseEvent | TouchEvent) => {
         if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
@@ -65,6 +125,13 @@ export function QuickHelpButton({ variant = "icon" }: { variant?: "icon" | "side
   const isTouch = getIsTouch();
   const shortcuts = SHORTCUTS.filter((s) => (isMac ? !s.ctrl : !s.meta));
   const tips = [...COMMON_TIPS, ...(isTouch ? TOUCH_TIPS : DESKTOP_TIPS)];
+  const close = () => setOpen(false);
+
+  const panelStyle = {
+    background: "var(--surface)",
+    borderColor: "var(--border)",
+    boxShadow: "0 8px 32px rgba(0,0,0,0.18)",
+  };
 
   return (
     <div className="relative" ref={ref}>
@@ -77,8 +144,8 @@ export function QuickHelpButton({ variant = "icon" }: { variant?: "icon" | "side
             : "h-8 w-8 justify-center rounded-lg"
         )}
         style={{ color: "var(--text-primary)", background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}
-        onMouseEnter={variant === "sidebar" ? (e) => { e.currentTarget.style.background = 'var(--surface-secondary)'; } : undefined}
-        onMouseLeave={variant === "sidebar" ? (e) => { e.currentTarget.style.background = ''; } : undefined}
+        onMouseEnter={variant === "sidebar" ? (e) => { e.currentTarget.style.background = "var(--surface-secondary)"; } : undefined}
+        onMouseLeave={variant === "sidebar" ? (e) => { e.currentTarget.style.background = ""; } : undefined}
         aria-label="Quick help"
       >
         <HelpCircle size={variant === "sidebar" ? 14 : 18} />
@@ -89,58 +156,14 @@ export function QuickHelpButton({ variant = "icon" }: { variant?: "icon" | "side
         <>
           <div
             className="fixed inset-0 z-[450] bg-black/20 backdrop-blur-[1px] sm:hidden"
-            onClick={() => setOpen(false)}
+            onClick={close}
           />
           <div
             className="fixed inset-x-3 top-20 z-[500] w-auto sm:inset-x-auto sm:w-72 sm:right-6 sm:top-16 rounded-xl border p-4 shadow-xl max-h-[70vh] overflow-y-auto"
-            style={{
-              background: "var(--surface)",
-              borderColor: "var(--border)",
-              boxShadow: "0 8px 32px rgba(0,0,0,0.18)",
-            }}
+            style={panelStyle}
           >
-          <div className="mb-3 flex items-center justify-between">
-            <h3 className="text-xs font-bold uppercase tracking-wider" style={{ color: "var(--text-primary)" }}>
-              Quick Tips
-            </h3>
-            <button onClick={() => setOpen(false)} style={{ color: 'var(--text-muted)' }} className="transition-colors hover:opacity-80">
-              <X size={14} />
-            </button>
+            <HelpPanelContent tips={tips} shortcuts={shortcuts} isTouch={isTouch} onClose={close} />
           </div>
-
-          <ul className="space-y-1.5">
-            {tips.map((tip, i) => (
-              <li key={i} className="flex items-center gap-2 text-xs leading-relaxed" style={{ color: "var(--text-secondary)" }}>
-                <span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: 'var(--secondary)' }} />
-                {tip}
-              </li>
-            ))}
-          </ul>
-
-          {!isTouch && (
-          <div className="mt-3 border-t pt-3" style={{ borderColor: "var(--border)" }}>
-            <h4 className="mb-2 text-xs font-bold uppercase tracking-wider" style={{ color: "var(--text-primary)" }}>
-              Keyboard Shortcuts
-            </h4>
-            <div className="space-y-1">
-              {shortcuts.map((s, i) => (
-                <div key={i} className="flex items-center justify-between text-xs">
-                  <span style={{ color: "var(--text-secondary)" }}>{s.description}</span>
-                  <kbd className="rounded border px-1.5 py-0.5 font-mono text-caption" style={{ borderColor: "var(--border)", color: "var(--text-secondary)", background: "var(--surface-secondary)" }}>
-                    {s.label}
-                  </kbd>
-                </div>
-              ))}
-            </div>
-          </div>
-          )}
-
-          {!isTouch && (
-          <p className="mt-3 text-center text-xs" style={{ color: "var(--text-secondary)" }}>
-            Press <kbd className="rounded border px-1 py-0.5 font-mono" style={{ borderColor: "var(--border)", background: "var(--surface-secondary)", color: "var(--text-primary)" }}>Shift + ?</kbd> for full shortcuts panel
-          </p>
-          )}
-        </div>
         </>,
         document.body,
       )}
@@ -148,53 +171,9 @@ export function QuickHelpButton({ variant = "icon" }: { variant?: "icon" | "side
       {open && variant === "sidebar" && (
         <div
           className="absolute z-[500] bottom-full left-0 mb-2 w-72 rounded-xl border p-4 shadow-xl max-h-[70vh] overflow-y-auto"
-          style={{
-            background: "var(--surface)",
-            borderColor: "var(--border)",
-            boxShadow: "0 8px 32px rgba(0,0,0,0.18)",
-          }}
+          style={panelStyle}
         >
-          <div className="mb-3 flex items-center justify-between">
-            <h3 className="text-xs font-bold uppercase tracking-wider" style={{ color: "var(--text-primary)" }}>
-              Quick Tips
-            </h3>
-            <button onClick={() => setOpen(false)} style={{ color: 'var(--text-muted)' }} className="transition-colors hover:opacity-80">
-              <X size={14} />
-            </button>
-          </div>
-
-          <ul className="space-y-1.5">
-            {tips.map((tip, i) => (
-              <li key={i} className="flex items-center gap-2 text-xs leading-relaxed" style={{ color: "var(--text-secondary)" }}>
-                <span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: 'var(--secondary)' }} />
-                {tip}
-              </li>
-            ))}
-          </ul>
-
-          {!isTouch && (
-          <div className="mt-3 border-t pt-3" style={{ borderColor: "var(--border)" }}>
-            <h4 className="mb-2 text-xs font-bold uppercase tracking-wider" style={{ color: "var(--text-primary)" }}>
-              Keyboard Shortcuts
-            </h4>
-            <div className="space-y-1">
-              {shortcuts.map((s, i) => (
-                <div key={i} className="flex items-center justify-between text-xs">
-                  <span style={{ color: "var(--text-secondary)" }}>{s.description}</span>
-                  <kbd className="rounded border px-1.5 py-0.5 font-mono text-caption" style={{ borderColor: "var(--border)", color: "var(--text-secondary)", background: "var(--surface-secondary)" }}>
-                    {s.label}
-                  </kbd>
-                </div>
-              ))}
-            </div>
-          </div>
-          )}
-
-          {!isTouch && (
-          <p className="mt-3 text-center text-xs" style={{ color: "var(--text-secondary)" }}>
-            Press <kbd className="rounded border px-1 py-0.5 font-mono" style={{ borderColor: "var(--border)", background: "var(--surface-secondary)", color: "var(--text-primary)" }}>Shift + ?</kbd> for full shortcuts panel
-          </p>
-          )}
+          <HelpPanelContent tips={tips} shortcuts={shortcuts} isTouch={isTouch} onClose={close} />
         </div>
       )}
     </div>

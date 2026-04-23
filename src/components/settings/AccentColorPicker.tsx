@@ -156,9 +156,28 @@ export function AccentColorPicker({ currentColor, onSelect }: AccentColorPickerP
                 onPointerDown={handleGradientPointerDown}
                 onPointerMove={handleGradientPointerMove}
                 onPointerUp={handleGradientPointerUp}
-                className="h-10 w-full rounded-xl cursor-crosshair touch-none"
+                tabIndex={0}
+                role="slider"
+                aria-label="Hue"
+                aria-valuemin={0}
+                aria-valuemax={360}
+                aria-valuenow={isCustom ? hueFromHex(selected) : 180}
+                onKeyDown={(e) => {
+                  if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+                  e.preventDefault();
+                  const step = e.shiftKey ? 30 : 10;
+                  const cur = isCustom ? hueFromHex(selected) : 180;
+                  const next = e.key === "ArrowRight"
+                    ? Math.min(cur + step, 360)
+                    : Math.max(cur - step, 0);
+                  const hex = hslToHex(next, 65, 50);
+                  setHexInput(hex);
+                  onSelect(hex);
+                }}
+                className="h-10 w-full rounded-xl cursor-crosshair touch-none focus:outline-2 focus:outline-offset-2"
                 style={{
                   background: "linear-gradient(to right, #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000)",
+                  outlineColor: "var(--accent)",
                 }}
               />
               {/* Thumb indicator */}

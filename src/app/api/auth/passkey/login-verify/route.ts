@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { verifyAuthenticationResponse } from "@simplewebauthn/server";
 import { prisma } from "@/lib/server/prisma";
 import {
+import { getClientIp } from "@/lib/server/guards";
   signAccessToken,
   generateRefreshToken,
   hashToken,
@@ -9,6 +10,7 @@ import {
   REFRESH_TOKEN_TTL_DAYS,
 } from "@/lib/server/tokens";
 import { audit } from "@/lib/server/audit";
+
 
 const RP_ID = process.env.WEBAUTHN_RP_ID ?? "localhost";
 const ORIGIN = process.env.WEBAUTHN_ORIGIN ?? "http://localhost:3000";
@@ -118,7 +120,7 @@ export async function POST(req: NextRequest) {
         refreshTokenHash: hashToken(refreshTokenRaw),
         userAgent: (req.headers.get("user-agent") ?? "").slice(0, 512),
         ipHash: hashIp(
-          req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown",
+          getClientIp(req),
         ),
         expiresAt: new Date(
           Date.now() + REFRESH_TOKEN_TTL_DAYS * 24 * 60 * 60 * 1000,
@@ -143,7 +145,7 @@ export async function POST(req: NextRequest) {
     action: "user.login",
     meta: { method: "passkey" },
     ipHash: hashIp(
-      req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown",
+      getClientIp(req),
     ),
   });
 

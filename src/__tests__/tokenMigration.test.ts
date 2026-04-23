@@ -59,13 +59,11 @@ const MIGRATED_COMPONENTS = [
   "components/settings/AccountCard.tsx",
   "components/settings/WorkspaceMembersCard.tsx",
   "components/settings/ExportImportWizard.tsx",
-  "components/settings/CSVImport.tsx",
   "components/sync/SyncIndicator.tsx",
   "components/settings/RecurringManager.tsx",
   "components/settings/DataAccountManagement.tsx",
   "components/expenses/ReceiptCapture.tsx",
   "components/settings/AutoRulesManager.tsx",
-  "components/settings/CategoryBudgetManager.tsx",
   "components/settings/SettingsAccordion.tsx",
   "app/settings/page.tsx",
   "app/business/page.tsx",
@@ -154,11 +152,6 @@ describe("token migration: CSS variable tokens are used", () => {
 
   test("ExportImportWizard uses token variables", () => {
     const src = readSrc("components/settings/ExportImportWizard.tsx");
-    expect(src).toMatch(/var\(--/);
-  });
-
-  test("CSVImport uses token variables", () => {
-    const src = readSrc("components/settings/CSVImport.tsx");
     expect(src).toMatch(/var\(--/);
   });
 

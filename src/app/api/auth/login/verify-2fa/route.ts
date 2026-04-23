@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/server/prisma";
 import { verifyTotp } from "@/lib/server/totp";
 import {
+import { getClientIp } from "@/lib/server/guards";
   signAccessToken,
   verify2FAChallenge,
   generateRefreshToken,
@@ -14,13 +15,14 @@ import { verify2FASchema } from "@/lib/validators";
 import { rateLimit } from "@/lib/server/rateLimit";
 import { setRefreshTokenCookie } from "@/lib/server/cookies";
 
+
 /**
  * POST /api/auth/login/verify-2fa
  * Complete login after TOTP verification.
  * Body: { challengeToken: string, code: string }
  */
 export async function POST(req: NextRequest) {
-  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+  const ip = getClientIp(req);
   const rl = rateLimit(`2fa:${hashIp(ip)}`, 5, 60_000);
   if (!rl.ok) {
     return NextResponse.json(
@@ -168,7 +170,7 @@ export async function POST(req: NextRequest) {
         refreshTokenHash,
         userAgent: ua,
         ipHash: hashIp(
-          req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown",
+          getClientIp(req),
         ),
         expiresAt,
       },
@@ -191,7 +193,7 @@ export async function POST(req: NextRequest) {
     action: "user.login",
     meta: { method: "password+totp" },
     ipHash: hashIp(
-      req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown",
+      getClientIp(req),
     ),
   });
 

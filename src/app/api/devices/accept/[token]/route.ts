@@ -7,7 +7,7 @@ import {
   generateRefreshToken,
   REFRESH_TOKEN_TTL_DAYS,
 } from "@/lib/server/tokens";
-import { requireAuth, jsonError } from "@/lib/server/guards";
+import { requireAuth, jsonError , getClientIp} from "@/lib/server/guards";
 import { audit } from "@/lib/server/audit";
 
 interface Params {
@@ -68,7 +68,7 @@ export async function POST(req: NextRequest, { params }: Params) {
         refreshTokenHash: hashToken(refreshTokenRaw),
         userAgent: (req.headers.get("user-agent") ?? "").slice(0, 512),
         ipHash: hashIp(
-          req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown",
+          getClientIp(req),
         ),
         expiresAt: new Date(
           Date.now() + REFRESH_TOKEN_TTL_DAYS * 24 * 60 * 60 * 1000,
@@ -93,7 +93,7 @@ export async function POST(req: NextRequest, { params }: Params) {
     action: "device_link.accept",
     meta: { deviceId: result.device.id, workspaceId: link.workspaceId },
     ipHash: hashIp(
-      req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown",
+      getClientIp(req),
     ),
   });
 

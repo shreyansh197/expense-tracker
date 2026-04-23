@@ -8,6 +8,29 @@ const VB_W = 360;
 const VB_H = 160;
 const PAD_X = 10;
 
+/** Navigate stones with Left/Right arrow keys */
+function useStoneKeyNav(
+  stones: { day: number }[],
+  activeStone: number | null,
+  setActiveStone: (d: number | null) => void,
+) {
+  return useCallback(
+    (e: React.KeyboardEvent) => {
+      if (!stones.length) return;
+      if (e.key === "Escape") { setActiveStone(null); return; }
+      if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+      e.preventDefault();
+      const idx = activeStone != null ? stones.findIndex((s) => s.day === activeStone) : -1;
+      const next =
+        e.key === "ArrowRight"
+          ? stones[Math.min(idx + 1, stones.length - 1)]
+          : stones[Math.max(idx - 1, 0)];
+      setActiveStone(next.day);
+    },
+    [stones, activeStone, setActiveStone],
+  );
+}
+
 interface SpendingStreamProps {
   /** 0-120 — percentage of budget used */
   budgetUsedPercent: number;
@@ -165,6 +188,8 @@ export function SpendingStream({
     setActiveStone(null);
   }, []);
 
+  const handleKeyDown = useStoneKeyNav(stones, activeStone, setActiveStone);
+
   /* ═══════════════════════════════════════════════════════
      Reduced-motion fallback — static gradient bar + stones
      ═══════════════════════════════════════════════════════ */
@@ -224,7 +249,9 @@ export function SpendingStream({
       className={className}
       style={{ position: "relative" }}
       role="img"
-      aria-label={`Spending stream: ${Math.round(clamped)}% of budget used`}
+      aria-label={`Spending stream: ${Math.round(clamped)}% of budget used${activeStone ? `. Day ${activeStone} selected` : ". Use arrow keys to explore daily spending"}`}
+      tabIndex={0}
+      onKeyDown={handleKeyDown}
     >
       {/* Active stone tooltip — HTML above SVG, never clipped */}
       {activeStone !== null && (() => {

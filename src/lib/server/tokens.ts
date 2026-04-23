@@ -116,6 +116,9 @@ export async function verifyPasswordResetToken(token: string): Promise<string> {
 // ── IP hashing (privacy-preserving) ──────────────────────────
 
 export function hashIp(ip: string): string {
-  const salt = process.env.IP_HASH_SALT ?? "expenstream-ip";
-  return createHash("sha256").update(`${salt}:${ip}`).digest("hex").slice(0, 16);
+  const salt = process.env.IP_HASH_SALT;
+  if (!salt && process.env.NODE_ENV === "production") {
+    throw new Error("IP_HASH_SALT environment variable must be set in production");
+  }
+  return createHash("sha256").update(`${salt ?? "expenstream-ip"}:${ip}`).digest("hex").slice(0, 16);
 }

@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { Trash2, Banknote, CreditCard, Smartphone, FileText, HelpCircle, X, Hash, StickyNote, Calendar, TrendingUp } from "lucide-react";
 import { useCurrency } from "@/hooks/useCurrency";
 import { useConfirm } from "@/components/ui/ConfirmDialog";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 import type { Payment, PaymentMethod } from "@/types";
 
 const methodIcons: Record<PaymentMethod, typeof Banknote> = {
@@ -61,6 +62,7 @@ function PaymentDetailModal({
   const { formatCurrency } = useCurrency();
   const { confirm } = useConfirm();
   const colorClass = payment.method ? methodColors[payment.method] : methodColors.other;
+  const trapRef = useFocusTrap<HTMLDivElement>(true);
 
   async function handleDelete() {
     const ok = await confirm({
@@ -84,6 +86,10 @@ function PaymentDetailModal({
 
       {/* Sheet — slides up from bottom on mobile, centered on desktop */}
       <div
+        ref={trapRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Payment details"
         className="fixed bottom-0 left-0 right-0 z-[201] rounded-t-2xl shadow-2xl
                     sm:bottom-auto sm:left-1/2 sm:top-1/2 sm:w-full sm:max-w-sm sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-2xl"
         style={{ background: 'var(--surface)', paddingBottom: 'env(safe-area-inset-bottom, 0px)', animation: 'et-screen-in 0.22s ease both' }}

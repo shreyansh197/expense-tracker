@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/server/prisma";
 import { verifyPassword } from "@/lib/server/password";
 import {
+import { getClientIp } from "@/lib/server/guards";
   signAccessToken,
   sign2FAChallenge,
   generateRefreshToken,
@@ -14,8 +15,9 @@ import { loginSchema } from "@/lib/validators";
 import { rateLimit } from "@/lib/server/rateLimit";
 import { setRefreshTokenCookie } from "@/lib/server/cookies";
 
+
 export async function POST(req: NextRequest) {
-  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+  const ip = getClientIp(req);
   const rl = rateLimit(`login:${hashIp(ip)}`, 10, 60_000);
   if (!rl.ok) {
     return NextResponse.json(
@@ -146,7 +148,7 @@ export async function POST(req: NextRequest) {
         refreshTokenHash,
         userAgent: ua,
         ipHash: hashIp(
-          req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown",
+          getClientIp(req),
         ),
         expiresAt,
       },
@@ -169,7 +171,7 @@ export async function POST(req: NextRequest) {
     action: "user.login",
     meta: { method: "password" },
     ipHash: hashIp(
-      req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown",
+      getClientIp(req),
     ),
   });
 

@@ -10,7 +10,8 @@ import {
   generateUUID,
 } from "@/lib/syncEngine";
 import { useDexieQuery } from "@/hooks/useDexieQuery";
-import type { Expense, ExpenseInput, CategoryId, SyncStatus } from "@/types";
+import { toExpense } from "@/lib/mappers";
+import type { Expense, ExpenseInput, SyncStatus } from "@/types";
 
 /** Invalidate the calc cache entry for a given month/year. */
 function invalidateCalcCache(wid: string, month: number, year: number) {
@@ -18,25 +19,6 @@ function invalidateCalcCache(wid: string, month: number, year: number) {
 }
 
 const EMPTY: Expense[] = [];
-
-function toExpense(row: { id: string; category: string; amount: number; currency?: string; day: number; month: number; year: number; remark?: string; isRecurring: boolean; recurringId?: string; createdAt: number; updatedAt: number; deletedAt: number | null | undefined }): Expense {
-  return {
-    id: row.id,
-    category: row.category as CategoryId,
-    amount: row.amount,
-    currency: row.currency,
-    day: row.day,
-    month: row.month,
-    year: row.year,
-    remark: row.remark,
-    isRecurring: row.isRecurring ?? false,
-    recurringId: row.recurringId,
-    createdAt: row.createdAt,
-    updatedAt: row.updatedAt,
-    deletedAt: row.deletedAt ?? null,
-    deviceId: "",
-  };
-}
 
 export function useExpenses(month: number, year: number) {
   const wid = getActiveWorkspaceId();

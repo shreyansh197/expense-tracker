@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useMemo, useState, useCallback } from "react";
+import dynamic from "next/dynamic";
 import { AppShell } from "@/components/layout/AppShell";
 import { MonthSwitcher } from "@/components/layout/MonthSwitcher";
 import { SyncIndicator } from "@/components/sync/SyncIndicator";
@@ -27,11 +28,11 @@ import {
   ChevronDown,
   Share2,
 } from "lucide-react";
-import { EmptyState } from "@/components/ui/EmptyState";
 import { FogOverlook } from "@/components/ui/illustrations/terrain";
-import { ChronicleView } from "@/components/dashboard/ChronicleView";
-import { TimeMachine } from "@/components/analytics/TimeMachine";
-import { CategorySeasons } from "@/components/analytics/CategorySeasons";
+import { EmptyState } from "@/components/ui/EmptyState";
+const ChronicleView = dynamic(() => import("@/components/dashboard/ChronicleView").then(m => ({ default: m.ChronicleView })), { ssr: false });
+const TimeMachine = dynamic(() => import("@/components/analytics/TimeMachine").then(m => ({ default: m.TimeMachine })), { ssr: false });
+const CategorySeasons = dynamic(() => import("@/components/analytics/CategorySeasons").then(m => ({ default: m.CategorySeasons })), { ssr: false });
 
 export default function AnalyticsPage() {
   return (

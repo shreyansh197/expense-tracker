@@ -6,13 +6,10 @@ import { db } from "@/lib/db";
 import { getActiveWorkspaceId } from "@/lib/authClient";
 import { getDaysInMonth } from "@/lib/utils";
 import { getDayOfWeekFactors } from "@/lib/calculations";
-import type { Expense, CategoryId } from "@/types";
+import { toExpense } from "@/lib/mappers";
+import type { Expense } from "@/types";
 
 const EMPTY: Expense[] = [];
-
-function toExpense(row: { id: string; category: string; amount: number; currency?: string; day: number; month: number; year: number; remark?: string; isRecurring: boolean; recurringId?: string; createdAt: number; updatedAt: number; deletedAt: number | null }): Expense {
-  return { id: row.id, category: row.category as CategoryId, amount: row.amount, currency: row.currency, day: row.day, month: row.month, year: row.year, remark: row.remark, isRecurring: row.isRecurring ?? false, recurringId: row.recurringId, createdAt: row.createdAt, updatedAt: row.updatedAt, deletedAt: row.deletedAt, deviceId: "" };
-}
 
 interface MonthData {
   month: number;

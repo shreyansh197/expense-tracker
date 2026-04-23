@@ -5,9 +5,10 @@ import { hashPassword } from "@/lib/server/password";
 import { audit } from "@/lib/server/audit";
 import { resetPasswordSchema } from "@/lib/validators";
 import { rateLimit } from "@/lib/server/rateLimit";
+import { getClientIp } from "@/lib/server/guards";
 
 export async function POST(req: NextRequest) {
-  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+  const ip = getClientIp(req);
   const rl = rateLimit(`reset-pw:${hashIp(ip)}`, 5, 60_000);
   if (!rl.ok) {
     return NextResponse.json(

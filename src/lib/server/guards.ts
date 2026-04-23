@@ -88,11 +88,13 @@ export async function requireWorkspaceAdmin(
 
 /**
  * Get client IP from request (privacy-safe path only).
+ * Prefers x-real-ip (set by reverse proxy / Vercel) over x-forwarded-for
+ * which can be spoofed by clients.
  */
 export function getClientIp(req: NextRequest): string {
   return (
-    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
     req.headers.get("x-real-ip") ??
+    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
     "unknown"
   );
 }

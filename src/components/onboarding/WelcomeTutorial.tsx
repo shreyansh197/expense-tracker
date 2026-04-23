@@ -71,7 +71,8 @@ export function WelcomeTutorial({ onComplete, onSetup }: WelcomeTutorialProps) {
   }, [screen]);
 
   const commitSetup = useCallback(() => {
-    const budget = parseFloat(budgetInput) || 0;
+    const parsed = parseFloat(budgetInput);
+    const budget = Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
     onSetup?.(currency, budget);
   }, [currency, budgetInput, onSetup]);
 

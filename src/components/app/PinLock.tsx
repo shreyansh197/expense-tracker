@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { Lock, Delete, AlertCircle } from "lucide-react";
 
 interface PinLockProps {
-  onVerify: (pin: string) => Promise<boolean>;
+  onVerify: (pin: string) => Promise<boolean | "locked-out">;
 }
 
 const PIN_LENGTH = 4;
@@ -12,6 +12,7 @@ const PIN_LENGTH = 4;
 export function PinLock({ onVerify }: PinLockProps) {
   const [pin, setPin] = useState("");
   const [error, setError] = useState(false);
+  const [lockedOut, setLockedOut] = useState(false);
   const [checking, setChecking] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -25,8 +26,14 @@ export function PinLock({ onVerify }: PinLockProps) {
       if (value.length !== PIN_LENGTH || checking) return;
       setChecking(true);
       setError(false);
-      const ok = await onVerify(value);
-      if (!ok) {
+      setLockedOut(false);
+      const result = await onVerify(value);
+      if (result === "locked-out") {
+        setLockedOut(true);
+        setPin("");
+        setChecking(false);
+        inputRef.current?.focus();
+      } else if (!result) {
         setError(true);
         setPin("");
         setChecking(false);
@@ -94,13 +101,21 @@ export function PinLock({ onVerify }: PinLockProps) {
         ))}
       </div>
 
-      {/* Error message */}
-      {error && (
-        <div className="flex items-center gap-1.5 text-err text-sm">
-          <AlertCircle size={14} />
-          <span>Incorrect PIN. Try again.</span>
-        </div>
-      )}
+      {/* Error / lockout message */}
+      <div aria-live="assertive" aria-atomic="true">
+        {lockedOut && (
+          <div className="flex items-center gap-1.5 text-err text-sm">
+            <AlertCircle size={14} />
+            <span>Too many attempts. Please wait or re-authenticate.</span>
+          </div>
+        )}
+        {error && !lockedOut && (
+          <div className="flex items-center gap-1.5 text-err text-sm">
+            <AlertCircle size={14} />
+            <span>Incorrect PIN. Try again.</span>
+          </div>
+        )}
+      </div>
 
       {/* Keypad */}
       <div className="grid grid-cols-3 gap-4">
@@ -128,6 +143,7 @@ export function PinLock({ onVerify }: PinLockProps) {
                 disabled={checking}
                 className="flex h-[72px] w-[72px] items-center justify-center rounded-2xl text-xl font-semibold transition-all active:scale-92 disabled:opacity-50 hover:bg-[var(--surface-tertiary)]"
                 style={{ background: "var(--surface-secondary)", color: "var(--text-primary)" }}
+                aria-label={`Digit ${key}`}
               >
                 {key}
               </button>

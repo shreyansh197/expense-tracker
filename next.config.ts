@@ -1,5 +1,10 @@
 import type { NextConfig } from "next";
 import { withSentryConfig } from "@sentry/nextjs";
+import bundleAnalyzer from "@next/bundle-analyzer";
+
+const withBundleAnalyzer = bundleAnalyzer({
+  enabled: process.env.ANALYZE === "true",
+});
 
 const cspDirectives = [
   "default-src 'self'",
@@ -56,7 +61,7 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withSentryConfig(nextConfig, {
+export default withSentryConfig(withBundleAnalyzer(nextConfig), {
   // Suppress source map upload warnings when SENTRY_AUTH_TOKEN is not set
   silent: !process.env.SENTRY_AUTH_TOKEN,
   // Disable source map uploads when auth token is not configured

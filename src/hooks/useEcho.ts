@@ -19,7 +19,7 @@ export interface EchoData {
  *
  * Suppressed on business routes to keep the business ledger flow clean.
  */
-export function useEcho(expenses: Expense[], ttlMs = 2500) {
+export function useEcho(expenses: Expense[], ttlMs = 4000) {
   const [echo, setEcho] = useState<EchoData | null>(null);
 
   const triggerEcho = useCallback(

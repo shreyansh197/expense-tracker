@@ -7,24 +7,26 @@ import { m, AnimatePresence } from "framer-motion";
 import { AppShell } from "@/components/layout/AppShell";
 import { MonthSwitcher } from "@/components/layout/MonthSwitcher";
 import { SyncIndicator } from "@/components/sync/SyncIndicator";
-import { RecurringSuggestions } from "@/components/dashboard/RecurringSuggestions";
-import { UpcomingStream } from "@/components/dashboard/UpcomingStream";
 import { MonthStartAnchor } from "@/components/dashboard/MonthStartAnchor";
 import { RevealOnScroll } from "@/components/motion/RevealOnScroll";
 import { stoneSettle } from "@/lib/motion/variants";
+import { SpendingStream } from "@/components/dashboard/SpendingStream";
 import { SkeletonKpiCards, SkeletonChart } from "@/components/ui/Skeleton";
 import { PageTransition } from "@/components/ui/PageTransition";
-import { SpendingStream } from "@/components/dashboard/SpendingStream";
-import { SpendingForecastCalendar } from "@/components/analytics/SpendingForecastCalendar";
-import { SavingsGoalsWidget } from "@/components/dashboard/SavingsGoalsWidget";
-import { NarrativeInsight } from "@/components/dashboard/NarrativeInsight";
-import { MonthlyPostcard } from "@/components/dashboard/MonthlyPostcard";
-import { PostcardPrompt } from "@/components/dashboard/PostcardPrompt";
 import { InstallBanner } from "@/components/pwa/InstallBanner";
-import { MoneyDnaCard } from "@/components/dashboard/MoneyDnaCard";
-import { SpendingChallenges } from "@/components/dashboard/SpendingChallenges";
 import { ClearingScene } from "@/components/ui/illustrations/terrain/ClearingScene";
 import { Repeat, PlusCircle, ChevronDown, Flame, TrendingUp, AlertTriangle, Leaf, Coffee, Sunrise } from "lucide-react";
+
+// Below-fold widgets — dynamic imports for faster initial paint
+const SpendingForecastCalendar = dynamic(() => import("@/components/analytics/SpendingForecastCalendar").then(m => ({ default: m.SpendingForecastCalendar })));
+const SavingsGoalsWidget = dynamic(() => import("@/components/dashboard/SavingsGoalsWidget").then(m => ({ default: m.SavingsGoalsWidget })));
+const NarrativeInsight = dynamic(() => import("@/components/dashboard/NarrativeInsight").then(m => ({ default: m.NarrativeInsight })));
+const MonthlyPostcard = dynamic(() => import("@/components/dashboard/MonthlyPostcard").then(m => ({ default: m.MonthlyPostcard })));
+const PostcardPrompt = dynamic(() => import("@/components/dashboard/PostcardPrompt").then(m => ({ default: m.PostcardPrompt })));
+const MoneyDnaCard = dynamic(() => import("@/components/dashboard/MoneyDnaCard").then(m => ({ default: m.MoneyDnaCard })));
+const SpendingChallenges = dynamic(() => import("@/components/dashboard/SpendingChallenges").then(m => ({ default: m.SpendingChallenges })));
+const RecurringSuggestions = dynamic(() => import("@/components/dashboard/RecurringSuggestions").then(m => ({ default: m.RecurringSuggestions })));
+const UpcomingStream = dynamic(() => import("@/components/dashboard/UpcomingStream").then(m => ({ default: m.UpcomingStream })));
 import type { LucideIcon } from "lucide-react";
 
 import { useExpenses } from "@/hooks/useExpenses";

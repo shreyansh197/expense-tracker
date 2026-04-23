@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/server/prisma";
-import { requireAuth, jsonError } from "@/lib/server/guards";
+import { requireAuth, jsonError , getClientIp} from "@/lib/server/guards";
 import { hashPassword, verifyPassword } from "@/lib/server/password";
 import { audit } from "@/lib/server/audit";
 import { hashIp } from "@/lib/server/tokens";
@@ -8,7 +8,7 @@ import { changePasswordSchema } from "@/lib/validators";
 import { rateLimit } from "@/lib/server/rateLimit";
 
 export async function PUT(req: NextRequest) {
-  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+  const ip = getClientIp(req);
   const rl = rateLimit(`chpw:${hashIp(ip)}`, 5, 60_000);
   if (!rl.ok) {
     return NextResponse.json(
@@ -55,7 +55,7 @@ export async function PUT(req: NextRequest) {
   });
 
   const ipHash = hashIp(
-    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown",
+    getClientIp(req),
   );
 
   await audit({

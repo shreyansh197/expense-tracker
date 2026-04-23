@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { SignJWT } from "jose";
 import { prisma } from "@/lib/server/prisma";
 import {
+import { getClientIp } from "@/lib/server/guards";
   signAccessToken,
   generateRefreshToken,
   hashToken,
@@ -11,6 +12,7 @@ import {
 import { audit } from "@/lib/server/audit";
 import { DEFAULT_CATEGORIES } from "@/lib/categories";
 import { setRefreshTokenCookie } from "@/lib/server/cookies";
+
 
 function getJwtSecret(): Uint8Array {
   const raw = process.env.JWT_SECRET;
@@ -96,7 +98,7 @@ export async function GET(req: NextRequest) {
 
     const ua = (req.headers.get("user-agent") ?? "").slice(0, 512);
     const ipHash = hashIp(
-      req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown",
+      getClientIp(req),
     );
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

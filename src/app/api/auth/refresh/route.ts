@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/server/prisma";
 import {
+import { getClientIp } from "@/lib/server/guards";
   signAccessToken,
   generateRefreshToken,
   hashToken,
@@ -9,6 +10,7 @@ import {
 } from "@/lib/server/tokens";
 import { refreshSchema } from "@/lib/validators";
 import { setRefreshTokenCookie, getRefreshTokenFromCookie } from "@/lib/server/cookies";
+
 
 export async function POST(req: NextRequest) {
   // Read refresh token from httpOnly cookie first, fall back to body for backwards compatibility
@@ -81,7 +83,7 @@ export async function POST(req: NextRequest) {
       refreshTokenHash: newRefreshTokenHash,
       expiresAt: newExpiresAt,
       ipHash: hashIp(
-        req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown",
+        getClientIp(req),
       ),
     },
   });

@@ -81,6 +81,8 @@ export function EchoCard({ echo, onDismiss }: EchoCardProps) {
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
           onClick={onDismiss}
+          tabIndex={0}
+          onKeyDown={(e) => { if (e.key === "Escape" || e.key === "Enter") onDismiss(); }}
           className={cn(
             "fixed z-[350] mx-auto cursor-pointer select-none rounded-2xl px-4 py-3 shadow-lg",
             "left-1/2 -translate-x-1/2",

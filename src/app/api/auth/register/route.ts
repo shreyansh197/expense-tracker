@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/server/prisma";
 import { hashPassword } from "@/lib/server/password";
+import { getClientIp } from "@/lib/server/guards";
 import {
   signAccessToken,
   generateRefreshToken,
@@ -12,10 +13,12 @@ import { audit } from "@/lib/server/audit";
 import { registerSchema } from "@/lib/validators";
 import { DEFAULT_CATEGORIES } from "@/lib/categories";
 import { rateLimit } from "@/lib/server/rateLimit";
+import { verifyCaptcha } from "@/lib/server/captcha";
 import { setRefreshTokenCookie } from "@/lib/server/cookies";
 
+
 export async function POST(req: NextRequest) {
-  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+  const ip = getClientIp(req);
   const rl = rateLimit(`register:${hashIp(ip)}`, 5, 60_000);
   if (!rl.ok) {
     return NextResponse.json(
@@ -42,6 +45,12 @@ export async function POST(req: NextRequest) {
 
   const { email, password, name } = parsed.data;
 
+  // CAPTCHA verification (enabled when TURNSTILE_SECRET_KEY is set)
+  const captchaToken = (parsed.data as Record<string, unknown>).captchaToken as string | undefined;
+  if (!(await verifyCaptcha(captchaToken, ip))) {
+    return NextResponse.json({ error: "CAPTCHA verification failed" }, { status: 403 });
+  }
+
   try {
   // Check for existing user
   const existing = await prisma.user.findUnique({
@@ -50,8 +59,8 @@ export async function POST(req: NextRequest) {
   });
   if (existing) {
     return NextResponse.json(
-      { error: "An account with this email already exists" },
-      { status: 409 },
+      { error: "If this email is not already registered, a new account has been created. Check your email to continue." },
+      { status: 200 },
     );
   }
 
@@ -116,7 +125,7 @@ export async function POST(req: NextRequest) {
         refreshTokenHash,
         userAgent: (req.headers.get("user-agent") ?? "").slice(0, 512),
         ipHash: hashIp(
-          req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown",
+          getClientIp(req),
         ),
         expiresAt,
       },
@@ -138,7 +147,7 @@ export async function POST(req: NextRequest) {
     entityId: result.user.id,
     action: "user.register",
     ipHash: hashIp(
-      req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown",
+      getClientIp(req),
     ),
   });
 
@@ -173,8 +182,8 @@ export async function POST(req: NextRequest) {
     }
     if (message.includes("unique constraint") || message.includes("duplicate key")) {
       return NextResponse.json(
-        { error: "An account with this email already exists" },
-        { status: 409 },
+        { error: "If this email is not already registered, a new account has been created. Check your email to continue." },
+        { status: 200 },
       );
     }
     if (message.includes("does not exist") || message.includes("relation") || message.includes("column")) {

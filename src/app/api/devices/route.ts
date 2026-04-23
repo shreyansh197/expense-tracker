@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/server/prisma";
-import { requireAuth, jsonError } from "@/lib/server/guards";
+import { requireAuth, jsonError , getClientIp} from "@/lib/server/guards";
 import { generateSecureToken, hashToken, hashIp } from "@/lib/server/tokens";
 import { audit } from "@/lib/server/audit";
 
@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
     entityId: link.id,
     action: "device_link.create",
     ipHash: hashIp(
-      req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown",
+      getClientIp(req),
     ),
   });
 

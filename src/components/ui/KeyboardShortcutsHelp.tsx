@@ -2,6 +2,7 @@
 
 import { X, Keyboard } from "lucide-react";
 import { SHORTCUTS } from "@/hooks/useKeyboardShortcuts";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 
 interface KeyboardShortcutsHelpProps {
   open: boolean;
@@ -9,6 +10,8 @@ interface KeyboardShortcutsHelpProps {
 }
 
 export function KeyboardShortcutsHelp({ open, onClose }: KeyboardShortcutsHelpProps) {
+  const trapRef = useFocusTrap<HTMLDivElement>(open);
+
   if (!open) return null;
 
   // Deduplicate: show Ctrl on Windows, ⌘ on Mac
@@ -22,8 +25,16 @@ export function KeyboardShortcutsHelp({ open, onClose }: KeyboardShortcutsHelpPr
     <div
       className="fixed inset-0 z-[300] flex items-center justify-center bg-black/40 backdrop-blur-sm"
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+      onKeyDown={(e) => { if (e.key === "Escape") onClose(); }}
     >
-      <div className="w-full max-w-sm rounded-2xl p-6 shadow-xl" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
+      <div
+        ref={trapRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Keyboard shortcuts"
+        className="w-full max-w-sm rounded-2xl p-6 shadow-xl"
+        style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
+      >
         <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Keyboard size={18} className="text-brand" />

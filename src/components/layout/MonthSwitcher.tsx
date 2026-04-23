@@ -63,6 +63,8 @@ export function MonthSwitcher() {
       <div className="relative min-w-[160px] overflow-hidden rounded-xl px-4 py-2" style={{ background: 'var(--surface-secondary)' }}>
         <h2
           key={label}
+          aria-live="polite"
+          aria-atomic="true"
           className="text-center text-sm font-bold tracking-tight"
           style={{
             color: 'var(--text-primary)',

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, createContext, useContext } from "react";
-import { m, AnimatePresence } from "framer-motion";
+import { m, AnimatePresence, useReducedMotion } from "framer-motion";
 import { CheckCircle, XCircle, AlertCircle, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { duration as motionDuration, ease } from "@/lib/motion/tokens";
@@ -61,6 +61,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
 
 function ToastItem({ toast, onClose }: { toast: Toast; onClose: () => void }) {
   const duration = toast.action ? 6000 : 3000;
+  const shouldReduceMotion = useReducedMotion();
 
   const Icon =
     toast.type === "success" ? CheckCircle :
@@ -80,11 +81,11 @@ function ToastItem({ toast, onClose }: { toast: Toast; onClose: () => void }) {
 
   return (
     <m.div
-      layout
-      initial={{ opacity: 0, y: 8 }}
+      layout={!shouldReduceMotion}
+      initial={shouldReduceMotion ? { opacity: 1 } : { opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, transition: { duration: motionDuration.exit } }}
-      transition={{ duration: motionDuration.normal, ease: ease.out }}
+      exit={{ opacity: 0, transition: { duration: shouldReduceMotion ? 0 : motionDuration.exit } }}
+      transition={shouldReduceMotion ? { duration: 0 } : { duration: motionDuration.normal, ease: ease.out }}
       drag="x"
       dragConstraints={{ left: 0, right: 0 }}
       dragElastic={{ left: 0, right: 0.5 }}

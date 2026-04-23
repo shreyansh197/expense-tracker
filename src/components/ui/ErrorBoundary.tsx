@@ -2,6 +2,7 @@
 
 import { Component, type ReactNode } from "react";
 import { AlertTriangle, RefreshCw } from "lucide-react";
+import * as Sentry from "@sentry/nextjs";
 
 interface Props {
   children: ReactNode;
@@ -25,6 +26,9 @@ export class ErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, info: React.ErrorInfo) {
     console.error("ErrorBoundary caught:", error, info.componentStack);
+    Sentry.captureException(error, {
+      extra: { componentStack: info.componentStack },
+    });
   }
 
   handleReset = () => {

@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/server/prisma";
-import { requireAuth, requireWorkspaceMember, jsonError } from "@/lib/server/guards";
+import { requireAuth, requireWorkspaceMember, jsonError , getClientIp} from "@/lib/server/guards";
 import { syncCommitSchema } from "@/lib/validators";
 import { ensureSyncColumns } from "@/lib/server/ensureSyncColumns";
+import { rateLimit } from "@/lib/server/rateLimit";
+import { hashIp } from "@/lib/server/tokens";
 import type { Prisma } from "@prisma/client";
 
 type Json = Prisma.InputJsonValue;
@@ -16,6 +18,15 @@ type Json = Prisma.InputJsonValue;
 export async function POST(req: NextRequest) {
   const auth = await requireAuth(req);
   if (!auth) return jsonError("Unauthorized", 401);
+
+  const ip = getClientIp(req);
+  const rl = rateLimit(`sync-commit:${hashIp(ip)}:${auth.userId}`, 60, 60_000);
+  if (!rl.ok) {
+    return NextResponse.json(
+      { error: "Too many requests. Try again later." },
+      { status: 429, headers: { "Retry-After": String(rl.retryAfter) } },
+    );
+  }
 
   let body: unknown;
   try {

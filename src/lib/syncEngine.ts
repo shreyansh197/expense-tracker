@@ -7,7 +7,7 @@ import * as Sentry from "@sentry/nextjs";
 
 // ── Sync logging — visible in browser console for debugging ──
 
-const SYNC_LOG = true; // Set false in production
+const SYNC_LOG = process.env.NODE_ENV !== "production" || process.env.NEXT_PUBLIC_SYNC_LOG === "true";
 function syncLog(tag: string, ...args: unknown[]) {
   if (SYNC_LOG) console.log(`[sync:${tag}]`, ...args);
 }
@@ -98,10 +98,25 @@ export function generateUUID(): string {
 
 // ── Enqueue a mutation to IDB ──
 
+const MAX_MUTATION_QUEUE_SIZE = 500;
+
 export async function enqueueMutation(
   mutation: Omit<IDBMutation, "localId" | "createdAt" | "workspaceId">,
   workspaceId: string,
 ): Promise<void> {
+  // Cap the mutation queue to prevent unbounded growth while offline
+  const count = await db.mutations.where("workspaceId").equals(workspaceId).count();
+  if (count >= MAX_MUTATION_QUEUE_SIZE) {
+    syncErr("enqueue", `Mutation queue full (${count}/${MAX_MUTATION_QUEUE_SIZE}). Dropping oldest entries.`);
+    // Remove oldest 10% to make room
+    const oldest = await db.mutations
+      .where("workspaceId")
+      .equals(workspaceId)
+      .sortBy("createdAt");
+    const toRemove = oldest.slice(0, Math.ceil(MAX_MUTATION_QUEUE_SIZE * 0.1));
+    await db.mutations.bulkDelete(toRemove.map((m) => m.localId!));
+  }
+
   syncLog("enqueue", `${mutation.table}:${mutation.operation} id=${mutation.id?.slice(0,8)}… key=${mutation.idempotencyKey}`);
 
   // Encrypt mutation data at rest if encryption key is available
@@ -117,6 +132,13 @@ export async function enqueueMutation(
     workspaceId,
     createdAt: Date.now(),
   });
+
+  // Register Background Sync so the SW wakes us when connectivity returns
+  if ("serviceWorker" in navigator && "SyncManager" in window) {
+    navigator.serviceWorker.ready
+      .then((reg) => (reg as unknown as { sync: { register: (tag: string) => Promise<void> } }).sync.register("mutation-push"))
+      .catch(() => { /* Background Sync not supported or denied */ });
+  }
 }
 
 // ── Pull changes from server into IDB ──
@@ -148,12 +170,11 @@ export async function pullChanges(workspaceId?: string): Promise<boolean> {
 
   const promise = (async () => {
     try {
-      // On the very first pull after page load, ALWAYS do a full sync
-      // (ignore stored cursor). This is simpler and more reliable than
-      // trying to clear the cursor table before any pull can race.
+      // Use stored cursor if available; only do full sync if no cursor exists.
+      // This avoids re-fetching all data on every page load.
       const syncMeta = await db.syncMeta.get(wid);
-      const useFullSync = !_firstPullDone;
-      if (useFullSync) _firstPullDone = true;
+      const useFullSync = !syncMeta?.cursor;
+      if (!_firstPullDone) _firstPullDone = true;
 
       const params = new URLSearchParams({ workspaceId: wid });
       if (!useFullSync && syncMeta?.cursor) {
@@ -450,12 +471,16 @@ export async function pushMutations(workspaceId?: string): Promise<number> {
           })),
         };
         syncLog("push", `Sending batch ${i/100 + 1}: ${batch.length} mutations`, batch.map(m => `${m.table}:${m.operation}:${m.id?.slice(0,8)}`));
+        const pushStart = Date.now();
         const res = await authFetch("/api/sync/commit", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
           signal: AbortSignal.timeout(30_000),
         });
+        // Update rolling RTT average for adaptive echo suppression
+        const rtt = Date.now() - pushStart;
+        _measuredRtt = _measuredRtt > 0 ? _measuredRtt * 0.7 + rtt * 0.3 : rtt;
         if (res.ok) {
           const body = await res.json();
           syncLog("push", `Server response:`, body.results.map((r: { status: string; id?: string; error?: string }) => `${r.status}${r.error ? ':'+r.error : ''}`));
@@ -532,8 +557,15 @@ let _lastPushAt = 0; // Timestamp of last successful push (for Realtime echo sup
 
 const FAST_POLL_MS = 3_000;    // 3s after recent mutations
 const SLOW_POLL_MS = 10_000;   // 10s when idle
+const MAX_BACKOFF_MS = 60_000; // max 60s between retries on error
 const FAST_POLL_WINDOW = 120_000; // fast-poll for 2 minutes after last mutation
-const REALTIME_ECHO_COOLDOWN = 3_000; // Ignore realtime events this long after own push
+const REALTIME_ECHO_COOLDOWN = 3_000; // Base echo cooldown — overridden by measured RTT
+let _measuredRtt = 0; // Rolling average of push RTT in ms
+function getEchoCooldown() {
+  // Use 2x measured RTT (clamped to 1.5s–10s) if available, else the fixed constant
+  return _measuredRtt > 0 ? Math.min(Math.max(_measuredRtt * 2, 1500), 10_000) : REALTIME_ECHO_COOLDOWN;
+}
+let _consecutiveErrors = 0;
 
 // ── Realtime channel setup (auth-aware, can be called multiple times) ──
 
@@ -552,7 +584,7 @@ function _setupRealtimeChannel(wid: string | null) {
       pullChanges(wid);
     })
     .on("postgres_changes", { event: "*", schema: "public", table: "expenses", filter: `workspace_id=eq.${wid}` }, () => {
-      if (Date.now() - _lastPushAt < REALTIME_ECHO_COOLDOWN) {
+      if (Date.now() - _lastPushAt < getEchoCooldown()) {
         syncLog("realtime", "postgres_changes on expenses → suppressed (own echo)");
         return;
       }
@@ -560,18 +592,18 @@ function _setupRealtimeChannel(wid: string | null) {
       pullChanges(wid);
     })
     .on("postgres_changes", { event: "*", schema: "public", table: "workspace_settings", filter: `workspace_id=eq.${wid}` }, () => {
-      if (Date.now() - _lastPushAt < REALTIME_ECHO_COOLDOWN) {
+      if (Date.now() - _lastPushAt < getEchoCooldown()) {
         syncLog("realtime", "postgres_changes on workspace_settings → suppressed (own echo)");
         return;
       }
       pullChanges(wid);
     })
     .on("postgres_changes", { event: "*", schema: "public", table: "business_ledgers", filter: `workspace_id=eq.${wid}` }, () => {
-      if (Date.now() - _lastPushAt < REALTIME_ECHO_COOLDOWN) return;
+      if (Date.now() - _lastPushAt < getEchoCooldown()) return;
       pullChanges(wid);
     })
     .on("postgres_changes", { event: "*", schema: "public", table: "business_payments", filter: `workspace_id=eq.${wid}` }, () => {
-      if (Date.now() - _lastPushAt < REALTIME_ECHO_COOLDOWN) return;
+      if (Date.now() - _lastPushAt < getEchoCooldown()) return;
       pullChanges(wid);
     })
     .subscribe((status) => {
@@ -603,12 +635,19 @@ function _broadcastSyncEvent(wid: string) {
 function _schedulePoll() {
   if (_syncTimeout) { clearTimeout(_syncTimeout); _syncTimeout = null; }
   const elapsed = Date.now() - _lastMutationAt;
-  const delay = elapsed < FAST_POLL_WINDOW ? FAST_POLL_MS : SLOW_POLL_MS;
+  let delay = elapsed < FAST_POLL_WINDOW ? FAST_POLL_MS : SLOW_POLL_MS;
+  // Exponential backoff on consecutive errors
+  if (_consecutiveErrors > 0) {
+    delay = Math.min(delay * Math.pow(2, _consecutiveErrors), MAX_BACKOFF_MS);
+  }
   _syncTimeout = setTimeout(async () => {
     try {
       if (document.visibilityState === "visible" && navigator.onLine) {
         await _doSync();
+        _consecutiveErrors = 0;
       }
+    } catch {
+      _consecutiveErrors++;
     } finally {
       // Always reschedule — even if _doSync throws, polling must continue
       _schedulePoll();
@@ -782,6 +821,16 @@ export function startSyncEngine() {
   // will await _initReady before doing real work, so the cursor is always clear.
   _onlineHandler = () => { _doSync(); };
   window.addEventListener("online", _onlineHandler);
+
+  // Listen for Background Sync push requests from the SW
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.addEventListener("message", (event) => {
+      if (event.data?.type === "SYNC_PUSH_REQUESTED") {
+        syncLog("bgSync", "SW requested mutation push after reconnect");
+        _doSync();
+      }
+    });
+  }
 
   _visibilityHandler = () => {
     if (document.visibilityState === "visible") _doSync();

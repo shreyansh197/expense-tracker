@@ -2,6 +2,9 @@ const CACHE_NAME = "expenstream-icons-74b974f1";
 const SHELL_CACHE = "expenstream-shell-v1";
 const FONT_CACHE = "expenstream-fonts-v1";
 
+// Max entries for the general cache to prevent unbounded growth
+const MAX_CACHE_ENTRIES = 200;
+
 const PRECACHE_URLS = [
   "/icons/icon-192.png",
   "/icons/icon-512.png",
@@ -11,14 +14,9 @@ const PRECACHE_URLS = [
   "/manifest.json",
 ];
 
-// Google Font CSS entries to precache on install — triggers font file download
-// next/font/google self-hosts woff2 under /_next/static/media/ (covered by static handler)
-// These external endpoints are kept as insurance for legacy offline scenarios
-const FONT_PRECACHE_URLS = [
-  "https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,700;1,400;1,500;1,700&display=swap",
-  "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap",
-  "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap",
-];
+// Google Font CSS entries are no longer precached on install.
+// next/font/google self-hosts woff2 under /_next/static/media/ (covered by static handler).
+// The font cache handler below still caches any runtime font requests.
 
 // App shell: HTML entry point for offline navigation
 const SHELL_URLS = ["/"];
@@ -28,16 +26,6 @@ self.addEventListener("install", (event) => {
     Promise.all([
       caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE_URLS)),
       caches.open(SHELL_CACHE).then((cache) => cache.addAll(SHELL_URLS)),
-      // Precache font CSS so terrain fonts are available offline from first launch
-      caches.open(FONT_CACHE).then((cache) =>
-        Promise.allSettled(
-          FONT_PRECACHE_URLS.map((url) =>
-            fetch(url, { mode: "cors" }).then((res) => {
-              if (res.ok) return cache.put(url, res);
-            }),
-          ),
-        ),
-      ),
     ]),
   );
   self.skipWaiting();
@@ -151,11 +139,29 @@ self.addEventListener("fetch", (event) => {
           request.url.startsWith(self.location.origin)
         ) {
           const clone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(request, clone);
+            // Evict oldest entries if cache exceeds max size
+            cache.keys().then((keys) => {
+              if (keys.length > MAX_CACHE_ENTRIES) {
+                cache.delete(keys[0]);
+              }
+            });
+          });
         }
         return response;
       })
-      .catch(() => caches.match(request)),
+      .catch(() =>
+        caches.open(CACHE_NAME).then((cache) =>
+          cache.match(request).then((cached) => {
+            if (cached) {
+              // LRU: re-put to move to end of key order
+              cache.put(request, cached.clone());
+            }
+            return cached;
+          }),
+        ),
+      ),
   );
 });
 
@@ -212,5 +218,23 @@ self.addEventListener("notificationclick", (event) => {
 self.addEventListener("message", (event) => {
   if (event.data && event.data.type === "SKIP_WAITING") {
     self.skipWaiting();
+  }
+});
+
+// ─── Background Sync ───────────────────────────────────────────────────────
+// When the browser regains connectivity, it fires a 'sync' event for any
+// registered tags. The app registers "mutation-push" when enqueuing offline
+// mutations. We notify the client to trigger its sync engine push.
+self.addEventListener("sync", (event) => {
+  if (event.tag === "mutation-push") {
+    event.waitUntil(
+      self.clients
+        .matchAll({ type: "window", includeUncontrolled: true })
+        .then((clients) => {
+          for (const client of clients) {
+            client.postMessage({ type: "SYNC_PUSH_REQUESTED" });
+          }
+        }),
+    );
   }
 });

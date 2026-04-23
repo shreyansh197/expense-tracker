@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/server/prisma";
-import { requireAuth, requireWorkspaceMember, jsonError } from "@/lib/server/guards";
+import { requireAuth, requireWorkspaceMember, jsonError , getClientIp} from "@/lib/server/guards";
 import { ensureSyncColumns } from "@/lib/server/ensureSyncColumns";
+import { rateLimit } from "@/lib/server/rateLimit";
+import { hashIp } from "@/lib/server/tokens";
 
 /**
  * GET /api/sync/changes?workspaceId=...&since=ISO8601
@@ -14,6 +16,15 @@ export async function GET(req: NextRequest) {
   try {
     const auth = await requireAuth(req);
     if (!auth) return jsonError("Unauthorized", 401);
+
+    const ip = getClientIp(req);
+    const rl = rateLimit(`sync-changes:${hashIp(ip)}:${auth.userId}`, 120, 60_000);
+    if (!rl.ok) {
+      return NextResponse.json(
+        { error: "Too many requests. Try again later." },
+        { status: 429, headers: { "Retry-After": String(rl.retryAfter) } },
+      );
+    }
 
     const url = req.nextUrl;
     const workspaceId = url.searchParams.get("workspaceId") ?? auth.workspaceId;

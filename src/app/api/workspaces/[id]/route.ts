@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/server/prisma";
-import { requireAuth, requireWorkspaceMember, requireWorkspaceAdmin, jsonError } from "@/lib/server/guards";
+import { requireAuth, requireWorkspaceMember, requireWorkspaceAdmin, jsonError , getClientIp} from "@/lib/server/guards";
 import { audit } from "@/lib/server/audit";
 import { hashIp } from "@/lib/server/tokens";
 import { createWorkspaceSchema } from "@/lib/validators";
@@ -82,7 +82,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     action: "workspace.update",
     meta: { name },
     ipHash: hashIp(
-      req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown",
+      getClientIp(req),
     ),
   });
 

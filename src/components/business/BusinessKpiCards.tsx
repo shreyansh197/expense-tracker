@@ -40,6 +40,7 @@ export function BusinessKpiCards({
       label: "Collection %",
       value: `${collectionPercent.toFixed(0)}%`,
       icon: CheckCircle2,
+      hint: collectionPercent >= 80 ? "On track" : collectionPercent >= 50 ? "In progress" : "Needs attention",
       color: collectionPercent >= 80
         ? "text-[var(--biz-accent-text)]"
         : collectionPercent >= 50
@@ -63,6 +64,7 @@ export function BusinessKpiCards({
           label: "Overdue",
           value: overdueCount.toString(),
           icon: AlertTriangle,
+          hint: "Action required",
           color: "text-[var(--danger-text)]",
           bg: "bg-[var(--danger-soft)]",
         }]
@@ -76,7 +78,8 @@ export function BusinessKpiCards({
         return (
           <div
             key={card.label}
-            className="card-sm p-3.5"
+            className="rounded-xl border p-3.5"
+            style={{ background: "var(--surface)", borderColor: "var(--border-card)" }}
           >
             <div className="flex items-center gap-2">
               <div className={cn("flex h-7 w-7 items-center justify-center rounded-lg", card.bg)}>
@@ -89,6 +92,9 @@ export function BusinessKpiCards({
             <p className={cn("mt-2 text-amount text-lg font-bold", card.color)}>
               {card.value}
             </p>
+            {card.hint && (
+              <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>{card.hint}</p>
+            )}
           </div>
         );
       })}

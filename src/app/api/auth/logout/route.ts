@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/server/prisma";
-import { requireAuth, jsonError } from "@/lib/server/guards";
+import { requireAuth, jsonError , getClientIp} from "@/lib/server/guards";
 import { audit } from "@/lib/server/audit";
 import { hashIp } from "@/lib/server/tokens";
 import { clearRefreshTokenCookie } from "@/lib/server/cookies";
@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
     entityId: auth.sessionId,
     action: "user.logout",
     ipHash: hashIp(
-      req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown",
+      getClientIp(req),
     ),
   });
 

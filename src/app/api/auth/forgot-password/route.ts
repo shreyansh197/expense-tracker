@@ -4,9 +4,10 @@ import { signPasswordResetToken, hashIp } from "@/lib/server/tokens";
 import { sendPasswordResetEmail } from "@/lib/server/email";
 import { forgotPasswordSchema } from "@/lib/validators";
 import { rateLimit } from "@/lib/server/rateLimit";
+import { getClientIp } from "@/lib/server/guards";
 
 export async function POST(req: NextRequest) {
-  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+  const ip = getClientIp(req);
   const rl = rateLimit(`forgot-pw:${hashIp(ip)}`, 3, 60_000);
   if (!rl.ok) {
     return NextResponse.json(

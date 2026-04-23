@@ -9,7 +9,7 @@ import { SUPPORTED_CURRENCIES, getMonthName } from "@/lib/utils";
 import {
   Wallet, LinkIcon, Tag, Repeat, TrendingUp, Target, Palette,
   Download, Zap, Sun, Moon, Monitor, Smartphone, Briefcase,
-  Shield, Users, Database, Globe, RefreshCw, ChevronLeft, ChevronRight,
+  Shield, Users, Database, Globe, ChevronLeft, ChevronRight,
   Search, Bell,
 } from "lucide-react";
 import { InstallButton } from "@/components/pwa/InstallButton";
@@ -18,6 +18,7 @@ import { useToast } from "@/components/ui/Toast";
 
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { SettingsAccordion, AccordionSection } from "@/components/settings/SettingsAccordion";
+import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import { AccountCard } from "@/components/settings/AccountCard";
 import { SecurityCard } from "@/components/settings/SecurityCard";
 import { WorkspaceMembersCard } from "@/components/settings/WorkspaceMembersCard";
@@ -30,220 +31,12 @@ const DataAccountManagement = lazy(() => import("@/components/settings/DataAccou
 import { SettingsFooterLogout } from "@/components/settings/SettingsFooterLogout";
 import { NotificationSettings } from "@/components/settings/NotificationSettings";
 import { subscribeToPush, unsubscribeFromPush } from "@/lib/pushSubscription";
-import { usePinLock } from "@/hooks/usePinLock";
 import { PageTransition } from "@/components/ui/PageTransition";
-import { fetchRates, getRateInfo, clearRateCache } from "@/lib/exchangeRates";
+import { RateSourceInfo } from "@/components/settings/RateSourceInfo";
+import { PinLockSettings } from "@/components/settings/PinLockSettings";
 
 function LazyFallback() {
   return <div className="flex items-center justify-center py-12"><div className="h-6 w-6 animate-spin rounded-full border-2 border-current border-t-transparent" style={{ color: 'var(--text-muted)' }} /></div>;
-}
-
-/** Shows live rate source, sample conversions, and a refresh button */
-function RateSourceInfo({ baseCurrency }: { baseCurrency: string }) {
-  const [info, setInfo] = useState<{ source: string; fetchedAt: Date; base: string } | null>(() => getRateInfo());
-  const [sampleRates, setSampleRates] = useState<Record<string, number> | null>(null);
-  const [refreshing, setRefreshing] = useState(false);
-
-  const loadInfo = () => {
-    const cached = getRateInfo();
-    setInfo(cached);
-  };
-
-  useEffect(() => {
-    let cancelled = false;
-    fetchRates(baseCurrency).then((rates) => {
-      if (cancelled) return;
-      setSampleRates(rates);
-      setInfo(getRateInfo());
-    });
-    return () => { cancelled = true; };
-  }, [baseCurrency]);
-
-  const handleRefresh = async () => {
-    setRefreshing(true);
-    await clearRateCache();
-    const rates = await fetchRates(baseCurrency);
-    setSampleRates(rates);
-    loadInfo();
-    setRefreshing(false);
-  };
-
-  const sourceLabel: Record<string, string> = {
-    frankfurter: "European Central Bank (frankfurter.dev)",
-    fawazahmed: "Open Source Rates (fawazahmed0)",
-    fallback: "Offline fallback rates",
-  };
-
-  const otherCurrencies = ["INR", "USD", "EUR", "GBP"].filter(c => c !== baseCurrency);
-
-  return (
-    <div className="rounded-lg p-3 space-y-2" style={{ background: "var(--surface-secondary)" }}>
-      <div className="flex items-center justify-between">
-        <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--text-tertiary)" }}>
-          Exchange Rates
-        </p>
-        <button
-          onClick={handleRefresh}
-          disabled={refreshing}
-          className="flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-medium transition-colors"
-          style={{ color: "var(--brand)", background: "var(--accent-soft)" }}
-        >
-          <RefreshCw size={10} className={refreshing ? "animate-spin" : ""} />
-          {refreshing ? "Fetching..." : "Refresh"}
-        </button>
-      </div>
-      {info && (
-        <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-          Source: {sourceLabel[info.source] ?? info.source} · Updated {info.fetchedAt.toLocaleTimeString()}
-        </p>
-      )}
-      {sampleRates && (
-        <div className="flex flex-wrap gap-x-4 gap-y-1">
-          {otherCurrencies.map(c => {
-            const rate = sampleRates[c];
-            if (!rate) return null;
-            return (
-              <span key={c} className="text-xs text-amount font-medium" style={{ color: "var(--text-secondary)" }}>
-                1 {baseCurrency} = {rate < 1 ? rate.toFixed(4) : rate.toFixed(2)} {c}
-              </span>
-            );
-          })}
-        </div>
-      )}
-    </div>
-  );
-}
-
-/** PIN Lock settings UI — embedded in Security section */
-function PinLockSettings() {
-  const { isEnabled, timeout, setupPin, disablePin, updateTimeout } = usePinLock();
-  const [newPin, setNewPin] = useState("");
-  const [confirmPin, setConfirmPin] = useState("");
-  const [step, setStep] = useState<"idle" | "setup" | "confirm">("idle");
-  const { toast } = useToast();
-
-  const handleSetup = () => {
-    if (step === "idle") {
-      setStep("setup");
-      return;
-    }
-    if (step === "setup") {
-      if (newPin.length !== 4 || !/^\d{4}$/.test(newPin)) {
-        toast("PIN must be exactly 4 digits");
-        return;
-      }
-      setStep("confirm");
-      return;
-    }
-    if (step === "confirm") {
-      if (confirmPin !== newPin) {
-        toast("PINs don't match. Try again.");
-        setConfirmPin("");
-        setStep("setup");
-        return;
-      }
-      setupPin(newPin, timeout);
-      setNewPin("");
-      setConfirmPin("");
-      setStep("idle");
-      toast("PIN lock enabled");
-    }
-  };
-
-  const handleDisable = () => {
-    disablePin();
-    toast("PIN lock disabled");
-  };
-
-  return (
-    <div className="mt-4 pt-4" style={{ borderTop: "1px solid var(--border-subtle)" }}>
-      <div className="flex items-center justify-between mb-3">
-        <div>
-          <h4 className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
-            App PIN Lock
-          </h4>
-          <p className="text-xs mt-0.5" style={{ color: "var(--text-secondary)" }}>
-            Require a PIN to access the app after inactivity
-          </p>
-        </div>
-        {isEnabled && (
-          <button
-            onClick={handleDisable}
-            className="rounded-lg px-3 py-1.5 text-xs font-medium text-err hover:bg-err-soft"
-          >
-            Disable
-          </button>
-        )}
-      </div>
-
-      {isEnabled ? (
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <label className="text-xs font-medium" style={{ color: "var(--text-secondary)" }}>
-              Lock after
-            </label>
-            <select
-              value={timeout}
-              onChange={(e) => updateTimeout(Number(e.target.value) as 5 | 15 | 30)}
-              className="rounded-lg border px-2 py-1 text-xs font-medium"
-              style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--text-primary)" }}
-            >
-              <option value={5}>5 minutes</option>
-              <option value={15}>15 minutes</option>
-              <option value={30}>30 minutes</option>
-            </select>
-            <span className="text-xs" style={{ color: "var(--text-tertiary)" }}>of inactivity</span>
-          </div>
-          <p className="text-xs rounded-lg p-2" style={{ background: "var(--surface-secondary)", color: "var(--text-secondary)" }}>
-            PIN lock is active. The app will ask for your PIN after {timeout} minutes of inactivity.
-          </p>
-        </div>
-      ) : (
-        <div className="space-y-3">
-          {step !== "idle" && (
-            <div className="space-y-2">
-              <input
-                type="password"
-                inputMode="numeric"
-                pattern="[0-9]*"
-                maxLength={4}
-                placeholder={step === "setup" ? "Enter 4-digit PIN" : "Confirm PIN"}
-                value={step === "setup" ? newPin : confirmPin}
-                onChange={(e) => {
-                  const v = e.target.value.replace(/\D/g, "").slice(0, 4);
-                  if (step === "setup") setNewPin(v);
-                  else setConfirmPin(v);
-                }}
-                autoFocus
-                className="w-full rounded-xl border py-2.5 px-3 text-center text-lg tracking-[0.5em] font-mono focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/30"
-                style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--text-primary)" }}
-              />
-              <p className="text-xs text-center" style={{ color: "var(--text-tertiary)" }}>
-                {step === "setup" ? "Choose a 4-digit PIN" : "Re-enter your PIN to confirm"}
-              </p>
-            </div>
-          )}
-          <div className="flex gap-2">
-            <button
-              onClick={handleSetup}
-              className="btn-primary btn-md"
-            >
-              {step === "idle" ? "Set Up PIN" : step === "setup" ? "Next" : "Confirm"}
-            </button>
-            {step !== "idle" && (
-              <button
-                onClick={() => { setStep("idle"); setNewPin(""); setConfirmPin(""); }}
-                className="rounded-xl px-4 py-2 text-sm"
-                style={{ color: "var(--text-secondary)" }}
-              >
-                Cancel
-              </button>
-            )}
-          </div>
-        </div>
-      )}
-    </div>
-  );
 }
 
 export default function SettingsPage() {
@@ -500,6 +293,12 @@ export default function SettingsPage() {
 
         <SettingsAccordion>
 
+          {visibleSections && visibleSections.size === 0 && (
+            <p className="text-center py-12 text-sm" style={{ color: "var(--text-muted)" }}>
+              No settings match &ldquo;{searchQuery}&rdquo;
+            </p>
+          )}
+
           {/* ━━━ YOUR ACCOUNT — indigo zone ━━━ */}
           <div id="zone-account" role="tabpanel" aria-labelledby="tab-zone-account" className={`space-y-3 scroll-mt-16 ${activeZone !== 'zone-account' ? 'lg:hidden' : ''} ${!isZoneVisible('zone-account') ? 'hidden' : ''}`}>
           <h3 className="text-xs font-bold uppercase tracking-wider pb-1 px-1" style={{ color: 'var(--text-tertiary)' }}>
@@ -669,7 +468,7 @@ export default function SettingsPage() {
             iconColor="bg-[var(--warning-soft)] text-[var(--warning-text)]"
             className={!isSectionVisible('categories') ? 'hidden' : ''}
           >
-            <Suspense fallback={<LazyFallback />}><CategoryManager /></Suspense>
+            <ErrorBoundary><Suspense fallback={<LazyFallback />}><CategoryManager /></Suspense></ErrorBoundary>
           </AccordionSection>
 
           {/* ─── Recurring Expenses ─── */}
@@ -686,7 +485,7 @@ export default function SettingsPage() {
             iconColor="bg-[var(--info-soft)] text-[var(--info-text)]"
             className={!isSectionVisible('recurring') ? 'hidden' : ''}
           >
-            <Suspense fallback={<LazyFallback />}><RecurringManager /></Suspense>
+            <ErrorBoundary><Suspense fallback={<LazyFallback />}><RecurringManager /></Suspense></ErrorBoundary>
           </AccordionSection>
 
           {/* ─── Savings Goals ─── */}
@@ -698,7 +497,7 @@ export default function SettingsPage() {
             badge={goalsCount > 0 ? goalsCount : undefined}
             iconColor="bg-[var(--goal-achieved-bg)] text-[var(--goal-achieved-text)]"
           >
-            <Suspense fallback={<LazyFallback />}><GoalsManager /></Suspense>
+            <ErrorBoundary><Suspense fallback={<LazyFallback />}><GoalsManager /></Suspense></ErrorBoundary>
           </AccordionSection>
 
           {/* ─── Budget Rollover ─── */}
@@ -713,6 +512,7 @@ export default function SettingsPage() {
               <button
                 role="switch"
                 aria-checked={settings.rolloverEnabled ?? false}
+                aria-label="Budget rollover"
                 onClick={() => updateSettings({ rolloverEnabled: !settings.rolloverEnabled })}
                 className={`relative h-6 w-11 rounded-full transition-colors ${
                   settings.rolloverEnabled ? "bg-brand" : "bg-[var(--border-strong)]"
@@ -769,7 +569,7 @@ export default function SettingsPage() {
             iconColor="bg-[var(--warning-soft)] text-[var(--warning-text)]"
             className={!isSectionVisible('rules') ? 'hidden' : ''}
           >
-            <Suspense fallback={<LazyFallback />}><AutoRulesManager /></Suspense>
+            <ErrorBoundary><Suspense fallback={<LazyFallback />}><AutoRulesManager /></Suspense></ErrorBoundary>
           </AccordionSection>
 
           {/* ─── Export & Import ─── */}
@@ -781,7 +581,7 @@ export default function SettingsPage() {
             iconColor="bg-[var(--info-soft)] text-[var(--info-text)]"
             className={!isSectionVisible('export-import') ? 'hidden' : ''}
           >
-            <Suspense fallback={<LazyFallback />}><ExportImportWizard /></Suspense>
+            <ErrorBoundary><Suspense fallback={<LazyFallback />}><ExportImportWizard /></Suspense></ErrorBoundary>
           </AccordionSection>
 
           {/* ─── Workspace Removal ─── */}
@@ -794,7 +594,7 @@ export default function SettingsPage() {
             iconColor="bg-[var(--danger-soft)] text-[var(--danger-text)]"
             className={!isSectionVisible('data-management') ? 'hidden' : ''}
           >
-            <Suspense fallback={<LazyFallback />}><DataAccountManagement /></Suspense>
+            <ErrorBoundary><Suspense fallback={<LazyFallback />}><DataAccountManagement /></Suspense></ErrorBoundary>
           </AccordionSection>
           </div>
           </div>
@@ -816,6 +616,7 @@ export default function SettingsPage() {
               <button
                 role="switch"
                 aria-checked={settings.businessMode ?? false}
+                aria-label="Business mode"
                 onClick={() => updateSettings({ businessMode: !settings.businessMode })}
                 className={`relative h-6 w-11 rounded-full transition-colors ${
                   settings.businessMode ? "bg-biz" : "bg-[var(--border-strong)]"
@@ -857,6 +658,7 @@ export default function SettingsPage() {
               <button
                 role="switch"
                 aria-checked={settings.multiCurrencyEnabled ?? false}
+                aria-label="Multi-currency mode"
                 onClick={() => updateSettings({ multiCurrencyEnabled: !settings.multiCurrencyEnabled })}
                 className={`relative h-6 w-11 rounded-full transition-colors ${
                   settings.multiCurrencyEnabled ? "bg-brand" : "bg-[var(--border-strong)]"
@@ -899,6 +701,7 @@ export default function SettingsPage() {
               <button
                 role="switch"
                 aria-checked={settings.notificationPrefs?.enabled ?? false}
+                aria-label="Enable notifications"
                 onClick={async () => {
                   const enabled = !settings.notificationPrefs?.enabled;
                   if (enabled) {
