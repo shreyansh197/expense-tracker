@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { setAuthState } from "@/lib/authClient";
+import { switchSettingsUser } from "@/hooks/useSettings";
 
 /**
  * /auth/complete
@@ -34,6 +35,9 @@ export default function AuthCompletePage() {
           workspaces: data.workspaces,
           activeWorkspaceId: data.activeWorkspaceId,
         });
+        if (data.user?.id) {
+          switchSettingsUser(data.user.id);
+        }
         router.replace("/");
       } catch {
         router.replace("/?error=oauth_exchange");

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { useCurrency } from "@/hooks/useCurrency";
 import {
@@ -241,8 +242,36 @@ export function AuthModal({
   const [showPassword, setShowPassword] = useState(false);
   const [forgotSent, setForgotSent] = useState(false);
   const { symbol } = useCurrency();
+  const searchParams = useSearchParams();
 
   const { login, loginWith2FA, register } = useAuth();
+
+  // Surface OAuth error from URL params (e.g. /?error=oauth_state_mismatch)
+  useEffect(() => {
+    const oauthError = searchParams.get("error");
+    const detail = searchParams.get("detail");
+    if (!oauthError) return;
+    const messages: Record<string, string> = {
+      google_not_configured: "Google sign-in is not configured. Please contact support.",
+      google_denied: "Google sign-in was cancelled.",
+      oauth_state_mismatch: "Security check failed. Please try signing in again.",
+      oauth_no_code: "Google did not return an authorization code. Please try again.",
+      oauth_token_exchange: "Could not complete Google sign-in. Please try again.",
+      oauth_user_info: "Could not retrieve your Google profile. Please try again.",
+      oauth_internal: detail
+        ? `Sign-in error: ${detail}. Please try again or contact support.`
+        : "An internal error occurred during sign-in. Please try again.",
+      oauth_exchange: "Could not finalize sign-in. Please try again.",
+    };
+    setError(messages[oauthError] ?? `Sign-in error (${oauthError}). Please try again.`);
+    // Clean the error from the URL without triggering a navigation
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      url.searchParams.delete("error");
+      url.searchParams.delete("detail");
+      window.history.replaceState({}, "", url.pathname + url.search);
+    }
+  }, [searchParams]);
 
   const handleRegister = async () => {
     if (!email || !password) {
@@ -559,6 +588,13 @@ export function AuthModal({
             Your finances, beautifully organized.
           </p>
         </div>
+
+        {error && (
+          <div className="mt-4 flex items-start gap-2.5 rounded-xl p-3.5 text-sm border" style={{ background: 'var(--danger-soft)', color: 'var(--danger-text)', borderColor: 'var(--danger-border)' }}>
+            <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
+            {error}
+          </div>
+        )}
 
         <div className="mt-7 space-y-3">
           {/* Create Account — primary CTA (top) */}
