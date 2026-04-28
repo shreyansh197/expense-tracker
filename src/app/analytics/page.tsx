@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useMemo, useState, useCallback, useRef } from "react";
+import { Suspense, useMemo, useState, useCallback } from "react";
 import dynamic from "next/dynamic";
 import { AppShell } from "@/components/layout/AppShell";
 import { MonthSwitcher } from "@/components/layout/MonthSwitcher";
@@ -73,10 +73,9 @@ function AnalyticsContent() {
   }, [history.topCategoriesAllTime]);
 
   // Share analytics summary as branded image (matches dashboard postcard style)
-  const shareCanvasRef = useRef<HTMLCanvasElement>(null);
-
   const handleShareAnalytics = useCallback(async () => {
-    const canvas = shareCanvasRef.current ?? document.createElement("canvas");
+   try {
+    const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
@@ -279,28 +278,37 @@ function AnalyticsContent() {
     const blob = await new Promise<Blob | null>((r) => canvas.toBlob(r, "image/png"));
     if (!blob) return;
 
-    const file = new File(
-      [blob],
-      `expenstream-analytics-${monthLabel.toLowerCase()}-${currentYear}.png`,
-      { type: "image/png" },
-    );
+    const fileName = `expenstream-analytics-${monthLabel.toLowerCase()}-${currentYear}.png`;
+    const file = new File([blob], fileName, { type: "image/png" });
 
-    if (typeof navigator !== "undefined" && navigator.share && navigator.canShare?.({ files: [file] })) {
+    if (typeof navigator !== "undefined" && navigator.share) {
       try {
-        await navigator.share({
-          title: `Analytics · ${monthLabel} ${currentYear} — ExpenStream`,
-          files: [file],
-        });
-        return;
-      } catch { /* user cancelled */ }
+        if (navigator.canShare?.({ files: [file] })) {
+          await navigator.share({
+            title: `Analytics · ${monthLabel} ${currentYear} — ExpenStream`,
+            files: [file],
+          });
+          return;
+        }
+      } catch { /* user cancelled or not supported */ }
     }
 
-    // Fallback: download
-    const url = canvas.toDataURL("image/png");
+    // Fallback: download via blob URL (more reliable on mobile PWAs than data URL)
+    const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `expenstream-analytics-${monthLabel.toLowerCase()}-${currentYear}.png`;
+    a.download = fileName;
+    a.style.display = "none";
+    document.body.appendChild(a);
     a.click();
+    // Clean up after a brief delay to ensure download starts
+    setTimeout(() => {
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }, 200);
+   } catch (err) {
+    console.error("[analytics:share]", err);
+   }
   }, [history, currentMonth, currentYear, formatCurrency, formatCurrencyCompact, effectiveBudget, topCats, catMap]);
 
   // Cumulative daily spend for burn chart
@@ -349,8 +357,6 @@ function AnalyticsContent() {
 
   return (
       <PageTransition className="relative mx-auto min-h-[80vh] max-w-4xl xl:max-w-6xl space-y-5 p-4 sm:p-6 lg:p-8">
-        {/* Hidden canvas for share image rendering */}
-        <canvas ref={shareCanvasRef} style={{ display: "none" }} />
         {/* ─── Overlook Header ─── */}
         <div className="flex items-center justify-between gap-3">
           <h1 className="font-display italic text-2xl" style={{ color: 'var(--text-primary)' }}>Analytics</h1>

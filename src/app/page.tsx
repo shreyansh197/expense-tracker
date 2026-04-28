@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect, Suspense, useMemo, useSyncExternalStore } from "react";
@@ -96,6 +96,15 @@ function DashboardContent() {
   const { expenses, loading } = useExpenses(currentMonth, currentYear);
   const { settings, updateSettings } = useSettings();
   const { user } = useAuth();
+
+  // Guard against hydration mismatch: during SSR, workspaceId is null so
+  // loading=false and expenses=[], which renders the empty state. On the
+  // client the real wid loads immediately, but AnimatePresence can stall
+  // during the rapid key transitions. By gating on `mounted` we show the
+  // skeleton on both server and client until data is ready.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+  const heroLoading = !mounted || loading;
 
   useEffect(() => {
     if (!searchParams.get("m") && !searchParams.get("y")) {
@@ -383,19 +392,15 @@ function DashboardContent() {
           2. HERO ZONE â€” total spent + spending stream
           â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
       <ErrorBoundary fallback={<SectionFallback />}>
-        <AnimatePresence mode="popLayout">
-          {loading ? (
-            <m.div key="hero-skeleton" initial={{ opacity: 0.6 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+        {heroLoading ? (
+            <div>
               <SkeletonKpiCards />
-            </m.div>
+            </div>
           ) : expenses.length === 0 ? (
-            /* Empty state â€” the clearing awaits */
             <m.div
-              key="hero-empty"
               className="card-terrain flex flex-col items-center p-8 text-center"
               initial={{ opacity: 0, scale: 0.97 }}
               animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.97 }}
               transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
             >
               <ClearingScene className="mx-auto mb-4 w-48 sm:w-56" />
@@ -417,14 +422,11 @@ function DashboardContent() {
             </m.div>
           ) : (
             <m.div
-              key="hero-content"
               className="card-terrain relative overflow-hidden p-5 sm:p-6"
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 8 }}
               transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
             >
-              {/* Greeting */}
               {user?.name && (
                 <p className="mb-1 text-xs font-medium tracking-wide" style={{ color: "var(--text-muted)" }}>
                   {(() => {
@@ -438,7 +440,6 @@ function DashboardContent() {
                 </p>
               )}
 
-              {/* Hero amount */}
               <m.p
                 layoutId="monthly-total"
                 className="font-display text-hero-amount leading-none"
@@ -458,7 +459,6 @@ function DashboardContent() {
                 )}
               </p>
 
-              {/* Budget progress bar */}
               {effectiveBudget > 0 && (
                 <div className="mt-3">
                   <div className="relative h-1.5 w-full rounded-full overflow-hidden" style={{ background: "var(--border)" }} role="progressbar" aria-valuenow={Math.min(Math.round(budgetUsedPercent), 100)} aria-valuemin={0} aria-valuemax={100} aria-label="Budget used">
@@ -471,7 +471,6 @@ function DashboardContent() {
                       animate={{ width: `${Math.min(budgetUsedPercent, 100)}%` }}
                       transition={{ delay: 0.2, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
                     />
-                    {/* 75% milestone marker */}
                     <div className="absolute top-0 bottom-0 w-px" style={{ left: "75%", background: "var(--text-muted)", opacity: 0.4 }} />
                   </div>
                   <div className="mt-1 flex justify-between text-xs" style={{ color: "var(--text-muted)" }}>
@@ -489,7 +488,6 @@ function DashboardContent() {
                 </div>
               )}
 
-              {/* Quiet day acknowledgment + quick repeat */}
               {todayTotal === 0 && (
                 <div className="mt-1.5 flex items-center gap-3">
                   <p className="flex items-center gap-1.5 text-xs" style={{ color: "var(--text-muted)" }}>
@@ -512,7 +510,6 @@ function DashboardContent() {
                 </div>
               )}
 
-              {/* Spending Stream */}
               <div className="mt-3">
                 <SpendingStream
                   budgetUsedPercent={budgetUsedPercent}
@@ -526,7 +523,6 @@ function DashboardContent() {
               </div>
             </m.div>
           )}
-        </AnimatePresence>
       </ErrorBoundary>
 
       {/* 2b. MONTH START ANCHOR — new month context card */}
