@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState, useEffect, Suspense, useMemo } from "react";
+import { useState, useEffect, Suspense, useMemo, useSyncExternalStore } from "react";
 import dynamic from "next/dynamic";
 import { m, AnimatePresence } from "framer-motion";
 import { AppShell } from "@/components/layout/AppShell";
@@ -38,7 +38,7 @@ import { useCurrency } from "@/hooks/useCurrency";
 import { getSpendingStreak } from "@/lib/calculations";
 import { useDexieQuery } from "@/hooks/useDexieQuery";
 import { db } from "@/lib/db";
-import { getActiveWorkspaceId } from "@/lib/authClient";
+import { getActiveWorkspaceId, subscribeAuth } from "@/lib/authClient";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useToast } from "@/components/ui/Toast";
 import { cn } from "@/lib/utils";
@@ -97,15 +97,6 @@ function DashboardContent() {
   const { settings, updateSettings } = useSettings();
   const { user } = useAuth();
 
-  // Prevent SSR/hydration mismatch in hero zone: on SSR wid is null so
-  // loading=false and the empty-state renders, but on the client wid is real
-  // so loading=true and the skeleton renders.  AnimatePresence mode="wait"
-  // can get stuck in that transition.  By keeping heroLoading true until
-  // after mount we guarantee both server and client render the same skeleton
-  // branch on the first pass.
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => { setMounted(true); }, []);
-
   useEffect(() => {
     if (!searchParams.get("m") && !searchParams.get("y")) {
       const now = new Date();
@@ -148,14 +139,14 @@ function DashboardContent() {
     [settings.customCategories, settings.hiddenDefaults],
   );
 
-  // Spending streak
+  // Spending streak — wid must be reactive so the liveQuery re-fires when auth loads
+  const streakWid = useSyncExternalStore(subscribeAuth, getActiveWorkspaceId, () => null);
   const allExpenses = useDexieQuery(
     () => {
-      const wid = getActiveWorkspaceId();
-      if (!wid) return [] as { year: number; month: number; day: number; deletedAt: number | null }[];
-      return db.expenses.where("workspaceId").equals(wid).toArray();
+      if (!streakWid) return [] as { year: number; month: number; day: number; deletedAt: number | null }[];
+      return db.expenses.where("workspaceId").equals(streakWid).toArray();
     },
-    [],
+    [streakWid],
     [] as { year: number; month: number; day: number; deletedAt: number | null }[],
   );
   const streak = useMemo(() => getSpendingStreak(allExpenses as Expense[]), [allExpenses]);
@@ -392,8 +383,8 @@ function DashboardContent() {
           2. HERO ZONE â€” total spent + spending stream
           â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
       <ErrorBoundary fallback={<SectionFallback />}>
-        <AnimatePresence mode="wait">
-          {(!mounted || loading) ? (
+        <AnimatePresence mode="popLayout">
+          {loading ? (
             <m.div key="hero-skeleton" initial={{ opacity: 0.6 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
               <SkeletonKpiCards />
             </m.div>

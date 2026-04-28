@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback } from "react";
-import { getActiveWorkspaceId } from "@/lib/authClient";
+import { useCallback, useSyncExternalStore } from "react";
+import { getActiveWorkspaceId, subscribeAuth } from "@/lib/authClient";
 import { db } from "@/lib/db";
 import {
   makeIdempotencyKey,
@@ -21,7 +21,9 @@ function invalidateCalcCache(wid: string, month: number, year: number) {
 const EMPTY: Expense[] = [];
 
 export function useExpenses(month: number, year: number) {
-  const wid = getActiveWorkspaceId();
+  // Reactively subscribe to auth state so the hook re-runs when workspaceId
+  // becomes available (e.g. after SSR hydration or delayed auth init).
+  const wid = useSyncExternalStore(subscribeAuth, getActiveWorkspaceId, () => null);
 
   const queryResult = useDexieQuery(
     async () => {

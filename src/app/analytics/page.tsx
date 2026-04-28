@@ -181,8 +181,7 @@ function AnalyticsContent() {
       // Bar
       ctx.fillStyle = isCurrent ? "#2D6B5A" : "#7A7F96";
       ctx.globalAlpha = isCurrent ? 0.9 : 0.3;
-      ctx.beginPath();
-      ctx.roundRect(180, y - 12, barW, 22, 6);
+      roundRect(ctx, 180, y - 12, barW, 22, 6);
       ctx.fill();
       ctx.globalAlpha = 1;
 
@@ -240,8 +239,7 @@ function AnalyticsContent() {
       // Card background
       ctx.fillStyle = "#EDEBE6";
       ctx.globalAlpha = 0.6;
-      ctx.beginPath();
-      ctx.roundRect(cx, cy, cellW, cellH - 10, 12);
+      roundRect(ctx, cx, cy, cellW, cellH - 10, 12);
       ctx.fill();
       ctx.globalAlpha = 1;
 
@@ -803,4 +801,26 @@ function AnalyticsContent() {
         )}
       </PageTransition>
   );
+}
+
+/* ── Canvas helper (polyfill for roundRect which isn't in all browsers) ── */
+function roundRect(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  r: number,
+) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
 }
