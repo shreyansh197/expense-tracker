@@ -97,6 +97,15 @@ function DashboardContent() {
   const { settings, updateSettings } = useSettings();
   const { user } = useAuth();
 
+  // Prevent SSR/hydration mismatch in hero zone: on SSR wid is null so
+  // loading=false and the empty-state renders, but on the client wid is real
+  // so loading=true and the skeleton renders.  AnimatePresence mode="wait"
+  // can get stuck in that transition.  By keeping heroLoading true until
+  // after mount we guarantee both server and client render the same skeleton
+  // branch on the first pass.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+
   useEffect(() => {
     if (!searchParams.get("m") && !searchParams.get("y")) {
       const now = new Date();
@@ -384,7 +393,7 @@ function DashboardContent() {
           â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
       <ErrorBoundary fallback={<SectionFallback />}>
         <AnimatePresence mode="wait">
-          {loading ? (
+          {(!mounted || loading) ? (
             <m.div key="hero-skeleton" initial={{ opacity: 0.6 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
               <SkeletonKpiCards />
             </m.div>
@@ -395,6 +404,7 @@ function DashboardContent() {
               className="card-terrain flex flex-col items-center p-8 text-center"
               initial={{ opacity: 0, scale: 0.97 }}
               animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.97 }}
               transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
             >
               <ClearingScene className="mx-auto mb-4 w-48 sm:w-56" />
@@ -420,6 +430,7 @@ function DashboardContent() {
               className="card-terrain relative overflow-hidden p-5 sm:p-6"
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 8 }}
               transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
             >
               {/* Greeting */}

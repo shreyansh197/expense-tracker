@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useMemo, useState, useCallback } from "react";
+import { Suspense, useMemo, useState, useCallback, useRef } from "react";
 import dynamic from "next/dynamic";
 import { AppShell } from "@/components/layout/AppShell";
 import { MonthSwitcher } from "@/components/layout/MonthSwitcher";
@@ -72,34 +72,238 @@ function AnalyticsContent() {
     return history.topCategoriesAllTime.slice(0, 6);
   }, [history.topCategoriesAllTime]);
 
-  // Share analytics summary
+  // Share analytics summary as branded image (matches dashboard postcard style)
+  const shareCanvasRef = useRef<HTMLCanvasElement>(null);
+
   const handleShareAnalytics = useCallback(async () => {
-    const currentMd = history.currentMonth;
+    const canvas = shareCanvasRef.current ?? document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const W = 1080;
+    const H = 1350;
+    canvas.width = W;
+    canvas.height = H;
+
+    // ── Background ──
+    ctx.fillStyle = "#FAF7F2";
+    ctx.fillRect(0, 0, W, H);
+
+    // Subtle terrain gradient at bottom
+    const grad = ctx.createLinearGradient(0, H * 0.7, 0, H);
+    grad.addColorStop(0, "rgba(200,217,196,0)");
+    grad.addColorStop(1, "rgba(200,217,196,0.3)");
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, W, H);
+
+    // Terrain ridge waves at bottom
+    ctx.save();
+    ctx.globalAlpha = 0.12;
+    ctx.fillStyle = "#2D6B5A";
+    ctx.beginPath();
+    ctx.moveTo(0, H);
+    for (let x = 0; x <= W; x += 10) {
+      const y = H - 80 - Math.sin(x / 60) * 25 - Math.sin(x / 30) * 12;
+      ctx.lineTo(x, y);
+    }
+    ctx.lineTo(W, H);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = "#7BAF9E";
+    ctx.beginPath();
+    ctx.moveTo(0, H);
+    for (let x = 0; x <= W; x += 10) {
+      const y = H - 50 - Math.sin(x / 45 + 1) * 18 - Math.cos(x / 25) * 8;
+      ctx.lineTo(x, y);
+    }
+    ctx.lineTo(W, H);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+
     const monthLabel = getMonthName(currentMonth);
-    const total = currentMd ? formatCurrencyCompact(currentMd.expenses.reduce((s, e) => s + e.amount, 0)) : "0";
-    const topCat = topCats.length > 0 ? catMap[topCats[0].category]?.label || topCats[0].category : "none";
-    const mom = history.monthOverMonthChange !== null ? `${history.monthOverMonthChange > 0 ? "+" : ""}${history.monthOverMonthChange.toFixed(1)}%` : "N/A";
+    const currentMd = history.currentMonth;
+    const total = currentMd ? currentMd.expenses.reduce((s, e) => s + e.amount, 0) : 0;
 
-    const text = [
-      `📊 ${monthLabel} ${currentYear} Spending Summary`,
-      `Total: ${total}`,
-      `Top category: ${topCat}`,
-      `vs Last month: ${mom}`,
-      `Avg monthly: ${formatCurrencyCompact(history.avgMonthlySpend)}`,
-      `Recurring: ${formatCurrencyCompact(history.recurringVsOneTime.recurring)}`,
-    ].join("\n");
+    // ── Title ──
+    ctx.fillStyle = "#1A1B2E";
+    ctx.font = "italic 72px Georgia, serif";
+    ctx.textAlign = "left";
+    ctx.fillText(`Analytics`, 80, 130);
 
-    if (typeof navigator !== "undefined" && navigator.share) {
+    // Subtitle — month + year
+    ctx.fillStyle = "#4A4E6B";
+    ctx.font = "300 36px system-ui, sans-serif";
+    ctx.fillText(`${monthLabel} ${currentYear}`, 80, 180);
+
+    // Divider
+    ctx.fillStyle = "#2D6B5A";
+    ctx.globalAlpha = 0.4;
+    ctx.fillRect(80, 200, 80, 2);
+    ctx.globalAlpha = 1;
+
+    // ── Total Amount ──
+    ctx.fillStyle = "#1A1B2E";
+    ctx.font = "bold 80px 'Courier New', monospace";
+    ctx.fillText(formatCurrency(total), 80, 300);
+
+    // Budget context
+    if (effectiveBudget > 0) {
+      const rem = effectiveBudget - total;
+      ctx.fillStyle = rem >= 0 ? "#1B5B4A" : "#C0392B";
+      ctx.font = "500 30px system-ui, sans-serif";
+      ctx.fillText(
+        rem >= 0 ? `${formatCurrency(rem)} under budget` : `${formatCurrency(Math.abs(rem))} over budget`,
+        80, 350,
+      );
+    }
+
+    // ── 6-Month Ridge Chart ──
+    const ridgeStartY = 410;
+    ctx.fillStyle = "#1A1B2E";
+    ctx.font = "600 26px system-ui, sans-serif";
+    ctx.fillText("6-Month Ridge", 80, ridgeStartY);
+
+    const ridgeBarMaxW = W - 300;
+    const maxTotal = Math.max(...history.months.map((m) => m.total), 1);
+    history.months.forEach((md, i) => {
+      const y = ridgeStartY + 45 + i * 56;
+      const isCurrent = md.month === currentMonth && md.year === currentYear;
+      const barW = Math.max((md.total / maxTotal) * ridgeBarMaxW, 8);
+
+      // Month label
+      ctx.fillStyle = isCurrent ? "#1A1B2E" : "#7A7F96";
+      ctx.font = "500 22px system-ui, sans-serif";
+      ctx.textAlign = "right";
+      ctx.fillText(md.label, 160, y + 4);
+      ctx.textAlign = "left";
+
+      // Bar
+      ctx.fillStyle = isCurrent ? "#2D6B5A" : "#7A7F96";
+      ctx.globalAlpha = isCurrent ? 0.9 : 0.3;
+      ctx.beginPath();
+      ctx.roundRect(180, y - 12, barW, 22, 6);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+
+      // Amount
+      ctx.fillStyle = "#1A1B2E";
+      ctx.font = "600 20px 'Courier New', monospace";
+      ctx.fillText(formatCurrencyCompact(md.total), 180 + barW + 14, y + 4);
+    });
+
+    // Budget marker line
+    if (effectiveBudget > 0) {
+      const budgetX = 180 + (effectiveBudget / maxTotal) * ridgeBarMaxW;
+      ctx.strokeStyle = "#C0392B";
+      ctx.globalAlpha = 0.5;
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([6, 4]);
+      ctx.beginPath();
+      ctx.moveTo(budgetX, ridgeStartY + 30);
+      ctx.lineTo(budgetX, ridgeStartY + 45 + history.months.length * 56 - 20);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.globalAlpha = 1;
+    }
+
+    // ── Weather Metrics Grid ──
+    const metricsY = ridgeStartY + 45 + history.months.length * 56 + 40;
+    ctx.fillStyle = "#1A1B2E";
+    ctx.font = "600 26px system-ui, sans-serif";
+    ctx.fillText("Key Metrics", 80, metricsY);
+
+    const metrics = [
+      { label: "Avg Monthly", value: formatCurrencyCompact(history.avgMonthlySpend) },
+      {
+        label: "vs Last Month",
+        value: history.monthOverMonthChange !== null
+          ? `${history.monthOverMonthChange > 0 ? "+" : ""}${history.monthOverMonthChange.toFixed(1)}%`
+          : "—",
+      },
+      { label: "Recurring", value: formatCurrencyCompact(history.recurringVsOneTime.recurring) },
+      {
+        label: "Top Category",
+        value: topCats.length > 0 ? (catMap[topCats[0].category]?.label ?? topCats[0].category) : "—",
+      },
+    ];
+
+    const gridCols = 2;
+    const cellW = (W - 160 - 30) / gridCols;
+    const cellH = 90;
+    metrics.forEach((m, i) => {
+      const col = i % gridCols;
+      const row = Math.floor(i / gridCols);
+      const cx = 80 + col * (cellW + 30);
+      const cy = metricsY + 30 + row * cellH;
+
+      // Card background
+      ctx.fillStyle = "#EDEBE6";
+      ctx.globalAlpha = 0.6;
+      ctx.beginPath();
+      ctx.roundRect(cx, cy, cellW, cellH - 10, 12);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+
+      // Label
+      ctx.fillStyle = "#7A7F96";
+      ctx.font = "600 18px system-ui, sans-serif";
+      ctx.fillText(m.label.toUpperCase(), cx + 16, cy + 30);
+
+      // Value
+      ctx.fillStyle = "#1A1B2E";
+      ctx.font = "bold 28px 'Courier New', monospace";
+      ctx.fillText(m.value, cx + 16, cy + 64);
+    });
+
+    // ── Watermark ──
+    ctx.fillStyle = "#2D6B5A";
+    ctx.globalAlpha = 0.25;
+    ctx.font = "500 22px system-ui, sans-serif";
+    ctx.textAlign = "right";
+    ctx.fillText("ExpenStream", W - 80, H - 40);
+    ctx.globalAlpha = 1;
+
+    // Three dots watermark (terrain signature)
+    const dotCx = W - 210;
+    const dotCy = H - 44;
+    ctx.fillStyle = "#2D6B5A";
+    ctx.globalAlpha = 0.25;
+    [[0, -6], [-6, 4], [6, 4]].forEach(([dx, dy]) => {
+      ctx.beginPath();
+      ctx.arc(dotCx + dx, dotCy + dy, 3, 0, Math.PI * 2);
+      ctx.fill();
+    });
+    ctx.globalAlpha = 1;
+    ctx.textAlign = "left";
+
+    // ── Share ──
+    const blob = await new Promise<Blob | null>((r) => canvas.toBlob(r, "image/png"));
+    if (!blob) return;
+
+    const file = new File(
+      [blob],
+      `expenstream-analytics-${monthLabel.toLowerCase()}-${currentYear}.png`,
+      { type: "image/png" },
+    );
+
+    if (typeof navigator !== "undefined" && navigator.share && navigator.canShare?.({ files: [file] })) {
       try {
-        await navigator.share({ text });
+        await navigator.share({
+          title: `Analytics · ${monthLabel} ${currentYear} — ExpenStream`,
+          files: [file],
+        });
         return;
-      } catch { /* user cancelled or not supported */ }
+      } catch { /* user cancelled */ }
     }
-    // Fallback: copy to clipboard
-    if (typeof navigator !== "undefined" && navigator.clipboard) {
-      await navigator.clipboard.writeText(text);
-    }
-  }, [history, currentMonth, currentYear, formatCurrencyCompact, topCats, catMap]);
+
+    // Fallback: download
+    const url = canvas.toDataURL("image/png");
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `expenstream-analytics-${monthLabel.toLowerCase()}-${currentYear}.png`;
+    a.click();
+  }, [history, currentMonth, currentYear, formatCurrency, formatCurrencyCompact, effectiveBudget, topCats, catMap]);
 
   // Cumulative daily spend for burn chart
   const cumulativeData = useMemo(() => {
@@ -147,6 +351,8 @@ function AnalyticsContent() {
 
   return (
       <PageTransition className="relative mx-auto min-h-[80vh] max-w-4xl xl:max-w-6xl space-y-5 p-4 sm:p-6 lg:p-8">
+        {/* Hidden canvas for share image rendering */}
+        <canvas ref={shareCanvasRef} style={{ display: "none" }} />
         {/* ─── Overlook Header ─── */}
         <div className="flex items-center justify-between gap-3">
           <h1 className="font-display italic text-2xl" style={{ color: 'var(--text-primary)' }}>Analytics</h1>
