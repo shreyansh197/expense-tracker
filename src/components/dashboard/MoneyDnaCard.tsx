@@ -4,6 +4,8 @@ import { useMemo, useState } from "react";
 import { m } from "framer-motion";
 import { Dna, ChevronRight, Share2 } from "lucide-react";
 import { computeMoneyDna } from "@/lib/moneyDna";
+import { computeFingerprint } from "@/lib/fingerprint";
+import { FingerprintBlob } from "@/components/dashboard/FingerprintBlob";
 import { useExpenses } from "@/hooks/useExpenses";
 import { useSettings } from "@/hooks/useSettings";
 import { useUIStore } from "@/stores/uiStore";
@@ -23,6 +25,11 @@ export function MoneyDnaCard() {
 
   const dna = useMemo(
     () => computeMoneyDna(expenses, recurringTotal, settings.categories),
+    [expenses, recurringTotal, settings.categories],
+  );
+
+  const fingerprint = useMemo(
+    () => computeFingerprint(expenses, recurringTotal, settings.categories),
     [expenses, recurringTotal, settings.categories],
   );
 
@@ -125,6 +132,16 @@ export function MoneyDnaCard() {
                   {trait}
                 </span>
               ))}
+            </div>
+          )}
+
+          {/* Financial Fingerprint */}
+          {fingerprint && (
+            <div className="mt-4">
+              <p className="mb-2 text-xs font-medium uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
+                Spending Fingerprint
+              </p>
+              <FingerprintBlob axes={fingerprint} />
             </div>
           )}
 

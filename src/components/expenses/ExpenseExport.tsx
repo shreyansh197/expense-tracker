@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Download, FileDown } from "lucide-react";
+import { Download, FileDown, Image } from "lucide-react";
 import type { Expense } from "@/types";
 import { CATEGORIES } from "@/lib/categories";
 import { useSettings } from "@/hooks/useSettings";
@@ -66,8 +66,8 @@ export function ExpenseExport({ expenses, month, year }: ExpenseExportProps) {
     setShowMenu(false);
   };
 
-  const download = (content: string, filename: string, type: string) => {
-    const blob = new Blob([content], { type });
+  const download = (content: string | Blob, filename: string, type: string) => {
+    const blob = content instanceof Blob ? content : new Blob([content], { type });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -76,6 +76,97 @@ export function ExpenseExport({ expenses, month, year }: ExpenseExportProps) {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+  };
+
+  const exportImage = async () => {
+    const monthName = new Date(year, month - 1).toLocaleString("default", { month: "long" });
+    const total = activeExpenses.reduce((s, e) => s + e.amount, 0);
+    const currency = settings.currency || "INR";
+    const symbol = currency === "INR" ? "₹" : currency === "USD" ? "$" : currency;
+
+    // Category breakdown
+    const catTotals: Record<string, number> = {};
+    for (const e of activeExpenses) {
+      catTotals[e.category] = (catTotals[e.category] || 0) + e.amount;
+    }
+    const topCats = Object.entries(catTotals)
+      .sort(([, a], [, b]) => b - a)
+      .slice(0, 5)
+      .map(([id, amt]) => ({ label: getCategoryLabel(id), amount: amt, pct: Math.round((amt / total) * 100) }));
+
+    const W = 600, H = 400;
+    const canvas = document.createElement("canvas");
+    canvas.width = W;
+    canvas.height = H;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    // Background
+    const bg = getComputedStyle(document.documentElement).getPropertyValue("--surface").trim() || "#FAF7F2";
+    const textPrimary = getComputedStyle(document.documentElement).getPropertyValue("--text-primary").trim() || "#1A1B2E";
+    const textMuted = getComputedStyle(document.documentElement).getPropertyValue("--text-muted").trim() || "#888";
+    const accent = getComputedStyle(document.documentElement).getPropertyValue("--accent").trim() || "#2D6B5A";
+
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, W, H);
+
+    // Header
+    ctx.fillStyle = textMuted;
+    ctx.font = "600 12px sans-serif";
+    ctx.fillText(`EXPENSTREAM • ${monthName.toUpperCase()} ${year}`, 32, 40);
+
+    // Total
+    ctx.fillStyle = textPrimary;
+    ctx.font = "700 36px sans-serif";
+    ctx.fillText(`${symbol}${total.toLocaleString()}`, 32, 88);
+
+    ctx.fillStyle = textMuted;
+    ctx.font = "400 13px sans-serif";
+    ctx.fillText(`${activeExpenses.length} transactions`, 32, 112);
+
+    // Divider
+    ctx.strokeStyle = accent + "33";
+    ctx.beginPath();
+    ctx.moveTo(32, 130);
+    ctx.lineTo(W - 32, 130);
+    ctx.stroke();
+
+    // Category breakdown
+    ctx.fillStyle = textMuted;
+    ctx.font = "600 11px sans-serif";
+    ctx.fillText("TOP CATEGORIES", 32, 156);
+
+    topCats.forEach((cat, i) => {
+      const y = 180 + i * 38;
+      // Bar
+      const barWidth = Math.max((cat.pct / 100) * (W - 180), 4);
+      ctx.fillStyle = accent + "22";
+      ctx.fillRect(32, y, W - 180, 22);
+      ctx.fillStyle = accent;
+      ctx.fillRect(32, y, barWidth, 22);
+
+      // Label
+      ctx.fillStyle = textPrimary;
+      ctx.font = "500 12px sans-serif";
+      ctx.fillText(cat.label, 36, y + 15);
+
+      // Amount
+      ctx.fillStyle = textMuted;
+      ctx.font = "400 12px sans-serif";
+      ctx.textAlign = "right";
+      ctx.fillText(`${symbol}${cat.amount.toLocaleString()} (${cat.pct}%)`, W - 32, y + 15);
+      ctx.textAlign = "left";
+    });
+
+    // Footer
+    ctx.fillStyle = textMuted;
+    ctx.font = "400 10px sans-serif";
+    ctx.fillText(`Generated ${new Date().toLocaleDateString()}`, 32, H - 20);
+
+    canvas.toBlob((blob) => {
+      if (blob) download(blob, `expenses-${monthName}-${year}.png`, "image/png");
+    }, "image/png");
+    setShowMenu(false);
   };
 
   if (activeExpenses.length === 0) return null;
@@ -117,6 +208,15 @@ export function ExpenseExport({ expenses, month, year }: ExpenseExportProps) {
             >
               <FileDown size={14} />
               Export as JSON
+            </button>
+            <button
+              onClick={exportImage}
+              className="flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors hover:bg-[var(--surface-secondary)] min-h-[44px]"
+              style={{ color: "var(--text-primary)" }}
+              aria-label="Export as Image"
+            >
+              <Image size={14} />
+              Export as Image
             </button>
           </div>
         </>

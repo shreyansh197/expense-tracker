@@ -1,9 +1,27 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { m, AnimatePresence, useReducedMotion, type Variants } from "framer-motion";
 import { usePathname } from "next/navigation";
 import type { WatcherInsight } from "@/hooks/useWatcher";
+
+const HISTORY_KEY = "es-watcher-insight-history";
+const MAX_HISTORY = 20;
+
+function loadHistory(): WatcherInsight[] {
+  if (typeof window === "undefined") return [];
+  try {
+    return JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]");
+  } catch { return []; }
+}
+
+function saveToHistory(insight: WatcherInsight) {
+  const history = loadHistory();
+  // Avoid duplicates (same text)
+  if (history.some((h) => h.text === insight.text)) return;
+  const next = [insight, ...history].slice(0, MAX_HISTORY);
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(next));
+}
 
 interface WatcherConstellationProps {
   insight: WatcherInsight | null;
@@ -20,10 +38,17 @@ interface WatcherConstellationProps {
  */
 export function WatcherConstellation({ insight, onDismiss }: WatcherConstellationProps) {
   const [open, setOpen] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [history, setHistory] = useState<WatcherInsight[]>(loadHistory);
   const prefersReduced = useReducedMotion();
   const pathname = usePathname();
   const isBizRoute = pathname.startsWith("/business");
   const popoverRef = useRef<HTMLDivElement>(null);
+
+  // Save current insight to history when it appears
+  useEffect(() => {
+    if (insight) saveToHistory(insight);
+  }, [insight]);
 
   const dotColor = isBizRoute ? "var(--biz-accent)" : "var(--accent)";
   const hasInsight = insight !== null;
@@ -44,8 +69,18 @@ export function WatcherConstellation({ insight, onDismiss }: WatcherConstellatio
   };
 
   const handleDismiss = () => {
+    if (insight) {
+      saveToHistory(insight);
+      setHistory(loadHistory());
+    }
     setOpen(false);
     onDismiss();
+  };
+
+  const handleOpenDrawer = () => {
+    setOpen(false);
+    setHistory(loadHistory());
+    setDrawerOpen(true);
   };
 
   // Close popover on outside tap
@@ -169,17 +204,114 @@ export function WatcherConstellation({ insight, onDismiss }: WatcherConstellatio
             </p>
 
             {/* Dismiss */}
-            <button
-              onClick={handleDismiss}
-              className="mt-2.5 text-xs font-medium underline-offset-2 hover:underline"
-              style={{
-                color: "var(--text-tertiary)",
-                fontFamily: "var(--font-body)",
-              }}
-            >
-              Got it
-            </button>
+            <div className="mt-2.5 flex items-center gap-3">
+              <button
+                onClick={handleDismiss}
+                className="text-xs font-medium underline-offset-2 hover:underline"
+                style={{
+                  color: "var(--text-tertiary)",
+                  fontFamily: "var(--font-body)",
+                }}
+              >
+                Got it
+              </button>
+              <button
+                onClick={handleOpenDrawer}
+                className="text-xs font-medium"
+                style={{
+                  color: dotColor,
+                  fontFamily: "var(--font-body)",
+                }}
+              >
+                View all →
+              </button>
+            </div>
           </m.div>
+        )}
+      </AnimatePresence>
+
+      {/* Insight Feed Drawer */}
+      <AnimatePresence>
+        {drawerOpen && (
+          <>
+            <m.div
+              key="drawer-backdrop"
+              className="fixed inset-0 z-[200] bg-black/40"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setDrawerOpen(false)}
+            />
+            <m.div
+              key="insight-drawer"
+              role="dialog"
+              aria-label="Insight history"
+              className="fixed inset-x-0 bottom-0 z-[210] max-h-[60vh] overflow-y-auto rounded-t-2xl p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom,0px))]"
+              style={{
+                background: "var(--surface)",
+                borderTop: "1px solid var(--border-card)",
+                boxShadow: "var(--shadow-lg)",
+              }}
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            >
+              <div className="mb-4 flex items-center justify-between">
+                <h2
+                  className="text-sm font-semibold"
+                  style={{ color: "var(--text-primary)" }}
+                >
+                  Watcher Insights
+                </h2>
+                <button
+                  onClick={() => setDrawerOpen(false)}
+                  className="text-xs font-medium"
+                  style={{ color: "var(--text-tertiary)" }}
+                >
+                  Close
+                </button>
+              </div>
+              {history.length === 0 ? (
+                <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+                  No insights yet — keep logging expenses and patterns will emerge.
+                </p>
+              ) : (
+                <div className="space-y-3">
+                  {history.map((item, i) => (
+                    <div
+                      key={i}
+                      className="rounded-xl border p-3"
+                      style={{
+                        borderColor: "var(--border)",
+                        background: "var(--surface-secondary)",
+                      }}
+                    >
+                      <span
+                        className="mb-1 inline-block rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider"
+                        style={{
+                          background: "var(--accent-soft)",
+                          color: "var(--accent)",
+                        }}
+                      >
+                        {item.type.replace("_", " ")}
+                      </span>
+                      <p
+                        className="mt-1 text-sm leading-relaxed"
+                        style={{
+                          color: "var(--text-secondary)",
+                          fontFamily: "var(--font-display)",
+                          fontStyle: "italic",
+                        }}
+                      >
+                        {item.text}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </m.div>
+          </>
         )}
       </AnimatePresence>
     </>

@@ -2,10 +2,11 @@
 
 import { useMemo, useState, useCallback, useRef, useEffect } from "react";
 import { m, AnimatePresence } from "framer-motion";
-import { Trash2, Edit3, Repeat, Receipt, CheckSquare, Square, X, Wallet } from "lucide-react";
+import { Trash2, Edit3, Repeat, Receipt, CheckSquare, Square, X, Wallet, Copy } from "lucide-react";
 import { useCurrency } from "@/hooks/useCurrency";
 import { useSettings } from "@/hooks/useSettings";
 import { CategoryBadge } from "./CategoryChips";
+import { getAllCategories } from "@/lib/categories";
 import { useUIStore } from "@/stores/uiStore";
 import { useToast } from "@/components/ui/Toast";
 import { useConfirm } from "@/components/ui/ConfirmDialog";
@@ -507,7 +508,12 @@ function SwipeableExpenseItem({
 
   // Stream aging visual properties — uniform opacity for readability
   const streamOpacity = 1;
-  const streamBorderLeft = '3px solid var(--es-clay, #B5654A)';
+  const allCats = useMemo(() => getAllCategories([], []), []);
+  const catColor = useMemo(() => {
+    const meta = allCats.find((c) => c.id === expense.category);
+    return meta?.color || "var(--es-clay, #B5654A)";
+  }, [allCats, expense.category]);
+  const streamBorderLeft = `3px solid ${catColor}`;
   const isHighSpend = categoryMedian !== undefined && categoryMedian > 0 && expense.amount > categoryMedian * 2;
   const isFullSwipe = absOffset >= FULL_DELETE_THRESHOLD;
   const isDragging = absOffset > 0 && absOffset < 9000;
@@ -522,13 +528,13 @@ function SwipeableExpenseItem({
         ? { duration: duration.normal, ease: ease.out }
         : { delay: staggerDelay(idx), duration: duration.normal, ease: ease.out }
       }
-      className="relative overflow-hidden rounded-2xl"
+      className="relative overflow-hidden rounded-ui-lg"
     >
 
       {/* Red delete action — full-width behind the row, revealed by card translate */}
       {(absOffset > 0 || swipeHint) && (
         <div
-          className="absolute inset-0 flex items-center justify-end overflow-hidden rounded-2xl"
+          className="absolute inset-0 flex items-center justify-end overflow-hidden rounded-ui-lg"
           style={{
             background: isFullSwipe
               ? 'var(--danger)'
@@ -561,7 +567,7 @@ function SwipeableExpenseItem({
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
         onClick={() => { if (absOffset === SWIPE_THRESHOLD) snapBack(); }}
-        className={`group relative flex items-center gap-3 rounded-2xl border px-4 py-3.5 focus:outline-none focus:ring-2 focus:ring-brand/40 ${
+        className={`group relative flex items-center gap-3 rounded-ui-lg border px-4 py-3.5 focus:outline-none focus:ring-2 focus:ring-brand/40 ${
           isSelected
             ? "border-brand-border"
             : ""
@@ -626,6 +632,20 @@ function SwipeableExpenseItem({
           )}
         </div>
         <div className="flex items-center gap-1 opacity-100 lg:opacity-0 lg:transition-opacity lg:group-hover:opacity-100">
+          <button
+            onClick={() => {
+              useUIStore.getState().openAddForm({
+                amount: expense.amount,
+                category: expense.category,
+                remark: expense.remark,
+              });
+            }}
+            className="flex h-11 w-11 items-center justify-center rounded-lg transition-colors hover:bg-[var(--surface-secondary)] hover:text-[var(--text-secondary)]"
+            style={{ color: 'var(--text-muted)' }}
+            aria-label="Duplicate expense"
+          >
+            <Copy size={16} />
+          </button>
           <button
             onClick={() => openEditForm(expense.id)}
             className="flex h-11 w-11 items-center justify-center rounded-lg transition-colors hover:bg-[var(--surface-secondary)] hover:text-[var(--text-secondary)]"

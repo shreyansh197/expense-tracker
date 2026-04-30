@@ -66,7 +66,7 @@ export function CategorySelector({ categories, selected, onSelect, showError, ca
   const showBudgetHint = selected && selectedBudget > 0;
 
   return (
-    <div className="-mx-1 rounded-xl px-3 py-2" style={{ background: 'var(--section-moss)' }}>
+    <div className="-mx-1 rounded-ui-lg px-3 py-2" style={{ background: 'var(--section-moss)' }}>
       <label className="form-label mb-1.5 uppercase">
         Category {showError && <span className="text-err normal-case">— please select</span>}
       </label>
@@ -86,7 +86,7 @@ export function CategorySelector({ categories, selected, onSelect, showError, ca
               role="radio"
               aria-checked={selected === cat.id}
               className={cn(
-                "relative flex items-center gap-1.5 rounded-full px-3 py-2 sm:py-2.5 text-xs font-medium transition-all",
+                "relative flex items-center gap-1.5 rounded-ui-full px-3 py-2 sm:py-2.5 text-xs font-medium transition-all",
                 selected === cat.id ? "text-white shadow-sm" : ""
               )}
               style={
@@ -110,7 +110,7 @@ export function CategorySelector({ categories, selected, onSelect, showError, ca
               {/* Budget proximity dot */}
               {nearLimit && selected !== cat.id && (
                 <span
-                  className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full"
+                  className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-ui-full"
                   style={{ background: overLimit ? "var(--danger)" : "var(--warning)" }}
                   aria-label={overLimit ? "Over budget" : "Near budget limit"}
                 />

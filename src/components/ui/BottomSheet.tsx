@@ -24,12 +24,14 @@ export function BottomSheet({ open, onClose, children, label, className, springP
   const [dragY, setDragY] = useState(0);
   const dragStartRef = useRef<number | null>(null);
   const closingRef = useRef(false);
+  const triggerRef = useRef<Element | null>(null);
   const trapRef = useFocusTrap<HTMLDivElement>(open);
 
   useEffect(() => {
     if (open) {
       closingRef.current = false;
       dragStartRef.current = null;
+      triggerRef.current = document.activeElement;
     }
   }, [open]);
 
@@ -48,6 +50,12 @@ export function BottomSheet({ open, onClose, children, label, className, springP
       });
     }
     onClose();
+    // Restore focus to the element that triggered the modal
+    requestAnimationFrame(() => {
+      if (triggerRef.current instanceof HTMLElement) {
+        triggerRef.current.focus();
+      }
+    });
   }, [onClose, trapRef]);
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {

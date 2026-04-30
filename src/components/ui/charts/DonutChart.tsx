@@ -14,6 +14,8 @@ interface DonutChartProps {
   thickness?: number;
   /** Gap angle (degrees) between segments. Default: 3 */
   gap?: number;
+  /** When true, SVG fills its container width (up to max-w-[300px]) */
+  responsive?: boolean;
   className?: string;
 }
 
@@ -22,6 +24,7 @@ export function DonutChart({
   size = 120,
   thickness = 16,
   gap = 3,
+  responsive = false,
   className,
 }: DonutChartProps) {
   const radius = (size - thickness) / 2;
@@ -56,10 +59,10 @@ export function DonutChart({
 
   return (
     <svg
-      width={size}
-      height={size}
+      width={responsive ? "100%" : size}
+      height={responsive ? "100%" : size}
       viewBox={`0 0 ${size} ${size}`}
-      className={className}
+      className={responsive ? `max-w-[300px] ${className ?? ""}` : className}
       aria-hidden="true"
     >
       {segments.map((seg) => (

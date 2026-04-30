@@ -23,6 +23,7 @@ import { PullToRefreshIndicator } from "@/components/ui/PullToRefreshIndicator";
 import { pullChanges } from "@/lib/syncEngine";
 import { OfflineBanner } from "@/components/sync/SyncIndicator";
 import { useBudgetHealthBg } from "@/hooks/useBudgetHealthBg";
+import { useSunsetTheme } from "@/hooks/useSunsetTheme";
 import { WatcherConstellation } from "@/components/ui/WatcherConstellation";
 import { useWatcher } from "@/hooks/useWatcher";
 
@@ -35,6 +36,9 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
 
   // Ambient background health drift
   useBudgetHealthBg();
+
+  // Sunset auto-theme (switch dark/light based on time of day)
+  useSunsetTheme();
 
   // Watcher ambient AI
   const { insight, dismiss } = useWatcher();

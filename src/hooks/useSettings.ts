@@ -108,8 +108,15 @@ export function useSettings() {
           // Do NOT merge collection fields here: mergeById cannot distinguish
           // "intentionally deleted" from "never added without tombstones,
           // causing deleted rules to be resurrected from stale local state.
-          saveLocal(remote);
-          _setShared(remote);
+          // Spread DEFAULT_SETTINGS first to ensure new fields survive.
+          // Preserve sunsetTheme from current state if remote doesn't carry it.
+          const merged = {
+            ...DEFAULT_SETTINGS,
+            ...remote,
+            sunsetTheme: remote.sunsetTheme || _settings.sunsetTheme || false,
+          };
+          saveLocal(merged);
+          _setShared(merged);
         } else if (localTs > 0 && localTs > remoteTs) {
           if (_settings.updatedAt < localTs) _setShared(local);
           guardedPush(local);
@@ -137,7 +144,7 @@ export function useSettings() {
   }, []);
 
   const updateSettings = useCallback(
-    async (updates: Partial<Pick<UserSettings, "salary" | "currency" | "categories" | "customCategories" | "hiddenDefaults" | "categoryBudgets" | "recurringExpenses" | "savedFilters" | "goals" | "rolloverEnabled" | "rolloverHistory" | "monthlyBudgets" | "businessMode" | "revenueExpectations" | "businessTags" | "dashboardLayout" | "multiCurrencyEnabled" | "dismissedRecurringSuggestions" | "autoRules" | "achievements" | "activeChallenges" | "accentColor" | "notificationPrefs">>) => {
+    async (updates: Partial<Pick<UserSettings, "salary" | "currency" | "categories" | "customCategories" | "hiddenDefaults" | "categoryBudgets" | "recurringExpenses" | "savedFilters" | "goals" | "rolloverEnabled" | "rolloverHistory" | "monthlyBudgets" | "businessMode" | "revenueExpectations" | "businessTags" | "dashboardLayout" | "multiCurrencyEnabled" | "dismissedRecurringSuggestions" | "autoRules" | "achievements" | "activeChallenges" | "accentColor" | "sunsetTheme" | "notificationPrefs">>) => {
       const next = { ..._settings, ...updates, updatedAt: Date.now() };
       saveLocal(next);
       _setShared(next);

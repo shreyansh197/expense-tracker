@@ -8,9 +8,9 @@ import { useTheme } from "@/components/providers/ThemeProvider";
 import { SUPPORTED_CURRENCIES, getMonthName } from "@/lib/utils";
 import {
   Wallet, LinkIcon, Tag, Repeat, TrendingUp, Target, Palette,
-  Download, Zap, Sun, Moon, Monitor, Smartphone, Briefcase,
+  Download, Zap, Smartphone, Briefcase,
   Shield, Users, Database, Globe, ChevronLeft, ChevronRight,
-  Search, Bell,
+  Search, Bell, Sunrise,
 } from "lucide-react";
 import { InstallButton } from "@/components/pwa/InstallButton";
 import { AccentColorPicker, applyAccentColor } from "@/components/settings/AccentColorPicker";
@@ -34,9 +34,10 @@ import { subscribeToPush, unsubscribeFromPush } from "@/lib/pushSubscription";
 import { PageTransition } from "@/components/ui/PageTransition";
 import { RateSourceInfo } from "@/components/settings/RateSourceInfo";
 import { PinLockSettings } from "@/components/settings/PinLockSettings";
+import { ThemeToggle } from "@/components/settings/ThemeToggle";
 
 function LazyFallback() {
-  return <div className="flex items-center justify-center py-12"><div className="h-6 w-6 animate-spin rounded-full border-2 border-current border-t-transparent" style={{ color: 'var(--text-muted)' }} /></div>;
+  return <div className="flex items-center justify-center py-12"><div className="h-6 w-6 animate-spin rounded-full border-2 border-current border-t-transparent text-[var(--text-muted)]" /></div>;
 }
 
 export default function SettingsPage() {
@@ -44,7 +45,7 @@ export default function SettingsPage() {
   const { settings, updateSettings } = useSettings();
   const { symbol, formatCurrency } = useCurrency();
   const { toast } = useToast();
-  const { theme, setTheme } = useTheme();
+  const { theme } = useTheme();
 
   const [salary, setSalary] = useState(settings.salary.toString());
   const [saving, setSaving] = useState(false);
@@ -221,26 +222,24 @@ export default function SettingsPage() {
         <div className="relative mb-4 card-terrain p-6 rounded-2xl">
           {/* Lora italic watermark behind header */}
           <p
-            className="pointer-events-none absolute inset-0 select-none font-display italic text-6xl font-bold leading-none"
-            style={{ color: "var(--text-primary)", opacity: 0.04, overflow: "hidden" }}
+            className="pointer-events-none absolute inset-0 select-none font-display italic text-6xl font-bold leading-none text-[var(--text-primary)] opacity-[0.04] overflow-hidden"
             aria-hidden="true"
           >
             Settings
           </p>
-          <h1 className="font-display italic text-2xl sm:text-3xl relative z-10" style={{ color: 'var(--text-primary)' }}>Settings</h1>
-          <p className="text-sm mt-1 relative z-10 font-body-terrain" style={{ color: 'var(--text-secondary)' }}>Customize your experience.</p>
+          <h1 className="font-display italic text-2xl sm:text-3xl relative z-10 text-[var(--text-primary)]">Settings</h1>
+          <p className="text-sm mt-1 relative z-10 font-body-terrain text-[var(--text-secondary)]">Customize your experience.</p>
         </div>
 
         {/* Search bar */}
         <div className="relative mb-2">
-          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: 'var(--text-muted)' }} />
+          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-muted)]" />
           <input
             type="text"
             placeholder="Search settings…"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full rounded-full border py-2.5 pl-9 pr-3 text-sm transition-colors focus:outline-none focus:ring-2"
-            style={{ background: 'var(--surface)', borderColor: 'var(--border)', color: 'var(--text-primary)' }}
+            className="w-full rounded-full border py-2.5 pl-9 pr-3 text-sm transition-colors focus:outline-none focus:ring-2 bg-[var(--surface)] border-[var(--border)] text-[var(--text-primary)]"
             aria-label="Search settings"
           />
         </div>
@@ -294,14 +293,14 @@ export default function SettingsPage() {
         <SettingsAccordion>
 
           {visibleSections && visibleSections.size === 0 && (
-            <p className="text-center py-12 text-sm" style={{ color: "var(--text-muted)" }}>
+            <p className="text-center py-12 text-sm text-[var(--text-muted)]">
               No settings match &ldquo;{searchQuery}&rdquo;
             </p>
           )}
 
           {/* ━━━ YOUR ACCOUNT — indigo zone ━━━ */}
           <div id="zone-account" role="tabpanel" aria-labelledby="tab-zone-account" className={`space-y-3 scroll-mt-16 ${activeZone !== 'zone-account' ? 'lg:hidden' : ''} ${!isZoneVisible('zone-account') ? 'hidden' : ''}`}>
-          <h3 className="text-xs font-bold uppercase tracking-wider pb-1 px-1" style={{ color: 'var(--text-tertiary)' }}>
+          <h3 className="text-xs font-bold uppercase tracking-wider pb-1 px-1 text-[var(--text-tertiary)]">
             Identity
           </h3>
 
@@ -343,7 +342,7 @@ export default function SettingsPage() {
 
           {/* ━━━ FINANCES — teal zone ━━━ */}
           <div id="zone-finances" role="tabpanel" aria-labelledby="tab-zone-finances" className={`space-y-3 scroll-mt-16 ${activeZone !== 'zone-finances' ? 'lg:hidden' : ''} ${!isZoneVisible('zone-finances') ? 'hidden' : ''}`}>
-          <h3 className="text-xs font-bold uppercase tracking-wider pt-2 pb-1 px-1" style={{ color: 'var(--text-tertiary)' }}>
+          <h3 className="text-xs font-bold uppercase tracking-wider pt-2 pb-1 px-1 text-[var(--text-tertiary)]">
             Ledger
           </h3>
 
@@ -360,7 +359,7 @@ export default function SettingsPage() {
             <div className="space-y-3">
               {/* Currency selector */}
               <div>
-                <label className="mb-1.5 block text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>Currency</label>
+                <label className="mb-1.5 block text-xs font-medium text-[var(--text-secondary)]">Currency</label>
                 <div className="flex gap-2">
                   {SUPPORTED_CURRENCIES.map((c) => (
                     <button
@@ -378,16 +377,16 @@ export default function SettingsPage() {
                     </button>
                   ))}
                 </div>
-                <p className="mt-1.5 text-xs" style={{ color: 'var(--text-tertiary)' }}>
-                  Preview: <span className="font-medium" style={{ color: 'var(--text-secondary)' }}>{formatCurrency(123456.78)}</span>
+                <p className="mt-1.5 text-xs text-[var(--text-tertiary)]">
+                  Preview: <span className="font-medium text-[var(--text-secondary)]">{formatCurrency(123456.78)}</span>
                 </p>
               </div>
               {/* Salary input — default budget */}
               <div>
-                <label className="mb-1.5 block text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>Default Monthly Budget</label>
+                <label className="mb-1.5 block text-xs font-medium text-[var(--text-secondary)]">Default Monthly Budget</label>
                 <div className="flex items-center gap-3">
                 <div className="relative flex-1">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm" style={{ color: 'var(--text-tertiary)' }}>{symbol}</span>
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-[var(--text-tertiary)]">{symbol}</span>
                   <input
                     type="number"
                     min="0.01"
@@ -395,8 +394,7 @@ export default function SettingsPage() {
                     value={salary}
                     onChange={(e) => setSalary(e.target.value)}
                     onKeyDown={(e) => { if (e.key === "Enter") handleSalaryUpdate(); }}
-                    className="w-full rounded-xl py-2.5 pl-7 pr-3 text-base font-medium focus:outline-none focus:ring-2 focus:ring-brand/20"
-                    style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
+                    className="w-full rounded-xl py-2.5 pl-7 pr-3 text-base font-medium focus:outline-none focus:ring-2 focus:ring-brand/20 bg-[var(--surface)] border border-[var(--border)] text-[var(--text-primary)]"
                   />
                 </div>
                 <button
@@ -408,28 +406,28 @@ export default function SettingsPage() {
                 </button>
 
                 </div>
-                <p className="mt-1 text-xs" style={{ color: 'var(--text-muted)' }}>
+                <p className="mt-1 text-xs text-[var(--text-muted)]">
                   Used for any month without a specific override below
                 </p>
               </div>
 
               {/* Per-month budget override */}
-              <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: '12px' }}>
-                <label className="mb-1.5 block text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>Month-Specific Budget</label>
+              <div className="border-t border-[var(--border-subtle)] pt-3">
+                <label className="mb-1.5 block text-xs font-medium text-[var(--text-secondary)]">Month-Specific Budget</label>
                 <div className="flex items-center gap-2 mb-2">
-                  <button onClick={prevBudgetMonth} className="rounded-lg p-1.5 transition-colors hover:opacity-80" style={{ background: 'var(--surface-secondary)' }} aria-label="Previous month">
-                    <ChevronLeft size={16} style={{ color: 'var(--text-secondary)' }} />
+                  <button onClick={prevBudgetMonth} className="rounded-lg p-1.5 transition-colors hover:opacity-80 bg-[var(--surface-secondary)]" aria-label="Previous month">
+                    <ChevronLeft size={16} className="text-[var(--text-secondary)]" />
                   </button>
-                  <span className="min-w-[120px] text-center text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
+                  <span className="min-w-[120px] text-center text-sm font-semibold text-[var(--text-primary)]">
                     {getMonthName(budgetMonth)} {budgetYear}
                   </span>
-                  <button onClick={nextBudgetMonth} className="rounded-lg p-1.5 transition-colors hover:opacity-80" style={{ background: 'var(--surface-secondary)' }} aria-label="Next month">
-                    <ChevronRight size={16} style={{ color: 'var(--text-secondary)' }} />
+                  <button onClick={nextBudgetMonth} className="rounded-lg p-1.5 transition-colors hover:opacity-80 bg-[var(--surface-secondary)]" aria-label="Next month">
+                    <ChevronRight size={16} className="text-[var(--text-secondary)]" />
                   </button>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="relative flex-1">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm" style={{ color: 'var(--text-tertiary)' }}>{symbol}</span>
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-[var(--text-tertiary)]">{symbol}</span>
                     <input
                       type="number"
                       min="0"
@@ -438,8 +436,7 @@ export default function SettingsPage() {
                       value={monthBudget}
                       onChange={(e) => setMonthBudget(e.target.value)}
                       onKeyDown={(e) => { if (e.key === "Enter") handleMonthBudgetUpdate(); }}
-                      className="w-full rounded-xl py-2.5 pl-7 pr-3 text-base font-medium focus:outline-none focus:ring-2 focus:ring-brand/20"
-                      style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
+                      className="w-full rounded-xl py-2.5 pl-7 pr-3 text-base font-medium focus:outline-none focus:ring-2 focus:ring-brand/20 bg-[var(--surface)] border border-[var(--border)] text-[var(--text-primary)]"
                     />
                   </div>
                   <button
@@ -450,7 +447,7 @@ export default function SettingsPage() {
                     {saving ? "..." : "Set"}
                   </button>
                 </div>
-                <p className="mt-1 text-xs" style={{ color: 'var(--text-muted)' }}>
+                <p className="mt-1 text-xs text-[var(--text-muted)]">
                   {monthlyBudgets[budgetKey] !== undefined
                     ? `Override: ${formatCurrency(monthlyBudgets[budgetKey])} — clear input and click Set to remove`
                     : "No override — using default budget"}
@@ -527,13 +524,13 @@ export default function SettingsPage() {
             }
           >
             <div className="space-y-3">
-              <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+              <p className="text-xs text-[var(--text-secondary)]">
                 {settings.rolloverEnabled
                   ? "Unspent budget from previous months will be added to your current month's budget."
                   : "Enable rollover to carry forward unspent budget automatically."}
               </p>
               {settings.rolloverEnabled && settings.rolloverHistory && Object.keys(settings.rolloverHistory).length > 0 && (
-                <div className="rounded-xl p-3" style={{ background: 'var(--surface-secondary)' }}>
+                <div className="rounded-xl p-3 bg-[var(--surface-secondary)]">
                   <h4 className="text-meta font-medium mb-2">Rollover History</h4>
                   <div className="space-y-1">
                     {Object.entries(settings.rolloverHistory)
@@ -541,7 +538,7 @@ export default function SettingsPage() {
                       .slice(0, 6)
                       .map(([key, amount]) => (
                         <div key={key} className="flex items-center justify-between text-xs">
-                          <span style={{ color: 'var(--text-tertiary)' }}>{key}</span>
+                          <span className="text-[var(--text-tertiary)]">{key}</span>
                           <span className="font-medium" style={{ color: amount >= 0 ? 'var(--success-text)' : 'var(--danger-text)' }}>
                             {amount >= 0 ? "+" : ""}{formatCurrency(amount)}
                           </span>
@@ -556,7 +553,7 @@ export default function SettingsPage() {
 
           {/* ━━━ AUTOMATION & DATA — violet zone ━━━ */}
           <div id="zone-automation" role="tabpanel" aria-labelledby="tab-zone-automation" className={`space-y-3 scroll-mt-16 ${activeZone !== 'zone-automation' ? 'lg:hidden' : ''} ${!isZoneVisible('zone-automation') ? 'hidden' : ''}`}>
-          <h3 className="text-xs font-bold uppercase tracking-wider pt-2 pb-1 px-1" style={{ color: 'var(--text-tertiary)' }}>
+          <h3 className="text-xs font-bold uppercase tracking-wider pt-2 pb-1 px-1 text-[var(--text-tertiary)]">
             Mechanisms
           </h3>
 
@@ -585,7 +582,7 @@ export default function SettingsPage() {
           </AccordionSection>
 
           {/* ─── Workspace Removal ─── */}
-          <div className="rounded-2xl p-[2px]" style={{ background: 'var(--danger-border)' }}>
+          <div className="rounded-2xl p-[2px] bg-[var(--danger-border)]">
           <AccordionSection
             id="data-management"
             icon={<Database size={18} />}
@@ -601,7 +598,7 @@ export default function SettingsPage() {
 
           {/* ━━━ PREFERENCES — indigo zone ━━━ */}
           <div id="zone-preferences" role="tabpanel" aria-labelledby="tab-zone-preferences" className={`space-y-3 scroll-mt-16 ${activeZone !== 'zone-preferences' ? 'lg:hidden' : ''} ${!isZoneVisible('zone-preferences') ? 'hidden' : ''}`}>
-          <h3 className="text-xs font-bold uppercase tracking-wider pt-2 pb-1 px-1" style={{ color: 'var(--text-tertiary)' }}>
+          <h3 className="text-xs font-bold uppercase tracking-wider pt-2 pb-1 px-1 text-[var(--text-tertiary)]">
             Atmosphere
           </h3>
 
@@ -631,14 +628,14 @@ export default function SettingsPage() {
             }
           >
             <div className="space-y-3">
-              <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+              <p className="text-xs text-[var(--text-secondary)]">
                 {settings.businessMode
                   ? "Business Owner Mode adds a ledger system to track expected income, log payments received, and view collection analytics."
                   : "Enable Business Owner Mode to track client payments, revenue expectations, and receivables alongside your expenses."}
               </p>
               {settings.businessMode && (
-                <div className="rounded-lg p-3" style={{ background: 'var(--biz-accent-soft)' }}>
-                  <p className="text-xs font-medium" style={{ color: 'var(--biz-accent-text)' }}>
+                <div className="rounded-lg p-3 bg-[var(--biz-accent-soft)]">
+                  <p className="text-xs font-medium text-[var(--biz-accent-text)]">
                     A &quot;Business&quot; tab is now visible in your navigation. Manage ledgers and payments there.
                   </p>
                 </div>
@@ -673,14 +670,14 @@ export default function SettingsPage() {
             }
           >
             <div className="space-y-3">
-              <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+              <p className="text-xs text-[var(--text-secondary)]">
                 {settings.multiCurrencyEnabled
                   ? "You can now set a currency per expense. Foreign amounts are auto-converted to your base currency for totals."
                   : "Enable to track expenses in multiple currencies. Rates are fetched automatically and cached for offline use."}
               </p>
               {settings.multiCurrencyEnabled && (
-                <div className="rounded-lg p-3" style={{ background: 'var(--info-soft)' }}>
-                  <p className="text-xs font-medium" style={{ color: 'var(--info-text)' }}>
+                <div className="rounded-lg p-3 bg-[var(--info-soft)]">
+                  <p className="text-xs font-medium text-[var(--info-text)]">
                     A currency picker now appears in the expense form. Conversions use your base currency ({settings.currency}) for all totals.
                   </p>
                 </div>
@@ -743,63 +740,58 @@ export default function SettingsPage() {
           >
             <div className="space-y-4">
               {/* Live theme preview mini-card */}
-              <div className="rounded-xl border p-3 overflow-hidden" style={{ background: 'var(--surface)', borderColor: 'var(--border-card)' }}>
+              <div className="rounded-xl border p-3 overflow-hidden bg-[var(--surface)] border-[var(--border-card)]">
                 <div className="flex items-center gap-2 mb-2">
-                  <div className="h-8 w-8 rounded-lg flex items-center justify-center" style={{ background: 'var(--accent-soft)' }}>
-                    <Palette size={14} style={{ color: 'var(--accent)' }} />
+                  <div className="h-8 w-8 rounded-lg flex items-center justify-center bg-[var(--accent-soft)]">
+                    <Palette size={14} className="text-[var(--accent)]" />
                   </div>
                   <div>
-                    <div className="h-2.5 w-20 rounded-full" style={{ background: 'var(--text-primary)', opacity: 0.8 }} />
-                    <div className="h-2 w-14 rounded-full mt-1" style={{ background: 'var(--text-muted)', opacity: 0.5 }} />
+                    <div className="h-2.5 w-20 rounded-full bg-[var(--text-primary)] opacity-80" />
+                    <div className="h-2 w-14 rounded-full mt-1 bg-[var(--text-muted)] opacity-50" />
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <div className="h-6 flex-1 rounded-lg" style={{ background: 'var(--surface-secondary)' }} />
-                  <div className="h-6 w-16 rounded-lg" style={{ background: 'var(--primary)', opacity: 0.7 }} />
+                  <div className="h-6 flex-1 rounded-lg bg-[var(--surface-secondary)]" />
+                  <div className="h-6 w-16 rounded-lg bg-[var(--primary)] opacity-70" />
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-2">
-                {[
-                  { value: "light" as const, icon: Sun, label: "Light", swatches: ["#FFFFFF", "#F3F4F6", "#7C3AED", "#111827"] },
-                  { value: "dark" as const, icon: Moon, label: "Dark", swatches: ["#1F2937", "#111827", "#A78BFA", "#F9FAFB"] },
-                  { value: "system" as const, icon: Monitor, label: "System", swatches: ["#FFFFFF", "#1F2937", "#7C3AED", "#A78BFA"] },
-                ].map((opt) => {
-                  const Icon = opt.icon;
-                  const active = theme === opt.value;
-                  return (
-                    <button
-                      key={opt.value}
-                      onClick={() => setTheme(opt.value)}
-                      className={`flex flex-col items-center gap-1.5 rounded-xl px-3 py-3 text-sm font-medium transition-colors ${
-                        active
-                          ? "bg-brand-soft text-brand ring-2"
-                          : ""
+              <ThemeToggle />
+
+              {/* Sunset Auto-Theme */}
+              <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-secondary)] p-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <Sunrise size={15} className="text-[var(--accent)]" />
+                    <div>
+                      <p className="text-sm font-medium text-[var(--text-primary)]">Sunset Auto-Switch</p>
+                      <p className="text-xs text-[var(--text-muted)]">Dark mode at sunset, light at sunrise</p>
+                    </div>
+                  </div>
+                  <button
+                    role="switch"
+                    aria-checked={!!settings.sunsetTheme}
+                    onClick={() => updateSettings({ sunsetTheme: !settings.sunsetTheme })}
+                    className={`relative h-6 w-11 rounded-full transition-colors ${
+                      settings.sunsetTheme ? "bg-brand" : "bg-[var(--border-strong)]"
+                    }`}
+                  >
+                    <span
+                      className={`absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${
+                        settings.sunsetTheme ? "translate-x-5" : "translate-x-0"
                       }`}
-                      style={{
-                        ...(!active ? { color: 'var(--text-secondary)' } : {}),
-                        ...(active ? { ringColor: undefined, boxShadow: 'inset 0 0 0 2px var(--accent)' } : {}),
-                      }}
-                    >
-                      <Icon size={16} />
-                      {opt.label}
-                      <div className="flex gap-1">
-                        {opt.swatches.map((c, i) => (
-                          <span key={i} className="h-2.5 w-2.5 rounded-full" style={{ background: c, border: '1px solid rgba(0,0,0,0.1)' }} />
-                        ))}
-                      </div>
-                    </button>
-                  );
-                })}
+                    />
+                  </button>
+                </div>
               </div>
 
               {/* Install PWA */}
-              <div className="pt-4" style={{ borderTop: '1px solid var(--border)' }}>
+              <div className="pt-4 border-t border-[var(--border)]">
                 <div className="flex items-center gap-3 mb-3">
-                  <Palette size={16} style={{ color: 'var(--text-tertiary)' }} />
+                  <Palette size={16} className="text-[var(--text-tertiary)]" />
                   <div>
-                    <p className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Accent Color</p>
-                    <p className="text-xs" style={{ color: 'var(--text-tertiary)' }}>Customize your theme color</p>
+                    <p className="text-sm font-medium text-[var(--text-secondary)]">Accent Color</p>
+                    <p className="text-xs text-[var(--text-tertiary)]">Customize your theme color</p>
                   </div>
                 </div>
                 <AccentColorPicker
@@ -812,12 +804,12 @@ export default function SettingsPage() {
               </div>
 
               {/* Install PWA */}
-              <div className="pt-4" style={{ borderTop: '1px solid var(--border)' }}>
+              <div className="pt-4 border-t border-[var(--border)]">
                 <div className="flex items-center gap-3 mb-3">
-                  <Smartphone size={16} style={{ color: 'var(--text-tertiary)' }} />
+                  <Smartphone size={16} className="text-[var(--text-tertiary)]" />
                   <div>
-                    <p className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Install App</p>
-                    <p className="text-xs" style={{ color: 'var(--text-tertiary)' }}>Install as app for quick access</p>
+                    <p className="text-sm font-medium text-[var(--text-secondary)]">Install App</p>
+                    <p className="text-xs text-[var(--text-tertiary)]">Install as app for quick access</p>
                   </div>
                 </div>
                 <InstallButton />

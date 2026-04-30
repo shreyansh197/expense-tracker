@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState, useEffect, Suspense, useMemo, useSyncExternalStore } from "react";
+import { useState, useEffect, Suspense, useMemo, useSyncExternalStore, useRef } from "react";
 import dynamic from "next/dynamic";
 import { m, AnimatePresence } from "framer-motion";
 import { AppShell } from "@/components/layout/AppShell";
@@ -9,13 +9,12 @@ import { MonthSwitcher } from "@/components/layout/MonthSwitcher";
 import { SyncIndicator } from "@/components/sync/SyncIndicator";
 import { MonthStartAnchor } from "@/components/dashboard/MonthStartAnchor";
 import { RevealOnScroll } from "@/components/motion/RevealOnScroll";
-import { stoneSettle } from "@/lib/motion/variants";
-import { SpendingStream } from "@/components/dashboard/SpendingStream";
+import { MonthSummaryHero } from "@/components/dashboard/MonthSummaryHero";
 import { SkeletonKpiCards, SkeletonChart } from "@/components/ui/Skeleton";
 import { PageTransition } from "@/components/ui/PageTransition";
 import { InstallBanner } from "@/components/pwa/InstallBanner";
 import { ClearingScene } from "@/components/ui/illustrations/terrain/ClearingScene";
-import { Repeat, PlusCircle, ChevronDown, Flame, TrendingUp, AlertTriangle, Leaf, Coffee, Sunrise } from "lucide-react";
+import { Repeat, PlusCircle, ChevronDown, Flame, TrendingUp, AlertTriangle, Leaf, Sunrise } from "lucide-react";
 
 // Below-fold widgets — dynamic imports for faster initial paint
 const SpendingForecastCalendar = dynamic(() => import("@/components/analytics/SpendingForecastCalendar").then(m => ({ default: m.SpendingForecastCalendar })));
@@ -105,6 +104,20 @@ function DashboardContent() {
   const [mounted, setMounted] = useState(false);
   useEffect(() => { setMounted(true); }, []);
   const heroLoading = !mounted || loading;
+
+  // Sticky compact hero: appears when the full hero scrolls out of view
+  const heroSentinelRef = useRef<HTMLDivElement>(null);
+  const [heroScrolledOut, setHeroScrolledOut] = useState(false);
+  useEffect(() => {
+    const el = heroSentinelRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setHeroScrolledOut(!entry.isIntersecting),
+      { threshold: 0 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     if (!searchParams.get("m") && !searchParams.get("y")) {
@@ -388,6 +401,39 @@ function DashboardContent() {
       {/* Install banner */}
       <InstallBanner />
 
+      {/* Sentinel: when this leaves viewport, compact sticky hero appears */}
+      <div ref={heroSentinelRef} aria-hidden="true" />
+
+      {/* Sticky compact hero bar */}
+      {heroScrolledOut && !heroLoading && expenses.length > 0 && (
+        <MonthSummaryHero
+          compact
+          monthlyTotal={monthlyTotal}
+          remaining={remaining}
+          budgetUsedPercent={budgetUsedPercent}
+          effectiveBudget={effectiveBudget}
+          daysRemaining={daysRemaining}
+          avgDaily={avgDaily}
+          paceToStayUnder={paceToStayUnder}
+          categoryTotals={categoryTotals}
+          categories={allCategories}
+          topCategory={topCategory}
+          streak={streak}
+          recurringCount={(settings.recurringExpenses ?? []).length}
+          recurringTotal={(settings.recurringExpenses ?? []).reduce((s, r) => s + r.amount, 0)}
+          formatCurrency={formatCurrency}
+          onCategoryClick={handleCategoryClick}
+          userName={user?.name}
+          todayTotal={todayTotal}
+          yesterdayExpense={yesterdayExpense}
+          achievementLabel={achievementsData.newlyUnlocked.length > 0 ? achievementsData.newlyUnlocked[0] : undefined}
+          dailyValues={dailyValues}
+          daysInMonth={daysInMonth}
+          anomalyDays={anomalyDays}
+          monthName={getMonthName(currentMonth)}
+        />
+      )}
+
       {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
           2. HERO ZONE â€” total spent + spending stream
           â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
@@ -412,7 +458,7 @@ function DashboardContent() {
               </p>
               <m.button
                 onClick={() => useUIStore.getState().openAddForm()}
-                className="mt-5 inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold text-white"
+                className="mt-5 inline-flex items-center gap-2 rounded-ui-md px-6 py-3 text-sm font-semibold text-white"
                 style={{ background: "var(--accent-gradient)" }}
                 whileTap={{ scale: 0.96 }}
               >
@@ -421,107 +467,31 @@ function DashboardContent() {
               </m.button>
             </m.div>
           ) : (
-            <m.div
-              className="card-terrain relative overflow-hidden p-5 sm:p-6"
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-            >
-              {user?.name && (
-                <p className="mb-1 text-xs font-medium tracking-wide" style={{ color: "var(--text-muted)" }}>
-                  {(() => {
-                    const h = new Date().getHours();
-                    if (h < 5) return "Burning the midnight oil";
-                    if (h < 12) return "Good morning";
-                    if (h < 17) return "Good afternoon";
-                    if (h < 21) return "Good evening";
-                    return "Good night";
-                  })()}, {user.name.split(" ")[0]}
-                </p>
-              )}
-
-              <m.p
-                layoutId="monthly-total"
-                className="font-display text-hero-amount leading-none"
-                style={{ color: "var(--text-primary)" }}
-              >
-                {formatCurrency(monthlyTotal)}
-              </m.p>
-
-              <p className="mt-1 text-sm" style={{ color: "var(--text-secondary)" }}>
-                {effectiveBudget > 0
-                  ? remaining >= 0
-                    ? `${formatCurrency(remaining)} remaining`
-                    : `${formatCurrency(Math.abs(remaining))} past budget`
-                  : `spent in ${getMonthName(currentMonth)}`}
-                {daysRemaining > 0 && effectiveBudget > 0 && (
-                  <span style={{ color: "var(--text-muted)" }}> · {daysRemaining}d left</span>
-                )}
-              </p>
-
-              {effectiveBudget > 0 && (
-                <div className="mt-3">
-                  <div className="relative h-1.5 w-full rounded-full overflow-hidden" style={{ background: "var(--border)" }} role="progressbar" aria-valuenow={Math.min(Math.round(budgetUsedPercent), 100)} aria-valuemin={0} aria-valuemax={100} aria-label="Budget used">
-                    <m.div
-                      className="h-full rounded-full"
-                      style={{
-                        background: budgetUsedPercent > 100 ? "var(--danger)" : budgetUsedPercent > 80 ? "var(--warning)" : "var(--accent)",
-                      }}
-                      initial={{ width: 0 }}
-                      animate={{ width: `${Math.min(budgetUsedPercent, 100)}%` }}
-                      transition={{ delay: 0.2, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-                    />
-                    <div className="absolute top-0 bottom-0 w-px" style={{ left: "75%", background: "var(--text-muted)", opacity: 0.4 }} />
-                  </div>
-                  <div className="mt-1 flex justify-between text-xs" style={{ color: "var(--text-muted)" }}>
-                    <span>
-                      {Math.round(budgetUsedPercent)}% used
-                      {budgetUsedPercent >= 100 && (
-                        <span style={{ color: "var(--danger)" }}> — over budget</span>
-                      )}
-                      {budgetUsedPercent >= 75 && budgetUsedPercent < 100 && (
-                        <span style={{ color: "var(--warning)" }}> — nearing limit</span>
-                      )}
-                    </span>
-                    <span>{formatCurrency(effectiveBudget)} budget</span>
-                  </div>
-                </div>
-              )}
-
-              {todayTotal === 0 && (
-                <div className="mt-1.5 flex items-center gap-3">
-                  <p className="flex items-center gap-1.5 text-xs" style={{ color: "var(--text-muted)" }}>
-                    <Coffee size={12} />
-                    <span>Quiet day so far</span>
-                  </p>
-                  {yesterdayExpense && (
-                    <button
-                      onClick={() => useUIStore.getState().openAddForm({
-                        amount: yesterdayExpense.amount,
-                        category: yesterdayExpense.category,
-                        remark: yesterdayExpense.remark,
-                      })}
-                      className="rounded-lg px-2.5 py-1 text-xs font-medium transition-colors"
-                      style={{ background: "var(--surface-secondary)", color: "var(--text-secondary)" }}
-                    >
-                      Same as yesterday · {yesterdayExpense.label}
-                    </button>
-                  )}
-                </div>
-              )}
-
-              <div className="mt-3">
-                <SpendingStream
-                  budgetUsedPercent={budgetUsedPercent}
-                  dailyValues={dailyValues}
-                  daysInMonth={daysInMonth}
-                  dailyBudgetPace={paceToStayUnder}
-                  anomalyDays={anomalyDays}
-                  effectiveBudget={effectiveBudget}
-                  formatCurrency={formatCurrency}
-                />
-              </div>
-            </m.div>
+            <MonthSummaryHero
+              monthlyTotal={monthlyTotal}
+              remaining={remaining}
+              budgetUsedPercent={budgetUsedPercent}
+              effectiveBudget={effectiveBudget}
+              daysRemaining={daysRemaining}
+              avgDaily={avgDaily}
+              paceToStayUnder={paceToStayUnder}
+              categoryTotals={categoryTotals}
+              categories={allCategories}
+              topCategory={topCategory}
+              streak={streak}
+              recurringCount={(settings.recurringExpenses ?? []).length}
+              recurringTotal={(settings.recurringExpenses ?? []).reduce((s, r) => s + r.amount, 0)}
+              formatCurrency={formatCurrency}
+              onCategoryClick={handleCategoryClick}
+              userName={user?.name}
+              todayTotal={todayTotal}
+              yesterdayExpense={yesterdayExpense}
+              achievementLabel={achievementsData.newlyUnlocked.length > 0 ? achievementsData.newlyUnlocked[0] : undefined}
+              dailyValues={dailyValues}
+              daysInMonth={daysInMonth}
+              anomalyDays={anomalyDays}
+              monthName={getMonthName(currentMonth)}
+            />
           )}
       </ErrorBoundary>
 
@@ -548,97 +518,9 @@ function DashboardContent() {
           ))}
         </div>
       )}
-      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-          3. STONE MARKERS â€” 2Ã—2 bento grid
-          â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
-      {!loading && expenses.length > 0 && (
-        <m.div
-          className="grid grid-cols-2 gap-3"
-          initial="initial"
-          animate="animate"
-          variants={{ initial: {}, animate: { transition: { staggerChildren: 0.06 } } }}
-        >
-          {/* Budget Pace */}
-          <m.div className="card-stone p-4" variants={stoneSettle}>
-            <p className="text-xs font-medium uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
-              Daily pace
-            </p>
-            <p className="mt-1 font-display text-lg font-bold" style={{ color: "var(--text-primary)" }}>
-              {formatCurrency(Math.round(avgDaily))}
-              <span className="text-xs font-normal" style={{ color: "var(--text-muted)" }}>/day</span>
-            </p>
-            {effectiveBudget > 0 && paceToStayUnder > 0 && (
-              <p className="mt-0.5 text-xs" style={{ color: avgDaily > paceToStayUnder ? "var(--warning)" : "var(--text-tertiary)" }}>
-                target â‰¤ {formatCurrency(Math.round(paceToStayUnder))}
-              </p>
-            )}
-          </m.div>
-
-          {/* Top Category */}
-          <m.div
-            className="card-stone cursor-pointer p-4"
-            variants={stoneSettle}
-            onClick={() => topCategory && handleCategoryClick(topCategory.slug)}
-            role="button"
-            tabIndex={0}
-          >
-            <p className="text-xs font-medium uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
-              Top category
-            </p>
-            {topCategory ? (
-              <>
-                <p className="mt-1 flex items-center gap-1.5 text-lg font-bold" style={{ color: "var(--text-primary)" }}>
-                  <span>{topCategory.emoji}</span>
-                  <span className="truncate">{topCategory.label}</span>
-                </p>
-                <p className="mt-0.5 text-xs" style={{ color: "var(--text-tertiary)" }}>
-                  {formatCurrency(topCategory.total)}
-                </p>
-              </>
-            ) : (
-              <p className="mt-1 text-sm" style={{ color: "var(--text-muted)" }}>â€”</p>
-            )}
-          </m.div>
-
-          {/* Recurring */}
-          <m.div className="card-stone p-4" variants={stoneSettle}>
-            <p className="text-xs font-medium uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
-              Recurring
-            </p>
-            <p className="mt-1 font-display text-lg font-bold" style={{ color: "var(--text-primary)" }}>
-              {(settings.recurringExpenses ?? []).length}
-            </p>
-            <p className="mt-0.5 text-xs" style={{ color: "var(--text-tertiary)" }}>
-              {formatCurrency((settings.recurringExpenses ?? []).reduce((s, r) => s + r.amount, 0))}/mo
-            </p>
-          </m.div>
-
-          {/* Streak / Achievement */}
-          <m.div className="card-stone p-4" variants={stoneSettle}>
-            <p className="text-xs font-medium uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
-              {streak >= 2 ? "Streak" : "Expenses"}
-            </p>
-            <p className="mt-1 font-display text-lg font-bold" style={{ color: "var(--text-primary)" }}>
-              {streak >= 2 ? `${streak} days` : expenses.length}
-            </p>
-            {achievementsData.newlyUnlocked.length > 0 && (
-              <p className="mt-0.5 text-xs" style={{ color: "var(--accent)" }}>
-                🏆 {achievementsData.newlyUnlocked[0]}
-              </p>
-            )}
-          </m.div>
-        </m.div>
-      )}
-
 
       {/* 3b. UPCOMING STREAM — forward recurring calendar */}
       {!loading && <UpcomingStream />}
-
-      {/* 3c. MONEY DNA — spending personality */}
-      {!loading && expenses.length >= 5 && <MoneyDnaCard />}
-
-      {/* 3d. SPENDING CHALLENGES — gamified sprints */}
-      {!loading && <SpendingChallenges />}
 
       {/* Recurring suggestions */}
       {!loading && <RecurringSuggestions />}
@@ -675,6 +557,16 @@ function DashboardContent() {
 
                 <RevealOnScroll>
                   <SavingsGoalsWidget />
+                </RevealOnScroll>
+
+                {expenses.length >= 5 && (
+                  <RevealOnScroll>
+                    <MoneyDnaCard />
+                  </RevealOnScroll>
+                )}
+
+                <RevealOnScroll>
+                  <SpendingChallenges />
                 </RevealOnScroll>
 
                 <PostcardPrompt month={currentMonth} year={currentYear} hasExpenses={expenses.length > 0} />

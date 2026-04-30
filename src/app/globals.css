@@ -2,6 +2,11 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* Enable cross-document view transitions for page navigations */
+@view-transition {
+  navigation: auto;
+}
+
 :root {
   /* ── Fluid type scale (320px → 1440px) ── */
   --text-display: clamp(2.25rem, 1.857rem + 1.964vw, 3.5rem);
@@ -566,20 +571,13 @@ html {
   line-height: 1;
 }
 
-/* ── Grain texture overlay (printed on every surface) ── */
-body::after {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
-  opacity: 0.025;
-  pointer-events: none;
-  z-index: 9999;
-  mix-blend-mode: multiply;
+/* ── Grain texture (scoped to card surfaces via ::after) ── */
+:root {
+  --grain-texture: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  --grain-opacity: 0.025;
 }
-.dark body::after {
-  opacity: 0.04;
-  mix-blend-mode: screen;
+.dark {
+  --grain-opacity: 0.04;
 }
 button, a {
   transition: color 0.15s, background-color 0.15s, border-color 0.15s, opacity 0.15s;
@@ -767,6 +765,8 @@ button, a {
 
 /* Stone card — matte, warm shadow, for KPI markers */
 .card-stone {
+  position: relative;
+  overflow: hidden;
   background: var(--surface-secondary);
   border: 1px solid var(--border-default);
   border-radius: 1.25rem;
@@ -788,6 +788,15 @@ button, a {
   box-shadow:
     0 1px 2px color-mix(in srgb, black 15%, transparent),
     0 4px 12px color-mix(in srgb, black 25%, transparent);
+}
+.card-stone::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: var(--grain-opacity);
+  background-image: var(--grain-texture);
+  mix-blend-mode: overlay;
 }
 
 /* Parchment card — flat textured surface for narrative insight cards */
@@ -1421,6 +1430,42 @@ input[type="password"]::-ms-clear {
 @keyframes tooltip-enter {
   from { opacity: 0; transform: scale(0.95) translateY(-2px); }
   to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* ── Unified radius utilities ──────────────────────────────── */
+.rounded-ui-sm  { border-radius: var(--radius-sm) !important; }
+.rounded-ui-md  { border-radius: var(--radius-md) !important; }
+.rounded-ui-lg  { border-radius: var(--radius-lg) !important; }
+.rounded-ui-xl  { border-radius: var(--radius-xl) !important; }
+.rounded-ui-full { border-radius: 9999px !important; }
+
+/* ── Breathing budget ring ─────────────────────────────────── */
+@keyframes breathe-calm {
+  0%, 100% { opacity: 0.5; transform: scale(1); }
+  50%      { opacity: 0.8; transform: scale(1.02); }
+}
+@keyframes breathe-warn {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50%      { opacity: 1;   transform: scale(1.03); }
+}
+@keyframes breathe-alert {
+  0%, 100% { opacity: 0.7; transform: scale(1); }
+  50%      { opacity: 1;   transform: scale(1.04); }
+}
+.budget-ring-calm  { animation: breathe-calm  4s   ease-in-out infinite; }
+.budget-ring-warn  { animation: breathe-warn  2.5s ease-in-out infinite; }
+.budget-ring-alert { animation: breathe-alert 1.5s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .budget-ring-calm,
+  .budget-ring-warn,
+  .budget-ring-alert { animation: none !important; }
+}
+
+/* ── Container-query chart wrapper ─────────────────────────── */
+.chart-container {
+  container-type: inline-size;
+  width: 100%;
 }
 
 /* ── Cross-platform polish ─────────────────────────────────── */

@@ -12,6 +12,7 @@ import {
 import { DEFAULT_CATEGORIES } from "@/lib/categories";
 import type { UserSettings } from "@/types";
 import {
+  DEFAULT_SETTINGS,
   _settings,
   _setShared,
   _currentUserId,
@@ -48,6 +49,7 @@ export async function pushToApi(s: UserSettings) {
     autoRules: s.autoRules ?? [],
     achievements: s.achievements ?? [],
     accentColor: s.accentColor,
+    sunsetTheme: s.sunsetTheme ?? false,
     notificationPrefs: s.notificationPrefs,
   };
 
@@ -98,6 +100,7 @@ export async function loadSettingsFromIDB(): Promise<UserSettings | null> {
       autoRules: s.autoRules ?? [],
       achievements: s.achievements ?? [],
       accentColor: s.accentColor,
+      sunsetTheme: s.sunsetTheme ?? false,
       notificationPrefs: s.notificationPrefs,
       createdAt: Date.now(),
       updatedAt: s.updatedAt,
@@ -152,6 +155,7 @@ export async function _fetchSettingsFromApi(): Promise<UserSettings | null> {
       autoRules: s.autoRules ?? [],
       achievements: s.achievements ?? [],
       accentColor: s.accentColor ?? undefined,
+      sunsetTheme: s.sunsetTheme ?? false,
       notificationPrefs: s.notificationPrefs,
       createdAt: Date.now(),
       updatedAt: new Date(s.updatedAt).getTime(),
@@ -180,6 +184,7 @@ export async function _fetchSettingsFromApi(): Promise<UserSettings | null> {
       autoRules: settings.autoRules ?? [],
       achievements: settings.achievements ?? [],
       accentColor: settings.accentColor,
+      sunsetTheme: settings.sunsetTheme ?? false,
       notificationPrefs: settings.notificationPrefs,
       updatedAt: settings.updatedAt,
     });
@@ -231,8 +236,14 @@ export function _syncFromIDB() {
       // Do NOT merge collection fields here: mergeById cannot distinguish
       // "intentionally deleted" from "never added" without tombstones,
       // causing deleted rules to be resurrected from stale local state.
-      localStorage.setItem(storageKeyForUser(userIdAtCallTime), JSON.stringify(remote));
-      _setShared(remote);
+      // Preserve sunsetTheme from current state if remote doesn't carry it.
+      const merged = {
+        ...DEFAULT_SETTINGS,
+        ...remote,
+        sunsetTheme: remote.sunsetTheme || _settings.sunsetTheme || false,
+      };
+      localStorage.setItem(storageKeyForUser(userIdAtCallTime), JSON.stringify(merged));
+      _setShared(merged);
     } else if (localTs > remoteTs && localTs > 0) {
       if (_settings.updatedAt < localTs) _setShared(local);
       pushToApi(local);
@@ -241,8 +252,14 @@ export function _syncFromIDB() {
       const { settingsContentHash } = await import("./settingsStore");
       if (settingsContentHash(remote) !== settingsContentHash(local)) {
         // Content differs at the same timestamp — prefer remote (server is truth)
-        localStorage.setItem(storageKeyForUser(userIdAtCallTime), JSON.stringify(remote));
-        _setShared(remote);
+        // Preserve sunsetTheme from current state if remote doesn't carry it.
+        const merged = {
+          ...DEFAULT_SETTINGS,
+          ...remote,
+          sunsetTheme: remote.sunsetTheme || _settings.sunsetTheme || false,
+        };
+        localStorage.setItem(storageKeyForUser(userIdAtCallTime), JSON.stringify(merged));
+        _setShared(merged);
       }
       // Hashes match → already in sync, no action needed
     }

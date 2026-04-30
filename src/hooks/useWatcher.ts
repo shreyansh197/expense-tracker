@@ -5,9 +5,11 @@ import { useCalculationsContext } from "@/contexts/CalculationsContext";
 import { useExpenses } from "@/hooks/useExpenses";
 import { useUIStore } from "@/stores/uiStore";
 import { getSpendingStreak } from "@/lib/calculations";
+import { detectCorrelations } from "@/lib/correlations";
 
 export type WatcherInsightType =
   | "anomaly"
+  | "correlation"
   | "streak"
   | "budget_milestone"
   | "forecast_warning";
@@ -77,6 +79,18 @@ export function useWatcher(): { insight: WatcherInsight | null; dismiss: () => v
       return {
         type: "anomaly",
         text: `That ${topAnomaly.expense.category} spend was unusually large — about ${Math.round(topAnomaly.zScore * 10) / 10}× your normal.`,
+      };
+    }
+
+    // 2a. Spending correlations (categories that move together)
+    const correlations = detectCorrelations(expenses.filter((e) => !e.deletedAt), 0.6);
+    if (correlations.length > 0) {
+      const top = correlations[0];
+      const pct = Math.round(Math.abs(top.coefficient) * 100);
+      const verb = top.direction === "positive" ? "rise together" : "move inversely";
+      return {
+        type: "correlation",
+        text: `Your ${top.category1} and ${top.category2} spending ${verb} (${pct}% linked) — are they connected?`,
       };
     }
 

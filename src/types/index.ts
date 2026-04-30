@@ -50,6 +50,7 @@ export interface UserSettings {
   achievements?: Achievement[];
   activeChallenges?: Challenge[];
   accentColor?: string;
+  sunsetTheme?: boolean;
   notificationPrefs?: NotificationPrefs;
   createdAt: number;
   updatedAt: number;

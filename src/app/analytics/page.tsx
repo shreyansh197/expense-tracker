@@ -30,6 +30,8 @@ import {
 } from "lucide-react";
 import { FogOverlook } from "@/components/ui/illustrations/terrain";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { InsightCard } from "@/components/analytics/InsightCard";
+import { AnimatePresence } from "framer-motion";
 const ChronicleView = dynamic(() => import("@/components/dashboard/ChronicleView").then(m => ({ default: m.ChronicleView })), { ssr: false });
 const TimeMachine = dynamic(() => import("@/components/analytics/TimeMachine").then(m => ({ default: m.TimeMachine })), { ssr: false });
 const CategorySeasons = dynamic(() => import("@/components/analytics/CategorySeasons").then(m => ({ default: m.CategorySeasons })), { ssr: false });
@@ -448,85 +450,34 @@ function AnalyticsContent() {
           )}
         </m.div>
 
-        {/* ─── 2. Weather Cards (budget health, pace, biggest move) ─── */}
+        {/* ─── 2. Insights Feed ─── */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <m.div
-            className="card-stone p-4 flex flex-col gap-1"
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.05 }}
-          >
-            <div className="flex items-center gap-1.5">
-              <DollarSign size={14} style={{ color: "var(--text-muted)" }} />
-              <span className="text-[10px] uppercase tracking-wider font-semibold" style={{ color: "var(--text-muted)" }}>
-                Avg Monthly
-              </span>
-            </div>
-            <span className="text-lg font-bold font-numeric" style={{ color: "var(--text-primary)" }}>
-              {formatCurrencyCompact(history.avgMonthlySpend)}
-            </span>
-          </m.div>
-
-          <m.div
-            className="card-stone p-4 flex flex-col gap-1"
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-          >
-            <div className="flex items-center gap-1.5">
-              <MoMIcon size={14} style={{ color: momColor }} />
-              <span className="text-[10px] uppercase tracking-wider font-semibold" style={{ color: "var(--text-muted)" }}>
-                vs Last Month
-              </span>
-            </div>
-            <span className="text-lg font-bold font-numeric" style={{ color: momColor }}>
-              {history.monthOverMonthChange !== null
-                ? `${history.monthOverMonthChange > 0 ? "+" : ""}${history.monthOverMonthChange.toFixed(1)}%`
-                : "—"}
-            </span>
-          </m.div>
-
-          <m.div
-            className="card-stone p-4 flex flex-col gap-1"
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.15 }}
-          >
-            <div className="flex items-center gap-1.5">
-              <Repeat size={14} style={{ color: "var(--text-muted)" }} />
-              <span className="text-[10px] uppercase tracking-wider font-semibold" style={{ color: "var(--text-muted)" }}>
-                Recurring
-              </span>
-            </div>
-            <span className="text-lg font-bold font-numeric" style={{ color: "var(--text-primary)" }}>
-              {formatCurrencyCompact(history.recurringVsOneTime.recurring)}
-            </span>
-            <span className="text-xs" style={{ color: "var(--text-tertiary)" }}>
-              vs {formatCurrencyCompact(history.recurringVsOneTime.oneTime)} one-time
-            </span>
-          </m.div>
-
-          <m.div
-            className="card-stone p-4 flex flex-col gap-1"
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-          >
-            <div className="flex items-center gap-1.5">
-              <Zap size={14} style={{ color: "var(--text-muted)" }} />
-              <span className="text-[10px] uppercase tracking-wider font-semibold" style={{ color: "var(--text-muted)" }}>
-                Top Category
-              </span>
-            </div>
-            <span className="text-lg font-bold font-numeric" style={{ color: "var(--text-primary)" }}>
-              {topCats.length > 0
-                ? (catMap[topCats[0].category]?.label ?? topCats[0].category)
-                : "—"}
-            </span>
-            <span className="text-xs" style={{ color: "var(--text-tertiary)" }}>
-              {topCats.length > 0 ? `${formatCurrencyCompact(topCats[0].total)} all-time` : "no data"}
-            </span>
-          </m.div>
+          <InsightCard
+            icon={DollarSign}
+            title="Avg Monthly"
+            value={formatCurrencyCompact(history.avgMonthlySpend)}
+            sparkData={history.months.map((m) => m.total)}
+          />
+          <InsightCard
+            icon={MoMIcon}
+            title="vs Last Month"
+            value={history.monthOverMonthChange !== null
+              ? `${history.monthOverMonthChange > 0 ? "+" : ""}${history.monthOverMonthChange.toFixed(1)}%`
+              : "—"}
+            accentColor={momColor}
+          />
+          <InsightCard
+            icon={Repeat}
+            title="Recurring"
+            value={formatCurrencyCompact(history.recurringVsOneTime.recurring)}
+            subtitle={`vs ${formatCurrencyCompact(history.recurringVsOneTime.oneTime)} one-time`}
+          />
+          <InsightCard
+            icon={Zap}
+            title="Top Category"
+            value={topCats.length > 0 ? (catMap[topCats[0].category]?.label ?? topCats[0].category) : "—"}
+            subtitle={topCats.length > 0 ? `${formatCurrencyCompact(topCats[0].total)} all-time` : "no data"}
+          />
         </div>
 
         {/* ─── 3. Strata — Spending Velocity + Biggest Expenses ─── */}
@@ -653,26 +604,7 @@ function AnalyticsContent() {
           </m.div>
         </div>
 
-        {/* ─── 4. Chronicle Section (inline) ─── */}
-        <m.div
-          className="card-parchment p-5"
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.35 }}
-        >
-          <h3 className="text-sm font-semibold uppercase tracking-wider mb-3" style={{ color: "var(--text-muted)" }}>
-            Chronicle
-          </h3>
-          <ChronicleView />
-        </m.div>
-
-        {/* ─── 4b. Time Machine — What If scenarios ─── */}
-        <TimeMachine />
-
-        {/* ─── 4c. Category Seasons — Annual Rhythm ─── */}
-        <CategorySeasons />
-
-        {/* ─── 5. Deep Core (expandable) ─── */}
+        {/* ─── 4. Deep Dive (collapsible — Chronicle, TimeMachine, CategorySeasons, Deep Core) ─── */}
         <m.div
           className="card-terrain overflow-hidden"
           initial={{ opacity: 0, y: 12 }}
@@ -685,7 +617,7 @@ function AnalyticsContent() {
             className="flex w-full items-center justify-between p-5 text-left"
           >
             <h3 className="text-sm font-semibold uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
-              Deep Core
+              Deep Dive
             </h3>
             <m.span
               animate={{ rotate: deepCoreOpen ? 180 : 0 }}
@@ -696,8 +628,29 @@ function AnalyticsContent() {
             </m.span>
           </button>
 
-          {deepCoreOpen && (
-            <div className="px-5 pb-5 space-y-5">
+          <AnimatePresence initial={false}>
+            {deepCoreOpen && (
+              <m.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                className="overflow-hidden"
+              >
+                <div className="px-5 pb-5 space-y-5">
+                  {/* Chronicle */}
+                  <div>
+                    <h4 className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: "var(--text-muted)" }}>
+                      Chronicle
+                    </h4>
+                    <ChronicleView />
+                  </div>
+
+                  {/* Time Machine */}
+                  <TimeMachine />
+
+                  {/* Category Seasons */}
+                  <CategorySeasons />
               {/* Cumulative Burn Chart */}
               <div>
                 <div className="flex items-center gap-2 mb-3">
@@ -712,7 +665,7 @@ function AnalyticsContent() {
                   </p>
                 ) : (
                   <div className="relative">
-                    <svg viewBox="0 0 400 160" className="w-full h-auto" preserveAspectRatio="xMidYMid meet">
+                    <svg viewBox="0 0 400 160" className="w-full h-auto" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Monthly spending trend chart">
                       {[0, 0.25, 0.5, 0.75, 1].map((frac) => (
                         <line
                           key={frac}
@@ -799,8 +752,10 @@ function AnalyticsContent() {
                   </p>
                 </div>
               )}
-            </div>
-          )}
+                </div>
+              </m.div>
+            )}
+          </AnimatePresence>
         </m.div>
 
         </>

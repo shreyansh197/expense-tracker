@@ -328,11 +328,10 @@ export function ExpenseForm({
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
             transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-            className="flex items-center justify-center gap-2 rounded-xl py-3 px-3"
-            style={{ background: 'var(--success-soft)' }}
+            className="flex items-center justify-center gap-2 rounded-ui-md py-3 px-3 bg-[var(--success-soft)]"
           >
-            <CheckCircle2 size={18} style={{ color: 'var(--success)' }} />
-            <span className="text-xs font-semibold" style={{ color: 'var(--success-text)' }}>
+            <CheckCircle2 size={18} className="text-[var(--success)]" />
+            <span className="text-xs font-semibold text-[var(--success-text)]">
               {editExpense ? "Updated!" : "Expense added!"}
             </span>
           </m.div>
@@ -343,7 +342,7 @@ export function ExpenseForm({
 
       {/* ─── 1. Amount Hero Display ─── */}
       <div className="flex flex-col items-center pt-1">
-        <span className="text-[11px] font-medium uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>
+        <span className="text-[11px] font-medium uppercase tracking-wider text-[var(--text-muted)]">
           {editExpense ? "Edit amount" : "How much?"}
         </span>
         <m.div
@@ -351,7 +350,7 @@ export function ExpenseForm({
           animate={amountInvalid ? { x: [-4, 4, -4, 4, 0] } : {}}
           transition={{ duration: 0.3 }}
         >
-          <span className="text-xl font-display" style={{ color: 'var(--text-muted)' }}>{symbol}</span>
+          <span className="text-xl font-display text-[var(--text-muted)]">{symbol}</span>
           <span
             className={cn(
               "text-4xl font-display font-bold tabular-nums tracking-tight transition-colors",
@@ -385,12 +384,11 @@ export function ExpenseForm({
                   transition={spring.water}
                   onClick={() => handleKeypadPress(key)}
                   className={cn(
-                    "flex items-center justify-center rounded-xl font-semibold font-numeric select-none",
-                    "active:bg-[var(--surface-tertiary)] transition-all",
+                    "flex items-center justify-center rounded-ui-md font-semibold font-numeric select-none",
+                    "bg-[var(--surface-secondary)] active:bg-[var(--surface-tertiary)] transition-all",
                     showMore ? "h-9 text-base" : "h-11 text-lg",
                     key === "backspace" ? "text-[var(--text-muted)]" : "text-[var(--text-primary)]"
                   )}
-                  style={{ background: 'var(--surface-secondary)' }}
                   aria-label={key === "backspace" ? "Delete" : key === "." ? "Decimal point" : key}
                 >
                   {key === "backspace" ? <Delete size={showMore ? 18 : 20} /> : key}
@@ -450,7 +448,7 @@ export function ExpenseForm({
             type="button"
             onClick={() => { if (voice.listening) { voice.stop(); } else { voice.start(); } }}
             className={cn(
-              "absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-1.5 transition-colors",
+              "absolute right-2 top-1/2 -translate-y-1/2 rounded-ui-full p-1.5 transition-colors",
               voice.listening && "animate-pulse"
             )}
             style={{ color: voice.listening ? 'var(--brand)' : 'var(--text-muted)' }}
@@ -464,8 +462,7 @@ export function ExpenseForm({
         {/* Typeahead dropdown */}
         {showSuggestions && remarkSuggestions.length > 0 && (
           <div
-            className="absolute left-0 right-0 top-full z-20 mt-1 overflow-hidden rounded-xl border shadow-lg"
-            style={{ background: "var(--surface)", borderColor: "var(--border)" }}
+            className="absolute left-0 right-0 top-full z-20 mt-1 overflow-hidden rounded-ui-lg border shadow-lg bg-[var(--surface)] border-[var(--border)]"
           >
             {remarkSuggestions.map((s) => {
               const catMeta = allCategories.find((c) => c.id === s.category);
@@ -481,8 +478,8 @@ export function ExpenseForm({
                     setShowSuggestions(false);
                   }}
                 >
-                  <span style={{ color: "var(--text-primary)" }}>{s.remark}</span>
-                  <span className="text-xs" style={{ color: "var(--text-muted)" }}>
+                  <span className="text-[var(--text-primary)]">{s.remark}</span>
+                  <span className="text-xs text-[var(--text-muted)]">
                     {catMeta?.label ?? s.category} · ~{symbol}{s.medianAmount.toLocaleString()}
                   </span>
                 </button>
@@ -492,7 +489,7 @@ export function ExpenseForm({
         )}
       </div>
       {voice.error && (
-        <p className="text-xs" style={{ color: 'var(--err)' }}>{voice.error}</p>
+        <p className="text-xs text-[var(--err)]">{voice.error}</p>
       )}
 
       {/* ─── 5. More options (date, scanner, currency) ─── */}
@@ -501,8 +498,7 @@ export function ExpenseForm({
           <button
             type="button"
             onClick={() => setShowMore(true)}
-            className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors"
-            style={{ background: 'var(--surface-secondary)', color: 'var(--text-secondary)' }}
+            className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors bg-[var(--surface-secondary)] text-[var(--text-secondary)]"
           >
             <CalendarDays size={12} />
             Day {day}{selectedMonth !== (today.getMonth() + 1) || selectedYear !== today.getFullYear() ? ` · ${selectedMonth}/${selectedYear}` : day === today.getDate() ? " (today)" : ""}
@@ -511,11 +507,10 @@ export function ExpenseForm({
         <button
           type="button"
           onClick={() => setShowMore((v) => !v)}
-          className="flex items-center gap-1 rounded-lg py-1.5 px-2 text-xs font-medium transition-colors"
-          style={{ color: 'var(--text-tertiary)' }}
+          className="flex items-center gap-1 rounded-ui-sm py-1.5 px-2 text-xs font-medium transition-colors text-[var(--text-tertiary)]"
         >
           {showMore ? "Less" : "More options"}
-          <m.span animate={{ rotate: showMore ? 180 : 0 }} transition={{ duration: 0.2 }} style={{ display: 'inline-flex' }}>
+          <m.span className="inline-flex" animate={{ rotate: showMore ? 180 : 0 }} transition={{ duration: 0.2 }}>
             <ChevronDown size={12} />
           </m.span>
         </button>
@@ -536,7 +531,7 @@ export function ExpenseForm({
                 <button
                   type="button"
                   onClick={() => setShowScanner((v) => !v)}
-                  className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors"
+                  className="flex items-center gap-1.5 rounded-ui-sm px-3 py-1.5 text-xs font-medium transition-colors"
                   style={{
                     background: showScanner ? 'var(--brand-soft)' : 'var(--surface-secondary)',
                     color: showScanner ? 'var(--brand)' : 'var(--text-tertiary)',
@@ -552,8 +547,7 @@ export function ExpenseForm({
                       animate={{ opacity: 1, height: "auto" }}
                       exit={{ opacity: 0, height: 0 }}
                       transition={{ duration: 0.2 }}
-                      className="overflow-hidden rounded-xl border"
-                      style={{ borderColor: "var(--border)", background: "var(--surface-secondary)" }}
+                      className="overflow-hidden rounded-ui-lg border border-[var(--border)] bg-[var(--surface-secondary)]"
                     >
                       <div className="p-3">
                         <ReceiptCapture
@@ -581,7 +575,7 @@ export function ExpenseForm({
                       type="button"
                       onClick={() => setExpenseCurrency(c.code)}
                       className={cn(
-                        "rounded-lg px-3 py-1.5 text-xs font-semibold transition-all",
+                        "rounded-ui-sm px-3 py-1.5 text-xs font-semibold transition-all",
                         expenseCurrency === c.code
                           ? "bg-brand-soft text-brand ring-1 ring-brand-border"
                           : "text-[var(--text-secondary)]"

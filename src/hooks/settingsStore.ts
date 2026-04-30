@@ -35,6 +35,7 @@ export const DEFAULT_SETTINGS: UserSettings = {
   multiCurrencyEnabled: false,
   dismissedRecurringSuggestions: [],
   autoRules: [],
+  sunsetTheme: false,
   createdAt: 0,
   updatedAt: 0,
 };
@@ -107,7 +108,7 @@ export function _setShared(next: UserSettings) {
   if (next.salary !== _settings.salary) {
     console.log(`[settings] salary changed: ${_settings.salary} → ${next.salary} (updatedAt=${next.updatedAt})`);
   }
-  _settings = next;
+  _settings = { ...DEFAULT_SETTINGS, ...next };
   _notify();
 }
 

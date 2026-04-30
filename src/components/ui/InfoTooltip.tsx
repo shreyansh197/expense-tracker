@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, useId } from "react";
 import { createPortal } from "react-dom";
 import { Info, X } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -15,6 +15,7 @@ export function InfoTooltip({ title, children, className }: InfoTooltipProps) {
   const [open, setOpen] = useState(false);
   const btnRef = useRef<HTMLSpanElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
+  const tooltipId = useId();
   const [pos, setPos] = useState<{ top?: number; bottom?: number; left: number; width: number; flipUp: boolean }>({
     left: 0,
     width: 288,
@@ -37,13 +38,13 @@ export function InfoTooltip({ title, children, className }: InfoTooltipProps) {
     );
   }, []);
 
-  // Measure on step change + scroll/resize
+  // Position once on open; close on scroll instead of expensive reposition
   useEffect(() => {
     if (!open) return;
     const frame = requestAnimationFrame(() => reposition());
-    const onScroll = () => reposition();
+    const onScroll = () => setOpen(false); // close on scroll — tooltips are ephemeral
     const onResize = () => reposition();
-    window.addEventListener("scroll", onScroll, true);
+    window.addEventListener("scroll", onScroll, { passive: true, capture: true });
     window.addEventListener("resize", onResize);
     const handler = (e: MouseEvent | TouchEvent) => {
       const t = e.target as Node;
@@ -67,6 +68,7 @@ export function InfoTooltip({ title, children, className }: InfoTooltipProps) {
         onClick={() => setOpen((v) => !v)}
         className="rounded-full p-1.5 text-[var(--text-muted)] hover:text-[var(--text-secondary)] hover:bg-[var(--surface-secondary)] dark:hover:text-[var(--text-secondary)] dark:hover:bg-[var(--surface-secondary)] transition-colors"
         aria-label={`Info: ${title}`}
+        aria-describedby={open ? tooltipId : undefined}
         type="button"
       >
         <Info size={14} />
@@ -75,6 +77,8 @@ export function InfoTooltip({ title, children, className }: InfoTooltipProps) {
         createPortal(
           <div
             ref={panelRef}
+            role="tooltip"
+            id={tooltipId}
             className="fixed z-[500] rounded-lg border border-[var(--border)] bg-[var(--surface)] p-3 shadow-lg dark:border-[var(--border)] dark:bg-[var(--surface)]"
             style={{
               width: pos.width,

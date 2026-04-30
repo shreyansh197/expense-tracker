@@ -55,6 +55,7 @@ export interface IDBSettings {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   achievements?: any[];
   accentColor?: string;
+  sunsetTheme?: boolean;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   notificationPrefs?: any;
   updatedAt: number;

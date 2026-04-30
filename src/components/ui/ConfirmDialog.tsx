@@ -32,8 +32,10 @@ export function ConfirmProvider({ children }: { children: React.ReactNode }) {
   } | null>(null);
   const [inputValue, setInputValue] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
+  const triggerRef = useRef<Element | null>(null);
 
   const confirm = useCallback((options: ConfirmOptions): Promise<boolean> => {
+    triggerRef.current = document.activeElement;
     return new Promise((resolve) => {
       setPending({ options, resolve });
       setInputValue("");
@@ -46,6 +48,14 @@ export function ConfirmProvider({ children }: { children: React.ReactNode }) {
     }
   }, [pending]);
 
+  const restoreFocus = useCallback(() => {
+    requestAnimationFrame(() => {
+      if (triggerRef.current instanceof HTMLElement) {
+        triggerRef.current.focus();
+      }
+    });
+  }, []);
+
   const handleConfirm = () => {
     if (pending?.options.requireInput) {
       if (inputValue.toUpperCase().trim() !== pending.options.requireInput.toUpperCase().trim()) {
@@ -54,11 +64,13 @@ export function ConfirmProvider({ children }: { children: React.ReactNode }) {
     }
     pending?.resolve(true);
     setPending(null);
+    restoreFocus();
   };
 
   const handleCancel = () => {
     pending?.resolve(false);
     setPending(null);
+    restoreFocus();
   };
 
   const variantColors = {

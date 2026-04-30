@@ -281,6 +281,7 @@ export async function pullChanges(workspaceId?: string): Promise<boolean> {
               autoRules: s.autoRules ?? [],
               achievements: s.achievements ?? [],
               accentColor: s.accentColor ?? undefined,
+              sunsetTheme: s.sunsetTheme ?? false,
               notificationPrefs: s.notificationPrefs ?? undefined,
               updatedAt: new Date(s.updatedAt as string).getTime(),
             };
@@ -303,6 +304,7 @@ export async function pullChanges(workspaceId?: string): Promise<boolean> {
               || existingSettings.rolloverEnabled !== incoming.rolloverEnabled
               || existingSettings.businessMode !== incoming.businessMode
               || existingSettings.multiCurrencyEnabled !== incoming.multiCurrencyEnabled
+              || (existingSettings as any).sunsetTheme !== incoming.sunsetTheme
               || JSON.stringify(existingSettings.notificationPrefs) !== JSON.stringify(incoming.notificationPrefs);
             if (hasPendingSettingsMutation) {
               // Local settings mutations are queued but not yet pushed — do not
@@ -314,7 +316,11 @@ export async function pullChanges(workspaceId?: string): Promise<boolean> {
               syncLog("pull", `Skipping settings write — IDB is newer (IDB=${existingSettings.updatedAt}, server=${incoming.updatedAt})`);
             } else if (settingsChanged) {
               syncLog("pull", "Settings changed — writing to IDB");
-              await db.settings.put(incoming);
+              // Preserve local-only fields the server may not store yet
+              const merged = existingSettings
+                ? { ...existingSettings, ...incoming, sunsetTheme: incoming.sunsetTheme || (existingSettings as any).sunsetTheme || false }
+                : incoming;
+              await db.settings.put(merged);
               didWrite = true;
             } else {
               syncLog("pull", "Settings unchanged — skipping IDB write");

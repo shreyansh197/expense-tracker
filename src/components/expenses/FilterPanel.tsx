@@ -92,12 +92,11 @@ export function FilterPanel({
       <div className="flex items-center gap-2">
         <button
           onClick={() => setOpen(!open)}
-          className={`flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium transition-colors ${
+          className={`flex items-center gap-1.5 rounded-ui-md px-3 py-2 text-xs font-medium transition-colors ${
             hasActiveFilters
               ? "bg-brand-soft text-brand"
-              : ""
+              : "text-[var(--text-secondary)]"
           }`}
-          style={!hasActiveFilters ? { color: 'var(--text-secondary)' } : undefined}
         >
           <SlidersHorizontal size={14} />
           Filters
@@ -110,8 +109,7 @@ export function FilterPanel({
         {hasActiveFilters && (
           <button
             onClick={onClear}
-            className="flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs transition-colors"
-            style={{ color: 'var(--text-tertiary)' }}
+            className="flex items-center gap-1 rounded-ui-md px-2 py-1.5 text-xs text-[var(--text-tertiary)] transition-colors"
           >
             <X size={12} />
             Clear all filters
@@ -123,33 +121,31 @@ export function FilterPanel({
         <div className="card mt-2 p-4">
           {/* Amount range */}
           <div className="mb-4">
-            <label className="mb-2 block text-xs font-medium uppercase" style={{ color: 'var(--text-secondary)' }}>
+            <label className="mb-2 block text-xs font-medium uppercase text-[var(--text-secondary)]">
               Amount Range
             </label>
             <div className="flex items-center gap-2">
               <div className="relative flex-1">
-                <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs" style={{ color: 'var(--text-tertiary)' }}>{symbol}</span>
+                <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-[var(--text-tertiary)]">{symbol}</span>
                 <input
                   type="number"
                   min="0"
                   placeholder="Min"
                   value={amountMin}
                   onChange={(e) => onAmountMinChange(e.target.value)}
-                  className="w-full rounded-xl py-2.5 pl-7 pr-2 text-xs focus:outline-none focus:ring-2 focus:ring-brand/20"
-                  style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
+                  className="w-full rounded-ui-md border border-[var(--border)] bg-[var(--surface)] py-2.5 pl-7 pr-2 text-xs text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-brand/20"
                 />
               </div>
-              <span className="text-xs" style={{ color: 'var(--text-tertiary)' }}>to</span>
+              <span className="text-xs text-[var(--text-tertiary)]">to</span>
               <div className="relative flex-1">
-                <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs" style={{ color: 'var(--text-tertiary)' }}>{symbol}</span>
+                <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-[var(--text-tertiary)]">{symbol}</span>
                 <input
                   type="number"
                   min="0"
                   placeholder="Max"
                   value={amountMax}
                   onChange={(e) => onAmountMaxChange(e.target.value)}
-                  className="w-full rounded-xl py-2.5 pl-7 pr-2 text-xs focus:outline-none focus:ring-2 focus:ring-brand/20"
-                  style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
+                  className="w-full rounded-ui-md border border-[var(--border)] bg-[var(--surface)] py-2.5 pl-7 pr-2 text-xs text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-brand/20"
                 />
               </div>
             </div>
@@ -157,7 +153,7 @@ export function FilterPanel({
 
           {/* Day range */}
           <div className="mb-4">
-            <label className="mb-2 block text-xs font-medium uppercase" style={{ color: 'var(--text-secondary)' }}>
+            <label className="mb-2 block text-xs font-medium uppercase text-[var(--text-secondary)]">
               Day Range
             </label>
             <div className="flex items-center gap-2">
@@ -168,10 +164,9 @@ export function FilterPanel({
                 placeholder="From"
                 value={dayMin}
                 onChange={(e) => onDayMinChange(e.target.value)}
-                className="w-full flex-1 rounded-xl py-2.5 px-2 text-xs focus:outline-none focus:ring-2 focus:ring-brand/20"
-                style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
+                className="w-full flex-1 rounded-ui-md border border-[var(--border)] bg-[var(--surface)] py-2.5 px-2 text-xs text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-brand/20"
               />
-              <span className="text-xs" style={{ color: 'var(--text-tertiary)' }}>to</span>
+              <span className="text-xs text-[var(--text-tertiary)]">to</span>
               <input
                 type="number"
                 min="1"
@@ -179,14 +174,13 @@ export function FilterPanel({
                 placeholder="To"
                 value={dayMax}
                 onChange={(e) => onDayMaxChange(e.target.value)}
-                className="w-full flex-1 rounded-xl py-2.5 px-2 text-xs focus:outline-none focus:ring-2 focus:ring-brand/20"
-                style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
+                className="w-full flex-1 rounded-ui-md border border-[var(--border)] bg-[var(--surface)] py-2.5 px-2 text-xs text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-brand/20"
               />
             </div>
           </div>
 
           {/* Save current filter */}
-          <div className="border-t pt-3" style={{ borderColor: 'var(--border)' }}>
+          <div className="border-t border-[var(--border)] pt-3">
             {showSaveInput ? (
               <div className="flex items-center gap-2">
                 <input
@@ -197,7 +191,7 @@ export function FilterPanel({
                   onKeyDown={(e) => e.key === "Enter" && handleSaveFilter()}
                   autoFocus
                   maxLength={30}
-                  className="flex-1 rounded px-2.5 py-1.5 text-xs focus:outline-none" style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-primary)' }}
+                  className="flex-1 rounded border border-[var(--border)] bg-[var(--surface)] px-2.5 py-1.5 text-xs text-[var(--text-primary)] focus:outline-none"
                 />
                 <button
                   onClick={handleSaveFilter}
@@ -208,7 +202,7 @@ export function FilterPanel({
                 </button>
                 <button
                   onClick={() => setShowSaveInput(false)}
-                  className="flex h-11 w-11 items-center justify-center rounded-lg transition-colors hover:bg-[var(--surface-secondary)]" style={{ color: 'var(--text-muted)' }}
+                  className="flex h-11 w-11 items-center justify-center rounded-lg text-[var(--text-muted)] transition-colors hover:bg-[var(--surface-secondary)]"
                   aria-label="Cancel save"
                 >
                   <X size={14} />
@@ -228,8 +222,8 @@ export function FilterPanel({
 
           {/* Saved filters */}
           {savedFilters.length > 0 && (
-            <div className="mt-3 border-t pt-3" style={{ borderColor: 'var(--border)' }}>
-              <p className="mb-2 text-xs font-medium" style={{ color: 'var(--text-tertiary)' }}>
+            <div className="mt-3 border-t border-[var(--border)] pt-3">
+              <p className="mb-2 text-xs font-medium text-[var(--text-tertiary)]">
                 Saved Filters
               </p>
               <div className="space-y-1">
@@ -241,14 +235,13 @@ export function FilterPanel({
                     <BookmarkCheck size={12} className="shrink-0 text-brand" />
                     <button
                       onClick={() => handleApplyFilter(f)}
-                      className="flex-1 text-left text-xs font-medium transition-colors hover:text-[var(--primary)]"
-                      style={{ color: 'var(--text-secondary)' }}
+                      className="flex-1 text-left text-xs font-medium text-[var(--text-secondary)] transition-colors hover:text-[var(--primary)]"
                     >
                       {f.name}
                     </button>
                     <button
                       onClick={() => handleDeleteFilter(f.id)}
-                      className="flex items-center justify-center rounded-lg p-2 transition-colors hover:text-[var(--danger)] hover:bg-[var(--danger-soft)]" style={{ color: 'var(--text-muted)' }}
+                      className="flex items-center justify-center rounded-lg p-2 text-[var(--text-muted)] transition-colors hover:text-[var(--danger)] hover:bg-[var(--danger-soft)]"
                       aria-label={`Delete filter ${f.name}`}
                     >
                       <Trash2 size={14} />

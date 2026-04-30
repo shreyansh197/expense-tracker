@@ -1,11 +1,14 @@
 "use client";
 
+import { useMemo } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { m } from "framer-motion";
+import { m, AnimatePresence } from "framer-motion";
 import {
   List,
   Plus,
+  BarChart3,
+  Filter,
 } from "lucide-react";
 import { IconDashboard, IconAnalytics, IconSettings, IconBusiness } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
@@ -60,6 +63,15 @@ export function BottomNav() {
     }
   };
 
+  // Contextual FAB icon based on route
+  const fabConfig = useMemo(() => {
+    if (isBusiness && isBusinessRoute) return { icon: Plus, key: "plus" };
+    if (pathname === "/analytics") return { icon: BarChart3, key: "chart" };
+    if (pathname === "/expenses") return { icon: Filter, key: "filter" };
+    return { icon: Plus, key: "plus" };
+  }, [pathname, isBusiness, isBusinessRoute]);
+  const FabIcon = fabConfig.icon;
+
   return (
     <>
       {/* ─── FAB (own fixed layer, ABOVE nav) ─── */}
@@ -70,7 +82,7 @@ export function BottomNav() {
         aria-label={isBusiness && isBusinessRoute ? "Add ledger" : "Add expense"}
         title={isBusiness && isBusinessRoute ? "Add ledger (Ctrl+N)" : "Add expense (Ctrl+N)"}
         className={cn(
-          "fixed left-1/2 z-[150] flex h-[54px] w-[54px] -translate-x-1/2 items-center justify-center rounded-full text-white transition-colors lg:hidden",
+          "fixed left-1/2 z-[150] flex h-[54px] w-[54px] -translate-x-1/2 items-center justify-center rounded-ui-full text-white transition-colors lg:hidden",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
           accentColor === "emerald"
             ? "text-white shadow-lg"
@@ -86,7 +98,18 @@ export function BottomNav() {
         whileHover={{ scale: 1.06, transition: { duration: 0.15 } }}
         whileTap={{ scale: 0.88 }}
       >
-        <Plus size={24} strokeWidth={2.5} />
+        <AnimatePresence mode="wait" initial={false}>
+          <m.span
+            key={fabConfig.key}
+            initial={{ scale: 0.6, opacity: 0, rotate: -90 }}
+            animate={{ scale: 1, opacity: 1, rotate: 0 }}
+            exit={{ scale: 0.6, opacity: 0, rotate: 90 }}
+            transition={{ duration: 0.2 }}
+            className="flex items-center justify-center"
+          >
+            <FabIcon size={24} strokeWidth={2.5} />
+          </m.span>
+        </AnimatePresence>
       </m.button>
       )}
 
@@ -133,7 +156,7 @@ export function BottomNav() {
                 {isActive && (
                   <m.span
                     layoutId="nav-pill"
-                    className="absolute inset-1 -z-[1] rounded-2xl"
+                    className="absolute inset-1 -z-[1] rounded-ui-lg"
                     style={{
                       background: isBiz
                         ? 'var(--biz-accent-soft)'

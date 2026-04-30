@@ -73,7 +73,7 @@ export function SpendingHeatmap({ expenses, month, year, onDayClick, todayTotal 
   const dayLabels = ["S", "M", "T", "W", "T", "F", "S"];
 
   return (
-    <div className="card p-4 sm:p-5">
+    <div className="chart-container card p-4 sm:p-5">
       <div className="mb-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Activity size={15} style={{ color: intensityColor, opacity: 0.7 }} />

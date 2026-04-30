@@ -141,7 +141,7 @@ export function CategoryChips() {
               animate={isHolding ? { scale: 1.1 } : { scale: 1 }}
               transition={{ type: "spring", stiffness: 400, damping: 20 }}
               className={cn(
-                "relative shrink-0 overflow-hidden rounded-full px-3.5 py-2 text-xs font-medium transition-all select-none",
+                "relative shrink-0 overflow-hidden rounded-ui-full px-3.5 py-2 text-xs font-medium transition-all select-none",
                 isActive ? "text-white" : "",
               )}
               style={{
@@ -155,7 +155,7 @@ export function CategoryChips() {
               {/* Long-press fill indicator */}
               {isHolding && (
                 <m.span
-                  className="pointer-events-none absolute inset-0 rounded-full"
+                  className="pointer-events-none absolute inset-0 rounded-ui-full"
                   style={{ background: "var(--es-mist)", originX: 0, scaleX: 0 }}
                   animate={{ scaleX: 1 }}
                   transition={{ duration: LONG_PRESS_MS / 1000, ease: "linear" }}
@@ -192,7 +192,7 @@ export function CategoryBadge({ category }: { category: CategoryId }) {
 
   return (
     <span
-      className="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium max-w-full truncate"
+      className="inline-flex items-center gap-1 rounded-ui-full px-2.5 py-0.5 text-xs font-medium max-w-full truncate"
       style={{
         backgroundColor: meta.bgColor,
         color: meta.color,

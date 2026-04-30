@@ -159,6 +159,7 @@ export function CategoryChart({ categoryTotals, onCategoryClick, categoryBudgets
             data={data.map((d) => ({ value: d.value, color: d.color, label: d.name }))}
             size={200}
             thickness={30}
+            responsive
           />
         </div>
       )}
