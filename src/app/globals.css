@@ -1439,27 +1439,20 @@ input[type="password"]::-ms-clear {
 .rounded-ui-xl  { border-radius: var(--radius-xl) !important; }
 .rounded-ui-full { border-radius: 9999px !important; }
 
-/* ── Breathing budget ring ─────────────────────────────────── */
-@keyframes breathe-calm {
-  0%, 100% { opacity: 0.5; transform: scale(1); }
-  50%      { opacity: 0.8; transform: scale(1.02); }
+/* ── Morphing ambient blob ─────────────────────────────────── */
+@keyframes morph {
+  0%, 100% { border-radius: 60% 40% 50% 50% / 50% 60% 40% 50%; transform: rotate(0deg) scale(1); }
+  25%      { border-radius: 40% 60% 55% 45% / 55% 40% 60% 45%; transform: rotate(3deg) scale(1.03); }
+  50%      { border-radius: 50% 50% 40% 60% / 45% 55% 45% 55%; transform: rotate(-2deg) scale(0.98); }
+  75%      { border-radius: 55% 45% 60% 40% / 40% 50% 55% 50%; transform: rotate(2deg) scale(1.02); }
 }
-@keyframes breathe-warn {
-  0%, 100% { opacity: 0.6; transform: scale(1); }
-  50%      { opacity: 1;   transform: scale(1.03); }
+.morph-blob {
+  animation: morph 8s ease-in-out infinite;
+  filter: blur(8px);
 }
-@keyframes breathe-alert {
-  0%, 100% { opacity: 0.7; transform: scale(1); }
-  50%      { opacity: 1;   transform: scale(1.04); }
-}
-.budget-ring-calm  { animation: breathe-calm  4s   ease-in-out infinite; }
-.budget-ring-warn  { animation: breathe-warn  2.5s ease-in-out infinite; }
-.budget-ring-alert { animation: breathe-alert 1.5s ease-in-out infinite; }
 
 @media (prefers-reduced-motion: reduce) {
-  .budget-ring-calm,
-  .budget-ring-warn,
-  .budget-ring-alert { animation: none !important; }
+  .morph-blob { animation: none !important; }
 }
 
 /* ── Container-query chart wrapper ─────────────────────────── */

@@ -6,7 +6,6 @@ import { Coffee, Flame, TrendingUp } from "lucide-react";
 import { DonutChart } from "@/components/ui/charts";
 import { SpendingStream } from "@/components/dashboard/SpendingStream";
 import { stoneSettle } from "@/lib/motion/variants";
-import { cn } from "@/lib/utils";
 import { useUIStore } from "@/stores/uiStore";
 import type { CategoryTotal, CategoryMeta } from "@/types";
 
@@ -81,12 +80,12 @@ export function MonthSummaryHero({
       });
   }, [categoryTotals, categories]);
 
-  // Breathing ring class based on budget health
-  const breathingClass = useMemo(() => {
-    if (effectiveBudget <= 0) return "";
-    if (budgetUsedPercent >= 85) return "budget-ring-alert";
-    if (budgetUsedPercent >= 60) return "budget-ring-warn";
-    return "budget-ring-calm";
+  // Ambient blob color based on budget health
+  const blobColor = useMemo(() => {
+    if (effectiveBudget <= 0) return "var(--accent)";
+    if (budgetUsedPercent >= 85) return "var(--danger)";
+    if (budgetUsedPercent >= 60) return "var(--warning)";
+    return "var(--accent)";
   }, [budgetUsedPercent, effectiveBudget]);
 
   const greeting = useMemo(() => {
@@ -182,10 +181,18 @@ export function MonthSummaryHero({
           </p>
         </div>
 
-        {/* Category donut ring with breathing glow */}
+        {/* Category donut ring with ambient morph blob */}
         {donutData.length > 0 && (
-          <div className={cn("relative shrink-0", breathingClass)}>
-            <div className="chart-container" style={{ width: 72, height: 72 }}>
+          <div className="relative shrink-0">
+            {/* Morphing background blob */}
+            <div
+              className="absolute inset-[-8px] morph-blob"
+              style={{
+                background: `radial-gradient(ellipse at 40% 40%, ${blobColor}, transparent 70%)`,
+                opacity: 0.25,
+              }}
+            />
+            <div className="chart-container relative" style={{ width: 72, height: 72 }}>
               <DonutChart
                 data={donutData}
                 size={72}
