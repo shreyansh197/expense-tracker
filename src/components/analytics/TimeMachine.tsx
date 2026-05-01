@@ -2,20 +2,27 @@
 
 import { useState, useMemo, useCallback } from "react";
 import { m, AnimatePresence } from "framer-motion";
-import { Clock, ArrowRightLeft, RotateCcw } from "lucide-react";
+import { Clock, ArrowRightLeft, RotateCcw, Bookmark, Trash2 } from "lucide-react";
 import { useExpenses } from "@/hooks/useExpenses";
 import { useSettings } from "@/hooks/useSettings";
 import { useUIStore } from "@/stores/uiStore";
 import { useCurrency } from "@/hooks/useCurrency";
 import { useCalculationsContext } from "@/contexts/CalculationsContext";
 import { getAllCategories, buildCategoryMap } from "@/lib/categories";
-import type { Expense } from "@/types";
 
 interface Scenario {
   sourceCategory: string;
   targetCategory: string;
   replacementAmount: number; // what each source expense would become
 }
+
+interface SavedScenario extends Scenario {
+  id: string;
+  name: string;
+  savedAt: number;
+}
+
+const SAVED_SCENARIOS_KEY = "expenstream-time-machine-scenarios";
 
 export function TimeMachine() {
   const { currentMonth, currentYear } = useUIStore();
@@ -25,6 +32,10 @@ export function TimeMachine() {
   const { monthlyTotal, effectiveBudget } = useCalculationsContext();
   const [scenario, setScenario] = useState<Scenario | null>(null);
   const [showWhatIf, setShowWhatIf] = useState(false);
+  const [savedScenarios, setSavedScenarios] = useState<SavedScenario[]>(() => {
+    if (typeof window === "undefined") return [];
+    try { return JSON.parse(localStorage.getItem(SAVED_SCENARIOS_KEY) || "[]"); } catch { return []; }
+  });
 
   const allCategories = useMemo(
     () => getAllCategories(settings.customCategories, settings.hiddenDefaults),
@@ -34,6 +45,30 @@ export function TimeMachine() {
     () => buildCategoryMap(settings.customCategories, settings.hiddenDefaults),
     [settings.customCategories, settings.hiddenDefaults],
   );
+
+  const saveScenario = useCallback(() => {
+    if (!scenario) return;
+    const entry: SavedScenario = {
+      ...scenario,
+      id: crypto.randomUUID(),
+      name: `${catMap[scenario.sourceCategory]?.label ?? scenario.sourceCategory} → ${formatCurrency(scenario.replacementAmount)}`,
+      savedAt: Date.now(),
+    };
+    const updated = [entry, ...savedScenarios].slice(0, 10);
+    setSavedScenarios(updated);
+    localStorage.setItem(SAVED_SCENARIOS_KEY, JSON.stringify(updated));
+  }, [scenario, savedScenarios, catMap, formatCurrency]);
+
+  const deleteSavedScenario = useCallback((id: string) => {
+    const updated = savedScenarios.filter((s) => s.id !== id);
+    setSavedScenarios(updated);
+    localStorage.setItem(SAVED_SCENARIOS_KEY, JSON.stringify(updated));
+  }, [savedScenarios]);
+
+  const loadSavedScenario = useCallback((saved: SavedScenario) => {
+    setScenario({ sourceCategory: saved.sourceCategory, targetCategory: saved.targetCategory, replacementAmount: saved.replacementAmount });
+    setShowWhatIf(true);
+  }, []);
 
   const active = useMemo(() => expenses.filter((e) => !e.deletedAt), [expenses]);
 
@@ -211,17 +246,55 @@ export function TimeMachine() {
                 )}
               </div>
 
-              <button
-                onClick={handleReset}
-                className="mt-3 flex items-center gap-1.5 text-xs font-medium"
-                style={{ color: "var(--text-muted)" }}
-              >
-                <RotateCcw size={12} />
-                Reset scenario
-              </button>
+              <div className="mt-3 flex items-center gap-3">
+                <button
+                  onClick={handleReset}
+                  className="flex items-center gap-1.5 text-xs font-medium"
+                  style={{ color: "var(--text-muted)" }}
+                >
+                  <RotateCcw size={12} />
+                  Reset
+                </button>
+                <button
+                  onClick={saveScenario}
+                  className="flex items-center gap-1.5 text-xs font-medium"
+                  style={{ color: "var(--accent)" }}
+                >
+                  <Bookmark size={12} />
+                  Save scenario
+                </button>
+              </div>
             </m.div>
           )}
         </AnimatePresence>
+
+        {/* Saved scenarios */}
+        {savedScenarios.length > 0 && (
+          <div className="mt-4 border-t pt-3" style={{ borderColor: "var(--border)" }}>
+            <p className="text-xs font-medium mb-2" style={{ color: "var(--text-muted)" }}>Saved Scenarios</p>
+            <div className="space-y-1.5">
+              {savedScenarios.map((s) => (
+                <div key={s.id} className="flex items-center justify-between rounded-lg px-2.5 py-1.5" style={{ background: "var(--surface-secondary)" }}>
+                  <button
+                    onClick={() => loadSavedScenario(s)}
+                    className="text-xs text-left flex-1 min-w-0 truncate"
+                    style={{ color: "var(--text-secondary)" }}
+                  >
+                    {s.name}
+                  </button>
+                  <button
+                    onClick={() => deleteSavedScenario(s.id)}
+                    className="shrink-0 p-1 rounded transition-colors hover:bg-[var(--danger-soft)]"
+                    style={{ color: "var(--text-muted)" }}
+                    aria-label={`Delete saved scenario: ${s.name}`}
+                  >
+                    <Trash2 size={12} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </m.div>
   );

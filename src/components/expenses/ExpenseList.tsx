@@ -44,7 +44,7 @@ function useSwipeToDelete(onDelete: () => void) {
     const dy = e.touches[0].clientY - touchStartY.current;
 
     if (!lockedAxis.current) {
-      if (Math.abs(dx) > 8 || Math.abs(dy) > 8) {
+      if (Math.abs(dx) > 14 || Math.abs(dy) > 14) {
         lockedAxis.current = Math.abs(dx) > Math.abs(dy) ? "x" : "y";
       }
       return;
@@ -501,6 +501,7 @@ function SwipeableExpenseItem({
 }) {
   const deleteCallback = useCallback(() => { handleDelete(expense.id); }, [handleDelete, expense.id]);
   const { offsetX, deleting, onTouchStart, onTouchMove, onTouchEnd, snapBack, confirmDelete } = useSwipeToDelete(deleteCallback);
+  const [remarkExpanded, setRemarkExpanded] = useState(false);
 
   const isSelected = selectedIds.has(expense.id);
   const absOffset = Math.abs(offsetX);
@@ -558,6 +559,7 @@ function SwipeableExpenseItem({
       {/* Foreground expense card */}
       <div
         tabIndex={0}
+        aria-description="Swipe left or press Delete to remove"
         onKeyDown={(e) => {
           if (e.key === "Enter") openEditForm(expense.id);
           if (e.key === "Delete" || e.key === "Backspace") handleDelete(expense.id);
@@ -608,7 +610,12 @@ function SwipeableExpenseItem({
               </span>
             )}
             {expense.remark && (
-              <span className="truncate text-xs" style={{ color: 'var(--text-muted)' }}>
+              <span
+                className={`text-xs cursor-pointer ${remarkExpanded ? "" : "truncate"}`}
+                style={{ color: 'var(--text-muted)' }}
+                onClick={(e) => { e.stopPropagation(); setRemarkExpanded(!remarkExpanded); }}
+                title={remarkExpanded ? undefined : expense.remark}
+              >
                 {expense.remark}
               </span>
             )}

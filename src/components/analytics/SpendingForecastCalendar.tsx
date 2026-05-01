@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState, useCallback } from "react";
 import { m } from "framer-motion";
 import { CalendarDays } from "lucide-react";
 import { useUIStore } from "@/stores/uiStore";
@@ -96,6 +96,26 @@ export function SpendingForecastCalendar() {
     1,
   );
 
+  const [focusedDay, setFocusedDay] = useState<number | null>(null);
+
+  const handleCalendarKeyDown = useCallback((e: React.KeyboardEvent) => {
+    setFocusedDay((prev) => {
+      const current = prev ?? 1;
+      let next = current;
+      switch (e.key) {
+        case "ArrowRight": next = Math.min(current + 1, daysInMonth); break;
+        case "ArrowLeft": next = Math.max(current - 1, 1); break;
+        case "ArrowDown": next = Math.min(current + 7, daysInMonth); break;
+        case "ArrowUp": next = Math.max(current - 7, 1); break;
+        case "Home": next = 1; break;
+        case "End": next = daysInMonth; break;
+        default: return prev;
+      }
+      e.preventDefault();
+      return next;
+    });
+  }, [daysInMonth]);
+
   if (expenses.length < 3 && today < 3) return null;
 
   return (
@@ -146,21 +166,29 @@ export function SpendingForecastCalendar() {
       </div>
 
       {/* Calendar grid */}
-      <div className="grid grid-cols-7 gap-1">
+      <div className="grid grid-cols-7 gap-1" role="grid" aria-label="Spending forecast calendar" onKeyDown={handleCalendarKeyDown}>
         {/* Empty cells for padding */}
         {Array.from({ length: firstDow }, (_, i) => (
-          <div key={`pad-${i}`} />
+          <div key={`pad-${i}`} role="gridcell" />
         ))}
 
         {calendarData.map((day) => {
           const amount = day.actual ?? day.predicted;
           const intensity = Math.min(amount / maxDayAmount, 1);
           const isFuture = !day.isPast;
+          const isFocused = focusedDay === day.day;
+          const cellLabel = day.isPast
+            ? `Day ${day.day}: ${formatCurrency(day.actual || 0)} spent`
+            : `Day ${day.day}: approximately ${formatCurrency(day.predicted)} predicted${day.recurring > 0 ? `, including ${formatCurrency(day.recurring)} recurring` : ""}`;
 
           return (
             <div
               key={day.day}
-              className="relative rounded-md p-1 text-center"
+              role="gridcell"
+              tabIndex={isFocused ? 0 : -1}
+              aria-label={cellLabel}
+              onFocus={() => setFocusedDay(day.day)}
+              className="relative rounded-md p-1 text-center focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/40"
               style={{
                 background: amount > 0
                   ? isFuture

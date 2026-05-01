@@ -242,6 +242,11 @@ export default function SettingsPage() {
             className="w-full rounded-full border py-2.5 pl-9 pr-3 text-sm transition-colors focus:outline-none focus:ring-2 bg-[var(--surface)] border-[var(--border)] text-[var(--text-primary)]"
             aria-label="Search settings"
           />
+          {searchQuery.trim() && (
+            <span className="sr-only" aria-live="polite" aria-atomic="true">
+              {visibleSections ? `${visibleSections.size} results found` : ""}
+            </span>
+          )}
         </div>
 
         {/* Mobile TOC — jump to section */}
@@ -449,7 +454,7 @@ export default function SettingsPage() {
                 </div>
                 <p className="mt-1 text-xs text-[var(--text-muted)]">
                   {monthlyBudgets[budgetKey] !== undefined
-                    ? `Override: ${formatCurrency(monthlyBudgets[budgetKey])} — clear input and click Set to remove`
+                    ? <span className="inline-flex items-center gap-1"><span className="inline-block h-2 w-2 rounded-full bg-[var(--accent)]" />{`Override active: ${formatCurrency(monthlyBudgets[budgetKey])} — clear input and click Set to remove`}</span>
                     : "No override — using default budget"}
                 </p>
               </div>

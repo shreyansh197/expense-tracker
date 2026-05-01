@@ -304,7 +304,7 @@ export async function pullChanges(workspaceId?: string): Promise<boolean> {
               || existingSettings.rolloverEnabled !== incoming.rolloverEnabled
               || existingSettings.businessMode !== incoming.businessMode
               || existingSettings.multiCurrencyEnabled !== incoming.multiCurrencyEnabled
-              || (existingSettings as any).sunsetTheme !== incoming.sunsetTheme
+              || existingSettings.sunsetTheme !== incoming.sunsetTheme
               || JSON.stringify(existingSettings.notificationPrefs) !== JSON.stringify(incoming.notificationPrefs);
             if (hasPendingSettingsMutation) {
               // Local settings mutations are queued but not yet pushed — do not
@@ -318,7 +318,7 @@ export async function pullChanges(workspaceId?: string): Promise<boolean> {
               syncLog("pull", "Settings changed — writing to IDB");
               // Preserve local-only fields the server may not store yet
               const merged = existingSettings
-                ? { ...existingSettings, ...incoming, sunsetTheme: incoming.sunsetTheme || (existingSettings as any).sunsetTheme || false }
+                ? { ...existingSettings, ...incoming, sunsetTheme: incoming.sunsetTheme || existingSettings.sunsetTheme || false }
                 : incoming;
               await db.settings.put(merged);
               didWrite = true;

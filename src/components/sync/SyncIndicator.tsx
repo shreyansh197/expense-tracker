@@ -3,6 +3,7 @@
 import { Wifi, WifiOff, RefreshCw, AlertCircle } from "lucide-react";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { useSyncStatus } from "@/hooks/useSyncStatus";
+import { trySyncPush } from "@/lib/syncEngine";
 
 export function SyncIndicator() {
   const isOnline = useOnlineStatus();
@@ -34,9 +35,16 @@ export function SyncIndicator() {
         </div>
       )}
       {effective === "error" && (
-        <div className="flex items-center gap-1" style={{ color: 'var(--danger)' }} title="Sync error">
+        <button
+          onClick={() => trySyncPush(undefined, true)}
+          className="flex items-center gap-1 rounded-md px-1.5 py-0.5 transition-colors hover:bg-[var(--surface-secondary)]"
+          style={{ color: 'var(--danger)' }}
+          title="Sync failed — tap to retry"
+          aria-label="Retry sync"
+        >
           <AlertCircle size={14} />
-        </div>
+          <span className="text-caption font-medium">Retry</span>
+        </button>
       )}
     </div>
   );

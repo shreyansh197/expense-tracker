@@ -131,6 +131,11 @@ export function CategorySelector({ categories, selected, onSelect, showError, ca
             : `${currencySymbol ?? ""}${Math.round(Math.abs(selectedRemaining)).toLocaleString()} over budget in ${categories.find((c) => c.id === selected)?.label ?? "this category"}`}
         </p>
       )}
+      {!showBudgetHint && selected && (
+        <p className="mt-1.5 text-xs" style={{ color: "var(--text-muted)" }}>
+          No budget set for {categories.find((c) => c.id === selected)?.label ?? "this category"}
+        </p>
+      )}
     </div>
   );
 }

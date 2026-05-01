@@ -40,6 +40,8 @@ export function NarrativeInsight({
       initial="initial"
       whileInView="animate"
       viewport={{ once: true, margin: "-40px" }}
+      aria-live="polite"
+      aria-atomic="true"
     >
       <div className="flex items-start gap-3">
         {/* Left accent bar */}

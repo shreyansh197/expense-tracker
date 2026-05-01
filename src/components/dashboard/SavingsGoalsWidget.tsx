@@ -94,7 +94,7 @@ export function SavingsGoalsWidget() {
             onClick={(e) => { if (e.target === e.currentTarget) handleCancel(); }}
             role="dialog"
             aria-modal="true"
-            aria-label={`Fund ${activeGoal.name}`}
+            aria-labelledby="savings-goal-modal-title"
             initial={{ backgroundColor: "rgba(0,0,0,0)" }}
             animate={{ backgroundColor: "rgba(0,0,0,0.5)" }}
             exit={{ backgroundColor: "rgba(0,0,0,0)" }}
@@ -110,7 +110,7 @@ export function SavingsGoalsWidget() {
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2 min-w-0">
                   <span className="h-3 w-3 shrink-0 rounded-full" style={{ backgroundColor: activeGoal.color }} />
-                  <h3 className="text-sm font-semibold truncate" style={{ color: "var(--text-primary)" }}>
+                  <h3 id="savings-goal-modal-title" className="text-sm font-semibold truncate" style={{ color: "var(--text-primary)" }}>
                     {activeGoal.name}
                   </h3>
                 </div>

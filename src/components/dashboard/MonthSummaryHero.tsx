@@ -2,8 +2,8 @@
 
 import { useMemo } from "react";
 import { m } from "framer-motion";
-import { Coffee, Flame, TrendingUp } from "lucide-react";
-import { DonutChart } from "@/components/ui/charts";
+import { Coffee, Flame } from "lucide-react";
+import { HeroOrb } from "@/components/dashboard/HeroOrb";
 import { SpendingStream } from "@/components/dashboard/SpendingStream";
 import { stoneSettle } from "@/lib/motion/variants";
 import { useUIStore } from "@/stores/uiStore";
@@ -46,8 +46,7 @@ export function MonthSummaryHero({
   daysRemaining,
   avgDaily,
   paceToStayUnder,
-  categoryTotals,
-  categories,
+  // categoryTotals / categories kept in interface for caller compatibility
   topCategory,
   streak,
   recurringCount,
@@ -64,30 +63,6 @@ export function MonthSummaryHero({
   monthName,
   compact = false,
 }: MonthSummaryHeroProps) {
-  // Donut data for category ring
-  const donutData = useMemo(() => {
-    const nonZero = categoryTotals.filter((c) => c.total > 0);
-    return nonZero
-      .sort((a, b) => b.total - a.total)
-      .slice(0, 6)
-      .map((c) => {
-        const meta = categories.find((m) => m.id === c.category);
-        return {
-          value: c.total,
-          color: meta?.color || "var(--category-fallback)",
-          label: meta?.label || c.category,
-        };
-      });
-  }, [categoryTotals, categories]);
-
-  // Ambient blob color based on budget health
-  const blobColor = useMemo(() => {
-    if (effectiveBudget <= 0) return "var(--accent)";
-    if (budgetUsedPercent >= 85) return "var(--danger)";
-    if (budgetUsedPercent >= 60) return "var(--warning)";
-    return "var(--accent)";
-  }, [budgetUsedPercent, effectiveBudget]);
-
   const greeting = useMemo(() => {
     const h = new Date().getHours();
     if (h < 5) return "Burning the midnight oil";
@@ -158,7 +133,7 @@ export function MonthSummaryHero({
         </p>
       )}
 
-      {/* Hero amount + donut ring */}
+      {/* Hero amount + orb */}
       <div className="flex items-center gap-4">
         <div className="flex-1 min-w-0">
           <m.p
@@ -181,27 +156,12 @@ export function MonthSummaryHero({
           </p>
         </div>
 
-        {/* Category donut ring with ambient morph blob */}
-        {donutData.length > 0 && (
-          <div className="relative shrink-0">
-            {/* Morphing background blob */}
-            <div
-              className="absolute inset-[-8px] morph-blob"
-              style={{
-                background: `radial-gradient(ellipse at 40% 40%, ${blobColor}, transparent 70%)`,
-                opacity: 0.25,
-              }}
-            />
-            <div className="chart-container relative" style={{ width: 72, height: 72 }}>
-              <DonutChart
-                data={donutData}
-                size={72}
-                thickness={8}
-                gap={4}
-              />
-            </div>
-          </div>
-        )}
+        {/* Gemini-style morphing orb */}
+        <HeroOrb
+          budgetUsedPercent={budgetUsedPercent}
+          hasBudget={effectiveBudget > 0}
+          size={76}
+        />
       </div>
 
       {/* Budget progress bar */}

@@ -2,6 +2,7 @@
 
 import { Suspense, useMemo, useState, useCallback } from "react";
 import dynamic from "next/dynamic";
+import { useRouter } from "next/navigation";
 import { AppShell } from "@/components/layout/AppShell";
 import { MonthSwitcher } from "@/components/layout/MonthSwitcher";
 import { SyncIndicator } from "@/components/sync/SyncIndicator";
@@ -28,6 +29,7 @@ import {
   ChevronDown,
   Share2,
 } from "lucide-react";
+import { useToast } from "@/components/ui/Toast";
 import { FogOverlook } from "@/components/ui/illustrations/terrain";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { InsightCard } from "@/components/analytics/InsightCard";
@@ -61,6 +63,8 @@ function AnalyticsContent() {
   const { effectiveBudget, anomalies } = useCalculationsContext();
   const { settings } = useSettings();
   const { formatCurrency, formatCurrencyCompact } = useCurrency();
+  const { toast } = useToast();
+  const router = useRouter();
   const history = useHistoricalData(currentMonth, currentYear, 6);
 
   const catMap = useMemo(
@@ -310,8 +314,9 @@ function AnalyticsContent() {
     }, 200);
    } catch (err) {
     console.error("[analytics:share]", err);
+    toast("Failed to generate share image");
    }
-  }, [history, currentMonth, currentYear, formatCurrency, formatCurrencyCompact, effectiveBudget, topCats, catMap]);
+  }, [history, currentMonth, currentYear, formatCurrency, formatCurrencyCompact, effectiveBudget, topCats, catMap, toast]);
 
   // Cumulative daily spend for burn chart
   const cumulativeData = useMemo(() => {
@@ -457,6 +462,7 @@ function AnalyticsContent() {
             title="Avg Monthly"
             value={formatCurrencyCompact(history.avgMonthlySpend)}
             sparkData={history.months.map((m) => m.total)}
+            onClick={() => router.push("/expenses")}
           />
           <InsightCard
             icon={MoMIcon}
@@ -465,18 +471,21 @@ function AnalyticsContent() {
               ? `${history.monthOverMonthChange > 0 ? "+" : ""}${history.monthOverMonthChange.toFixed(1)}%`
               : "—"}
             accentColor={momColor}
+            onClick={() => router.push("/expenses")}
           />
           <InsightCard
             icon={Repeat}
             title="Recurring"
             value={formatCurrencyCompact(history.recurringVsOneTime.recurring)}
             subtitle={`vs ${formatCurrencyCompact(history.recurringVsOneTime.oneTime)} one-time`}
+            onClick={() => router.push("/expenses?recurring=true")}
           />
           <InsightCard
             icon={Zap}
             title="Top Category"
             value={topCats.length > 0 ? (catMap[topCats[0].category]?.label ?? topCats[0].category) : "—"}
             subtitle={topCats.length > 0 ? `${formatCurrencyCompact(topCats[0].total)} all-time` : "no data"}
+            onClick={topCats.length > 0 ? () => router.push(`/expenses?category=${topCats[0].category}`) : undefined}
           />
         </div>
 

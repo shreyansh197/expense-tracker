@@ -163,7 +163,11 @@ export function FilterPanel({
                 max="31"
                 placeholder="From"
                 value={dayMin}
-                onChange={(e) => onDayMinChange(e.target.value)}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  if (v && dayMax && parseInt(v, 10) > parseInt(dayMax, 10)) return;
+                  onDayMinChange(v);
+                }}
                 className="w-full flex-1 rounded-ui-md border border-[var(--border)] bg-[var(--surface)] py-2.5 px-2 text-xs text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-brand/20"
               />
               <span className="text-xs text-[var(--text-tertiary)]">to</span>
@@ -173,7 +177,11 @@ export function FilterPanel({
                 max="31"
                 placeholder="To"
                 value={dayMax}
-                onChange={(e) => onDayMaxChange(e.target.value)}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  if (v && dayMin && parseInt(v, 10) < parseInt(dayMin, 10)) return;
+                  onDayMaxChange(v);
+                }}
                 className="w-full flex-1 rounded-ui-md border border-[var(--border)] bg-[var(--surface)] py-2.5 px-2 text-xs text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-brand/20"
               />
             </div>

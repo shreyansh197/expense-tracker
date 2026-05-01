@@ -62,7 +62,7 @@
   --text-primary: #1A1B2E;
   --text-secondary: #4A4E6B;
   --text-tertiary: #545870;
-  --text-muted: #6A6F86;
+  --text-muted: #595D73;
   --text-inverse: #FFFFFF;
   /* ── Semantic surfaces ── */
   --surface-modal: #FAF7F2;
@@ -1439,20 +1439,104 @@ input[type="password"]::-ms-clear {
 .rounded-ui-xl  { border-radius: var(--radius-xl) !important; }
 .rounded-ui-full { border-radius: 9999px !important; }
 
-/* ── Morphing ambient blob ─────────────────────────────────── */
-@keyframes morph {
-  0%, 100% { border-radius: 60% 40% 50% 50% / 50% 60% 40% 50%; transform: rotate(0deg) scale(1); }
-  25%      { border-radius: 40% 60% 55% 45% / 55% 40% 60% 45%; transform: rotate(3deg) scale(1.03); }
-  50%      { border-radius: 50% 50% 40% 60% / 45% 55% 45% 55%; transform: rotate(-2deg) scale(0.98); }
-  75%      { border-radius: 55% 45% 60% 40% / 40% 50% 55% 50%; transform: rotate(2deg) scale(1.02); }
+/* ── Hero orb — Gemini-style shape morph ───────────────────── */
+.hero-orb-container {
+  position: relative;
+  flex-shrink: 0;
 }
-.morph-blob {
-  animation: morph 8s ease-in-out infinite;
-  filter: blur(8px);
+
+.hero-orb-glow {
+  position: absolute;
+  inset: -30%;
+  border-radius: 50%;
+  opacity: 0.3;
+  animation: orb-glow 4s ease-in-out infinite;
+  z-index: 0;
+}
+
+.hero-orb-blob {
+  position: absolute;
+  inset: 0;
+  filter: blur(6px);
+}
+
+/* Blob 1: main shape — defines outer silhouette */
+.orb-blob-1 {
+  animation: orb-shape-1 8s linear infinite;
+  z-index: 1;
+}
+
+/* Blob 2: secondary — counter-rotates for complexity */
+.orb-blob-2 {
+  inset: 10%;
+  mix-blend-mode: overlay;
+  opacity: 0.85;
+  animation: orb-shape-2 6s linear infinite;
+  z-index: 2;
+}
+
+/* Blob 3: inner core — subtle pulse */
+.orb-blob-3 {
+  inset: 20%;
+  filter: blur(4px);
+  opacity: 0.8;
+  animation: orb-shape-3 5s linear infinite;
+  z-index: 3;
+}
+
+/* Specular — glass highlight */
+.hero-orb-specular {
+  position: absolute;
+  top: 10%;
+  left: 15%;
+  width: 40%;
+  height: 30%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(255,255,255,0.55), transparent 70%);
+  animation: orb-specular 6s ease-in-out infinite;
+  z-index: 4;
+  pointer-events: none;
+}
+
+/* ── Keyframes: each blob morphs border-radius while rotating ── */
+@keyframes orb-shape-1 {
+  0%   { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; transform: rotate(0deg); }
+  25%  { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; transform: rotate(90deg); }
+  50%  { border-radius: 50% 60% 30% 60% / 30% 50% 70% 60%; transform: rotate(180deg); }
+  75%  { border-radius: 60% 30% 50% 40% / 70% 40% 60% 30%; transform: rotate(270deg); }
+  100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; transform: rotate(360deg); }
+}
+
+@keyframes orb-shape-2 {
+  0%   { border-radius: 40% 60% 60% 40% / 60% 40% 60% 40%; transform: rotate(0deg); }
+  25%  { border-radius: 60% 40% 40% 60% / 40% 60% 40% 60%; transform: rotate(-60deg); }
+  50%  { border-radius: 50% 50% 60% 40% / 60% 50% 40% 50%; transform: rotate(-120deg); }
+  75%  { border-radius: 40% 60% 50% 50% / 50% 40% 60% 50%; transform: rotate(-180deg); }
+  100% { border-radius: 40% 60% 60% 40% / 60% 40% 60% 40%; transform: rotate(-240deg); }
+}
+
+@keyframes orb-shape-3 {
+  0%, 100% { border-radius: 50% 50% 50% 50% / 50% 50% 50% 50%; transform: scale(1); }
+  33%      { border-radius: 45% 55% 60% 40% / 55% 45% 40% 60%; transform: scale(1.05); }
+  66%      { border-radius: 55% 45% 40% 60% / 45% 55% 60% 40%; transform: scale(0.95); }
+}
+
+@keyframes orb-specular {
+  0%, 100% { transform: translate(0, 0); opacity: 0.55; }
+  50%      { transform: translate(5%, 8%); opacity: 0.35; }
+}
+
+@keyframes orb-glow {
+  0%, 100% { transform: scale(1); opacity: 0.25; }
+  50%      { transform: scale(1.1); opacity: 0.4; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .morph-blob { animation: none !important; }
+  .orb-blob-1,
+  .orb-blob-2,
+  .orb-blob-3,
+  .hero-orb-specular,
+  .hero-orb-glow { animation: none !important; }
 }
 
 /* ── Container-query chart wrapper ─────────────────────────── */

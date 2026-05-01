@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { m } from "framer-motion";
 import { Layers } from "lucide-react";
 import { useUIStore } from "@/stores/uiStore";
@@ -109,6 +109,9 @@ export function CategorySeasons() {
   const xScale = (i: number) => PADDING_LEFT + (i / Math.max(stackedData.length - 1, 1)) * chartW;
   const yScale = (val: number) => PADDING_TOP + chartH - (val / maxTotal) * chartH;
 
+  // Y-axis ticks (0, 25%, 50%, 75%, 100%)
+  const yTicks = [0, 0.25, 0.5, 0.75, 1];
+
   return (
     <m.div
       className="card-terrain p-5"
@@ -124,70 +127,21 @@ export function CategorySeasons() {
       </div>
 
       {/* Stacked area chart */}
-      <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto" preserveAspectRatio="xMidYMid meet">
-        {/* Grid lines */}
-        {[0, 0.25, 0.5, 0.75, 1].map((frac) => (
-          <line
-            key={frac}
-            x1={PADDING_LEFT} y1={yScale(frac * maxTotal)}
-            x2={W - PADDING_RIGHT} y2={yScale(frac * maxTotal)}
-            stroke="var(--border)" strokeWidth="0.5" strokeDasharray="3 3"
-          />
-        ))}
-
-        {/* Stacked areas — render bottom to top */}
-        {topCats.map((cat, catIdx) => {
-          const bottomPoints = stacks.map((s, i) => ({
-            x: xScale(i),
-            y: yScale(catIdx > 0 ? s[catIdx - 1] : 0),
-          }));
-          const topPoints = stacks.map((s, i) => ({
-            x: xScale(i),
-            y: yScale(s[catIdx]),
-          }));
-
-          const d = [
-            `M${topPoints[0].x},${topPoints[0].y}`,
-            ...topPoints.slice(1).map((p) => `L${p.x},${p.y}`),
-            ...bottomPoints.reverse().map((p) => `L${p.x},${p.y}`),
-            "Z",
-          ].join(" ");
-
-          return (
-            <path
-              key={cat}
-              d={d}
-              fill={catColors[catIdx]}
-              opacity={0.35}
-              stroke={catColors[catIdx]}
-              strokeWidth="1"
-              strokeOpacity="0.6"
-            />
-          );
-        })}
-
-        {/* Month labels */}
-        {stackedData.map((row, i) => (
-          <text
-            key={i}
-            x={xScale(i)}
-            y={H - 5}
-            textAnchor="middle"
-            fill="var(--text-muted)"
-            fontSize="8"
-          >
-            {(row.label as string).split(" ")[0]}
-          </text>
-        ))}
-
-        {/* Y-axis labels */}
-        <text x={PADDING_LEFT - 4} y={PADDING_TOP + 4} textAnchor="end" fill="var(--text-muted)" fontSize="8">
-          {formatCurrencyCompact(maxTotal)}
-        </text>
-        <text x={PADDING_LEFT - 4} y={PADDING_TOP + chartH + 4} textAnchor="end" fill="var(--text-muted)" fontSize="8">
-          0
-        </text>
-      </svg>
+      <ChartWithTooltip
+        W={W} H={H}
+        PADDING_LEFT={PADDING_LEFT} PADDING_RIGHT={PADDING_RIGHT}
+        PADDING_TOP={PADDING_TOP} PADDING_BOTTOM={PADDING_BOTTOM}
+        chartW={chartW} chartH={chartH}
+        yTicks={yTicks}
+        xScale={xScale} yScale={yScale}
+        maxTotal={maxTotal}
+        stackedData={stackedData}
+        stacks={stacks}
+        topCats={topCats}
+        catColors={catColors}
+        catMap={catMap}
+        formatCurrencyCompact={formatCurrencyCompact}
+      />
 
       {/* Legend */}
       <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5">
@@ -213,5 +167,174 @@ export function CategorySeasons() {
         </div>
       )}
     </m.div>
+  );
+}
+
+/** Interactive SVG chart with hover tooltip */
+function ChartWithTooltip({
+  W, H, PADDING_LEFT, PADDING_RIGHT, PADDING_TOP, PADDING_BOTTOM,
+  chartW, chartH, yTicks, xScale, yScale, maxTotal,
+  stackedData, stacks, topCats, catColors, catMap, formatCurrencyCompact,
+}: {
+  W: number; H: number;
+  PADDING_LEFT: number; PADDING_RIGHT: number;
+  PADDING_TOP: number; PADDING_BOTTOM: number;
+  chartW: number; chartH: number;
+  yTicks: number[];
+  xScale: (i: number) => number;
+  yScale: (v: number) => number;
+  maxTotal: number;
+  stackedData: Array<Record<string, string | number>>;
+  stacks: number[][];
+  topCats: string[];
+  catColors: string[];
+  catMap: Record<string, { label?: string; color?: string }>;
+  formatCurrencyCompact: (n: number) => string;
+}) {
+  const [hoverIdx, setHoverIdx] = useState<number | null>(null);
+  const colWidth = chartW / Math.max(stackedData.length, 1);
+
+  return (
+    <div className="relative">
+      <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto" preserveAspectRatio="xMidYMid meet">
+        {/* Grid lines + Y-axis labels */}
+        {yTicks.map((frac) => (
+          <g key={frac}>
+            <line
+              x1={PADDING_LEFT} y1={yScale(frac * maxTotal)}
+              x2={W - PADDING_RIGHT} y2={yScale(frac * maxTotal)}
+              stroke="var(--border)" strokeWidth="0.5" strokeDasharray="3 3"
+            />
+            <text
+              x={PADDING_LEFT - 4} y={yScale(frac * maxTotal) + 3}
+              textAnchor="end" fill="var(--text-muted)" fontSize="7"
+            >
+              {formatCurrencyCompact(frac * maxTotal)}
+            </text>
+          </g>
+        ))}
+
+        {/* Stacked areas — render bottom to top */}
+        {topCats.map((cat, catIdx) => {
+          const bottomPoints = stacks.map((s, i) => ({
+            x: xScale(i),
+            y: yScale(catIdx > 0 ? s[catIdx - 1] : 0),
+          }));
+          const topPoints = stacks.map((s, i) => ({
+            x: xScale(i),
+            y: yScale(s[catIdx]),
+          }));
+
+          const d = [
+            `M${topPoints[0].x},${topPoints[0].y}`,
+            ...topPoints.slice(1).map((p) => `L${p.x},${p.y}`),
+            ...bottomPoints.reverse().map((p) => `L${p.x},${p.y}`),
+            "Z",
+          ].join(" ");
+
+          return (
+            <path
+              key={cat}
+              d={d}
+              fill={catColors[catIdx]}
+              opacity={hoverIdx !== null ? 0.25 : 0.35}
+              stroke={catColors[catIdx]}
+              strokeWidth="1"
+              strokeOpacity="0.6"
+            >
+              <title>{catMap[cat]?.label ?? cat}</title>
+            </path>
+          );
+        })}
+
+        {/* Hover highlight column */}
+        {hoverIdx !== null && (
+          <rect
+            x={xScale(hoverIdx) - colWidth / 2}
+            y={PADDING_TOP}
+            width={colWidth}
+            height={chartH}
+            fill="var(--text-primary)"
+            opacity="0.04"
+            rx="2"
+          />
+        )}
+
+        {/* Month labels */}
+        {stackedData.map((row, i) => (
+          <text
+            key={i}
+            x={xScale(i)}
+            y={H - 5}
+            textAnchor="middle"
+            fill={hoverIdx === i ? "var(--text-primary)" : "var(--text-muted)"}
+            fontSize="8"
+            fontWeight={hoverIdx === i ? "600" : "400"}
+          >
+            {(row.label as string).split(" ")[0]}
+          </text>
+        ))}
+
+        {/* Invisible hover regions */}
+        {stackedData.map((_, i) => (
+          <rect
+            key={i}
+            x={xScale(i) - colWidth / 2}
+            y={0}
+            width={colWidth}
+            height={H}
+            fill="transparent"
+            onMouseEnter={() => setHoverIdx(i)}
+            onMouseLeave={() => setHoverIdx(null)}
+            onTouchStart={() => setHoverIdx(i)}
+            onTouchEnd={() => setHoverIdx(null)}
+            style={{ cursor: "crosshair" }}
+          />
+        ))}
+      </svg>
+
+      {/* Tooltip */}
+      {hoverIdx !== null && (() => {
+        const pct = (xScale(hoverIdx) / W) * 100;
+        const atLeft = pct < 20;
+        const atRight = pct > 80;
+        return (
+          <div
+            className="absolute pointer-events-none z-[60] rounded-lg p-2 shadow-md text-xs min-w-[120px]"
+            style={{
+              background: "var(--surface-elevated)",
+              border: "1px solid var(--border)",
+              left: atLeft ? `${pct}%` : atRight ? undefined : `${pct}%`,
+              right: atRight ? `${100 - pct}%` : undefined,
+              top: "8px",
+              transform: atLeft || atRight ? undefined : "translateX(-50%)",
+            }}
+          >
+          <p className="font-semibold mb-1" style={{ color: "var(--text-primary)" }}>
+            {stackedData[hoverIdx].label as string}
+          </p>
+          {topCats.map((cat, catIdx) => {
+            const val = (stackedData[hoverIdx][cat] as number) || 0;
+            if (val === 0) return null;
+            return (
+              <div key={cat} className="flex items-center justify-between gap-3">
+                <span className="flex items-center gap-1">
+                  <span className="inline-block w-2 h-2 rounded-sm" style={{ background: catColors[catIdx] }} />
+                  <span style={{ color: "var(--text-secondary)" }}>{catMap[cat]?.label ?? cat}</span>
+                </span>
+                <span className="font-medium font-numeric" style={{ color: "var(--text-primary)" }}>
+                  {formatCurrencyCompact(val)}
+                </span>
+              </div>
+            );
+          })}
+          <div className="mt-1 pt-1 flex justify-between font-semibold" style={{ borderTop: "1px solid var(--border)", color: "var(--text-primary)" }}>
+            <span>Total</span>
+            <span className="font-numeric">{formatCurrencyCompact(stackedData[hoverIdx].total as number)}</span>
+          </div>
+        </div>
+        );
+      })()}
+    </div>
   );
 }

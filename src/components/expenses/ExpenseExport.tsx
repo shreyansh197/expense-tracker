@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { Download, FileDown, Image } from "lucide-react";
 import type { Expense } from "@/types";
 import { CATEGORIES } from "@/lib/categories";
@@ -15,6 +16,15 @@ interface ExpenseExportProps {
 export function ExpenseExport({ expenses, month, year }: ExpenseExportProps) {
   const [showMenu, setShowMenu] = useState(false);
   const { settings } = useSettings();
+  const btnRef = useRef<HTMLButtonElement>(null);
+  const [menuPos, setMenuPos] = useState<{ top: number; right: number }>({ top: 0, right: 0 });
+
+  useEffect(() => {
+    if (showMenu && btnRef.current) {
+      const rect = btnRef.current.getBoundingClientRect();
+      setMenuPos({ top: rect.bottom + 4, right: window.innerWidth - rect.right });
+    }
+  }, [showMenu]);
 
   const getCategoryLabel = (id: string): string => {
     const builtIn = CATEGORIES.find((c) => c.id === id);
@@ -174,6 +184,7 @@ export function ExpenseExport({ expenses, month, year }: ExpenseExportProps) {
   return (
     <div className="relative">
       <button
+        ref={btnRef}
         onClick={() => setShowMenu(!showMenu)}
         className="flex items-center gap-1.5 rounded-lg px-3 py-2.5 text-xs font-medium transition-colors hover:bg-[var(--surface-secondary)] min-h-[44px]"
         style={{ color: "var(--text-secondary)" }}
@@ -184,12 +195,12 @@ export function ExpenseExport({ expenses, month, year }: ExpenseExportProps) {
         <span className="hidden sm:inline">Export</span>
       </button>
 
-      {showMenu && (
+      {showMenu && createPortal(
         <>
           <div className="fixed inset-0 z-[50]" onClick={() => setShowMenu(false)} />
           <div
-            className="absolute right-0 top-full z-[50] mt-1 min-w-[160px] rounded-xl border p-2 shadow-lg"
-            style={{ background: "var(--surface)", borderColor: "var(--border)" }}
+            className="fixed z-[50] min-w-[160px] rounded-xl border p-2 shadow-lg"
+            style={{ background: "var(--surface)", borderColor: "var(--border)", top: menuPos.top, right: menuPos.right }}
           >
             <button
               onClick={exportCSV}
@@ -219,7 +230,8 @@ export function ExpenseExport({ expenses, month, year }: ExpenseExportProps) {
               Export as Image
             </button>
           </div>
-        </>
+        </>,
+        document.body
       )}
     </div>
   );

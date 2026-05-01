@@ -68,7 +68,7 @@ function ExpensesContent() {
   });
   const [localSearch, setLocalSearch] = useState(searchQuery);
 
-  // Pre-fill day filter from URL ?day=N (e.g. from clicking a daily bar chart)
+  // Pre-fill filters from URL params (e.g. from analytics drill-down)
   useEffect(() => {
     const dayParam = searchParams.get("day");
     if (dayParam) {
@@ -77,6 +77,15 @@ function ExpensesContent() {
         setDayMin(String(d));
         setDayMax(String(d));
       }
+    }
+    const categoryParam = searchParams.get("category");
+    if (categoryParam) {
+      setActiveCategories([categoryParam]);
+    }
+    const recurringParam = searchParams.get("recurring");
+    if (recurringParam === "true") {
+      setSearchQuery("recurring");
+      setLocalSearch("recurring");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
