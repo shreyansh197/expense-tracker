@@ -3,7 +3,7 @@
 import { useMemo } from "react";
 import { m } from "framer-motion";
 import { Coffee, Flame } from "lucide-react";
-import { HeroOrb } from "@/components/dashboard/HeroOrb";
+import { PaceGauge } from "@/components/dashboard/PaceGauge";
 import { SpendingStream } from "@/components/dashboard/SpendingStream";
 import { stoneSettle } from "@/lib/motion/variants";
 import { useUIStore } from "@/stores/uiStore";
@@ -46,7 +46,7 @@ export function MonthSummaryHero({
   daysRemaining,
   avgDaily,
   paceToStayUnder,
-  // categoryTotals / categories kept in interface for caller compatibility
+  // categoryTotals / categories available for future use
   topCategory,
   streak,
   recurringCount,
@@ -156,11 +156,12 @@ export function MonthSummaryHero({
           </p>
         </div>
 
-        {/* Gemini-style morphing orb */}
-        <HeroOrb
-          budgetUsedPercent={budgetUsedPercent}
+        {/* Pace gauge — daily spend vs target */}
+        <PaceGauge
+          avgDaily={avgDaily}
+          paceToStayUnder={paceToStayUnder}
           hasBudget={effectiveBudget > 0}
-          size={76}
+          size={88}
         />
       </div>
 
