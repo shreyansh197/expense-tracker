@@ -14,7 +14,7 @@ import { SkeletonKpiCards, SkeletonChart } from "@/components/ui/Skeleton";
 import { PageTransition } from "@/components/ui/PageTransition";
 import { InstallBanner } from "@/components/pwa/InstallBanner";
 import { ClearingScene } from "@/components/ui/illustrations/terrain/ClearingScene";
-import { Repeat, PlusCircle, ChevronDown, Flame, TrendingUp, AlertTriangle, Leaf, Sunrise } from "lucide-react";
+import { Repeat, PlusCircle, ChevronDown, Flame, TrendingUp, TrendingDown, AlertTriangle, Leaf, Sunrise } from "lucide-react";
 
 // Below-fold widgets — dynamic imports for faster initial paint
 const SpendingForecastCalendar = dynamic(() => import("@/components/analytics/SpendingForecastCalendar").then(m => ({ default: m.SpendingForecastCalendar })));
@@ -48,6 +48,7 @@ import { useHistoricalData } from "@/hooks/useHistoricalData";
 import { useNotifications } from "@/hooks/useNotifications";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import { useMonthUrlSync } from "@/hooks/useMonthUrlSync";
+import { OnboardingFlow } from "@/components/onboarding/OnboardingFlow";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { getAllCategories } from "@/lib/categories";
 
@@ -172,6 +173,11 @@ function DashboardContent() {
     [] as { year: number; month: number; day: number; deletedAt: number | null }[],
   );
   const streak = useMemo(() => getSpendingStreak(allExpenses as Expense[]), [allExpenses]);
+
+  const prevMonthTotal = useMemo(
+    () => prevMonthExpenses.filter((e) => !e.deletedAt).reduce((s, e) => s + e.amount, 0),
+    [prevMonthExpenses],
+  );
 
   // Achievements
   const achievementsData = useAchievements(settings, allExpenses as Expense[], expenses, streak, updateSettings);
@@ -443,12 +449,16 @@ function DashboardContent() {
               <SkeletonKpiCards />
             </div>
           ) : expenses.length === 0 ? (
-            <m.div
-              className="card-terrain flex flex-col items-center p-8 text-center"
-              initial={{ opacity: 0, scale: 0.97 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-            >
+            <div className="space-y-3">
+              <OnboardingFlow
+                onSetBudget={(amount) => updateSettings({ salary: amount })}
+              />
+              <m.div
+                className="card-terrain flex flex-col items-center p-8 text-center"
+                initial={{ opacity: 0, scale: 0.97 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+              >
               <ClearingScene className="mx-auto mb-4 w-48 sm:w-56" />
               <h2 className="font-display italic text-lg" style={{ color: "var(--text-primary)" }}>
                 Start tracking
@@ -466,6 +476,7 @@ function DashboardContent() {
                 Add First Expense
               </m.button>
             </m.div>
+            </div>
           ) : (
             <MonthSummaryHero
               monthlyTotal={monthlyTotal}
@@ -494,6 +505,40 @@ function DashboardContent() {
             />
           )}
       </ErrorBoundary>
+
+      {/* 2a-b. LAST MONTH vs THIS MONTH — comparison strip */}
+      {!loading && expenses.length > 0 && prevMonthTotal > 0 && (() => {
+        const delta = prevMonthTotal > 0 ? ((monthlyTotal - prevMonthTotal) / prevMonthTotal) * 100 : null;
+        const up = delta !== null && delta > 2;
+        const down = delta !== null && delta < -2;
+        const DeltaIcon = up ? TrendingUp : down ? TrendingDown : null;
+        const deltaColor = up ? "var(--warning)" : down ? "var(--success)" : "var(--text-muted)";
+        return (
+          <m.div
+            className="card-terrain flex items-center justify-between gap-4 px-4 py-3"
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <div className="flex-1 text-center">
+              <p className="text-[10px] font-medium uppercase tracking-wider mb-0.5" style={{ color: "var(--text-muted)" }}>Last month</p>
+              <p className="text-base font-bold font-numeric leading-none" style={{ color: "var(--text-secondary)" }}>{formatCurrency(prevMonthTotal)}</p>
+            </div>
+            <div className="flex flex-col items-center gap-0.5 shrink-0">
+              {DeltaIcon && <DeltaIcon size={14} style={{ color: deltaColor }} />}
+              {delta !== null && (
+                <span className="text-[11px] font-semibold font-numeric" style={{ color: deltaColor }}>
+                  {delta > 0 ? "+" : ""}{Math.round(delta)}%
+                </span>
+              )}
+            </div>
+            <div className="flex-1 text-center">
+              <p className="text-[10px] font-medium uppercase tracking-wider mb-0.5" style={{ color: "var(--text-muted)" }}>This month</p>
+              <p className="text-base font-bold font-numeric leading-none" style={{ color: "var(--text-primary)" }}>{formatCurrency(monthlyTotal)}</p>
+            </div>
+          </m.div>
+        );
+      })()}
 
       {/* 2b. MONTH START ANCHOR — new month context card */}
       {!loading && (

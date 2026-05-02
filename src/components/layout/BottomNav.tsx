@@ -1,20 +1,19 @@
 "use client";
 
-import { useMemo } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState, useRef } from "react";
 import { m, AnimatePresence } from "framer-motion";
 import {
   List,
   Plus,
-  BarChart3,
-  Filter,
 } from "lucide-react";
 import { IconDashboard, IconAnalytics, IconSettings, IconBusiness } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 import { useUIStore } from "@/stores/uiStore";
 import { useSettings } from "@/hooks/useSettings";
 import { spring } from "@/lib/motion/tokens";
+import { QuickAddSheet } from "@/components/layout/QuickAddSheet";
 
 const springStiff = spring.stiff;
 
@@ -50,11 +49,33 @@ export function BottomNav() {
   const isLedgerDetail = /^\/business\/[^/]+/.test(pathname);
   const shouldHideFAB = isLedgerDetail || pathname.startsWith("/settings");
 
+  const [quickAddOpen, setQuickAddOpen] = useState(false);
+  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const didLongPress = useRef(false);
+
   const navLinks = isBusiness ? businessLinks : personalLinks;
   const gridCols = navLinks.length;
   const accentColor = isBusiness && isBusinessRoute ? "emerald" : "blue";
 
+  const handleFabPointerDown = () => {
+    didLongPress.current = false;
+    longPressTimer.current = setTimeout(() => {
+      didLongPress.current = true;
+      if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate([10, 30, 10]);
+      setQuickAddOpen(true);
+    }, 450);
+  };
+
+  const cancelLongPress = () => {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+    }
+  };
+
   const handleFabClick = () => {
+    if (didLongPress.current) return; // sheet already opened
+    cancelLongPress();
     if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate(30);
     if (isBusiness && isBusinessRoute) {
       openLedgerForm();
@@ -63,14 +84,8 @@ export function BottomNav() {
     }
   };
 
-  // Contextual FAB icon based on route
-  const fabConfig = useMemo(() => {
-    if (isBusiness && isBusinessRoute) return { icon: Plus, key: "plus" };
-    if (pathname === "/analytics") return { icon: BarChart3, key: "chart" };
-    if (pathname === "/expenses") return { icon: Filter, key: "filter" };
-    return { icon: Plus, key: "plus" };
-  }, [pathname, isBusiness, isBusinessRoute]);
-  const FabIcon = fabConfig.icon;
+  const fabConfig = { icon: Plus, key: "plus" };
+  const FabIcon = Plus;
 
   return (
     <>
@@ -79,8 +94,12 @@ export function BottomNav() {
       <m.button
         data-tour="fab"
         onClick={handleFabClick}
+        onPointerDown={handleFabPointerDown}
+        onPointerUp={cancelLongPress}
+        onPointerLeave={cancelLongPress}
+        onPointerCancel={cancelLongPress}
         aria-label={isBusiness && isBusinessRoute ? "Add ledger" : "Add expense"}
-        title={isBusiness && isBusinessRoute ? "Add ledger (Ctrl+N)" : "Add expense (Ctrl+N)"}
+        title={isBusiness && isBusinessRoute ? "Add ledger (Ctrl+N)" : "Add expense (Ctrl+N) · Hold for quick add"}
         className={cn(
           "fixed left-1/2 z-[150] flex h-[54px] w-[54px] -translate-x-1/2 items-center justify-center rounded-ui-full text-white transition-colors lg:hidden",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
@@ -112,6 +131,8 @@ export function BottomNav() {
         </AnimatePresence>
       </m.button>
       )}
+
+      <QuickAddSheet open={quickAddOpen} onClose={() => setQuickAddOpen(false)} />
 
       {/* ─── Nav bar (z-30, below FAB) ─── */}
       <nav

@@ -57,5 +57,6 @@ export function useBudgetHealthBg(): void {
     }
 
     document.documentElement.style.setProperty("--page-bg", bg);
+    document.body.style.transition = "background-color 0.8s ease";
   }, [budgetUsedPercent, pathname, resolvedTheme]);
 }

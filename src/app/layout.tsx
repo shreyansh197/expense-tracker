@@ -1,14 +1,8 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Lora, Plus_Jakarta_Sans, JetBrains_Mono } from "next/font/google";
+import { Lora, Plus_Jakarta_Sans, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 import { ServiceWorkerRegistration } from "@/components/pwa/ServiceWorkerRegistration";
-
-const inter = Inter({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-inter",
-});
 
 const lora = Lora({
   subsets: ["latin"],
@@ -71,7 +65,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning className={`${inter.variable} ${lora.variable} ${jakarta.variable} ${mono.variable}`}>
+    <html lang="en" suppressHydrationWarning className={`${lora.variable} ${jakarta.variable} ${mono.variable}`}>
       <head>
         <script
           dangerouslySetInnerHTML={{
@@ -79,7 +73,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="transition-colors duration-200">
+      <body>
         <Providers>{children}</Providers>
         <ServiceWorkerRegistration />
       </body>

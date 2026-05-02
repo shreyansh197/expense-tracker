@@ -183,8 +183,34 @@ function MobileAuthPage({ children }: { children: React.ReactNode }) {
             animationDelay: "0.14s",
           }}
         >
-          Smart expense tracking, simplified.
+          Know where every rupee goes.
         </p>
+
+        {/* Feature proof chips */}
+        <div
+          style={{
+            display: "flex", gap: 8, marginTop: 20,
+            animation: "sp-card-in 0.4s ease both",
+            animationDelay: "0.2s",
+          }}
+        >
+          {["📊 Smart analytics", "🔄 Multi-device sync", "🎯 Budget tracking"].map((f) => (
+            <span
+              key={f}
+              style={{
+                fontSize: "0.7rem", fontWeight: 500,
+                padding: "4px 10px",
+                borderRadius: 99,
+                background: "color-mix(in srgb, var(--accent) 10%, transparent)",
+                color: "var(--text-secondary)",
+                border: "1px solid color-mix(in srgb, var(--accent) 20%, transparent)",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {f}
+            </span>
+          ))}
+        </div>
       </div>
 
       {/* ── Form card — bottom section ──────────────────── */}

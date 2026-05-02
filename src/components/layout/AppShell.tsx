@@ -111,7 +111,7 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
             <Sidebar />
             <main
               id="main-content"
-              className="flex-1 overflow-y-auto pb-36 lg:pb-0"
+              className="flex-1 overflow-y-auto pb-24 lg:pb-0"
               style={{ background: 'linear-gradient(180deg, var(--surface-secondary), transparent 200px)', overscrollBehaviorY: 'contain' }}
               onTouchStart={onTouchStart}
               onTouchEnd={onTouchEnd}
@@ -188,7 +188,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   if (!hydrated) {
     return (
       <div className="flex h-screen items-center justify-center" style={{ background: 'var(--background)' }}>
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-brand border-t-transparent" />
+        <div role="status" aria-label="Loading ExpenStream">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-brand border-t-transparent" aria-hidden="true" />
+          <span className="sr-only">Loading…</span>
+        </div>
       </div>
     );
   }

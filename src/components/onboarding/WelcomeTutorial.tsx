@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, m } from "framer-motion";
 import { ArrowRight, X } from "lucide-react";
 import { ClearingScene } from "@/components/ui/illustrations/terrain/ClearingScene";
 import { SUPPORTED_CURRENCIES } from "@/lib/utils";
@@ -89,7 +89,7 @@ export function WelcomeTutorial({ onComplete, onSetup }: WelcomeTutorialProps) {
   if (screen === -1) {
     return (
       <div className="fixed inset-0 z-[300] flex items-center justify-center" style={{ background: "var(--es-chalk, #FAF7F2)" }}>
-        <motion.div
+        <m.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
@@ -97,7 +97,7 @@ export function WelcomeTutorial({ onComplete, onSetup }: WelcomeTutorialProps) {
         >
           <div className="flex justify-center gap-2 mb-6" aria-hidden="true">
             {[0, 1, 2].map((i) => (
-              <motion.span
+              <m.span
                 key={i}
                 className="block w-2.5 h-2.5 rounded-full"
                 style={{ background: "var(--accent)" }}
@@ -110,7 +110,7 @@ export function WelcomeTutorial({ onComplete, onSetup }: WelcomeTutorialProps) {
           <h1 className="font-display italic text-2xl" style={{ color: "var(--text-primary)" }}>
             ExpenStream
           </h1>
-        </motion.div>
+        </m.div>
       </div>
     );
   }
@@ -144,7 +144,7 @@ export function WelcomeTutorial({ onComplete, onSetup }: WelcomeTutorialProps) {
       {/* Content area */}
       <div className="flex-1 flex flex-col items-center justify-center px-8 overflow-hidden">
         <AnimatePresence mode="wait" custom={dir}>
-          <motion.div
+          <m.div
             key={screen}
             custom={dir}
             variants={slideVariants}
@@ -237,6 +237,7 @@ export function WelcomeTutorial({ onComplete, onSetup }: WelcomeTutorialProps) {
                         background: "var(--surface)",
                         border: "1px solid var(--border)",
                         color: "var(--text-primary)",
+                        fontSize: "16px",
                       }}
                       aria-label="Monthly budget amount"
                     />
@@ -266,7 +267,7 @@ export function WelcomeTutorial({ onComplete, onSetup }: WelcomeTutorialProps) {
                 ))}
               </div>
             )}
-          </motion.div>
+          </m.div>
         </AnimatePresence>
       </div>
 

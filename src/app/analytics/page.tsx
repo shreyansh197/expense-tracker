@@ -78,6 +78,41 @@ function AnalyticsContent() {
     return history.topCategoriesAllTime.slice(0, 6);
   }, [history.topCategoriesAllTime]);
 
+  // Generate the single most notable headline for this month
+  const monthHeadline = useMemo(() => {
+    const cur = history.currentMonth;
+    const mom = history.monthOverMonthChange;
+    const topCat = history.topCategoriesAllTime[0];
+    if (!cur || cur.total === 0) return null;
+
+    // Over-budget alert takes priority
+    if (effectiveBudget > 0 && cur.total > effectiveBudget) {
+      const over = cur.total - effectiveBudget;
+      return { text: `You're ${formatCurrencyCompact(over)} over budget this month.`, tone: "danger" as const };
+    }
+    // Month-over-month change
+    if (mom !== null && Math.abs(mom) >= 10) {
+      const dir = mom > 0 ? "up" : "down";
+      const pct = Math.abs(Math.round(mom));
+      const tone = mom > 20 ? "warning" as const : mom < -10 ? "success" as const : "neutral" as const;
+      return { text: `Spending is ${dir} ${pct}% vs last month.`, tone };
+    }
+    // Top category dominance
+    if (topCat && cur.total > 0) {
+      const pct = Math.round((topCat.total / cur.total) * 100);
+      if (pct >= 35) {
+        const label = catMap[topCat.category]?.label ?? topCat.category;
+        return { text: `${label} accounts for ${pct}% of your spend this month.`, tone: "neutral" as const };
+      }
+    }
+    // On-track positive
+    if (effectiveBudget > 0) {
+      const pct = Math.round((cur.total / effectiveBudget) * 100);
+      if (pct <= 75) return { text: `You're ${pct}% through your budget — on track.`, tone: "success" as const };
+    }
+    return null;
+  }, [history, effectiveBudget, catMap, formatCurrencyCompact]);
+
   // Share analytics summary as branded image (matches dashboard postcard style)
   const handleShareAnalytics = useCallback(async () => {
    try {
@@ -391,10 +426,46 @@ function AnalyticsContent() {
             icon={BarChart3}
             illustration={<FogOverlook />}
             title="Clear skies ahead"
-            description="Start adding expenses to see your terrain unfold — trends, patterns, and insights will appear here."
+            description="Add at least 3 expenses to unlock spending insights — trends, patterns, and month-over-month comparisons will appear here."
           />
         ) : (
         <>
+
+        {/* Sparse data nudge */}
+        {history.currentMonth && history.currentMonth.expenses.length > 0 && history.currentMonth.expenses.length < 3 && (
+          <div
+            className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm"
+            style={{ background: "color-mix(in srgb, var(--accent) 8%, transparent)", border: "1px solid color-mix(in srgb, var(--accent) 20%, transparent)" }}
+          >
+            <BarChart3 size={15} style={{ color: "var(--accent)" }} />
+            <p style={{ color: "var(--text-secondary)" }}>
+              Add <strong>{3 - history.currentMonth.expenses.length} more expense{3 - history.currentMonth.expenses.length > 1 ? "s" : ""}</strong> to unlock full analytics for this month.
+            </p>
+          </div>
+        )}
+
+        {/* ─── 0. Month Headline ─── */}
+        {monthHeadline && (
+          <m.div
+            className="card-terrain px-4 py-3 flex items-center gap-3"
+            initial={{ opacity: 0, y: -6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <div
+              className="w-2 h-2 rounded-full flex-shrink-0"
+              style={{
+                background: monthHeadline.tone === "danger" ? "var(--danger)" :
+                  monthHeadline.tone === "warning" ? "var(--warning)" :
+                  monthHeadline.tone === "success" ? "var(--success, #22c55e)" :
+                  "var(--accent)",
+              }}
+            />
+            <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
+              {monthHeadline.text}
+            </p>
+          </m.div>
+        )}
 
         {/* ─── 1. RidgeLine Hero (6-month terrain ridge) ─── */}
         <m.div

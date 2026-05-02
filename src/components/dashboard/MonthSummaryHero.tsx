@@ -101,7 +101,7 @@ export function MonthSummaryHero({
                     }}
                   />
                 </div>
-                <span className="text-[10px] font-medium font-numeric" style={{ color: "var(--text-muted)" }}>
+                <span className="text-[11px] font-medium font-numeric" style={{ color: "var(--text-muted)" }}>
                   {Math.round(budgetUsedPercent)}%
                 </span>
               </div>
@@ -175,7 +175,7 @@ export function MonthSummaryHero({
             aria-valuenow={Math.min(Math.round(budgetUsedPercent), 100)}
             aria-valuemin={0}
             aria-valuemax={100}
-            aria-label="Budget used"
+            aria-label={`Budget: ${Math.round(budgetUsedPercent)}% of ${formatCurrency(effectiveBudget)} used`}
           >
             <m.div
               className="h-full rounded-full"
@@ -187,18 +187,6 @@ export function MonthSummaryHero({
               transition={{ delay: 0.2, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
             />
             <div className="absolute top-0 bottom-0 w-px" style={{ left: "75%", background: "var(--text-muted)", opacity: 0.4 }} />
-          </div>
-          <div className="mt-1 flex justify-between text-xs" style={{ color: "var(--text-muted)" }}>
-            <span>
-              {Math.round(budgetUsedPercent)}% used
-              {budgetUsedPercent >= 100 && (
-                <span style={{ color: "var(--danger)" }}> — over budget</span>
-              )}
-              {budgetUsedPercent >= 75 && budgetUsedPercent < 100 && (
-                <span style={{ color: "var(--warning)" }}> — nearing limit</span>
-              )}
-            </span>
-            <span>{formatCurrency(effectiveBudget)} budget</span>
           </div>
         </div>
       )}
@@ -228,6 +216,10 @@ export function MonthSummaryHero({
 
       {/* Spending stream visualization */}
       <div className="mt-3">
+        <div className="flex items-center justify-between mb-1.5">
+          <span className="text-[11px] font-medium uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Daily spend</span>
+          <span className="text-[11px]" style={{ color: "var(--text-muted)" }}>{monthName}</span>
+        </div>
         <SpendingStream
           budgetUsedPercent={budgetUsedPercent}
           dailyValues={dailyValues}
@@ -249,14 +241,14 @@ export function MonthSummaryHero({
       >
         {/* Daily pace */}
         <m.div className="text-center" variants={stoneSettle}>
-          <p className="text-[10px] font-medium uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
+          <p className="text-[11px] font-medium uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
             Pace
           </p>
           <p className="mt-0.5 text-sm font-bold font-numeric" style={{ color: "var(--text-primary)" }}>
             {formatCurrency(Math.round(avgDaily))}
           </p>
           {effectiveBudget > 0 && paceToStayUnder > 0 && (
-            <p className="text-[9px]" style={{ color: avgDaily > paceToStayUnder ? "var(--warning)" : "var(--text-muted)" }}>
+            <p className="text-[11px]" style={{ color: avgDaily > paceToStayUnder ? "var(--warning)" : "var(--text-muted)" }}>
               ≤ {formatCurrency(Math.round(paceToStayUnder))}
             </p>
           )}
@@ -270,7 +262,7 @@ export function MonthSummaryHero({
           role={topCategory ? "button" : undefined}
           tabIndex={topCategory ? 0 : undefined}
         >
-          <p className="text-[10px] font-medium uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
+          <p className="text-[11px] font-medium uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
             Top
           </p>
           {topCategory ? (
@@ -284,26 +276,38 @@ export function MonthSummaryHero({
 
         {/* Recurring */}
         <m.div className="text-center" variants={stoneSettle}>
-          <p className="text-[10px] font-medium uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
+          <p className="text-[11px] font-medium uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
             Recurring
           </p>
           <p className="mt-0.5 text-sm font-bold font-numeric" style={{ color: "var(--text-primary)" }}>
             {recurringCount}
           </p>
-          <p className="text-[9px]" style={{ color: "var(--text-muted)" }}>
+          <p className="text-[11px]" style={{ color: "var(--text-muted)" }}>
             {formatCurrency(recurringTotal)}/mo
           </p>
         </m.div>
 
         {/* Streak / Achievement */}
-        <m.div className="text-center" variants={stoneSettle}>
-          <p className="text-[10px] font-medium uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
+        <m.div
+          className="text-center rounded-lg py-0.5"
+          variants={stoneSettle}
+          style={streak >= 7 ? { background: "color-mix(in srgb, var(--danger) 8%, transparent)" } : streak >= 4 ? { background: "rgba(249,115,22,0.07)" } : undefined}
+        >
+          <p className="text-[11px] font-medium uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
             {streak >= 2 ? "Streak" : "Count"}
           </p>
           <p className="mt-0.5 text-sm font-bold font-numeric" style={{ color: "var(--text-primary)" }}>
             {streak >= 2 ? (
-              <span className="inline-flex items-center gap-0.5">
-                <Flame size={12} className="text-warn" />
+              <span
+                className="inline-flex items-center gap-0.5"
+                style={{
+                  color: streak >= 14 ? "var(--danger)"
+                    : streak >= 7 ? "#ef4444"
+                    : streak >= 4 ? "#f97316"
+                    : "var(--warning)",
+                }}
+              >
+                <Flame size={12} />
                 {streak}d
               </span>
             ) : (
@@ -311,7 +315,7 @@ export function MonthSummaryHero({
             )}
           </p>
           {achievementLabel && (
-            <p className="text-[9px] truncate" style={{ color: "var(--accent)" }}>
+            <p className="text-[11px] truncate" style={{ color: "var(--accent)" }}>
               🏆 {achievementLabel}
             </p>
           )}

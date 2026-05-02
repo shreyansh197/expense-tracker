@@ -2,10 +2,8 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* Enable cross-document view transitions for page navigations */
-@view-transition {
-  navigation: auto;
-}
+/* View transitions removed — RouteTransition (Framer Motion) owns page animations */
+/* @view-transition { navigation: auto; } */
 
 :root {
   /* ── Fluid type scale (320px → 1440px) ── */
@@ -111,11 +109,11 @@
   --info: #42A5F5;
   --info-soft: #e8f4fd;
   /* ── Semantic ── */
-  --success: #1B5B4A;
-  --success-soft: #BDD9D0;
-  --success-text: #1B5B4A;
-  --success-hover: #1B5B4A;
-  --success-soft-hover: rgba(200, 217, 196, 0.8);
+  --success: #2E7D5E;
+  --success-soft: #D4EDE4;
+  --success-text: #1E6B50;
+  --success-hover: #256A4E;
+  --success-soft-hover: rgba(210, 230, 220, 0.8);
   --warning: #C17A2E;
   --warning-soft: #FBF0E0;
   --warning-text: #C17A2E;
@@ -493,18 +491,12 @@ body {
     radial-gradient(ellipse at 15% 5%, rgba(61, 90, 62, 0.07), transparent 50%),
     radial-gradient(ellipse at 85% 95%, rgba(181, 101, 74, 0.05), transparent 50%);
   color: var(--foreground);
-  font-family: var(--font-body, var(--font-inter, Inter)), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+  font-family: var(--font-body), 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   line-height: 1.6;
-  transition: background-color 2s ease;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  body {
-    transition: none;
-  }
+  /* background-color transition is handled by useBudgetHealthBg hook (0.8s) */
 }
 
 .dark body {
@@ -557,8 +549,8 @@ html {
 }
 .font-numeric {
   font-family: var(--font-numeric);
-  font-variant-numeric: tabular-nums oldstyle-nums;
-  font-feature-settings: "tnum", "onum";
+  font-variant-numeric: tabular-nums lining-nums;
+  font-feature-settings: "tnum", "lnum";
 }
 .font-body-terrain {
   font-family: var(--font-body);
@@ -739,15 +731,23 @@ button, a {
 .card-terrain {
   position: relative;
   overflow: hidden;
+  contain: paint;
   background: color-mix(in srgb, var(--surface) 72%, transparent);
-  backdrop-filter: blur(20px) saturate(1.4);
-  -webkit-backdrop-filter: blur(20px) saturate(1.4);
+  backdrop-filter: blur(8px) saturate(1.2);
+  -webkit-backdrop-filter: blur(8px) saturate(1.2);
   border: 1px solid color-mix(in srgb, var(--border-card) 50%, transparent);
   border-radius: 1.5rem;
   box-shadow:
     inset 0 1px 0 0 color-mix(in srgb, white 6%, transparent),
     var(--shadow-md);
   transition: box-shadow var(--duration-normal) var(--ease-out), border-color var(--duration-normal) var(--ease-out);
+}
+@media (prefers-reduced-motion: reduce) {
+  .card-terrain {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: var(--surface);
+  }
 }
 .card-terrain::after {
   content: "";
@@ -1446,6 +1446,13 @@ input[type="password"]::-ms-clear {
 }
 
 /* ── Cross-platform polish ─────────────────────────────────── */
+
+/* Prevent iOS Safari auto-zoom on focused inputs (triggers when font-size < 16px) */
+@media (max-width: 768px) {
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+}
 
 
 

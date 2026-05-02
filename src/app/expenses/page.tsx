@@ -92,7 +92,7 @@ function ExpensesContent() {
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const debouncedSetSearch = useCallback(
-    debounce((val: string) => setSearchQuery(val), 300),
+    debounce((val: string) => setSearchQuery(val), 150),
     []
   );
 
