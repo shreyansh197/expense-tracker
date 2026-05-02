@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useCallback } from "react";
+import { useMemo, useState } from "react";
 import { m } from "framer-motion";
 import { CalendarDays } from "lucide-react";
 import { useUIStore } from "@/stores/uiStore";
@@ -98,7 +98,7 @@ export function SpendingForecastCalendar() {
 
   const [focusedDay, setFocusedDay] = useState<number | null>(null);
 
-  const handleCalendarKeyDown = useCallback((e: React.KeyboardEvent) => {
+  const handleCalendarKeyDown = (e: React.KeyboardEvent) => {
     setFocusedDay((prev) => {
       const current = prev ?? 1;
       let next = current;
@@ -114,7 +114,7 @@ export function SpendingForecastCalendar() {
       e.preventDefault();
       return next;
     });
-  }, [daysInMonth]);
+  };
 
   if (expenses.length < 3 && today < 3) return null;
 
