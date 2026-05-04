@@ -2,7 +2,7 @@
 
 import { useMemo, useState, useCallback, useRef, useEffect } from "react";
 import { m, AnimatePresence } from "framer-motion";
-import { Trash2, Edit3, Repeat, Receipt, CheckSquare, Square, X, Wallet, Copy, MoreHorizontal } from "lucide-react";
+import { Trash2, Edit3, Repeat, Receipt, CheckSquare, Square, X, Wallet, Copy } from "lucide-react";
 import { useCurrency } from "@/hooks/useCurrency";
 import { useSettings } from "@/hooks/useSettings";
 import { CategoryBadge } from "./CategoryChips";
@@ -502,7 +502,6 @@ function SwipeableExpenseItem({
   const deleteCallback = useCallback(() => { handleDelete(expense.id); }, [handleDelete, expense.id]);
   const { offsetX, deleting, onTouchStart, onTouchMove, onTouchEnd, snapBack, confirmDelete } = useSwipeToDelete(deleteCallback);
   const [remarkExpanded, setRemarkExpanded] = useState(false);
-  const [actionsOpen, setActionsOpen] = useState(false);
 
   const isSelected = selectedIds.has(expense.id);
   const absOffset = Math.abs(offsetX);
@@ -569,7 +568,10 @@ function SwipeableExpenseItem({
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
-        onClick={() => { if (absOffset === SWIPE_THRESHOLD) snapBack(); }}
+        onClick={() => {
+          if (absOffset === SWIPE_THRESHOLD) { snapBack(); return; }
+          if (absOffset === 0) openEditForm(expense.id);
+        }}
         className={`group relative rounded-ui-lg border focus:outline-none focus:ring-2 focus:ring-brand/40 ${
           isSelected ? "border-brand-border" : ""
         }`}
@@ -589,7 +591,7 @@ function SwipeableExpenseItem({
         {/* Main row */}
         <div className="flex items-center gap-3 px-4 py-3.5">
         <button
-          onClick={() => toggleSelect(expense.id)}
+          onClick={(e) => { e.stopPropagation(); toggleSelect(expense.id); }}
           className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg transition-colors"
           style={{ color: 'var(--text-muted)' }}
           role="checkbox"
@@ -640,16 +642,32 @@ function SwipeableExpenseItem({
           )}
         </div>
 
-        {/* Mobile: single ⋮ toggle button */}
-        <button
-          className="sm:hidden flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-colors"
-          style={{ color: actionsOpen ? 'var(--text-primary)' : 'var(--text-muted)', background: actionsOpen ? 'var(--surface-secondary)' : undefined }}
-          onClick={(e) => { e.stopPropagation(); setActionsOpen((v) => !v); }}
-          aria-label="More actions"
-          aria-expanded={actionsOpen}
-        >
-          <MoreHorizontal size={15} />
-        </button>
+        {/* Mobile: compact Copy + Delete icon buttons (tap row = edit, swipe = delete) */}
+        <div className="sm:hidden flex items-center gap-0.5 shrink-0">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              useUIStore.getState().openAddForm({
+                amount: expense.amount,
+                category: expense.category,
+                remark: expense.remark,
+              });
+            }}
+            className="flex h-8 w-8 items-center justify-center rounded-lg transition-colors active:bg-[var(--surface-secondary)]"
+            style={{ color: 'var(--text-muted)', opacity: 0.6 }}
+            aria-label="Duplicate expense"
+          >
+            <Copy size={13} />
+          </button>
+          <button
+            onClick={(e) => { e.stopPropagation(); handleDelete(expense.id); }}
+            className="flex h-8 w-8 items-center justify-center rounded-lg transition-colors active:bg-err-soft active:text-err"
+            style={{ color: 'var(--text-muted)', opacity: 0.6 }}
+            aria-label="Delete expense"
+          >
+            <Trash2 size={13} />
+          </button>
+        </div>
 
         {/* Desktop: 3 action buttons revealed on hover */}
         <div className="hidden sm:flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
@@ -684,50 +702,7 @@ function SwipeableExpenseItem({
             <Trash2 size={16} />
           </button>
         </div>
-        </div>
-
-        {/* Mobile: expanded action row (shown when ⋮ tapped) */}
-        {actionsOpen && (
-          <div
-            className="sm:hidden flex items-center justify-end gap-3 px-4 pb-3 pt-1 border-t"
-            style={{ borderColor: 'var(--border-subtle)' }}
-          >
-            <button
-              onClick={() => {
-                useUIStore.getState().openAddForm({
-                  amount: expense.amount,
-                  category: expense.category,
-                  remark: expense.remark,
-                });
-                setActionsOpen(false);
-              }}
-              className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium transition-colors"
-              style={{ background: 'var(--surface-secondary)', color: 'var(--text-secondary)' }}
-              aria-label="Duplicate expense"
-            >
-              <Copy size={13} />
-              Copy
-            </button>
-            <button
-              onClick={() => { openEditForm(expense.id); setActionsOpen(false); }}
-              className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium transition-colors"
-              style={{ background: 'var(--surface-secondary)', color: 'var(--text-secondary)' }}
-              aria-label="Edit expense"
-            >
-              <Edit3 size={13} />
-              Edit
-            </button>
-            <button
-              onClick={() => { handleDelete(expense.id); setActionsOpen(false); }}
-              className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium transition-colors"
-              style={{ background: 'var(--danger-soft, #FEE2E2)', color: 'var(--danger, #EF4444)' }}
-              aria-label="Delete expense"
-            >
-              <Trash2 size={13} />
-              Delete
-            </button>
-          </div>
-        )}
+        </div>{/* end main row */}
       </div>
     </m.div>
   );
