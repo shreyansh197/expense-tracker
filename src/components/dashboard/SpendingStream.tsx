@@ -299,6 +299,28 @@ export function SpendingStream({
         );
       })()}
 
+      {/* ── Gauge labels as HTML — immune to preserveAspectRatio="none" stretching ── */}
+      {gaugeMarks.map((g) => (
+        <div
+          key={g.pct}
+          style={{
+            position: "absolute",
+            right: 4,
+            top: `${(g.y / VB_H) * 100}%`,
+            transform: "translateY(-50%)",
+            fontSize: 9,
+            lineHeight: 1,
+            color: "var(--text-muted)",
+            opacity: 0.6,
+            pointerEvents: "none",
+            userSelect: "none",
+            fontVariantNumeric: "tabular-nums",
+          }}
+        >
+          {g.pct}%
+        </div>
+      ))}
+
       <div style={{ overflow: "hidden", height: VB_H }}>
       <svg
         viewBox={`0 0 ${VB_W} ${VB_H}`}
@@ -417,29 +439,18 @@ export function SpendingStream({
             />
           )}
 
-          {/* ── Right-edge gauge marks (50%, 75%, 100%) ── */}
+          {/* ── Right-edge gauge tick marks only (labels rendered as HTML) ── */}
           {gaugeMarks.map((g) => (
-            <g key={g.pct}>
-              <line
-                x1={VB_W - 6}
-                x2={VB_W}
-                y1={g.y}
-                y2={g.y}
-                stroke="var(--text-muted)"
-                strokeWidth={0.5}
-                opacity={0.4}
-              />
-              <text
-                x={VB_W - 8}
-                y={g.y + 2}
-                textAnchor="end"
-                fontSize={5.5}
-                fill="var(--text-muted)"
-                opacity={0.6}
-              >
-                {g.pct}%
-              </text>
-            </g>
+            <line
+              key={g.pct}
+              x1={VB_W - 6}
+              x2={VB_W}
+              y1={g.y}
+              y2={g.y}
+              stroke="var(--text-muted)"
+              strokeWidth={0.5}
+              opacity={0.4}
+            />
           ))}
 
           {/* ── 2 wave layers (back + front) ── */}

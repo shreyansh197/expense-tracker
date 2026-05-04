@@ -80,7 +80,7 @@ function HeroBackground() {
 /* ── Desktop layout — video background + right form ──────── */
 function DesktopAuthPage({ children }: { children: React.ReactNode }) {
   return (
-    <div className="hidden min-h-screen w-full lg:block" style={{ position: "relative", overflow: "hidden" }}>
+    <div className="hidden h-screen w-full lg:block" style={{ position: "relative", overflow: "hidden" }}>
       <video
         autoPlay
         muted
@@ -99,7 +99,7 @@ function DesktopAuthPage({ children }: { children: React.ReactNode }) {
           background: "linear-gradient(to right, transparent 35%, rgba(0,0,0,0.5) 65%, rgba(0,0,0,0.7) 100%)",
         }}
       />
-      <div className="relative z-10 flex min-h-screen items-center justify-end pr-[6%] py-10">
+      <div className="relative z-10 flex min-h-full items-center justify-end pr-[6%] py-10 overflow-y-auto">
         <div className="w-full max-w-sm" style={{ animation: "sp-form-in 0.45s ease both" }}>
           <div className="card-glass rounded-2xl p-8 shadow-2xl">
             {children}
