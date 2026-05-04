@@ -18,7 +18,25 @@ import { PageTransition } from "@/components/ui/PageTransition";
 import { TargetIllustration } from "@/components/ui/illustrations";
 import { RevealOnScroll } from "@/components/motion/RevealOnScroll";
 import { RidgeLine } from "@/components/ui/RidgeLine";
-import { ArrowLeft } from "lucide-react";
+import {
+  ArrowLeft,
+  Tv, Car, ShoppingCart, UtensilsCrossed, ShoppingBag,
+  MoreHorizontal, CreditCard, Wifi, TrendingUp, Tag, Package,
+} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+
+const ICON_MAP: Record<string, LucideIcon> = {
+  Tv, Car, ShoppingCart, UtensilsCrossed, ShoppingBag,
+  MoreHorizontal, CreditCard, Wifi, TrendingUp, Tag, Package,
+};
+
+function CategoryIcon({ icon, color, size = 32 }: { icon?: string; color?: string; size?: number }) {
+  if (!icon) return <span style={{ fontSize: size }}>💳</span>;
+  const Icon = ICON_MAP[icon];
+  if (Icon) return <Icon size={size} style={{ color: color || "currentColor" }} />;
+  // Emoji fallback
+  return <span style={{ fontSize: size, lineHeight: 1 }}>{icon}</span>;
+}
 
 export default function CategoryPage({ params }: { params: Promise<{ slug: string }> }) {
   const { formatCurrency } = useCurrency();
@@ -156,16 +174,18 @@ export default function CategoryPage({ params }: { params: Promise<{ slug: strin
           className="card-terrain relative overflow-hidden px-6 py-7"
           style={{ background: `color-mix(in srgb, ${categoryColor} 10%, var(--surface))` }}
         >
-          {/* Category emoji watermark */}
+          {/* Category icon watermark */}
           <span
-            className="pointer-events-none absolute right-4 top-4 text-7xl leading-none"
+            className="pointer-events-none absolute right-4 top-4 leading-none"
             aria-hidden="true"
             style={{ opacity: 0.12 }}
           >
-            {meta?.icon || "💳"}
+            <CategoryIcon icon={meta?.icon} color={categoryColor} size={72} />
           </span>
 
-          <span className="mb-2 block text-3xl leading-none">{meta?.icon || "💳"}</span>
+          <span className="mb-2 block leading-none">
+            <CategoryIcon icon={meta?.icon} color={categoryColor} size={32} />
+          </span>
           <h1
             className="font-display italic text-2xl leading-tight"
             style={{ color: "var(--text-primary)" }}

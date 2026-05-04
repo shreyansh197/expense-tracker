@@ -1,11 +1,21 @@
 "use client";
 
 import { useMemo } from "react";
-import { Calendar, Repeat } from "lucide-react";
+import {
+  Calendar, Repeat,
+  Tv, Car, ShoppingCart, UtensilsCrossed, ShoppingBag,
+  MoreHorizontal, CreditCard, Wifi, TrendingUp, Tag, Package,
+} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { useSettings } from "@/hooks/useSettings";
 import { useCurrency } from "@/hooks/useCurrency";
 import { getAllCategories, buildCategoryMap } from "@/lib/categories";
 import type { RecurringExpense } from "@/types";
+
+const ICON_MAP: Record<string, LucideIcon> = {
+  Tv, Car, ShoppingCart, UtensilsCrossed, ShoppingBag,
+  MoreHorizontal, CreditCard, Wifi, TrendingUp, Tag, Package,
+};
 
 interface UpcomingItem {
   recurring: RecurringExpense;
@@ -81,14 +91,27 @@ export function UpcomingStream() {
             style={{ background: "var(--surface-secondary)" }}
           >
             <div className="flex items-center gap-3 min-w-0">
-              <span className="text-base shrink-0">{item.categoryIcon}</span>
+              {(() => {
+                const Icon = ICON_MAP[item.categoryIcon];
+                return Icon ? (
+                  <span className="shrink-0 flex items-center justify-center w-5 h-5" style={{ color: item.categoryColor }}>
+                    <Icon size={15} />
+                  </span>
+                ) : (
+                  <span className="text-base shrink-0">{item.categoryIcon}</span>
+                );
+              })()}
               <div className="min-w-0">
                 <p className="truncate text-sm font-medium" style={{ color: "var(--text-primary)" }}>
                   {item.recurring.remark || item.categoryLabel}
                 </p>
-                <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-                  {item.daysUntil === 0 ? "Today" : item.daysUntil === 1 ? "Tomorrow" : `In ${item.daysUntil} days`}
-                  <Repeat size={10} className="ml-1.5 inline-block" style={{ color: "var(--text-muted)", opacity: 0.5 }} />
+                <p className="text-xs flex items-center gap-1" style={{ color: "var(--text-muted)" }}>
+                  {item.recurring.remark && (
+                    <span className="truncate max-w-[90px]">{item.categoryLabel}</span>
+                  )}
+                  {item.recurring.remark && <span>·</span>}
+                  <span>{item.daysUntil === 0 ? "Today" : item.daysUntil === 1 ? "Tomorrow" : `In ${item.daysUntil} days`}</span>
+                  <Repeat size={10} className="shrink-0" style={{ color: "var(--text-muted)", opacity: 0.5 }} />
                 </p>
               </div>
             </div>

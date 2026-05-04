@@ -2,12 +2,22 @@
 
 import { useMemo } from "react";
 import { m } from "framer-motion";
-import { Coffee, Flame } from "lucide-react";
+import {
+  Coffee, Flame,
+  Tv, Car, ShoppingCart, UtensilsCrossed, ShoppingBag,
+  MoreHorizontal, CreditCard, Wifi, TrendingUp, Tag, Package,
+} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { PaceGauge } from "@/components/dashboard/PaceGauge";
 import { SpendingStream } from "@/components/dashboard/SpendingStream";
 import { stoneSettle } from "@/lib/motion/variants";
 import { useUIStore } from "@/stores/uiStore";
 import type { CategoryTotal, CategoryMeta } from "@/types";
+
+const ICON_MAP: Record<string, LucideIcon> = {
+  Tv, Car, ShoppingCart, UtensilsCrossed, ShoppingBag,
+  MoreHorizontal, CreditCard, Wifi, TrendingUp, Tag, Package,
+};
 
 interface MonthSummaryHeroProps {
   monthlyTotal: number;
@@ -266,8 +276,14 @@ export function MonthSummaryHero({
             Top
           </p>
           {topCategory ? (
-            <p className="mt-0.5 text-sm font-bold truncate" style={{ color: "var(--text-primary)" }}>
-              {topCategory.emoji} {topCategory.label}
+            <p className="mt-0.5 text-sm font-bold truncate flex items-center justify-center gap-1" style={{ color: "var(--text-primary)" }}>
+              {(() => {
+                const Icon = ICON_MAP[topCategory.emoji];
+                return Icon
+                  ? <Icon size={13} className="shrink-0" />
+                  : <span>{topCategory.emoji}</span>;
+              })()}
+              {topCategory.label}
             </p>
           ) : (
             <p className="mt-0.5 text-sm" style={{ color: "var(--text-muted)" }}>—</p>
