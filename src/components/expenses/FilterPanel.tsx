@@ -24,6 +24,7 @@ interface FilterPanelProps {
   onDayMinChange: (v: string) => void;
   onDayMaxChange: (v: string) => void;
   onClear: () => void;
+  rightSlot?: React.ReactNode;
 }
 
 export function FilterPanel({
@@ -36,6 +37,7 @@ export function FilterPanel({
   onDayMinChange,
   onDayMaxChange,
   onClear,
+  rightSlot,
 }: FilterPanelProps) {
   const [open, setOpen] = useState(false);
   const { settings, updateSettings } = useSettings();
@@ -115,6 +117,7 @@ export function FilterPanel({
             Clear all filters
           </button>
         )}
+        {rightSlot && <div className="ml-auto">{rightSlot}</div>}
       </div>
 
       {open && (

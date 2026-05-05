@@ -10,7 +10,7 @@ import { CategoryChips } from "@/components/expenses/CategoryChips";
 import { FilterPanel } from "@/components/expenses/FilterPanel";
 import { useExpenses } from "@/hooks/useExpenses";
 import { useUIStore } from "@/stores/uiStore";
-import { Search, PlusCircle, Globe } from "lucide-react";
+import { Search, PlusCircle, Globe, ArrowUpDown } from "lucide-react";
 import { useCurrency } from "@/hooks/useCurrency";
 import { debounce } from "@/lib/debounce";
 import { useMonthUrlSync } from "@/hooks/useMonthUrlSync";
@@ -218,43 +218,44 @@ function ExpensesContent() {
           </button>
         </div>
 
-        {/* Row 2: Filters (left) + Sort (right) */}
-        <div className="flex items-start gap-2.5">
-          <div className="flex-1 min-w-0">
-            <FilterPanel
-              amountMin={amountMin}
-              amountMax={amountMax}
-              onAmountMinChange={setAmountMin}
-              onAmountMaxChange={setAmountMax}
-              dayMin={dayMin}
-              dayMax={dayMax}
-              onDayMinChange={setDayMin}
-              onDayMaxChange={setDayMax}
-              onClear={handleClearFilters}
-            />
-          </div>
-          <select
-            value={sortBy}
-            onChange={(e) => {
-              const v = e.target.value as SortOption;
-              setSortBy(v);
-              localStorage.setItem("expenstream-expenses-sort", v);
-            }}
-            aria-label="Sort order"
-            className="shrink-0 rounded-2xl px-3 py-2 text-xs font-medium focus:outline-none focus:ring-2"
-            style={{
-              background: sortBy !== "day-desc" ? "var(--surface-secondary)" : "var(--surface)",
-              border: "1px solid var(--border)",
-              color: "var(--text-secondary)",
-              height: "36px",
-            }}
-          >
-            <option value="day-desc">Newest first</option>
-            <option value="day-asc">Oldest first</option>
-            <option value="amount-desc">Highest amount</option>
-            <option value="amount-asc">Lowest amount</option>
-          </select>
-        </div>
+        {/* Row 2: Filters (left) + Sort (right, via rightSlot) */}
+        <FilterPanel
+          amountMin={amountMin}
+          amountMax={amountMax}
+          onAmountMinChange={setAmountMin}
+          onAmountMaxChange={setAmountMax}
+          dayMin={dayMin}
+          dayMax={dayMax}
+          onDayMinChange={setDayMin}
+          onDayMaxChange={setDayMax}
+          onClear={handleClearFilters}
+          rightSlot={
+            <div className="relative flex items-center">
+              <ArrowUpDown
+                size={14}
+                className="pointer-events-none absolute left-3"
+                style={{ color: sortBy !== "day-desc" ? "var(--accent)" : "var(--text-secondary)" }}
+              />
+              <select
+                value={sortBy}
+                onChange={(e) => {
+                  const v = e.target.value as SortOption;
+                  setSortBy(v);
+                  localStorage.setItem("expenstream-expenses-sort", v);
+                }}
+                aria-label="Sort order"
+                className={`appearance-none cursor-pointer rounded-ui-md py-2 pl-8 pr-3 text-xs font-medium focus:outline-none transition-colors ${
+                  sortBy !== "day-desc" ? "bg-brand-soft text-brand" : "text-[var(--text-secondary)]"
+                }`}
+              >
+                <option value="day-desc">Newest</option>
+                <option value="day-asc">Oldest</option>
+                <option value="amount-desc">Highest</option>
+                <option value="amount-asc">Lowest</option>
+              </select>
+            </div>
+          }
+        />
 
         <CategoryChips />
 
