@@ -179,7 +179,7 @@ function ExpensesContent() {
         </div>
 
         {/* Search + Sort */}
-        <div className="flex gap-2">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
           <div className="relative flex-1">
             <Search
               size={15}
@@ -200,40 +200,43 @@ function ExpensesContent() {
               aria-label="Search expenses"
             />
           </div>
-          {/* Cross-month search toggle */}
-          <button
-            onClick={() => setCrossMonthEnabled((v) => !v)}
-            title={crossMonthEnabled ? "Showing all months" : "Search all months"}
-            aria-pressed={crossMonthEnabled}
-            className="flex shrink-0 items-center justify-center rounded-2xl px-3 py-2.5 transition-colors"
-            style={{
-              border: "1px solid var(--border)",
-              background: crossMonthEnabled ? "var(--accent-soft)" : "var(--surface)",
-              color: crossMonthEnabled ? "var(--accent)" : "var(--text-muted)",
-            }}
-          >
-            <Globe size={15} />
-          </button>
-          <select
-            value={sortBy}
-            onChange={(e) => {
-              const v = e.target.value as SortOption;
-              setSortBy(v);
-              localStorage.setItem("expenstream-expenses-sort", v);
-            }}
-            aria-label="Sort order"
-            className="rounded-2xl px-3 py-2.5 text-xs font-medium focus:outline-none focus:ring-2"
-            style={{
-              background: sortBy !== "day-desc" ? "var(--surface-secondary)" : "var(--surface)",
-              border: "1px solid var(--border)",
-              color: "var(--text-secondary)",
-            }}
-          >
-            <option value="day-desc">Newest first</option>
-            <option value="day-asc">Oldest first</option>
-            <option value="amount-desc">Highest amount</option>
-            <option value="amount-asc">Lowest amount</option>
-          </select>
+          <div className="flex gap-2">
+            {/* Cross-month search toggle */}
+            <button
+              onClick={() => setCrossMonthEnabled((v) => !v)}
+              title={crossMonthEnabled ? "Showing all months" : "Search all months"}
+              aria-pressed={crossMonthEnabled}
+              className="flex shrink-0 items-center justify-center gap-1.5 rounded-2xl px-3 py-2.5 text-xs font-medium transition-colors"
+              style={{
+                border: "1px solid var(--border)",
+                background: crossMonthEnabled ? "var(--accent-soft)" : "var(--surface)",
+                color: crossMonthEnabled ? "var(--accent)" : "var(--text-muted)",
+              }}
+            >
+              <Globe size={14} />
+              <span className="hidden xs:inline sm:hidden md:inline">All months</span>
+            </button>
+            <select
+              value={sortBy}
+              onChange={(e) => {
+                const v = e.target.value as SortOption;
+                setSortBy(v);
+                localStorage.setItem("expenstream-expenses-sort", v);
+              }}
+              aria-label="Sort order"
+              className="flex-1 rounded-2xl px-3 py-2.5 text-xs font-medium focus:outline-none focus:ring-2 sm:flex-none"
+              style={{
+                background: sortBy !== "day-desc" ? "var(--surface-secondary)" : "var(--surface)",
+                border: "1px solid var(--border)",
+                color: "var(--text-secondary)",
+              }}
+            >
+              <option value="day-desc">Newest first</option>
+              <option value="day-asc">Oldest first</option>
+              <option value="amount-desc">Highest amount</option>
+              <option value="amount-asc">Lowest amount</option>
+            </select>
+          </div>
         </div>
 
         <FilterPanel
