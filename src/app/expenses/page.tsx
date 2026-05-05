@@ -178,65 +178,63 @@ function ExpensesContent() {
           </div>
         </div>
 
-        {/* Search + Sort */}
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-          <div className="relative flex-1">
-            <Search
-              size={15}
-              className="absolute left-3.5 top-1/2 -translate-y-1/2"
-              style={{ color: "var(--text-muted)" }}
-            />
-            <input
-              type="text"
-              placeholder="Search expenses…"
-              value={localSearch}
-              onChange={(e) => handleSearchChange(e.target.value)}
-              className="w-full rounded-2xl py-2.5 pl-9 pr-3 text-base sm:text-sm focus:outline-none focus:ring-2"
-              style={{
-                background: "var(--surface)",
-                border: "1px solid var(--border)",
-                color: "var(--text-primary)",
-              }}
-              aria-label="Search expenses"
-            />
-          </div>
-          <div className="flex gap-2">
-            {/* Cross-month search toggle */}
-            <button
-              onClick={() => setCrossMonthEnabled((v) => !v)}
-              title={crossMonthEnabled ? "Showing all months" : "Search all months"}
-              aria-pressed={crossMonthEnabled}
-              className="flex shrink-0 items-center justify-center gap-1.5 rounded-2xl px-3 py-2.5 text-xs font-medium transition-colors"
-              style={{
-                border: "1px solid var(--border)",
-                background: crossMonthEnabled ? "var(--accent-soft)" : "var(--surface)",
-                color: crossMonthEnabled ? "var(--accent)" : "var(--text-muted)",
-              }}
-            >
-              <Globe size={14} />
-              <span className="hidden xs:inline sm:hidden md:inline">All months</span>
-            </button>
-            <select
-              value={sortBy}
-              onChange={(e) => {
-                const v = e.target.value as SortOption;
-                setSortBy(v);
-                localStorage.setItem("expenstream-expenses-sort", v);
-              }}
-              aria-label="Sort order"
-              className="flex-1 rounded-2xl px-3 py-2.5 text-xs font-medium focus:outline-none focus:ring-2 sm:flex-none"
-              style={{
-                background: sortBy !== "day-desc" ? "var(--surface-secondary)" : "var(--surface)",
-                border: "1px solid var(--border)",
-                color: "var(--text-secondary)",
-              }}
-            >
-              <option value="day-desc">Newest first</option>
-              <option value="day-asc">Oldest first</option>
-              <option value="amount-desc">Highest amount</option>
-              <option value="amount-asc">Lowest amount</option>
-            </select>
-          </div>
+        {/* Search bar — full width with globe toggle on right */}
+        <div className="relative">
+          <Search
+            size={15}
+            className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"
+            style={{ color: "var(--text-muted)" }}
+          />
+          <input
+            type="text"
+            placeholder="Search expenses…"
+            value={localSearch}
+            onChange={(e) => handleSearchChange(e.target.value)}
+            className="w-full rounded-2xl py-2.5 pl-9 pr-11 text-base sm:text-sm focus:outline-none focus:ring-2"
+            style={{
+              background: "var(--surface)",
+              border: "1px solid var(--border)",
+              color: "var(--text-primary)",
+            }}
+            aria-label="Search expenses"
+          />
+          {/* Cross-month search toggle — inside search bar, right side */}
+          <button
+            onClick={() => setCrossMonthEnabled((v) => !v)}
+            title={crossMonthEnabled ? "Showing all months" : "Search all months"}
+            aria-pressed={crossMonthEnabled}
+            className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center justify-center rounded-xl p-1.5 transition-colors"
+            style={{
+              background: crossMonthEnabled ? "var(--accent-soft)" : "transparent",
+              color: crossMonthEnabled ? "var(--accent)" : "var(--text-muted)",
+            }}
+          >
+            <Globe size={15} />
+          </button>
+        </div>
+
+        {/* Sort */}
+        <div className="flex items-center gap-2">
+          <select
+            value={sortBy}
+            onChange={(e) => {
+              const v = e.target.value as SortOption;
+              setSortBy(v);
+              localStorage.setItem("expenstream-expenses-sort", v);
+            }}
+            aria-label="Sort order"
+            className="flex-1 rounded-2xl px-3 py-2 text-xs font-medium focus:outline-none focus:ring-2"
+            style={{
+              background: sortBy !== "day-desc" ? "var(--surface-secondary)" : "var(--surface)",
+              border: "1px solid var(--border)",
+              color: "var(--text-secondary)",
+            }}
+          >
+            <option value="day-desc">Newest first</option>
+            <option value="day-asc">Oldest first</option>
+            <option value="amount-desc">Highest amount</option>
+            <option value="amount-asc">Lowest amount</option>
+          </select>
         </div>
 
         <FilterPanel
