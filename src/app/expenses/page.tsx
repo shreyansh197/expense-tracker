@@ -244,7 +244,7 @@ function ExpensesContent() {
                   localStorage.setItem("expenstream-expenses-sort", v);
                 }}
                 aria-label="Sort order"
-                className={`appearance-none cursor-pointer rounded-ui-md py-2 pl-8 pr-3 text-xs font-medium focus:outline-none transition-colors ${
+                className={`appearance-none cursor-pointer rounded-ui-md py-2 pl-8 pr-3 text-xs font-medium font-[inherit] focus:outline-none transition-colors ${
                   sortBy !== "day-desc" ? "bg-brand-soft text-brand" : "text-[var(--text-secondary)]"
                 }`}
               >
