@@ -1,26 +1,38 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { m, AnimatePresence, useReducedMotion, type Variants } from "framer-motion";
 import { usePathname } from "next/navigation";
+import { db } from "@/lib/db";
 import type { WatcherInsight } from "@/hooks/useWatcher";
 
-const HISTORY_KEY = "es-watcher-insight-history";
 const MAX_HISTORY = 20;
+const INTRO_SEEN_KEY = "es-watcher-intro-seen";
 
-function loadHistory(): WatcherInsight[] {
-  if (typeof window === "undefined") return [];
+async function loadHistoryFromDB(): Promise<WatcherInsight[]> {
   try {
-    return JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]");
+    const rows = await db.watcherHistory
+      .orderBy("savedAt")
+      .reverse()
+      .limit(MAX_HISTORY)
+      .toArray();
+    return rows.map((r) => ({ text: r.text, type: r.type as WatcherInsight["type"] }));
   } catch { return []; }
 }
 
-function saveToHistory(insight: WatcherInsight) {
-  const history = loadHistory();
-  // Avoid duplicates (same text)
-  if (history.some((h) => h.text === insight.text)) return;
-  const next = [insight, ...history].slice(0, MAX_HISTORY);
-  localStorage.setItem(HISTORY_KEY, JSON.stringify(next));
+async function saveToHistoryDB(insight: WatcherInsight): Promise<void> {
+  try {
+    // Avoid duplicates (same text)
+    const existing = await db.watcherHistory.where("savedAt").above(0).filter((r) => r.text === insight.text).count();
+    if (existing > 0) return;
+    await db.watcherHistory.add({ text: insight.text, type: insight.type, savedAt: Date.now() });
+    // Prune to MAX_HISTORY
+    const all = await db.watcherHistory.orderBy("savedAt").toArray();
+    if (all.length > MAX_HISTORY) {
+      const toDelete = all.slice(0, all.length - MAX_HISTORY);
+      await db.watcherHistory.bulkDelete(toDelete.map((r) => r.id!));
+    }
+  } catch { /* non-fatal */ }
 }
 
 interface WatcherConstellationProps {
@@ -39,22 +51,43 @@ interface WatcherConstellationProps {
 export function WatcherConstellation({ insight, onDismiss }: WatcherConstellationProps) {
   const [open, setOpen] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [history, setHistory] = useState<WatcherInsight[]>(loadHistory);
+  const [history, setHistory] = useState<WatcherInsight[]>([]);
+  const [showIntroTooltip, setShowIntroTooltip] = useState(false);
   const prefersReduced = useReducedMotion();
   const pathname = usePathname();
   const isBizRoute = pathname.startsWith("/business");
   const popoverRef = useRef<HTMLDivElement>(null);
+  const prevInsightRef = useRef<WatcherInsight | null>(null);
 
-  // Save current insight to history when it appears
+  // Save current insight to history (Dexie) when it appears
   useEffect(() => {
-    if (insight) saveToHistory(insight);
+    if (insight) saveToHistoryDB(insight);
   }, [insight]);
+
+  // Show one-time intro tooltip on the very first Watcher insight
+  useEffect(() => {
+    if (insight && !prevInsightRef.current) {
+      if (typeof window !== "undefined" && !localStorage.getItem(INTRO_SEEN_KEY)) {
+        setShowIntroTooltip(true);
+        localStorage.setItem(INTRO_SEEN_KEY, "1");
+      }
+    }
+    prevInsightRef.current = insight;
+  }, [insight]);
+
+  // Load history from Dexie when drawer opens
+  const handleOpenDrawer = useCallback(async () => {
+    setOpen(false);
+    const h = await loadHistoryFromDB();
+    setHistory(h);
+    setDrawerOpen(true);
+  }, []);
 
   const dotColor = isBizRoute ? "var(--biz-accent)" : "var(--accent)";
   const hasInsight = insight !== null;
 
   // Hide completely when no insight — avoid confusing idle dots
-  if (!hasInsight && !open) return null;
+  if (!hasInsight && !open && !showIntroTooltip) return null;
 
   // Dot positions forming a small equilateral triangle
   const dots = [
@@ -64,23 +97,17 @@ export function WatcherConstellation({ insight, onDismiss }: WatcherConstellatio
   ];
 
   const handleToggle = () => {
+    setShowIntroTooltip(false); // dismiss intro on first tap
     if (!hasInsight) return;
     setOpen((v) => !v);
   };
 
   const handleDismiss = () => {
     if (insight) {
-      saveToHistory(insight);
-      setHistory(loadHistory());
+      saveToHistoryDB(insight);
     }
     setOpen(false);
     onDismiss();
-  };
-
-  const handleOpenDrawer = () => {
-    setOpen(false);
-    setHistory(loadHistory());
-    setDrawerOpen(true);
   };
 
   // Close popover on outside tap
@@ -121,6 +148,30 @@ export function WatcherConstellation({ insight, onDismiss }: WatcherConstellatio
             onClick={handleBackdropClick}
             aria-hidden="true"
           />
+        )}
+      </AnimatePresence>
+
+      {/* First-time intro tooltip — shown only once, anchored to the dots */}
+      <AnimatePresence>
+        {showIntroTooltip && !open && (
+          <m.div
+            key="watcher-intro"
+            className="fixed z-[166] rounded-lg px-3 py-2 text-xs font-medium shadow-md pointer-events-none"
+            style={{
+              right: "calc(1.25rem + 30px)",
+              bottom: `calc(56px + env(safe-area-inset-bottom, 0px) + 14px)`,
+              background: "var(--surface-elevated, var(--surface))",
+              border: `1px solid ${dotColor}`,
+              color: dotColor,
+              whiteSpace: "nowrap",
+            }}
+            initial={{ opacity: 0, x: 8 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 8 }}
+            transition={{ duration: 0.25, delay: 0.6 }}
+          >
+            Watcher noticed something →
+          </m.div>
         )}
       </AnimatePresence>
 

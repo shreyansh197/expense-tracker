@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { Plus, Trash2, Zap, X, Pencil } from "lucide-react";
 import { useSettings } from "@/hooks/useSettings";
 import { getAllCategories } from "@/lib/categories";
@@ -16,7 +16,7 @@ const LEGACY_STORAGE_KEY = "expenstream-auto-rules";
 
 export function useAutoRules() {
   const { settings, updateSettings } = useSettings();
-  const rules = (settings.autoRules ?? []) as AutoRule[];
+  const rules = useMemo(() => (settings.autoRules ?? []) as AutoRule[], [settings.autoRules]);
   const migrated = useRef(false);
 
   // One-time migration from localStorage to synced settings
@@ -33,7 +33,7 @@ export function useAutoRules() {
         localStorage.removeItem(LEGACY_STORAGE_KEY);
       }
     } catch { /* ignore */ }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [rules, updateSettings]);
 
   const addRule = (rule: Omit<AutoRule, "id" | "createdAt">) => {
     const newRule: AutoRule = {
@@ -272,7 +272,7 @@ export function AutoRulesManager() {
                   if (f === "remark") setCondOp("contains");
                   else if (f === "amount") setCondOp("greater_than");
                   else if (f === "day_of_month") setCondOp("equals");
-                  else if (f === "is_recurring") setCondOp("equals");
+                  else if (f === "is_recurring") { setCondOp("equals"); setCondValue("true"); }
                 }}
                 className="form-select rounded px-2 py-1.5 text-xs"
               >
@@ -391,7 +391,7 @@ export function AutoRulesManager() {
           <div className="flex gap-2">
             <button
               onClick={handleAdd}
-              disabled={!name.trim() || !condValue.trim()}
+              disabled={!name.trim() || (condField !== "is_recurring" && (condOp === "between" ? !condValue.trim() || !condValue2.trim() : !condValue.trim()))}
               className="rounded-lg px-3 py-2 text-sm font-medium text-white disabled:opacity-40 transition-colors"
               style={{ background: 'var(--secondary)' }}
             >

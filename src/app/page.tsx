@@ -11,7 +11,6 @@ import { MonthStartAnchor } from "@/components/dashboard/MonthStartAnchor";
 import { RevealOnScroll } from "@/components/motion/RevealOnScroll";
 import { MonthSummaryHero } from "@/components/dashboard/MonthSummaryHero";
 import { SkeletonKpiCards, SkeletonChart } from "@/components/ui/Skeleton";
-import { PageTransition } from "@/components/ui/PageTransition";
 import { InstallBanner } from "@/components/pwa/InstallBanner";
 import { ClearingScene } from "@/components/ui/illustrations/terrain/ClearingScene";
 import { Repeat, PlusCircle, ChevronDown, Flame, TrendingUp, TrendingDown, AlertTriangle, Leaf, Sunrise } from "lucide-react";
@@ -375,7 +374,7 @@ function DashboardContent() {
   }, [expenses, allCategories]);
 
   return (
-    <PageTransition className="relative mx-auto min-h-[80vh] max-w-4xl xl:max-w-5xl space-y-5 p-4 sm:p-6 lg:p-8">
+    <div className="relative mx-auto min-h-[80vh] max-w-4xl xl:max-w-5xl space-y-5 p-4 sm:p-6 lg:p-8">
 
       {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
           1. CANOPY HEADER â€” month name + sync
@@ -668,6 +667,6 @@ function DashboardContent() {
           </div>
         </RevealOnScroll>
       )}
-    </PageTransition>
+    </div>
   );
 }

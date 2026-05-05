@@ -31,7 +31,6 @@ const DataAccountManagement = lazy(() => import("@/components/settings/DataAccou
 import { SettingsFooterLogout } from "@/components/settings/SettingsFooterLogout";
 import { NotificationSettings } from "@/components/settings/NotificationSettings";
 import { subscribeToPush, unsubscribeFromPush } from "@/lib/pushSubscription";
-import { PageTransition } from "@/components/ui/PageTransition";
 import { RateSourceInfo } from "@/components/settings/RateSourceInfo";
 import { PinLockSettings } from "@/components/settings/PinLockSettings";
 import { ThemeToggle } from "@/components/settings/ThemeToggle";
@@ -218,7 +217,7 @@ export default function SettingsPage() {
 
   return (
     <AppShell>
-        <PageTransition className="relative mx-auto max-w-4xl xl:max-w-6xl space-y-4 sm:space-y-6 p-4 sm:p-6 lg:p-8">
+        <div className="relative mx-auto max-w-4xl xl:max-w-6xl space-y-4 sm:space-y-6 p-4 sm:p-6 lg:p-8">
         <div className="relative mb-4 card-terrain p-6 rounded-2xl">
           {/* Lora italic watermark behind header */}
           <p
@@ -827,7 +826,7 @@ export default function SettingsPage() {
 
         {/* ─── 12. Log Out Footer ─── */}
         <SettingsFooterLogout />
-      </PageTransition>
+      </div>
     </AppShell>
   );
 }

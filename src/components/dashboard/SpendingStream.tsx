@@ -62,6 +62,7 @@ export function SpendingStream({
   const prefersReduced = useReducedMotion();
   const clamped = Math.min(Math.max(budgetUsedPercent, 0), 120);
   const [activeStone, setActiveStone] = useState<number | null>(null);
+  const [isHovering, setIsHovering] = useState(false);
 
   const fmt = useCallback(
     (n: number) => (formatCurrency ? formatCurrency(n) : `₹${n.toLocaleString()}`),
@@ -252,6 +253,10 @@ export function SpendingStream({
       aria-label={`Spending stream: ${Math.round(clamped)}% of budget used${activeStone ? `. Day ${activeStone} selected` : ". Use arrow keys to explore daily spending"}`}
       tabIndex={0}
       onKeyDown={handleKeyDown}
+      onMouseEnter={() => setIsHovering(true)}
+      onMouseLeave={() => setIsHovering(false)}
+      onFocus={() => setIsHovering(true)}
+      onBlur={() => setIsHovering(false)}
     >
       {/* Active stone tooltip — HTML above SVG, never clipped */}
       {activeStone !== null && (() => {
@@ -299,7 +304,7 @@ export function SpendingStream({
         );
       })()}
 
-      {/* ── Gauge labels as HTML — immune to preserveAspectRatio="none" stretching ── */}
+      {/* ── Gauge labels as HTML — shown only on hover/focus to fix WCAG AA 9px contrast ── */}
       {gaugeMarks.map((g) => (
         <div
           key={g.pct}
@@ -311,11 +316,13 @@ export function SpendingStream({
             fontSize: 9,
             lineHeight: 1,
             color: "var(--text-muted)",
-            opacity: 0.6,
+            opacity: isHovering ? 0.8 : 0,
+            transition: "opacity 0.2s ease",
             pointerEvents: "none",
             userSelect: "none",
             fontVariantNumeric: "tabular-nums",
           }}
+          aria-hidden="true"
         >
           {g.pct}%
         </div>

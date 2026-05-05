@@ -26,7 +26,6 @@ const CollectionChart = dynamic(
 import { SyncIndicator } from "@/components/sync/SyncIndicator";
 import { BusinessExport } from "@/components/business/BusinessExport";
 import { SkeletonBusinessKpi, SkeletonLedgerList } from "@/components/ui/Skeleton";
-import { PageTransition } from "@/components/ui/PageTransition";
 import { BusinessGraphic } from "@/components/ui/illustrations";
 import { m, AnimatePresence } from "framer-motion";
 import type { LedgerInput, Ledger } from "@/types";
@@ -134,7 +133,7 @@ export default function BusinessPage() {
 
   return (
     <AppShell>
-      <PageTransition className="relative mx-auto min-h-[80vh] max-w-5xl xl:max-w-7xl space-y-6 p-4 sm:p-6 lg:p-8">
+      <div className="relative mx-auto min-h-[80vh] max-w-5xl xl:max-w-7xl space-y-6 p-4 sm:p-6 lg:p-8">
         {/* Header + KPIs — The Counting House */}
         <div className="space-y-6 relative">
         <div className="flex items-center justify-between">
@@ -251,7 +250,7 @@ export default function BusinessPage() {
           />
         )}
         </AnimatePresence>
-      </PageTransition>
+      </div>
     </AppShell>
   );
 }

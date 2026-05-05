@@ -120,6 +120,22 @@ export interface IDBCalcCache {
   computedAt: number;
 }
 
+export interface IDBWatcherInsight {
+  id?: number; // auto-increment PK
+  text: string;
+  type: string;
+  savedAt: number;
+}
+
+export interface IDBTimeMachineScenario {
+  id: string;
+  name: string;
+  sourceCategory: string;
+  targetCategory: string;
+  replacementAmount: number;
+  savedAt: number;
+}
+
 // ── Database ──
 
 class ExpenseDB extends Dexie {
@@ -131,6 +147,8 @@ class ExpenseDB extends Dexie {
   syncMeta!: Table<IDBSyncMeta, string>;
   exchangeRates!: Table<IDBExchangeRate, string>;
   calcCache!: Table<IDBCalcCache, string>;
+  watcherHistory!: Table<IDBWatcherInsight, number>;
+  timeMachineScenarios!: Table<IDBTimeMachineScenario, string>;
 
   constructor() {
     super("expenstream");
@@ -151,6 +169,18 @@ class ExpenseDB extends Dexie {
       syncMeta: "workspaceId",
       exchangeRates: "base",
       calcCache: "key",
+    });
+    this.version(3).stores({
+      expenses: "id, workspaceId, [workspaceId+month+year], category",
+      settings: "workspaceId",
+      ledgers: "id, workspaceId",
+      payments: "id, workspaceId, ledgerId",
+      mutations: "++localId, workspaceId, idempotencyKey",
+      syncMeta: "workspaceId",
+      exchangeRates: "base",
+      calcCache: "key",
+      watcherHistory: "++id, savedAt",
+      timeMachineScenarios: "id, savedAt",
     });
   }
 }

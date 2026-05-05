@@ -8,7 +8,6 @@ import {
   MoreHorizontal, CreditCard, Wifi, TrendingUp, Tag, Package,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import { PaceGauge } from "@/components/dashboard/PaceGauge";
 import { SpendingStream } from "@/components/dashboard/SpendingStream";
 import { stoneSettle } from "@/lib/motion/variants";
 import { useUIStore } from "@/stores/uiStore";
@@ -165,14 +164,6 @@ export function MonthSummaryHero({
             )}
           </p>
         </div>
-
-        {/* Pace gauge — daily spend vs target */}
-        <PaceGauge
-          avgDaily={avgDaily}
-          paceToStayUnder={paceToStayUnder}
-          hasBudget={effectiveBudget > 0}
-          size={88}
-        />
       </div>
 
       {/* Budget progress bar */}

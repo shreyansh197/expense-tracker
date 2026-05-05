@@ -14,7 +14,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 
 import { ReceiptIllustration } from "@/components/ui/illustrations";
 import { StillWater } from "@/components/ui/illustrations/terrain";
-import { filterExpenses, groupByDay } from "@/lib/filters";
+import { filterExpenses, groupByDay, groupByFullDate } from "@/lib/filters";
 import { formatCurrency as fmtCurrency } from "@/lib/utils";
 import { fetchRates, convert, getFallbackRates } from "@/lib/exchangeRates";
 import { staggerDelay, duration, ease } from "@/lib/motion/tokens";
@@ -116,10 +116,14 @@ interface ExpenseListProps {
   dayMin?: number;
   dayMax?: number;
   sortBy?: string;
+  /** When true, groups by full date and shows absolute date labels */
+  crossMonth?: boolean;
 }
 
 interface DayGroup {
   day: number;
+  month?: number;
+  year?: number;
   total: number;
   expenses: Expense[];
 }
@@ -137,6 +141,7 @@ export function ExpenseList({
   dayMin,
   dayMax,
   sortBy = "day-desc",
+  crossMonth = false,
 }: ExpenseListProps) {
   const openEditForm = useUIStore((s) => s.openEditForm);
   const openAddForm = useUIStore((s) => s.openAddForm);
@@ -218,7 +223,10 @@ export function ExpenseList({
     return convert(e.amount, e.currency, baseCurrency, effectiveRates);
   }, [multiCurrency, baseCurrency, rates]);
 
-  const grouped = useMemo(() => groupByDay(filtered, sortBy), [filtered, sortBy]);
+  const grouped = useMemo(
+    () => crossMonth ? groupByFullDate(filtered, sortBy) : groupByDay(filtered, sortBy),
+    [filtered, sortBy, crossMonth]
+  );
 
   // Category median map for the ↑ ambient signal
   const categoryMedians = useMemo(() => {
@@ -389,12 +397,19 @@ export function ExpenseList({
                   style={{ color: "var(--text-primary)" }}
                 >
                   {(() => {
+                    const groupMonth = group.month ?? currentMonth;
+                    const groupYear = group.year ?? currentYear;
+                    const d = new Date(groupYear, groupMonth - 1, group.day);
+                    // Cross-month mode: always show full date e.g. "Mar 15, 2024"
+                    if (crossMonth) {
+                      const isThisYear = groupYear === new Date().getFullYear();
+                      return d.toLocaleString("en", { month: "short", day: "numeric", year: isThisYear ? undefined : "numeric" });
+                    }
                     const today = new Date();
                     const todayDay = today.getDate(), todayMonth = today.getMonth() + 1, todayYear = today.getFullYear();
-                    if (group.day === todayDay && currentMonth === todayMonth && currentYear === todayYear) return "Today";
+                    if (group.day === todayDay && groupMonth === todayMonth && groupYear === todayYear) return "Today";
                     const yesterday = new Date(today); yesterday.setDate(today.getDate() - 1);
-                    if (group.day === yesterday.getDate() && currentMonth === yesterday.getMonth() + 1 && currentYear === yesterday.getFullYear()) return "Yesterday";
-                    const d = new Date(currentYear, currentMonth - 1, group.day);
+                    if (group.day === yesterday.getDate() && groupMonth === yesterday.getMonth() + 1 && groupYear === yesterday.getFullYear()) return "Yesterday";
                     const dayName = d.toLocaleString("en", { weekday: "long" });
                     const diffDays = Math.round((today.getTime() - d.getTime()) / 86400000);
                     return diffDays <= 6 ? `Last ${dayName}` : d.toLocaleString("en", { month: "short", day: "numeric" });
@@ -672,7 +687,8 @@ function SwipeableExpenseItem({
         {/* Desktop: 3 action buttons revealed on hover */}
         <div className="hidden sm:flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
           <button
-            onClick={() => {
+            onClick={(e) => {
+              e.stopPropagation();
               useUIStore.getState().openAddForm({
                 amount: expense.amount,
                 category: expense.category,
@@ -686,7 +702,7 @@ function SwipeableExpenseItem({
             <Copy size={16} />
           </button>
           <button
-            onClick={() => openEditForm(expense.id)}
+            onClick={(e) => { e.stopPropagation(); openEditForm(expense.id); }}
             className="flex h-11 w-11 items-center justify-center rounded-lg transition-colors hover:bg-[var(--surface-secondary)] hover:text-[var(--text-secondary)]"
             style={{ color: 'var(--text-muted)' }}
             aria-label="Edit expense"
@@ -694,7 +710,7 @@ function SwipeableExpenseItem({
             <Edit3 size={16} />
           </button>
           <button
-            onClick={() => handleDelete(expense.id)}
+            onClick={(e) => { e.stopPropagation(); handleDelete(expense.id); }}
             className="flex h-11 w-11 items-center justify-center rounded-lg transition-colors hover:bg-err-soft hover:text-err"
             style={{ color: 'var(--text-muted)' }}
             aria-label="Delete expense"

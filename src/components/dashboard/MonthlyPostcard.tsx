@@ -63,7 +63,7 @@ export function MonthlyPostcard() {
 
   const hasData = expenses.filter((e) => !e.deletedAt).length > 0;
 
-  const drawPostcard = useCallback(() => {
+  const drawPostcard = useCallback(async () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
@@ -71,9 +71,10 @@ export function MonthlyPostcard() {
 
     const W = 1080;
     const H = 1350;
-    canvas.width = W;
-    canvas.height = H;
-    const dpr = 1; // already at high res
+    canvas.width = 540;
+    canvas.height = 675;
+    const dpr = 1;
+    ctx.scale(0.5, 0.5); // output at half resolution; platforms downsample anyway
     ctx.scale(dpr, dpr);
 
     // Background
@@ -113,9 +114,10 @@ export function MonthlyPostcard() {
     ctx.fill();
     ctx.restore();
 
-    // Month name — serif italic style
+    // Month name — Lora italic (matches app font-display)
+    await document.fonts.load('italic 72px Lora').catch(() => {});
     ctx.fillStyle = "#1A1B2E";
-    ctx.font = "italic 72px Georgia, serif";
+    ctx.font = "italic 72px Lora, Georgia, serif";
     ctx.textAlign = "left";
     ctx.fillText(`${getMonthName(currentMonth)} ${currentYear}`, 80, 160);
 
@@ -251,12 +253,17 @@ export function MonthlyPostcard() {
     });
   }, [drawPostcard]);
 
-  // Listen for external trigger (e.g., from PostcardPrompt)
+  const showPostcard = useUIStore((s) => s.showPostcard);
+  const closePostcard = useUIStore((s) => s.closePostcard);
+
+  // Respond to external open trigger (e.g., from PostcardPrompt via uiStore)
   useEffect(() => {
-    const listener = () => handleOpen();
-    window.addEventListener("expenstream:open-postcard", listener);
-    return () => window.removeEventListener("expenstream:open-postcard", listener);
-  }, [handleOpen]);
+    if (!showPostcard) return;
+    closePostcard();
+    // Defer so the state update settles before opening
+    const t = setTimeout(() => handleOpen(), 0);
+    return () => clearTimeout(t);
+  }, [showPostcard, handleOpen, closePostcard]);
 
   const handleDownload = useCallback(() => {
     const canvas = canvasRef.current;

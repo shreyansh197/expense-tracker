@@ -15,6 +15,7 @@ interface UIState {
   showLedgerForm: boolean;
   appMode: AppMode;
   activeLedgerId: string | null;
+  showPostcard: boolean;
 
   setMonth: (month: number, year: number) => void;
   nextMonth: () => void;
@@ -30,6 +31,8 @@ interface UIState {
   closeLedgerForm: () => void;
   setAppMode: (mode: AppMode) => void;
   setActiveLedger: (id: string | null) => void;
+  openPostcard: () => void;
+  closePostcard: () => void;
 }
 
 const now = new Date();
@@ -51,6 +54,7 @@ export const useUIStore = create<UIState>((set) => ({
   showLedgerForm: false,
   appMode: loadAppMode(),
   activeLedgerId: null,
+  showPostcard: false,
 
   setMonth: (month, year) => set({ currentMonth: month, currentYear: year }),
 
@@ -96,4 +100,6 @@ export const useUIStore = create<UIState>((set) => ({
     set({ appMode: mode });
   },
   setActiveLedger: (id) => set({ activeLedgerId: id }),
+  openPostcard: () => set({ showPostcard: true }),
+  closePostcard: () => set({ showPostcard: false }),
 }));

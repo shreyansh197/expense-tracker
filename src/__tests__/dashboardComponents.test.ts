@@ -177,9 +177,9 @@ describe("PostcardPrompt component contract", () => {
     expect(src).toContain("expenstream-postcard-prompt-dismissed");
   });
 
-  test("TC-DASH-003-06: dispatches custom event to open postcard", () => {
-    expect(src).toContain('expenstream:open-postcard');
-    expect(src).toContain("CustomEvent");
+  test("TC-DASH-003-06: uses uiStore openPostcard to open postcard", () => {
+    expect(src).toContain('openPostcard');
+    expect(src).toContain("useUIStore");
   });
 
   test("TC-DASH-003-07: has dismiss button with aria-label", () => {

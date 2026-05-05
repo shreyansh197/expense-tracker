@@ -14,7 +14,6 @@ import { useCurrency } from "@/hooks/useCurrency";
 import { getCategoryTotal } from "@/lib/calculations";
 import { authFetch, getActiveWorkspaceId } from "@/lib/authClient";
 import { SkeletonCategoryDetail } from "@/components/ui/Skeleton";
-import { PageTransition } from "@/components/ui/PageTransition";
 import { TargetIllustration } from "@/components/ui/illustrations";
 import { RevealOnScroll } from "@/components/motion/RevealOnScroll";
 import { RidgeLine } from "@/components/ui/RidgeLine";
@@ -153,7 +152,7 @@ export default function CategoryPage({ params }: { params: Promise<{ slug: strin
 
   return (
     <AppShell>
-      <PageTransition className="mx-auto max-w-4xl xl:max-w-6xl space-y-5 sm:space-y-6 p-4 sm:p-6 lg:p-8">
+      <div className="mx-auto max-w-4xl xl:max-w-6xl space-y-5 sm:space-y-6 p-4 sm:p-6 lg:p-8">
         {/* Back nav */}
         <Link
           href="/"
@@ -332,7 +331,7 @@ export default function CategoryPage({ params }: { params: Promise<{ slug: strin
         )}
         </>
         )}
-      </PageTransition>
+      </div>
     </AppShell>
   );
 }

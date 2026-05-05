@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Trash2, X, Pencil, TrendingUp, Minus, Target } from "lucide-react";
+import { Plus, Trash2, Pencil, Target, X } from "lucide-react";
+import { GoalFundingSheet } from "@/components/goals/GoalFundingSheet";
 import { useSettings } from "@/hooks/useSettings";
 import { useToast } from "@/components/ui/Toast";
 import { useConfirm } from "@/components/ui/ConfirmDialog";
@@ -17,9 +18,7 @@ export function GoalsManager() {
   const goals = settings.goals || [];
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
-  const [fundGoalId, setFundGoalId] = useState<string | null>(null);
-  const [fundAmount, setFundAmount] = useState("");
-  const [fundMode, setFundMode] = useState<"add" | "subtract">("add");
+  const [fundGoal, setFundGoal] = useState<Goal | null>(null);
 
   const [name, setName] = useState("");
   const [targetAmount, setTargetAmount] = useState("");
@@ -95,25 +94,14 @@ export function GoalsManager() {
     }
   };
 
-  const handleFundSave = () => {
-    if (!fundGoalId) return;
-    const amt = parseFloat(fundAmount);
-    if (isNaN(amt) || amt <= 0) {
-      toast("Enter a valid amount", "error");
-      return;
-    }
-    const updated = goals.map((g) => {
-      if (g.id !== fundGoalId) return g;
-      const newSaved = fundMode === "add"
-        ? Math.min(g.savedAmount + amt, g.targetAmount)
-        : Math.max(g.savedAmount - amt, 0);
-      return { ...g, savedAmount: newSaved };
-    });
+  const handleFundSave = (goalId: string, newSaved: number) => {
+    const goal = goals.find((g) => g.id === goalId);
+    const prev = goal?.savedAmount ?? 0;
+    const updated = goals.map((g) =>
+      g.id === goalId ? { ...g, savedAmount: newSaved } : g
+    );
     updateSettings({ goals: updated });
-    toast(fundMode === "add" ? `Added ${formatCurrency(amt)}` : `Removed ${formatCurrency(amt)}`);
-    setFundGoalId(null);
-    setFundAmount("");
-    setFundMode("add");
+    toast(newSaved > prev ? `+${formatCurrency(newSaved - prev)} added` : `${formatCurrency(prev - newSaved)} removed`);
   };
 
   // Summary stats
@@ -123,6 +111,11 @@ export function GoalsManager() {
 
   return (
     <div>
+      <GoalFundingSheet
+        goal={fundGoal}
+        onClose={() => setFundGoal(null)}
+        onSave={handleFundSave}
+      />
       {/* Summary bar */}
       {goals.length > 0 && (
         <div className="mb-4 rounded-xl px-4 py-3" style={{ background: 'var(--status-ok-bg)', border: '1px solid var(--status-ok-border)' }}>
@@ -278,10 +271,10 @@ export function GoalsManager() {
                   </div>
                   <div className="flex items-center gap-1">
                     <button
-                      onClick={() => { setFundGoalId(g.id); setFundMode("add"); setFundAmount(""); }}
+                      onClick={() => setFundGoal(g)}
                       className="rounded-lg px-2.5 py-1.5 text-xs font-medium text-data hover:bg-data-soft"
                     >
-                      + Add
+                      + Fund
                     </button>
                     <button
                       onClick={() => handleEdit(g)}
@@ -301,73 +294,6 @@ export function GoalsManager() {
                     </button>
                   </div>
                 </div>
-
-                {/* Add/Subtract Funds inline */}
-                {fundGoalId === g.id && (
-                  <div className="mb-3 rounded-xl p-3 space-y-2.5" style={{ background: 'var(--surface-secondary)' }}>
-                    {/* Row 1: input (left) + toggle (right) */}
-                    <div className="flex items-center gap-2">
-                      <div className="relative flex-1 min-w-0">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm" style={{ color: 'var(--text-tertiary)' }}>{symbol}</span>
-                        <input
-                          type="number"
-                          min="0.01"
-                          step="0.01"
-                          value={fundAmount}
-                          onChange={(e) => setFundAmount(e.target.value)}
-                          onKeyDown={(e) => { if (e.key === "Enter") handleFundSave(); if (e.key === "Escape") setFundGoalId(null); }}
-                          autoFocus
-                          placeholder="Enter amount"
-                          className="form-input w-full"
-                          style={{ fontSize: '0.875rem', minHeight: '2.25rem', paddingLeft: '1.75rem', borderRadius: '0.625rem' }}
-                        />
-                      </div>
-                      <div className="flex shrink-0 rounded-lg" style={{ border: '1px solid var(--border)' }}>
-                        <button
-                          onClick={() => setFundMode("add")}
-                          className={`flex h-9 w-9 items-center justify-center text-xs font-medium rounded-l-lg ${
-                            fundMode === "add"
-                              ? "bg-[var(--goal-achieved-bg)] text-[var(--goal-achieved-text)]"
-                              : ""
-                          }`}
-                          style={fundMode !== "add" ? { color: 'var(--text-muted)' } : undefined}
-                          aria-label="Add funds"
-                        >
-                          <TrendingUp size={14} />
-                        </button>
-                        <button
-                          onClick={() => setFundMode("subtract")}
-                          className={`flex h-9 w-9 items-center justify-center text-xs font-medium rounded-r-lg ${
-                            fundMode === "subtract"
-                              ? "bg-[var(--goal-exceeded-bg)] text-[var(--goal-exceeded-text)]"
-                              : ""
-                          }`}
-                          style={fundMode !== "subtract" ? { color: 'var(--text-muted)' } : undefined}
-                          aria-label="Subtract funds"
-                        >
-                          <Minus size={14} />
-                        </button>
-                      </div>
-                    </div>
-                    {/* Row 2: action buttons + helper text */}
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={handleFundSave}
-                        className="flex-1 rounded-lg bg-data py-2 text-xs font-semibold text-white transition-colors hover:bg-data-hover disabled:opacity-40"
-                      >
-                        {fundMode === "add" ? "Add Funds" : "Remove Funds"}
-                      </button>
-                      <button
-                        onClick={() => setFundGoalId(null)}
-                        className="rounded-lg px-4 py-2 text-xs font-medium transition-colors"
-                        style={{ color: 'var(--text-secondary)', background: 'var(--surface)', border: '1px solid var(--border)' }}
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                    <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Enter amount to {fundMode === "add" ? "add to" : "remove from"} your goal</p>
-                  </div>
-                )}
 
                 <div className="h-2.5 w-full overflow-hidden rounded-full" style={{ background: 'var(--surface-secondary)' }} role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} aria-label={`${g.name} progress`}>
                   <div

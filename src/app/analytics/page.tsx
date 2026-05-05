@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import { AppShell } from "@/components/layout/AppShell";
 import { MonthSwitcher } from "@/components/layout/MonthSwitcher";
 import { SyncIndicator } from "@/components/sync/SyncIndicator";
-import { PageTransition } from "@/components/ui/PageTransition";
 import { useUIStore } from "@/stores/uiStore";
 import { useMonthUrlSync } from "@/hooks/useMonthUrlSync";
 import { usePageTitle } from "@/hooks/usePageTitle";
@@ -398,7 +397,7 @@ function AnalyticsContent() {
           : "var(--text-secondary)";
 
   return (
-      <PageTransition className="relative mx-auto min-h-[80vh] max-w-4xl xl:max-w-6xl space-y-5 p-4 sm:p-6 lg:p-8">
+      <div className="relative mx-auto min-h-[80vh] max-w-4xl xl:max-w-6xl space-y-5 p-4 sm:p-6 lg:p-8">
         {/* ─── Overlook Header ─── */}
         <div className="flex items-center justify-between gap-3">
           <h1 className="font-display italic text-2xl" style={{ color: 'var(--text-primary)' }}>Analytics</h1>
@@ -840,7 +839,7 @@ function AnalyticsContent() {
 
         </>
         )}
-      </PageTransition>
+      </div>
   );
 }
 

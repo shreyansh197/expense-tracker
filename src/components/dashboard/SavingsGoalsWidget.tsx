@@ -1,80 +1,40 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { createPortal } from "react-dom";
-import { TrendingUp, Minus, X, Target, Sparkles } from "lucide-react";
-import { m, AnimatePresence } from "framer-motion";
+import { useState } from "react";
+import { Target, Sparkles } from "lucide-react";
+import { m } from "framer-motion";
 import { useSettings } from "@/hooks/useSettings";
 import { useToast } from "@/components/ui/Toast";
 import { useCurrency } from "@/hooks/useCurrency";
+import { GoalFundingSheet } from "@/components/goals/GoalFundingSheet";
+import type { Goal } from "@/types";
 
 /**
  * Savings Goals Widget — terrain-styled dashboard card.
- * Shows progress rings, fund/withdraw modal, and inline progress bars.
+ * Shows progress rings, fund/withdraw sheet, and inline progress bars.
  * Returns null when no goals exist.
  */
 export function SavingsGoalsWidget() {
   const { settings, updateSettings } = useSettings();
-  const { formatCurrency, symbol } = useCurrency();
+  const { formatCurrency } = useCurrency();
   const { toast } = useToast();
   const goals = settings.goals || [];
 
-  const [activeGoalId, setActiveGoalId] = useState<string | null>(null);
-  const [fundAmount, setFundAmount] = useState("");
-  const [fundMode, setFundMode] = useState<"add" | "subtract">("add");
+  const [activeGoal, setActiveGoal] = useState<Goal | null>(null);
 
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  const handleFund = () => {
-    if (!activeGoalId) return;
-    const amt = parseFloat(fundAmount);
-    if (isNaN(amt) || amt <= 0) {
-      toast("Enter a valid amount", "error");
-      return;
-    }
-    const updated = goals.map((g) => {
-      if (g.id !== activeGoalId) return g;
-      const newSaved =
-        fundMode === "add"
-          ? Math.min(g.savedAmount + amt, g.targetAmount)
-          : Math.max(g.savedAmount - amt, 0);
-      return { ...g, savedAmount: newSaved };
-    });
-    updateSettings({ goals: updated });
-    toast(
-      fundMode === "add"
-        ? `+${formatCurrency(amt)} added`
-        : `${formatCurrency(amt)} removed`,
+  const handleFundSave = (goalId: string, newSaved: number) => {
+    const goal = goals.find((g) => g.id === goalId);
+    const prev = goal?.savedAmount ?? 0;
+    const updated = goals.map((g) =>
+      g.id === goalId ? { ...g, savedAmount: newSaved } : g
     );
-    setActiveGoalId(null);
-    setFundAmount("");
-    setFundMode("add");
-  };
-
-  const handleCancel = () => {
-    setActiveGoalId(null);
-    setFundAmount("");
-    setFundMode("add");
+    updateSettings({ goals: updated });
+    toast(newSaved > prev ? `+${formatCurrency(newSaved - prev)} added` : `${formatCurrency(prev - newSaved)} removed`);
   };
 
   const totalTarget = goals.reduce((s, g) => s + g.targetAmount, 0);
   const totalSaved = goals.reduce((s, g) => s + g.savedAmount, 0);
   const overallPct = totalTarget > 0 ? Math.round((totalSaved / totalTarget) * 100) : 0;
-
-  useEffect(() => {
-    if (activeGoalId && inputRef.current) {
-      inputRef.current.focus();
-    }
-  }, [activeGoalId]);
-
-  useEffect(() => {
-    if (!activeGoalId) return;
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") handleCancel(); };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  });
-
-  const activeGoal = goals.find((g) => g.id === activeGoalId);
 
   if (goals.length === 0) return null;
 
@@ -85,128 +45,11 @@ export function SavingsGoalsWidget() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
     >
-      {/* Fund Modal — portaled to body */}
-      {typeof document !== "undefined" && createPortal(
-      <AnimatePresence>
-        {activeGoalId && activeGoal && (
-          <m.div
-            className="fixed inset-0 z-[300] flex items-center justify-center p-4"
-            onClick={(e) => { if (e.target === e.currentTarget) handleCancel(); }}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="savings-goal-modal-title"
-            initial={{ backgroundColor: "rgba(0,0,0,0)" }}
-            animate={{ backgroundColor: "rgba(0,0,0,0.5)" }}
-            exit={{ backgroundColor: "rgba(0,0,0,0)" }}
-            transition={{ duration: 0.2 }}
-          >
-            <m.div
-              className="card-terrain w-full max-w-sm p-5 shadow-xl"
-              initial={{ opacity: 0, scale: 0.92, y: 10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 8 }}
-              transition={{ type: "spring", stiffness: 400, damping: 28 }}
-            >
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2 min-w-0">
-                  <span className="h-3 w-3 shrink-0 rounded-full" style={{ backgroundColor: activeGoal.color }} />
-                  <h3 id="savings-goal-modal-title" className="text-sm font-semibold truncate" style={{ color: "var(--text-primary)" }}>
-                    {activeGoal.name}
-                  </h3>
-                </div>
-                <button
-                  onClick={handleCancel}
-                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg transition-colors"
-                  style={{ color: "var(--text-muted)" }}
-                  aria-label="Close"
-                >
-                  <X size={16} />
-                </button>
-              </div>
-
-              <div className="mb-4">
-                <div className="flex justify-between text-xs mb-1.5" style={{ color: "var(--text-secondary)" }}>
-                  <span>{formatCurrency(activeGoal.savedAmount)} saved</span>
-                  <span>of {formatCurrency(activeGoal.targetAmount)}</span>
-                </div>
-                <div className="h-2 w-full overflow-hidden rounded-full" style={{ background: "var(--surface-secondary)" }}>
-                  <div
-                    className="h-full rounded-full transition-all duration-500"
-                    style={{
-                      width: `${Math.min(Math.round((activeGoal.savedAmount / activeGoal.targetAmount) * 100), 100)}%`,
-                      backgroundColor: activeGoal.color,
-                    }}
-                  />
-                </div>
-              </div>
-
-              <div className="flex rounded-xl mb-3 overflow-hidden" style={{ border: "1px solid var(--border)" }}>
-                <button
-                  onClick={() => setFundMode("add")}
-                  className="flex-1 py-2.5 text-xs font-medium transition-colors"
-                  style={fundMode === "add"
-                    ? { background: "var(--accent-soft)", color: "var(--accent)" }
-                    : { color: "var(--text-muted)" }
-                  }
-                >
-                  <TrendingUp size={14} className="inline mr-1.5 -mt-0.5" />
-                  Add
-                </button>
-                <button
-                  onClick={() => setFundMode("subtract")}
-                  className="flex-1 py-2.5 text-xs font-medium transition-colors"
-                  style={fundMode === "subtract"
-                    ? { background: "var(--accent-soft)", color: "var(--accent)" }
-                    : { color: "var(--text-muted)" }
-                  }
-                >
-                  <Minus size={14} className="inline mr-1.5 -mt-0.5" />
-                  Remove
-                </button>
-              </div>
-
-              <div className="relative mb-4">
-                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-medium" style={{ color: "var(--text-muted)" }}>{symbol}</span>
-                <input
-                  ref={inputRef}
-                  type="number"
-                  min="1"
-                  value={fundAmount}
-                  onChange={(e) => setFundAmount(e.target.value)}
-                  onKeyDown={(e) => { if (e.key === "Enter") handleFund(); }}
-                  placeholder="Enter amount"
-                  className="form-input w-full rounded-xl"
-                  style={{ paddingLeft: "2rem" }}
-                />
-              </div>
-
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={handleFund}
-                  disabled={!fundAmount || parseFloat(fundAmount) <= 0}
-                  className="flex-1 rounded-xl py-2.5 text-sm font-semibold text-white transition-all disabled:opacity-40"
-                  style={{
-                    background: fundMode === "add"
-                      ? "var(--primary-gradient)"
-                      : "var(--accent-gradient)",
-                  }}
-                >
-                  {fundMode === "add" ? "Add Funds" : "Remove Funds"}
-                </button>
-                <button
-                  onClick={handleCancel}
-                  className="rounded-xl px-5 py-2.5 text-sm font-medium transition-colors"
-                  style={{ color: "var(--text-secondary)", background: "var(--surface-secondary)" }}
-                >
-                  Cancel
-                </button>
-              </div>
-            </m.div>
-          </m.div>
-        )}
-      </AnimatePresence>,
-      document.body,
-      )}
+      <GoalFundingSheet
+        goal={activeGoal}
+        onClose={() => setActiveGoal(null)}
+        onSave={handleFundSave}
+      />
 
       {/* Header */}
       <div className="flex items-center justify-between p-4 pb-0">
@@ -283,9 +126,7 @@ export function SavingsGoalsWidget() {
                   ) : (
                     <button
                       onClick={() => {
-                        setActiveGoalId(g.id);
-                        setFundAmount("");
-                        setFundMode("add");
+                        setActiveGoal(g);
                       }}
                       className="shrink-0 rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors min-h-[44px]"
                       style={{ background: "var(--accent-soft)", color: "var(--accent)" }}

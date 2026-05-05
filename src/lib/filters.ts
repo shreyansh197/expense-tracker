@@ -11,6 +11,8 @@ interface FilterOptions {
 
 export interface DayGroup {
   day: number;
+  month?: number;
+  year?: number;
   total: number;
   expenses: Expense[];
 }
@@ -99,4 +101,54 @@ export function groupByDay(
   return sortBy === "day-asc"
     ? groups.sort((a, b) => a.day - b.day)
     : groups.sort((a, b) => b.day - a.day);
+}
+
+/**
+ * Groups expenses by full date (year-month-day), used for cross-month results.
+ * Each group carries month and year so headers can show the real date.
+ */
+export function groupByFullDate(
+  filtered: Expense[],
+  sortBy: string = "day-desc"
+): DayGroup[] {
+  const map = new Map<string, Expense[]>();
+  for (const e of filtered) {
+    const key = `${e.year}-${e.month}-${e.day}`;
+    const arr = map.get(key) || [];
+    arr.push(e);
+    map.set(key, arr);
+  }
+
+  const groups: DayGroup[] = [];
+  for (const [key, exps] of map) {
+    const [year, month, day] = key.split("-").map(Number);
+    const sorted =
+      sortBy === "amount-desc"
+        ? [...exps].sort((a, b) => b.amount - a.amount)
+        : sortBy === "amount-asc"
+        ? [...exps].sort((a, b) => a.amount - b.amount)
+        : [...exps].sort((a, b) => b.amount - a.amount);
+    groups.push({
+      day,
+      month,
+      year,
+      total: exps.reduce((s, e) => s + e.amount, 0),
+      expenses: sorted,
+    });
+  }
+
+  if (sortBy === "amount-desc") return groups.sort((a, b) => b.total - a.total);
+  if (sortBy === "amount-asc") return groups.sort((a, b) => a.total - b.total);
+  if (sortBy === "day-asc") {
+    return groups.sort((a, b) =>
+      a.year !== b.year ? a.year! - b.year! :
+      a.month !== b.month ? a.month! - b.month! :
+      a.day - b.day
+    );
+  }
+  return groups.sort((a, b) =>
+    a.year !== b.year ? b.year! - a.year! :
+    a.month !== b.month ? b.month! - a.month! :
+    b.day - a.day
+  );
 }

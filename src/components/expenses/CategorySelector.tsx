@@ -95,8 +95,9 @@ export function CategorySelector({ categories, selected, onSelect, showError, ca
                   : {
                       background: 'var(--surface-secondary)',
                       color: 'var(--text-secondary)',
-                      opacity: selected ? 0.2 : 1,
-                      transition: 'opacity 0.2s ease',
+                      opacity: selected ? 0.55 : 1,
+                      transform: selected ? 'scale(0.95)' : 'scale(1)',
+                      transition: 'opacity 0.2s ease, transform 0.2s ease',
                     }
               }
               onMouseEnter={selected !== cat.id ? (e: React.MouseEvent<HTMLButtonElement>) => { e.currentTarget.style.background = 'var(--surface-tertiary)'; } : undefined}

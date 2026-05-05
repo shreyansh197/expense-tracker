@@ -67,7 +67,7 @@ export function ExpenseForm({
   const allWorkspaceExpenses = useDexieQuery(
     async () => {
       if (!wid) return EMPTY_EXPENSES;
-      const rows = await db.expenses.where("workspaceId").equals(wid).toArray();
+      const rows = await db.expenses.where("workspaceId").equals(wid).reverse().limit(500).toArray();
       return rows.filter(r => !r.deletedAt).map(r => ({
         id: r.id, category: r.category as CategoryId, amount: r.amount,
         currency: r.currency, day: r.day, month: r.month, year: r.year,

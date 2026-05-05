@@ -2,7 +2,6 @@
 
 import { useState, useCallback, Suspense, useEffect } from "react";
 import { AppShell } from "@/components/layout/AppShell";
-import { PageTransition } from "@/components/ui/PageTransition";
 import { SkeletonExpenseList } from "@/components/ui/Skeleton";
 import { MonthSwitcher } from "@/components/layout/MonthSwitcher";
 import { SyncIndicator } from "@/components/sync/SyncIndicator";
@@ -11,7 +10,7 @@ import { CategoryChips } from "@/components/expenses/CategoryChips";
 import { FilterPanel } from "@/components/expenses/FilterPanel";
 import { useExpenses } from "@/hooks/useExpenses";
 import { useUIStore } from "@/stores/uiStore";
-import { Search, PlusCircle } from "lucide-react";
+import { Search, PlusCircle, Globe } from "lucide-react";
 import { useCurrency } from "@/hooks/useCurrency";
 import { debounce } from "@/lib/debounce";
 import { useMonthUrlSync } from "@/hooks/useMonthUrlSync";
@@ -20,6 +19,7 @@ import { usePageTitle } from "@/hooks/usePageTitle";
 import { useCalculationsContext } from "@/contexts/CalculationsContext";
 import { ExpenseExport } from "@/components/expenses/ExpenseExport";
 import { useToast } from "@/components/ui/Toast";
+import { useCrossMonthSearch } from "@/hooks/useCrossMonthSearch";
 
 type SortOption = "day-desc" | "day-asc" | "amount-desc" | "amount-asc";
 
@@ -67,6 +67,17 @@ function ExpensesContent() {
     return (localStorage.getItem("expenstream-expenses-sort") as SortOption) || "day-desc";
   });
   const [localSearch, setLocalSearch] = useState(searchQuery);
+  const [crossMonthEnabled, setCrossMonthEnabled] = useState(false);
+
+  const { results: crossMonthResults, loading: crossMonthLoading } = useCrossMonthSearch(
+    {
+      searchQuery,
+      activeCategories,
+      amountMin: amountMin ? parseFloat(amountMin) : undefined,
+      amountMax: amountMax ? parseFloat(amountMax) : undefined,
+    },
+    crossMonthEnabled,
+  );
 
   // Pre-fill filters from URL params (e.g. from analytics drill-down)
   useEffect(() => {
@@ -133,7 +144,7 @@ function ExpensesContent() {
   };
 
   return (
-      <PageTransition className="relative mx-auto min-h-[80vh] max-w-4xl xl:max-w-6xl space-y-4 sm:space-y-5 p-4 sm:p-6 lg:p-8">
+      <div className="relative mx-auto min-h-[80vh] max-w-4xl xl:max-w-6xl space-y-4 sm:space-y-5 p-4 sm:p-6 lg:p-8">
         {/* Stream Bed Header */}
         <div className="card-terrain p-4 sm:p-5 space-y-3">
           <div className="flex items-center justify-between gap-2 sm:gap-4">
@@ -189,6 +200,20 @@ function ExpensesContent() {
               aria-label="Search expenses"
             />
           </div>
+          {/* Cross-month search toggle */}
+          <button
+            onClick={() => setCrossMonthEnabled((v) => !v)}
+            title={crossMonthEnabled ? "Showing all months" : "Search all months"}
+            aria-pressed={crossMonthEnabled}
+            className="flex shrink-0 items-center justify-center rounded-2xl px-3 py-2.5 transition-colors"
+            style={{
+              border: "1px solid var(--border)",
+              background: crossMonthEnabled ? "var(--accent-soft)" : "var(--surface)",
+              color: crossMonthEnabled ? "var(--accent)" : "var(--text-muted)",
+            }}
+          >
+            <Globe size={15} />
+          </button>
           <select
             value={sortBy}
             onChange={(e) => {
@@ -232,23 +257,31 @@ function ExpensesContent() {
           </p>
         )}
 
+        {crossMonthEnabled && (
+          <p className="px-1 text-xs font-medium" style={{ color: "var(--accent)" }} aria-live="polite">
+            <Globe size={11} className="inline mr-1 -mt-0.5" />
+            Searching all months
+          </p>
+        )}
+
         {/* Expense List */}
-        {loading ? (
+        {loading || crossMonthLoading ? (
           <SkeletonExpenseList />
         ) : (
           <ExpenseList
-            expenses={expenses}
+            expenses={crossMonthEnabled ? crossMonthResults : expenses}
             onDelete={deleteExpense}
             onDeleteMany={deleteExpenses}
-            activeCategories={activeCategories}
-            searchQuery={searchQuery}
+            activeCategories={crossMonthEnabled ? [] : activeCategories}
+            searchQuery={crossMonthEnabled ? "" : searchQuery}
             amountMin={amountMin ? parseFloat(amountMin) : undefined}
             amountMax={amountMax ? parseFloat(amountMax) : undefined}
-            dayMin={dayMin ? parseInt(dayMin, 10) : undefined}
-            dayMax={dayMax ? parseInt(dayMax, 10) : undefined}
+            dayMin={crossMonthEnabled ? undefined : (dayMin ? parseInt(dayMin, 10) : undefined)}
+            dayMax={crossMonthEnabled ? undefined : (dayMax ? parseInt(dayMax, 10) : undefined)}
             sortBy={sortBy}
+            crossMonth={crossMonthEnabled}
           />
         )}
-      </PageTransition>
+      </div>
   );
 }

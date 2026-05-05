@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { m, AnimatePresence } from "framer-motion";
 import { Clock, ArrowRightLeft, RotateCcw, Bookmark, Trash2 } from "lucide-react";
 import { useExpenses } from "@/hooks/useExpenses";
@@ -9,6 +9,7 @@ import { useUIStore } from "@/stores/uiStore";
 import { useCurrency } from "@/hooks/useCurrency";
 import { useCalculationsContext } from "@/contexts/CalculationsContext";
 import { getAllCategories, buildCategoryMap } from "@/lib/categories";
+import { db } from "@/lib/db";
 
 interface Scenario {
   sourceCategory: string;
@@ -22,8 +23,6 @@ interface SavedScenario extends Scenario {
   savedAt: number;
 }
 
-const SAVED_SCENARIOS_KEY = "expenstream-time-machine-scenarios";
-
 export function TimeMachine() {
   const { currentMonth, currentYear } = useUIStore();
   const { expenses } = useExpenses(currentMonth, currentYear);
@@ -32,10 +31,29 @@ export function TimeMachine() {
   const { monthlyTotal, effectiveBudget } = useCalculationsContext();
   const [scenario, setScenario] = useState<Scenario | null>(null);
   const [showWhatIf, setShowWhatIf] = useState(false);
-  const [savedScenarios, setSavedScenarios] = useState<SavedScenario[]>(() => {
-    if (typeof window === "undefined") return [];
-    try { return JSON.parse(localStorage.getItem(SAVED_SCENARIOS_KEY) || "[]"); } catch { return []; }
-  });
+  const [savedScenarios, setSavedScenarios] = useState<SavedScenario[]>([]);
+
+  // Load saved scenarios from Dexie on mount
+  useEffect(() => {
+    db.timeMachineScenarios
+      .orderBy("savedAt")
+      .reverse()
+      .limit(10)
+      .toArray()
+      .then((rows) =>
+        setSavedScenarios(
+          rows.map((r) => ({
+            id: r.id,
+            name: r.name,
+            sourceCategory: r.sourceCategory,
+            targetCategory: r.targetCategory,
+            replacementAmount: r.replacementAmount,
+            savedAt: r.savedAt,
+          }))
+        )
+      )
+      .catch(() => {});
+  }, []);
 
   const allCategories = useMemo(
     () => getAllCategories(settings.customCategories, settings.hiddenDefaults),
@@ -46,7 +64,7 @@ export function TimeMachine() {
     [settings.customCategories, settings.hiddenDefaults],
   );
 
-  const saveScenario = useCallback(() => {
+  const saveScenario = useCallback(async () => {
     if (!scenario) return;
     const entry: SavedScenario = {
       ...scenario,
@@ -54,16 +72,32 @@ export function TimeMachine() {
       name: `${catMap[scenario.sourceCategory]?.label ?? scenario.sourceCategory} → ${formatCurrency(scenario.replacementAmount)}`,
       savedAt: Date.now(),
     };
-    const updated = [entry, ...savedScenarios].slice(0, 10);
-    setSavedScenarios(updated);
-    localStorage.setItem(SAVED_SCENARIOS_KEY, JSON.stringify(updated));
-  }, [scenario, savedScenarios, catMap, formatCurrency]);
+    try {
+      await db.timeMachineScenarios.put({
+        id: entry.id,
+        name: entry.name,
+        sourceCategory: entry.sourceCategory,
+        targetCategory: entry.targetCategory,
+        replacementAmount: entry.replacementAmount,
+        savedAt: entry.savedAt,
+      });
+      // Reload from DB to stay in sync
+      const rows = await db.timeMachineScenarios.orderBy("savedAt").reverse().limit(10).toArray();
+      setSavedScenarios(
+        rows.map((r) => ({
+          id: r.id, name: r.name, sourceCategory: r.sourceCategory,
+          targetCategory: r.targetCategory, replacementAmount: r.replacementAmount, savedAt: r.savedAt,
+        }))
+      );
+    } catch { /* non-fatal */ }
+  }, [scenario, catMap, formatCurrency]);
 
-  const deleteSavedScenario = useCallback((id: string) => {
-    const updated = savedScenarios.filter((s) => s.id !== id);
-    setSavedScenarios(updated);
-    localStorage.setItem(SAVED_SCENARIOS_KEY, JSON.stringify(updated));
-  }, [savedScenarios]);
+  const deleteSavedScenario = useCallback(async (id: string) => {
+    try {
+      await db.timeMachineScenarios.delete(id);
+      setSavedScenarios((prev) => prev.filter((s) => s.id !== id));
+    } catch { /* non-fatal */ }
+  }, []);
 
   const loadSavedScenario = useCallback((saved: SavedScenario) => {
     setScenario({ sourceCategory: saved.sourceCategory, targetCategory: saved.targetCategory, replacementAmount: saved.replacementAmount });

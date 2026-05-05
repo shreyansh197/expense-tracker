@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { Image, X } from "lucide-react";
+import { useUIStore } from "@/stores/uiStore";
 
 const DISMISSED_KEY = "expenstream-postcard-prompt-dismissed";
 
@@ -18,6 +19,7 @@ interface PostcardPromptProps {
  */
 export function PostcardPrompt({ month, year, hasExpenses }: PostcardPromptProps) {
   const monthKey = `${year}-${month}`;
+  const openPostcard = useUIStore((s) => s.openPostcard);
 
   const [dismissed, setDismissed] = useState(() => {
     if (typeof window === "undefined") return true;
@@ -45,7 +47,7 @@ export function PostcardPrompt({ month, year, hasExpenses }: PostcardPromptProps
   };
 
   const handleOpen = () => {
-    window.dispatchEvent(new CustomEvent("expenstream:open-postcard"));
+    openPostcard();
     handleDismiss();
   };
 
