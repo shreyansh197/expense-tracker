@@ -121,17 +121,22 @@ export function WelcomeTutorial({ onComplete, onSetup }: WelcomeTutorialProps) {
   const currencyMeta = SUPPORTED_CURRENCIES.find((c) => c.code === currency) ?? SUPPORTED_CURRENCIES[0];
 
   return (
+    // Outer: always covers the FULL screen so the dashboard never shows through.
     <div
-      className="fixed inset-x-0 top-0 z-[300] flex flex-col overflow-y-auto"
+      className="fixed inset-0 z-[300]"
       aria-modal="true"
       role="dialog"
-      style={{
-        height: vpHeight > 0 ? `${vpHeight}px` : "100dvh",
-        background: "var(--es-chalk, #FAF7F2)",
-        paddingTop: "env(safe-area-inset-top, 0px)",
-        paddingBottom: keyboardHeight > 40 ? "12px" : "env(safe-area-inset-bottom, 0px)",
-      }}
+      style={{ background: "var(--es-chalk, #FAF7F2)" }}
     >
+      {/* Inner: shrinks to vpHeight when keyboard opens so content stays above keyboard */}
+      <div
+        className="flex flex-col overflow-y-auto"
+        style={{
+          height: vpHeight > 0 ? `${vpHeight}px` : "100svh",
+          paddingTop: "env(safe-area-inset-top, 0px)",
+          paddingBottom: keyboardHeight > 40 ? "12px" : "env(safe-area-inset-bottom, 0px)",
+        }}
+      >
       {/* Skip button */}
       <div className="flex justify-end p-4">
         <button
@@ -310,6 +315,7 @@ export function WelcomeTutorial({ onComplete, onSetup }: WelcomeTutorialProps) {
           </button>
         </div>
       </div>
+      </div>{/* end inner content div */}
     </div>
   );
 }

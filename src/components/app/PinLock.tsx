@@ -113,24 +113,32 @@ export function PinLock({ onVerify, onBiometricVerify, biometricIsConditional }:
   }, [onBiometricVerify, bioChecking, checking]);
 
   return (
+    // Outer: always covers the FULL screen (fixed inset-0) so the dashboard
+    // is never visible behind the overlay, even when the keyboard is open.
     <div
-      className="fixed inset-x-0 top-0 z-[999] flex flex-col items-center justify-center gap-8 overflow-y-auto backdrop-blur-xl"
-      style={{
-        // Constrain height to the visible area above the keyboard.
-        // When keyboardHeight > 0 (keyboard open): shrink and justify to top
-        // so content stays fully visible and not obscured.
-        height: vpHeight > 0 ? `${vpHeight}px` : "100dvh",
-        // Shift content toward top when keyboard is open so PIN dots are visible
-        justifyContent: keyboardHeight > 40 ? "flex-start" : "center",
-        paddingTop: keyboardHeight > 40
-          ? "env(safe-area-inset-top, 16px)"
-          : "env(safe-area-inset-top, 0px)",
-        paddingBottom: keyboardHeight > 40
-          ? "12px"
-          : "env(safe-area-inset-bottom, 0px)",
-        background: "color-mix(in srgb, var(--surface) 95%, transparent)",
-      }}
+      className="fixed inset-0 z-[999] backdrop-blur-xl"
+      style={{ background: "color-mix(in srgb, var(--surface) 95%, transparent)" }}
     >
+      {/*
+        Inner: constrained to the visible area above the keyboard.
+        When the keyboard opens, vpHeight shrinks — this div shrinks with it
+        so the content (lock icon, PIN dots, biometric button) sits above
+        the keyboard and isn't obscured, while the outer div still covers
+        the full screen (including behind the keyboard).
+      */}
+      <div
+        className="flex flex-col items-center gap-8 overflow-y-auto"
+        style={{
+          height: vpHeight > 0 ? `${vpHeight}px` : "100svh",
+          justifyContent: keyboardHeight > 40 ? "flex-start" : "center",
+          paddingTop: keyboardHeight > 40
+            ? "env(safe-area-inset-top, 16px)"
+            : "env(safe-area-inset-top, 0px)",
+          paddingBottom: keyboardHeight > 40
+            ? "12px"
+            : "env(safe-area-inset-bottom, 0px)",
+        }}
+      >
       {/* Lock icon */}
       <div
         className="flex h-16 w-16 items-center justify-center rounded-2xl"
@@ -253,6 +261,7 @@ export function PinLock({ onVerify, onBiometricVerify, biometricIsConditional }:
           </span>
         </button>
       )}
+      </div>{/* end inner content div */}
     </div>
   );
 }

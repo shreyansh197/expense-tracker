@@ -51,11 +51,13 @@ export function useVisualViewport(): VisualViewportState {
     if (!vv) return;
 
     const update = () => setState(getState());
+    // Only listen to "resize" — that's when the keyboard opens/closes.
+    // Do NOT listen to "scroll": the visual viewport scroll event fires on
+    // every page scroll (as the address bar animates in/out), which would
+    // cause a state update and re-render on every scroll frame → jank.
     vv.addEventListener("resize", update);
-    vv.addEventListener("scroll", update);
     return () => {
       vv.removeEventListener("resize", update);
-      vv.removeEventListener("scroll", update);
     };
   }, []);
 
