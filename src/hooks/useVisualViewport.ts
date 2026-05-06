@@ -18,11 +18,19 @@ interface VisualViewportState {
  * - `window.visualViewport.height` shrinks to the area ABOVE the keyboard
  * - `window.innerHeight` stays the same (layout viewport)
  *
- * `keyboardHeight` is the difference — how much height the keyboard is eating.
- * Use this to shift fixed/full-screen overlays up so they stay above the keyboard.
+ * IMPORTANT — threshold:
+ * `window.innerHeight - vv.height` is NEVER zero on mobile because the
+ * address bar always takes some space. During scrolling, `visualViewport.resize`
+ * fires as the address bar animates in/out (delta ~50px). We must ignore those
+ * small changes. A real software keyboard is at least 200px tall; address bars
+ * are at most 130px. We use 150px as the cutoff.
  *
  * Falls back to {height: window.innerHeight, keyboardHeight: 0} when not supported.
  */
+
+// Minimum height-shrinkage to count as a keyboard (not address-bar animation)
+const KEYBOARD_THRESHOLD_PX = 150;
+
 export function useVisualViewport(): VisualViewportState {
   const getState = (): VisualViewportState => {
     if (typeof window === "undefined") {
@@ -36,7 +44,10 @@ export function useVisualViewport(): VisualViewportState {
         offsetTop: 0,
       };
     }
-    const keyboardHeight = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+    const rawDiff = window.innerHeight - vv.height;
+    // Only report a non-zero keyboardHeight when the viewport has shrunk
+    // enough to be a real keyboard, not just an address-bar animation.
+    const keyboardHeight = rawDiff > KEYBOARD_THRESHOLD_PX ? rawDiff : 0;
     return {
       height: vv.height,
       keyboardHeight,

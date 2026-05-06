@@ -48,6 +48,11 @@ function KeyboardScrollEffect() {
     const vv = window.visualViewport;
     if (!vv) return;
     const handleResize = () => {
+      // Only react when the viewport shrank by > 150px — that's a real keyboard.
+      // Address-bar animations are < 130px and must not trigger scrollIntoView
+      // because that fights the user's scroll gesture and causes jank.
+      const rawDiff = window.innerHeight - vv.height;
+      if (rawDiff <= 150) return;
       const el = document.activeElement as HTMLElement | null;
       if (
         el &&

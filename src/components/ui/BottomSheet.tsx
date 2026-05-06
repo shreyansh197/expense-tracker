@@ -83,19 +83,15 @@ export function BottomSheet({ open, onClose, children, label, className, springP
     [handleClose]
   );
 
-  // Track keyboard height to lift the sheet above the keyboard
-  const [keyboardOffset, setKeyboardOffset] = useState(0);
-
-  // Scroll focused inputs into view when mobile keyboard opens
+  // Scroll focused inputs into view when the keyboard opens
   useEffect(() => {
     if (!open) return;
     const vv = window.visualViewport;
     if (!vv) return;
     const handleResize = () => {
-      // Calculate how much the keyboard is covering
-      const kb = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
-      setKeyboardOffset(kb);
-      // Also scroll the active input into view
+      const rawDiff = window.innerHeight - vv.height;
+      // Only react when viewport shrank by > 150px (real keyboard, not address-bar)
+      if (rawDiff <= 150) return;
       const el = document.activeElement as HTMLElement | null;
       if (el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.tagName === "SELECT")) {
         requestAnimationFrame(() => {
@@ -104,10 +100,7 @@ export function BottomSheet({ open, onClose, children, label, className, springP
       }
     };
     vv.addEventListener("resize", handleResize);
-    return () => {
-      vv.removeEventListener("resize", handleResize);
-      setKeyboardOffset(0);
-    };
+    return () => vv.removeEventListener("resize", handleResize);
   }, [open]);
 
   return (
@@ -131,13 +124,10 @@ export function BottomSheet({ open, onClose, children, label, className, springP
               background: "var(--surface)",
               border: "1px solid var(--border)",
               paddingBottom: "env(safe-area-inset-bottom, 0px)",
-              // Lift the sheet above the keyboard; also apply drag offset
-              transform: dragY > 0
-                ? `translateY(${dragY}px)`
-                : keyboardOffset > 0
-                  ? `translateY(-${keyboardOffset}px)`
-                  : undefined,
-              transition: keyboardOffset > 0 ? "transform 0.2s ease-out" : undefined,
+              // Only apply drag transform. Keyboard lifting is handled by
+              // scrollIntoView above — translateY during scroll causes jank
+              // because visualViewport.resize fires on every address-bar animation.
+              transform: dragY > 0 ? `translateY(${dragY}px)` : undefined,
               opacity: dragY > 0 ? Math.max(1 - dragY / 300, 0.5) : 1,
             }}
             initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 40, scale: 0.97 }}
