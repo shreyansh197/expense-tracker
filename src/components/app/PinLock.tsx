@@ -1,23 +1,27 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Lock, Delete, AlertCircle } from "lucide-react";
+import { Lock, AlertCircle, Fingerprint, Loader2 } from "lucide-react";
 
 interface PinLockProps {
   onVerify: (pin: string) => Promise<boolean | "locked-out">;
+  /** When provided, shows a biometric unlock button that calls this function. */
+  onBiometricVerify?: () => Promise<boolean>;
 }
 
 const PIN_LENGTH = 4;
 
-export function PinLock({ onVerify }: PinLockProps) {
+export function PinLock({ onVerify, onBiometricVerify }: PinLockProps) {
   const [pin, setPin] = useState("");
   const [error, setError] = useState(false);
   const [lockedOut, setLockedOut] = useState(false);
   const [checking, setChecking] = useState(false);
+  const [bioChecking, setBioChecking] = useState(false);
+  const [bioError, setBioError] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    // Focus the hidden input on mount
+    // Auto-focus triggers the native keyboard on mobile
     inputRef.current?.focus();
   }, []);
 
@@ -44,20 +48,18 @@ export function PinLock({ onVerify }: PinLockProps) {
     [onVerify, checking],
   );
 
-  const handleKeypad = (digit: string) => {
-    if (pin.length >= PIN_LENGTH) return;
-    const next = pin + digit;
-    setPin(next);
-    setError(false);
-    if (next.length === PIN_LENGTH) {
-      handleSubmit(next);
+  const handleBiometric = useCallback(async () => {
+    if (!onBiometricVerify || bioChecking || checking) return;
+    setBioChecking(true);
+    setBioError(false);
+    const ok = await onBiometricVerify();
+    if (!ok) {
+      setBioError(true);
+      setBioChecking(false);
+      inputRef.current?.focus();
     }
-  };
-
-  const handleDelete = () => {
-    setPin((prev) => prev.slice(0, -1));
-    setError(false);
-  };
+    // If ok, parent unmounts this component
+  }, [onBiometricVerify, bioChecking, checking]);
 
   return (
     <div className="fixed inset-0 z-[999] flex flex-col items-center justify-center gap-8 backdrop-blur-xl"
@@ -80,96 +82,108 @@ export function PinLock({ onVerify }: PinLockProps) {
         </p>
       </div>
 
-      {/* PIN dots */}
-      <div className="flex gap-5">
-        {Array.from({ length: PIN_LENGTH }, (_, i) => (
-          <div
-            key={i}
-            className={`h-3.5 w-3.5 rounded-full transition-all duration-200 ${
-              error
-                ? "bg-[var(--danger)]"
-                : i < pin.length
-                  ? "bg-[var(--accent)] scale-125"
-                  : ""
-            }`}
-            style={
-              !error && i >= pin.length
-                ? { background: "var(--border)", transform: "scale(1)" }
-                : undefined
-            }
-          />
-        ))}
+      {/* PIN dots + invisible native input overlay */}
+      <div
+        className="relative flex cursor-text flex-col items-center gap-4"
+        onClick={() => inputRef.current?.focus()}
+      >
+        <div className="flex gap-5">
+          {Array.from({ length: PIN_LENGTH }, (_, i) => (
+            <div
+              key={i}
+              className={`h-3.5 w-3.5 rounded-full transition-all duration-200 ${
+                error
+                  ? "bg-[var(--danger)]"
+                  : i < pin.length
+                    ? "bg-[var(--accent)] scale-125"
+                    : ""
+              }`}
+              style={
+                !error && i >= pin.length
+                  ? { background: "var(--border)", transform: "scale(1)" }
+                  : undefined
+              }
+            />
+          ))}
+        </div>
+
+        {/* Tap hint */}
+        <p className="select-none text-xs" style={{ color: "var(--text-tertiary)" }}>
+          {pin.length === 0
+            ? "Tap here to open keyboard"
+            : `${pin.length} of ${PIN_LENGTH} digits entered`}
+        </p>
+
+        {/*
+          Invisible input positioned over the tap area.
+          type="tel" + inputMode="numeric" triggers the phone's native
+          numeric keyboard on Android and iOS.
+          font-size 16px prevents iOS from auto-zooming on focus.
+          opacity-0 keeps it invisible; the dots above provide all visual feedback.
+        */}
+        <input
+          ref={inputRef}
+          type="tel"
+          inputMode="numeric"
+          pattern="[0-9]*"
+          maxLength={PIN_LENGTH}
+          value={pin}
+          onChange={(e) => {
+            const v = e.target.value.replace(/\D/g, "").slice(0, PIN_LENGTH);
+            setPin(v);
+            setError(false);
+            setBioError(false);
+            if (v.length === PIN_LENGTH) handleSubmit(v);
+          }}
+          disabled={checking || lockedOut}
+          autoComplete="off"
+          aria-label="PIN entry"
+          className="absolute inset-0 h-full w-full opacity-0"
+          style={{ fontSize: "16px" }}
+        />
       </div>
 
       {/* Error / lockout message */}
-      <div aria-live="assertive" aria-atomic="true">
+      <div aria-live="assertive" aria-atomic="true" className="min-h-[20px]">
         {lockedOut && (
-          <div className="flex items-center gap-1.5 text-err text-sm">
+          <div className="flex items-center gap-1.5 text-sm" style={{ color: "var(--danger)" }}>
             <AlertCircle size={14} />
             <span>Too many attempts. Please wait or re-authenticate.</span>
           </div>
         )}
         {error && !lockedOut && (
-          <div className="flex items-center gap-1.5 text-err text-sm">
+          <div className="flex items-center gap-1.5 text-sm" style={{ color: "var(--danger)" }}>
             <AlertCircle size={14} />
             <span>Incorrect PIN. Try again.</span>
           </div>
         )}
-      </div>
-
-      {/* Keypad */}
-      <div className="grid grid-cols-3 gap-4">
-        {["1", "2", "3", "4", "5", "6", "7", "8", "9", "", "0", "del"].map(
-          (key) => {
-            if (key === "") return <div key="empty" />;
-            if (key === "del") {
-              return (
-                <button
-                  key="del"
-                  onClick={handleDelete}
-                  disabled={checking || pin.length === 0}
-                  className="flex h-[72px] w-[72px] items-center justify-center rounded-2xl text-lg transition-all active:scale-92 disabled:opacity-30 hover:bg-[var(--surface-tertiary)]"
-                  style={{ background: "var(--surface-secondary)", color: "var(--text-secondary)" }}
-                  aria-label="Delete last digit"
-                >
-                  <Delete size={22} />
-                </button>
-              );
-            }
-            return (
-              <button
-                key={key}
-                onClick={() => handleKeypad(key)}
-                disabled={checking}
-                className="flex h-[72px] w-[72px] items-center justify-center rounded-2xl text-xl font-semibold transition-all active:scale-92 disabled:opacity-50 hover:bg-[var(--surface-tertiary)]"
-                style={{ background: "var(--surface-secondary)", color: "var(--text-primary)" }}
-                aria-label={`Digit ${key}`}
-              >
-                {key}
-              </button>
-            );
-          },
+        {bioError && (
+          <div className="flex items-center gap-1.5 text-sm" style={{ color: "var(--danger)" }}>
+            <AlertCircle size={14} />
+            <span>Biometric failed. Enter your PIN instead.</span>
+          </div>
         )}
       </div>
 
-      {/* Hidden input for keyboard entry */}
-      <input
-        ref={inputRef}
-        type="password"
-        inputMode="numeric"
-        pattern="[0-9]*"
-        maxLength={PIN_LENGTH}
-        value={pin}
-        onChange={(e) => {
-          const v = e.target.value.replace(/\D/g, "").slice(0, PIN_LENGTH);
-          setPin(v);
-          setError(false);
-          if (v.length === PIN_LENGTH) handleSubmit(v);
-        }}
-        className="sr-only"
-        autoComplete="off"
-        aria-label="PIN entry"
-      />
+      {/* Biometric unlock button — only shown when parent passes the handler */}
+      {onBiometricVerify && !lockedOut && (
+        <button
+          onClick={handleBiometric}
+          disabled={bioChecking || checking}
+          className="flex flex-col items-center gap-2 rounded-2xl px-6 py-4 transition-all active:scale-95 disabled:opacity-50"
+          style={{ background: "var(--surface-secondary)" }}
+          aria-label="Unlock with biometrics"
+        >
+          {bioChecking ? (
+            <Loader2 size={28} className="animate-spin" style={{ color: "var(--accent)" }} />
+          ) : (
+            <Fingerprint size={28} style={{ color: "var(--accent)" }} />
+          )}
+          <span className="text-xs font-medium" style={{ color: "var(--text-secondary)" }}>
+            {bioChecking ? "Verifying…" : "Use Biometrics"}
+          </span>
+        </button>
+      )}
     </div>
   );
 }

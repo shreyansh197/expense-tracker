@@ -18,6 +18,7 @@ import { onWorkspaceAccessDenied } from "@/lib/syncEngine";
 import { useToast } from "@/components/ui/Toast";
 import { PinLock } from "@/components/app/PinLock";
 import { usePinLock } from "@/hooks/usePinLock";
+import { useBiometricLock } from "@/hooks/useBiometricLock";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { PullToRefreshIndicator } from "@/components/ui/PullToRefreshIndicator";
 import { pullChanges } from "@/lib/syncEngine";
@@ -140,6 +141,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const [hydrated, setHydrated] = useState(false);
   const [showTutorial, setShowTutorial] = useState(false);
   const pinLock = usePinLock();
+  const biometricLock = useBiometricLock();
 
   useEffect(() => {
     setHydrated(true);
@@ -211,7 +213,20 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex h-screen flex-col" style={{ background: 'var(--background)' }}>
       <AppShellInner>{children}</AppShellInner>
-      {pinLock.isLocked && <PinLock onVerify={pinLock.verifyPin} />}
+      {pinLock.isLocked && (
+        <PinLock
+          onVerify={pinLock.verifyPin}
+          onBiometricVerify={
+            biometricLock.isEnabled
+              ? async () => {
+                  const ok = await biometricLock.verify();
+                  if (ok) pinLock.unlock();
+                  return ok;
+                }
+              : undefined
+          }
+        />
+      )}
       {showTutorial && (
         <WelcomeTutorial
           onComplete={() => {

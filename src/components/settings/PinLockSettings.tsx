@@ -2,15 +2,32 @@
 
 import { useState } from "react";
 import { usePinLock } from "@/hooks/usePinLock";
+import { useBiometricLock } from "@/hooks/useBiometricLock";
 import { useToast } from "@/components/ui/Toast";
+import { Fingerprint, Loader2, CheckCircle2 } from "lucide-react";
 
 /** PIN Lock settings UI — embedded in Security section */
 export function PinLockSettings() {
   const { isEnabled, timeout, setupPin, disablePin, updateTimeout } = usePinLock();
+  const biometric = useBiometricLock();
   const [newPin, setNewPin] = useState("");
   const [confirmPin, setConfirmPin] = useState("");
   const [step, setStep] = useState<"idle" | "setup" | "confirm">("idle");
   const { toast } = useToast();
+
+  const handleBiometricToggle = async () => {
+    if (biometric.isEnabled) {
+      biometric.unregister();
+      toast("Biometric unlock disabled");
+    } else {
+      const ok = await biometric.register();
+      if (ok) {
+        toast("Biometric unlock enabled");
+      } else {
+        toast("Biometric registration failed or was cancelled");
+      }
+    }
+  };
 
   const handleSetup = () => {
     if (step === "idle") {
@@ -67,26 +84,67 @@ export function PinLockSettings() {
       </div>
 
       {isEnabled ? (
-        <div className="space-y-2">
+        <div className="space-y-3">
           <div className="flex items-center gap-2">
             <label className="text-xs font-medium" style={{ color: "var(--text-secondary)" }}>
               Lock after
             </label>
             <select
               value={timeout}
-              onChange={(e) => updateTimeout(Number(e.target.value) as 5 | 15 | 30)}
+              onChange={(e) => updateTimeout(Number(e.target.value) as 30 | 60 | 300 | 600)}
               className="rounded-lg border px-2 py-1 text-xs font-medium"
               style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--text-primary)" }}
             >
-              <option value={5}>5 minutes</option>
-              <option value={15}>15 minutes</option>
-              <option value={30}>30 minutes</option>
+              <option value={30}>30 seconds</option>
+              <option value={60}>1 minute</option>
+              <option value={300}>5 minutes</option>
+              <option value={600}>10 minutes</option>
             </select>
             <span className="text-xs" style={{ color: "var(--text-tertiary)" }}>of inactivity</span>
           </div>
           <p className="text-xs rounded-lg p-2" style={{ background: "var(--surface-secondary)", color: "var(--text-secondary)" }}>
-            PIN lock is active. The app will ask for your PIN after {timeout} minutes of inactivity.
+            PIN lock is active. The app will ask for your PIN after{" "}
+            {timeout < 60 ? `${timeout} seconds` : `${timeout / 60} minute${timeout / 60 !== 1 ? "s" : ""}`}{" "}
+            of inactivity.
           </p>
+
+          {/* Biometric unlock — only shown when the device supports it */}
+          {biometric.isAvailable && (
+            <div
+              className="flex items-center justify-between rounded-lg p-3"
+              style={{ background: "var(--surface-secondary)", border: "1px solid var(--border-subtle)" }}
+            >
+              <div className="flex items-center gap-2">
+                <Fingerprint size={16} style={{ color: "var(--accent)" }} />
+                <div>
+                  <p className="text-xs font-semibold" style={{ color: "var(--text-primary)" }}>
+                    Biometric Unlock
+                  </p>
+                  <p className="text-xs" style={{ color: "var(--text-tertiary)" }}>
+                    Use fingerprint or Face ID instead of PIN
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={handleBiometricToggle}
+                disabled={biometric.registering}
+                className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all disabled:opacity-50"
+                style={{
+                  background: biometric.isEnabled ? "var(--success-soft)" : "var(--surface)",
+                  color: biometric.isEnabled ? "var(--success-text)" : "var(--text-secondary)",
+                  border: "1px solid var(--border)",
+                }}
+              >
+                {biometric.registering ? (
+                  <><Loader2 size={12} className="animate-spin" /> Registering…</>
+                ) : biometric.isEnabled ? (
+                  <><CheckCircle2 size={12} /> Enabled</>
+                ) : (
+                  "Enable"
+                )}
+              </button>
+            </div>
+          )}
         </div>
       ) : (
         <div className="space-y-3">

@@ -9,7 +9,8 @@ const PIN_LAST_ACTIVE_KEY = "expenstream-pin-last-active";
 const PIN_ATTEMPTS_KEY = "expenstream-pin-attempts";
 const PIN_LOCKOUT_UNTIL_KEY = "expenstream-pin-lockout-until";
 
-type PinTimeout = 5 | 15 | 30; // minutes
+// Timeout values stored and compared in seconds
+type PinTimeout = 30 | 60 | 300 | 600; // 30s | 1min | 5min | 10min
 
 const MAX_ATTEMPTS_BEFORE_COOLDOWN = 3;
 const COOLDOWN_MS = 30_000; // 30 seconds after 3 failures
@@ -83,8 +84,8 @@ function resetAttempts(): void {
 function getTimeout(): PinTimeout {
   const raw = localStorage.getItem(PIN_TIMEOUT_KEY);
   const val = parseInt(raw || "", 10);
-  if (val === 5 || val === 15 || val === 30) return val;
-  return 5;
+  if (val === 30 || val === 60 || val === 300 || val === 600) return val;
+  return 300; // default: 5 minutes
 }
 
 function setTimeout_(minutes: PinTimeout): void {
@@ -123,7 +124,7 @@ export function usePinLock() {
 
       // Check if we should lock (exceeded timeout since last activity)
       const last = getLastActive();
-      const timeoutMs = getTimeout() * 60 * 1000;
+      const timeoutMs = getTimeout() * 1000;
       if (!last || Date.now() - last > timeoutMs) {
         setIsLocked(true);
       } else {
@@ -143,10 +144,10 @@ export function usePinLock() {
     window.addEventListener("pointerdown", resetActivity, { passive: true });
     window.addEventListener("keydown", resetActivity, { passive: true });
 
-    // Check inactivity every 30s
+    // Check inactivity every 10s (short enough to catch 30s timeout)
     activityTimer.current = setInterval(() => {
       const last = getLastActive();
-      const timeoutMs = getTimeout() * 60 * 1000;
+      const timeoutMs = getTimeout() * 1000;
       if (last && Date.now() - last > timeoutMs) {
         setIsLocked(true);
       }
@@ -198,14 +199,14 @@ export function usePinLock() {
   }, []);
 
   /** Set up a new PIN. */
-  const setupPin = useCallback(async (pin: string, timeoutMinutes: PinTimeout = 5) => {
+  const setupPin = useCallback(async (pin: string, timeoutSeconds: PinTimeout = 300) => {
     const hash = await hashPin(pin);
     await savePinHash(hash);
-    setTimeout_(timeoutMinutes);
+    setTimeout_(timeoutSeconds);
     setLastActive();
     setIsEnabled(true);
     setIsLocked(false);
-    setTimeoutVal(timeoutMinutes);
+    setTimeoutVal(timeoutSeconds);
   }, []);
 
   /** Disable PIN lock. */
@@ -221,6 +222,12 @@ export function usePinLock() {
     setTimeoutVal(minutes);
   }, []);
 
+  /** Unlock without PIN verification — used by biometric unlock after server-side assertion succeeds. */
+  const unlock = useCallback(() => {
+    setIsLocked(false);
+    setLastActive();
+  }, []);
+
   return {
     isLocked,
     isEnabled,
@@ -229,5 +236,6 @@ export function usePinLock() {
     setupPin,
     disablePin,
     updateTimeout,
+    unlock,
   };
 }

@@ -8,30 +8,31 @@
 -- Zero policies = deny all for anon/authenticated roles by default.
 -- ══════════════════════════════════════════════════════════════
 
--- Each table is enabled only if it exists, making this script safe to run
--- regardless of which prior migrations have been applied.
-DO $$ DECLARE
-  tbl TEXT;
-BEGIN
-  FOREACH tbl IN ARRAY ARRAY[
-    -- Auth & identity
-    'users', 'passkeys', 'workspaces', 'memberships', 'devices',
-    'sessions', 'invites', 'device_links', 'audit_logs', 'verification_tokens',
-    -- Domain data
-    'expenses', 'workspace_settings', 'business_ledgers', 'business_payments',
-    'sync_cursors', 'push_subscriptions',
-    -- Legacy (pre-002 clean-slate migration)
-    'user_settings'
-  ]
-  LOOP
-    IF EXISTS (
-      SELECT 1 FROM information_schema.tables
-      WHERE table_schema = 'public' AND table_name = tbl
-    ) THEN
-      EXECUTE format('ALTER TABLE %I ENABLE ROW LEVEL SECURITY', tbl);
-      RAISE NOTICE 'RLS enabled on %', tbl;
-    ELSE
-      RAISE NOTICE 'Skipped % (table does not exist)', tbl;
-    END IF;
-  END LOOP;
+-- ── Auth & identity tables ─────────────────────────────────────
+ALTER TABLE "users"               ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "passkeys"            ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "workspaces"          ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "memberships"         ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "devices"             ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "sessions"            ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "invites"             ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "device_links"        ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "audit_logs"          ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "verification_tokens" ENABLE ROW LEVEL SECURITY;
+
+-- ── Domain data tables ─────────────────────────────────────────
+ALTER TABLE "expenses"            ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "workspace_settings"  ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "business_ledgers"    ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "business_payments"   ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "sync_cursors"        ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "push_subscriptions"  ENABLE ROW LEVEL SECURITY;
+
+-- ── Legacy tables (if they still exist) ───────────────────────
+-- These were created by earlier migration scripts before the 002
+-- clean-slate migration. Safe to run even if they were dropped.
+DO $$ BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'user_settings' AND table_schema = 'public') THEN
+    EXECUTE 'ALTER TABLE user_settings ENABLE ROW LEVEL SECURITY';
+  END IF;
 END $$;
