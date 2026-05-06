@@ -336,7 +336,7 @@ export function useBiometricLock(): BiometricLockState {
     } finally {
       setVerifying(false);
     }
-  }, [verifying]);
+  }, [verifying, isConditionalSupported]);
 
   /** Disable biometric unlock and remove local state. */
   const unregister = useCallback(() => {

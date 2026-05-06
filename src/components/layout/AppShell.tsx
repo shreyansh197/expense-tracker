@@ -113,7 +113,7 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
             <main
               id="main-content"
               className="flex-1 overflow-y-auto pb-24 lg:pb-0"
-              style={{ background: 'linear-gradient(180deg, var(--surface-secondary), transparent 200px)', overscrollBehaviorY: 'contain' }}
+              style={{ background: 'linear-gradient(180deg, var(--surface-secondary), transparent 200px)' }}
               onTouchStart={onTouchStart}
               onTouchEnd={onTouchEnd}
             >
