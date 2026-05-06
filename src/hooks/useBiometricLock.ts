@@ -74,14 +74,26 @@ export interface BiometricLockState {
   isAvailable: boolean;
   /** True when the user has registered a passkey for app-lock. */
   isEnabled: boolean;
+  /**
+   * True when the browser supports WebAuthn Conditional UI (iOS 16+, Chrome 108+).
+   * When true, passkeys appear in the keyboard QuickType bar — tapping one
+   * triggers Face ID/fingerprint immediately without any modal popup.
+   */
+  isConditionalSupported: boolean;
   /** Busy while registering a new passkey. */
   registering: boolean;
   /** Busy while verifying the biometric prompt. */
   verifying: boolean;
   /** Register a platform passkey for app-lock biometric unlock. */
   register: () => Promise<{ ok: boolean; error?: string }>;
-  /** Trigger biometric prompt and verify against the server. Returns true on success. */
-  verify: () => Promise<boolean>;
+  /**
+   * Trigger biometric verification.
+   * - Without signal: shows the regular modal prompt (works on all platforms).
+   * - With signal (and isConditionalSupported): uses Conditional UI — the passkey
+   *   appears in the keyboard bar, Face ID runs on tap with no popup.
+   *   Abort the signal to cancel (e.g. when the user unlocks via PIN instead).
+   */
+  verify: (signal?: AbortSignal) => Promise<boolean>;
   /** Remove biometric unlock (clears local storage + disables). */
   unregister: () => void;
 }
@@ -89,6 +101,7 @@ export interface BiometricLockState {
 export function useBiometricLock(): BiometricLockState {
   const [isAvailable, setIsAvailable] = useState(false);
   const [isEnabled, setIsEnabled] = useState(false);
+  const [isConditionalSupported, setIsConditionalSupported] = useState(false);
   const [registering, setRegistering] = useState(false);
   const [verifying, setVerifying] = useState(false);
 
@@ -113,6 +126,18 @@ export function useBiometricLock(): BiometricLockState {
             localStorage.getItem(BIOMETRIC_ENABLED_KEY) === "1" &&
               !!localStorage.getItem(BIOMETRIC_CREDENTIAL_KEY),
           );
+          // Check for Conditional UI support (iOS 16+, Chrome 108+)
+          // This allows passkeys to appear in the keyboard QuickType bar,
+          // triggering Face ID directly without any modal popup.
+          const conditionalCheck =
+            (PublicKeyCredential as { isConditionalMediationAvailable?: () => Promise<boolean> })
+              .isConditionalMediationAvailable;
+          if (typeof conditionalCheck === "function") {
+            try {
+              const supported = await conditionalCheck();
+              if (!cancelled) setIsConditionalSupported(supported);
+            } catch { /* not supported */ }
+          }
         }
       } catch {
         // Browser doesn't support WebAuthn
@@ -222,11 +247,19 @@ export function useBiometricLock(): BiometricLockState {
 
   /**
    * Verify the device biometric to unlock the app.
-   * Gets a fresh challenge, presents the OS biometric prompt scoped to the
-   * registered credential, then verifies with /api/auth/passkey/app-lock-verify.
-   * Returns true on success (parent component should unlock the app).
+   *
+   * Two modes depending on whether an AbortSignal is passed:
+   *
+   * 1. No signal (modal mode): Immediately shows the "Use Passkey" system sheet.
+   *    User taps Continue → Face ID/fingerprint runs. Works on all platforms.
+   *
+   * 2. With signal (conditional mode, iOS 16+ / Chrome 108+): Uses
+   *    WebAuthn Conditional UI. The passkey silently appears in the keyboard
+   *    QuickType bar — tapping it triggers Face ID with zero popup/modal.
+   *    Abort the signal when the user unlocks via PIN so the pending call
+   *    is cleaned up.
    */
-  const verify = useCallback(async (): Promise<boolean> => {
+  const verify = useCallback(async (signal?: AbortSignal): Promise<boolean> => {
     const credentialId = localStorage.getItem(BIOMETRIC_CREDENTIAL_KEY);
     if (!credentialId || verifying) return false;
 
@@ -271,12 +304,19 @@ export function useBiometricLock(): BiometricLockState {
       // 2. Trigger the OS biometric prompt
       let assertion: PublicKeyCredential;
       try {
-        const result = await navigator.credentials.get({
-          publicKey: options,
-        });
+        // Conditional UI: passkey appears in keyboard QuickType bar, no modal.
+        // Regular (no signal): shows the system "Use Passkey" modal sheet.
+        const getOptions: CredentialRequestOptions = { publicKey: options };
+        if (signal && isConditionalSupported) {
+          getOptions.mediation = "conditional";
+          getOptions.signal = signal;
+        }
+        const result = await navigator.credentials.get(getOptions);
         if (!result) return false;
         assertion = result as PublicKeyCredential;
-      } catch {
+      } catch (err) {
+        // AbortError is expected when the signal fires (user typed PIN)
+        if ((err as DOMException)?.name === "AbortError") return false;
         // User cancelled or biometric failed
         return false;
       }
@@ -306,5 +346,5 @@ export function useBiometricLock(): BiometricLockState {
     setIsEnabled(false);
   }, []);
 
-  return { isAvailable, isEnabled, registering, verifying, register, verify, unregister };
+  return { isAvailable, isEnabled, isConditionalSupported, registering, verifying, register, verify, unregister };
 }

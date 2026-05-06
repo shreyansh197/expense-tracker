@@ -216,10 +216,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       {pinLock.isLocked && (
         <PinLock
           onVerify={pinLock.verifyPin}
+          biometricIsConditional={biometricLock.isConditionalSupported}
           onBiometricVerify={
             biometricLock.isEnabled
-              ? async () => {
-                  const ok = await biometricLock.verify();
+              ? async (signal?: AbortSignal) => {
+                  const ok = await biometricLock.verify(signal);
                   if (ok) pinLock.unlock();
                   return ok;
                 }

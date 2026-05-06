@@ -6,13 +6,25 @@ import { useVisualViewport } from "@/hooks/useVisualViewport";
 
 interface PinLockProps {
   onVerify: (pin: string) => Promise<boolean | "locked-out">;
-  /** When provided, shows a biometric unlock button that calls this function. */
-  onBiometricVerify?: () => Promise<boolean>;
+  /**
+   * When provided, enables biometric unlock.
+   * - Called without a signal: shows the regular modal prompt.
+   * - Called with an AbortSignal: uses Conditional UI (passkey in keyboard bar,
+   *   no popup). Only triggered when biometricIsConditional is true.
+   */
+  onBiometricVerify?: (signal?: AbortSignal) => Promise<boolean>;
+  /**
+   * When true, the browser supports WebAuthn Conditional UI (iOS 16+).
+   * PinLock will focus the input immediately so the keyboard is shown and
+   * the passkey appears in the QuickType bar — tapping it triggers Face ID
+   * with no popup. Falls back to modal on the fingerprint button tap.
+   */
+  biometricIsConditional?: boolean;
 }
 
 const PIN_LENGTH = 4;
 
-export function PinLock({ onVerify, onBiometricVerify }: PinLockProps) {
+export function PinLock({ onVerify, onBiometricVerify, biometricIsConditional }: PinLockProps) {
   const [pin, setPin] = useState("");
   const [error, setError] = useState(false);
   const [lockedOut, setLockedOut] = useState(false);
@@ -20,19 +32,41 @@ export function PinLock({ onVerify, onBiometricVerify }: PinLockProps) {
   const [bioChecking, setBioChecking] = useState(false);
   const [bioError, setBioError] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  // AbortController for the background conditional-mediation WebAuthn call
+  const conditionalAbortRef = useRef<AbortController | null>(null);
   // Track visual viewport so the overlay shrinks above the keyboard
   const { height: vpHeight, keyboardHeight } = useVisualViewport();
 
   useEffect(() => {
-    if (onBiometricVerify) {
-      // Auto-trigger biometric immediately on mount (like banking apps).
-      // Short delay lets the overlay finish rendering before the system prompt appears.
-      const t = setTimeout(() => handleBiometric(), 300);
-      return () => clearTimeout(t);
-    } else {
+    if (!onBiometricVerify) {
       // No biometric — open the native keyboard straight away.
       inputRef.current?.focus();
+      return;
     }
+
+    if (biometricIsConditional) {
+      // ── Conditional UI path (iOS 16+ / Chrome 108+) ────────────────────
+      // Focus the input so the keyboard appears. The passkey is shown in the
+      // keyboard QuickType bar. Tapping it triggers Face ID immediately with
+      // no modal/popup — the same UX as native banking apps.
+      inputRef.current?.focus();
+      const controller = new AbortController();
+      conditionalAbortRef.current = controller;
+      // Start the background conditional call. It stays pending until the
+      // user taps the passkey in the QuickType bar (resolves) or the signal
+      // is aborted (e.g. after the user unlocks with PIN instead).
+      onBiometricVerify(controller.signal).catch(() => {});
+    } else {
+      // ── Modal path (iOS 15 and below / unsupported browsers) ───────────
+      // Auto-trigger the system sheet 300ms after the overlay renders.
+      const t = setTimeout(() => handleBiometric(), 300);
+      return () => clearTimeout(t);
+    }
+
+    return () => {
+      // Abort the conditional call on unmount (PIN unlock or nav away).
+      conditionalAbortRef.current?.abort();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -61,8 +95,13 @@ export function PinLock({ onVerify, onBiometricVerify }: PinLockProps) {
 
   const handleBiometric = useCallback(async () => {
     if (!onBiometricVerify || bioChecking || checking) return;
+    // Abort any running conditional call — two concurrent credential.get() calls
+    // would conflict. The modal flow replaces the conditional flow here.
+    conditionalAbortRef.current?.abort();
+    conditionalAbortRef.current = null;
     setBioChecking(true);
     setBioError(false);
+    // Called without a signal → uses the regular modal prompt
     const ok = await onBiometricVerify();
     if (!ok) {
       setBioError(true);
@@ -163,7 +202,10 @@ export function PinLock({ onVerify, onBiometricVerify }: PinLockProps) {
             if (v.length === PIN_LENGTH) handleSubmit(v);
           }}
           disabled={checking || lockedOut}
-          autoComplete="off"
+          // "webauthn" tells iOS Safari this input is associated with a passkey,
+          // which causes the registered passkey to appear in the keyboard QuickType
+          // bar when the conditional WebAuthn call is in-flight.
+          autoComplete={biometricIsConditional ? "webauthn" : "off"}
           aria-label="PIN entry"
           className="absolute inset-0 h-full w-full opacity-0"
           style={{ fontSize: "16px" }}
