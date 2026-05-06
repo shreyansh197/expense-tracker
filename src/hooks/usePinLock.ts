@@ -105,7 +105,7 @@ function setLastActive(): void {
 export function usePinLock() {
   const [isLocked, setIsLocked] = useState(false);
   const [isEnabled, setIsEnabled] = useState(false);
-  const [timeout, setTimeoutVal] = useState<PinTimeout>(5);
+  const [timeout, setTimeoutVal] = useState<PinTimeout>(300);
   const activityTimer = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Initialize: check if PIN is set and whether we should lock on load
