@@ -148,7 +148,7 @@ export function useSettings() {
       const next = { ..._settings, ...updates, updatedAt: Date.now() };
       saveLocal(next);
       _setShared(next);
-      pushToApi(next);
+      await pushToApi(next);
     },
     []
   );
