@@ -10,10 +10,8 @@ import {
   REFRESH_TOKEN_TTL_DAYS,
 } from "@/lib/server/tokens";
 import { audit } from "@/lib/server/audit";
+import { getWebAuthnConfig } from "@/lib/server/webauthn";
 
-
-const RP_ID = process.env.WEBAUTHN_RP_ID ?? "localhost";
-const ORIGIN = process.env.WEBAUTHN_ORIGIN ?? "http://localhost:3000";
 
 export async function POST(req: NextRequest) {
   const challenge = req.cookies.get("webauthn_challenge")?.value;
@@ -23,6 +21,8 @@ export async function POST(req: NextRequest) {
       { status: 400 },
     );
   }
+
+  const { rpID, origin: ORIGIN } = getWebAuthnConfig(req);
 
   let body: unknown;
   try {
@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
       response: credential,
       expectedChallenge: challenge,
       expectedOrigin: ORIGIN,
-      expectedRPID: RP_ID,
+      expectedRPID: rpID,
       credential: {
         id: passkey.credentialId,
         publicKey: passkey.credentialPublicKey,

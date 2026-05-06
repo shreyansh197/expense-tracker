@@ -2,9 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { verifyAuthenticationResponse } from "@simplewebauthn/server";
 import { prisma } from "@/lib/server/prisma";
 import { requireAuth, jsonError } from "@/lib/server/guards";
-
-const RP_ID = process.env.WEBAUTHN_RP_ID ?? "localhost";
-const ORIGIN = process.env.WEBAUTHN_ORIGIN ?? "http://localhost:3000";
+import { getWebAuthnConfig } from "@/lib/server/webauthn";
 
 /**
  * POST /api/auth/passkey/app-lock-verify
@@ -20,6 +18,8 @@ export async function POST(req: NextRequest) {
   // Must be authenticated (JWT still valid, app is just PIN-locked)
   const auth = await requireAuth(req);
   if (!auth) return jsonError("Unauthorized", 401);
+
+  const { rpID, origin: ORIGIN } = getWebAuthnConfig(req);
 
   const challenge = req.cookies.get("webauthn_challenge")?.value;
   if (!challenge) {
@@ -62,7 +62,7 @@ export async function POST(req: NextRequest) {
       response: credential,
       expectedChallenge: challenge,
       expectedOrigin: ORIGIN,
-      expectedRPID: RP_ID,
+      expectedRPID: rpID,
       credential: {
         id: passkey.credentialId,
         publicKey: passkey.credentialPublicKey,

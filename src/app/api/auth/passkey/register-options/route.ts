@@ -2,13 +2,15 @@ import { NextRequest, NextResponse } from "next/server";
 import { generateRegistrationOptions } from "@simplewebauthn/server";
 import { prisma } from "@/lib/server/prisma";
 import { requireAuth, jsonError } from "@/lib/server/guards";
+import { getWebAuthnConfig } from "@/lib/server/webauthn";
 
 const RP_NAME = "ExpenStream";
-const RP_ID = process.env.WEBAUTHN_RP_ID ?? "localhost";
 
 export async function POST(req: NextRequest) {
   const auth = await requireAuth(req);
   if (!auth) return jsonError("Unauthorized", 401);
+
+  const { rpID } = getWebAuthnConfig(req);
 
   const user = await prisma.user.findUnique({
     where: { id: auth.userId },
@@ -26,7 +28,7 @@ export async function POST(req: NextRequest) {
 
   const options = await generateRegistrationOptions({
     rpName: RP_NAME,
-    rpID: RP_ID,
+    rpID,
     userName: user.email,
     userDisplayName: user.name || user.email,
     attestationType: "none",

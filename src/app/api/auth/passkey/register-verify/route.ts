@@ -4,13 +4,13 @@ import { prisma } from "@/lib/server/prisma";
 import { requireAuth, jsonError , getClientIp} from "@/lib/server/guards";
 import { audit } from "@/lib/server/audit";
 import { hashIp } from "@/lib/server/tokens";
-
-const RP_ID = process.env.WEBAUTHN_RP_ID ?? "localhost";
-const ORIGIN = process.env.WEBAUTHN_ORIGIN ?? "http://localhost:3000";
+import { getWebAuthnConfig } from "@/lib/server/webauthn";
 
 export async function POST(req: NextRequest) {
   const auth = await requireAuth(req);
   if (!auth) return jsonError("Unauthorized", 401);
+
+  const { rpID, origin: ORIGIN } = getWebAuthnConfig(req);
 
   const challenge = req.cookies.get("webauthn_challenge")?.value;
   if (!challenge) {
@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
       response: credential,
       expectedChallenge: challenge,
       expectedOrigin: ORIGIN,
-      expectedRPID: RP_ID,
+      expectedRPID: rpID,
     });
   } catch (err) {
     console.error("[passkey/register-verify]", err);

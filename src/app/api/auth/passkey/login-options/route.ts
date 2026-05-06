@@ -2,8 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { generateAuthenticationOptions } from "@simplewebauthn/server";
 import { prisma } from "@/lib/server/prisma";
 import { passkeyLoginOptionsSchema } from "@/lib/validators";
-
-const RP_ID = process.env.WEBAUTHN_RP_ID ?? "localhost";
+import { getWebAuthnConfig } from "@/lib/server/webauthn";
 
 export async function POST(req: NextRequest) {
   let body: unknown;
@@ -19,6 +18,8 @@ export async function POST(req: NextRequest) {
   }
 
   const { email } = parsed.data;
+
+  const { rpID } = getWebAuthnConfig(req);
 
   // If email is provided, scope to that user's passkeys
   let allowCredentials: { id: string; transports?: AuthenticatorTransport[] }[] | undefined;
@@ -42,7 +43,7 @@ export async function POST(req: NextRequest) {
   }
 
   const options = await generateAuthenticationOptions({
-    rpID: RP_ID,
+    rpID,
     allowCredentials,
     userVerification: "preferred",
   });
