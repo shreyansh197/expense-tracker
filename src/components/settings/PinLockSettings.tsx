@@ -2,42 +2,15 @@
 
 import { useState } from "react";
 import { usePinLock } from "@/hooks/usePinLock";
-import { useBiometricLock } from "@/hooks/useBiometricLock";
 import { useToast } from "@/components/ui/Toast";
-import { Fingerprint, Loader2, CheckCircle2 } from "lucide-react";
 
 /** PIN Lock settings UI — embedded in Security section */
 export function PinLockSettings() {
   const { isEnabled, timeout, setupPin, disablePin, updateTimeout } = usePinLock();
-  const biometric = useBiometricLock();
   const [newPin, setNewPin] = useState("");
   const [confirmPin, setConfirmPin] = useState("");
   const [step, setStep] = useState<"idle" | "setup" | "confirm">("idle");
   const { toast } = useToast();
-
-  const handleBiometricToggle = async () => {
-    if (biometric.isEnabled) {
-      biometric.unregister();
-      toast("Biometric unlock disabled");
-    } else {
-      const result = await biometric.register();
-      if (result.ok) {
-        toast("Biometric unlock enabled");
-      } else {
-        // Show the real error so the user (or developer) can debug
-        const reason = result.error ?? "Unknown error";
-        if (reason.startsWith("NotAllowedError")) {
-          toast("Biometric prompt cancelled");
-        } else if (reason.startsWith("InvalidStateError")) {
-          toast("Biometric already registered — try re-enabling");
-        } else if (reason.startsWith("NotSupportedError")) {
-          toast("Biometric not supported on this device");
-        } else {
-          toast(`Biometric registration failed: ${reason.slice(0, 80)}`);
-        }
-      }
-    }
-  };
 
   const handleSetup = () => {
     if (step === "idle") {
@@ -117,44 +90,6 @@ export function PinLockSettings() {
             {timeout < 60 ? `${timeout} seconds` : `${timeout / 60} minute${timeout / 60 !== 1 ? "s" : ""}`}{" "}
             of inactivity.
           </p>
-
-          {/* Biometric unlock — only shown when the device supports it */}
-          {biometric.isAvailable && (
-            <div
-              className="flex items-center justify-between rounded-lg p-3"
-              style={{ background: "var(--surface-secondary)", border: "1px solid var(--border-subtle)" }}
-            >
-              <div className="flex items-center gap-2">
-                <Fingerprint size={16} style={{ color: "var(--accent)" }} />
-                <div>
-                  <p className="text-xs font-semibold" style={{ color: "var(--text-primary)" }}>
-                    Biometric Unlock
-                  </p>
-                  <p className="text-xs" style={{ color: "var(--text-tertiary)" }}>
-                    Use fingerprint or Face ID instead of PIN
-                  </p>
-                </div>
-              </div>
-              <button
-                onClick={handleBiometricToggle}
-                disabled={biometric.registering}
-                className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all disabled:opacity-50"
-                style={{
-                  background: biometric.isEnabled ? "var(--success-soft)" : "var(--surface)",
-                  color: biometric.isEnabled ? "var(--success-text)" : "var(--text-secondary)",
-                  border: "1px solid var(--border)",
-                }}
-              >
-                {biometric.registering ? (
-                  <><Loader2 size={12} className="animate-spin" /> Registering…</>
-                ) : biometric.isEnabled ? (
-                  <><CheckCircle2 size={12} /> Enabled</>
-                ) : (
-                  "Enable"
-                )}
-              </button>
-            </div>
-          )}
         </div>
       ) : (
         <div className="space-y-3">
