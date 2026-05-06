@@ -531,7 +531,6 @@ export function trySyncPush(workspaceId?: string, showSpinner = false) {
   _schedulePoll(); // Switch to fast polling
   if (showSpinner) _setSyncPhase("syncing");
   pushMutations(workspaceId).then(async (applied) => {
-    if (applied > 0) _lastPushAt = Date.now(); // Mark push time for Realtime echo suppression
     await pullChanges(workspaceId);
     const wid = workspaceId ?? getActiveWorkspaceId();
     if (wid && applied > 0) _broadcastSyncEvent(wid);
@@ -559,18 +558,12 @@ let _unsubAuth: (() => void) | null = null;
 let _started = false;
 let _currentWid: string | null = null;
 let _lastMutationAt = 0;
-let _lastPushAt = 0; // Timestamp of last successful push (for Realtime echo suppression)
 
 const FAST_POLL_MS = 3_000;    // 3s after recent mutations
 const SLOW_POLL_MS = 10_000;   // 10s when idle
 const MAX_BACKOFF_MS = 60_000; // max 60s between retries on error
 const FAST_POLL_WINDOW = 120_000; // fast-poll for 2 minutes after last mutation
-const REALTIME_ECHO_COOLDOWN = 3_000; // Base echo cooldown — overridden by measured RTT
-let _measuredRtt = 0; // Rolling average of push RTT in ms
-function getEchoCooldown() {
-  // Use 2x measured RTT (clamped to 1.5s–10s) if available, else the fixed constant
-  return _measuredRtt > 0 ? Math.min(Math.max(_measuredRtt * 2, 1500), 10_000) : REALTIME_ECHO_COOLDOWN;
-}
+let _measuredRtt = 0; // Rolling average of push RTT in ms (used for adaptive polling)
 let _consecutiveErrors = 0;
 
 // ── Realtime channel setup (auth-aware, can be called multiple times) ──
@@ -583,33 +576,13 @@ function _setupRealtimeChannel(wid: string | null) {
   if (!wid) return;
 
   syncLog("realtime", `Setting up Supabase channel for workspace=${wid.slice(0,8)}…`);
+  // postgres_changes listeners removed: RLS (deny-all for anon) blocks them.
+  // Cross-device sync is covered by explicit broadcast sent after every push
+  // (see _broadcastSyncEvent) plus adaptive polling (3 s fast / 10 s idle).
   _realtimeChannel = supabase
     .channel(`sync-${wid}`)
     .on("broadcast", { event: "sync" }, () => {
       syncLog("realtime", "Received broadcast sync event → pulling");
-      pullChanges(wid);
-    })
-    .on("postgres_changes", { event: "*", schema: "public", table: "expenses", filter: `workspace_id=eq.${wid}` }, () => {
-      if (Date.now() - _lastPushAt < getEchoCooldown()) {
-        syncLog("realtime", "postgres_changes on expenses → suppressed (own echo)");
-        return;
-      }
-      syncLog("realtime", "postgres_changes on expenses → pulling");
-      pullChanges(wid);
-    })
-    .on("postgres_changes", { event: "*", schema: "public", table: "workspace_settings", filter: `workspace_id=eq.${wid}` }, () => {
-      if (Date.now() - _lastPushAt < getEchoCooldown()) {
-        syncLog("realtime", "postgres_changes on workspace_settings → suppressed (own echo)");
-        return;
-      }
-      pullChanges(wid);
-    })
-    .on("postgres_changes", { event: "*", schema: "public", table: "business_ledgers", filter: `workspace_id=eq.${wid}` }, () => {
-      if (Date.now() - _lastPushAt < getEchoCooldown()) return;
-      pullChanges(wid);
-    })
-    .on("postgres_changes", { event: "*", schema: "public", table: "business_payments", filter: `workspace_id=eq.${wid}` }, () => {
-      if (Date.now() - _lastPushAt < getEchoCooldown()) return;
       pullChanges(wid);
     })
     .subscribe((status) => {
@@ -685,8 +658,7 @@ async function _doSync() {
           _migrated = true;
           syncLog("migrate", "Migration complete");
         }
-        const applied = await pushMutations(wid);
-        if (applied > 0) _lastPushAt = Date.now();
+        await pushMutations(wid);
         await pullChanges(wid);
         _setSyncPhase("idle");
       })(),
@@ -880,7 +852,6 @@ export function stopSyncEngine() {
   _firstPullDone = false;
   _firstPullResolve = null;
   _firstPullPromise = new Promise((r) => { _firstPullResolve = r; });
-  _lastPushAt = 0;
   _initReady = Promise.resolve();
   _setSyncPhase("idle");
 }
