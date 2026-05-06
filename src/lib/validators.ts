@@ -128,6 +128,9 @@ const settingsMutationData = z.object({
   dashboardLayout: z.unknown().optional(),
   dismissedRecurringSuggestions: z.array(z.unknown()).optional(),
   autoRules: z.array(z.unknown()).optional(),
+  achievements: z.array(z.unknown()).optional(),
+  accentColor: z.string().max(20).optional(),
+  notificationPrefs: z.unknown().optional(),
 });
 
 const ledgerMutationData = z.object({
