@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import { Lock, AlertCircle, Fingerprint, Loader2 } from "lucide-react";
+import { useVisualViewport } from "@/hooks/useVisualViewport";
 
 interface PinLockProps {
   onVerify: (pin: string) => Promise<boolean | "locked-out">;
@@ -19,6 +20,8 @@ export function PinLock({ onVerify, onBiometricVerify }: PinLockProps) {
   const [bioChecking, setBioChecking] = useState(false);
   const [bioError, setBioError] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  // Track visual viewport so the overlay shrinks above the keyboard
+  const { height: vpHeight, keyboardHeight } = useVisualViewport();
 
   useEffect(() => {
     // Auto-focus triggers the native keyboard on mobile
@@ -62,8 +65,23 @@ export function PinLock({ onVerify, onBiometricVerify }: PinLockProps) {
   }, [onBiometricVerify, bioChecking, checking]);
 
   return (
-    <div className="fixed inset-0 z-[999] flex flex-col items-center justify-center gap-8 backdrop-blur-xl"
-      style={{ background: "color-mix(in srgb, var(--surface) 95%, transparent)", paddingTop: "env(safe-area-inset-top, 0px)", paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
+    <div
+      className="fixed inset-x-0 top-0 z-[999] flex flex-col items-center justify-center gap-8 overflow-y-auto backdrop-blur-xl"
+      style={{
+        // Constrain height to the visible area above the keyboard.
+        // When keyboardHeight > 0 (keyboard open): shrink and justify to top
+        // so content stays fully visible and not obscured.
+        height: vpHeight > 0 ? `${vpHeight}px` : "100dvh",
+        // Shift content toward top when keyboard is open so PIN dots are visible
+        justifyContent: keyboardHeight > 40 ? "flex-start" : "center",
+        paddingTop: keyboardHeight > 40
+          ? "env(safe-area-inset-top, 16px)"
+          : "env(safe-area-inset-top, 0px)",
+        paddingBottom: keyboardHeight > 40
+          ? "12px"
+          : "env(safe-area-inset-bottom, 0px)",
+        background: "color-mix(in srgb, var(--surface) 95%, transparent)",
+      }}
     >
       {/* Lock icon */}
       <div

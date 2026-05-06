@@ -53,6 +53,12 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
+  // interactive-widget=resizes-visual: on Android Chrome, the visual viewport
+  // shrinks when the soft keyboard opens (instead of the keyboard overlaying
+  // the content). This makes keyboard-aware layouts work correctly.
+  // viewportFit=cover: allows content to extend into safe areas (notch/home bar).
+  viewportFit: "cover",
+  interactiveWidget: "resizes-visual",
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#FAF7F2" },
     { media: "(prefers-color-scheme: dark)", color: "#1A1B2E" },

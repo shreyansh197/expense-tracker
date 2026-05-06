@@ -126,7 +126,9 @@ function MobileAuthPage({ children }: { children: React.ReactNode }) {
         position: "relative",
         minHeight: "100dvh",
         background: "var(--background)",
-        overflow: "hidden",
+        // Allow overflow so the form can scroll above the keyboard.
+        // HeroBackground uses absolute positioning so it won't cause overflow.
+        overflow: "visible",
       }}
     >
       <HeroBackground />

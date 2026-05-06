@@ -5,6 +5,38 @@
 /* View transitions removed — RouteTransition (Framer Motion) owns page animations */
 /* @view-transition { navigation: auto; } */
 
+/* ── Keyboard-aware layout fixes ──────────────────────────────────────────────
+ * On mobile, when the soft keyboard opens:
+ *   - iOS Safari: the layout viewport stays the same; the keyboard overlays it.
+ *     We handle this via the Visual Viewport API (useVisualViewport hook).
+ *   - Android Chrome: with interactive-widget=resizes-visual (set in viewport
+ *     meta), the visual viewport shrinks. dvh units react to this.
+ *
+ * 1. Use 100dvh (dynamic viewport height) everywhere we previously used 100vh
+ *    so full-screen containers shrink when the keyboard is open on Android.
+ * 2. Give every input/textarea a scroll-margin-bottom so scrollIntoView()
+ *    keeps the field clear of the keyboard by at least 80px.
+ * 3. Prevent iOS from auto-zooming on input focus (font-size ≥ 16px rule).
+ * ────────────────────────────────────────────────────────────────────────── */
+
+/* Replace 100vh with 100dvh on mobile to respect keyboard shrinkage */
+.h-screen {
+  height: 100dvh;
+}
+.min-h-screen {
+  min-height: 100dvh;
+}
+.max-h-screen {
+  max-height: 100dvh;
+}
+
+/* Ensure inputs are never hidden behind the keyboard when scrollIntoView fires */
+input,
+textarea,
+select {
+  scroll-margin-bottom: 80px;
+}
+
 :root {
   /* ── Fluid type scale (320px → 1440px) ── */
   --text-display: clamp(2.25rem, 1.857rem + 1.964vw, 3.5rem);

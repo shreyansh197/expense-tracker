@@ -5,6 +5,7 @@ import { AnimatePresence, m } from "framer-motion";
 import { ArrowRight, X } from "lucide-react";
 import { ClearingScene } from "@/components/ui/illustrations/terrain/ClearingScene";
 import { SUPPORTED_CURRENCIES } from "@/lib/utils";
+import { useVisualViewport } from "@/hooks/useVisualViewport";
 
 /* ── 5-Screen Onboarding Flow ────────────────────────────── */
 
@@ -62,6 +63,7 @@ export function WelcomeTutorial({ onComplete, onSetup }: WelcomeTutorialProps) {
   const [currency, setCurrency] = useState("INR");
   const [budgetInput, setBudgetInput] = useState("");
   const isLast = screen === TOTAL_SCREENS - 1;
+  const { height: vpHeight, keyboardHeight } = useVisualViewport();
 
   // Splash auto-advance after 2s
   useEffect(() => {
@@ -120,13 +122,14 @@ export function WelcomeTutorial({ onComplete, onSetup }: WelcomeTutorialProps) {
 
   return (
     <div
-      className="fixed inset-0 z-[300] flex flex-col"
+      className="fixed inset-x-0 top-0 z-[300] flex flex-col overflow-y-auto"
       aria-modal="true"
       role="dialog"
       style={{
+        height: vpHeight > 0 ? `${vpHeight}px` : "100dvh",
         background: "var(--es-chalk, #FAF7F2)",
         paddingTop: "env(safe-area-inset-top, 0px)",
-        paddingBottom: "env(safe-area-inset-bottom, 0px)",
+        paddingBottom: keyboardHeight > 40 ? "12px" : "env(safe-area-inset-bottom, 0px)",
       }}
     >
       {/* Skip button */}

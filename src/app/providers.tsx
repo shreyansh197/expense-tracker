@@ -31,6 +31,39 @@ function AccentColorEffect() {
   return null;
 }
 
+/**
+ * Global keyboard-awareness effect.
+ *
+ * On iOS Safari the virtual keyboard overlays content without resizing the
+ * layout viewport. The Visual Viewport API tells us when the keyboard appears
+ * (vv.height shrinks). When that happens, scroll the currently-focused input
+ * into the visible area so it isn't hidden behind the keyboard.
+ *
+ * On Android Chrome, interactive-widget=resizes-visual (set in layout.tsx
+ * viewport meta) already shrinks the visual viewport, so dvh units respond
+ * correctly and this extra scroll is just a belt-and-braces safety net.
+ */
+function KeyboardScrollEffect() {
+  useEffect(() => {
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const handleResize = () => {
+      const el = document.activeElement as HTMLElement | null;
+      if (
+        el &&
+        (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.tagName === "SELECT")
+      ) {
+        requestAnimationFrame(() => {
+          el.scrollIntoView({ block: "nearest", behavior: "smooth" });
+        });
+      }
+    };
+    vv.addEventListener("resize", handleResize);
+    return () => vv.removeEventListener("resize", handleResize);
+  }, []);
+  return null;
+}
+
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <LazyMotion features={domAnimation} strict>
@@ -40,6 +73,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
             <ToastProvider>
               <SWUpdateListener />
               <AccentColorEffect />
+              <KeyboardScrollEffect />
               <ConfirmProvider>{children}</ConfirmProvider>
             </ToastProvider>
           </SyncProvider>
