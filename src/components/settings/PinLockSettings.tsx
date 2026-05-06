@@ -20,11 +20,21 @@ export function PinLockSettings() {
       biometric.unregister();
       toast("Biometric unlock disabled");
     } else {
-      const ok = await biometric.register();
-      if (ok) {
+      const result = await biometric.register();
+      if (result.ok) {
         toast("Biometric unlock enabled");
       } else {
-        toast("Biometric registration failed or was cancelled");
+        // Show the real error so the user (or developer) can debug
+        const reason = result.error ?? "Unknown error";
+        if (reason.startsWith("NotAllowedError")) {
+          toast("Biometric prompt cancelled");
+        } else if (reason.startsWith("InvalidStateError")) {
+          toast("Biometric already registered — try re-enabling");
+        } else if (reason.startsWith("NotSupportedError")) {
+          toast("Biometric not supported on this device");
+        } else {
+          toast(`Biometric registration failed: ${reason.slice(0, 80)}`);
+        }
       }
     }
   };

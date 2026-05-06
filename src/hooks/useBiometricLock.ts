@@ -5,6 +5,7 @@ import { authFetch } from "@/lib/authClient";
 
 const BIOMETRIC_ENABLED_KEY = "expenstream-biometric-enabled";
 const BIOMETRIC_CREDENTIAL_KEY = "expenstream-biometric-credential-id";
+const BIOMETRIC_TRANSPORTS_KEY = "expenstream-biometric-transports";
 
 // ── Base64url helpers ─────────────────────────────────────────
 
@@ -78,7 +79,7 @@ export interface BiometricLockState {
   /** Busy while verifying the biometric prompt. */
   verifying: boolean;
   /** Register a platform passkey for app-lock biometric unlock. */
-  register: () => Promise<boolean>;
+  register: () => Promise<{ ok: boolean; error?: string }>;
   /** Trigger biometric prompt and verify against the server. Returns true on success. */
   verify: () => Promise<boolean>;
   /** Remove biometric unlock (clears local storage + disables). */
@@ -125,10 +126,10 @@ export function useBiometricLock(): BiometricLockState {
   /**
    * Register the device's platform authenticator as an app-lock passkey.
    * Reuses the existing /api/auth/passkey/register-* endpoints.
-   * Returns true on success.
+   * Returns { ok: true } on success, or { ok: false, error: "reason" }.
    */
-  const register = useCallback(async (): Promise<boolean> => {
-    if (registering) return false;
+  const register = useCallback(async (): Promise<{ ok: boolean; error?: string }> => {
+    if (registering) return { ok: false, error: "Already registering" };
     setRegistering(true);
     try {
       // 1. Get registration options (challenge) from server
@@ -137,21 +138,25 @@ export function useBiometricLock(): BiometricLockState {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({}),
       });
-      if (!optRes.ok) return false;
+      if (!optRes.ok) {
+        const body = await optRes.json().catch(() => ({}));
+        return { ok: false, error: body?.error ?? `Server error ${optRes.status}` };
+      }
 
       const options = await optRes.json();
 
       // 2. Convert base64url fields to ArrayBuffers for the browser API
       options.challenge = base64urlToBuffer(options.challenge);
       options.user.id = base64urlToBuffer(options.user.id);
-      if (Array.isArray(options.excludeCredentials)) {
-        options.excludeCredentials = options.excludeCredentials.map(
-          (c: { id: string; type: string; transports?: string[] }) => ({
-            ...c,
-            id: base64urlToBuffer(c.id),
-          }),
-        );
-      }
+
+      // ── Key fix #1 ───────────────────────────────────────────────────────
+      // Clear excludeCredentials for app-lock registration.
+      // The server excludes all existing passkeys to prevent duplicates during
+      // login-passkey registration. But for app-lock we intentionally need to
+      // register even if a login passkey already exists on this device.
+      // Without this, iOS/Android refuse registration with InvalidStateError.
+      options.excludeCredentials = [];
+      // ────────────────────────────────────────────────────────────────────
 
       // 3. Trigger the OS biometric enrollment dialog
       let credential: PublicKeyCredential;
@@ -167,34 +172,49 @@ export function useBiometricLock(): BiometricLockState {
             },
           },
         });
-        if (!created) return false;
+        if (!created) return { ok: false, error: "No credential returned" };
         credential = created as PublicKeyCredential;
-      } catch {
-        // User cancelled or biometric unavailable
-        return false;
+      } catch (err) {
+        const name = (err as DOMException)?.name ?? "UnknownError";
+        const msg = (err as DOMException)?.message ?? String(err);
+        // NotAllowedError = user cancelled or timed out
+        // InvalidStateError = credential already exists (should not happen after fix #1)
+        // NotSupportedError = platform authenticator not available
+        return { ok: false, error: `${name}: ${msg}` };
       }
 
-      // 4. Send credential to server for verification + storage
-      const verifyRes = await authFetch(
-        "/api/auth/passkey/register-verify",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            credential: credentialToJson(credential),
-            deviceName: "Biometric App Lock",
-          }),
-        },
-      );
-      if (!verifyRes.ok) return false;
+      // ── Key fix #2 ───────────────────────────────────────────────────────
+      // Store the transports reported by the authenticator.
+      // These are needed later in verify() so the browser/OS can find the
+      // credential. Hardcoding ["internal"] breaks Android (hybrid transport)
+      // and some iOS configurations.
+      const att = credential.response as AuthenticatorAttestationResponse;
+      const transports: string[] =
+        typeof att.getTransports === "function" ? att.getTransports() : [];
+      // ────────────────────────────────────────────────────────────────────
 
-      // 5. Persist locally so we know which credential to use for unlock
+      // 4. Send credential to server for verification + storage
+      const verifyRes = await authFetch("/api/auth/passkey/register-verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          credential: credentialToJson(credential),
+          deviceName: "Biometric App Lock",
+        }),
+      });
+      if (!verifyRes.ok) {
+        const body = await verifyRes.json().catch(() => ({}));
+        return { ok: false, error: body?.error ?? `Verify failed ${verifyRes.status}` };
+      }
+
+      // 5. Persist locally so we know which credential + transports to use for unlock
       localStorage.setItem(BIOMETRIC_CREDENTIAL_KEY, credential.id);
+      localStorage.setItem(BIOMETRIC_TRANSPORTS_KEY, JSON.stringify(transports));
       localStorage.setItem(BIOMETRIC_ENABLED_KEY, "1");
       setIsEnabled(true);
-      return true;
-    } catch {
-      return false;
+      return { ok: true };
+    } catch (err) {
+      return { ok: false, error: String(err) };
     } finally {
       setRegistering(false);
     }
@@ -210,6 +230,18 @@ export function useBiometricLock(): BiometricLockState {
     const credentialId = localStorage.getItem(BIOMETRIC_CREDENTIAL_KEY);
     if (!credentialId || verifying) return false;
 
+    // ── Key fix #3 ─────────────────────────────────────────────────────────
+    // Retrieve the transports that were recorded during registration.
+    // Using stored transports (instead of hardcoded ["internal"]) ensures the
+    // browser/OS can locate the credential on Android (which may use "hybrid")
+    // and various iOS configurations.
+    let storedTransports: AuthenticatorTransport[] | undefined;
+    try {
+      const raw = localStorage.getItem(BIOMETRIC_TRANSPORTS_KEY);
+      if (raw) storedTransports = JSON.parse(raw);
+    } catch { /* ignore */ }
+    // ───────────────────────────────────────────────────────────────────────
+
     setVerifying(true);
     try {
       // 1. Get a fresh challenge from the server
@@ -223,14 +255,17 @@ export function useBiometricLock(): BiometricLockState {
       const options = await optRes.json();
       options.challenge = base64urlToBuffer(options.challenge);
 
-      // Scope to only our registered app-lock credential
-      options.allowCredentials = [
-        {
-          id: base64urlToBuffer(credentialId),
-          type: "public-key",
-          transports: ["internal"] as AuthenticatorTransport[],
-        },
-      ];
+      // Scope to only our registered app-lock credential.
+      // Use stored transports; omit the field entirely if none stored so the
+      // browser tries all available transports (safest fallback).
+      const allowEntry: PublicKeyCredentialDescriptor = {
+        id: base64urlToBuffer(credentialId),
+        type: "public-key",
+      };
+      if (storedTransports && storedTransports.length > 0) {
+        allowEntry.transports = storedTransports;
+      }
+      options.allowCredentials = [allowEntry];
       options.userVerification = "required";
 
       // 2. Trigger the OS biometric prompt
@@ -247,14 +282,11 @@ export function useBiometricLock(): BiometricLockState {
       }
 
       // 3. Verify with the app-lock endpoint (no new tokens issued)
-      const verifyRes = await authFetch(
-        "/api/auth/passkey/app-lock-verify",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(credentialToJson(assertion)),
-        },
-      );
+      const verifyRes = await authFetch("/api/auth/passkey/app-lock-verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(credentialToJson(assertion)),
+      });
 
       if (!verifyRes.ok) return false;
       const data = await verifyRes.json();
@@ -270,6 +302,7 @@ export function useBiometricLock(): BiometricLockState {
   const unregister = useCallback(() => {
     localStorage.removeItem(BIOMETRIC_ENABLED_KEY);
     localStorage.removeItem(BIOMETRIC_CREDENTIAL_KEY);
+    localStorage.removeItem(BIOMETRIC_TRANSPORTS_KEY);
     setIsEnabled(false);
   }, []);
 
