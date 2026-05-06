@@ -130,6 +130,7 @@ const settingsMutationData = z.object({
   autoRules: z.array(z.unknown()).optional(),
   achievements: z.array(z.unknown()).optional(),
   accentColor: z.string().max(20).optional(),
+  sunsetTheme: z.boolean().optional(),
   notificationPrefs: z.unknown().optional(),
 });
 
