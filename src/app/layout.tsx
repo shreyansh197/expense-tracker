@@ -53,12 +53,14 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
-  // viewportFit=cover: allows content to extend into safe areas (notch/home bar).
-  // NOTE: Do NOT set interactiveWidget here. resizes-visual causes the browser
-  // to offset the visual viewport during scrolling (address-bar animation), which
-  // produces scroll jank and top-clipping. We handle keyboard awareness via the
-  // Visual Viewport API (useVisualViewport) without changing the viewport model.
-  viewportFit: "cover",
+  // NOTE: Do NOT set viewportFit or interactiveWidget here.
+  // - viewportFit=cover makes env(safe-area-inset-*) return real values (~34px
+  //   on iPhone), which inflates the bottom nav height and changes iOS scroll
+  //   boundary behaviour. The app components were designed without it.
+  // - interactiveWidget=resizes-visual repositions the visual viewport during
+  //   address-bar animations, causing scroll jank.
+  // Keyboard awareness is handled entirely by the Visual Viewport API
+  // (useVisualViewport hook) without changing the viewport model at all.
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#FAF7F2" },
     { media: "(prefers-color-scheme: dark)", color: "#1A1B2E" },
