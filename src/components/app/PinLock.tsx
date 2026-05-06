@@ -24,8 +24,16 @@ export function PinLock({ onVerify, onBiometricVerify }: PinLockProps) {
   const { height: vpHeight, keyboardHeight } = useVisualViewport();
 
   useEffect(() => {
-    // Auto-focus triggers the native keyboard on mobile
-    inputRef.current?.focus();
+    if (onBiometricVerify) {
+      // Auto-trigger biometric immediately on mount (like banking apps).
+      // Short delay lets the overlay finish rendering before the system prompt appears.
+      const t = setTimeout(() => handleBiometric(), 300);
+      return () => clearTimeout(t);
+    } else {
+      // No biometric — open the native keyboard straight away.
+      inputRef.current?.focus();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleSubmit = useCallback(
@@ -59,6 +67,7 @@ export function PinLock({ onVerify, onBiometricVerify }: PinLockProps) {
     if (!ok) {
       setBioError(true);
       setBioChecking(false);
+      // Fall back to PIN — open the keyboard now
       inputRef.current?.focus();
     }
     // If ok, parent unmounts this component
