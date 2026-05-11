@@ -43,7 +43,6 @@ export async function GET(req: NextRequest) {
       prisma.expense.findMany({
         where: { workspaceId, updatedAt: { gt: since } },
         orderBy: { updatedAt: "asc" },
-        take: 500,
       }),
       prisma.workspaceSettings.findFirst({
         where: { workspaceId, updatedAt: { gt: since } },
@@ -75,8 +74,9 @@ export async function GET(req: NextRequest) {
         ? new Date(Math.max(...allDates.map((d) => d.getTime()))).toISOString()
         : since.toISOString();
 
+    // Expenses are returned fully so cursor never skips older expense rows.
+    // Keep pagination flags for business tables only.
     const hasMore =
-      expenses.length === 500 ||
       ledgers.length === 200 ||
       payments.length === 500;
 

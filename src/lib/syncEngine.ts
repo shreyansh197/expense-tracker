@@ -767,6 +767,10 @@ async function _migrateStuckData() {
 // Promise gate: no sync operations proceed until init is done.
 let _initReady: Promise<void> = Promise.resolve();
 
+// One-time repair switch: clear stale cursors created before the
+// pagination/cursor fix so clients perform a full pull once.
+const CURSOR_REPAIR_KEY = "expenstream-sync-cursor-repair-v1";
+
 // Flag: first pull for each workspace always does a full sync (ignores cursor)
 let _firstPullDone = false;
 
@@ -790,6 +794,13 @@ export function startSyncEngine() {
   _initReady = (async () => {
     try {
       await migrateFromLocalStorage();
+
+      // Force a single full sync after deploying the cursor-safety fix.
+      if (typeof localStorage !== "undefined" && localStorage.getItem(CURSOR_REPAIR_KEY) !== "1") {
+        await db.syncMeta.clear();
+        localStorage.setItem(CURSOR_REPAIR_KEY, "1");
+        syncLog("init", "Applied one-time cursor repair: cleared sync cursors for full re-pull");
+      }
     } catch {
       // Non-fatal
     }
