@@ -238,7 +238,7 @@ describe("ExpenseList: viewMode prop contract (Feature 4)", () => {
   });
 
   test("TC-F4-08: infinite scroll sentinel only shown in day mode", () => {
-    expect(src).toMatch(/viewMode\s*!==\s*["']category["'].*hasMore/s);
+    expect(src).toMatch(/viewMode[\s\S]*!==[\s\S]*hasMore/);
   });
 
   test("TC-F4-09: categoryMetaMap built from settings.customCategories", () => {

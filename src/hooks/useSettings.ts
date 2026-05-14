@@ -144,7 +144,7 @@ export function useSettings() {
   }, []);
 
   const updateSettings = useCallback(
-    async (updates: Partial<Pick<UserSettings, "salary" | "currency" | "categories" | "customCategories" | "hiddenDefaults" | "categoryBudgets" | "recurringExpenses" | "savedFilters" | "goals" | "rolloverEnabled" | "rolloverHistory" | "monthlyBudgets" | "businessMode" | "revenueExpectations" | "businessTags" | "dashboardLayout" | "multiCurrencyEnabled" | "dismissedRecurringSuggestions" | "autoRules" | "achievements" | "activeChallenges" | "accentColor" | "sunsetTheme" | "notificationPrefs">>) => {
+    async (updates: Partial<Pick<UserSettings, "salary" | "currency" | "categories" | "customCategories" | "hiddenDefaults" | "categoryBudgets" | "recurringExpenses" | "savedFilters" | "goals" | "rolloverEnabled" | "rolloverHistory" | "monthlyBudgets" | "businessMode" | "revenueExpectations" | "businessTags" | "dashboardLayout" | "multiCurrencyEnabled" | "dismissedRecurringSuggestions" | "autoRules" | "achievements" | "activeChallenges" | "accentColor" | "sunsetTheme" | "notificationPrefs" | "quickTemplates">>) => {
       const next = { ..._settings, ...updates, updatedAt: Date.now() };
       saveLocal(next);
       _setShared(next);
