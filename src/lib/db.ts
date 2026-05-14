@@ -9,6 +9,7 @@ import type {
   LedgerStatus,
   PaymentMethod,
   DashboardLayout,
+  ExpenseTemplate,
 } from "@/types";
 
 // ── IDB record types ──
@@ -58,6 +59,7 @@ export interface IDBSettings {
   sunsetTheme?: boolean;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   notificationPrefs?: any;
+  quickTemplates?: ExpenseTemplate[];
   updatedAt: number;
 }
 

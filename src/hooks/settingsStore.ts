@@ -36,6 +36,7 @@ export const DEFAULT_SETTINGS: UserSettings = {
   dismissedRecurringSuggestions: [],
   autoRules: [],
   sunsetTheme: false,
+  quickTemplates: [],
   createdAt: 0,
   updatedAt: 0,
 };
@@ -74,6 +75,7 @@ export function mergeSettingsForConflict(
     savedFilters: mergeById(winner.savedFilters ?? [], other.savedFilters ?? []),
     goals: mergeById(winner.goals ?? [], other.goals ?? []),
     customCategories: mergeById(winner.customCategories ?? [], other.customCategories ?? []),
+    quickTemplates: mergeById(winner.quickTemplates ?? [], other.quickTemplates ?? []),
     // Record fields: winner's keys take precedence; other only fills in missing keys
     categoryBudgets: { ...other.categoryBudgets, ...winner.categoryBudgets },
     monthlyBudgets: { ...(other.monthlyBudgets ?? {}), ...(winner.monthlyBudgets ?? {}) },
@@ -108,7 +110,15 @@ export function _setShared(next: UserSettings) {
   if (next.salary !== _settings.salary) {
     console.log(`[settings] salary changed: ${_settings.salary} → ${next.salary} (updatedAt=${next.updatedAt})`);
   }
-  _settings = { ...DEFAULT_SETTINGS, ...next };
+  // Fill only truly-missing fields from DEFAULT_SETTINGS (undefined/null), preserving
+  // all fields present in `next` including optional ones like quickTemplates.
+  const merged: UserSettings = { ...DEFAULT_SETTINGS };
+  for (const key of Object.keys(next) as (keyof UserSettings)[]) {
+    if (next[key] !== undefined && next[key] !== null) {
+      (merged as Record<string, unknown>)[key] = next[key];
+    }
+  }
+  _settings = merged;
   _notify();
 }
 

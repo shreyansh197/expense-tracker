@@ -114,6 +114,8 @@ export function useSettings() {
             ...DEFAULT_SETTINGS,
             ...remote,
             sunsetTheme: remote.sunsetTheme || _settings.sunsetTheme || false,
+            // Preserve local-only fields that may not exist in the remote API response yet.
+            quickTemplates: remote.quickTemplates?.length ? remote.quickTemplates : (_settings.quickTemplates?.length ? _settings.quickTemplates : local.quickTemplates ?? []),
           };
           saveLocal(merged);
           _setShared(merged);

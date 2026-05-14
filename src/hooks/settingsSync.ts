@@ -27,6 +27,7 @@ export async function pushToApi(s: UserSettings) {
   const wid = getActiveWorkspaceId();
   if (!wid || !isAuthenticated()) return;
 
+  // Data to sync to Supabase — only columns that exist in the remote schema.
   const settingsData = {
     salary: s.salary,
     currency: s.currency,
@@ -53,9 +54,11 @@ export async function pushToApi(s: UserSettings) {
     notificationPrefs: s.notificationPrefs,
   };
 
+  // IDB storage includes local-only fields (quickTemplates) not yet in Supabase schema.
   await db.settings.put({
     workspaceId: wid,
     ...settingsData,
+    quickTemplates: s.quickTemplates ?? [],
     updatedAt: s.updatedAt,
   });
 
@@ -102,6 +105,7 @@ export async function loadSettingsFromIDB(): Promise<UserSettings | null> {
       accentColor: s.accentColor,
       sunsetTheme: s.sunsetTheme ?? false,
       notificationPrefs: s.notificationPrefs,
+      quickTemplates: s.quickTemplates ?? [],
       createdAt: Date.now(),
       updatedAt: s.updatedAt,
     };

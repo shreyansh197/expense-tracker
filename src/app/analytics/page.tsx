@@ -455,7 +455,7 @@ function AnalyticsContent() {
         </m.div>
 
         {/* ─── 2. Insights Feed ─── */}
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <InsightCard
             icon={DollarSign}
             title="Avg Monthly"
