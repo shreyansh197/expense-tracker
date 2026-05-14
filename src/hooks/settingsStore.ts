@@ -112,13 +112,10 @@ export function _setShared(next: UserSettings) {
   }
   // Fill only truly-missing fields from DEFAULT_SETTINGS (undefined/null), preserving
   // all fields present in `next` including optional ones like quickTemplates.
-  const merged: UserSettings = { ...DEFAULT_SETTINGS };
-  for (const key of Object.keys(next) as (keyof UserSettings)[]) {
-    if (next[key] !== undefined && next[key] !== null) {
-      (merged as Record<string, unknown>)[key] = next[key];
-    }
-  }
-  _settings = merged;
+  const defined = Object.fromEntries(
+    Object.entries(next).filter(([, v]) => v !== undefined && v !== null)
+  );
+  _settings = { ...DEFAULT_SETTINGS, ...defined } as UserSettings;
   _notify();
 }
 
