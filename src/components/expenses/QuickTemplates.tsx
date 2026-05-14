@@ -18,7 +18,7 @@ import type { ExpenseTemplate } from "@/types";
 export function QuickTemplates() {
   const { settings, updateSettings } = useSettings();
   const { symbol, formatCurrency } = useCurrency();
-  const { openAddForm, currentMonth, currentYear } = useUIStore();
+  const { openAddForm } = useUIStore();
   const { toast } = useToast();
 
   const templates: ExpenseTemplate[] = settings.quickTemplates ?? [];
@@ -30,11 +30,7 @@ export function QuickTemplates() {
   const [newCategory, setNewCategory] = useState(allCategories[0]?.id ?? "food");
 
   const handleAddExpense = (t: ExpenseTemplate) => {
-    const today = new Date();
-    const day = currentMonth === today.getMonth() + 1 && currentYear === today.getFullYear()
-      ? today.getDate()
-      : 1;
-    openAddForm({ amount: t.amount, category: t.category, remark: t.remark ?? t.label, day });
+    openAddForm({ amount: t.amount, category: t.category, remark: t.remark ?? t.label });
     toast(`${t.label} — ready to log`, "success");
   };
 
