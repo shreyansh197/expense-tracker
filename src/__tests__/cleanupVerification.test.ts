@@ -132,8 +132,9 @@ describe("Dashboard page uses new components", () => {
     expect(dashboardSrc).toContain("UpcomingStream");
   });
 
-  test("TC-CLEAN-005-02: imports MonthStartAnchor", () => {
-    expect(dashboardSrc).toContain("MonthStartAnchor");
+  // TC-CLEAN-005-02: MonthStartAnchor was removed from page.tsx (dead code cleanup)
+  test("TC-CLEAN-005-02: does NOT import MonthStartAnchor (dead code removed)", () => {
+    expect(dashboardSrc).not.toContain("MonthStartAnchor");
   });
 
   test("TC-CLEAN-005-03: imports PostcardPrompt", () => {
@@ -161,7 +162,6 @@ describe("Dashboard page uses new components", () => {
 describe("New component files exist", () => {
   const newFiles = [
     "components/dashboard/UpcomingStream.tsx",
-    "components/dashboard/MonthStartAnchor.tsx",
     "components/dashboard/PostcardPrompt.tsx",
     "components/settings/NotificationSettings.tsx",
     "hooks/useNotifications.ts",
@@ -169,12 +169,34 @@ describe("New component files exist", () => {
     "app/api/push/subscribe/route.ts",
     "app/api/push/send/route.ts",
     "app/api/push/vapid-key/route.ts",
+    // New feature files
+    "components/expenses/QuickTemplates.tsx",
   ];
 
   for (const file of newFiles) {
     const name = path.basename(file).replace(/\.[^.]+$/, "");
     test(`TC-CLEAN-006-${name}: ${file} exists`, () => {
       expect(fileExists(file)).toBe(true);
+    });
+  }
+});
+
+// =========================================================================
+// TC-CLEAN-007: Dead code files confirmed deleted (Phase-G cleanup)
+// Priority: HIGH | SpendingHeatmap, ChronicleView, MonthStartAnchor
+// =========================================================================
+
+describe("Phase-G dead code files are deleted", () => {
+  const deletedFiles = [
+    "components/dashboard/SpendingHeatmap.tsx",
+    "components/dashboard/ChronicleView.tsx",
+    "components/dashboard/MonthStartAnchor.tsx",
+  ];
+
+  for (const file of deletedFiles) {
+    const name = path.basename(file, ".tsx");
+    test(`TC-CLEAN-007-${name}: ${file} does not exist`, () => {
+      expect(fileExists(file)).toBe(false);
     });
   }
 });

@@ -1,5 +1,5 @@
 const CACHE_NAME = "expenstream-icons-74b974f1";
-const SHELL_CACHE = "expenstream-shell-v1";
+const SHELL_CACHE = "expenstream-shell-v2";
 const FONT_CACHE = "expenstream-fonts-v1";
 
 // Max entries for the general cache to prevent unbounded growth
@@ -56,22 +56,28 @@ self.addEventListener("fetch", (event) => {
 
   const url = new URL(request.url);
 
-  // Network-first for icons, favicon, and manifest so PWA icon updates propagate
+  // Stale-while-revalidate for icons, favicon, and manifest:
+  // Serve from cache immediately (versioned URLs guarantee freshness),
+  // fetch an update in the background so the next load gets the latest.
   if (
     url.pathname.startsWith("/icons/") ||
     url.pathname === "/manifest.json" ||
     url.pathname === "/favicon.ico"
   ) {
     event.respondWith(
-      fetch(request)
-        .then((response) => {
-          if (response.ok && response.status === 200) {
-            const clone = response.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
-          }
-          return response;
-        })
-        .catch(() => caches.match(request)),
+      caches.open(CACHE_NAME).then(async (cache) => {
+        const cached = await cache.match(request);
+        const networkFetch = fetch(request)
+          .then((response) => {
+            if (response.ok && response.status === 200) {
+              cache.put(request, response.clone());
+            }
+            return response;
+          })
+          .catch(() => undefined);
+        // Return cached immediately if available, otherwise await network
+        return cached ?? networkFetch;
+      }),
     );
     return;
   }

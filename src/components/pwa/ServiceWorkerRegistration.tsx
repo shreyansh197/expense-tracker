@@ -10,6 +10,9 @@ export function ServiceWorkerRegistration() {
 
   useEffect(() => {
     if (!("serviceWorker" in navigator)) return;
+    // Never register the SW in development — it caches _next/static/ chunks
+    // and serves the old design after rebuilds, making dev hard to work with.
+    if (process.env.NODE_ENV === "development") return;
 
     navigator.serviceWorker
       .register("/sw.js")

@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState, useCallback, useRef, useEffect } from "react";
-import { m, AnimatePresence } from "framer-motion";
+import { m, AnimatePresence, useScroll } from "framer-motion";
 import { Trash2, Edit3, Repeat, Receipt, CheckSquare, Square, X, Wallet, Copy } from "lucide-react";
 import { useCurrency } from "@/hooks/useCurrency";
 import { useSettings } from "@/hooks/useSettings";
@@ -14,7 +14,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 
 import { ReceiptIllustration } from "@/components/ui/illustrations";
 import { StillWater } from "@/components/ui/illustrations/terrain";
-import { filterExpenses, groupByDay, groupByFullDate } from "@/lib/filters";
+import { filterExpenses, groupByDay, groupByFullDate, groupByCategory } from "@/lib/filters";
 import { formatCurrency as fmtCurrency } from "@/lib/utils";
 import { fetchRates, convert, getFallbackRates } from "@/lib/exchangeRates";
 import { staggerDelay, duration, ease } from "@/lib/motion/tokens";
@@ -118,6 +118,8 @@ interface ExpenseListProps {
   sortBy?: string;
   /** When true, groups by full date and shows absolute date labels */
   crossMonth?: boolean;
+  /** "day" groups by day (default), "category" groups by category */
+  viewMode?: "day" | "category";
 }
 
 interface DayGroup {
@@ -142,6 +144,7 @@ export function ExpenseList({
   dayMax,
   sortBy = "day-desc",
   crossMonth = false,
+  viewMode = "day",
 }: ExpenseListProps) {
   const openEditForm = useUIStore((s) => s.openEditForm);
   const openAddForm = useUIStore((s) => s.openAddForm);
@@ -216,6 +219,11 @@ export function ExpenseList({
     [expenses, activeCategories, searchQuery, amountMin, amountMax, dayMin, dayMax, pendingDeletes]
   );
 
+  const filterKey = useMemo(
+    () => [activeCategories.join(","), searchQuery, amountMin, amountMax, dayMin, dayMax, sortBy].join("|"),
+    [activeCategories, searchQuery, amountMin, amountMax, dayMin, dayMax, sortBy]
+  );
+
   // Helper: convert an expense amount to base currency if needed
   const toBase = useCallback((e: Expense): number => {
     if (!multiCurrency || !baseCurrency || !e.currency || e.currency === baseCurrency) return e.amount;
@@ -223,9 +231,22 @@ export function ExpenseList({
     return convert(e.amount, e.currency, baseCurrency, effectiveRates);
   }, [multiCurrency, baseCurrency, rates]);
 
+  // Category metadata map for groupByCategory enrichment
+  const categoryMetaMap = useMemo(() => {
+    const allCats = getAllCategories(settings.customCategories, settings.hiddenDefaults);
+    const map = new Map();
+    for (const c of allCats) map.set(c.id, c);
+    return map;
+  }, [settings.customCategories, settings.hiddenDefaults]);
+
   const grouped = useMemo(
     () => crossMonth ? groupByFullDate(filtered, sortBy) : groupByDay(filtered, sortBy),
     [filtered, sortBy, crossMonth]
+  );
+
+  const groupedByCategory = useMemo(
+    () => viewMode === "category" ? groupByCategory(filtered, sortBy, categoryMetaMap) : [],
+    [filtered, sortBy, viewMode, categoryMetaMap]
   );
 
   // Category median map for the ↑ ambient signal
@@ -323,7 +344,11 @@ export function ExpenseList({
     }
   };
 
-  if (grouped.length === 0) {
+  // D4: scroll progress indicator — must be before any early return
+  const listRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({ target: listRef, offset: ["start 0.9", "end 0.1"] });
+
+  if (filtered.length === 0) {
     const hasFilters = !!(searchQuery || activeCategories.length > 0);
     return (
       <EmptyState
@@ -343,7 +368,13 @@ export function ExpenseList({
   }
 
   return (
-    <div className="space-y-4" aria-live="polite">
+    <div ref={listRef} className="space-y-4" aria-live="polite">
+      {/* Scroll progress bar */}
+      <m.div
+        className="sticky top-0 z-[6] h-0.5 origin-left rounded-full"
+        style={{ scaleX: scrollYProgress, background: "var(--accent)", transformOrigin: "left" }}
+        aria-hidden="true"
+      />
       {/* Screen reader expense count announcement */}
       <p className="sr-only">{filtered.length} expense{filtered.length !== 1 ? "s" : ""} shown</p>
       {/* Batch action bar */}
@@ -371,8 +402,69 @@ export function ExpenseList({
         </div>
       )}
 
+      {/* Category view mode */}
+      {viewMode === "category" ? (
+        <>
+          {groupedByCategory.map((catGroup) => (
+            <div key={`${filterKey}-cat-${catGroup.category}`}>
+              {/* Category header */}
+              <div
+                className="sticky top-0 z-[5] mb-2 flex items-center justify-between px-1 py-1.5 backdrop-blur-sm"
+                style={{ background: "color-mix(in srgb, var(--background) 90%, transparent)" }}
+              >
+                <div className="flex items-center gap-2">
+                  <div
+                    className="h-3 w-3 shrink-0 rounded-full"
+                    style={{ background: catGroup.color }}
+                    aria-hidden="true"
+                  />
+                  <span
+                    className="font-display italic text-base leading-tight"
+                    style={{ color: "var(--text-primary)" }}
+                  >
+                    {catGroup.label}
+                  </span>
+                  <span className="text-xs" style={{ color: "var(--text-muted)" }}>
+                    {catGroup.expenses.length} item{catGroup.expenses.length !== 1 ? "s" : ""}
+                  </span>
+                </div>
+                <span
+                  className="font-numeric text-xs font-semibold tabular-nums"
+                  style={{ color: "var(--text-secondary)" }}
+                >
+                  {formatCurrency(catGroup.total)}
+                </span>
+              </div>
+              {/* Expenses in this category */}
+              <div className="space-y-1.5">
+                <AnimatePresence initial={false}>
+                  {catGroup.expenses.map((expense, idx) => (
+                    <SwipeableExpenseItem
+                      key={expense.id}
+                      expense={expense}
+                      idx={idx}
+                      selectedIds={selectedIds}
+                      formatCurrency={formatCurrency}
+                      toggleSelect={toggleSelect}
+                      openEditForm={openEditForm}
+                      handleDelete={handleDelete}
+                      baseCurrency={baseCurrency}
+                      multiCurrency={multiCurrency}
+                      rates={rates}
+                      swipeHint={false}
+                      categoryMedian={categoryMedians[expense.category]}
+                    />
+                  ))}
+                </AnimatePresence>
+              </div>
+            </div>
+          ))}
+        </>
+      ) : (
+        <>
+
       {paginatedGroups.map((group, gIdx) => (
-        <div key={group.day}>
+        <div key={`${filterKey}-${group.day}`}>
           {/* Day header — Lora italic with terracotta underline */}
           <div
             className="sticky top-0 z-[5] mb-2 flex items-center justify-between px-1 py-1.5 backdrop-blur-sm"
@@ -454,8 +546,11 @@ export function ExpenseList({
         </div>
       ))}
 
-      {/* Infinite scroll sentinel */}
-      {hasMore && (
+        </>
+      )}
+
+      {/* Infinite scroll sentinel — only in day mode */}
+      {viewMode !== "category" && hasMore && (
         <InfiniteScrollSentinel onIntersect={() => setVisibleCount((v) => v + PAGE_SIZE)} />
       )}
     </div>

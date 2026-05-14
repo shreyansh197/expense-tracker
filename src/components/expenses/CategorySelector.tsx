@@ -1,14 +1,19 @@
 "use client";
 
-import { useCallback, useRef } from "react";
-import { m } from "framer-motion";
+import { useCallback, useRef, useState } from "react";
+import { m, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import {
   Tv, Car, ShoppingCart, UtensilsCrossed, ShoppingBag,
-  MoreHorizontal, CreditCard, Wifi, TrendingUp, Tag,
+  MoreHorizontal, CreditCard, Wifi, TrendingUp, Tag, Plus, Check, X,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { CategoryId } from "@/types";
+
+const QUICK_COLORS = [
+  "#6366F1", "#8B5CF6", "#EC4899", "#EF4444",
+  "#F59E0B", "#10B981", "#06B6D4", "#3B82F6",
+];
 
 /** Map icon name strings from categories.ts to lucide components */
 const ICON_MAP: Record<string, LucideIcon> = {
@@ -39,10 +44,16 @@ interface CategorySelectorProps {
   categoryTotals?: CategoryTotal[];
   /** Currency symbol for display */
   currencySymbol?: string;
+  /** Called when user creates a new category inline; receives name + color */
+  onAddCategory?: (name: string, color: string) => void;
 }
 
-export function CategorySelector({ categories, selected, onSelect, showError, categoryBudgets, categoryTotals, currencySymbol }: CategorySelectorProps) {
+export function CategorySelector({ categories, selected, onSelect, showError, categoryBudgets, categoryTotals, currencySymbol, onAddCategory }: CategorySelectorProps) {
   const gridRef = useRef<HTMLDivElement>(null);
+  const newNameRef = useRef<HTMLInputElement>(null);
+  const [showCreate, setShowCreate] = useState(false);
+  const [newName, setNewName] = useState("");
+  const [newColor, setNewColor] = useState(QUICK_COLORS[0]);
   // Build a lookup of spent per category
   const spentMap = new Map<string, number>();
   categoryTotals?.forEach((ct) => spentMap.set(ct.category, ct.total));
@@ -57,6 +68,15 @@ export function CategorySelector({ categories, selected, onSelect, showError, ca
       : buttons[(idx - 1 + buttons.length) % buttons.length];
     next?.focus();
   }, []);
+
+  const handleSaveNewCategory = () => {
+    const trimmed = newName.trim();
+    if (!trimmed) return;
+    onAddCategory?.(trimmed, newColor);
+    setNewName("");
+    setNewColor(QUICK_COLORS[0]);
+    setShowCreate(false);
+  };
 
   // Compute budget remaining for the selected category
   const selectedBudget = selected && categoryBudgets?.[selected] ? categoryBudgets[selected] : 0;
@@ -119,7 +139,90 @@ export function CategorySelector({ categories, selected, onSelect, showError, ca
             </m.button>
           );
         })}
+
+        {/* + New category chip */}
+        {onAddCategory && !showCreate && (
+          <m.button
+            type="button"
+            onClick={() => { setShowCreate(true); setTimeout(() => newNameRef.current?.focus(), 50); }}
+            className="flex items-center gap-1 rounded-ui-full px-3 py-2 text-xs font-medium border border-dashed transition-colors"
+            style={{ borderColor: "var(--border)", color: "var(--text-muted)", background: "transparent" }}
+            whileTap={{ scale: 0.94 }}
+            aria-label="Add new category"
+          >
+            <Plus size={11} />
+            New
+          </m.button>
+        )}
       </div>
+
+      {/* Inline new-category form */}
+      <AnimatePresence>
+        {showCreate && (
+          <m.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+            className="overflow-hidden"
+          >
+            <div className="mt-2 flex flex-col gap-2 rounded-xl p-3" style={{ background: "var(--surface-secondary)" }}>
+              <div className="flex items-center gap-2">
+                <input
+                  ref={newNameRef}
+                  type="text"
+                  value={newName}
+                  onChange={(e) => setNewName(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleSaveNewCategory(); } if (e.key === "Escape") { setShowCreate(false); setNewName(""); } }}
+                  placeholder="Category name"
+                  maxLength={32}
+                  className="flex-1 rounded-lg bg-transparent px-2 py-1 text-xs outline-none"
+                  style={{ border: "1px solid var(--border)", color: "var(--text-primary)" }}
+                  aria-label="New category name"
+                />
+                <button
+                  type="button"
+                  onClick={handleSaveNewCategory}
+                  disabled={!newName.trim()}
+                  className="flex h-7 w-7 items-center justify-center rounded-lg transition-opacity disabled:opacity-40"
+                  style={{ background: "var(--accent)", color: "#fff" }}
+                  aria-label="Save new category"
+                >
+                  <Check size={13} />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setShowCreate(false); setNewName(""); }}
+                  className="flex h-7 w-7 items-center justify-center rounded-lg transition-colors"
+                  style={{ background: "var(--surface-tertiary)", color: "var(--text-muted)" }}
+                  aria-label="Cancel"
+                >
+                  <X size={13} />
+                </button>
+              </div>
+              {/* Color swatches */}
+              <div className="flex gap-1.5">
+                {QUICK_COLORS.map((c) => (
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={() => setNewColor(c)}
+                    className="h-5 w-5 rounded-full transition-transform"
+                    style={{
+                      background: c,
+                      transform: newColor === c ? "scale(1.25)" : "scale(1)",
+                      outline: newColor === c ? `2px solid var(--accent)` : "none",
+                      outlineOffset: "1px",
+                    }}
+                    aria-label={`Color ${c}`}
+                    aria-pressed={newColor === c}
+                  />
+                ))}
+              </div>
+            </div>
+          </m.div>
+        )}
+      </AnimatePresence>
 
       {/* Budget remaining hint for selected category */}
       {showBudgetHint && (

@@ -1,4 +1,4 @@
-import type { Expense, CategoryId } from "@/types";
+import type { Expense, CategoryId, CategoryMeta } from "@/types";
 
 interface FilterOptions {
   activeCategories: CategoryId[];
@@ -151,4 +151,54 @@ export function groupByFullDate(
     a.month !== b.month ? b.month! - a.month! :
     b.day - a.day
   );
+}
+
+export interface CategoryGroup {
+  category: CategoryId;
+  label: string;
+  color: string;
+  bgColor: string;
+  total: number;
+  expenses: Expense[];
+}
+
+/**
+ * Groups filtered expenses by category, sorted by total descending (most spent first).
+ * Accepts an optional category metadata map for label/color enrichment.
+ */
+export function groupByCategory(
+  filtered: Expense[],
+  sortBy: string = "day-desc",
+  categoryMap: Map<CategoryId, CategoryMeta> = new Map()
+): CategoryGroup[] {
+  const map = new Map<CategoryId, Expense[]>();
+  for (const e of filtered) {
+    const arr = map.get(e.category) ?? [];
+    arr.push(e);
+    map.set(e.category, arr);
+  }
+
+  const groups: CategoryGroup[] = [];
+  for (const [cat, exps] of map) {
+    const meta = categoryMap.get(cat);
+    const sortedExps =
+      sortBy === "amount-desc"
+        ? [...exps].sort((a, b) => b.amount - a.amount)
+        : sortBy === "amount-asc"
+        ? [...exps].sort((a, b) => a.amount - b.amount)
+        : sortBy === "day-asc"
+        ? [...exps].sort((a, b) => a.day !== b.day ? a.day - b.day : b.amount - a.amount)
+        : [...exps].sort((a, b) => a.day !== b.day ? b.day - a.day : b.amount - a.amount);
+    groups.push({
+      category: cat,
+      label: meta?.label ?? cat,
+      color: meta?.color ?? "var(--accent)",
+      bgColor: meta?.bgColor ?? "var(--surface-secondary)",
+      total: exps.reduce((s, e) => s + e.amount, 0),
+      expenses: sortedExps,
+    });
+  }
+
+  // Sort groups by total descending (highest spending category first)
+  return groups.sort((a, b) => b.total - a.total);
 }

@@ -1,6 +1,6 @@
 /// <reference types="jest" />
-import { filterExpenses, groupByDay } from "../lib/filters";
-import type { Expense } from "../types";
+import { filterExpenses, groupByDay, groupByCategory } from "../lib/filters";
+import type { Expense, CategoryMeta } from "../types";
 
 function makeExpense(overrides: Partial<Expense> = {}): Expense {
   return {
@@ -300,5 +300,115 @@ describe("groupByDay edge cases", () => {
     const groupSum = groups.reduce((s, g) => s + g.total, 0);
     const expenseSum = expenses.reduce((s, e) => s + e.amount, 0);
     expect(groupSum).toBe(expenseSum);
+  });
+});
+
+// =========================================================================
+// groupByCategory tests
+// =========================================================================
+
+const catMap: Map<string, CategoryMeta> = new Map([
+  ["groceries", { id: "groceries", label: "Groceries", color: "#16a34a", bgColor: "#dcfce7", icon: "🛒" }],
+  ["transport", { id: "transport", label: "Transport", color: "#2563eb", bgColor: "#dbeafe", icon: "🚌" }],
+  ["eat-out", { id: "eat-out", label: "Eat Out", color: "#dc2626", bgColor: "#fee2e2", icon: "🍽️" }],
+  ["shopping", { id: "shopping", label: "Shopping", color: "#7c3aed", bgColor: "#ede9fe", icon: "🛍️" }],
+  ["subscriptions", { id: "subscriptions", label: "Subscriptions", color: "#0891b2", bgColor: "#cffafe", icon: "📺" }],
+]);
+
+describe("groupByCategory", () => {
+  test("TC-GBC-01: produces one group per unique category", () => {
+    const groups = groupByCategory(expenses, "day-desc", catMap);
+    const cats = groups.map((g) => g.category);
+    expect(new Set(cats).size).toBe(cats.length); // all unique
+    expect(cats.length).toBe(5); // groceries, transport, eat-out, shopping, subscriptions
+  });
+
+  test("TC-GBC-02: groups are sorted by total descending", () => {
+    const groups = groupByCategory(expenses, "day-desc", catMap);
+    for (let i = 1; i < groups.length; i++) {
+      expect(groups[i - 1].total).toBeGreaterThanOrEqual(groups[i].total);
+    }
+  });
+
+  test("TC-GBC-03: shopping (2000) is first, transport (200) near last", () => {
+    const groups = groupByCategory(expenses, "day-desc", catMap);
+    expect(groups[0].category).toBe("shopping");
+    expect(groups[0].total).toBe(2000);
+  });
+
+  test("TC-GBC-04: groceries group total is 800 (500 + 300)", () => {
+    const groups = groupByCategory(expenses, "day-desc", catMap);
+    const g = groups.find((g) => g.category === "groceries");
+    expect(g).toBeDefined();
+    expect(g!.total).toBe(800);
+    expect(g!.expenses).toHaveLength(2);
+  });
+
+  test("TC-GBC-05: label and color are enriched from catMap", () => {
+    const groups = groupByCategory(expenses, "day-desc", catMap);
+    const g = groups.find((g) => g.category === "groceries");
+    expect(g!.label).toBe("Groceries");
+    expect(g!.color).toBe("#16a34a");
+    expect(g!.bgColor).toBe("#dcfce7");
+  });
+
+  test("TC-GBC-06: unknown category uses category id as label", () => {
+    const unknown = [makeExpense({ category: "unknown-cat", amount: 100, day: 1 })];
+    const groups = groupByCategory(unknown, "day-desc", catMap);
+    expect(groups[0].label).toBe("unknown-cat");
+  });
+
+  test("TC-GBC-07: empty expenses returns empty array", () => {
+    expect(groupByCategory([], "day-desc", catMap)).toHaveLength(0);
+  });
+
+  test("TC-GBC-08: sum of all group totals equals sum of all expense amounts", () => {
+    const groups = groupByCategory(expenses, "day-desc", catMap);
+    const groupSum = groups.reduce((s, g) => s + g.total, 0);
+    const expenseSum = expenses.reduce((s, e) => s + e.amount, 0);
+    expect(groupSum).toBe(expenseSum);
+  });
+
+  test("TC-GBC-09: day-asc sortBy sorts expenses within group by day ascending", () => {
+    const groups = groupByCategory(expenses, "day-asc", catMap);
+    const groceries = groups.find((g) => g.category === "groceries")!;
+    // day 1 should come before day 5
+    expect(groceries.expenses[0].day).toBeLessThanOrEqual(groceries.expenses[1].day);
+  });
+
+  test("TC-GBC-10: day-desc sortBy sorts expenses within group by day descending", () => {
+    const groups = groupByCategory(expenses, "day-desc", catMap);
+    const groceries = groups.find((g) => g.category === "groceries")!;
+    // day 5 should come before day 1
+    expect(groceries.expenses[0].day).toBeGreaterThanOrEqual(groceries.expenses[1].day);
+  });
+
+  test("TC-GBC-11: amount-desc sortBy sorts expenses within group by amount descending", () => {
+    const groups = groupByCategory(expenses, "amount-desc", catMap);
+    const groceries = groups.find((g) => g.category === "groceries")!;
+    expect(groceries.expenses[0].amount).toBeGreaterThanOrEqual(groceries.expenses[1].amount);
+  });
+
+  test("TC-GBC-12: amount-asc sortBy sorts expenses within group by amount ascending", () => {
+    const groups = groupByCategory(expenses, "amount-asc", catMap);
+    const groceries = groups.find((g) => g.category === "groceries")!;
+    expect(groceries.expenses[0].amount).toBeLessThanOrEqual(groceries.expenses[1].amount);
+  });
+
+  test("TC-GBC-13: single-category dataset produces exactly one group", () => {
+    const only = expenses.filter((e) => e.category === "groceries");
+    const groups = groupByCategory(only, "day-desc", catMap);
+    expect(groups).toHaveLength(1);
+    expect(groups[0].category).toBe("groceries");
+  });
+
+  test("TC-GBC-14: works without catMap (defaults applied)", () => {
+    const groups = groupByCategory(expenses, "day-desc");
+    expect(groups).toHaveLength(5);
+    // All have fallback color
+    groups.forEach((g) => {
+      expect(g.color).toBeDefined();
+      expect(g.bgColor).toBeDefined();
+    });
   });
 });

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useUIStore } from "@/stores/uiStore";
 import { useSettings } from "@/hooks/useSettings";
 import { useCurrency } from "@/hooks/useCurrency";
@@ -11,8 +11,170 @@ import {
   Bookmark,
   BookmarkCheck,
   Trash2,
+  Calendar,
 } from "lucide-react";
 import type { SavedFilter } from "@/types";
+
+const MONTH_NAMES = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December",
+];
+const DOW = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
+
+/** Compact month-locked calendar used for date range filtering */
+function CalendarPicker({
+  label,
+  value,
+  onChange,
+  month,
+  year,
+  otherValue,
+  isStart,
+}: {
+  label: string;
+  value: number | null;
+  onChange: (day: number | null) => void;
+  month: number;
+  year: number;
+  otherValue: number | null;
+  isStart: boolean;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const [openUpward, setOpenUpward] = useState(false);
+
+  const daysInMonth = new Date(year, month, 0).getDate();
+  const firstDay = new Date(year, month - 1, 1).getDay();
+  const today = new Date();
+  const isCurrentViewMonth = today.getMonth() + 1 === month && today.getFullYear() === year;
+
+  const cells: (number | null)[] = [];
+  for (let i = 0; i < firstDay; i++) cells.push(null);
+  for (let d = 1; d <= daysInMonth; d++) cells.push(d);
+  while (cells.length % 7 !== 0) cells.push(null);
+
+  useEffect(() => {
+    if (!open) return;
+    function onOutsideClick(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener("mousedown", onOutsideClick);
+    return () => document.removeEventListener("mousedown", onOutsideClick);
+  }, [open]);
+
+  const handleToggle = () => {
+    if (!open && ref.current) {
+      const rect = ref.current.getBoundingClientRect();
+      setOpenUpward(rect.bottom + 280 > window.innerHeight && rect.top > 280);
+    }
+    setOpen((o) => !o);
+  };
+
+  const handleSelect = (day: number) => {
+    onChange(day);
+    setOpen(false);
+  };
+
+  return (
+    <div ref={ref} className="relative flex-1">
+      <button
+        type="button"
+        onClick={handleToggle}
+        aria-expanded={open}
+        aria-label={label}
+        className="flex w-full items-center gap-1.5 rounded-ui-md border py-2 px-2.5 text-xs transition-colors"
+        style={{
+          borderColor: open ? "var(--accent)" : "var(--border)",
+          background: "var(--surface)",
+          color: value !== null ? "var(--text-primary)" : "var(--text-muted)",
+        }}
+      >
+        <Calendar size={12} style={{ color: "var(--text-muted)", flexShrink: 0 }} />
+        <span className="flex-1 text-left">{value !== null ? `Day ${value}` : label}</span>
+        {value !== null && (
+          <span
+            role="button"
+            aria-label={`Clear ${label}`}
+            onClick={(e) => { e.stopPropagation(); onChange(null); }}
+            className="flex h-4 w-4 items-center justify-center rounded-full transition-colors hover:bg-[var(--surface-secondary)]"
+          >
+            <X size={10} />
+          </span>
+        )}
+      </button>
+
+      {open && (
+        <div
+          className={`absolute z-50 w-64 rounded-xl border p-3 shadow-xl ${
+            openUpward ? "bottom-full mb-1.5" : "top-full mt-1.5"
+          } left-0`}
+          style={{ background: "var(--surface)", borderColor: "var(--border)" }}
+        >
+          {/* Month header — fixed to current month, no nav needed */}
+          <div className="mb-2 flex items-center justify-between">
+            <span className="text-xs font-semibold" style={{ color: "var(--text-primary)" }}>
+              {MONTH_NAMES[month - 1]} {year}
+            </span>
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              className="rounded p-0.5"
+              style={{ color: "var(--text-muted)" }}
+              aria-label="Close calendar"
+            >
+              <X size={13} />
+            </button>
+          </div>
+
+          {/* Day-of-week header */}
+          <div className="mb-1 grid grid-cols-7 text-center">
+            {DOW.map((d) => (
+              <span key={d} className="text-[10px] font-medium" style={{ color: "var(--text-muted)" }}>{d}</span>
+            ))}
+          </div>
+
+          {/* Day grid */}
+          <div className="grid grid-cols-7 gap-0.5">
+            {cells.map((day, i) => {
+              if (day === null) return <span key={i} />;
+              const isSelected = day === value;
+              const isToday = isCurrentViewMonth && day === today.getDate();
+              const inRange = otherValue !== null && (
+                isStart ? (day >= (value ?? day) && day <= otherValue)
+                         : (day >= otherValue && day <= (value ?? day))
+              );
+              return (
+                <button
+                  key={day}
+                  type="button"
+                  onClick={() => handleSelect(day)}
+                  aria-label={`${MONTH_NAMES[month - 1]} ${day}`}
+                  aria-pressed={isSelected}
+                  className="h-7 w-7 rounded-lg text-xs font-medium transition-colors"
+                  style={{
+                    background: isSelected
+                      ? "var(--accent)"
+                      : inRange
+                      ? "var(--accent-soft)"
+                      : undefined,
+                    color: isSelected
+                      ? "white"
+                      : isToday
+                      ? "var(--accent)"
+                      : "var(--text-primary)",
+                    fontWeight: isToday ? 700 : undefined,
+                  }}
+                >
+                  {day}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 interface FilterPanelProps {
   amountMin: string;
@@ -42,7 +204,7 @@ export function FilterPanel({
   const [open, setOpen] = useState(false);
   const { settings, updateSettings } = useSettings();
   const { symbol } = useCurrency();
-  const { activeCategories, searchQuery } = useUIStore();
+  const { activeCategories, searchQuery, currentMonth, currentYear } = useUIStore();
   const { toast } = useToast();
   const [saveName, setSaveName] = useState("");
   const [showSaveInput, setShowSaveInput] = useState(false);
@@ -154,38 +316,30 @@ export function FilterPanel({
             </div>
           </div>
 
-          {/* Day range */}
+          {/* Date range */}
           <div className="mb-4">
             <label className="mb-2 block text-xs font-medium uppercase text-[var(--text-secondary)]">
-              Day Range
+              Date Range
             </label>
             <div className="flex items-center gap-2">
-              <input
-                type="number"
-                min="1"
-                max="31"
-                placeholder="From"
-                value={dayMin}
-                onChange={(e) => {
-                  const v = e.target.value;
-                  if (v && dayMax && parseInt(v, 10) > parseInt(dayMax, 10)) return;
-                  onDayMinChange(v);
-                }}
-                className="w-full flex-1 rounded-ui-md border border-[var(--border)] bg-[var(--surface)] py-2.5 px-2 text-xs text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-brand/20"
+              <CalendarPicker
+                label="From"
+                value={dayMin ? parseInt(dayMin, 10) : null}
+                onChange={(d) => onDayMinChange(d !== null ? String(d) : "")}
+                month={currentMonth}
+                year={currentYear}
+                otherValue={dayMax ? parseInt(dayMax, 10) : null}
+                isStart={true}
               />
-              <span className="text-xs text-[var(--text-tertiary)]">to</span>
-              <input
-                type="number"
-                min="1"
-                max="31"
-                placeholder="To"
-                value={dayMax}
-                onChange={(e) => {
-                  const v = e.target.value;
-                  if (v && dayMin && parseInt(v, 10) < parseInt(dayMin, 10)) return;
-                  onDayMaxChange(v);
-                }}
-                className="w-full flex-1 rounded-ui-md border border-[var(--border)] bg-[var(--surface)] py-2.5 px-2 text-xs text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-brand/20"
+              <span className="shrink-0 text-xs" style={{ color: "var(--text-tertiary)" }}>to</span>
+              <CalendarPicker
+                label="To"
+                value={dayMax ? parseInt(dayMax, 10) : null}
+                onChange={(d) => onDayMaxChange(d !== null ? String(d) : "")}
+                month={currentMonth}
+                year={currentYear}
+                otherValue={dayMin ? parseInt(dayMin, 10) : null}
+                isStart={false}
               />
             </div>
           </div>

@@ -1,9 +1,9 @@
 "use client";
 
-import { useMemo } from "react";
-import { m } from "framer-motion";
+import { useMemo, useState, useRef } from "react";
+import { m, AnimatePresence } from "framer-motion";
 import {
-  Coffee, Flame,
+  Coffee, Flame, Edit2, Check, X,
   Tv, Car, ShoppingCart, UtensilsCrossed, ShoppingBag,
   MoreHorizontal, CreditCard, Wifi, TrendingUp, Tag, Package,
 } from "lucide-react";
@@ -45,6 +45,8 @@ interface MonthSummaryHeroProps {
   monthName: string;
   /** When true, renders a compact sticky bar instead of full hero */
   compact?: boolean;
+  /** Called when user edits the budget/salary inline */
+  onBudgetEdit?: (newBudget: number) => void;
 }
 
 export function MonthSummaryHero({
@@ -71,6 +73,7 @@ export function MonthSummaryHero({
   anomalyDays,
   monthName,
   compact = false,
+  onBudgetEdit,
 }: MonthSummaryHeroProps) {
   const greeting = useMemo(() => {
     const h = new Date().getHours();
@@ -80,6 +83,22 @@ export function MonthSummaryHero({
     if (h < 21) return "Good evening";
     return "Good night";
   }, []);
+
+  const [editingBudget, setEditingBudget] = useState(false);
+  const [budgetInput, setBudgetInput] = useState("");
+  const budgetInputRef = useRef<HTMLInputElement>(null);
+
+  const handleBudgetEditStart = () => {
+    setBudgetInput(effectiveBudget > 0 ? String(effectiveBudget) : "");
+    setEditingBudget(true);
+    setTimeout(() => budgetInputRef.current?.focus(), 40);
+  };
+
+  const handleBudgetSave = () => {
+    const val = parseFloat(budgetInput);
+    if (!isNaN(val) && val >= 0) onBudgetEdit?.(val);
+    setEditingBudget(false);
+  };
 
   // ─── Compact sticky bar ───────────────────────────────────
   if (compact) {
@@ -167,28 +186,75 @@ export function MonthSummaryHero({
       </div>
 
       {/* Budget progress bar */}
-      {effectiveBudget > 0 && (
+      {(effectiveBudget > 0 || onBudgetEdit) && (
         <div className="mt-3">
-          <div
-            className="relative h-1.5 w-full rounded-full overflow-hidden"
-            style={{ background: "var(--border)" }}
-            role="progressbar"
-            aria-valuenow={Math.min(Math.round(budgetUsedPercent), 100)}
-            aria-valuemin={0}
-            aria-valuemax={100}
-            aria-label={`Budget: ${Math.round(budgetUsedPercent)}% of ${formatCurrency(effectiveBudget)} used`}
-          >
-            <m.div
-              className="h-full rounded-full"
-              style={{
-                background: budgetUsedPercent > 100 ? "var(--danger)" : budgetUsedPercent > 80 ? "var(--warning)" : "var(--accent)",
-              }}
-              initial={{ width: 0 }}
-              animate={{ width: `${Math.min(budgetUsedPercent, 100)}%` }}
-              transition={{ delay: 0.2, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-            />
-            <div className="absolute top-0 bottom-0 w-px" style={{ left: "75%", background: "var(--text-muted)", opacity: 0.4 }} />
-          </div>
+          {/* Budget label row with inline edit */}
+          {onBudgetEdit && (
+            <div className="flex items-center justify-between mb-1.5">
+              <AnimatePresence mode="wait">
+                {editingBudget ? (
+                  <m.div
+                    key="edit"
+                    initial={{ opacity: 0, y: -4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -4 }}
+                    transition={{ duration: 0.15 }}
+                    className="flex items-center gap-1.5"
+                  >
+                    <input
+                      ref={budgetInputRef}
+                      type="number"
+                      value={budgetInput}
+                      onChange={(e) => setBudgetInput(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === "Enter") handleBudgetSave(); if (e.key === "Escape") setEditingBudget(false); }}
+                      className="w-28 rounded-lg bg-transparent px-2 py-0.5 text-sm font-numeric outline-none"
+                      style={{ border: "1px solid var(--border)", color: "var(--text-primary)" }}
+                      placeholder="Monthly budget"
+                      aria-label="Set monthly budget"
+                    />
+                    <button onClick={handleBudgetSave} className="flex h-6 w-6 items-center justify-center rounded-lg" style={{ background: "var(--accent)", color: "#fff" }} aria-label="Save budget"><Check size={12} /></button>
+                    <button onClick={() => setEditingBudget(false)} className="flex h-6 w-6 items-center justify-center rounded-lg" style={{ background: "var(--surface-tertiary)", color: "var(--text-muted)" }} aria-label="Cancel"><X size={12} /></button>
+                  </m.div>
+                ) : (
+                  <m.button
+                    key="label"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    onClick={handleBudgetEditStart}
+                    className="flex items-center gap-1.5 text-xs transition-opacity hover:opacity-70"
+                    style={{ color: "var(--text-muted)" }}
+                    aria-label="Edit monthly budget"
+                  >
+                    {effectiveBudget > 0 ? `Budget: ${formatCurrency(effectiveBudget)}` : "Set a budget"}
+                    <Edit2 size={11} />
+                  </m.button>
+                )}
+              </AnimatePresence>
+            </div>
+          )}
+          {effectiveBudget > 0 && (
+            <div
+              className="relative h-1.5 w-full rounded-full overflow-hidden"
+              style={{ background: "var(--border)" }}
+              role="progressbar"
+              aria-valuenow={Math.min(Math.round(budgetUsedPercent), 100)}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-label={`Budget: ${Math.round(budgetUsedPercent)}% of ${formatCurrency(effectiveBudget)} used`}
+            >
+              <m.div
+                className="h-full rounded-full"
+                style={{
+                  background: budgetUsedPercent > 100 ? "var(--danger)" : budgetUsedPercent > 80 ? "var(--warning)" : "var(--accent)",
+                }}
+                initial={{ width: 0 }}
+                animate={{ width: `${Math.min(budgetUsedPercent, 100)}%` }}
+                transition={{ delay: 0.2, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+              />
+              <div className="absolute top-0 bottom-0 w-px" style={{ left: "75%", background: "var(--text-muted)", opacity: 0.4 }} />
+            </div>
+          )}
         </div>
       )}
 
@@ -240,19 +306,28 @@ export function MonthSummaryHero({
         animate="animate"
         variants={{ initial: {}, animate: { transition: { staggerChildren: 0.04 } } }}
       >
-        {/* Daily pace */}
+        {/* Today's allowance */}
         <m.div className="text-center" variants={stoneSettle}>
           <p className="text-[11px] font-medium uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
-            Pace
+            {effectiveBudget > 0 && paceToStayUnder > 0 ? "Spend today" : "Daily avg"}
           </p>
-          <p className="mt-0.5 text-sm font-bold font-numeric" style={{ color: "var(--text-primary)" }}>
-            {formatCurrency(Math.round(avgDaily))}
+          <p
+            className="mt-0.5 text-sm font-bold font-numeric"
+            style={{
+              color: effectiveBudget > 0 && paceToStayUnder > 0
+                ? (avgDaily > paceToStayUnder ? "var(--warning)" : "var(--accent)")
+                : "var(--text-primary)",
+            }}
+          >
+            {effectiveBudget > 0 && paceToStayUnder > 0
+              ? formatCurrency(Math.round(paceToStayUnder))
+              : formatCurrency(Math.round(avgDaily))}
           </p>
-          {effectiveBudget > 0 && paceToStayUnder > 0 && (
-            <p className="text-[11px]" style={{ color: avgDaily > paceToStayUnder ? "var(--warning)" : "var(--text-muted)" }}>
-              ≤ {formatCurrency(Math.round(paceToStayUnder))}
-            </p>
-          )}
+          <p className="text-[11px]" style={{ color: "var(--text-muted)" }}>
+            {effectiveBudget > 0 && paceToStayUnder > 0
+              ? `avg ${formatCurrency(Math.round(avgDaily))}`
+              : "this month"}
+          </p>
         </m.div>
 
         {/* Top Category */}

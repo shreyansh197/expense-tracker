@@ -52,6 +52,7 @@ export interface UserSettings {
   accentColor?: string;
   sunsetTheme?: boolean;
   notificationPrefs?: NotificationPrefs;
+  quickTemplates?: ExpenseTemplate[];
   createdAt: number;
   updatedAt: number;
 }
@@ -113,6 +114,14 @@ export interface SavedFilter {
   searchQuery: string;
   amountMin?: number;
   amountMax?: number;
+}
+
+export interface ExpenseTemplate {
+  id: string;
+  label: string;
+  amount: number;
+  category: CategoryId;
+  remark?: string;
 }
 
 export interface MonthYear {

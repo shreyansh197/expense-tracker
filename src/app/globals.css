@@ -95,6 +95,7 @@ select {
   --radius-md: 0.75rem;
   --radius-lg: 1rem;
   --radius-xl: 1.25rem;
+  --radius-card: 1rem;
   /* ── Card padding ── */
   --card-padding: var(--space-5);
   --card-padding-sm: var(--space-4);
@@ -255,36 +256,36 @@ select {
   /* ── Business surface overrides ── */
   --biz-surface: #F4F7FA;
   /* ── Terrain font families ── */
-  --font-display: var(--font-lora, 'Lora Variable', 'Lora', Georgia, serif);
-  --font-body: var(--font-jakarta, 'Plus Jakarta Sans Variable', 'Plus Jakarta Sans', Inter, sans-serif);
-  --font-numeric: var(--font-mono, 'JetBrains Mono Variable', 'JetBrains Mono', monospace);
+  --font-display: var(--font-sora, 'Sora', Inter, system-ui, sans-serif);
+  --font-body: var(--font-jakarta, 'Plus Jakarta Sans', Inter, system-ui, sans-serif);
+  --font-numeric: var(--font-dm-mono, 'DM Mono', 'Courier New', monospace);
 }
 
 .dark {
   /* ── Spacing scale (inherited from :root) ── */
   /* ── Surfaces (obsidian depth layers) ── */
-  --background: #1A1B2E;
-  --foreground: #F0EBE0;
-  --surface: #252638;
-  --surface-secondary: #2D2E42;
-  --surface-hover: #363750;
-  --surface-tertiary: #404258;
-  --surface-elevated: #2D2E42;
+  --background: #0A0A0F;
+  --foreground: #E8E8F0;
+  --surface: #111118;
+  --surface-secondary: #1C1C27;
+  --surface-hover: #252532;
+  --surface-tertiary: #2E2E3C;
+  --surface-elevated: #1C1C27;
   /* ── Borders ── */
-  --border: #3D3E54;
-  --border-subtle: #2D2E42;
-  --border-card: #3D3E54;
+  --border: #2A2A38;
+  --border-subtle: #1C1C27;
+  --border-card: #2A2A38;
   /* ── Text ── */
-  --text-primary: #F0EBE0;
-  --text-secondary: #B0A898;
-  --text-tertiary: #8A8798;
-  --text-muted: #9EA3B8;
-  --text-inverse: #1A1B2E;
+  --text-primary: #E8E8F0;
+  --text-secondary: #9E9EB8;
+  --text-tertiary: #7A7A90;
+  --text-muted: #AAAABF;
+  --text-inverse: #0A0A0F;
   /* ── Semantic surfaces ── */
-  --surface-modal: #2D2E42;
-  --surface-popover: #2D2E42;
+  --surface-modal: #1C1C27;
+  --surface-popover: #1C1C27;
   /* ── Semantic borders ── */
-  --border-strong: #4D4E68;
+  --border-strong: #383848;
   --border-focus: var(--primary);
   /* ── Primary (Sage-Teal — light terrain for dark mode) ── */
   --primary: #7BAF9E;
@@ -294,13 +295,13 @@ select {
   --secondary: #BDD9D0;
   --secondary-soft: rgba(189, 217, 208, 0.12);
   --secondary-gradient: linear-gradient(135deg, #BDD9D0, #7BAF9E);
-  /* ── Accent (Dust — lighter clay for dark mode) ── */
-  --accent: #D4906A;
-  --accent-soft: rgba(212, 144, 106, 0.15);
-  --accent-hover: #C07A55;
-  --accent-deep: #A0583F;
-  --accent-border: rgba(212, 144, 106, 0.35);
-  --accent-gradient: linear-gradient(135deg, #D4906A, #C07A55);
+  /* ── Accent (Amber — dark luxury fintech CTA) ── */
+  --accent: #F59E0B;
+  --accent-soft: rgba(245, 158, 11, 0.15);
+  --accent-hover: #D97706;
+  --accent-deep: #B45309;
+  --accent-border: rgba(245, 158, 11, 0.35);
+  --accent-gradient: linear-gradient(135deg, #F59E0B, #D97706);
   /* ── Primary derived ── */
   --primary-hover: #5A9680;
   --primary-border: rgba(123, 175, 158, 0.35);
@@ -346,7 +347,7 @@ select {
   --biz-accent-text: #6EB88A;
   --biz-accent-gradient: linear-gradient(135deg, #6EB88A, #7BAF9E);
   /* ── Interactive state tokens ── */
-  --focus-ring: rgba(212, 144, 106, 0.25);
+  --focus-ring: rgba(245, 158, 11, 0.35);
   --focus-ring-biz: rgba(110, 184, 138, 0.25);
   --disabled-opacity: 0.4;
   /* ── Goal / achievement tokens ── */
@@ -389,24 +390,25 @@ select {
   --gradient-hero: linear-gradient(135deg, rgba(123, 175, 158, 0.10) 0%, rgba(212, 144, 106, 0.08) 60%, rgba(45, 107, 90, 0.05) 100%);
   --hero-glow: rgba(123, 175, 158, 0.05);
   /* ── Elevation (3-level shadow system) ── */
-  --shadow-sm: 0 1px 4px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.15);
-  --shadow-md: 0 4px 18px rgba(0, 0, 0, 0.4), 0 2px 4px rgba(0, 0, 0, 0.2);
-  --shadow-lg: 0 8px 36px rgba(0, 0, 0, 0.5), 0 2px 8px rgba(0, 0, 0, 0.25);
+  --shadow-sm: 0 1px 4px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 18px rgba(0, 0, 0, 0.5), 0 2px 4px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 8px 36px rgba(0, 0, 0, 0.6), 0 2px 8px rgba(0, 0, 0, 0.35);
+  --shadow-glow: 0 0 24px rgba(245, 158, 11, 0.18), 0 0 60px rgba(245, 158, 11, 0.08);
   --card-shadow: var(--shadow-sm);
   --card-shadow-hover: var(--shadow-md);
   /* ── Charts ── */
-  --chart-tooltip-bg: #131B2E;
-  --chart-tooltip-fg: #E2E8F0;
-  --chart-tooltip-border: #1E2D4A;
+  --chart-tooltip-bg: #111118;
+  --chart-tooltip-fg: #E8E8F0;
+  --chart-tooltip-border: #2A2A38;
   /* ── Auth decorative orbs ── */
   --auth-orb-1: rgba(123, 175, 158, 0.1);
   --auth-orb-2: rgba(212, 144, 106, 0.08);
   --auth-badge-bg: rgba(123, 175, 158, 0.15);
   --auth-badge-ring: rgba(123, 175, 158, 0.4);
   /* ── Living Terrain 2026 — Dark overrides ── */
-  --es-chalk: #09101C;
-  --es-parchment: #111827;
-  --es-vellum: #1E293B;
+  --es-chalk: #0A0A0F;
+  --es-parchment: #111118;
+  --es-vellum: #1C1C27;
   --es-moss: #5EEAD4;
   --es-sage: #2DD4BF;
   --es-mist: rgba(94, 234, 212, 0.15);
@@ -418,7 +420,7 @@ select {
   --es-ember: #F87171;
   --es-biz-surface: #1A2332;
   --es-biz-bg: #111827;
-  --page-bg: #1A1B2E;
+  --page-bg: #0A0A0F;
 }
 
 @theme inline {
@@ -523,8 +525,8 @@ body {
 
 .dark body {
   background-image:
-    radial-gradient(ellipse at 15% 5%, rgba(143, 175, 139, 0.06), transparent 50%),
-    radial-gradient(ellipse at 85% 90%, rgba(212, 144, 106, 0.04), transparent 50%);
+    radial-gradient(ellipse at 20% 10%, rgba(245, 158, 11, 0.04), transparent 45%),
+    radial-gradient(ellipse at 80% 90%, rgba(245, 158, 11, 0.03), transparent 45%);
 }
 
 @media (display-mode: standalone) {

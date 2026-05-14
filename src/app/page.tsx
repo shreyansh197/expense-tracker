@@ -7,22 +7,41 @@ import { m, AnimatePresence } from "framer-motion";
 import { AppShell } from "@/components/layout/AppShell";
 import { MonthSwitcher } from "@/components/layout/MonthSwitcher";
 import { SyncIndicator } from "@/components/sync/SyncIndicator";
-import { MonthStartAnchor } from "@/components/dashboard/MonthStartAnchor";
 import { RevealOnScroll } from "@/components/motion/RevealOnScroll";
 import { MonthSummaryHero } from "@/components/dashboard/MonthSummaryHero";
 import { SkeletonKpiCards, SkeletonChart } from "@/components/ui/Skeleton";
 import { InstallBanner } from "@/components/pwa/InstallBanner";
 import { ClearingScene } from "@/components/ui/illustrations/terrain/ClearingScene";
-import { Repeat, PlusCircle, ChevronDown, Flame, TrendingUp, TrendingDown, AlertTriangle, Leaf, Sunrise } from "lucide-react";
+import { PlusCircle, ChevronDown, Flame, TrendingUp, AlertTriangle, Leaf, Sunrise } from "lucide-react";
+
+// Skeleton used while "More Insights" dynamic components hydrate
+function InsightSkeleton() {
+  return <div className="h-36 rounded-xl animate-pulse" style={{ background: "var(--surface)" }} />;
+}
 
 // Below-fold widgets — dynamic imports for faster initial paint
-const SpendingForecastCalendar = dynamic(() => import("@/components/analytics/SpendingForecastCalendar").then(m => ({ default: m.SpendingForecastCalendar })));
-const SavingsGoalsWidget = dynamic(() => import("@/components/dashboard/SavingsGoalsWidget").then(m => ({ default: m.SavingsGoalsWidget })));
+const SpendingForecastCalendar = dynamic(
+  () => import("@/components/analytics/SpendingForecastCalendar").then(m => ({ default: m.SpendingForecastCalendar })),
+  { loading: () => <InsightSkeleton /> }
+);
+const SavingsGoalsWidget = dynamic(
+  () => import("@/components/dashboard/SavingsGoalsWidget").then(m => ({ default: m.SavingsGoalsWidget })),
+  { loading: () => <InsightSkeleton /> }
+);
 const NarrativeInsight = dynamic(() => import("@/components/dashboard/NarrativeInsight").then(m => ({ default: m.NarrativeInsight })));
 const MonthlyPostcard = dynamic(() => import("@/components/dashboard/MonthlyPostcard").then(m => ({ default: m.MonthlyPostcard })));
-const PostcardPrompt = dynamic(() => import("@/components/dashboard/PostcardPrompt").then(m => ({ default: m.PostcardPrompt })));
-const MoneyDnaCard = dynamic(() => import("@/components/dashboard/MoneyDnaCard").then(m => ({ default: m.MoneyDnaCard })));
-const SpendingChallenges = dynamic(() => import("@/components/dashboard/SpendingChallenges").then(m => ({ default: m.SpendingChallenges })));
+const PostcardPrompt = dynamic(
+  () => import("@/components/dashboard/PostcardPrompt").then(m => ({ default: m.PostcardPrompt })),
+  { loading: () => <InsightSkeleton /> }
+);
+const MoneyDnaCard = dynamic(
+  () => import("@/components/dashboard/MoneyDnaCard").then(m => ({ default: m.MoneyDnaCard })),
+  { loading: () => <InsightSkeleton /> }
+);
+const SpendingChallenges = dynamic(
+  () => import("@/components/dashboard/SpendingChallenges").then(m => ({ default: m.SpendingChallenges })),
+  { loading: () => <InsightSkeleton /> }
+);
 const RecurringSuggestions = dynamic(() => import("@/components/dashboard/RecurringSuggestions").then(m => ({ default: m.RecurringSuggestions })));
 const UpcomingStream = dynamic(() => import("@/components/dashboard/UpcomingStream").then(m => ({ default: m.UpcomingStream })));
 import type { LucideIcon } from "lucide-react";
@@ -61,10 +80,6 @@ function SectionFallback() {
 }
 
 // Lazy-load heavy charts (only in "Dig Deeper" expandable)
-const CategoryChart = dynamic(
-  () => import("@/components/dashboard/CategoryChart").then((m) => m.CategoryChart),
-  { ssr: false },
-);
 const CategoryLegend = dynamic(
   () => import("@/components/dashboard/CategoryChart").then((m) => m.CategoryLegend),
   { ssr: false },
@@ -173,11 +188,6 @@ function DashboardContent() {
   );
   const streak = useMemo(() => getSpendingStreak(allExpenses as Expense[]), [allExpenses]);
 
-  const prevMonthTotal = useMemo(
-    () => prevMonthExpenses.filter((e) => !e.deletedAt).reduce((s, e) => s + e.amount, 0),
-    [prevMonthExpenses],
-  );
-
   // Achievements
   const achievementsData = useAchievements(settings, allExpenses as Expense[], expenses, streak, updateSettings);
 
@@ -217,6 +227,17 @@ function DashboardContent() {
   // "Dig Deeper" expandable state
   const [digDeeperOpen, setDigDeeperOpen] = useState(false);
   const [moreInsightsOpen, setMoreInsightsOpen] = useState(false);
+  const prefetchInsightsRef = useRef(false);
+
+  const prefetchMoreInsights = () => {
+    if (prefetchInsightsRef.current) return;
+    prefetchInsightsRef.current = true;
+    import("@/components/analytics/SpendingForecastCalendar");
+    import("@/components/dashboard/SavingsGoalsWidget");
+    import("@/components/dashboard/MoneyDnaCard");
+    import("@/components/dashboard/SpendingChallenges");
+    import("@/components/dashboard/PostcardPrompt");
+  };
 
   // Narrative insights â€” generated from calculations context
   const narrativeInsights = useMemo(() => {
@@ -298,19 +319,6 @@ function DashboardContent() {
       });
     }
 
-    // Recurring coming up
-    const recurringExpenses = settings.recurringExpenses ?? [];
-    if (recurringExpenses.length > 0) {
-      const upcomingTotal = recurringExpenses.reduce((s, r) => s + r.amount, 0);
-      if (upcomingTotal > 0) {
-        insights.push({
-          text: `${formatCurrency(upcomingTotal)} in recurring bills across ${recurringExpenses.length} subscription${recurringExpenses.length !== 1 ? "s" : ""}.`,
-          type: "neutral",
-          icon: Repeat,
-        });
-      }
-    }
-
     // Monthly reflection — last 3 days of month
     if (today >= daysInMonth - 2 && active.length > 0) {
       const topCat = [...new Map<string, number>()].length === 0 ? null : (() => {
@@ -335,7 +343,7 @@ function DashboardContent() {
     }
 
     return insights.slice(0, 3);
-  }, [expenses, prevMonthExpenses, effectiveBudget, avgDaily, daysInMonth, forecast, settings.recurringExpenses, dailyTotals, allCategories, formatCurrency, monthlyTotal, remaining, isCurrentMonth]);
+  }, [expenses, prevMonthExpenses, effectiveBudget, avgDaily, daysInMonth, forecast, dailyTotals, allCategories, formatCurrency, monthlyTotal, remaining, isCurrentMonth]);
 
   // Top category for stone marker
   const topCategory = useMemo(() => {
@@ -501,53 +509,11 @@ function DashboardContent() {
               daysInMonth={daysInMonth}
               anomalyDays={anomalyDays}
               monthName={getMonthName(currentMonth)}
+              onBudgetEdit={(val) => updateSettings({ salary: val })}
             />
           )}
       </ErrorBoundary>
 
-      {/* 2a-b. LAST MONTH vs THIS MONTH — comparison strip */}
-      {!loading && expenses.length > 0 && prevMonthTotal > 0 && (() => {
-        const delta = prevMonthTotal > 0 ? ((monthlyTotal - prevMonthTotal) / prevMonthTotal) * 100 : null;
-        const up = delta !== null && delta > 2;
-        const down = delta !== null && delta < -2;
-        const DeltaIcon = up ? TrendingUp : down ? TrendingDown : null;
-        const deltaColor = up ? "var(--warning)" : down ? "var(--success)" : "var(--text-muted)";
-        return (
-          <m.div
-            className="card-terrain flex items-center justify-between gap-4 px-4 py-3"
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-          >
-            <div className="flex-1 text-center">
-              <p className="text-[10px] font-medium uppercase tracking-wider mb-0.5" style={{ color: "var(--text-muted)" }}>Last month</p>
-              <p className="text-base font-bold font-numeric leading-none" style={{ color: "var(--text-secondary)" }}>{formatCurrency(prevMonthTotal)}</p>
-            </div>
-            <div className="flex flex-col items-center gap-0.5 shrink-0">
-              {DeltaIcon && <DeltaIcon size={14} style={{ color: deltaColor }} />}
-              {delta !== null && (
-                <span className="text-[11px] font-semibold font-numeric" style={{ color: deltaColor }}>
-                  {delta > 0 ? "+" : ""}{Math.round(delta)}%
-                </span>
-              )}
-            </div>
-            <div className="flex-1 text-center">
-              <p className="text-[10px] font-medium uppercase tracking-wider mb-0.5" style={{ color: "var(--text-muted)" }}>This month</p>
-              <p className="text-base font-bold font-numeric leading-none" style={{ color: "var(--text-primary)" }}>{formatCurrency(monthlyTotal)}</p>
-            </div>
-          </m.div>
-        );
-      })()}
-
-      {/* 2b. MONTH START ANCHOR — new month context card */}
-      {!loading && (
-        <MonthStartAnchor
-          prevMonthExpenses={prevMonthExpenses}
-          prevMonthBudget={effectiveBudget}
-          currentBudget={effectiveBudget}
-          currentMonthTotal={monthlyTotal}
-        />
-      )}
       {/* 2c. NARRATIVE INSIGHTS — promoted to appear early */}
       {!loading && narrativeInsights.length > 0 && (
         <div className="space-y-3">
@@ -576,6 +542,8 @@ function DashboardContent() {
         <>
           <button
             onClick={() => setMoreInsightsOpen((o) => !o)}
+            onPointerEnter={prefetchMoreInsights}
+            onFocus={prefetchMoreInsights}
             className="flex w-full items-center justify-between rounded-xl px-4 py-3 text-sm font-semibold transition-colors"
             style={{ background: "var(--surface-secondary)", color: "var(--text-secondary)" }}
             aria-expanded={moreInsightsOpen}
@@ -650,15 +618,7 @@ function DashboardContent() {
                 >
                   <div className="border-t p-5" style={{ borderColor: "var(--border-default)" }}>
                     <Suspense fallback={<SkeletonChart />}>
-                      <CategoryChart
-                        categoryTotals={categoryTotals}
-                        onCategoryClick={handleCategoryClick}
-                        categoryBudgets={settings.categoryBudgets}
-                        expenses={expenses}
-                      />
-                      <div className="mt-4">
-                        <CategoryLegend categoryTotals={categoryTotals} onCategoryClick={handleCategoryClick} categoryBudgets={settings.categoryBudgets} />
-                      </div>
+                      <CategoryLegend categoryTotals={categoryTotals} onCategoryClick={handleCategoryClick} categoryBudgets={settings.categoryBudgets} />
                     </Suspense>
                   </div>
                 </m.div>

@@ -10,7 +10,8 @@ import { CategoryChips } from "@/components/expenses/CategoryChips";
 import { FilterPanel } from "@/components/expenses/FilterPanel";
 import { useExpenses } from "@/hooks/useExpenses";
 import { useUIStore } from "@/stores/uiStore";
-import { Search, PlusCircle, Globe, ArrowUpDown } from "lucide-react";
+import { Search, PlusCircle, Globe, ArrowUpDown, LayoutList, Tag } from "lucide-react";
+import { QuickTemplates } from "@/components/expenses/QuickTemplates";
 import { useCurrency } from "@/hooks/useCurrency";
 import { debounce } from "@/lib/debounce";
 import { useMonthUrlSync } from "@/hooks/useMonthUrlSync";
@@ -22,6 +23,7 @@ import { useToast } from "@/components/ui/Toast";
 import { useCrossMonthSearch } from "@/hooks/useCrossMonthSearch";
 
 type SortOption = "day-desc" | "day-asc" | "amount-desc" | "amount-asc";
+type ViewMode = "day" | "category";
 
 export default function ExpensesPage() {
   return (
@@ -65,6 +67,10 @@ function ExpensesContent() {
   const [sortBy, setSortBy] = useState<SortOption>(() => {
     if (typeof window === "undefined") return "day-desc";
     return (localStorage.getItem("expenstream-expenses-sort") as SortOption) || "day-desc";
+  });
+  const [viewMode, setViewMode] = useState<ViewMode>(() => {
+    if (typeof window === "undefined") return "day";
+    return (localStorage.getItem("expenstream-expenses-view") as ViewMode) || "day";
   });
   const [localSearch, setLocalSearch] = useState(searchQuery);
   const [crossMonthEnabled, setCrossMonthEnabled] = useState(false);
@@ -253,9 +259,42 @@ function ExpensesContent() {
                 <option value="amount-desc">Highest</option>
                 <option value="amount-asc">Lowest</option>
               </select>
+              {/* Day | Category view toggle */}
+              <div
+                className="ml-1 flex items-center rounded-xl p-0.5 gap-0.5"
+                style={{ background: "var(--surface-secondary)", border: "1px solid var(--border)" }}
+              >
+                <button
+                  onClick={() => { setViewMode("day"); localStorage.setItem("expenstream-expenses-view", "day"); }}
+                  aria-pressed={viewMode === "day"}
+                  title="Group by day"
+                  className="flex items-center justify-center rounded-lg p-1.5 transition-colors"
+                  style={{
+                    background: viewMode === "day" ? "var(--accent)" : "transparent",
+                    color: viewMode === "day" ? "#fff" : "var(--text-muted)",
+                  }}
+                >
+                  <LayoutList size={13} />
+                </button>
+                <button
+                  onClick={() => { setViewMode("category"); localStorage.setItem("expenstream-expenses-view", "category"); }}
+                  aria-pressed={viewMode === "category"}
+                  title="Group by category"
+                  className="flex items-center justify-center rounded-lg p-1.5 transition-colors"
+                  style={{
+                    background: viewMode === "category" ? "var(--accent)" : "transparent",
+                    color: viewMode === "category" ? "#fff" : "var(--text-muted)",
+                  }}
+                >
+                  <Tag size={13} />
+                </button>
+              </div>
             </div>
           }
         />
+
+        {/* Quick expense templates */}
+        <QuickTemplates />
 
         <CategoryChips />
 
@@ -289,6 +328,7 @@ function ExpensesContent() {
             dayMax={crossMonthEnabled ? undefined : (dayMax ? parseInt(dayMax, 10) : undefined)}
             sortBy={sortBy}
             crossMonth={crossMonthEnabled}
+            viewMode={viewMode}
           />
         )}
       </div>

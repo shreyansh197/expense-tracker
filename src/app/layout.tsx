@@ -1,14 +1,14 @@
 import type { Metadata, Viewport } from "next";
-import { Lora, Plus_Jakarta_Sans, JetBrains_Mono } from "next/font/google";
+import { Sora, Plus_Jakarta_Sans, DM_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 import { ServiceWorkerRegistration } from "@/components/pwa/ServiceWorkerRegistration";
 
-const lora = Lora({
+const sora = Sora({
   subsets: ["latin"],
   display: "swap",
-  variable: "--font-lora",
-  weight: ["400", "500", "700"],
+  variable: "--font-sora",
+  weight: ["400", "600", "700"],
 });
 
 const jakarta = Plus_Jakarta_Sans({
@@ -18,10 +18,10 @@ const jakarta = Plus_Jakarta_Sans({
   weight: ["300", "400", "500", "600", "700"],
 });
 
-const mono = JetBrains_Mono({
+const mono = DM_Mono({
   subsets: ["latin"],
   display: "swap",
-  variable: "--font-mono",
+  variable: "--font-dm-mono",
   weight: ["400", "500"],
 });
 
@@ -63,7 +63,7 @@ export const viewport: Viewport = {
   // (useVisualViewport hook) without changing the viewport model at all.
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#FAF7F2" },
-    { media: "(prefers-color-scheme: dark)", color: "#1A1B2E" },
+    { media: "(prefers-color-scheme: dark)", color: "#0A0A0F" },
   ],
 };
 
@@ -73,8 +73,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning className={`${lora.variable} ${jakarta.variable} ${mono.variable}`}>
+    <html lang="en" suppressHydrationWarning className={`${sora.variable} ${jakarta.variable} ${mono.variable}`}>
       <head>
+        {/* Preconnect to font and Supabase origins to cut TTFB */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        {process.env.NEXT_PUBLIC_SUPABASE_URL && (
+          <link rel="preconnect" href={process.env.NEXT_PUBLIC_SUPABASE_URL} />
+        )}
         <script
           dangerouslySetInnerHTML={{
             __html: `window.__pwaInstallPrompt=null;window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();window.__pwaInstallPrompt=e;});`,

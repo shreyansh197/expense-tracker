@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useRef } from "react";
+import { useInView } from "framer-motion";
 
 export interface DonutSegment {
   label: string;
@@ -27,6 +28,9 @@ export function DonutChart({
   responsive = false,
   className,
 }: DonutChartProps) {
+  const svgRef = useRef<SVGSVGElement>(null);
+  const inView = useInView(svgRef, { once: true, margin: "-40px 0px" });
+
   const radius = (size - thickness) / 2;
   const center = size / 2;
   const circumference = 2 * Math.PI * radius;
@@ -49,7 +53,8 @@ export function DonutChart({
 
       return {
         ...d,
-        dashArray: `${dashLength} ${dashGap}`,
+        fullDashArray: `${dashLength} ${dashGap}`,
+        emptyDashArray: `0 ${circumference}`,
         rotation,
       };
     });
@@ -59,6 +64,7 @@ export function DonutChart({
 
   return (
     <svg
+      ref={svgRef}
       width={responsive ? "100%" : size}
       height={responsive ? "100%" : size}
       viewBox={`0 0 ${size} ${size}`}
@@ -74,7 +80,7 @@ export function DonutChart({
           fill="none"
           stroke={seg.color}
           strokeWidth={thickness}
-          strokeDasharray={seg.dashArray}
+          strokeDasharray={inView ? seg.fullDashArray : seg.emptyDashArray}
           strokeDashoffset={0}
           strokeLinecap="round"
           transform={`rotate(${seg.rotation} ${center} ${center})`}

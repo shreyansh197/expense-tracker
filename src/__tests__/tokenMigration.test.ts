@@ -75,7 +75,7 @@ const MIGRATED_COMPONENTS = [
   "app/auth/complete/page.tsx",
   "components/settings/SettingsFooterLogout.tsx",
   "components/settings/GoalsManager.tsx",
-  "components/dashboard/SpendingHeatmap.tsx",
+  // SpendingHeatmap removed (dead code cleanup — file deleted)
 ];
 
 // =========== No forbidden Tailwind color classes ===========
@@ -155,9 +155,10 @@ describe("token migration: CSS variable tokens are used", () => {
     expect(src).toMatch(/var\(--/);
   });
 
-  test("SpendingHeatmap uses var(--text-inverse)", () => {
-    const src = readSrc("components/dashboard/SpendingHeatmap.tsx");
-    expect(src).toMatch(/var\(--text-inverse\)/);
+  test("SpendingHeatmap (deleted — dead code cleanup)", () => {
+    // SpendingHeatmap was removed. Assert file is gone.
+    const fullPath = path.resolve(__dirname, "..", "components/dashboard/SpendingHeatmap.tsx");
+    expect(fs.existsSync(fullPath)).toBe(false);
   });
 });
 
@@ -177,16 +178,9 @@ describe("token migration: no hardcoded hex for brand colors", () => {
 // =========== Chart components use var(--text-inverse) instead of #fff ===========
 
 describe("chart Polish: no raw #fff in chart components", () => {
-  test("SpendingHeatmap does not use #fff or #ffffff for text fill", () => {
-    const src = readSrc("components/dashboard/SpendingHeatmap.tsx");
-    // #fff should have been replaced with var(--text-inverse)
-    // Exclude common template patterns or CSS that isn't color
-    const lines = src.split("\n");
-    for (const line of lines) {
-      if (line.includes("fill") || line.includes("color")) {
-        expect(line).not.toMatch(/#fff(?:fff)?\b/i);
-      }
-    }
+  test("SpendingHeatmap deleted (dead code cleanup)", () => {
+    // SpendingHeatmap was removed — assert the file no longer exists
+    expect(fs.existsSync(path.resolve(__dirname, "..", "components/dashboard/SpendingHeatmap.tsx"))).toBe(false);
   });
 });
 

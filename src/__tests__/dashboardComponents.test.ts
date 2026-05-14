@@ -85,64 +85,14 @@ describe("UpcomingStream component contract", () => {
 });
 
 // =========================================================================
-// TC-DASH-002: MonthStartAnchor component contract
-// Priority: HIGH | US-DASH-002
+// TC-DASH-002: MonthStartAnchor — DELETED (dead code cleanup)
+// Replaced by: deletion verification in cleanupVerification.test.ts
 // =========================================================================
 
-describe("MonthStartAnchor component contract", () => {
-  const src = readComponent("components/dashboard/MonthStartAnchor.tsx");
-
-  test("TC-DASH-002-01: exports MonthStartAnchor as named export", () => {
-    expect(src).toMatch(/export\s+function\s+MonthStartAnchor/);
-  });
-
-  test("TC-DASH-002-02: uses 'use client' directive", () => {
-    expect(src).toContain('"use client"');
-  });
-
-  test("TC-DASH-002-03: accepts prevMonthExpenses, prevMonthBudget, currentBudget props", () => {
-    expect(src).toContain("prevMonthExpenses");
-    expect(src).toContain("prevMonthBudget");
-    expect(src).toContain("currentBudget");
-  });
-
-  test("TC-DASH-002-04: only shows on days 1-3", () => {
-    expect(src).toMatch(/today\s*>\s*3.*return\s+null/s);
-  });
-
-  test("TC-DASH-002-05: returns null when prevMonthBudget <= 0", () => {
-    expect(src).toMatch(/prevMonthBudget\s*<=\s*0.*return\s+null/s);
-  });
-
-  test("TC-DASH-002-06: calculates under/over budget correctly", () => {
-    expect(src).toContain("underBudget");
-    expect(src).toMatch(/prevMonthBudget\s*-\s*prevTotal/);
-  });
-
-  test("TC-DASH-002-07: computes recurring committed total", () => {
-    expect(src).toContain("recurringTotal");
-  });
-
-  test("TC-DASH-002-08: computes flexible amount after recurring", () => {
-    expect(src).toContain("afterRecurring");
-    expect(src).toMatch(/currentBudget\s*-\s*recurringTotal/);
-  });
-
-  test("TC-DASH-002-09: uses success/warning color for border", () => {
-    expect(src).toContain("var(--success)");
-    expect(src).toContain("var(--warning)");
-  });
-
-  test("TC-DASH-002-10: uses Sunrise icon", () => {
-    expect(src).toContain("Sunrise");
-  });
-
-  test("TC-DASH-002-11: filters out deleted expenses", () => {
-    expect(src).toMatch(/filter.*deletedAt/);
-  });
-
-  test("TC-DASH-002-12: returns null when anchor is null", () => {
-    expect(src).toMatch(/if\s*\(!anchor\)\s*return\s+null/);
+describe("MonthStartAnchor deleted (dead code cleanup)", () => {
+  test("TC-DASH-002-DELETED: file no longer exists", () => {
+    const fullPath = path.resolve(__dirname, "..", "components/dashboard/MonthStartAnchor.tsx");
+    expect(fs.existsSync(fullPath)).toBe(false);
   });
 });
 
@@ -205,54 +155,14 @@ describe("PostcardPrompt component contract", () => {
 });
 
 // =========================================================================
-// TC-DASH-004: SpendingHeatmap with pulse consolidation
-// Priority: HIGH | US-DASH-004
+// TC-DASH-004: SpendingHeatmap — DELETED (dead code cleanup)
+// The pure pulse-rate calculation logic is preserved in TC-DASH-005.
 // =========================================================================
 
-describe("SpendingHeatmap pulse consolidation contract", () => {
-  const src = readComponent("components/dashboard/SpendingHeatmap.tsx");
-
-  test("TC-DASH-004-01: exports SpendingHeatmap as named export", () => {
-    expect(src).toMatch(/export\s+function\s+SpendingHeatmap/);
-  });
-
-  test("TC-DASH-004-02: accepts todayTotal and avgDaily props", () => {
-    expect(src).toContain("todayTotal");
-    expect(src).toContain("avgDaily");
-  });
-
-  test("TC-DASH-004-03: computes pulse rate moods", () => {
-    expect(src).toContain('"Resting"');
-    expect(src).toContain('"Calm"');
-    expect(src).toContain('"Steady"');
-    expect(src).toContain('"Active"');
-    expect(src).toContain('"Surging"');
-  });
-
-  test("TC-DASH-004-04: pulse rate thresholds are correct", () => {
-    // ratio < 0.5 → Calm, < 1 → Steady, < 1.5 → Active, else → Surging
-    expect(src).toContain("ratio < 0.5");
-    expect(src).toContain("ratio < 1");
-    expect(src).toContain("ratio < 1.5");
-  });
-
-  test("TC-DASH-004-05: uses Activity and Zap icons for pulse mood", () => {
-    expect(src).toContain("Activity");
-    expect(src).toContain("Zap");
-  });
-
-  test("TC-DASH-004-06: uses terrain color tokens for intensity", () => {
-    expect(src).toContain("var(--es-sage)");
-    expect(src).toContain("var(--es-clay)");
-  });
-
-  test("TC-DASH-004-07: defaults todayTotal and avgDaily to 0", () => {
-    expect(src).toContain("todayTotal = 0");
-    expect(src).toContain("avgDaily = 0");
-  });
-
-  test("TC-DASH-004-08: filters out deleted expenses in heatmap", () => {
-    expect(src).toMatch(/deletedAt/);
+describe("SpendingHeatmap deleted (dead code cleanup)", () => {
+  test("TC-DASH-004-DELETED: file no longer exists", () => {
+    const fullPath = path.resolve(__dirname, "..", "components/dashboard/SpendingHeatmap.tsx");
+    expect(fs.existsSync(fullPath)).toBe(false);
   });
 });
 

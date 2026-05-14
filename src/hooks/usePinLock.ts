@@ -42,6 +42,12 @@ async function loadPinHash(): Promise<string | null> {
   return raw;
 }
 
+function broadcastPinChange(): void {
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new CustomEvent("expenstream:pin-changed"));
+  }
+}
+
 async function savePinHash(hash: string): Promise<void> {
   if (typeof window === "undefined") return;
   if (hasEncryptionKey()) {
@@ -50,6 +56,7 @@ async function savePinHash(hash: string): Promise<void> {
   } else {
     localStorage.setItem(PIN_STORAGE_KEY, hash);
   }
+  broadcastPinChange();
 }
 
 function clearPinHash(): void {
@@ -58,6 +65,7 @@ function clearPinHash(): void {
   localStorage.removeItem(PIN_LAST_ACTIVE_KEY);
   localStorage.removeItem(PIN_ATTEMPTS_KEY);
   localStorage.removeItem(PIN_LOCKOUT_UNTIL_KEY);
+  broadcastPinChange();
 }
 
 function getAttempts(): number {
@@ -108,32 +116,41 @@ export function usePinLock() {
   const [timeout, setTimeoutVal] = useState<PinTimeout>(300);
   const activityTimer = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  const initFromStorage = useCallback(async () => {
+    const storedHash = await loadPinHash();
+    if (!storedHash) {
+      setIsEnabled(false);
+      setIsLocked(false);
+      return;
+    }
+    setIsEnabled(true);
+    setTimeoutVal(getTimeout());
+    const last = getLastActive();
+    const timeoutMs = getTimeout() * 1000;
+    if (!last || Date.now() - last > timeoutMs) {
+      setIsLocked(true);
+    } else {
+      setIsLocked(false);
+      setLastActive();
+    }
+  }, []);
+
   // Initialize: check if PIN is set and whether we should lock on load
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const storedHash = await loadPinHash();
       if (cancelled) return;
-      if (!storedHash) {
-        setIsEnabled(false);
-        setIsLocked(false);
-        return;
-      }
-      setIsEnabled(true);
-      setTimeoutVal(getTimeout());
-
-      // Check if we should lock (exceeded timeout since last activity)
-      const last = getLastActive();
-      const timeoutMs = getTimeout() * 1000;
-      if (!last || Date.now() - last > timeoutMs) {
-        setIsLocked(true);
-      } else {
-        setIsLocked(false);
-        setLastActive();
-      }
+      await initFromStorage();
     })();
     return () => { cancelled = true; };
-  }, []);
+  }, [initFromStorage]);
+
+  // Re-sync when another hook instance changes pin state (e.g. Settings → AppShell)
+  useEffect(() => {
+    const handler = () => { initFromStorage(); };
+    window.addEventListener("expenstream:pin-changed", handler);
+    return () => window.removeEventListener("expenstream:pin-changed", handler);
+  }, [initFromStorage]);
 
   // Activity tracking: reset timer on user interaction
   useEffect(() => {

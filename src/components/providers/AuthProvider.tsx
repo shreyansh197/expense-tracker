@@ -7,6 +7,7 @@ import {
   useCallback,
   useEffect,
   useRef,
+  useState,
   type ReactNode,
 } from "react";
 import {
@@ -15,6 +16,7 @@ import {
   setAuthState,
   clearAuthState,
   authFetch,
+  refreshTokens,
   type AuthState,
   type AuthUser,
   type AuthWorkspace,
@@ -49,6 +51,22 @@ const SERVER_SNAPSHOT: AuthState = {
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const state = useSyncExternalStore(subscribeAuth, getAuthState, () => SERVER_SNAPSHOT);
+  // True while we are trying to restore the session from the httpOnly refresh cookie.
+  // Prevents the login form from flashing on hard refresh.
+  const [bootRefreshDone, setBootRefreshDone] = useState(false);
+
+  useEffect(() => {
+    // If we already have an access token in module memory, no refresh needed.
+    if (state.tokens?.accessToken) {
+      setBootRefreshDone(true);
+      return;
+    }
+    // Attempt silent restore from httpOnly refresh cookie.
+    refreshTokens()
+      .catch(() => { /* no cookie / server down — stay logged out */ })
+      .finally(() => setBootRefreshDone(true));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // only on mount
 
   // Fetch workspace encryption key and store in sessionStorage
   const fetchEncryptionKey = useCallback(async () => {
@@ -285,7 +303,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         switchWorkspace,
       }}
     >
-      {children}
+      {!bootRefreshDone ? null : children}
     </AuthContext.Provider>
   );
 }

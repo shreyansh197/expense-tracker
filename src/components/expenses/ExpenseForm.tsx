@@ -57,7 +57,7 @@ export function ExpenseForm({
   const storeCloseForm = useUIStore((s) => s.closeForm);
   const closeForm = onClose ?? storeCloseForm;
   const { toast } = useToast();
-  const { settings } = useSettings();
+  const { settings, addCategory } = useSettings();
   const { symbol } = useCurrency();
   const { categoryTotals } = useCalculationsContext();
 
@@ -412,6 +412,13 @@ export function ExpenseForm({
         categoryBudgets={settings.categoryBudgets}
         categoryTotals={categoryTotals}
         currencySymbol={symbol}
+        onAddCategory={(name, color) => {
+          const newId = name.toLowerCase().replace(/\s+/g, "-") + "-" + Date.now();
+          addCategory({ id: newId, label: name, color, bgColor: color + "22", icon: "Tag" });
+          setCategory(newId as CategoryId);
+          setAutoApplied(false);
+          setManualOverride(true);
+        }}
       />
 
       {/* ─── 4. Remark (always visible) with typeahead ─── */}
