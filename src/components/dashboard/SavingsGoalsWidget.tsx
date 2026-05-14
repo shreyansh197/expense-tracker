@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useMemo } from "react";
 import { Target, Sparkles, Plus, Check, X } from "lucide-react";
 import { m, AnimatePresence } from "framer-motion";
 import { useSettings } from "@/hooks/useSettings";
@@ -20,7 +20,7 @@ export function SavingsGoalsWidget() {
   const { settings, updateSettings } = useSettings();
   const { formatCurrency } = useCurrency();
   const { toast } = useToast();
-  const goals = settings.goals || [];
+  const goals = useMemo(() => settings.goals || [], [settings.goals]);
 
   const [activeGoal, setActiveGoal] = useState<Goal | null>(null);
   const [showCreate, setShowCreate] = useState(false);
@@ -50,6 +50,7 @@ export function SavingsGoalsWidget() {
       savedAmount: 0,
       color: newColor,
       deadline: undefined,
+      createdAt: Date.now(),
     };
     updateSettings({ goals: [...goals, newGoal] });
     toast(`Goal "${trimmedName}" created`);
