@@ -259,39 +259,47 @@ function ExpensesContent() {
                 <option value="amount-desc">Highest</option>
                 <option value="amount-asc">Lowest</option>
               </select>
-              {/* Day | Category view toggle */}
-              <div
-                className="ml-1 flex items-center rounded-xl p-0.5 gap-0.5"
-                style={{ background: "var(--surface-secondary)", border: "1px solid var(--border)" }}
-              >
-                <button
-                  onClick={() => { setViewMode("day"); localStorage.setItem("expenstream-expenses-view", "day"); }}
-                  aria-pressed={viewMode === "day"}
-                  title="Group by day"
-                  className="flex items-center justify-center rounded-lg p-1.5 transition-colors"
-                  style={{
-                    background: viewMode === "day" ? "var(--accent)" : "transparent",
-                    color: viewMode === "day" ? "#fff" : "var(--text-muted)",
-                  }}
-                >
-                  <LayoutList size={13} />
-                </button>
-                <button
-                  onClick={() => { setViewMode("category"); localStorage.setItem("expenstream-expenses-view", "category"); }}
-                  aria-pressed={viewMode === "category"}
-                  title="Group by category"
-                  className="flex items-center justify-center rounded-lg p-1.5 transition-colors"
-                  style={{
-                    background: viewMode === "category" ? "var(--accent)" : "transparent",
-                    color: viewMode === "category" ? "#fff" : "var(--text-muted)",
-                  }}
-                >
-                  <Tag size={13} />
-                </button>
-              </div>
             </div>
           }
         />
+
+        {/* View-mode toggle row — separate from filter bar to avoid mobile crowding */}
+        <div className="flex items-center justify-between gap-2">
+          <span className="text-xs" style={{ color: "var(--text-muted)" }}>
+            {viewMode === "day" ? "Grouped by day" : "Grouped by category"}
+          </span>
+          <div
+            className="flex items-center rounded-xl p-0.5 gap-0.5"
+            style={{ background: "var(--surface-secondary)", border: "1px solid var(--border)" }}
+          >
+            <button
+              onClick={() => { setViewMode("day"); localStorage.setItem("expenstream-expenses-view", "day"); }}
+              aria-pressed={viewMode === "day"}
+              title="Group by day"
+              className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors"
+              style={{
+                background: viewMode === "day" ? "var(--accent)" : "transparent",
+                color: viewMode === "day" ? "#fff" : "var(--text-muted)",
+              }}
+            >
+              <LayoutList size={12} />
+              <span>Day</span>
+            </button>
+            <button
+              onClick={() => { setViewMode("category"); localStorage.setItem("expenstream-expenses-view", "category"); }}
+              aria-pressed={viewMode === "category"}
+              title="Group by category"
+              className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors"
+              style={{
+                background: viewMode === "category" ? "var(--accent)" : "transparent",
+                color: viewMode === "category" ? "#fff" : "var(--text-muted)",
+              }}
+            >
+              <Tag size={12} />
+              <span>Category</span>
+            </button>
+          </div>
+        </div>
 
         {/* Quick expense templates */}
         <QuickTemplates />

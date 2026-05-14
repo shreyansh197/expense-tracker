@@ -30,6 +30,7 @@ function CalendarPicker({
   year,
   otherValue,
   isStart,
+  alignRight = false,
 }: {
   label: string;
   value: number | null;
@@ -38,6 +39,7 @@ function CalendarPicker({
   year: number;
   otherValue: number | null;
   isStart: boolean;
+  alignRight?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -107,7 +109,7 @@ function CalendarPicker({
         <div
           className={`absolute z-50 w-64 rounded-xl border p-3 shadow-xl ${
             openUpward ? "bottom-full mb-1.5" : "top-full mt-1.5"
-          } left-0`}
+          } ${alignRight ? "right-0" : "left-0"}`}
           style={{ background: "var(--surface)", borderColor: "var(--border)" }}
         >
           {/* Month header — fixed to current month, no nav needed */}
@@ -340,6 +342,7 @@ export function FilterPanel({
                 year={currentYear}
                 otherValue={dayMin ? parseInt(dayMin, 10) : null}
                 isStart={false}
+                alignRight
               />
             </div>
           </div>

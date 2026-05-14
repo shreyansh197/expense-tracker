@@ -94,10 +94,10 @@ export function QuickTemplates() {
               <Zap size={11} className="shrink-0" />
               <span className="max-w-[80px] truncate">{t.label}</span>
               <span className="font-numeric font-semibold">{formatCurrency(t.amount)}</span>
-              {/* Remove button */}
+              {/* Remove button — always visible on mobile, hover-only on desktop */}
               <button
                 onClick={(e) => handleRemove(t.id, e)}
-                className="absolute right-1.5 top-1/2 -translate-y-1/2 flex h-4 w-4 items-center justify-center rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                className="absolute right-1.5 top-1/2 -translate-y-1/2 flex h-4 w-4 items-center justify-center rounded-full opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
                 style={{ background: "var(--surface)", color: "var(--text-muted)" }}
                 aria-label={`Remove ${t.label} template`}
               >
