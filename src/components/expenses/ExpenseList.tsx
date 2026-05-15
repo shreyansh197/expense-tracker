@@ -393,7 +393,7 @@ export function ExpenseList({
             </button>
             <button
               onClick={() => setSelectedIds(new Set())}
-              className="flex h-11 w-11 items-center justify-center rounded-lg text-brand hover:bg-brand-soft"
+              className="flex h-8 w-8 items-center justify-center rounded-lg text-brand hover:bg-brand-soft"
               aria-label="Clear selection"
             >
               <X size={14} />
@@ -473,7 +473,7 @@ export function ExpenseList({
             <div className="flex items-center gap-2">
               <button
                 onClick={() => toggleSelectDay(group.expenses)}
-                className="flex h-11 w-11 items-center justify-center rounded-lg transition-colors"
+                className="flex h-8 w-8 items-center justify-center rounded-lg transition-colors"
                 style={{ color: "var(--text-muted)" }}
                 aria-label={`Select all day ${group.day}`}
               >

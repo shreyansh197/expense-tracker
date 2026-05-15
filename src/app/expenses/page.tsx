@@ -10,7 +10,7 @@ import { CategoryChips } from "@/components/expenses/CategoryChips";
 import { FilterPanel } from "@/components/expenses/FilterPanel";
 import { useExpenses } from "@/hooks/useExpenses";
 import { useUIStore } from "@/stores/uiStore";
-import { Search, PlusCircle, Globe, ArrowUpDown, LayoutList, Tag } from "lucide-react";
+import { Search, PlusCircle, Globe, ArrowUpDown, LayoutList, Tag, ChevronDown } from "lucide-react";
 import { QuickTemplates } from "@/components/expenses/QuickTemplates";
 import { useCurrency } from "@/hooks/useCurrency";
 import { debounce } from "@/lib/debounce";
@@ -250,7 +250,7 @@ function ExpensesContent() {
                   localStorage.setItem("expenstream-expenses-sort", v);
                 }}
                 aria-label="Sort order"
-                className={`appearance-none cursor-pointer rounded-ui-md py-2 pl-8 pr-3 text-xs font-medium font-[inherit] focus:outline-none transition-colors ${
+                className={`appearance-none cursor-pointer rounded-ui-md py-2 pl-8 pr-7 text-xs font-medium font-[inherit] focus:outline-none transition-colors ${
                   sortBy !== "day-desc" ? "bg-brand-soft text-brand" : "text-[var(--text-secondary)]"
                 }`}
               >
@@ -259,6 +259,11 @@ function ExpensesContent() {
                 <option value="amount-desc">Highest</option>
                 <option value="amount-asc">Lowest</option>
               </select>
+              <ChevronDown
+                size={11}
+                className="pointer-events-none absolute right-2"
+                style={{ color: sortBy !== "day-desc" ? "var(--accent)" : "var(--text-secondary)" }}
+              />
             </div>
           }
         />

@@ -131,9 +131,10 @@ export function QuickTemplates() {
             className="overflow-hidden"
           >
             <div
-              className="flex flex-wrap items-center gap-2 rounded-xl p-3"
+              className="flex flex-col gap-1.5 rounded-xl p-2.5"
               style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
             >
+              {/* Row 1: Label */}
               <input
                 type="text"
                 placeholder="Label (e.g. Coffee)"
@@ -141,50 +142,53 @@ export function QuickTemplates() {
                 onChange={(e) => setNewLabel(e.target.value)}
                 maxLength={20}
                 autoFocus
-                className="flex-1 min-w-[100px] rounded-lg px-2.5 py-1.5 text-xs focus:outline-none"
+                className="w-full rounded-lg px-2.5 py-1.5 text-xs focus:outline-none"
                 style={{ background: "var(--surface-secondary)", color: "var(--text-primary)", border: "1px solid var(--border)" }}
               />
-              <div className="relative">
-                <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs" style={{ color: "var(--text-muted)" }}>{symbol}</span>
-                <input
-                  type="number"
-                  placeholder="0.00"
-                  value={newAmount}
-                  onChange={(e) => setNewAmount(e.target.value)}
-                  className="w-20 rounded-lg py-1.5 pl-6 pr-2 text-xs focus:outline-none"
-                  style={{ background: "var(--surface-secondary)", color: "var(--text-primary)", border: "1px solid var(--border)" }}
-                  min="0.01"
-                  step="0.01"
-                />
-              </div>
-              <select
-                value={newCategory}
-                onChange={(e) => setNewCategory(e.target.value)}
-                className="rounded-lg px-2 py-1.5 text-xs focus:outline-none"
-                style={{ background: "var(--surface-secondary)", color: "var(--text-primary)", border: "1px solid var(--border)" }}
-              >
-                {allCategories.map((c) => (
-                  <option key={c.id} value={c.id}>{c.label}</option>
-                ))}
-              </select>
+              {/* Row 2: Amount + Category + Actions */}
               <div className="flex items-center gap-1.5">
-                <button
-                  onClick={handleCreate}
-                  disabled={!newLabel.trim() || !newAmount}
-                  className="flex h-7 w-7 items-center justify-center rounded-lg disabled:opacity-40"
-                  style={{ background: "var(--accent)", color: "#fff" }}
-                  aria-label="Save template"
+                <div className="relative shrink-0">
+                  <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs" style={{ color: "var(--text-muted)" }}>{symbol}</span>
+                  <input
+                    type="number"
+                    placeholder="0"
+                    value={newAmount}
+                    onChange={(e) => setNewAmount(e.target.value)}
+                    className="w-20 rounded-lg py-1.5 pl-6 pr-2 text-xs focus:outline-none"
+                    style={{ background: "var(--surface-secondary)", color: "var(--text-primary)", border: "1px solid var(--border)" }}
+                    min="0.01"
+                    step="0.01"
+                  />
+                </div>
+                <select
+                  value={newCategory}
+                  onChange={(e) => setNewCategory(e.target.value)}
+                  className="min-w-0 flex-1 rounded-lg px-2 py-1.5 text-xs focus:outline-none"
+                  style={{ background: "var(--surface-secondary)", color: "var(--text-primary)", border: "1px solid var(--border)" }}
                 >
-                  <Check size={13} />
-                </button>
-                <button
-                  onClick={() => setShowCreate(false)}
-                  className="flex h-7 w-7 items-center justify-center rounded-lg"
-                  style={{ background: "var(--surface-secondary)", color: "var(--text-muted)" }}
-                  aria-label="Cancel"
-                >
-                  <X size={13} />
-                </button>
+                  {allCategories.map((c) => (
+                    <option key={c.id} value={c.id}>{c.label}</option>
+                  ))}
+                </select>
+                <div className="flex shrink-0 items-center gap-1">
+                  <button
+                    onClick={handleCreate}
+                    disabled={!newLabel.trim() || !newAmount}
+                    className="flex h-7 w-7 items-center justify-center rounded-lg disabled:opacity-40"
+                    style={{ background: "var(--accent)", color: "#fff" }}
+                    aria-label="Save template"
+                  >
+                    <Check size={13} />
+                  </button>
+                  <button
+                    onClick={() => setShowCreate(false)}
+                    className="flex h-7 w-7 items-center justify-center rounded-lg"
+                    style={{ background: "var(--surface-secondary)", color: "var(--text-muted)" }}
+                    aria-label="Cancel"
+                  >
+                    <X size={13} />
+                  </button>
+                </div>
               </div>
             </div>
           </m.div>
