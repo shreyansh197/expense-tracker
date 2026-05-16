@@ -330,7 +330,7 @@ function AnalyticsContent() {
               <button
                 type="button"
                 onClick={handleShareAnalytics}
-                className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors"
+                className="hidden sm:flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors"
                 style={{ color: "var(--text-muted)" }}
                 aria-label="Share analytics summary"
               >
