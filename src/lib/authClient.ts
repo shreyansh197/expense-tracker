@@ -121,12 +121,19 @@ export function getActiveWorkspaceId(): string | null {
 
 // ── Token refresh ────────────────────────────────────────────
 
-let _refreshPromise: Promise<boolean> | null = null;
+/**
+ * "ok"           – refresh succeeded, new access token stored
+ * "revoked"      – server explicitly rejected the token (401/403) — user must log in
+ * "network-error" – fetch failed or server returned 5xx — transient; keep cached state
+ */
+export type RefreshResult = "ok" | "revoked" | "network-error";
 
-export async function refreshTokens(): Promise<boolean> {
+let _refreshPromise: Promise<RefreshResult> | null = null;
+
+export async function refreshTokens(): Promise<RefreshResult> {
   if (_refreshPromise) return _refreshPromise;
 
-  _refreshPromise = (async () => {
+  _refreshPromise = (async (): Promise<RefreshResult> => {
     try {
       const res = await fetch("/api/auth/refresh", {
         method: "POST",
@@ -136,10 +143,8 @@ export async function refreshTokens(): Promise<boolean> {
       });
 
       if (!res.ok) {
-        // Don't clear auth state here — let the caller or heartbeat decide.
-        // Clearing here causes race conditions when multiple requests trigger
-        // refresh simultaneously or during page transitions.
-        return false;
+        // 401/403 → session definitively invalid; anything else is transient
+        return res.status === 401 || res.status === 403 ? "revoked" : "network-error";
       }
 
       const data = await res.json();
@@ -149,9 +154,10 @@ export async function refreshTokens(): Promise<boolean> {
           // refreshToken is now in httpOnly cookie, not in response body
         },
       });
-      return true;
+      return "ok";
     } catch {
-      return false;
+      // Network unreachable, DNS failure, timeout, etc. — do NOT sign the user out
+      return "network-error";
     } finally {
       _refreshPromise = null;
     }
@@ -177,8 +183,8 @@ export async function authFetch(
 
   // If 401, try refreshing (cookie-based)
   if (res.status === 401 && _state.tokens?.accessToken) {
-    const ok = await refreshTokens();
-    if (ok) {
+    const result = await refreshTokens();
+    if (result === "ok") {
       const newToken = getAccessToken();
       if (newToken) {
         headers.set("Authorization", `Bearer ${newToken}`);

@@ -3,6 +3,7 @@
 import { TrendingUp, AlertTriangle, CheckCircle2, Clock, Banknote } from "lucide-react";
 import { useCurrency } from "@/hooks/useCurrency";
 import { cn } from "@/lib/utils";
+import { AnimatedNumber } from "@/components/ui/AnimatedNumber";
 
 interface BusinessKpiCardsProps {
   totalExpected: number;
@@ -21,17 +22,31 @@ export function BusinessKpiCards({
   overdueCount,
 }: BusinessKpiCardsProps) {
   const { formatCurrency } = useCurrency();
-  const cards = [
+
+  type KpiCard = {
+    label: string;
+    rawValue?: number;
+    format?: (n: number) => string;
+    value?: string;
+    icon: typeof Banknote;
+    color: string;
+    bg: string;
+    hint?: string;
+  };
+
+  const cards: KpiCard[] = [
     {
       label: "Total Expected",
-      value: formatCurrency(totalExpected),
+      rawValue: totalExpected,
+      format: formatCurrency,
       icon: Banknote,
       color: "text-[var(--text-secondary)]",
       bg: "bg-[var(--surface-secondary)]",
     },
     {
       label: "Total Received",
-      value: formatCurrency(totalReceived),
+      rawValue: totalReceived,
+      format: formatCurrency,
       icon: TrendingUp,
       color: "text-[var(--biz-accent-text)]",
       bg: "bg-[var(--biz-accent-soft)]",
@@ -54,7 +69,8 @@ export function BusinessKpiCards({
     },
     {
       label: "Active",
-      value: activeCount.toString(),
+      rawValue: activeCount,
+      format: (n) => Math.round(n).toString(),
       icon: Clock,
       color: "text-[var(--biz-pending-text)]",
       bg: "bg-[var(--biz-pending-bg)]",
@@ -62,12 +78,13 @@ export function BusinessKpiCards({
     ...(overdueCount > 0
       ? [{
           label: "Overdue",
-          value: overdueCount.toString(),
+          rawValue: overdueCount,
+          format: (n: number) => Math.round(n).toString(),
           icon: AlertTriangle,
           hint: "Action required",
           color: "text-[var(--danger-text)]",
           bg: "bg-[var(--danger-soft)]",
-        }]
+        } satisfies KpiCard]
       : []),
   ];
 
@@ -90,7 +107,11 @@ export function BusinessKpiCards({
               </span>
             </div>
             <p className={cn("mt-2 text-amount text-lg font-bold", card.color)}>
-              {card.value}
+              {card.rawValue !== undefined && card.format ? (
+                <AnimatedNumber value={card.rawValue} format={card.format} duration={450} />
+              ) : (
+                card.value
+              )}
             </p>
             {card.hint && (
               <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>{card.hint}</p>
@@ -100,4 +121,13 @@ export function BusinessKpiCards({
       })}
     </div>
   );
+}
+
+interface BusinessKpiCardsProps {
+  totalExpected: number;
+  totalReceived: number;
+  collectionPercent: number;
+  activeCount: number;
+  overdueCount: number;
+  completedCount: number;
 }

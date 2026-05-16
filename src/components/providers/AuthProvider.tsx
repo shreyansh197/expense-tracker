@@ -54,6 +54,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // True while we are trying to restore the session from the httpOnly refresh cookie.
   // Prevents the login form from flashing on hard refresh.
   const [bootRefreshDone, setBootRefreshDone] = useState(false);
+  // True when the boot refresh failed due to a network/server error (not an auth rejection).
+  // In this case the user is kept "soft-authenticated" using cached localStorage data
+  // and a silent retry is scheduled so they are not forced to log in on every app open
+  // after coming back from sleep / offline.
+  const [bootNetworkError, setBootNetworkError] = useState(false);
 
   useEffect(() => {
     // If we already have an access token in module memory, no refresh needed.
@@ -63,10 +68,48 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     // Attempt silent restore from httpOnly refresh cookie.
     refreshTokens()
-      .catch(() => { /* no cookie / server down — stay logged out */ })
+      .then((result) => {
+        if (result === "network-error" && getAuthState().user) {
+          // Transient failure (device waking from sleep, flaky network, server hiccup).
+          // Keep the user signed-in using cached state; retry when the network recovers.
+          setBootNetworkError(true);
+        }
+        // "revoked" → nothing extra; isAuthenticated will be false → login screen shown
+        // "ok" → state already updated inside refreshTokens
+      })
+      .catch(() => { /* should not reach here; refreshTokens never throws */ })
       .finally(() => setBootRefreshDone(true));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // only on mount
+
+  // When a network-error boot happened, retry silently on visibility change or after a delay.
+  useEffect(() => {
+    if (!bootNetworkError) return;
+
+    let cancelled = false;
+
+    const retry = async () => {
+      if (cancelled || document.visibilityState !== "visible") return;
+      const result = await refreshTokens();
+      if (cancelled) return;
+      if (result !== "network-error") {
+        // Either recovered ("ok") or session was actually revoked — either way, clear the
+        // soft-auth flag so the correct state is shown.
+        setBootNetworkError(false);
+      }
+    };
+
+    const onVisibility = () => { if (document.visibilityState === "visible") retry(); };
+    document.addEventListener("visibilitychange", onVisibility);
+    // Also retry after a brief delay in case the network comes up quickly.
+    const timer = setTimeout(retry, 5_000);
+
+    return () => {
+      cancelled = true;
+      document.removeEventListener("visibilitychange", onVisibility);
+      clearTimeout(timer);
+    };
+  }, [bootNetworkError]);
 
   // Fetch workspace encryption key and store in sessionStorage
   const fetchEncryptionKey = useCallback(async () => {
@@ -295,7 +338,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     <AuthContext.Provider
       value={{
         ...state,
-        isAuthenticated: !!state.tokens?.accessToken,
+        // Soft-auth: treat user as authenticated if the boot refresh failed due to a
+        // network error (not a 401) and we have cached user data from localStorage.
+        // This prevents devices from being signed out just because the network was
+        // unavailable when the app was opened (e.g. waking from sleep).
+        // The retry effect above will re-verify when connectivity returns.
+        isAuthenticated: !!state.tokens?.accessToken || (bootNetworkError && !!state.user),
         login,
         loginWith2FA,
         register,

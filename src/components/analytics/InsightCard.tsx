@@ -3,6 +3,7 @@
 import { m } from "framer-motion";
 import type { LucideIcon } from "lucide-react";
 import { Sparkline } from "@/components/ui/charts";
+import { InfoTooltip } from "@/components/ui/InfoTooltip";
 import { cn } from "@/lib/utils";
 
 export interface InsightCardProps {
@@ -10,6 +11,8 @@ export interface InsightCardProps {
   title: string;
   value: string;
   subtitle?: string;
+  /** Short explanation of how this metric is calculated — renders an inline ⓘ icon */
+  tooltip?: string;
   sparkData?: number[];
   accentColor?: string;
   onClick?: () => void;
@@ -21,6 +24,7 @@ export function InsightCard({
   title,
   value,
   subtitle,
+  tooltip,
   sparkData,
   accentColor = "var(--accent)",
   onClick,
@@ -47,9 +51,16 @@ export function InsightCard({
         <Icon size={16} style={{ color: accentColor }} />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-xs font-medium uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
-          {title}
-        </p>
+        <div className="flex items-center gap-1">
+          <p className="text-xs font-medium uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
+            {title}
+          </p>
+          {tooltip && (
+            <InfoTooltip title={title} className="shrink-0">
+              <p className="text-xs leading-relaxed" style={{ color: "var(--text-secondary)" }}>{tooltip}</p>
+            </InfoTooltip>
+          )}
+        </div>
         <p className="mt-0.5 font-display text-lg font-bold leading-tight" style={{ color: "var(--text-primary)" }}>
           {value}
         </p>

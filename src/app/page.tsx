@@ -69,6 +69,7 @@ import { useMonthUrlSync } from "@/hooks/useMonthUrlSync";
 import { OnboardingFlow } from "@/components/onboarding/OnboardingFlow";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { getAllCategories } from "@/lib/categories";
+import { QuickHelpButton } from "@/components/ui/QuickHelpButton";
 
 /* â”€â”€ Lightweight fallback for per-section ErrorBoundary â”€â”€â”€â”€â”€â”€ */
 function SectionFallback() {
@@ -399,15 +400,21 @@ function DashboardContent() {
         <div className="flex shrink-0 items-center gap-2">
           <SyncIndicator />
           {!loading && expenses.length > 0 && <MonthlyPostcard />}
-          {streak >= 2 && (
-            <span
-              className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold"
-              style={{ background: "var(--warning-soft)", color: "var(--warning-text)" }}
-            >
-              <Flame size={10} />
-              {streak}d
-            </span>
-          )}
+          {/* On desktop the sidebar already has Help & Tips — show only on mobile */}
+          <div className="lg:hidden">
+            <QuickHelpButton
+              showGeneral
+              pageTips={[
+                "Tap any category chip under the spending stream to drill into those expenses",
+                "The stream graph highlights days with unusually high spending in amber",
+                "Set a monthly budget in Settings to unlock the forecast and pace bar",
+                "Add recurring expenses in Settings → Recurring — they auto-log each month",
+                "Pull down to sync the latest data from the cloud",
+                "Tap the hero amount to edit your monthly budget inline",
+              ]}
+              pageLabel="Dashboard"
+            />
+          </div>
         </div>
       </m.header>
 

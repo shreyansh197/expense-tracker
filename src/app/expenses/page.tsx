@@ -21,6 +21,8 @@ import { useCalculationsContext } from "@/contexts/CalculationsContext";
 import { ExpenseExport } from "@/components/expenses/ExpenseExport";
 import { useToast } from "@/components/ui/Toast";
 import { useCrossMonthSearch } from "@/hooks/useCrossMonthSearch";
+import { AnimatedNumber } from "@/components/ui/AnimatedNumber";
+import { QuickHelpButton } from "@/components/ui/QuickHelpButton";
 
 type SortOption = "day-desc" | "day-asc" | "amount-desc" | "amount-asc";
 type ViewMode = "day" | "category";
@@ -157,12 +159,13 @@ function ExpensesContent() {
             <div className="min-w-0 flex flex-col gap-0.5">
               <MonthSwitcher />
               <div className="flex items-baseline gap-1.5 pl-0.5">
-                <span
+                <AnimatedNumber
+                  value={monthlyTotal}
+                  format={formatCurrency}
+                  duration={450}
                   className="font-numeric text-2xl sm:text-3xl font-bold tabular-nums"
                   style={{ color: "var(--accent)", letterSpacing: "-0.03em" }}
-                >
-                  {formatCurrency(monthlyTotal)}
-                </span>
+                />
                 <span className="font-display italic text-xs" style={{ color: "var(--text-muted)" }}>
                   this month
                 </span>
@@ -170,6 +173,17 @@ function ExpensesContent() {
             </div>
             <div className="flex items-center gap-2 sm:gap-3 shrink-0">
               <ExpenseExport expenses={expenses} month={currentMonth} year={currentYear} />
+              <QuickHelpButton
+                pageTips={[
+                  "Swipe an expense left to delete it, or tap to edit",
+                  "Enable cross-month search (globe icon) to find any past expense",
+                  "Sort by amount using the sort icon to spot your biggest expenses",
+                  "Quick Templates (⚡) let you re-add common expenses in one tap",
+                  "Filter by category using the chips below the search bar",
+                  "Export your data as CSV using the download icon on the right",
+                ]}
+                pageLabel="Expenses"
+              />
               <SyncIndicator />
               <button
                 onClick={() => openAddForm()}

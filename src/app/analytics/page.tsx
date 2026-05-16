@@ -29,7 +29,9 @@ import { useToast } from "@/components/ui/Toast";
 import { FogOverlook } from "@/components/ui/illustrations/terrain";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { InsightCard } from "@/components/analytics/InsightCard";
+import { InfoTooltip } from "@/components/ui/InfoTooltip";
 import { AnimatePresence } from "framer-motion";
+import { QuickHelpButton } from "@/components/ui/QuickHelpButton";
 const RollingAverageChart = dynamic(() => import("@/components/analytics/RollingAverageChart").then(m => ({ default: m.RollingAverageChart })), { ssr: false });
 const AnomalyCallout = dynamic(() => import("@/components/analytics/AnomalyCallout").then(m => ({ default: m.AnomalyCallout })), { ssr: false });
 const PredictiveBurnBar = dynamic(() => import("@/components/analytics/PredictiveBurnBar").then(m => ({ default: m.PredictiveBurnBar })), { ssr: false });
@@ -337,6 +339,16 @@ function AnalyticsContent() {
               </button>
             )}
             <SyncIndicator />
+            <QuickHelpButton
+              pageTips={[
+                "Tap an Insights card to navigate directly to the related expenses",
+                "Expand Deep Dive for Rolling Average, Category Velocity, Time Machine and Category Seasons",
+                "Switch months with the month switcher to compare different time periods",
+                "Share exports a branded image summary you can save or send",
+                "Add at least 3 expenses in a month to unlock full analytics for that month",
+              ]}
+              pageLabel="Analytics"
+            />
           </div>
         </div>
 
@@ -371,9 +383,14 @@ function AnalyticsContent() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, delay: 0.05 }}
         >
-          <h3 className="text-sm font-semibold uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
-            Trend Intelligence
-          </h3>
+          <div className="flex items-center gap-1.5">
+            <h3 className="text-sm font-semibold uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
+              Trend Intelligence
+            </h3>
+            <InfoTooltip title="Trend Intelligence">
+              <p className="text-xs leading-relaxed">The <strong>Forecast bar</strong> multiplies your current daily average by the remaining days to project your end-of-month total. <strong>Anomalies</strong> are detected using a modified Z-score: days where your spending is more than 2 standard deviations above your personal median are flagged.</p>
+            </InfoTooltip>
+          </div>
 
           {/* Predictive Burn Bar */}
           <PredictiveBurnBar
@@ -406,6 +423,9 @@ function AnalyticsContent() {
             <h3 className="text-sm font-semibold uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
               6-Month Ridge
             </h3>
+            <InfoTooltip title="6-Month Ridge">
+              <p className="text-xs leading-relaxed">Horizontal bars show your <strong>total spend per month</strong> for the last 6 months, scaled to the highest month. The red dashed marker shows your budget limit. The current month is highlighted in your accent colour.</p>
+            </InfoTooltip>
           </div>
           <div className="mt-3 space-y-2">
             {history.months.map((md) => {
@@ -459,6 +479,7 @@ function AnalyticsContent() {
             icon={DollarSign}
             title="Avg Monthly"
             value={formatCurrencyCompact(history.avgMonthlySpend)}
+            tooltip="Simple average of your total monthly spend across the last 6 months of data."
             sparkData={history.months.map((m) => m.total)}
             onClick={() => router.push("/expenses")}
           />
@@ -466,6 +487,7 @@ function AnalyticsContent() {
             icon={Zap}
             title="Top Category"
             value={topCats.length > 0 ? (catMap[topCats[0].category]?.label ?? topCats[0].category) : "—"}
+            tooltip="The category with the highest cumulative spend across all tracked months. Tap to filter expenses."
             subtitle={topCats.length > 0 ? `${formatCurrencyCompact(topCats[0].total)} all-time` : "no data"}
             onClick={topCats.length > 0 ? () => router.push(`/expenses?category=${topCats[0].category}`) : undefined}
           />
@@ -473,6 +495,7 @@ function AnalyticsContent() {
             icon={Award}
             title="Biggest Spend"
             value={history.biggestExpenses.length > 0 ? formatCurrencyCompact(history.biggestExpenses[0].amount) : "—"}
+            tooltip="Your single largest expense logged in the currently selected month. Tap to view all expenses."
             subtitle={history.biggestExpenses.length > 0 ? (history.biggestExpenses[0].remark || catMap[history.biggestExpenses[0].category]?.label || history.biggestExpenses[0].category) : "no data"}
             onClick={() => router.push("/expenses")}
           />
@@ -491,6 +514,9 @@ function AnalyticsContent() {
               <h3 className="text-sm font-semibold uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
                 Spending Velocity
               </h3>
+              <InfoTooltip title="Spending Velocity">
+                <p className="text-xs leading-relaxed">The month is split into <strong>weekly buckets</strong> (W1–W4/5). Bar height is relative to the busiest week. <strong>Red bars</strong> exceed the ideal weekly budget pace (your budget ÷ number of weeks). The percentage below each bar shows the change from the previous week.</p>
+              </InfoTooltip>
             </div>
             {history.spendingByWeek.length === 0 ? (
               <p className="text-xs" style={{ color: "var(--text-muted)" }}>Not enough data yet</p>
@@ -563,6 +589,9 @@ function AnalyticsContent() {
               <h3 className="text-sm font-semibold uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
                 Biggest This Month
               </h3>
+              <InfoTooltip title="Biggest This Month">
+                <p className="text-xs leading-relaxed">Your <strong>top 5 largest individual expenses</strong> for the selected month, ranked by amount. Tap any expense on the Expenses page to edit or delete it.</p>
+              </InfoTooltip>
             </div>
             {history.biggestExpenses.length === 0 ? (
               <p className="text-xs" style={{ color: "var(--text-muted)" }}>
@@ -644,9 +673,14 @@ function AnalyticsContent() {
 
                   {/* Rolling Average */}
                   <div>
-                    <h4 className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: "var(--text-muted)" }}>
+                  <div className="flex items-center gap-1.5 mb-2">
+                    <h4 className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
                       Rolling Average
                     </h4>
+                    <InfoTooltip title="Rolling Average">
+                      <p className="text-xs leading-relaxed">A <strong>7-day moving average</strong> of your daily spend. Each point is the mean of the surrounding 7 days, smoothing out single-day spikes to reveal your underlying spending trend.</p>
+                    </InfoTooltip>
+                  </div>
                     <RollingAverageChart
                       dailyTotals={Object.fromEntries(
                         dailyTotals.map((d) => [
