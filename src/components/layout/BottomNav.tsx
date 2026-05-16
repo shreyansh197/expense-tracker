@@ -162,6 +162,7 @@ export function BottomNav() {
                 href={item.href}
                 {...(item.label === "Settings" ? { "data-tour": "nav-settings" } : {})}
                 aria-current={isActive ? "page" : undefined}
+                title={item.label}
                 className={cn(
                   "relative flex flex-col items-center justify-center gap-0.5 py-1.5 transition-colors",
                   isActive
@@ -191,11 +192,11 @@ export function BottomNav() {
                   strokeWidth={isActive ? 2.2 : 1.5}
                   className="transition-all"
                 />
-                <span
-                  className="text-[10px] font-medium leading-tight"
-                >
-                  {item.label}
-                </span>
+                {isActive && (
+                  <span className="text-[10px] font-medium leading-tight">
+                    {item.label}
+                  </span>
+                )}
                 {isBiz && !isActive && isBusiness && (
                   <span className="absolute top-1 right-1/4 h-1.5 w-1.5 rounded-full bg-biz" />
                 )}

@@ -224,9 +224,8 @@ function DashboardContent() {
     }
   }, [effectiveBudget, monthlyTotal, currentMonth, currentYear, loading, toast, isCurrentMonth]);
 
-  // "Dig Deeper" expandable state
-  const [digDeeperOpen, setDigDeeperOpen] = useState(false);
-  const [moreInsightsOpen, setMoreInsightsOpen] = useState(false);
+  // "Explore" expandable state (was: "More Insights" + "Dig Deeper" as separate buttons)
+  const [exploreOpen, setExploreOpen] = useState(false);
   const prefetchInsightsRef = useRef(false);
 
   const prefetchMoreInsights = () => {
@@ -237,6 +236,7 @@ function DashboardContent() {
     import("@/components/dashboard/MoneyDnaCard");
     import("@/components/dashboard/SpendingChallenges");
     import("@/components/dashboard/PostcardPrompt");
+    import("@/components/dashboard/CategoryChart");
   };
 
   // Narrative insights â€” generated from calculations context
@@ -538,95 +538,69 @@ function DashboardContent() {
       {/* ═══════════════════════════════════════════════════
           4b. MORE INSIGHTS — collapsible secondary sections
           ═══════════════════════════════════════════════════ */}
-      {!loading && expenses.length > 0 && (
-        <>
-          <button
-            onClick={() => setMoreInsightsOpen((o) => !o)}
-            onPointerEnter={prefetchMoreInsights}
-            onFocus={prefetchMoreInsights}
-            className="flex w-full items-center justify-between rounded-xl px-4 py-3 text-sm font-semibold transition-colors"
-            style={{ background: "var(--surface-secondary)", color: "var(--text-secondary)" }}
-            aria-expanded={moreInsightsOpen}
-          >
-            <span>More insights</span>
-            <ChevronDown
-              size={18}
-              className={cn("transition-transform duration-300", moreInsightsOpen && "rotate-180")}
-            />
-          </button>
-          <AnimatePresence initial={false}>
-            {moreInsightsOpen && (
-              <m.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: "auto", opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-                className="overflow-hidden space-y-4"
-              >
-                <RevealOnScroll>
-                  <SpendingForecastCalendar />
-                </RevealOnScroll>
-
-                <RevealOnScroll>
-                  <SavingsGoalsWidget />
-                </RevealOnScroll>
-
-                {expenses.length >= 5 && (
-                  <RevealOnScroll>
-                    <MoneyDnaCard />
-                  </RevealOnScroll>
-                )}
-
-                <RevealOnScroll>
-                  <SpendingChallenges />
-                </RevealOnScroll>
-
-                <PostcardPrompt month={currentMonth} year={currentYear} hasExpenses={expenses.length > 0} />
-              </m.div>
-            )}
-          </AnimatePresence>
-        </>
-      )}
-
-      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-          5. DIG DEEPER â€” expandable charts
-          â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
+      {/* EXPLORE — unified expandable: breakdown + insights */}
       {!loading && expenses.length > 0 && (
         <RevealOnScroll>
-          <div className="card-terrain overflow-hidden">
+          <>
             <button
-              onClick={() => setDigDeeperOpen((o) => !o)}
-              className="flex w-full items-center justify-between p-4 text-sm font-semibold"
-              style={{ color: "var(--text-secondary)" }}
-              aria-expanded={digDeeperOpen}
+              onClick={() => setExploreOpen((o) => !o)}
+              onPointerEnter={prefetchMoreInsights}
+              onFocus={prefetchMoreInsights}
+              className="flex w-full items-center justify-between rounded-xl px-4 py-3 text-sm font-semibold transition-colors"
+              style={{ background: "var(--surface-secondary)", color: "var(--text-secondary)" }}
+              aria-expanded={exploreOpen}
             >
-              <span>See full breakdown</span>
+              <span>Explore more</span>
               <ChevronDown
                 size={18}
-                className={cn("transition-transform duration-300", digDeeperOpen && "rotate-180")}
+                className={cn("transition-transform duration-300", exploreOpen && "rotate-180")}
               />
             </button>
-
-            <AnimatePresence>
-              {digDeeperOpen && (
+          <AnimatePresence initial={false}>
+              {exploreOpen && (
                 <m.div
                   initial={{ height: 0, opacity: 0 }}
                   animate={{ height: "auto", opacity: 1 }}
                   exit={{ height: 0, opacity: 0 }}
                   transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-                  className="overflow-hidden"
+                  className="overflow-hidden space-y-4 pt-1"
                 >
-                  <div className="border-t p-5" style={{ borderColor: "var(--border-default)" }}>
+                  {/* Category breakdown — most actionable first */}
+                  <div className="card-terrain p-5">
                     <Suspense fallback={<SkeletonChart />}>
                       <CategoryLegend categoryTotals={categoryTotals} onCategoryClick={handleCategoryClick} categoryBudgets={settings.categoryBudgets} />
                     </Suspense>
                   </div>
+
+                  <RevealOnScroll>
+                    <SpendingForecastCalendar />
+                  </RevealOnScroll>
+
+                  <RevealOnScroll>
+                    <SavingsGoalsWidget />
+                  </RevealOnScroll>
+
+                  {expenses.length >= 5 && (
+                    <RevealOnScroll>
+                      <MoneyDnaCard />
+                    </RevealOnScroll>
+                  )}
+
+                  <RevealOnScroll>
+                    <SpendingChallenges />
+                  </RevealOnScroll>
+
+                  <PostcardPrompt month={currentMonth} year={currentYear} hasExpenses={expenses.length > 0} />
                 </m.div>
               )}
             </AnimatePresence>
-          </div>
+          </>
         </RevealOnScroll>
       )}
+
+      {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+          5. DIG DEEPER â€” expandable charts
+          â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
     </div>
   );
 }

@@ -10,7 +10,7 @@ import { CategoryChips } from "@/components/expenses/CategoryChips";
 import { FilterPanel } from "@/components/expenses/FilterPanel";
 import { useExpenses } from "@/hooks/useExpenses";
 import { useUIStore } from "@/stores/uiStore";
-import { Search, PlusCircle, Globe, ArrowUpDown, LayoutList, Tag, ChevronDown } from "lucide-react";
+import { Search, PlusCircle, Globe, ArrowUpDown, ChevronDown } from "lucide-react";
 import { QuickTemplates } from "@/components/expenses/QuickTemplates";
 import { useCurrency } from "@/hooks/useCurrency";
 import { debounce } from "@/lib/debounce";
@@ -152,10 +152,21 @@ function ExpensesContent() {
   return (
       <div className="relative mx-auto min-h-[80vh] max-w-4xl xl:max-w-6xl space-y-4 sm:space-y-5 p-4 sm:p-6 lg:p-8">
         {/* Stream Bed Header */}
-        <div className="card-terrain p-4 sm:p-5 space-y-3">
+        <div className="card-terrain p-4 sm:p-5">
           <div className="flex items-center justify-between gap-2 sm:gap-4">
-            <div className="min-w-0">
+            <div className="min-w-0 flex flex-col gap-0.5">
               <MonthSwitcher />
+              <div className="flex items-baseline gap-1.5 pl-0.5">
+                <span
+                  className="font-numeric text-2xl sm:text-3xl font-bold tabular-nums"
+                  style={{ color: "var(--accent)", letterSpacing: "-0.03em" }}
+                >
+                  {formatCurrency(monthlyTotal)}
+                </span>
+                <span className="font-display italic text-xs" style={{ color: "var(--text-muted)" }}>
+                  this month
+                </span>
+              </div>
             </div>
             <div className="flex items-center gap-2 sm:gap-3 shrink-0">
               <ExpenseExport expenses={expenses} month={currentMonth} year={currentYear} />
@@ -170,144 +181,103 @@ function ExpensesContent() {
               </button>
             </div>
           </div>
-          {/* Hero total */}
-          <div className="flex items-baseline gap-2">
-            <span
-              className="font-numeric text-3xl sm:text-4xl font-bold tabular-nums"
-              style={{ color: "var(--accent)", letterSpacing: "-0.03em" }}
-            >
-              {formatCurrency(monthlyTotal)}
-            </span>
-            <span className="font-display italic text-sm" style={{ color: "var(--text-muted)" }}>
-              this month
-            </span>
-          </div>
         </div>
 
-        {/* Row 1: Search + Globe */}
-        <div className="flex items-center gap-2.5">
-          <div className="relative flex-1">
-            <Search
-              size={15}
-              className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"
-              style={{ color: "var(--text-muted)" }}
-            />
-            <input
-              type="text"
-              placeholder="Search expenses…"
-              value={localSearch}
-              onChange={(e) => handleSearchChange(e.target.value)}
-              className="w-full rounded-2xl py-2.5 pl-9 pr-3 text-sm focus:outline-none focus:ring-2"
-              style={{
-                background: "var(--surface)",
-                border: "1px solid var(--border)",
-                color: "var(--text-primary)",
-              }}
-              aria-label="Search expenses"
-            />
-          </div>
-          {/* Cross-month search toggle */}
-          <button
-            onClick={() => setCrossMonthEnabled((v) => !v)}
-            title={crossMonthEnabled ? "Showing all months" : "Search all months"}
-            aria-pressed={crossMonthEnabled}
-            className="flex shrink-0 items-center justify-center rounded-2xl p-2.5 transition-colors"
-            style={{
-              border: "1px solid var(--border)",
-              background: crossMonthEnabled ? "var(--accent-soft)" : "var(--surface)",
-              color: crossMonthEnabled ? "var(--accent)" : "var(--text-muted)",
-              width: "42px",
-              height: "42px",
-            }}
-          >
-            <Globe size={16} />
-          </button>
-        </div>
-
-        {/* Row 2: Filters (left) + Sort (right, via rightSlot) */}
-        <FilterPanel
-          amountMin={amountMin}
-          amountMax={amountMax}
-          onAmountMinChange={setAmountMin}
-          onAmountMaxChange={setAmountMax}
-          dayMin={dayMin}
-          dayMax={dayMax}
-          onDayMinChange={setDayMin}
-          onDayMaxChange={setDayMax}
-          onClear={handleClearFilters}
-          rightSlot={
-            <div className="relative flex items-center">
-              <ArrowUpDown
-                size={14}
-                className="pointer-events-none absolute left-3"
-                style={{ color: sortBy !== "day-desc" ? "var(--accent)" : "var(--text-secondary)" }}
+        {/* Controls cluster — tighter internal rhythm than the outer space-y-4 */}
+        <div className="space-y-2">
+          {/* Search + all-months globe */}
+          <div className="flex items-center gap-2.5">
+            <div className="relative flex-1">
+              <Search
+                size={15}
+                className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"
+                style={{ color: "var(--text-muted)" }}
               />
-              <select
-                value={sortBy}
-                onChange={(e) => {
-                  const v = e.target.value as SortOption;
-                  setSortBy(v);
-                  localStorage.setItem("expenstream-expenses-sort", v);
+              <input
+                type="text"
+                placeholder="Search expenses…"
+                value={localSearch}
+                onChange={(e) => handleSearchChange(e.target.value)}
+                className="w-full rounded-2xl py-2.5 pl-9 pr-3 text-sm focus:outline-none focus:ring-2"
+                style={{
+                  background: "var(--surface)",
+                  border: "1px solid var(--border)",
+                  color: "var(--text-primary)",
                 }}
-                aria-label="Sort order"
-                className={`appearance-none cursor-pointer rounded-ui-md py-2 pl-8 pr-7 text-xs font-medium font-[inherit] focus:outline-none transition-colors ${
-                  sortBy !== "day-desc" ? "bg-brand-soft text-brand" : "text-[var(--text-secondary)]"
-                }`}
-              >
-                <option value="day-desc">Newest</option>
-                <option value="day-asc">Oldest</option>
-                <option value="amount-desc">Highest</option>
-                <option value="amount-asc">Lowest</option>
-              </select>
-              <ChevronDown
-                size={11}
-                className="pointer-events-none absolute right-2"
-                style={{ color: sortBy !== "day-desc" ? "var(--accent)" : "var(--text-secondary)" }}
+                aria-label="Search expenses"
               />
             </div>
-          }
-        />
-
-        {/* View-mode toggle row — separate from filter bar to avoid mobile crowding */}
-        <div className="flex items-center justify-between gap-2">
-          <span className="text-xs" style={{ color: "var(--text-muted)" }}>
-            {viewMode === "day" ? "Grouped by day" : "Grouped by category"}
-          </span>
-          <div
-            className="flex items-center rounded-xl p-0.5 gap-0.5"
-            style={{ background: "var(--surface-secondary)", border: "1px solid var(--border)" }}
-          >
             <button
-              onClick={() => { setViewMode("day"); localStorage.setItem("expenstream-expenses-view", "day"); }}
-              aria-pressed={viewMode === "day"}
-              title="Group by day"
-              className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors"
+              onClick={() => setCrossMonthEnabled((v) => !v)}
+              title={crossMonthEnabled ? "Showing all months" : "Search all months"}
+              aria-pressed={crossMonthEnabled}
+              className="flex shrink-0 items-center justify-center rounded-2xl p-2.5 transition-colors"
               style={{
-                background: viewMode === "day" ? "var(--accent)" : "transparent",
-                color: viewMode === "day" ? "#fff" : "var(--text-muted)",
+                border: "1px solid var(--border)",
+                background: crossMonthEnabled ? "var(--accent-soft)" : "var(--surface)",
+                color: crossMonthEnabled ? "var(--accent)" : "var(--text-muted)",
+                width: "42px",
+                height: "42px",
               }}
             >
-              <LayoutList size={12} />
-              <span>Day</span>
-            </button>
-            <button
-              onClick={() => { setViewMode("category"); localStorage.setItem("expenstream-expenses-view", "category"); }}
-              aria-pressed={viewMode === "category"}
-              title="Group by category"
-              className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors"
-              style={{
-                background: viewMode === "category" ? "var(--accent)" : "transparent",
-                color: viewMode === "category" ? "#fff" : "var(--text-muted)",
-              }}
-            >
-              <Tag size={12} />
-              <span>Category</span>
+              <Globe size={16} />
             </button>
           </div>
+
+          {/* Filters (left) + Sort (right) */}
+          <FilterPanel
+            amountMin={amountMin}
+            amountMax={amountMax}
+            onAmountMinChange={setAmountMin}
+            onAmountMaxChange={setAmountMax}
+            dayMin={dayMin}
+            dayMax={dayMax}
+            onDayMinChange={setDayMin}
+            onDayMaxChange={setDayMax}
+            onClear={handleClearFilters}
+            rightSlot={
+              <div className="relative flex items-center">
+                <ArrowUpDown
+                  size={13}
+                  className="pointer-events-none absolute left-2.5"
+                  style={{ color: sortBy !== "day-desc" ? "var(--accent)" : "var(--text-secondary)" }}
+                />
+                <select
+                  value={sortBy}
+                  onChange={(e) => {
+                    const v = e.target.value as SortOption;
+                    setSortBy(v);
+                    localStorage.setItem("expenstream-expenses-sort", v);
+                  }}
+                  aria-label="Sort order"
+                  className={`appearance-none cursor-pointer rounded-ui-md py-1.5 pl-7 pr-6 text-xs font-medium font-[inherit] focus:outline-none transition-colors ${
+                    sortBy !== "day-desc" ? "bg-brand-soft text-brand" : "text-[var(--text-secondary)]"
+                  }`}
+                >
+                  <option value="day-desc">Newest</option>
+                  <option value="day-asc">Oldest</option>
+                  <option value="amount-desc">Highest</option>
+                  <option value="amount-asc">Lowest</option>
+                </select>
+                <ChevronDown
+                  size={11}
+                  className="pointer-events-none absolute right-1.5"
+                  style={{ color: sortBy !== "day-desc" ? "var(--accent)" : "var(--text-secondary)" }}
+                />
+              </div>
+            }
+          />
+
         </div>
 
-        {/* Quick expense templates */}
-        <QuickTemplates />
+        {/* Quick expense templates + view-mode toggle (unified row) */}
+        <QuickTemplates
+          viewMode={viewMode}
+          onViewModeChange={(mode) => {
+            setViewMode(mode);
+            localStorage.setItem("expenstream-expenses-view", mode);
+          }}
+        />
 
         <CategoryChips />
 

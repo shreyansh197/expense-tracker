@@ -320,9 +320,9 @@ function AnalyticsContent() {
 
   return (
       <div className="relative mx-auto min-h-[80vh] max-w-4xl xl:max-w-6xl space-y-5 p-4 sm:p-6 lg:p-8">
-        {/* ─── Overlook Header ─── */}
+        {/* ─── Header ─── */}
         <div className="flex items-center justify-between gap-3">
-          <h1 className="font-display italic text-2xl" style={{ color: 'var(--text-primary)' }}>Analytics</h1>
+          <MonthSwitcher />
           <div className="flex items-center gap-2">
             {history.months.length > 0 && (
               <button
@@ -339,7 +339,6 @@ function AnalyticsContent() {
             <SyncIndicator />
           </div>
         </div>
-        <MonthSwitcher />
 
         {/* Empty state */}
         {history.months.length === 0 ? (

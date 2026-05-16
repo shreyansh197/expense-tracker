@@ -121,10 +121,10 @@ export default function SettingsPage() {
   const goalsCount = settings.goals?.length || 0;
 
   const zones = [
-    { id: "zone-account", label: "Account", description: "Profile, security & workspace" },
-    { id: "zone-finances", label: "Budget & Categories", description: "Budget, categories & goals" },
-    { id: "zone-automation", label: "Data & Automation", description: "Rules, export & data" },
-    { id: "zone-preferences", label: "Appearance", description: "Theme, currency & mode" },
+    { id: "zone-account", label: "Account", shortLabel: "Account", icon: Shield, description: "Profile, security & workspace" },
+    { id: "zone-finances", label: "Budget & Categories", shortLabel: "Budget", icon: Wallet, description: "Budget, categories & goals" },
+    { id: "zone-automation", label: "Data & Automation", shortLabel: "Data", icon: Database, description: "Rules, export & data" },
+    { id: "zone-preferences", label: "Appearance", shortLabel: "Look", icon: Palette, description: "Theme, currency & mode" },
   ];
   const [activeZone, setActiveZoneRaw] = useState(() => {
     // Check URL hash to pre-select the right zone
@@ -248,25 +248,31 @@ export default function SettingsPage() {
           )}
         </div>
 
-        {/* Mobile TOC — jump to section */}
-        <div className="flex lg:hidden gap-2 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-none">
-          {zones.map((z) => (
-            <button
-              key={z.id}
-              onClick={() => {
-                setActiveZone(z.id);
-                document.getElementById(z.id)?.scrollIntoView({ behavior: "smooth", block: "start" });
-              }}
-              className="flex-shrink-0 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all whitespace-nowrap"
-              style={
-                activeZone === z.id
-                  ? { background: 'var(--primary-soft)', color: 'var(--primary)' }
-                  : { background: 'var(--surface-secondary)', color: 'var(--text-secondary)' }
-              }
-            >
-              {z.label}
-            </button>
-          ))}
+        {/* Mobile TOC — icon + short label grid, no scroll needed */}
+        <div className="grid grid-cols-4 gap-1 lg:hidden rounded-xl p-1" style={{ background: "var(--surface-secondary)" }}>
+          {zones.map((z) => {
+            const ZoneIcon = z.icon;
+            const isActiveZone = activeZone === z.id;
+            return (
+              <button
+                key={z.id}
+                onClick={() => {
+                  setActiveZone(z.id);
+                  document.getElementById(z.id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+                }}
+                className="flex flex-col items-center gap-1 rounded-lg py-2 transition-all"
+                style={
+                  isActiveZone
+                    ? { background: "var(--primary-soft)", color: "var(--primary)" }
+                    : { color: "var(--text-secondary)" }
+                }
+                title={z.label}
+              >
+                <ZoneIcon size={16} strokeWidth={isActiveZone ? 2.2 : 1.5} />
+                <span className="text-[10px] font-semibold leading-none">{z.shortLabel}</span>
+              </button>
+            );
+          })}
         </div>
 
         {/* Tab navigation — desktop: shows only active zone; mobile: all zones visible */}

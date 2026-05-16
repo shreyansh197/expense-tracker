@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { m, AnimatePresence } from "framer-motion";
-import { Zap, Plus, X, Check, Pin } from "lucide-react";
+import { Zap, Plus, X, Check, Pin, LayoutList, Tag } from "lucide-react";
 import { useSettings } from "@/hooks/useSettings";
 import { useCurrency } from "@/hooks/useCurrency";
 import { useUIStore } from "@/stores/uiStore";
@@ -10,12 +10,22 @@ import { useToast } from "@/components/ui/Toast";
 import { getAllCategories } from "@/lib/categories";
 import type { ExpenseTemplate } from "@/types";
 
+interface QuickTemplatesProps {
+  viewMode: "day" | "category";
+  onViewModeChange: (mode: "day" | "category") => void;
+}
+
 /**
- * QuickTemplates — a horizontal scrollable row of pinned expense templates.
- * One tap adds the expense for today. Long-press or edit button lets users
- * remove a template. A "+" chip opens a mini creation form inline.
+ * QuickTemplates — scrollable pinned-expense chip row with a fixed view-mode
+ * toggle anchored to the right edge.
+ *
+ * Layout:
+ *   [ ⚡chip … ⚡chip  + ]  (scrolls)   |  [⊞][⊟]  (fixed)
+ *
+ * The "+" lives inside the scroll container so it travels with the chips.
+ * After saving a new template the row auto-scrolls to reveal it.
  */
-export function QuickTemplates() {
+export function QuickTemplates({ viewMode, onViewModeChange }: QuickTemplatesProps) {
   const { settings, updateSettings } = useSettings();
   const { symbol, formatCurrency } = useCurrency();
   const { openAddForm } = useUIStore();
@@ -28,6 +38,44 @@ export function QuickTemplates() {
   const [newLabel, setNewLabel] = useState("");
   const [newAmount, setNewAmount] = useState("");
   const [newCategory, setNewCategory] = useState(allCategories[0]?.id ?? "food");
+
+  // Ref for the scroll container so we can scroll-to-end after adding a chip
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Stop AppShell month-swipe from triggering when the user scrolls this row
+  const swipeStartX = useRef<number | null>(null);
+
+  // Sentinel pattern: a real + button lives inside the scroll area and travels with chips.
+  // An IntersectionObserver fires when it scrolls out of view → we show a fixed + next to
+  // the toggle. When templates shrink and it comes back into view, the fixed + disappears.
+  const plusSentinelRef = useRef<HTMLButtonElement>(null);
+  const [plusFixed, setPlusFixed] = useState(false);
+
+  useEffect(() => {
+    const sentinel = plusSentinelRef.current;
+    const scroll = scrollRef.current;
+    if (!sentinel || !scroll) {
+      setPlusFixed(false);
+      return;
+    }
+    const io = new IntersectionObserver(
+      ([entry]) => setPlusFixed(!entry.isIntersecting),
+      { root: scroll, threshold: 0 },
+    );
+    io.observe(sentinel);
+    return () => io.disconnect();
+    // re-run when sentinel mounts/unmounts (template count or form toggled)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [templates.length, showCreate]);
+  const onChipRowTouchStart = useCallback((e: React.TouchEvent) => {
+    swipeStartX.current = e.touches[0].clientX;
+  }, []);
+  const onChipRowTouchEnd = useCallback((e: React.TouchEvent) => {
+    if (swipeStartX.current === null) return;
+    const dx = Math.abs(e.changedTouches[0].clientX - swipeStartX.current);
+    swipeStartX.current = null;
+    if (dx > 10) e.stopPropagation();
+  }, []);
 
   const handleAddExpense = (t: ExpenseTemplate) => {
     openAddForm({ amount: t.amount, category: t.category, remark: t.remark ?? t.label });
@@ -53,62 +101,121 @@ export function QuickTemplates() {
     setNewAmount("");
     setShowCreate(false);
     toast(`"${template.label}" template saved`);
+    // Scroll to reveal the newly added chip
+    setTimeout(() => {
+      scrollRef.current?.scrollTo({ left: scrollRef.current.scrollWidth, behavior: "smooth" });
+    }, 80);
   };
 
-  // Don't render the row if empty and create form is closed
-  if (templates.length === 0 && !showCreate) {
-    return (
-      <div className="flex items-center gap-2 py-1">
-        <button
-          onClick={() => setShowCreate(true)}
-          className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors"
-          style={{ background: "var(--surface)", border: "1px dashed var(--border)", color: "var(--text-muted)" }}
-          aria-label="Add quick template"
-        >
-          <Pin size={11} />
-          Pin quick expense
-        </button>
-      </div>
-    );
-  }
+  /* ── View-mode toggle (shared between both layout branches) ── */
+  const ViewToggle = (
+    <div
+      className="shrink-0 flex items-center gap-0.5 rounded-lg p-0.5"
+      style={{ background: "var(--surface-secondary)", border: "1px solid var(--border)" }}
+    >
+      <button
+        onClick={() => { onViewModeChange("day"); localStorage.setItem("expenstream-expenses-view", "day"); }}
+        aria-pressed={viewMode === "day"}
+        title="Group by day"
+        className="flex items-center justify-center rounded-md p-1.5 transition-colors"
+        style={{
+          background: viewMode === "day" ? "var(--accent)" : "transparent",
+          color: viewMode === "day" ? "#fff" : "var(--text-muted)",
+        }}
+      >
+        <LayoutList size={13} />
+      </button>
+      <button
+        onClick={() => { onViewModeChange("category"); localStorage.setItem("expenstream-expenses-view", "category"); }}
+        aria-pressed={viewMode === "category"}
+        title="Group by category"
+        className="flex items-center justify-center rounded-md p-1.5 transition-colors"
+        style={{
+          background: viewMode === "category" ? "var(--accent)" : "transparent",
+          color: viewMode === "category" ? "#fff" : "var(--text-muted)",
+        }}
+      >
+        <Tag size={13} />
+      </button>
+    </div>
+  );
 
   return (
     <div className="space-y-2">
-      <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
-        {/* Existing templates */}
-        {templates.map((t) => {
-          const cat = allCategories.find((c) => c.id === t.category);
-          return (
-            <m.button
-              key={t.id}
-              onClick={() => handleAddExpense(t)}
-              className="group relative flex shrink-0 items-center gap-2 rounded-full py-1.5 pl-2.5 pr-8 text-xs font-medium transition-colors"
-              style={{
-                background: cat?.bgColor ?? "var(--surface-secondary)",
-                color: cat?.color ?? "var(--text-primary)",
-                border: `1px solid color-mix(in srgb, ${cat?.color ?? "var(--accent)"} 20%, transparent)`,
-              }}
-              whileTap={{ scale: 0.94 }}
-              aria-label={`Quick add ${t.label} for ${formatCurrency(t.amount)}`}
-            >
-              <Zap size={11} className="shrink-0" />
-              <span className="max-w-[80px] truncate">{t.label}</span>
-              <span className="font-numeric font-semibold">{formatCurrency(t.amount)}</span>
-              {/* Remove button — always visible on mobile, hover-only on desktop */}
-              <button
-                onClick={(e) => handleRemove(t.id, e)}
-                className="absolute right-1.5 top-1/2 -translate-y-1/2 flex h-4 w-4 items-center justify-center rounded-full opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
-                style={{ background: "var(--surface)", color: "var(--text-muted)" }}
-                aria-label={`Remove ${t.label} template`}
-              >
-                <X size={9} />
-              </button>
-            </m.button>
-          );
-        })}
+      {/* ── Main chip row ── */}
+      <div className="flex items-center gap-2">
+        {/* Scrollable area — flex-1 so the toggle stays pinned to the right */}
+        <div
+          ref={scrollRef}
+          className="flex-1 min-w-0 overflow-x-auto scrollbar-hide"
+          onTouchStart={onChipRowTouchStart}
+          onTouchEnd={onChipRowTouchEnd}
+        >
+          {/* Inner row uses max-content so chips don't wrap */}
+          <div className="flex items-center gap-1.5" style={{ width: "max-content", minWidth: "100%" }}>
 
-        {/* Add new template chip */}
-        {!showCreate && (
+            {/* Empty-state CTA (disappears once first template is created) */}
+            {templates.length === 0 && !showCreate && (
+              <button
+                onClick={() => setShowCreate(true)}
+                className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors"
+                style={{ background: "var(--surface)", border: "1px dashed var(--border)", color: "var(--text-muted)" }}
+                aria-label="Add quick template"
+              >
+                <Pin size={11} />
+                Pin quick expense
+              </button>
+            )}
+
+            {/* Template chips */}
+            {templates.map((t) => {
+              const cat = allCategories.find((c) => c.id === t.category);
+              return (
+                <m.button
+                  key={t.id}
+                  onClick={() => handleAddExpense(t)}
+                  className="group relative flex shrink-0 items-center gap-2 rounded-full py-1.5 pl-2.5 pr-8 text-xs font-medium transition-colors"
+                  style={{
+                    background: cat?.bgColor ?? "var(--surface-secondary)",
+                    color: cat?.color ?? "var(--text-primary)",
+                    border: `1px solid color-mix(in srgb, ${cat?.color ?? "var(--accent)"} 20%, transparent)`,
+                  }}
+                  whileTap={{ scale: 0.94 }}
+                  aria-label={`Quick add ${t.label} for ${formatCurrency(t.amount)}`}
+                >
+                  <Zap size={11} className="shrink-0" />
+                  <span className="max-w-[80px] truncate">{t.label}</span>
+                  <span className="font-numeric font-semibold">{formatCurrency(t.amount)}</span>
+                  <button
+                    onClick={(e) => handleRemove(t.id, e)}
+                    className="absolute right-1.5 top-1/2 -translate-y-1/2 flex h-4 w-4 items-center justify-center rounded-full opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
+                    style={{ background: "var(--surface)", color: "var(--text-muted)" }}
+                    aria-label={`Remove ${t.label} template`}
+                  >
+                    <X size={9} />
+                  </button>
+                </m.button>
+              );
+            })}
+
+            {/* Sentinel + button — scrolls with chips; when it leaves view the fixed + activates */}
+            {!showCreate && templates.length > 0 && (
+              <button
+                ref={plusSentinelRef}
+                onClick={() => setShowCreate(true)}
+                className="flex shrink-0 items-center justify-center rounded-full p-1.5 transition-colors"
+                style={{ background: "var(--surface)", border: "1px dashed var(--border)", color: "var(--text-muted)" }}
+                aria-label="Add quick template"
+              >
+                <Plus size={13} />
+              </button>
+            )}
+
+          </div>
+        </div>
+
+        {/* Fixed + button — only appears when the sentinel has scrolled out of view */}
+        {!showCreate && templates.length > 0 && plusFixed && (
           <button
             onClick={() => setShowCreate(true)}
             className="flex shrink-0 items-center justify-center rounded-full p-1.5 transition-colors"
@@ -118,9 +225,12 @@ export function QuickTemplates() {
             <Plus size={13} />
           </button>
         )}
+
+        {/* View-mode toggle — anchored to the right, never scrolls */}
+        {ViewToggle}
       </div>
 
-      {/* Inline creation form */}
+      {/* ── Inline create form (expands below the chip row) ── */}
       <AnimatePresence>
         {showCreate && (
           <m.div
@@ -197,3 +307,4 @@ export function QuickTemplates() {
     </div>
   );
 }
+
