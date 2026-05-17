@@ -323,32 +323,36 @@ function AnalyticsContent() {
   return (
       <div className="relative mx-auto min-h-[80vh] max-w-4xl xl:max-w-6xl space-y-5 p-4 sm:p-6 lg:p-8">
         {/* ─── Header ─── */}
-        <div className="flex items-center justify-between gap-3">
-          <MonthSwitcher />
-          <div className="flex shrink-0 items-center gap-2">
-            {history.months.length > 0 && (
-              <button
-                type="button"
-                onClick={handleShareAnalytics}
-                className="hidden sm:flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors"
-                style={{ color: "var(--text-muted)" }}
-                aria-label="Share analytics summary"
-              >
-                <Share2 size={14} />
-                <span className="hidden sm:inline">Share</span>
-              </button>
-            )}
-            <SyncIndicator />
-            <QuickHelpButton
-              pageTips={[
-                "Tap an Insights card to navigate directly to the related expenses",
-                "Expand Deep Dive for Rolling Average, Category Velocity, Time Machine and Category Seasons",
-                "Switch months with the month switcher to compare different time periods",
-                "Share exports a branded image summary you can save or send",
-                "Add at least 3 expenses in a month to unlock full analytics for that month",
-              ]}
-              pageLabel="Analytics"
-            />
+        <div className="card-terrain p-4 sm:p-5">
+          <div className="flex items-center justify-between gap-2 sm:gap-4">
+            <div className="min-w-0">
+              <MonthSwitcher />
+            </div>
+            <div className="flex shrink-0 items-center gap-2">
+              {history.months.length > 0 && (
+                <button
+                  type="button"
+                  onClick={handleShareAnalytics}
+                  className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors"
+                  style={{ color: "var(--text-muted)" }}
+                  aria-label="Share analytics summary"
+                >
+                  <Share2 size={14} />
+                  <span className="hidden sm:inline">Share</span>
+                </button>
+              )}
+              <SyncIndicator />
+              <QuickHelpButton
+                pageTips={[
+                  "Tap an Insights card to navigate directly to the related expenses",
+                  "Expand Deep Dive for Rolling Average, Category Velocity, Time Machine and Category Seasons",
+                  "Switch months with the month switcher to compare different time periods",
+                  "Share exports a branded image summary you can save or send",
+                  "Add at least 3 expenses in a month to unlock full analytics for that month",
+                ]}
+                pageLabel="Analytics"
+              />
+            </div>
           </div>
         </div>
 
