@@ -209,26 +209,48 @@ export function useCalculations(
     return getEomForecast(monthlyTotal, effectiveBudget, elapsedDays, daysInMonth);
   }, [monthlyTotal, effectiveBudget, elapsedDays, daysInMonth, month, year, historicalTotals, historicalExpenses, normalizedExpenses]);
 
+  // Only compute anomalies after ≥7 elapsed days AND ≥10 expenses — sparse data produces unreliable z-scores
   const anomalies: AnomalyResult[] = useMemo(
-    () => detectAnomalies(normalizedExpenses, month, year),
-    [normalizedExpenses, month, year]
+    () => elapsedDays >= 7 && normalizedExpenses.length >= 10
+      ? detectAnomalies(normalizedExpenses, month, year)
+      : [],
+    [normalizedExpenses, month, year, elapsedDays]
   );
 
-  return {
-    monthlyTotal,
-    remaining,
-    budgetUsedPercent,
-    avgDaily,
-    categoryTotals,
-    dailyTotals,
-    stackedDailyTotals,
-    topCategory,
-    daysInMonth,
-    elapsedDays,
-    daysRemaining,
-    paceToStayUnder,
-    forecast,
-    anomalies,
-    effectiveBudget,
-  };
+  return useMemo(
+    () => ({
+      monthlyTotal,
+      remaining,
+      budgetUsedPercent,
+      avgDaily,
+      categoryTotals,
+      dailyTotals,
+      stackedDailyTotals,
+      topCategory,
+      daysInMonth,
+      elapsedDays,
+      daysRemaining,
+      paceToStayUnder,
+      forecast,
+      anomalies,
+      effectiveBudget,
+    }),
+    [
+      monthlyTotal,
+      remaining,
+      budgetUsedPercent,
+      avgDaily,
+      categoryTotals,
+      dailyTotals,
+      stackedDailyTotals,
+      topCategory,
+      daysInMonth,
+      elapsedDays,
+      daysRemaining,
+      paceToStayUnder,
+      forecast,
+      anomalies,
+      effectiveBudget,
+    ],
+  );
 }

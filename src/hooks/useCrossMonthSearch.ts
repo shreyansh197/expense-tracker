@@ -47,10 +47,24 @@ export function useCrossMonthSearch(
     }
     let cancelled = false;
     setLoading(true);
+    // Cap to last 12 months to avoid scanning years of data
+    const now = new Date();
+    const capYear = now.getFullYear();
+    const capMonth = now.getMonth() + 1; // 1-indexed
+    const cutoffYear = capMonth === 12 ? capYear : capYear - 1;
+    const cutoffMonth = capMonth === 12 ? 1 : capMonth + 1;
+
     db.expenses
       .where("workspaceId")
       .equals(wid)
-      .filter((e) => e.deletedAt === null)
+      .filter((e) => {
+        if (e.deletedAt !== null) return false;
+        // Keep if within the last 12 months
+        if (e.year > capYear) return false;
+        if (e.year < cutoffYear) return false;
+        if (e.year === cutoffYear && e.month < cutoffMonth) return false;
+        return true;
+      })
       .toArray()
       .then((rows) => {
         if (!cancelled) {

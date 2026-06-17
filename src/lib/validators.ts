@@ -106,7 +106,15 @@ const expenseMutationData = z.object({
   isRecurring: z.boolean().optional(),
   recurringId: z.string().max(64).nullable().optional(),
   deletedAt: z.string().nullable().optional(),
-});
+}).refine((data) => {
+  // Cross-field date validation: prevent impossible dates like Feb 31, Apr 31, etc.
+  if (data.day !== undefined && data.month !== undefined && data.year !== undefined) {
+    // new Date(year, month, 0) gives last day of the given 1-indexed month
+    const maxDay = new Date(data.year, data.month, 0).getDate();
+    return data.day <= maxDay;
+  }
+  return true;
+}, { message: "Invalid date — day exceeds the number of days in this month", path: ["day"] });
 
 const settingsMutationData = z.object({
   salary: z.number().min(0).optional(),

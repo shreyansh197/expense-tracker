@@ -62,31 +62,31 @@ async function savePinHash(hash: string): Promise<void> {
 function clearPinHash(): void {
   localStorage.removeItem(PIN_STORAGE_KEY);
   localStorage.removeItem(PIN_TIMEOUT_KEY);
-  localStorage.removeItem(PIN_LAST_ACTIVE_KEY);
-  localStorage.removeItem(PIN_ATTEMPTS_KEY);
-  localStorage.removeItem(PIN_LOCKOUT_UNTIL_KEY);
+  sessionStorage.removeItem(PIN_LAST_ACTIVE_KEY);
+  sessionStorage.removeItem(PIN_ATTEMPTS_KEY);
+  sessionStorage.removeItem(PIN_LOCKOUT_UNTIL_KEY);
   broadcastPinChange();
 }
 
 function getAttempts(): number {
-  return parseInt(localStorage.getItem(PIN_ATTEMPTS_KEY) || "0", 10);
+  return parseInt(sessionStorage.getItem(PIN_ATTEMPTS_KEY) || "0", 10);
 }
 
 function setAttempts(n: number): void {
-  localStorage.setItem(PIN_ATTEMPTS_KEY, String(n));
+  sessionStorage.setItem(PIN_ATTEMPTS_KEY, String(n));
 }
 
 function getLockoutUntil(): number {
-  return parseInt(localStorage.getItem(PIN_LOCKOUT_UNTIL_KEY) || "0", 10);
+  return parseInt(sessionStorage.getItem(PIN_LOCKOUT_UNTIL_KEY) || "0", 10);
 }
 
 function setLockoutUntil(ts: number): void {
-  localStorage.setItem(PIN_LOCKOUT_UNTIL_KEY, String(ts));
+  sessionStorage.setItem(PIN_LOCKOUT_UNTIL_KEY, String(ts));
 }
 
 function resetAttempts(): void {
-  localStorage.removeItem(PIN_ATTEMPTS_KEY);
-  localStorage.removeItem(PIN_LOCKOUT_UNTIL_KEY);
+  sessionStorage.removeItem(PIN_ATTEMPTS_KEY);
+  sessionStorage.removeItem(PIN_LOCKOUT_UNTIL_KEY);
 }
 
 function getTimeout(): PinTimeout {
@@ -101,11 +101,11 @@ function setTimeout_(minutes: PinTimeout): void {
 }
 
 function getLastActive(): number {
-  return parseInt(localStorage.getItem(PIN_LAST_ACTIVE_KEY) || "0", 10);
+  return parseInt(sessionStorage.getItem(PIN_LAST_ACTIVE_KEY) || "0", 10);
 }
 
 function setLastActive(): void {
-  localStorage.setItem(PIN_LAST_ACTIVE_KEY, String(Date.now()));
+  sessionStorage.setItem(PIN_LAST_ACTIVE_KEY, String(Date.now()));
 }
 
 // ── Hook ──

@@ -38,6 +38,7 @@ export interface UserSettings {
   savedFilters: SavedFilter[];
   goals?: Goal[];
   rolloverEnabled?: boolean;
+  rolloverCap?: number; // max amount that can roll over (0 or undefined = unlimited)
   rolloverHistory?: Record<string, number>; // key: "YYYY-MM", value: unspent amount
   monthlyBudgets?: Record<string, number>; // key: "YYYY-MM", value: budget override for that month
   businessMode?: boolean;
@@ -83,7 +84,7 @@ export interface CategoryMeta {
   icon: string;
 }
 
-export type RecurringFrequency = "monthly";
+export type RecurringFrequency = "monthly" | "weekly" | "bi-weekly" | "quarterly" | "annual";
 
 export interface RecurringExpense {
   id: string;

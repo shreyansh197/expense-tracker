@@ -2,22 +2,11 @@
 
 import { useMemo, useState, useRef } from "react";
 import { m, AnimatePresence } from "framer-motion";
-import {
-  Coffee, Flame, Edit2, Check, X,
-  Tv, Car, ShoppingCart, UtensilsCrossed, ShoppingBag,
-  MoreHorizontal, CreditCard, Wifi, TrendingUp, Tag, Package,
-} from "lucide-react";
-import type { LucideIcon } from "lucide-react";
+import { Coffee, Edit2, Check, X } from "lucide-react";
 import { SpendingStream } from "@/components/dashboard/SpendingStream";
-import { stoneSettle } from "@/lib/motion/variants";
 import { useUIStore } from "@/stores/uiStore";
 import { AnimatedNumber } from "@/components/ui/AnimatedNumber";
 import type { CategoryTotal, CategoryMeta } from "@/types";
-
-const ICON_MAP: Record<string, LucideIcon> = {
-  Tv, Car, ShoppingCart, UtensilsCrossed, ShoppingBag,
-  MoreHorizontal, CreditCard, Wifi, TrendingUp, Tag, Package,
-};
 
 interface MonthSummaryHeroProps {
   monthlyTotal: number;
@@ -44,6 +33,9 @@ interface MonthSummaryHeroProps {
   daysInMonth: number;
   anomalyDays: Set<number>;
   monthName: string;
+  /** Numeric month (1-12) and year being displayed — passed to SpendingStream for the today marker */
+  month: number;
+  year: number;
   /** When true, renders a compact sticky bar instead of full hero */
   compact?: boolean;
   /** Called when user edits the budget/salary inline */
@@ -58,27 +50,22 @@ export function MonthSummaryHero({
   daysRemaining,
   avgDaily,
   paceToStayUnder,
-  // categoryTotals / categories available for future use
-  topCategory,
-  streak,
-  recurringCount,
-  recurringTotal,
   formatCurrency,
-  onCategoryClick,
   userName,
   todayTotal,
   yesterdayExpense,
-  achievementLabel,
   dailyValues,
   daysInMonth,
   anomalyDays,
   monthName,
+  month,
+  year,
   compact = false,
   onBudgetEdit,
 }: MonthSummaryHeroProps) {
   const greeting = useMemo(() => {
     const h = new Date().getHours();
-    if (h < 5) return "Burning the midnight oil";
+    if (h < 5) return "Working late";
     if (h < 12) return "Good morning";
     if (h < 17) return "Good afternoon";
     if (h < 21) return "Good evening";
@@ -97,7 +84,7 @@ export function MonthSummaryHero({
 
   const handleBudgetSave = () => {
     const val = parseFloat(budgetInput);
-    if (!isNaN(val) && val >= 0) onBudgetEdit?.(val);
+    if (!isNaN(val) && val > 0) onBudgetEdit?.(val);
     setEditingBudget(false);
   };
 
@@ -181,7 +168,7 @@ export function MonthSummaryHero({
             />
           </m.p>
 
-          <p className="mt-1 text-sm" style={{ color: "var(--text-secondary)" }}>
+          <p className="mt-1 text-sm" style={{ color: remaining < 0 ? "var(--danger)" : "var(--text-secondary)", fontWeight: remaining < 0 ? 700 : undefined }}>
             {effectiveBudget > 0
               ? remaining >= 0
                 ? `${formatCurrency(remaining)} remaining`
@@ -262,9 +249,29 @@ export function MonthSummaryHero({
                 transition={{ delay: 0.2, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
               />
               <div className="absolute top-0 bottom-0 w-px" style={{ left: "75%", background: "var(--text-muted)", opacity: 0.4 }} />
+              {budgetUsedPercent > 100 && (
+                <m.div
+                  className="absolute right-0 top-1/2 -translate-y-1/2 h-2.5 w-2.5 rounded-full"
+                  style={{ background: "var(--danger)", marginRight: "-4px" }}
+                  animate={{ scale: [1, 1.6, 1], opacity: [1, 0.5, 1] }}
+                  transition={{ repeat: Infinity, duration: 1.4, ease: "easeInOut" }}
+                />
+              )}
             </div>
           )}
         </div>
+      )}
+
+      {/* Pace insight — one clear, human line instead of a stat grid */}
+      {effectiveBudget > 0 && paceToStayUnder > 0 && (
+        <p
+          className="mt-2 text-xs"
+          style={{ color: avgDaily > paceToStayUnder ? "var(--warning)" : "var(--text-muted)" }}
+        >
+          {avgDaily > paceToStayUnder
+            ? `Spending ${formatCurrency(Math.round(avgDaily))}/day — aim for ${formatCurrency(Math.round(paceToStayUnder))} to stay on track`
+            : `On track — ${formatCurrency(Math.round(paceToStayUnder))}/day keeps you under budget`}
+        </p>
       )}
 
       {/* Quiet day / yesterday repeat */}
@@ -304,114 +311,10 @@ export function MonthSummaryHero({
           anomalyDays={anomalyDays}
           effectiveBudget={effectiveBudget}
           formatCurrency={formatCurrency}
+          month={month}
+          year={year}
         />
       </div>
-
-      {/* Compact 4-stat row */}
-      <m.div
-        className="mt-4 grid grid-cols-4 gap-2 border-t pt-3"
-        style={{ borderColor: "var(--border-subtle)" }}
-        initial="initial"
-        animate="animate"
-        variants={{ initial: {}, animate: { transition: { staggerChildren: 0.04 } } }}
-      >
-        {/* Today's allowance */}
-        <m.div className="text-center" variants={stoneSettle}>
-          <p className="text-[11px] font-medium uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
-            {effectiveBudget > 0 && paceToStayUnder > 0 ? "Spend today" : "Daily avg"}
-          </p>
-          <p
-            className="mt-0.5 text-sm font-bold font-numeric"
-            style={{
-              color: effectiveBudget > 0 && paceToStayUnder > 0
-                ? (avgDaily > paceToStayUnder ? "var(--warning)" : "var(--accent)")
-                : "var(--text-primary)",
-            }}
-          >
-            {effectiveBudget > 0 && paceToStayUnder > 0
-              ? formatCurrency(Math.round(paceToStayUnder))
-              : formatCurrency(Math.round(avgDaily))}
-          </p>
-          <p className="text-[11px]" style={{ color: "var(--text-muted)" }}>
-            {effectiveBudget > 0 && paceToStayUnder > 0
-              ? `avg ${formatCurrency(Math.round(avgDaily))}`
-              : "this month"}
-          </p>
-        </m.div>
-
-        {/* Top Category */}
-        <m.div
-          className="text-center cursor-pointer"
-          variants={stoneSettle}
-          onClick={() => topCategory && onCategoryClick(topCategory.slug)}
-          role={topCategory ? "button" : undefined}
-          tabIndex={topCategory ? 0 : undefined}
-        >
-          <p className="text-[11px] font-medium uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
-            Top
-          </p>
-          {topCategory ? (
-            <p className="mt-0.5 text-sm font-bold truncate flex items-center justify-center gap-1" style={{ color: "var(--text-primary)" }}>
-              {(() => {
-                const Icon = ICON_MAP[topCategory.emoji];
-                return Icon
-                  ? <Icon size={13} className="shrink-0" />
-                  : <span>{topCategory.emoji}</span>;
-              })()}
-              {topCategory.label}
-            </p>
-          ) : (
-            <p className="mt-0.5 text-sm" style={{ color: "var(--text-muted)" }}>—</p>
-          )}
-        </m.div>
-
-        {/* Recurring */}
-        <m.div className="text-center" variants={stoneSettle}>
-          <p className="text-[11px] font-medium uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
-            Recurring
-          </p>
-          <p className="mt-0.5 text-sm font-bold font-numeric" style={{ color: "var(--text-primary)" }}>
-            {recurringCount}
-          </p>
-          <p className="text-[11px]" style={{ color: "var(--text-muted)" }}>
-            {formatCurrency(recurringTotal)}/mo
-          </p>
-        </m.div>
-
-        {/* Streak / Achievement */}
-        <m.div
-          className="text-center rounded-lg py-0.5"
-          variants={stoneSettle}
-          style={streak >= 7 ? { background: "color-mix(in srgb, var(--danger) 8%, transparent)" } : streak >= 4 ? { background: "rgba(249,115,22,0.07)" } : undefined}
-        >
-          <p className="text-[11px] font-medium uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
-            {streak >= 2 ? "Streak" : "Count"}
-          </p>
-          <p className="mt-0.5 text-sm font-bold font-numeric" style={{ color: "var(--text-primary)" }}>
-            {streak >= 2 ? (
-              <span
-                className="inline-flex items-center gap-0.5"
-                style={{
-                  color: streak >= 14 ? "var(--danger)"
-                    : streak >= 7 ? "#ef4444"
-                    : streak >= 4 ? "#f97316"
-                    : "var(--warning)",
-                }}
-              >
-                <Flame size={12} />
-                {streak}d
-              </span>
-            ) : (
-              <span>—</span>
-            )}
-          </p>
-          {achievementLabel && (
-            <p className="text-[11px] truncate" style={{ color: "var(--accent)" }}>
-              🏆 {achievementLabel}
-            </p>
-          )}
-        </m.div>
-      </m.div>
     </m.div>
   );
 }

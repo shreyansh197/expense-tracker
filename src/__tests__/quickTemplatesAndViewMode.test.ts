@@ -26,23 +26,22 @@ function read(relativePath: string): string {
 // Feature 2: MonthSummaryHero — Today's allowance (paceToStayUnder)
 // =========================================================================
 
-describe("MonthSummaryHero: Today's allowance stat (Feature 2)", () => {
+describe("MonthSummaryHero: pace insight (Feature 2)", () => {
   const src = read("components/dashboard/MonthSummaryHero.tsx");
 
-  test("TC-F2-01: 'Spend today' label present in stat grid", () => {
-    expect(src).toContain("Spend today");
+  test("TC-F2-01: renders a single pace insight line (stat grid removed for minimal design)", () => {
+    // De-densified: the 4-stat grid was replaced by one human pace line.
+    expect(src).toContain("Pace insight");
+    expect(src).not.toContain("grid-cols-4");
   });
 
-  test("TC-F2-02: paceToStayUnder is rendered as the primary large number", () => {
-    // The stat now shows paceToStayUnder when effectiveBudget > 0
+  test("TC-F2-02: paceToStayUnder is rendered and currency-formatted", () => {
     expect(src).toContain("paceToStayUnder");
-    // Must format it
     expect(src).toMatch(/formatCurrency\(Math\.round\(paceToStayUnder\)\)/);
   });
 
-  test("TC-F2-03: falls back to avgDaily label when no budget", () => {
-    // 'Daily avg' shown when no effectiveBudget
-    expect(src).toContain("Daily avg");
+  test("TC-F2-03: only shows pace guidance when a budget pace exists", () => {
+    expect(src).toContain("effectiveBudget > 0 && paceToStayUnder > 0");
   });
 
   test("TC-F2-04: shows warning color when avgDaily > paceToStayUnder", () => {
@@ -50,25 +49,22 @@ describe("MonthSummaryHero: Today's allowance stat (Feature 2)", () => {
     expect(src).toContain("var(--warning)");
   });
 
-  test("TC-F2-05: shows accent color when within budget pace", () => {
-    expect(src).toContain("var(--accent)");
+  test("TC-F2-05: communicates an on-track state", () => {
+    expect(src).toContain("On track");
+    expect(src).toContain("to stay on track");
   });
 
-  test("TC-F2-06: secondary line shows actual avg daily spend", () => {
-    // The sub-label shows "avg {avgDaily}" as context
-    expect(src).toMatch(/avg.*formatCurrency\(Math\.round\(avgDaily\)\)/);
+  test("TC-F2-06: surfaces actual avg daily spend in the message", () => {
+    expect(src).toMatch(/formatCurrency\(Math\.round\(avgDaily\)\)/);
   });
 
-  test("TC-F2-07: legacy 'Pace' label no longer used for this stat", () => {
-    // The old label was literally just 'Pace' — replaced by contextual label
-    // Guard: 'Pace' might appear elsewhere; specifically the stat header should not say Pace
-    // We check the new label IS there (already done above) not the absence of 'Pace' globally
-    expect(src).toContain("Spend today");
+  test("TC-F2-07: legacy stat grid labels are no longer present", () => {
+    expect(src).not.toContain("Spend today");
+    expect(src).not.toContain("Daily avg");
   });
 
   test("TC-F2-08: paceToStayUnder prop is declared in the component props interface", () => {
     expect(src).toContain("paceToStayUnder");
-    // It must appear in the props destructuring too
     expect(src).toMatch(/paceToStayUnder[,\s]/);
   });
 });

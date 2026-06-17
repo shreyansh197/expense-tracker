@@ -36,10 +36,10 @@ export function MoneyDnaCard() {
   if (!dna) return null;
 
   const handleShare = async () => {
-    const text = `My Money DNA: ${dna.primary.emoji} ${dna.primary.name}\n${dna.primary.description}\n\nTraits: ${dna.traits.join(", ")}\n\n— ExpenStream`;
+    const text = `My Spending Profile: ${dna.primary.emoji} ${dna.primary.name}\n${dna.primary.description}\n\nTraits: ${dna.traits.join(", ")}\n\n— ExpenStream`;
     if (navigator.share) {
       try {
-        await navigator.share({ title: "My Money DNA", text });
+        await navigator.share({ title: "My Spending Profile", text });
       } catch {
         /* user cancelled */
       }
@@ -66,7 +66,7 @@ export function MoneyDnaCard() {
           <div className="flex items-center gap-2">
             <Dna size={13} style={{ color: "var(--accent)" }} />
             <p className="text-xs font-medium uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
-              Money DNA
+              Spending Profile
             </p>
           </div>
           <p className="mt-0.5 text-sm font-semibold" style={{ color: "var(--text-primary)" }}>

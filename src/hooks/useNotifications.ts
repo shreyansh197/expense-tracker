@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { useSettings } from "@/hooks/useSettings";
+import { useToast } from "@/components/ui/Toast";
 import { useCalculationsContext } from "@/contexts/CalculationsContext";
 import { subscribeToPush, unsubscribeFromPush } from "@/lib/pushSubscription";
 import { evaluateSmartNudges, markNudgeSent } from "@/lib/smartNudges";
@@ -21,10 +22,12 @@ const LAST_BUDGET_ALERT_KEY = "expenstream-last-budget-alert";
  *    calculation data from the React tree (fires in-tab only).
  */
 export function useNotifications(month: number, year: number, expenses?: Expense[]) {
-  const { settings } = useSettings();
+  const { settings, updateSettings } = useSettings();
   const { budgetUsedPercent, monthlyTotal, effectiveBudget, remaining } = useCalculationsContext();
   const subscribedRef = useRef(false);
   const nudgeCheckedRef = useRef("");
+  const notifPromptShownRef = useRef(false);
+  const { toast } = useToast();
 
   const prefs = settings.notificationPrefs as Partial<NotificationPrefs> | undefined;
 
@@ -35,7 +38,14 @@ export function useNotifications(month: number, year: number, expenses?: Expense
     if (enabled && !subscribedRef.current) {
       subscribeToPush().then((ok) => {
         subscribedRef.current = ok;
-        if (ok) console.log("[notifications] Push subscription active");
+        if (ok) {
+          console.log("[notifications] Push subscription active");
+          // Auto-detect timezone on first subscription if not already saved
+          const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+          if (tz && !(prefs as Record<string, unknown> | undefined)?.timezone) {
+            updateSettings({ notificationPrefs: { ...(prefs ?? {}), timezone: tz } as NotificationPrefs }).catch(() => {});
+          }
+        }
       });
     } else if (!enabled && subscribedRef.current) {
       unsubscribeFromPush().then(() => {
@@ -43,7 +53,7 @@ export function useNotifications(month: number, year: number, expenses?: Expense
         console.log("[notifications] Push subscription removed");
       });
     }
-  }, [prefs?.enabled]);
+  }, [prefs?.enabled, prefs, updateSettings]);
 
   // Budget milestone alerts (in-tab, needs live data)
   useEffect(() => {
@@ -76,6 +86,28 @@ export function useNotifications(month: number, year: number, expenses?: Expense
       }
     }
   }, [prefs?.enabled, prefs?.budgetAlerts, budgetUsedPercent, effectiveBudget, monthlyTotal, month, year]);
+
+  // Contextual notification permission prompt at 70% budget
+  useEffect(() => {
+    if (typeof Notification === "undefined") return;
+    if (Notification.permission !== "default") return;
+    if (budgetUsedPercent < 70) return;
+    if (notifPromptShownRef.current) return;
+    if (localStorage.getItem("expenstream-notif-prompt-shown")) return;
+
+    notifPromptShownRef.current = true;
+    localStorage.setItem("expenstream-notif-prompt-shown", "1");
+    toast(
+      "You've used 70% of your budget — enable notifications to get alerted at 100%",
+      "info",
+      {
+        label: "Enable",
+        onClick: () => {
+          Notification.requestPermission().catch(() => {});
+        },
+      }
+    );
+  }, [budgetUsedPercent, toast]);
 
   // Smart nudges (in-tab, max 3/week)
   useEffect(() => {

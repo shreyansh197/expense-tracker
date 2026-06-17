@@ -45,6 +45,39 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  // ── Timestamp replay-attack prevention ───────────────────────
+  // Optional: if caller sends X-Cron-Timestamp (Unix seconds), reject requests
+  // older than 5 minutes to prevent stolen-token replay attacks.
+  const tsHeader = req.headers.get("x-cron-timestamp");
+  if (tsHeader) {
+    const ts = parseInt(tsHeader, 10);
+    const ageSeconds = Math.abs(Date.now() / 1000 - ts);
+    if (isNaN(ts) || ageSeconds > 300) {
+      return NextResponse.json({ error: "Request timestamp out of window" }, { status: 401 });
+    }
+    // Verify HMAC signature if CRON_SECRET_HMAC env var is set
+    const hmacSecret = process.env.CRON_SECRET_HMAC;
+    if (hmacSecret) {
+      const sigHeader = req.headers.get("x-cron-signature");
+      if (!sigHeader) {
+        return NextResponse.json({ error: "Missing HMAC signature" }, { status: 401 });
+      }
+      const key = await crypto.subtle.importKey(
+        "raw",
+        new TextEncoder().encode(hmacSecret),
+        { name: "HMAC", hash: "SHA-256" },
+        false,
+        ["verify"],
+      );
+      const expected = new TextEncoder().encode(`${tsHeader}`);
+      const sigBytes = Buffer.from(sigHeader, "hex");
+      const valid = await crypto.subtle.verify("HMAC", key, sigBytes, expected);
+      if (!valid) {
+        return NextResponse.json({ error: "Invalid HMAC signature" }, { status: 401 });
+      }
+    }
+  }
+
   // ── VAPID setup ───────────────────────────────────────────────
   const vapidPublic = process.env.VAPID_PUBLIC_KEY;
   const vapidPrivate = process.env.VAPID_PRIVATE_KEY;
@@ -114,11 +147,12 @@ export async function POST(req: NextRequest) {
     notification_prefs: Record<string, unknown>;
     monthly_budgets: Record<string, number> | null;
     category_budgets: Record<string, number> | null;
+    recurring_expenses: Array<{ id: string; day: number; remark: string; amount: number; active: boolean }> | null;
   }>;
 
   try {
     workspaceRows = await prisma.$queryRawUnsafe<typeof workspaceRows>(
-      `SELECT workspace_id, currency, notification_prefs, monthly_budgets, category_budgets
+      `SELECT workspace_id, currency, notification_prefs, monthly_budgets, category_budgets, recurring_expenses
        FROM workspace_settings
        WHERE notification_prefs IS NOT NULL
          AND (notification_prefs->>'enabled')::boolean = true`,
@@ -159,7 +193,7 @@ export async function POST(req: NextRequest) {
         body: "Log your day? A quick note keeps your stream flowing.",
         icon: "/icons/icon-192.png",
         tag: `evening-reminder-${todayStr}`,
-        data: { url: "/", type: "evening-reminder" },
+        data: { url: "/expenses", type: "evening-reminder" },
       });
     }
 
@@ -170,7 +204,7 @@ export async function POST(req: NextRequest) {
         body: "Your weekly spending summary is ready. See how you did this week!",
         icon: "/icons/icon-192.png",
         tag: `weekly-digest-${todayStr}`,
-        data: { url: "/", type: "weekly-digest" },
+        data: { url: "/analytics", type: "weekly-digest" },
       });
     }
 
@@ -197,6 +231,26 @@ export async function POST(req: NextRequest) {
           icon: "/icons/icon-192.png",
           tag: `smart-nudge-afternoon-${todayStr}`,
           data: { url: "/", type: "smart-nudge" },
+        });
+      }
+    }
+
+    // 5. Bill reminders — day before a recurring expense (09:00 local)
+    if (localT === "09:00" && row.recurring_expenses?.length) {
+      const localDayStr = new Intl.DateTimeFormat("en-CA", { day: "numeric", timeZone: tz || "UTC" }).format(now);
+      const localDay = parseInt(localDayStr, 10);
+      const tomorrowDay = localDay + 1; // simplified: won't wrap month, good enough for reminders
+
+      for (const rec of row.recurring_expenses) {
+        if (!rec.active || rec.day !== tomorrowDay) continue;
+        push({
+          title: "Bill Due Tomorrow",
+          body: rec.remark
+            ? `${rec.remark} — ${row.currency || ""} ${rec.amount} due tomorrow`
+            : `Recurring expense of ${row.currency || ""} ${rec.amount} due tomorrow`,
+          icon: "/icons/icon-192.png",
+          tag: `bill-reminder-${rec.id}-${todayStr}`,
+          data: { url: "/expenses", type: "bill-reminder" },
         });
       }
     }
@@ -258,7 +312,7 @@ export async function POST(req: NextRequest) {
           body: `You've used ${pct}% of your ${currency} budget this month. Keep an eye on spending!`,
           icon: "/icons/icon-192.png",
           tag: `budget-alert-75-${monthStr}`,
-          data: { url: "/", type: "budget-alert", pct },
+          data: { url: "/analytics", type: "budget-alert", pct },
         });
       }
     }

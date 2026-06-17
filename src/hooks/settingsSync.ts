@@ -39,6 +39,7 @@ export async function pushToApi(s: UserSettings) {
     savedFilters: s.savedFilters || [],
     goals: s.goals || [],
     rolloverEnabled: s.rolloverEnabled ?? false,
+    rolloverCap: s.rolloverCap ?? 0,
     rolloverHistory: s.rolloverHistory || {},
     monthlyBudgets: s.monthlyBudgets || {},
     businessMode: s.businessMode ?? false,
@@ -119,6 +120,8 @@ export async function loadSettingsFromIDB(): Promise<UserSettings | null> {
  * both have default/empty settings.
  */
 let _directFetchDone = false;
+/** Reset the one-time failsafe flag so a new user session can trigger a fresh fetch. */
+export function resetDirectFetchDone() { _directFetchDone = false; }
 export async function _fetchSettingsFromApi(): Promise<UserSettings | null> {
   if (_directFetchDone) return null;
 
@@ -177,6 +180,7 @@ export async function _fetchSettingsFromApi(): Promise<UserSettings | null> {
       savedFilters: settings.savedFilters ?? [],
       goals: settings.goals ?? [],
       rolloverEnabled: settings.rolloverEnabled ?? false,
+      rolloverCap: settings.rolloverCap ?? 0,
       rolloverHistory: settings.rolloverHistory ?? {},
       monthlyBudgets: settings.monthlyBudgets ?? {},
       businessMode: settings.businessMode ?? false,
@@ -227,7 +231,9 @@ export function _syncFromIDB() {
       const best = _settings.salary >= local.salary ? _settings : local;
       if (best.updatedAt > 0) pushToApi(best);
       if (_settings.salary < bestKnownSalary) {
-        _setShared({ ...local, salary: bestKnownSalary });
+        const merged = { ...local, salary: bestKnownSalary };
+        saveLocal(merged);
+        _setShared(merged);
       }
       return;
     }
@@ -255,15 +261,13 @@ export function _syncFromIDB() {
       // Timestamps equal — use content hash to detect actual differences
       const { settingsContentHash } = await import("./settingsStore");
       if (settingsContentHash(remote) !== settingsContentHash(local)) {
-        // Content differs at the same timestamp — prefer remote (server is truth)
-        // Preserve sunsetTheme from current state if remote doesn't carry it.
-        const merged = {
-          ...DEFAULT_SETTINGS,
-          ...remote,
-          sunsetTheme: remote.sunsetTheme || _settings.sunsetTheme || false,
-        };
-        localStorage.setItem(storageKeyForUser(userIdAtCallTime), JSON.stringify(merged));
-        _setShared(merged);
+        // Content differs at the same timestamp — prefer LOCAL over remote, same
+        // rationale as onSyncPull: guard against an old cached app version on
+        // another device that pushed settings without newer fields (e.g.
+        // autoRules, monthlyBudgets), silently wiping them on the server.
+        // Push local back to repair any server-side data loss.
+        if (_settings.updatedAt < localTs) _setShared(local);
+        pushToApi(local);
       }
       // Hashes match → already in sync, no action needed
     }

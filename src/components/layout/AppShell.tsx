@@ -178,11 +178,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   // Show tutorial for first-time authenticated users
   useEffect(() => {
-    if (hydrated && isAuthenticated && isFirstVisit) {
+    if (hydrated && isAuthenticated) {
       const seen = localStorage.getItem("expenstream-tutorial-seen");
       if (!seen) setShowTutorial(true);
     }
-  }, [hydrated, isAuthenticated, isFirstVisit]);
+  }, [hydrated, isAuthenticated]);
 
   // Don't render any app content until hydrated
   if (!hydrated) {

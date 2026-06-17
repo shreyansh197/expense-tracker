@@ -202,20 +202,30 @@ self.addEventListener("push", (event) => {
   );
 });
 
-// Handle notification clicks — open/focus the app
+// Handle notification clicks — open/focus the app and navigate to deep-link
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
-  const url = event.notification.data?.url || "/";
+  const targetUrl = event.notification.data?.url || "/";
+  const absoluteUrl = targetUrl.startsWith("http")
+    ? targetUrl
+    : self.location.origin + targetUrl;
   event.waitUntil(
     self.clients
       .matchAll({ type: "window", includeUncontrolled: true })
       .then((clients) => {
         for (const client of clients) {
-          if (client.url.includes(self.location.origin) && "focus" in client) {
-            return client.focus();
+          if (
+            client.url.startsWith(self.location.origin) &&
+            "focus" in client
+          ) {
+            client.focus();
+            if ("navigate" in client) {
+              return client.navigate(absoluteUrl);
+            }
+            return;
           }
         }
-        return self.clients.openWindow(url);
+        return self.clients.openWindow(absoluteUrl);
       }),
   );
 });

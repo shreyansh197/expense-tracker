@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState, useEffect, Suspense, useMemo, useSyncExternalStore, useRef } from "react";
+import { useState, useEffect, Suspense, useMemo, useSyncExternalStore, useRef, useCallback } from "react";
 import dynamic from "next/dynamic";
 import { m, AnimatePresence } from "framer-motion";
 import { AppShell } from "@/components/layout/AppShell";
@@ -44,6 +44,7 @@ const SpendingChallenges = dynamic(
 );
 const RecurringSuggestions = dynamic(() => import("@/components/dashboard/RecurringSuggestions").then(m => ({ default: m.RecurringSuggestions })));
 const UpcomingStream = dynamic(() => import("@/components/dashboard/UpcomingStream").then(m => ({ default: m.UpcomingStream })));
+import { BudgetVsActuals } from "@/components/dashboard/BudgetVsActuals";
 import type { LucideIcon } from "lucide-react";
 
 import { useExpenses } from "@/hooks/useExpenses";
@@ -66,10 +67,10 @@ import { useHistoricalData } from "@/hooks/useHistoricalData";
 import { useNotifications } from "@/hooks/useNotifications";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import { useMonthUrlSync } from "@/hooks/useMonthUrlSync";
-import { OnboardingFlow } from "@/components/onboarding/OnboardingFlow";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { getAllCategories } from "@/lib/categories";
 import { QuickHelpButton } from "@/components/ui/QuickHelpButton";
+import { NewUserChecklist } from "@/components/onboarding/NewUserChecklist";
 
 /* â”€â”€ Lightweight fallback for per-section ErrorBoundary â”€â”€â”€â”€â”€â”€ */
 function SectionFallback() {
@@ -107,7 +108,7 @@ function DashboardContent() {
   const { formatCurrency } = useCurrency();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { currentMonth, currentYear, setMonth } = useUIStore();
+  const { currentMonth, currentYear, setMonth, nextMonth, prevMonth } = useUIStore();
   const { expenses, loading } = useExpenses(currentMonth, currentYear);
   const { settings, updateSettings } = useSettings();
   const { user } = useAuth();
@@ -124,12 +125,30 @@ function DashboardContent() {
   // Sticky compact hero: appears when the full hero scrolls out of view
   const heroSentinelRef = useRef<HTMLDivElement>(null);
   const [heroScrolledOut, setHeroScrolledOut] = useState(false);
+
+  // Swipe gesture for month navigation
+  const swipeTouchStartX = useRef(0);
+  const handleSwipeTouchStart = useCallback((e: React.TouchEvent) => {
+    swipeTouchStartX.current = e.touches[0].clientX;
+  }, []);
+  const handleSwipeTouchEnd = useCallback((e: React.TouchEvent) => {
+    const delta = e.changedTouches[0].clientX - swipeTouchStartX.current;
+    if (Math.abs(delta) < 60) return;
+    if (delta > 0) {
+      if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate(20);
+      prevMonth();
+    } else {
+      if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate(20);
+      nextMonth();
+    }
+  }, [prevMonth, nextMonth]);
   useEffect(() => {
     const el = heroSentinelRef.current;
     if (!el) return;
     const observer = new IntersectionObserver(
       ([entry]) => setHeroScrolledOut(!entry.isIntersecting),
-      { threshold: 0 }
+      // rootMargin + explicit root avoids iOS Safari firing issues with zero-height sentinels
+      { threshold: 0, rootMargin: "0px" }
     );
     observer.observe(el);
     return () => observer.disconnect();
@@ -139,6 +158,15 @@ function DashboardContent() {
     if (!searchParams.get("m") && !searchParams.get("y")) {
       const now = new Date();
       setMonth(now.getMonth() + 1, now.getFullYear());
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Handle ?action=add deep-link (e.g. from Analytics empty state CTA)
+  useEffect(() => {
+    if (searchParams.get("action") === "add") {
+      useUIStore.getState().openAddForm();
+      router.replace("/");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -168,9 +196,9 @@ function DashboardContent() {
   );
 
   // Previous month for comparisons
-  const prevMonth = currentMonth === 1 ? 12 : currentMonth - 1;
-  const prevYear = currentMonth === 1 ? currentYear - 1 : currentYear;
-  const { expenses: prevMonthExpenses } = useExpenses(prevMonth, prevYear);
+  const prevMonthNum = currentMonth === 1 ? 12 : currentMonth - 1;
+  const prevYearNum = currentMonth === 1 ? currentYear - 1 : currentYear;
+  const { expenses: prevMonthExpenses } = useExpenses(prevMonthNum, prevYearNum);
 
   const allCategories = useMemo(
     () => getAllCategories(settings.customCategories, settings.hiddenDefaults),
@@ -289,7 +317,8 @@ function DashboardContent() {
           type: "positive",
           icon: TrendingUp,
         });
-      } else if (forecast.projectedRemaining < 0) {
+      } else if (forecast.projectedRemaining < 0 && !insights.some((i) => i.type === "warning")) {
+        // Skip generic budget-overrun tip if a category-specific warning already fired
         insights.push({
           text: `At current pace, spending may run ${formatCurrency(Math.abs(Math.round(forecast.projectedRemaining)))} past budget — consider slowing down.`,
           type: "tip",
@@ -355,6 +384,19 @@ function DashboardContent() {
     return { slug: top.category, label: meta?.label ?? top.category, emoji: meta?.icon ?? "📦", total: top.total };
   }, [categoryTotals, allCategories]);
 
+  const budgetVsActualsData = useMemo(() => {
+    return categoryTotals.map((ct) => {
+      const cat = allCategories.find((c) => c.id === ct.category);
+      return {
+        id: ct.category,
+        label: cat?.label ?? ct.category,
+        color: cat?.color ?? "var(--accent)",
+        actual: ct.total,
+        budget: (settings.categoryBudgets as Record<string, number> | undefined)?.[ct.category] ?? 0,
+      };
+    });
+  }, [categoryTotals, allCategories, settings.categoryBudgets]);
+
   const handleCategoryClick = (categorySlug: string) => {
     router.push(`/category/${encodeURIComponent(categorySlug)}?month=${currentMonth}&year=${currentYear}`);
   };
@@ -383,7 +425,11 @@ function DashboardContent() {
   }, [expenses, allCategories]);
 
   return (
-    <div className="relative mx-auto min-h-[80vh] max-w-4xl xl:max-w-5xl space-y-5 p-4 sm:p-6 lg:p-8">
+    <div
+      className="relative mx-auto min-h-[80vh] max-w-4xl xl:max-w-5xl space-y-5 p-4 sm:p-6 lg:p-8"
+      onTouchStart={handleSwipeTouchStart}
+      onTouchEnd={handleSwipeTouchEnd}
+    >
 
       {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
           1. CANOPY HEADER â€” month name + sync
@@ -421,8 +467,8 @@ function DashboardContent() {
       {/* Install banner */}
       <InstallBanner />
 
-      {/* Sentinel: when this leaves viewport, compact sticky hero appears */}
-      <div ref={heroSentinelRef} aria-hidden="true" />
+      {/* Sentinel: when this leaves viewport, compact sticky hero appears. h-px required for iOS Safari IntersectionObserver */}
+      <div ref={heroSentinelRef} aria-hidden="true" className="h-px" />
 
       {/* Sticky compact hero bar */}
       {heroScrolledOut && !heroLoading && expenses.length > 0 && (
@@ -451,6 +497,8 @@ function DashboardContent() {
           daysInMonth={daysInMonth}
           anomalyDays={anomalyDays}
           monthName={getMonthName(currentMonth)}
+          month={currentMonth}
+          year={currentYear}
         />
       )}
 
@@ -463,34 +511,11 @@ function DashboardContent() {
               <SkeletonKpiCards />
             </div>
           ) : expenses.length === 0 ? (
-            <div className="space-y-3">
-              <OnboardingFlow
-                onSetBudget={(amount) => updateSettings({ salary: amount })}
-              />
-              <m.div
-                className="card-terrain flex flex-col items-center p-8 text-center"
-                initial={{ opacity: 0, scale: 0.97 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-              >
-              <ClearingScene className="mx-auto mb-4 w-48 sm:w-56" />
-              <h2 className="font-display italic text-lg" style={{ color: "var(--text-primary)" }}>
-                Start tracking
-              </h2>
-              <p className="mt-1 text-sm" style={{ color: "var(--text-secondary)" }}>
-                Add your first expense to see your spending insights.
-              </p>
-              <m.button
-                onClick={() => useUIStore.getState().openAddForm()}
-                className="mt-5 inline-flex items-center gap-2 rounded-ui-md px-6 py-3 text-sm font-semibold text-white"
-                style={{ background: "var(--accent-gradient)" }}
-                whileTap={{ scale: 0.96 }}
-              >
-                <PlusCircle size={16} />
-                Add First Expense
-              </m.button>
-            </m.div>
-            </div>
+            <NewUserChecklist
+              userName={user?.name}
+              hasBudget={!!settings.salary && settings.salary > 0}
+              onAddExpense={() => useUIStore.getState().openAddForm()}
+            />
           ) : (
             <MonthSummaryHero
               monthlyTotal={monthlyTotal}
@@ -516,7 +541,14 @@ function DashboardContent() {
               daysInMonth={daysInMonth}
               anomalyDays={anomalyDays}
               monthName={getMonthName(currentMonth)}
-              onBudgetEdit={(val) => updateSettings({ salary: val })}
+              month={currentMonth}
+              year={currentYear}
+              onBudgetEdit={(val) => {
+                const monthKey = `${currentYear}-${String(currentMonth).padStart(2, "0")}`;
+                updateSettings({
+                  monthlyBudgets: { ...(settings.monthlyBudgets ?? {}), [monthKey]: val },
+                });
+              }}
             />
           )}
       </ErrorBoundary>
@@ -549,6 +581,17 @@ function DashboardContent() {
       {!loading && expenses.length > 0 && (
         <RevealOnScroll>
           <>
+            {/* Teaser: always show category breakdown, clipped when collapsed */}
+            <div className="relative overflow-hidden rounded-xl" style={{ maxHeight: exploreOpen ? "none" : "80px" }}>
+              <div className="card-terrain p-5">
+                <Suspense fallback={<SkeletonChart />}>
+                  <CategoryLegend categoryTotals={categoryTotals} onCategoryClick={handleCategoryClick} categoryBudgets={settings.categoryBudgets} />
+                </Suspense>
+              </div>
+              {!exploreOpen && (
+                <div className="absolute inset-x-0 bottom-0 h-12 pointer-events-none" style={{ background: "linear-gradient(to bottom, transparent, var(--surface))" }} />
+              )}
+            </div>
             <button
               onClick={() => setExploreOpen((o) => !o)}
               onPointerEnter={prefetchMoreInsights}
@@ -557,7 +600,7 @@ function DashboardContent() {
               style={{ background: "var(--surface-secondary)", color: "var(--text-secondary)" }}
               aria-expanded={exploreOpen}
             >
-              <span>Explore more</span>
+              <span>{exploreOpen ? "Show less" : "Explore more"}</span>
               <ChevronDown
                 size={18}
                 className={cn("transition-transform duration-300", exploreOpen && "rotate-180")}
@@ -572,13 +615,6 @@ function DashboardContent() {
                   transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
                   className="overflow-hidden space-y-4 pt-1"
                 >
-                  {/* Category breakdown — most actionable first */}
-                  <div className="card-terrain p-5">
-                    <Suspense fallback={<SkeletonChart />}>
-                      <CategoryLegend categoryTotals={categoryTotals} onCategoryClick={handleCategoryClick} categoryBudgets={settings.categoryBudgets} />
-                    </Suspense>
-                  </div>
-
                   <RevealOnScroll>
                     <SpendingForecastCalendar />
                   </RevealOnScroll>
@@ -598,6 +634,18 @@ function DashboardContent() {
                   </RevealOnScroll>
 
                   <PostcardPrompt month={currentMonth} year={currentYear} hasExpenses={expenses.length > 0} />
+
+                  {/* Budget vs Actuals */}
+                  {budgetVsActualsData.length > 0 && (
+                    <RevealOnScroll>
+                      <div className="card-terrain p-5">
+                        <h3 className="text-xs font-semibold uppercase tracking-wider mb-4" style={{ color: "var(--text-muted)" }}>
+                          Budget vs Actuals
+                        </h3>
+                        <BudgetVsActuals data={budgetVsActualsData} formatCurrency={formatCurrency} />
+                      </div>
+                    </RevealOnScroll>
+                  )}
                 </m.div>
               )}
             </AnimatePresence>

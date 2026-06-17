@@ -43,6 +43,7 @@ export interface IDBSettings {
   savedFilters: SavedFilter[];
   goals: Goal[];
   rolloverEnabled: boolean;
+  rolloverCap: number; // 0 = unlimited
   rolloverHistory: Record<string, number>;
   monthlyBudgets?: Record<string, number>;
   businessMode: boolean;

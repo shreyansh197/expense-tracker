@@ -170,7 +170,7 @@ export function WatcherConstellation({ insight, onDismiss }: WatcherConstellatio
             exit={{ opacity: 0, x: 8 }}
             transition={{ duration: 0.25, delay: 0.6 }}
           >
-            Watcher noticed something →
+            New insight →
           </m.div>
         )}
       </AnimatePresence>
@@ -186,7 +186,7 @@ export function WatcherConstellation({ insight, onDismiss }: WatcherConstellatio
           touchAction: "none",
         }}
         onClick={handleToggle}
-        aria-label={hasInsight ? "View Watcher insight" : "Watcher — no new insights"}
+        aria-label={hasInsight ? "View insight" : "No new insights"}
         aria-haspopup={hasInsight ? "dialog" : undefined}
         aria-expanded={open}
       >
@@ -218,7 +218,7 @@ export function WatcherConstellation({ insight, onDismiss }: WatcherConstellatio
             ref={popoverRef}
             key="watcher-popover"
             role="dialog"
-            aria-label="Watcher insight"
+            aria-label="Spending insight"
             className="fixed z-[170] rounded-2xl px-4 py-3 shadow-lg"
             style={{
               right: "1rem",
@@ -233,12 +233,12 @@ export function WatcherConstellation({ insight, onDismiss }: WatcherConstellatio
             exit={prefersReduced ? { opacity: 0 } : { opacity: 0, y: 6, scale: 0.97 }}
             transition={{ type: "spring", stiffness: 500, damping: 30 }}
           >
-            {/* Watcher eyebrow */}
+            {/* Insight eyebrow */}
             <p
               className="mb-1.5 text-xs font-medium uppercase tracking-widest"
               style={{ color: dotColor, fontFamily: "var(--font-body)" }}
             >
-              Watcher
+              Insight
             </p>
 
             {/* Insight text */}
@@ -313,7 +313,7 @@ export function WatcherConstellation({ insight, onDismiss }: WatcherConstellatio
                   className="text-sm font-semibold"
                   style={{ color: "var(--text-primary)" }}
                 >
-                  Watcher Insights
+                  Insights
                 </h2>
                 <button
                   onClick={() => setDrawerOpen(false)}

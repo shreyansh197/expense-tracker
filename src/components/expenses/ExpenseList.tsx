@@ -197,7 +197,7 @@ export function ExpenseList({
         return next;
       });
       pendingTimers.current.delete(id);
-    }, 5000);
+    }, 10000);
     pendingTimers.current.set(id, timer);
     const msg = expense ? `${formatCurrency(expense.amount)} deleted` : "Expense deleted";
     toast(msg, "error", {
@@ -344,9 +344,9 @@ export function ExpenseList({
     }
   };
 
-  // D4: scroll progress indicator — must be before any early return
+  // D4: scroll progress indicator — window scroll avoids ref-not-hydrated warning
   const listRef = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({ target: listRef, offset: ["start 0.9", "end 0.1"] });
+  const { scrollYProgress } = useScroll();
 
   if (filtered.length === 0) {
     const hasFilters = !!(searchQuery || activeCategories.length > 0);
@@ -360,7 +360,7 @@ export function ExpenseList({
             ? searchQuery
               ? `No results for "${searchQuery}". Try a different search or adjust filters.`
               : "Try adjusting your filters or search terms."
-            : "No expenses yet — add your first one to see it here."
+            : "Your spending history will appear here — filterable by category, date, and amount. Add your first expense to get started."
         }
         action={!hasFilters ? { label: "Add Expense", onClick: openAddForm } : undefined}
       />
@@ -732,6 +732,7 @@ function SwipeableExpenseItem({
                 {expense.remark}
               </span>
             )}
+
           </div>
         </div>
         <div className="flex flex-col items-end">

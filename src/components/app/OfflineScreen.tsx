@@ -81,7 +81,7 @@ export function OfflineScreen() {
           maxWidth: "640px",
           margin: "8px auto",
           background: "var(--surface)",
-          border: "1px solid var(--danger)",
+          border: "1px solid var(--warning, #F59E0B)",
           borderRadius: "12px",
           boxShadow: "0 4px 20px rgba(0,0,0,0.12), 0 2px 6px rgba(0,0,0,0.06)",
           padding: "10px 12px",
@@ -95,14 +95,14 @@ export function OfflineScreen() {
             width: 32,
             height: 32,
             borderRadius: "50%",
-            background: "var(--danger-soft)",
+            background: "var(--warning-soft, #FEF9C3)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             flexShrink: 0,
           }}
         >
-          <WifiOff size={16} color="var(--danger)" strokeWidth={2} />
+          <WifiOff size={16} color="var(--warning-text, #B45309)" strokeWidth={2} />
         </div>
 
         <div style={{ flex: 1, minWidth: 0 }}>
@@ -121,8 +121,8 @@ export function OfflineScreen() {
             padding: "5px 10px",
             borderRadius: "8px",
             border: "none",
-            background: "var(--danger-soft)",
-            color: "var(--danger)",
+            background: "var(--warning-soft, #FEF9C3)",
+            color: "var(--warning-text, #B45309)",
             fontSize: "0.75rem",
             fontWeight: 600,
             cursor: isChecking ? "not-allowed" : "pointer",

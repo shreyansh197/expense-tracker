@@ -54,10 +54,11 @@ export function ExpenseFormModal() {
     }
   }, [addExpense, triggerEcho, isBizRoute]);
 
-  // Keyboard shortcut: Ctrl/Cmd+N to open add form
+  // Keyboard shortcut: Ctrl/Cmd+Shift+E to open add form
+  // (avoids conflict with browser's native Ctrl+N "New Tab")
   useEffect(() => {
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === "n") {
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === "E") {
         e.preventDefault();
         useUIStore.getState().openAddForm();
       }

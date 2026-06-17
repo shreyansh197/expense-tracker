@@ -30,7 +30,7 @@ const TOUCH_TIPS = [
 
 const DESKTOP_TIPS = [
   "Use Ctrl+K (⌘K on Mac) to focus the search bar",
-  "Press Ctrl+N (⌘N on Mac) to add a new expense",
+  "Press Ctrl+Shift+E (⌘+Shift+E on Mac) to add a new expense",
   "Press Shift+? to see all keyboard shortcuts",
   "Arrow keys navigate the spending stream chart, accent color picker & category grid",
   "Tab to the echo card after adding an expense, then Esc to dismiss",

@@ -6,11 +6,12 @@ import { useSettings } from "@/hooks/useSettings";
 import { useCurrency } from "@/hooks/useCurrency";
 import { useTheme } from "@/components/providers/ThemeProvider";
 import { SUPPORTED_CURRENCIES, getMonthName } from "@/lib/utils";
+import { useUIStore } from "@/stores/uiStore";
 import {
   Wallet, LinkIcon, Tag, Repeat, TrendingUp, Target, Palette,
   Download, Zap, Smartphone, Briefcase,
   Shield, Users, Database, Globe, ChevronLeft, ChevronRight,
-  Search, Bell, Sunrise,
+  Search, Bell, Sunrise, RotateCcw,
 } from "lucide-react";
 import { InstallButton } from "@/components/pwa/InstallButton";
 import { AccentColorPicker, applyAccentColor } from "@/components/settings/AccentColorPicker";
@@ -29,6 +30,7 @@ const ExportImportWizard = lazy(() => import("@/components/settings/ExportImport
 const AutoRulesManager = lazy(() => import("@/components/settings/AutoRulesManager").then(m => ({ default: m.AutoRulesManager })));
 const DataAccountManagement = lazy(() => import("@/components/settings/DataAccountManagement").then(m => ({ default: m.DataAccountManagement })));
 import { SettingsFooterLogout } from "@/components/settings/SettingsFooterLogout";
+import Link from "next/link";
 import { NotificationSettings } from "@/components/settings/NotificationSettings";
 import { subscribeToPush, unsubscribeFromPush } from "@/lib/pushSubscription";
 import { RateSourceInfo } from "@/components/settings/RateSourceInfo";
@@ -45,15 +47,17 @@ export default function SettingsPage() {
   const { symbol, formatCurrency } = useCurrency();
   const { toast } = useToast();
   const { theme } = useTheme();
+  // Initialise budget month from dashboard's current month so Settings stays
+  // in sync with whichever month the user was viewing before navigating here.
+  const { currentMonth: dashMonth, currentYear: dashYear } = useUIStore();
 
   const [salary, setSalary] = useState(settings.salary.toString());
   const [saving, setSaving] = useState(false);
 
 
   // Per-month budget state
-  const now = new Date();
-  const [budgetMonth, setBudgetMonth] = useState(now.getMonth() + 1);
-  const [budgetYear, setBudgetYear] = useState(now.getFullYear());
+  const [budgetMonth, setBudgetMonth] = useState(dashMonth);
+  const [budgetYear, setBudgetYear] = useState(dashYear);
   const budgetKey = `${budgetYear}-${String(budgetMonth).padStart(2, "0")}`;
   const monthlyBudgets = settings.monthlyBudgets ?? {};
   const [monthBudget, setMonthBudget] = useState(
@@ -302,6 +306,30 @@ export default function SettingsPage() {
 
         <SettingsAccordion>
 
+          {/* Quick-start banner for new users who haven't set budget */}
+          {!searchQuery && settings.salary <= 0 && (
+            <div
+              className="flex items-center gap-3 rounded-xl px-4 py-3 mb-3"
+              style={{ background: "color-mix(in srgb, var(--accent) 8%, transparent)", border: "1px solid color-mix(in srgb, var(--accent) 20%, transparent)" }}
+            >
+              <Target size={16} style={{ color: "var(--accent)" }} />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>Complete your setup</p>
+                <p className="text-xs" style={{ color: "var(--text-secondary)" }}>Set a monthly budget to unlock budget tracking and forecasts.</p>
+              </div>
+              <button
+                onClick={() => {
+                  const el = document.getElementById("budget");
+                  if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+                }}
+                className="flex-shrink-0 rounded-lg px-3 py-1.5 text-xs font-semibold text-white"
+                style={{ background: "var(--accent)" }}
+              >
+                Set budget
+              </button>
+            </div>
+          )}
+
           {visibleSections && visibleSections.size === 0 && (
             <p className="text-center py-12 text-sm text-[var(--text-muted)]">
               No settings match &ldquo;{searchQuery}&rdquo;
@@ -310,7 +338,7 @@ export default function SettingsPage() {
 
           {/* ━━━ YOUR ACCOUNT — indigo zone ━━━ */}
           <div id="zone-account" role="tabpanel" aria-labelledby="tab-zone-account" className={`space-y-3 scroll-mt-16 ${activeZone !== 'zone-account' ? 'lg:hidden' : ''} ${!isZoneVisible('zone-account') ? 'hidden' : ''}`}>
-          <h3 className="text-xs font-bold uppercase tracking-wider pb-1 px-1 text-[var(--text-tertiary)]">
+          <h3 className="sticky top-0 z-10 lg:static text-xs font-bold uppercase tracking-wider pb-1 px-1 py-1 text-[var(--text-tertiary)] backdrop-blur-sm lg:backdrop-blur-none" style={{ background: 'color-mix(in srgb, var(--canvas, var(--surface)) 92%, transparent)' }}>
             Identity
           </h3>
 
@@ -352,7 +380,7 @@ export default function SettingsPage() {
 
           {/* ━━━ FINANCES — teal zone ━━━ */}
           <div id="zone-finances" role="tabpanel" aria-labelledby="tab-zone-finances" className={`space-y-3 scroll-mt-16 ${activeZone !== 'zone-finances' ? 'lg:hidden' : ''} ${!isZoneVisible('zone-finances') ? 'hidden' : ''}`}>
-          <h3 className="text-xs font-bold uppercase tracking-wider pt-2 pb-1 px-1 text-[var(--text-tertiary)]">
+          <h3 className="sticky top-0 z-10 lg:static text-xs font-bold uppercase tracking-wider pt-2 pb-1 px-1 py-1 text-[var(--text-tertiary)] backdrop-blur-sm lg:backdrop-blur-none" style={{ background: 'color-mix(in srgb, var(--canvas, var(--surface)) 92%, transparent)' }}>
             Ledger
           </h3>
 
@@ -539,6 +567,26 @@ export default function SettingsPage() {
                   ? "Unspent budget from previous months will be added to your current month's budget."
                   : "Enable rollover to carry forward unspent budget automatically."}
               </p>
+              {settings.rolloverEnabled && (
+                <div className="rounded-xl p-3 bg-[var(--surface-secondary)] space-y-2">
+                  <label className="text-xs font-medium" style={{ color: "var(--text-secondary)" }}>
+                    Cap rollover at (leave 0 for unlimited)
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm" style={{ color: "var(--text-muted)" }}>{settings.currency}</span>
+                    <input
+                      type="number"
+                      min={0}
+                      step={100}
+                      value={settings.rolloverCap ?? 0}
+                      onChange={(e) => updateSettings({ rolloverCap: Math.max(0, Number(e.target.value)) })}
+                      className="flex-1 rounded-lg px-3 py-1.5 text-sm border"
+                      style={{ background: "var(--surface-primary)", borderColor: "var(--border)", color: "var(--text-primary)" }}
+                      placeholder="0 = unlimited"
+                    />
+                  </div>
+                </div>
+              )}
               {settings.rolloverEnabled && settings.rolloverHistory && Object.keys(settings.rolloverHistory).length > 0 && (
                 <div className="rounded-xl p-3 bg-[var(--surface-secondary)]">
                   <h4 className="text-meta font-medium mb-2">Rollover History</h4>
@@ -563,7 +611,7 @@ export default function SettingsPage() {
 
           {/* ━━━ AUTOMATION & DATA — violet zone ━━━ */}
           <div id="zone-automation" role="tabpanel" aria-labelledby="tab-zone-automation" className={`space-y-3 scroll-mt-16 ${activeZone !== 'zone-automation' ? 'lg:hidden' : ''} ${!isZoneVisible('zone-automation') ? 'hidden' : ''}`}>
-          <h3 className="text-xs font-bold uppercase tracking-wider pt-2 pb-1 px-1 text-[var(--text-tertiary)]">
+          <h3 className="sticky top-0 z-10 lg:static text-xs font-bold uppercase tracking-wider pt-2 pb-1 px-1 py-1 text-[var(--text-tertiary)] backdrop-blur-sm lg:backdrop-blur-none" style={{ background: 'color-mix(in srgb, var(--canvas, var(--surface)) 92%, transparent)' }}>
             Mechanisms
           </h3>
 
@@ -608,7 +656,7 @@ export default function SettingsPage() {
 
           {/* ━━━ PREFERENCES — indigo zone ━━━ */}
           <div id="zone-preferences" role="tabpanel" aria-labelledby="tab-zone-preferences" className={`space-y-3 scroll-mt-16 ${activeZone !== 'zone-preferences' ? 'lg:hidden' : ''} ${!isZoneVisible('zone-preferences') ? 'hidden' : ''}`}>
-          <h3 className="text-xs font-bold uppercase tracking-wider pt-2 pb-1 px-1 text-[var(--text-tertiary)]">
+          <h3 className="sticky top-0 z-10 lg:static text-xs font-bold uppercase tracking-wider pt-2 pb-1 px-1 py-1 text-[var(--text-tertiary)] backdrop-blur-sm lg:backdrop-blur-none" style={{ background: 'color-mix(in srgb, var(--canvas, var(--surface)) 92%, transparent)' }}>
             Atmosphere
           </h3>
 
@@ -824,6 +872,29 @@ export default function SettingsPage() {
                 </div>
                 <InstallButton />
               </div>
+
+              {/* Replay Welcome Tour */}
+              <div className="pt-4 border-t border-[var(--border)]">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <RotateCcw size={16} className="text-[var(--text-tertiary)]" />
+                    <div>
+                      <p className="text-sm font-medium text-[var(--text-secondary)]">Welcome Tour</p>
+                      <p className="text-xs text-[var(--text-tertiary)]">Replay the onboarding walkthrough</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => {
+                      try { localStorage.removeItem("expenstream-tutorial-seen"); } catch {}
+                      toast("Tour will replay when you visit Home");
+                    }}
+                    className="rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors hover:bg-[var(--surface-secondary)]"
+                    style={{ color: "var(--accent)" }}
+                  >
+                    Replay
+                  </button>
+                </div>
+              </div>
             </div>
           </AccordionSection>
           </div>
@@ -832,6 +903,12 @@ export default function SettingsPage() {
 
         {/* ─── 12. Log Out Footer ─── */}
         <SettingsFooterLogout />
+
+        {/* ─── Legal links ─── */}
+        <div className="flex justify-center gap-6 pb-8 text-xs" style={{ color: "var(--text-muted)" }}>
+          <Link href="/privacy" className="hover:underline">Privacy Policy</Link>
+          <Link href="/terms" className="hover:underline">Terms of Service</Link>
+        </div>
       </div>
     </AppShell>
   );

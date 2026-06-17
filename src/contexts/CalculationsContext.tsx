@@ -100,11 +100,18 @@ export function CalculationsProvider({ children }: { children: React.ReactNode }
             .where("[workspaceId+month+year]")
             .equals([wid, pm, py])
             .toArray();
-          const total = rows
-            .filter((r) => !r.deletedAt)
-            .reduce((sum, r) => sum + r.amount, 0);
+          const activeRows = rows.filter((r) => !r.deletedAt);
+          // Skip months with zero expenses — can't distinguish "no tracking" from "spent nothing"
+          // Adding full budget as rollover for untracked months inflates future budgets incorrectly
+          if (activeRows.length === 0) continue;
+          const total = activeRows.reduce((sum, r) => sum + r.amount, 0);
 
           history[key] = budget - total;
+          // Apply rollover cap if set
+          const cap = settings.rolloverCap;
+          if (cap && cap > 0 && history[key] > cap) {
+            history[key] = cap;
+          }
           changed = true;
         }
 
@@ -115,7 +122,7 @@ export function CalculationsProvider({ children }: { children: React.ReactNode }
         computingRef.current = false;
       }
     })();
-  }, [settings.rolloverEnabled, settings.salary, settings.rolloverHistory, settings.monthlyBudgets, updateSettings]);
+  }, [settings.rolloverEnabled, settings.salary, settings.rolloverHistory, settings.monthlyBudgets, settings.rolloverCap, updateSettings]);
 
   return (
     <CalculationsContext.Provider value={calcs}>

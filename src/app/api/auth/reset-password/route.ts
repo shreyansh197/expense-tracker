@@ -9,7 +9,7 @@ import { getClientIp } from "@/lib/server/guards";
 
 export async function POST(req: NextRequest) {
   const ip = getClientIp(req);
-  const rl = rateLimit(`reset-pw:${hashIp(ip)}`, 5, 60_000);
+  const rl = await rateLimit(`reset-pw:${hashIp(ip)}`, 5, 60_000);
   if (!rl.ok) {
     return NextResponse.json(
       { error: "Too many attempts. Try again later." },

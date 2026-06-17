@@ -92,7 +92,7 @@ export function InstallBanner() {
               Install ExpenStream
             </p>
             <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-              Add to your home screen for quick access
+              Works offline and loads in a flash — no browser chrome, no extra steps. Add to your home screen for the full app experience.
             </p>
           </div>
           <button

@@ -14,6 +14,7 @@ import { useUIStore } from "@/stores/uiStore";
 import { useSettings } from "@/hooks/useSettings";
 import { spring } from "@/lib/motion/tokens";
 import { QuickAddSheet } from "@/components/layout/QuickAddSheet";
+import { useCalculationsContext } from "@/contexts/CalculationsContext";
 
 const springStiff = spring.stiff;
 
@@ -56,6 +57,8 @@ export function BottomNav() {
   const navLinks = isBusiness ? businessLinks : personalLinks;
   const gridCols = navLinks.length;
   const accentColor = isBusiness && isBusinessRoute ? "emerald" : "blue";
+  const { monthlyTotal } = useCalculationsContext();
+  const analyticsNeedsData = monthlyTotal === 0;
 
   const handleFabPointerDown = () => {
     didLongPress.current = false;
@@ -199,6 +202,15 @@ export function BottomNav() {
                 )}
                 {isBiz && !isActive && isBusiness && (
                   <span className="absolute top-1 right-1/4 h-1.5 w-1.5 rounded-full bg-biz" />
+                )}
+                {item.href === "/analytics" && !isActive && analyticsNeedsData && (
+                  <span
+                    className="absolute -top-0.5 -right-0.5 text-[8px] font-bold rounded-full px-1 py-px leading-none"
+                    style={{ background: "var(--surface-secondary)", color: "var(--text-muted)" }}
+                    aria-label="Needs expense data"
+                  >
+                    ?
+                  </span>
                 )}
               </Link>
             );

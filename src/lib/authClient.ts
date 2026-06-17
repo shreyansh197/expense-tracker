@@ -144,7 +144,13 @@ export async function refreshTokens(): Promise<RefreshResult> {
 
       if (!res.ok) {
         // 401/403 → session definitively invalid; anything else is transient
-        return res.status === 401 || res.status === 403 ? "revoked" : "network-error";
+        if (res.status === 401 || res.status === 403) {
+          if (typeof window !== "undefined") {
+            window.dispatchEvent(new CustomEvent("expenstream:session-expired"));
+          }
+          return "revoked";
+        }
+        return "network-error";
       }
 
       const data = await res.json();

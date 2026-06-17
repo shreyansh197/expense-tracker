@@ -9,9 +9,15 @@ import { ConfirmProvider } from "@/components/ui/ConfirmDialog";
 import { SplashScreen } from "@/components/app/SplashScreen";
 import { OfflineScreen } from "@/components/app/OfflineScreen";
 import { SWUpdateListener } from "@/components/pwa/SWUpdateListener";
+import { RecoveryCodeBanner } from "@/components/pwa/RecoveryCodeBanner";
+import { AppReviewPrompt } from "@/components/pwa/AppReviewPrompt";
 import { startSyncEngine, stopSyncEngine } from "@/lib/syncEngine";
 import { applyAccentColor } from "@/components/settings/AccentColorPicker";
 import { useSettings } from "@/hooks/useSettings";
+import { rehydrateAppMode } from "@/stores/uiStore";
+import { useAuth } from "@/components/providers/AuthProvider";
+import { useToast } from "@/components/ui/Toast";
+import { useSyncConflictToast } from "@/hooks/useSyncConflictToast";
 
 function SyncProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
@@ -19,6 +25,28 @@ function SyncProvider({ children }: { children: React.ReactNode }) {
     return () => stopSyncEngine();
   }, []);
   return <>{children}</>;
+}
+
+/** Listens for session-expired events fired by authClient, logs out, and shows a toast */
+function SessionExpiryWatcher() {
+  const { logout } = useAuth();
+  const { toast } = useToast();
+  useEffect(() => {
+    const handleExpiry = () => {
+      logout().then(() => {
+        toast("Your session expired — please sign in again.", "error");
+      });
+    };
+    window.addEventListener("expenstream:session-expired", handleExpiry);
+    return () => window.removeEventListener("expenstream:session-expired", handleExpiry);
+  }, [logout, toast]);
+  return null;
+}
+
+/** Shows toast when sync engine detects LWW conflicts from another device */
+function SyncConflictWatcher() {
+  useSyncConflictToast();
+  return null;
 }
 
 /** Apply the user's accent color on mount and when theme/color changes */
@@ -70,6 +98,9 @@ function KeyboardScrollEffect() {
 }
 
 export function Providers({ children }: { children: React.ReactNode }) {
+  // Rehydrate client-only store state (appMode) after first render to avoid
+  // SSR/client hydration mismatch caused by reading localStorage at module init time.
+  useEffect(() => { rehydrateAppMode(); }, []);
   return (
     <LazyMotion features={domAnimation} strict>
       <ThemeProvider>
@@ -77,8 +108,12 @@ export function Providers({ children }: { children: React.ReactNode }) {
           <SyncProvider>
             <ToastProvider>
               <SWUpdateListener />
+              <SessionExpiryWatcher />
               <AccentColorEffect />
               <KeyboardScrollEffect />
+              <SyncConflictWatcher />
+              <RecoveryCodeBanner />
+              <AppReviewPrompt />
               <ConfirmProvider>{children}</ConfirmProvider>
             </ToastProvider>
           </SyncProvider>

@@ -68,16 +68,17 @@ export function RollingAverageChart({ dailyTotals, formatCurrency, width = 320, 
 
   return (
     <div>
-      {/* Window toggle */}
-      <div className="mb-2 flex gap-1.5">
-        {([30, 60, 90] as WindowDays[]).map((w) => (
+      {/* Segmented control — connected pill style */}
+      <div className="mb-2 inline-flex rounded-lg overflow-hidden" style={{ border: "1px solid var(--border)" }}>
+        {([30, 60, 90] as WindowDays[]).map((w, i) => (
           <button
             key={w}
             onClick={() => setWindow(w)}
-            className="rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors"
+            className="px-2.5 py-1 text-xs font-semibold transition-colors"
             style={{
               background: window === w ? "var(--accent)" : "var(--surface-secondary)",
               color: window === w ? "#fff" : "var(--text-muted)",
+              borderRight: i < 2 ? "1px solid var(--border)" : "none",
             }}
             aria-pressed={window === w}
           >

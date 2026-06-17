@@ -37,9 +37,11 @@ interface UIState {
 
 const now = new Date();
 
+/** Read appMode from localStorage on the client; safe to call server-side (returns "personal"). */
 function loadAppMode(): AppMode {
   if (typeof window === "undefined") return "personal";
-  return (localStorage.getItem("expenstream-app-mode") as AppMode) || "personal";
+  const stored = localStorage.getItem("expenstream-app-mode");
+  return stored === "business" ? "business" : "personal";
 }
 
 export const useUIStore = create<UIState>((set) => ({
@@ -52,7 +54,8 @@ export const useUIStore = create<UIState>((set) => ({
   editingExpenseId: null,
   formPrefill: null,
   showLedgerForm: false,
-  appMode: loadAppMode(),
+  // Always start with the SSR-safe default; rehydrated on the client in providers.tsx
+  appMode: "personal",
   activeLedgerId: null,
   showPostcard: false,
 
@@ -103,3 +106,11 @@ export const useUIStore = create<UIState>((set) => ({
   openPostcard: () => set({ showPostcard: true }),
   closePostcard: () => set({ showPostcard: false }),
 }));
+
+/**
+ * Client-side rehydration: reads appMode from localStorage and applies it to the
+ * store. Call once in a top-level useEffect to avoid SSR/client hydration mismatch.
+ */
+export function rehydrateAppMode() {
+  useUIStore.setState({ appMode: loadAppMode() });
+}

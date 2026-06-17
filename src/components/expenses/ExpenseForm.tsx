@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { m, AnimatePresence } from "framer-motion";
-import { Camera, CalendarDays, CheckCircle2, Mic, MicOff, Delete, ChevronDown } from "lucide-react";
+import { Camera, CalendarDays, CheckCircle2, Mic, MicOff, Delete, ChevronDown, AlertTriangle } from "lucide-react";
 import { getAllCategories } from "@/lib/categories";
 import { cn, getDaysInMonth, getCurrencySymbol } from "@/lib/utils";
 import { useUIStore } from "@/stores/uiStore";
@@ -16,6 +16,7 @@ import { useCurrency } from "@/hooks/useCurrency";
 import { useAutoRules } from "@/components/settings/AutoRulesManager";
 import { SUPPORTED_CURRENCIES } from "@/lib/utils";
 import { spring } from "@/lib/motion/tokens";
+
 import { MoneyEcho } from "@/components/ui/MoneyEcho";
 import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
 import { useCalculationsContext } from "@/contexts/CalculationsContext";
@@ -104,11 +105,31 @@ export function ExpenseForm({
   const [category, setCategory] = useState<CategoryId>(() => {
     if (editExpense?.category) return editExpense.category;
     if (prefill?.category) return prefill.category;
+    // Smart default: pre-select the last-used category so the common path is
+    // just "amount + Add Expense" (no separate category tap). Still editable.
+    if (typeof window !== "undefined") {
+      const last = localStorage.getItem("expenstream-last-category");
+      if (last) return last as CategoryId;
+    }
     return "";
   });
   const [autoApplied, setAutoApplied] = useState(false);
   const [manualOverride, setManualOverride] = useState(false);
   const [amount, setAmount] = useState(editExpense?.amount?.toString() || prefill?.amount?.toString() || "");
+
+  // ── Budget warning: show inline when adding this expense exceeds a category budget ──
+  const budgetWarning = useMemo(() => {
+    if (!category || !amount || isNaN(parseFloat(amount))) return null;
+    const catBudget = (settings.categoryBudgets as Record<string, number> | undefined)?.[category] ?? 0;
+    if (catBudget <= 0) return null;
+    const existingTotal = categoryTotals.find((ct) => ct.category === category)?.total ?? 0;
+    const newAmount = parseFloat(amount);
+    const newTotal = existingTotal + newAmount;
+    if (newTotal <= catBudget) return null;
+    const overage = newTotal - catBudget;
+    const catLabel = allCategories.find((c) => c.id === category)?.label ?? category;
+    return { catLabel, overage };
+  }, [category, amount, settings.categoryBudgets, categoryTotals, allCategories]);
   const today = new Date();
   const [day, setDay] = useState(editExpense?.day || today.getDate());
   const [selectedMonth, setSelectedMonth] = useState(editExpense ? month : today.getMonth() + 1);
@@ -256,6 +277,15 @@ export function ExpenseForm({
       setSubmitting(true);
       try {
         if (editExpense && onUpdate) {
+          const prevValues = {
+            category: editExpense.category,
+            amount: editExpense.amount,
+            currency: editExpense.currency,
+            day: editExpense.day,
+            month: editExpense.month,
+            year: editExpense.year,
+            remark: editExpense.remark,
+          };
           await onUpdate(editExpense.id, {
             category,
             amount: parsedAmount,
@@ -265,6 +295,19 @@ export function ExpenseForm({
             year: selectedYear,
             remark: remark.trim() || undefined,
           });
+          const catLabel = allCategories.find(c => c.id === category)?.label ?? category;
+          const displaySymbol = multiCurrency && expenseCurrency ? getCurrencySymbol(expenseCurrency) : symbol;
+          toast(`${displaySymbol}${parsedAmount} in ${catLabel} updated`, "success", {
+            label: "Undo",
+            onClick: () => {
+              onUpdate(editExpense.id, prevValues).catch(() => {});
+            },
+          });
+          if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate([20, 30, 20]);
+          setShowSuccess(true);
+          setEchoTrigger((t) => t + 1);
+          setTimeout(() => { closeForm(); }, 600);
+          return;
         } else {
           await onSubmit({
             category,
@@ -277,11 +320,6 @@ export function ExpenseForm({
           });
         }
         localStorage.setItem("expenstream-last-category", category);
-        const catLabel = allCategories.find(c => c.id === category)?.label ?? category;
-        const displaySymbol = multiCurrency && expenseCurrency ? getCurrencySymbol(expenseCurrency) : symbol;
-        if (editExpense) {
-          toast(`${displaySymbol}${parsedAmount} in ${catLabel} updated`);
-        }
         if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate([20, 30, 20]);
         setShowSuccess(true);
         setEchoTrigger((t) => t + 1);
@@ -420,6 +458,32 @@ export function ExpenseForm({
           setManualOverride(true);
         }}
       />
+
+      {/* ─── Budget-exceeded warning ─── */}
+      <AnimatePresence>
+        {budgetWarning && (
+          <m.div
+            key="budget-warning"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+            className="overflow-hidden"
+          >
+            <div
+              className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium"
+              style={{ background: "var(--warning-soft)", color: "var(--warning-text)" }}
+              role="alert"
+            >
+              <AlertTriangle size={13} className="shrink-0" />
+              <span>
+                This puts <strong>{budgetWarning.catLabel}</strong>{" "}
+                {symbol}{budgetWarning.overage.toLocaleString(undefined, { maximumFractionDigits: 0 })} over budget
+              </span>
+            </div>
+          </m.div>
+        )}
+      </AnimatePresence>
 
       {/* ─── 4. Remark (always visible) with typeahead ─── */}
       <div className="relative">
@@ -621,10 +685,10 @@ export function ExpenseForm({
         transition={spring.water}
       >
         {submitting
-          ? "Dropping stone..."
+          ? "Saving..."
           : editExpense
             ? "Update Expense"
-            : "Drop Stone"}
+            : "Add Expense"}
       </m.button>
     </form>
   );

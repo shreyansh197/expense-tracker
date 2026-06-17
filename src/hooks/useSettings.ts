@@ -25,12 +25,15 @@ import {
   loadSettingsFromIDB,
   _fetchSettingsFromApi,
   _syncFromIDB,
+  resetDirectFetchDone,
 } from "./settingsSync";
 
 // ── Exports consumed by AuthProvider and other modules ──
 
 export function switchSettingsUser(userId: string) {
   const changed = _currentUserId !== userId;
+  // Reset the one-time failsafe fetch flag so the new user can trigger it.
+  resetDirectFetchDone();
   setCurrentUserId(userId);
   if (changed) {
     const local = loadSettings(userId);
@@ -146,7 +149,7 @@ export function useSettings() {
   }, []);
 
   const updateSettings = useCallback(
-    async (updates: Partial<Pick<UserSettings, "salary" | "currency" | "categories" | "customCategories" | "hiddenDefaults" | "categoryBudgets" | "recurringExpenses" | "savedFilters" | "goals" | "rolloverEnabled" | "rolloverHistory" | "monthlyBudgets" | "businessMode" | "revenueExpectations" | "businessTags" | "dashboardLayout" | "multiCurrencyEnabled" | "dismissedRecurringSuggestions" | "autoRules" | "achievements" | "activeChallenges" | "accentColor" | "sunsetTheme" | "notificationPrefs" | "quickTemplates">>) => {
+    async (updates: Partial<Pick<UserSettings, "salary" | "currency" | "categories" | "customCategories" | "hiddenDefaults" | "categoryBudgets" | "recurringExpenses" | "savedFilters" | "goals" | "rolloverEnabled" | "rolloverCap" | "rolloverHistory" | "monthlyBudgets" | "businessMode" | "revenueExpectations" | "businessTags" | "dashboardLayout" | "multiCurrencyEnabled" | "dismissedRecurringSuggestions" | "autoRules" | "achievements" | "activeChallenges" | "accentColor" | "sunsetTheme" | "notificationPrefs" | "quickTemplates">>) => {
       const next = { ..._settings, ...updates, updatedAt: Date.now() };
       saveLocal(next);
       _setShared(next);

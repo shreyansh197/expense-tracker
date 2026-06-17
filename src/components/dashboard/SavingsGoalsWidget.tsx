@@ -150,7 +150,7 @@ export function SavingsGoalsWidget() {
               <button
                 type="button"
                 onClick={() => { setShowCreate(false); setNewName(""); setNewTarget(""); }}
-                className="flex h-7 w-7 items-center justify-center rounded-lg transition-colors"
+                className="flex h-11 w-11 items-center justify-center rounded-lg transition-colors"
                 style={{ background: "var(--surface-tertiary)", color: "var(--text-muted)" }}
                 aria-label="Cancel"
               >
@@ -160,7 +160,7 @@ export function SavingsGoalsWidget() {
                 type="button"
                 onClick={handleCreateGoal}
                 disabled={!newName.trim() || !newTarget || parseFloat(newTarget) <= 0}
-                className="flex h-7 w-7 items-center justify-center rounded-lg transition-opacity disabled:opacity-40"
+                className="flex h-11 w-11 items-center justify-center rounded-lg transition-opacity disabled:opacity-40"
                 style={{ background: "var(--accent)", color: "#fff" }}
                 aria-label="Save goal"
               >

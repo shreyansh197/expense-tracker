@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { Download, FileDown, Image } from "lucide-react";
+import { Download, FileDown, Image, FileSpreadsheet, FileText, Upload } from "lucide-react";
 import type { Expense } from "@/types";
 import { CATEGORIES } from "@/lib/categories";
 import { useSettings } from "@/hooks/useSettings";
@@ -11,9 +11,10 @@ interface ExpenseExportProps {
   expenses: Expense[];
   month: number;
   year: number;
+  onImport?: () => void;
 }
 
-export function ExpenseExport({ expenses, month, year }: ExpenseExportProps) {
+export function ExpenseExport({ expenses, month, year, onImport }: ExpenseExportProps) {
   const [showMenu, setShowMenu] = useState(false);
   const { settings } = useSettings();
   const btnRef = useRef<HTMLButtonElement>(null);
@@ -73,6 +74,61 @@ export function ExpenseExport({ expenses, month, year }: ExpenseExportProps) {
     };
     const monthName = new Date(year, month - 1).toLocaleString("default", { month: "long" });
     download(JSON.stringify(data, null, 2), `expenses-${monthName}-${year}.json`, "application/json");
+    setShowMenu(false);
+  };
+
+  const exportExcel = async () => {
+    const { utils, write } = await import("xlsx");
+    const monthName = new Date(year, month - 1).toLocaleString("default", { month: "long" });
+    const rows = activeExpenses.map((e) => ({
+      Date: `${e.year}-${String(e.month).padStart(2, "0")}-${String(e.day).padStart(2, "0")}`,
+      Category: getCategoryLabel(e.category),
+      Amount: e.amount,
+      Currency: e.currency || settings.currency || "INR",
+      Remark: e.remark || "",
+      Recurring: e.isRecurring ? "Yes" : "No",
+    }));
+    const ws = utils.json_to_sheet(rows);
+    const wb = utils.book_new();
+    utils.book_append_sheet(wb, ws, `${monthName} ${year}`);
+    const buf = write(wb, { type: "array", bookType: "xlsx" });
+    download(new Blob([buf], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }), `expenses-${monthName}-${year}.xlsx`, "");
+    setShowMenu(false);
+  };
+
+  const exportPDF = () => {
+    const monthName = new Date(year, month - 1).toLocaleString("default", { month: "long" });
+    const total = activeExpenses.reduce((s, e) => s + e.amount, 0);
+    const currency = settings.currency || "INR";
+    const symbol = currency === "INR" ? "₹" : currency === "USD" ? "$" : currency;
+
+    const printWindow = window.open("", "_blank");
+    if (!printWindow) return;
+
+    const rows = activeExpenses
+      .map((e) => `<tr><td>${e.year}-${String(e.month).padStart(2, "0")}-${String(e.day).padStart(2, "0")}</td><td>${getCategoryLabel(e.category)}</td><td style="text-align:right">${symbol}${e.amount.toLocaleString()}</td><td>${e.remark || ""}</td></tr>`)
+      .join("");
+
+    printWindow.document.write(`<!DOCTYPE html><html><head><title>Expenses – ${monthName} ${year}</title>
+<style>
+  body { font-family: sans-serif; padding: 32px; color: #1a1b2e; }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  p { color: #666; margin: 0 0 24px; font-size: 13px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; border-bottom: 2px solid #eee; padding: 8px 6px; font-size: 11px; text-transform: uppercase; color: #888; }
+  td { padding: 8px 6px; border-bottom: 1px solid #f0f0f0; }
+  tfoot td { font-weight: 700; border-top: 2px solid #eee; }
+  @media print { body { padding: 16px; } }
+</style></head><body>
+<h1>Expenses — ${monthName} ${year}</h1>
+<p>${activeExpenses.length} transactions · Total: ${symbol}${total.toLocaleString()}</p>
+<table><thead><tr><th>Date</th><th>Category</th><th>Amount</th><th>Remark</th></tr></thead>
+<tbody>${rows}</tbody>
+<tfoot><tr><td colspan="2">Total</td><td style="text-align:right">${symbol}${total.toLocaleString()}</td><td></td></tr></tfoot>
+</table></body></html>`);
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => { printWindow.print(); }, 250);
     setShowMenu(false);
   };
 
@@ -202,6 +258,20 @@ export function ExpenseExport({ expenses, month, year }: ExpenseExportProps) {
             className="fixed z-[50] min-w-[160px] rounded-xl border p-2 shadow-lg"
             style={{ background: "var(--surface)", borderColor: "var(--border)", top: menuPos.top, right: menuPos.right }}
           >
+            {onImport && (
+              <>
+                <button
+                  onClick={() => { onImport(); setShowMenu(false); }}
+                  className="flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors hover:bg-[var(--surface-secondary)] min-h-[44px]"
+                  style={{ color: "var(--text-primary)" }}
+                  aria-label="Import from CSV"
+                >
+                  <Upload size={14} />
+                  Import from CSV
+                </button>
+                <div className="my-1 border-t" style={{ borderColor: "var(--border-color)" }} />
+              </>
+            )}
             <button
               onClick={exportCSV}
               className="flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors hover:bg-[var(--surface-secondary)] min-h-[44px]"
@@ -228,6 +298,24 @@ export function ExpenseExport({ expenses, month, year }: ExpenseExportProps) {
             >
               <Image size={14} />
               Export as Image
+            </button>
+            <button
+              onClick={exportExcel}
+              className="flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors hover:bg-[var(--surface-secondary)] min-h-[44px]"
+              style={{ color: "var(--text-primary)" }}
+              aria-label="Export as Excel"
+            >
+              <FileSpreadsheet size={14} />
+              Export as Excel
+            </button>
+            <button
+              onClick={exportPDF}
+              className="flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors hover:bg-[var(--surface-secondary)] min-h-[44px]"
+              style={{ color: "var(--text-primary)" }}
+              aria-label="Export as PDF"
+            >
+              <FileText size={14} />
+              Export as PDF
             </button>
           </div>
         </>,

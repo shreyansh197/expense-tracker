@@ -24,6 +24,7 @@ import {
   Award,
   ChevronDown,
   Share2,
+  GitCompareArrows,
 } from "lucide-react";
 import { useToast } from "@/components/ui/Toast";
 import { FogOverlook } from "@/components/ui/illustrations/terrain";
@@ -32,7 +33,10 @@ import { InsightCard } from "@/components/analytics/InsightCard";
 import { InfoTooltip } from "@/components/ui/InfoTooltip";
 import { AnimatePresence } from "framer-motion";
 import { QuickHelpButton } from "@/components/ui/QuickHelpButton";
+import { ComparisonView } from "@/components/analytics/ComparisonView";
 const RollingAverageChart = dynamic(() => import("@/components/analytics/RollingAverageChart").then(m => ({ default: m.RollingAverageChart })), { ssr: false });
+const YearOverYearChart = dynamic(() => import("@/components/analytics/YearOverYearChart").then(m => ({ default: m.YearOverYearChart })), { ssr: false });
+const MerchantBreakdown = dynamic(() => import("@/components/analytics/MerchantBreakdown").then(m => ({ default: m.MerchantBreakdown })), { ssr: false });
 const AnomalyCallout = dynamic(() => import("@/components/analytics/AnomalyCallout").then(m => ({ default: m.AnomalyCallout })), { ssr: false });
 const PredictiveBurnBar = dynamic(() => import("@/components/analytics/PredictiveBurnBar").then(m => ({ default: m.PredictiveBurnBar })), { ssr: false });
 const CategoryVelocity = dynamic(() => import("@/components/analytics/CategoryVelocity").then(m => ({ default: m.CategoryVelocity })), { ssr: false });
@@ -60,13 +64,14 @@ function AnalyticsContent() {
   usePageTitle("Analytics");
   useMonthUrlSync();
   const [deepCoreOpen, setDeepCoreOpen] = useState(false);
+  const [lookback, setLookback] = useState(6);
   const { currentMonth, currentYear } = useUIStore();
   const { effectiveBudget, anomalies, forecast, monthlyTotal, dailyTotals, elapsedDays, daysInMonth } = useCalculationsContext();
   const { settings } = useSettings();
   const { formatCurrency, formatCurrencyCompact } = useCurrency();
   const { toast } = useToast();
   const router = useRouter();
-  const history = useHistoricalData(currentMonth, currentYear, 6);
+  const history = useHistoricalData(currentMonth, currentYear, lookback);
 
   const catMap = useMemo(
     () => buildCategoryMap(settings.customCategories, settings.hiddenDefaults),
@@ -329,6 +334,26 @@ function AnalyticsContent() {
               <MonthSwitcher />
             </div>
             <div className="flex shrink-0 items-center gap-2">
+              {/* Lookback period selector */}
+              <div className="flex items-center gap-0.5 rounded-lg p-0.5" style={{ background: "var(--surface-secondary)" }}>
+                {([3, 6, 12] as const).map((n) => (
+                  <button
+                    key={n}
+                    type="button"
+                    onClick={() => setLookback(n)}
+                    className="rounded-md px-2 py-1 text-xs font-medium transition-colors"
+                    style={{
+                      background: lookback === n ? "var(--surface)" : "transparent",
+                      color: lookback === n ? "var(--text-primary)" : "var(--text-muted)",
+                      boxShadow: lookback === n ? "0 1px 3px rgba(0,0,0,0.08)" : "none",
+                    }}
+                    aria-pressed={lookback === n}
+                    aria-label={`Show last ${n} months`}
+                  >
+                    {n}M
+                  </button>
+                ))}
+              </div>
               {history.months.length > 0 && (
                 <button
                   type="button"
@@ -345,6 +370,7 @@ function AnalyticsContent() {
               <QuickHelpButton
                 pageTips={[
                   "Tap an Insights card to navigate directly to the related expenses",
+                  "Use 3M / 6M / 12M to adjust how many months of history are shown",
                   "Expand Deep Dive for Rolling Average, Category Velocity, Time Machine and Category Seasons",
                   "Switch months with the month switcher to compare different time periods",
                   "Share exports a branded image summary you can save or send",
@@ -361,8 +387,9 @@ function AnalyticsContent() {
           <EmptyState
             icon={BarChart3}
             illustration={<FogOverlook />}
-            title="Clear skies ahead"
-            description="Add at least 3 expenses to unlock spending insights — trends, patterns, and month-over-month comparisons will appear here."
+            title="Your spending insights will appear here"
+            description="Add at least 3 expenses to unlock trends, patterns, and month-over-month comparisons. The more you track, the smarter your analytics become."
+            action={{ label: "Add an expense", onClick: () => { router.push("/?action=add"); } }}
           />
         ) : (
         <>
@@ -379,6 +406,77 @@ function AnalyticsContent() {
             </p>
           </div>
         )}
+
+        {/* ─── Plain-language monthly summary ─── */}
+        {history.currentMonth && history.currentMonth.expenses.length >= 3 && (() => {
+          const sentences: string[] = [];
+
+          // Month-over-month change
+          if (history.monthOverMonthChange !== null) {
+            const pct = Math.abs(Math.round(history.monthOverMonthChange));
+            if (history.monthOverMonthChange > 5) {
+              sentences.push(`You spent ${pct}% more than last month.`);
+            } else if (history.monthOverMonthChange < -5) {
+              sentences.push(`You spent ${pct}% less than last month — nice work.`);
+            } else {
+              sentences.push(`Spending is roughly in line with last month.`);
+            }
+          }
+
+          // Top growing category vs previous month
+          if (history.months.length >= 2) {
+            const sorted = [...history.months].sort((a, b) => (b.year * 12 + b.month) - (a.year * 12 + a.month));
+            const cur = sorted[0];
+            const prev = sorted[1];
+            if (cur && prev) {
+              let maxGrowthCat = "";
+              let maxGrowthPct = 0;
+              for (const [catId, curAmt] of Object.entries(cur.categoryBreakdown)) {
+                const prevAmt = prev.categoryBreakdown[catId] ?? 0;
+                if (prevAmt > 0 && curAmt > prevAmt) {
+                  const growthPct = ((curAmt - prevAmt) / prevAmt) * 100;
+                  if (growthPct > maxGrowthPct) {
+                    maxGrowthPct = growthPct;
+                    maxGrowthCat = catId;
+                  }
+                }
+              }
+              if (maxGrowthCat && maxGrowthPct > 20) {
+                const label = catMap[maxGrowthCat]?.label ?? maxGrowthCat;
+                sentences.push(`${label} saw the biggest jump (+${Math.round(maxGrowthPct)}% vs last month).`);
+              }
+            }
+          }
+
+          // Budget projection
+          if (effectiveBudget > 0 && forecast.projectedTotal > 0 && daysInMonth - elapsedDays > 3) {
+            const projectedOver = forecast.projectedTotal - effectiveBudget;
+            if (projectedOver > 0) {
+              sentences.push(`At this pace you're projected to go ${formatCurrencyCompact(projectedOver)} over budget.`);
+            } else if (projectedOver < 0) {
+              sentences.push(`You're on track to finish ${formatCurrencyCompact(Math.abs(projectedOver))} under budget.`);
+            }
+          }
+
+          if (sentences.length === 0) return null;
+
+          return (
+            <m.div
+              className="rounded-xl px-4 py-3"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+              style={{
+                background: "color-mix(in srgb, var(--accent) 6%, transparent)",
+                border: "1px solid color-mix(in srgb, var(--accent) 14%, transparent)",
+              }}
+            >
+              <p className="text-sm leading-relaxed" style={{ color: "var(--text-secondary)" }}>
+                {sentences.join(" ")}
+              </p>
+            </m.div>
+          );
+        })()}
 
         {/* ─── Trend Intelligence ─── */}
         <m.div
@@ -477,13 +575,41 @@ function AnalyticsContent() {
           )}
         </m.div>
 
+        {/* ─── Month vs Month Comparison ─── */}
+        {history.months.length >= 2 && (() => {
+          const sorted = [...history.months].sort((a, b) => (b.year * 12 + b.month) - (a.year * 12 + a.month));
+          const cur = sorted[0];
+          const prev = sorted[1];
+          const categoryLabels = Object.fromEntries(Object.entries(catMap).map(([k, v]) => [k, v.label]));
+          return (
+            <m.div
+              className="card-terrain p-5"
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: 0.1 }}
+            >
+              <div className="flex items-center gap-1.5 mb-4">
+                <GitCompareArrows size={16} style={{ color: "var(--accent)" }} />
+                <h3 className="text-sm font-semibold uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
+                  Month vs Month
+                </h3>
+              </div>
+              <ComparisonView
+                current={cur}
+                previous={prev}
+                categoryLabels={categoryLabels}
+                formatCurrency={formatCurrency}
+              />
+            </m.div>
+          );
+        })()}
+
         {/* ─── 2. Insights Feed ─── */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <InsightCard
             icon={DollarSign}
             title="Avg Monthly"
             value={formatCurrencyCompact(history.avgMonthlySpend)}
-            tooltip="Simple average of your total monthly spend across the last 6 months of data."
             sparkData={history.months.map((m) => m.total)}
             onClick={() => router.push("/expenses")}
           />
@@ -491,7 +617,6 @@ function AnalyticsContent() {
             icon={Zap}
             title="Top Category"
             value={topCats.length > 0 ? (catMap[topCats[0].category]?.label ?? topCats[0].category) : "—"}
-            tooltip="The category with the highest cumulative spend across all tracked months. Tap to filter expenses."
             subtitle={topCats.length > 0 ? `${formatCurrencyCompact(topCats[0].total)} all-time` : "no data"}
             onClick={topCats.length > 0 ? () => router.push(`/expenses?category=${topCats[0].category}`) : undefined}
           />
@@ -499,7 +624,6 @@ function AnalyticsContent() {
             icon={Award}
             title="Biggest Spend"
             value={history.biggestExpenses.length > 0 ? formatCurrencyCompact(history.biggestExpenses[0].amount) : "—"}
-            tooltip="Your single largest expense logged in the currently selected month. Tap to view all expenses."
             subtitle={history.biggestExpenses.length > 0 ? (history.biggestExpenses[0].remark || catMap[history.biggestExpenses[0].category]?.label || history.biggestExpenses[0].category) : "no data"}
             onClick={() => router.push("/expenses")}
           />
@@ -706,6 +830,35 @@ function AnalyticsContent() {
                     )}
                     formatCurrency={formatCurrency}
                   />
+
+                  {/* Merchant / Payee Breakdown */}
+                  <div>
+                    <div className="flex items-center gap-1.5 mb-3">
+                      <h4 className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
+                        Top Merchants / Payees
+                      </h4>
+                      <InfoTooltip title="Merchant Breakdown">
+                        <p className="text-xs leading-relaxed">Groups this month&apos;s expenses by the remark/payee field. The bar shows each merchant&apos;s share of your largest single merchant.</p>
+                      </InfoTooltip>
+                    </div>
+                    <MerchantBreakdown
+                      expenses={history.months.find((m) => m.month === currentMonth && m.year === currentYear)?.expenses ?? []}
+                      formatCurrency={formatCurrency}
+                    />
+                  </div>
+
+                  {/* Year-over-Year */}
+                  <div>
+                    <div className="flex items-center gap-1.5 mb-3">
+                      <h4 className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
+                        Year over Year
+                      </h4>
+                      <InfoTooltip title="Year over Year">
+                        <p className="text-xs leading-relaxed">Grouped bars comparing each month&apos;s spend this year (solid) vs the same month last year (faded). Hover a bar for the exact amount.</p>
+                      </InfoTooltip>
+                    </div>
+                    <YearOverYearChart formatCurrency={formatCurrencyCompact} />
+                  </div>
                 </div>
               </m.div>
             )}

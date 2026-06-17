@@ -229,11 +229,27 @@ export async function pullChanges(workspaceId?: string): Promise<boolean> {
         async () => {
           // ── Expenses ──
           if (changes.expenses?.length) {
+            // Batch-fetch all existing records for conflict detection (one query vs N)
+            const incomingIds = changes.expenses
+              .filter((r: Record<string, unknown>) => !r.deletedAt && !pendingDeleteIds.has(r.id as string))
+              .map((r: Record<string, unknown>) => r.id as string);
+            const existingMap = new Map(
+              (await db.expenses.bulkGet(incomingIds))
+                .filter(Boolean)
+                .map((e) => [e!.id, e!])
+            );
+
+            let conflictCount = 0;
             for (const row of changes.expenses) {
               if (pendingDeleteIds.has(row.id)) continue;
               if (row.deletedAt) {
                 await db.expenses.delete(row.id);
               } else {
+                const serverUpdatedAt = new Date(row.updatedAt).getTime();
+                const existing = existingMap.get(row.id);
+                if (existing && existing.updatedAt > serverUpdatedAt) {
+                  conflictCount++;
+                }
                 await db.expenses.put({
                   id: row.id,
                   workspaceId: wid,
@@ -247,11 +263,14 @@ export async function pullChanges(workspaceId?: string): Promise<boolean> {
                   isRecurring: row.isRecurring ?? false,
                   recurringId: row.recurringId ?? undefined,
                   createdAt: new Date(row.createdAt).getTime(),
-                  updatedAt: new Date(row.updatedAt).getTime(),
+                  updatedAt: serverUpdatedAt,
                   deletedAt: null,
                 });
               }
               didWrite = true;
+            }
+            if (conflictCount > 0 && _broadcastChannel) {
+              _broadcastChannel.postMessage({ type: "sync-conflict", count: conflictCount });
             }
           }
 
@@ -270,6 +289,7 @@ export async function pullChanges(workspaceId?: string): Promise<boolean> {
               savedFilters: s.savedFilters ?? [],
               goals: s.goals ?? [],
               rolloverEnabled: s.rolloverEnabled ?? false,
+              rolloverCap: s.rolloverCap ?? 0,
               rolloverHistory: s.rolloverHistory ?? {},
               monthlyBudgets: s.monthlyBudgets ?? {},
               businessMode: s.businessMode ?? false,

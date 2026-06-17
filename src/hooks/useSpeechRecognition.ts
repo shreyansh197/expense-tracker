@@ -27,6 +27,7 @@ export function useSpeechRecognition(
   const [error, setError] = useState<string | null>(null);
   const recognitionRef = useRef<any>(null);
   const onResultRef = useRef(onResult);
+  const silenceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     onResultRef.current = onResult;
@@ -41,6 +42,7 @@ export function useSpeechRecognition(
     return () => {
       recognitionRef.current?.abort();
       recognitionRef.current = null;
+      if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
     };
   }, []);
 
@@ -93,12 +95,20 @@ export function useSpeechRecognition(
     };
 
     recognition.onend = () => {
+      if (silenceTimerRef.current) {
+        clearTimeout(silenceTimerRef.current);
+        silenceTimerRef.current = null;
+      }
       setListening(false);
       recognitionRef.current = null;
     };
 
     recognitionRef.current = recognition;
     recognition.start();
+    // Auto-stop after 8 seconds to prevent runaway recording when user walks away
+    silenceTimerRef.current = setTimeout(() => {
+      recognitionRef.current?.stop();
+    }, 8000);
   }, [supported, lang]);
 
   const stop = useCallback(() => {

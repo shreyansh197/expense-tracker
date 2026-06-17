@@ -37,6 +37,18 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  experimental: {
+    optimizePackageImports: [
+      "lucide-react",
+      "@visx/curve",
+      "@visx/gradient",
+      "@visx/group",
+      "@visx/responsive",
+      "@visx/scale",
+      "@visx/shape",
+      "date-fns",
+    ],
+  },
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "lh3.googleusercontent.com" },

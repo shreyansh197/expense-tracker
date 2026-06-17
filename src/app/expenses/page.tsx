@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, Suspense, useEffect } from "react";
+import { useState, useCallback, Suspense, useEffect, useRef } from "react";
 import { AppShell } from "@/components/layout/AppShell";
 import { SkeletonExpenseList } from "@/components/ui/Skeleton";
 import { MonthSwitcher } from "@/components/layout/MonthSwitcher";
@@ -10,15 +10,16 @@ import { CategoryChips } from "@/components/expenses/CategoryChips";
 import { FilterPanel } from "@/components/expenses/FilterPanel";
 import { useExpenses } from "@/hooks/useExpenses";
 import { useUIStore } from "@/stores/uiStore";
-import { Search, PlusCircle, Globe, ArrowUpDown, ChevronDown } from "lucide-react";
+import { Search, PlusCircle, Globe, ArrowUp, ArrowDown, ArrowUpDown, ChevronDown } from "lucide-react";
 import { QuickTemplates } from "@/components/expenses/QuickTemplates";
 import { useCurrency } from "@/hooks/useCurrency";
 import { debounce } from "@/lib/debounce";
 import { useMonthUrlSync } from "@/hooks/useMonthUrlSync";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { useCalculationsContext } from "@/contexts/CalculationsContext";
 import { ExpenseExport } from "@/components/expenses/ExpenseExport";
+import { CSVImportWizard } from "@/components/expenses/CSVImportWizard";
 import { useToast } from "@/components/ui/Toast";
 import { useCrossMonthSearch } from "@/hooks/useCrossMonthSearch";
 import { AnimatedNumber } from "@/components/ui/AnimatedNumber";
@@ -76,6 +77,14 @@ function ExpensesContent() {
   });
   const [localSearch, setLocalSearch] = useState(searchQuery);
   const [crossMonthEnabled, setCrossMonthEnabled] = useState(false);
+  const [showImport, setShowImport] = useState(false);
+
+  const router = useRouter();
+  const pathname = usePathname();
+  // Tracks whether the mount-time URL-read effect has run.
+  // The write-back effect only fires after this is set to true so it doesn't
+  // clobber URL params with empty initial state before they've been read.
+  const filterInitialized = useRef(false);
 
   const { results: crossMonthResults, loading: crossMonthLoading } = useCrossMonthSearch(
     {
@@ -87,7 +96,7 @@ function ExpensesContent() {
     crossMonthEnabled,
   );
 
-  // Pre-fill filters from URL params (e.g. from analytics drill-down)
+  // Pre-fill filters from URL params (e.g. from analytics drill-down or shared links)
   useEffect(() => {
     const dayParam = searchParams.get("day");
     if (dayParam) {
@@ -97,6 +106,17 @@ function ExpensesContent() {
         setDayMax(String(d));
       }
     }
+    const dminParam = searchParams.get("dmin");
+    const dmaxParam = searchParams.get("dmax");
+    if (dminParam) setDayMin(dminParam);
+    if (dmaxParam) setDayMax(dmaxParam);
+    const aminParam = searchParams.get("amin");
+    const amaxParam = searchParams.get("amax");
+    if (aminParam) setAmountMin(aminParam);
+    if (amaxParam) setAmountMax(amaxParam);
+    const sortParam = searchParams.get("sort") as SortOption | null;
+    const validSorts: SortOption[] = ["day-desc", "day-asc", "amount-desc", "amount-asc"];
+    if (sortParam && validSorts.includes(sortParam)) setSortBy(sortParam);
     const categoryParam = searchParams.get("category");
     if (categoryParam) {
       setActiveCategories([categoryParam]);
@@ -106,8 +126,22 @@ function ExpensesContent() {
       setSearchQuery("recurring");
       setLocalSearch("recurring");
     }
+    filterInitialized.current = true;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Write filter state back to URL so filters survive page refresh and are shareable
+  useEffect(() => {
+    if (!filterInitialized.current) return;
+    const params = new URLSearchParams(searchParams.toString());
+    if (amountMin) params.set("amin", amountMin); else params.delete("amin");
+    if (amountMax) params.set("amax", amountMax); else params.delete("amax");
+    if (dayMin) params.set("dmin", dayMin); else params.delete("dmin");
+    if (dayMax) params.set("dmax", dayMax); else params.delete("dmax");
+    if (sortBy !== "day-desc") params.set("sort", sortBy); else params.delete("sort");
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [amountMin, amountMax, dayMin, dayMax, sortBy]);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const debouncedSetSearch = useCallback(
@@ -151,7 +185,64 @@ function ExpensesContent() {
     });
   };
 
+  // Smart preset filter helpers
+  const todayDay = new Date().getDate();
+  const weekStart = Math.max(1, todayDay - new Date().getDay()); // Sunday-anchored
+
+  const SMART_PRESETS = [
+    {
+      label: "Today",
+      isActive: dayMin === String(todayDay) && dayMax === String(todayDay),
+      apply: () => { setDayMin(String(todayDay)); setDayMax(String(todayDay)); setAmountMin(""); setAmountMax(""); },
+    },
+    {
+      label: "This Week",
+      isActive: dayMin === String(weekStart) && dayMax === String(todayDay),
+      apply: () => { setDayMin(String(weekStart)); setDayMax(String(todayDay)); setAmountMin(""); setAmountMax(""); },
+    },
+    {
+      label: "Big Spends",
+      isActive: sortBy === "amount-desc" && amountMin !== "",
+      apply: () => {
+        preBigSpendSort.current = sortBy;
+        setSortBy("amount-desc");
+        setAmountMin("1000");
+        setDayMin("");
+        setDayMax("");
+      },
+      deactivate: () => {
+        setAmountMin("");
+        setSortBy(preBigSpendSort.current);
+      },
+    },
+    {
+      label: "Early Month",
+      isActive: dayMax === "10" && dayMin === "",
+      apply: () => { setDayMin(""); setDayMax("10"); setAmountMin(""); setAmountMax(""); },
+    },
+    {
+      label: "Month End",
+      isActive: dayMin === "20" && dayMax === "",
+      apply: () => { setDayMin("20"); setDayMax(""); setAmountMin(""); setAmountMax(""); },
+    },
+  ];
+
+  // Stop AppShell month-swipe from firing when user scrolls the preset chips row
+  const presetSwipeX = useRef<number | null>(null);
+  // Remember sort order before "Big Spends" overrides it so we can restore on deactivate
+  const preBigSpendSort = useRef<SortOption>(sortBy);
+  const onPresetTouchStart = useCallback((e: React.TouchEvent) => {
+    presetSwipeX.current = e.touches[0].clientX;
+  }, []);
+  const onPresetTouchEnd = useCallback((e: React.TouchEvent) => {
+    if (presetSwipeX.current === null) return;
+    const dx = Math.abs(e.changedTouches[0].clientX - presetSwipeX.current);
+    presetSwipeX.current = null;
+    if (dx > 10) e.stopPropagation();
+  }, []);
+
   return (
+    <>
       <div className="relative mx-auto min-h-[80vh] max-w-4xl xl:max-w-6xl space-y-4 sm:space-y-5 p-4 sm:p-6 lg:p-8">
         {/* Stream Bed Header */}
         <div className="card-terrain p-4 sm:p-5">
@@ -172,7 +263,7 @@ function ExpensesContent() {
               </div>
             </div>
             <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-              <ExpenseExport expenses={expenses} month={currentMonth} year={currentYear} />
+              <ExpenseExport expenses={expenses} month={currentMonth} year={currentYear} onImport={() => setShowImport(true)} />
               <QuickHelpButton
                 pageTips={[
                   "Swipe an expense left to delete it, or tap to edit",
@@ -180,7 +271,7 @@ function ExpensesContent() {
                   "Sort by amount using the sort icon to spot your biggest expenses",
                   "Quick Templates (⚡) let you re-add common expenses in one tap",
                   "Filter by category using the chips below the search bar",
-                  "Export your data as CSV using the download icon on the right",
+                  "Export or import data using the download icon on the right",
                 ]}
                 pageLabel="Expenses"
               />
@@ -251,11 +342,10 @@ function ExpensesContent() {
             onClear={handleClearFilters}
             rightSlot={
               <div className="relative flex items-center">
-                <ArrowUpDown
-                  size={13}
-                  className="pointer-events-none absolute left-2.5"
-                  style={{ color: sortBy !== "day-desc" ? "var(--accent)" : "var(--text-secondary)" }}
-                />
+                {(() => {
+                  const SortIcon = sortBy.endsWith("-asc") ? ArrowUp : sortBy.endsWith("-desc") && sortBy !== "day-desc" ? ArrowDown : ArrowUpDown;
+                  return <SortIcon size={13} className="pointer-events-none absolute left-2.5" style={{ color: sortBy !== "day-desc" ? "var(--accent)" : "var(--text-secondary)" }} />;
+                })()}
                 <select
                   value={sortBy}
                   onChange={(e) => {
@@ -282,6 +372,31 @@ function ExpensesContent() {
             }
           />
 
+        </div>
+
+        {/* Smart preset filter chips — touch handlers stop AppShell month-swipe */}
+        <div
+          className="flex gap-1.5 overflow-x-auto pb-0.5"
+          style={{ scrollbarWidth: "none" }}
+          onTouchStart={onPresetTouchStart}
+          onTouchEnd={onPresetTouchEnd}
+        >
+          {SMART_PRESETS.map((preset) => (
+            <button
+              key={preset.label}
+              type="button"
+              onClick={() => preset.isActive ? (preset.deactivate ? preset.deactivate() : handleClearFilters()) : preset.apply()}
+              className="flex shrink-0 items-center gap-1 rounded-full px-3 py-1.5 text-xs font-medium transition-all"
+              style={{
+                background: preset.isActive ? "var(--accent)" : "var(--surface-secondary)",
+                color: preset.isActive ? "#fff" : "var(--text-secondary)",
+                border: preset.isActive ? "none" : "1px solid var(--border)",
+              }}
+              aria-pressed={preset.isActive}
+            >
+              {preset.label}
+            </button>
+          ))}
         </div>
 
         {/* Quick expense templates + view-mode toggle (unified row) */}
@@ -329,5 +444,13 @@ function ExpensesContent() {
           />
         )}
       </div>
+      {showImport && (
+        <CSVImportWizard
+          month={currentMonth}
+          year={currentYear}
+          onClose={() => setShowImport(false)}
+        />
+      )}
+    </>
   );
 }

@@ -58,8 +58,8 @@ function getCheck(id: string) {
 // =========== FUNCTIONAL TESTS ===========
 
 describe("Achievement definitions — functional", () => {
-  test("ACHIEVEMENT_DEFS has exactly 7 definitions", () => {
-    expect(ACHIEVEMENT_DEFS).toHaveLength(7);
+  test("ACHIEVEMENT_DEFS has exactly 8 definitions", () => {
+    expect(ACHIEVEMENT_DEFS).toHaveLength(8);
   });
 
   test("all definitions have unique IDs", () => {
@@ -234,7 +234,7 @@ describe("Achievement definitions — performance", () => {
     const originalLength = ACHIEVEMENT_DEFS.length;
     // Attempting to modify shouldn't affect the exported array in a real module
     expect(ACHIEVEMENT_DEFS.length).toBe(originalLength);
-    expect(originalLength).toBe(7);
+    expect(originalLength).toBe(8);
   });
 });
 

@@ -6,11 +6,17 @@
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "display_override": ["window-controls-overlay", "standalone"],
+  "display_override": [
+    "window-controls-overlay",
+    "standalone"
+  ],
   "background_color": "#FAF7F2",
   "theme_color": "#2D6B5A",
   "orientation": "any",
-  "categories": ["finance", "productivity"],
+  "categories": [
+    "finance",
+    "productivity"
+  ],
   "shortcuts": [
     {
       "name": "Add Expense",
@@ -53,6 +59,12 @@
     {
       "src": "/icons/icon-96.png?v=74b974f1",
       "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-128.png?v=74b974f1",
+      "sizes": "128x128",
       "type": "image/png",
       "purpose": "any"
     },

@@ -14,8 +14,8 @@ interface ShortcutDef {
 }
 
 export const SHORTCUTS: Omit<ShortcutDef, "action">[] = [
-  { key: "n", ctrl: true, label: "Ctrl+N", description: "Add new expense" },
-  { key: "n", meta: true, label: "⌘+N", description: "Add new expense" },
+  { key: "E", ctrl: true, shift: true, label: "Ctrl+Shift+E", description: "Add new expense" },
+  { key: "E", meta: true, shift: true, label: "⌘+Shift+E", description: "Add new expense" },
   { key: "k", ctrl: true, label: "Ctrl+K", description: "Focus search" },
   { key: "k", meta: true, label: "⌘+K", description: "Focus search" },
   { key: "?", label: "?", description: "Show keyboard shortcuts" },

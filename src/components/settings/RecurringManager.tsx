@@ -11,7 +11,7 @@ import { Plus, Trash2, ToggleLeft, ToggleRight, Pencil, X, ArrowUpDown } from "l
 import { FormError } from "@/components/ui/FormError";
 import { CategorySelector } from "@/components/expenses/CategorySelector";
 
-import type { RecurringExpense, CategoryId } from "@/types";
+import type { RecurringExpense, CategoryId, RecurringFrequency } from "@/types";
 
 type SortKey = "day" | "amount" | "remark";
 
@@ -30,6 +30,7 @@ export function RecurringManager() {
   const [amount, setAmount] = useState("");
   const [day, setDay] = useState("1");
   const [remark, setRemark] = useState("");
+  const [frequency, setFrequency] = useState<RecurringFrequency>("monthly");
   const [sortKey, setSortKey] = useState<SortKey>("day");
   const [formError, setFormError] = useState("");
 
@@ -38,6 +39,7 @@ export function RecurringManager() {
     setAmount("");
     setDay("1");
     setRemark("");
+    setFrequency("monthly");
     setEditId(null);
     setShowAdd(false);
     setFormError("");
@@ -60,7 +62,7 @@ export function RecurringManager() {
       // Edit existing
       const updated = recurring.map((r) =>
         r.id === editId
-          ? { ...r, category, amount: parsedAmount, day: parsedDay, remark: remark.trim() || r.remark }
+          ? { ...r, category, amount: parsedAmount, day: parsedDay, remark: remark.trim() || r.remark, frequency }
           : r
       );
       updateSettings({ recurringExpenses: updated });
@@ -73,7 +75,7 @@ export function RecurringManager() {
         amount: parsedAmount,
         day: parsedDay,
         remark: remark.trim() || `${allCategories.find((c) => c.id === category)?.label || category} (recurring)`,
-        frequency: "monthly",
+        frequency,
         active: true,
         createdAt: 0,
       };
@@ -89,6 +91,7 @@ export function RecurringManager() {
     setAmount(String(r.amount));
     setDay(String(r.day));
     setRemark(r.remark);
+    setFrequency(r.frequency || "monthly");
     setShowAdd(true);
   };
 
@@ -180,6 +183,14 @@ export function RecurringManager() {
                 <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>Day {r.day}</span>
                 <span className="text-xs" style={{ color: 'var(--text-muted)' }}>·</span>
                 <span className="text-xs font-semibold" style={{ color: 'var(--text-primary)' }}>{formatCurrency(r.amount)}</span>
+                {r.frequency && r.frequency !== "monthly" && (
+                  <>
+                    <span className="text-xs" style={{ color: 'var(--text-muted)' }}>·</span>
+                    <span className="text-[10px] rounded-full px-1.5 py-0.5 font-medium" style={{ background: "var(--surface-secondary)", color: "var(--text-muted)" }}>
+                      {r.frequency}
+                    </span>
+                  </>
+                )}
               </div>
             </div>
             <span className="shrink-0 w-20 text-right text-xs" style={{ color: 'var(--text-muted)' }}>
@@ -273,6 +284,20 @@ export function RecurringManager() {
                 maxLength={100}
                 className="form-input"
               />
+              <div>
+                <label className="form-label">Frequency</label>
+                <select
+                  value={frequency}
+                  onChange={(e) => setFrequency(e.target.value as RecurringFrequency)}
+                  className="form-input"
+                >
+                  <option value="weekly">Weekly</option>
+                  <option value="bi-weekly">Bi-weekly (every 2 weeks)</option>
+                  <option value="monthly">Monthly</option>
+                  <option value="quarterly">Quarterly (every 3 months)</option>
+                  <option value="annual">Annual (once a year)</option>
+                </select>
+              </div>
               <FormError message={formError} visible={!!formError} />
               <div className="flex gap-2 pt-1">
                 <button

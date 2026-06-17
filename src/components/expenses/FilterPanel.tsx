@@ -284,6 +284,30 @@ export function FilterPanel({
         {rightSlot && <div className="ml-auto">{rightSlot}</div>}
       </div>
 
+      {/* Saved filter quick chips (visible outside the expanded panel) */}
+      {savedFilters.length > 0 && !open && (
+        <div className="mt-2 flex flex-wrap gap-1.5" role="list" aria-label="Saved filters">
+          {savedFilters.map((f) => (
+            <button
+              key={f.id}
+              type="button"
+              role="listitem"
+              onClick={() => handleApplyFilter(f)}
+              className="flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium transition-all"
+              style={{
+                background: "var(--surface-secondary)",
+                color: "var(--text-secondary)",
+                border: "1px solid var(--border)",
+              }}
+              title={`Apply filter: ${f.name}`}
+            >
+              <BookmarkCheck size={10} className="shrink-0 text-brand" />
+              {f.name}
+            </button>
+          ))}
+        </div>
+      )}
+
       {open && (
         <div className="card mt-2 p-4">
           {/* Amount range */}
@@ -300,6 +324,7 @@ export function FilterPanel({
                   placeholder="Min"
                   value={amountMin}
                   onChange={(e) => onAmountMinChange(e.target.value)}
+                  onKeyDown={(e) => { if (["e", "E", "+", "-"].includes(e.key)) e.preventDefault(); }}
                   className="w-full rounded-ui-md border border-[var(--border)] bg-[var(--surface)] py-2.5 pl-7 pr-2 text-xs text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-brand/20"
                 />
               </div>
@@ -312,6 +337,7 @@ export function FilterPanel({
                   placeholder="Max"
                   value={amountMax}
                   onChange={(e) => onAmountMaxChange(e.target.value)}
+                  onKeyDown={(e) => { if (["e", "E", "+", "-"].includes(e.key)) e.preventDefault(); }}
                   className="w-full rounded-ui-md border border-[var(--border)] bg-[var(--surface)] py-2.5 pl-7 pr-2 text-xs text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-brand/20"
                 />
               </div>

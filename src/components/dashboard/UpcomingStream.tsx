@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, Fragment } from "react";
 import {
   Calendar, Repeat,
   Tv, Car, ShoppingCart, UtensilsCrossed, ShoppingBag,
@@ -84,42 +84,55 @@ export function UpcomingStream() {
       </div>
 
       <div className="space-y-2">
-        {upcoming.map((item) => (
-          <div
-            key={item.recurring.id}
-            className="flex items-center justify-between rounded-lg px-3 py-2"
-            style={{ background: "var(--surface-secondary)" }}
-          >
-            <div className="flex items-center gap-3 min-w-0">
-              {(() => {
-                const Icon = ICON_MAP[item.categoryIcon];
-                return Icon ? (
-                  <span className="shrink-0 flex items-center justify-center w-5 h-5" style={{ color: item.categoryColor }}>
-                    <Icon size={15} />
-                  </span>
-                ) : (
-                  <span className="text-base shrink-0">{item.categoryIcon}</span>
-                );
-              })()}
-              <div className="min-w-0">
-                <p className="truncate text-sm font-medium" style={{ color: "var(--text-primary)" }}>
-                  {item.recurring.remark || item.categoryLabel}
-                </p>
-                <p className="text-xs flex items-center gap-1" style={{ color: "var(--text-muted)" }}>
-                  {item.recurring.remark && (
-                    <span className="truncate max-w-[90px]">{item.categoryLabel}</span>
-                  )}
-                  {item.recurring.remark && <span>·</span>}
-                  <span>{item.daysUntil === 0 ? "Today" : item.daysUntil === 1 ? "Tomorrow" : `In ${item.daysUntil} days`}</span>
-                  <Repeat size={10} className="shrink-0" style={{ color: "var(--text-muted)", opacity: 0.5 }} />
-                </p>
+        {upcoming.map((item, idx) => {
+          const prevDaysUntil = idx > 0 ? upcoming[idx - 1].daysUntil : item.daysUntil;
+          const showFutureSeparator = item.daysUntil > 0 && prevDaysUntil === 0;
+          return (
+            <Fragment key={item.recurring.id}>
+              {showFutureSeparator && (
+                <div key={`sep-${item.recurring.id}`} className="flex items-center gap-2 py-1">
+                  <div className="h-px flex-1" style={{ background: "var(--border-subtle)" }} />
+                  <span className="text-[10px] font-medium uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Upcoming</span>
+                  <div className="h-px flex-1" style={{ background: "var(--border-subtle)" }} />
+                </div>
+              )}
+              <div
+                key={item.recurring.id}
+                className="flex items-center justify-between rounded-lg px-3 py-2"
+                style={{ background: "var(--surface-secondary)" }}
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  {(() => {
+                    const Icon = ICON_MAP[item.categoryIcon];
+                    return Icon ? (
+                      <span className="shrink-0 flex items-center justify-center w-5 h-5" style={{ color: item.categoryColor }}>
+                        <Icon size={15} />
+                      </span>
+                    ) : (
+                      <span className="text-base shrink-0">{item.categoryIcon}</span>
+                    );
+                  })()}
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium" style={{ color: "var(--text-primary)" }}>
+                      {item.recurring.remark || item.categoryLabel}
+                    </p>
+                    <p className="text-xs flex items-center gap-1" style={{ color: "var(--text-muted)" }}>
+                      {item.recurring.remark && (
+                        <span className="truncate max-w-[90px]">{item.categoryLabel}</span>
+                      )}
+                      {item.recurring.remark && <span>·</span>}
+                      <span>{item.daysUntil === 0 ? "Today" : item.daysUntil === 1 ? "Tomorrow" : `In ${item.daysUntil} days`}</span>
+                      <Repeat size={10} className="shrink-0" style={{ color: "var(--text-muted)", opacity: 0.5 }} />
+                    </p>
+                  </div>
+                </div>
+                <span className="text-sm font-semibold font-numeric shrink-0 ml-3" style={{ color: "var(--text-primary)" }}>
+                  {formatCurrency(item.recurring.amount)}
+                </span>
               </div>
-            </div>
-            <span className="text-sm font-semibold font-numeric shrink-0 ml-3" style={{ color: "var(--text-primary)" }}>
-              {formatCurrency(item.recurring.amount)}
-            </span>
-          </div>
-        ))}
+            </Fragment>
+          );
+        })}
       </div>
     </div>
   );

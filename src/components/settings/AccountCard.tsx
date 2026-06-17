@@ -7,7 +7,7 @@ import { useAuth } from "@/components/providers/AuthProvider";
 import { useConfirm } from "@/components/ui/ConfirmDialog";
 import { useToast } from "@/components/ui/Toast";
 import { authFetch, clearAuthState, setAuthState, getAuthState } from "@/lib/authClient";
-import { User, Trash2, Camera, Eye, EyeOff, Loader2, X, ImagePlus } from "lucide-react";
+import { User, Trash2, Camera, Eye, EyeOff, Loader2, X, ImagePlus, Download } from "lucide-react";
 import { Skeleton } from "@/components/ui/Skeleton";
 
 const ALL_LOCAL_STORAGE_KEYS = [
@@ -377,6 +377,25 @@ export function AccountCard() {
           </div>
         </div>
       )}
+
+      {/* GDPR: Download my data */}
+      <div className="pt-4" style={{ borderTop: '1px solid var(--border)' }}>
+        <p className="mb-2 text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--text-secondary)' }}>Data & Privacy</p>
+        <p className="mb-3 text-xs" style={{ color: 'var(--text-secondary)' }}>
+          You can request a full copy of your data at any time (GDPR Art. 20).
+        </p>
+        <button
+          onClick={() => {
+            const el = document.getElementById("export-import");
+            el?.scrollIntoView({ behavior: "smooth", block: "start" });
+          }}
+          className="flex items-center gap-2 rounded-lg border px-4 py-2 text-xs font-medium transition-colors"
+          style={{ borderColor: 'var(--border)', color: 'var(--text-secondary)' }}
+        >
+          <Download size={14} />
+          Download my data
+        </button>
+      </div>
 
       {/* Delete Account */}
       <div className="pt-4" style={{ borderTop: '1px solid var(--border)' }}>

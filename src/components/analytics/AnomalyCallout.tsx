@@ -31,7 +31,13 @@ export function AnomalyCallout({ anomalies, formatCurrency, categoryLabels }: An
 
       {anomalies.slice(0, 5).map((a, i) => {
         const catLabel = categoryLabels[a.expense.category] ?? a.expense.category;
-        const sigma = a.zScore.toFixed(1);
+        const multiplier = a.categoryMedian > 0 ? (a.expense.amount / a.categoryMedian).toFixed(1) : null;
+        const anomalyDesc =
+          a.zScore >= 3.5
+            ? "unusually high — well above your normal"
+            : a.zScore >= 2.5
+            ? `about ${multiplier ?? "2"}× your typical ${catLabel} spend`
+            : "notably higher than your usual spending";
 
         return (
           <m.div
@@ -65,7 +71,7 @@ export function AnomalyCallout({ anomalies, formatCurrency, categoryLabels }: An
                     {a.expense.remark || catLabel}
                   </p>
                   <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
-                    {catLabel} · {sigma}σ above 30-day avg
+                    {catLabel} · {anomalyDesc}
                   </p>
                 </div>
                 <div className="shrink-0 text-right">

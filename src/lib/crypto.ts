@@ -60,8 +60,14 @@ export function hasEncryptionKey(): boolean {
  */
 export async function encryptString(plaintext: string): Promise<string> {
   const keyB64 = getStoredKeyB64();
-  if (!keyB64) return plaintext;
-
+  if (!keyB64) {
+    if (process.env.NODE_ENV !== "production") {
+      console.warn(
+        "[crypto] encryptString called without an encryption key — storing plaintext (migration fallback).",
+      );
+    }
+    return plaintext;
+  }
   const key = await importKey(keyB64);
   const iv = crypto.getRandomValues(new Uint8Array(IV_BYTES));
   const encoded = new TextEncoder().encode(plaintext);

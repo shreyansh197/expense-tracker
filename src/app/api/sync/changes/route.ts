@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
     if (!auth) return jsonError("Unauthorized", 401);
 
     const ip = getClientIp(req);
-    const rl = rateLimit(`sync-changes:${hashIp(ip)}:${auth.userId}`, 120, 60_000);
+    const rl = await rateLimit(`sync-changes:${hashIp(ip)}:${auth.userId}`, 120, 60_000);
     if (!rl.ok) {
       return NextResponse.json(
         { error: "Too many requests. Try again later." },

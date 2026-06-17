@@ -538,6 +538,30 @@ body {
   }
 }
 
+/* Desktop PWA: Window Controls Overlay — leave room for the titlebar */
+@media (display-mode: window-controls-overlay) {
+  :root {
+    --titlebar-area-height: env(titlebar-area-height, 0px);
+    --titlebar-area-x: env(titlebar-area-x, 0px);
+    --titlebar-area-width: env(titlebar-area-width, 100%);
+  }
+  body {
+    /* Push content below the WCO titlebar */
+    padding-top: env(titlebar-area-height, 0px);
+  }
+  /* Draggable region fills the WCO titlebar area */
+  .titlebar-drag-region {
+    position: fixed;
+    top: 0;
+    left: env(titlebar-area-x, 0px);
+    width: env(titlebar-area-width, 100%);
+    height: env(titlebar-area-height, 0px);
+    -webkit-app-region: drag;
+    app-region: drag;
+    z-index: 9999;
+  }
+}
+
 html {
   scroll-behavior: smooth;
 }

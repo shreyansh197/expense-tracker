@@ -156,6 +156,7 @@ export function SecurityCard() {
         setVerifyCode("");
         if (data.recoveryCodes?.length) {
           setRecoveryCodes(data.recoveryCodes);
+          localStorage.setItem("expenstream-recovery-codes-pending", "true");
           toast("2FA enabled! Save your recovery codes now.");
         } else {
           toast("2FA verified");

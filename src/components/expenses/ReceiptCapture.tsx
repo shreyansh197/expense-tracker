@@ -140,7 +140,13 @@ export function ReceiptCapture({ onExtracted, onClose }: ReceiptCaptureProps) {
         <div className="flex flex-col items-center gap-3">
           <button
             type="button"
-            onClick={() => fileRef.current?.click()}
+            onClick={() => {
+              if (!navigator.onLine) {
+                setError("Receipt scanning requires an internet connection — OCR is unavailable offline.");
+                return;
+              }
+              fileRef.current?.click();
+            }}
             className="flex h-28 w-full flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed transition-colors"
             style={{ borderColor: "var(--border)", color: "var(--text-secondary)" }}
           >

@@ -21,9 +21,11 @@ interface AchievementContext {
   completedGoals: number;
   activeRecurring: number;
   consecutiveMonthsUnderBudget: number;
+  hasBudget: boolean;
 }
 
 export const ACHIEVEMENT_DEFS: AchievementDef[] = [
+  { id: "getting_started", name: "Getting Started", description: "Set a budget and log 3 expenses", icon: "🚀", check: (ctx) => ctx.hasBudget && ctx.totalExpenses >= 3 },
   { id: "week_warrior", name: "Week Warrior", description: "7-day logging streak", icon: "🔥", check: (ctx) => ctx.streak >= 7 },
   { id: "monthly_master", name: "Monthly Master", description: "30-day logging streak", icon: "⭐", check: (ctx) => ctx.streak >= 30 },
   { id: "budget_hero", name: "Budget Hero", description: "Finish a month under budget", icon: "🛡️", check: (ctx) => ctx.consecutiveMonthsUnderBudget >= 1 },
@@ -113,6 +115,7 @@ export function useAchievements(
       completedGoals: settings.goals?.filter((g) => g.savedAmount >= g.targetAmount).length ?? 0,
       activeRecurring: settings.recurringExpenses?.filter((r) => r.active).length ?? 0,
       consecutiveMonthsUnderBudget: consecutiveUnderBudget,
+      hasBudget: (settings.salary ?? 0) > 0,
     };
   }, [allExpenses, currentMonthExpenses, streak, settings.goals, settings.recurringExpenses, consecutiveUnderBudget]);
 

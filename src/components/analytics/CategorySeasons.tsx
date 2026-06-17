@@ -27,7 +27,7 @@ export function CategorySeasons() {
 
   // Find top 6 categories across all months
   const topCats = useMemo(() => {
-    if (months.length < 3) return [];
+    if (months.length < 4) return [];
     const catTotals: Record<string, number> = {};
     for (const md of months) {
       for (const [cat, amt] of Object.entries(md.categoryBreakdown)) {
@@ -42,7 +42,7 @@ export function CategorySeasons() {
 
   // Build stacked data per month
   const { stackedData, maxTotal, stacks, catColors } = useMemo(() => {
-    if (months.length < 3 || topCats.length === 0) {
+    if (months.length < 4 || topCats.length === 0) {
       return { stackedData: [], maxTotal: 1, stacks: [], catColors: [] };
     }
     const sd: Array<Record<string, string | number>> = months.map((md) => {
@@ -93,8 +93,22 @@ export function CategorySeasons() {
     };
   }, [months, topCats, catMap]);
 
-  // Early return AFTER all hooks
-  if (months.length < 3 || topCats.length === 0) return null;
+  // Early return AFTER all hooks — require 4 months for meaningful seasonal patterns
+  if (months.length < 4 || topCats.length === 0) {
+    return (
+      <m.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+        className="rounded-2xl p-6 text-center card-parchment"
+      >
+        <Layers size={20} className="mx-auto mb-2 opacity-40" style={{ color: "var(--text-muted)" }} />
+        <p className="text-xs font-medium" style={{ color: "var(--text-muted)" }}>
+          Seasonal patterns appear after 4 months of tracking
+        </p>
+      </m.div>
+    );
+  }
 
   // SVG dimensions
   const W = 400;

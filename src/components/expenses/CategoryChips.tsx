@@ -2,6 +2,7 @@
 
 import { useRef, useCallback, useState, useEffect } from "react";
 import { m, AnimatePresence } from "framer-motion";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { getAllCategories, buildCategoryMap } from "@/lib/categories";
 import { cn } from "@/lib/utils";
 import { useUIStore } from "@/stores/uiStore";
@@ -18,6 +19,31 @@ export function CategoryChips() {
   const containerRef = useRef<HTMLDivElement>(null);
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
   const isHorizontalSwipe = useRef(false);
+
+  // Desktop scroll arrows
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+
+  const updateArrows = useCallback(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    setCanScrollLeft(el.scrollLeft > 4);
+    setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 4);
+  }, []);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    updateArrows();
+    el.addEventListener("scroll", updateArrows, { passive: true });
+    const ro = new ResizeObserver(updateArrows);
+    ro.observe(el);
+    return () => { el.removeEventListener("scroll", updateArrows); ro.disconnect(); };
+  }, [updateArrows]);
+
+  const scrollBy = useCallback((dir: -1 | 1) => {
+    containerRef.current?.scrollBy({ left: dir * 160, behavior: "smooth" });
+  }, []);
 
   // Long-press state
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -114,15 +140,30 @@ export function CategoryChips() {
 
   return (
     <>
-      <div
-        ref={containerRef}
-        role="group"
-        aria-label="Category filters — hold to peek at a category"
-        className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide md:flex-wrap md:overflow-visible"
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-      >
+      <div className="group/chips relative">
+        {/* Left scroll arrow — desktop only, visible on hover */}
+        {canScrollLeft && (
+          <button
+            type="button"
+            onClick={() => scrollBy(-1)}
+            aria-label="Scroll categories left"
+            className="absolute left-0 top-1/2 z-10 hidden -translate-y-1/2 items-center justify-center rounded-full p-0.5 shadow opacity-0 transition-opacity duration-150 group-hover/chips:opacity-100 md:flex"
+            style={{ background: "var(--surface)", border: "1px solid var(--border)", color: "var(--text-secondary)" }}
+          >
+            <ChevronLeft size={14} />
+          </button>
+        )}
+
+        <div
+          ref={containerRef}
+          role="group"
+          aria-label="Category filters — hold to peek at a category"
+          className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide"
+          style={{ scrollSnapType: "x mandatory" }}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+        >
         {allCategories.map((cat, i) => {
           const isActive =
             activeCategories.length === 0 || activeCategories.includes(cat.id);
@@ -165,6 +206,20 @@ export function CategoryChips() {
             </m.button>
           );
         })}
+        </div>
+
+        {/* Right scroll arrow — desktop only, visible on hover */}
+        {canScrollRight && (
+          <button
+            type="button"
+            onClick={() => scrollBy(1)}
+            aria-label="Scroll categories right"
+            className="absolute right-0 top-1/2 z-10 hidden -translate-y-1/2 items-center justify-center rounded-full p-0.5 shadow opacity-0 transition-opacity duration-150 group-hover/chips:opacity-100 md:flex"
+            style={{ background: "var(--surface)", border: "1px solid var(--border)", color: "var(--text-secondary)" }}
+          >
+            <ChevronRight size={14} />
+          </button>
+        )}
       </div>
       <AnimatePresence>
         {showLongPressHint && (

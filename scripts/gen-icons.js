@@ -17,6 +17,7 @@ async function gen() {
     { name: "icon-48.png", size: 48, pad: 0 },
     { name: "icon-72.png", size: 72, pad: 0 },
     { name: "icon-96.png", size: 96, pad: 0 },
+    { name: "icon-128.png", size: 128, pad: 0 },
     { name: "icon-144.png", size: 144, pad: 0 },
     { name: "icon-192.png", size: 192, pad: 0 },
     { name: "icon-384.png", size: 384, pad: 0 },

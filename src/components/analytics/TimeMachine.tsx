@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { m, AnimatePresence } from "framer-motion";
-import { Clock, ArrowRightLeft, RotateCcw, Bookmark, Trash2 } from "lucide-react";
+import { Clock, ArrowRightLeft, RotateCcw, Bookmark, Trash2, Copy, Check } from "lucide-react";
 import { useExpenses } from "@/hooks/useExpenses";
 import { useSettings } from "@/hooks/useSettings";
 import { useUIStore } from "@/stores/uiStore";
@@ -31,6 +31,7 @@ export function TimeMachine() {
   const { monthlyTotal, effectiveBudget } = useCalculationsContext();
   const [scenario, setScenario] = useState<Scenario | null>(null);
   const [showWhatIf, setShowWhatIf] = useState(false);
+  const [copied, setCopied] = useState(false);
   const [savedScenarios, setSavedScenarios] = useState<SavedScenario[]>([]);
 
   // Load saved scenarios from Dexie on mount
@@ -297,6 +298,31 @@ export function TimeMachine() {
                   <Bookmark size={12} />
                   Save scenario
                 </button>
+                {whatIfResult && (
+                  <button
+                    onClick={() => {
+                      const catLabel = catMap[scenario!.sourceCategory]?.label ?? scenario!.sourceCategory;
+                      const text = [
+                        `Time Machine — ${catLabel}`,
+                        `Reality: ${formatCurrency(monthlyTotal)} (${catLabel}: ${formatCurrency(whatIfResult.originalSourceTotal)})`,
+                        `What-If: ${formatCurrency(whatIfResult.newMonthlyTotal)} (${catLabel}: ${formatCurrency(whatIfResult.newSourceTotal)})`,
+                        whatIfResult.savings > 0
+                          ? `Would save ${formatCurrency(whatIfResult.savings)} across ${whatIfResult.transactionCount} transactions`
+                          : `Would spend ${formatCurrency(Math.abs(whatIfResult.savings))} more`,
+                      ].join('\n');
+                      navigator.clipboard.writeText(text).then(() => {
+                        setCopied(true);
+                        setTimeout(() => setCopied(false), 2000);
+                      });
+                    }}
+                    className="flex items-center gap-1.5 text-xs font-medium"
+                    style={{ color: "var(--text-muted)" }}
+                    aria-label="Copy scenario as text"
+                  >
+                    {copied ? <Check size={12} /> : <Copy size={12} />}
+                    {copied ? 'Copied' : 'Copy'}
+                  </button>
+                )}
               </div>
             </m.div>
           )}

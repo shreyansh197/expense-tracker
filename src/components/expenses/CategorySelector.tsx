@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { m, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import {
@@ -54,6 +54,11 @@ export function CategorySelector({ categories, selected, onSelect, showError, ca
   const [showCreate, setShowCreate] = useState(false);
   const [newName, setNewName] = useState("");
   const [newColor, setNewColor] = useState(QUICK_COLORS[0]);
+
+  const handleSelect = useCallback((id: CategoryId) => {
+    onSelect(selected === id ? ("" as CategoryId) : id);
+  }, [onSelect, selected]);
+
   // Build a lookup of spent per category
   const spentMap = new Map<string, number>();
   categoryTotals?.forEach((ct) => spentMap.set(ct.category, ct.total));
@@ -90,6 +95,7 @@ export function CategorySelector({ categories, selected, onSelect, showError, ca
       <label className="form-label mb-1.5 uppercase">
         Category {showError && <span className="text-err normal-case">— please select</span>}
       </label>
+
       <div ref={gridRef} onKeyDown={handleGridKeyDown} className="flex max-h-36 flex-wrap gap-1.5 overflow-y-auto" role="radiogroup" aria-label="Select category">
         {categories.map((cat) => {
           const budget = categoryBudgets?.[cat.id] ?? 0;
@@ -102,11 +108,11 @@ export function CategorySelector({ categories, selected, onSelect, showError, ca
             <m.button
               key={cat.id}
               type="button"
-              onClick={() => onSelect(selected === cat.id ? ("" as CategoryId) : (cat.id as CategoryId))}
+              onClick={() => handleSelect(cat.id as CategoryId)}
               role="radio"
               aria-checked={selected === cat.id}
               className={cn(
-                "relative flex items-center gap-1.5 rounded-ui-full px-3 py-2 sm:py-2.5 text-xs font-medium transition-all",
+                "relative flex items-center gap-1.5 rounded-ui-full px-3 py-2 sm:py-2.5 text-xs font-medium transition-all overflow-hidden",
                 selected === cat.id ? "text-white shadow-sm" : ""
               )}
               style={
@@ -134,6 +140,17 @@ export function CategorySelector({ categories, selected, onSelect, showError, ca
                   className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-ui-full"
                   style={{ background: overLimit ? "var(--danger)" : "var(--warning)" }}
                   aria-label={overLimit ? "Over budget" : "Near budget limit"}
+                />
+              )}
+              {/* Budget mini-bar at the bottom of the chip */}
+              {budget > 0 && (
+                <span
+                  className="absolute bottom-0 left-0 h-0.5"
+                  style={{
+                    width: `${Math.min(pct, 100)}%`,
+                    background: overLimit ? "var(--danger)" : pct >= 80 ? "var(--warning)" : (selected === cat.id ? "rgba(255,255,255,0.5)" : "var(--accent)"),
+                  }}
+                  aria-hidden
                 />
               )}
             </m.button>

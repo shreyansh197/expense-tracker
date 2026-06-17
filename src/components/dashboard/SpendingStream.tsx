@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useCallback } from "react";
+import { useMemo, useState, useCallback, useEffect } from "react";
 import { m, useReducedMotion } from "framer-motion";
 
 /* ── Layout constants ── */
@@ -46,6 +46,9 @@ interface SpendingStreamProps {
   effectiveBudget?: number;
   /** Currency formatter */
   formatCurrency?: (n: number) => string;
+  /** Month (1-12) and year being displayed — used to determine whether to show the "today" marker */
+  month?: number;
+  year?: number;
   className?: string;
 }
 
@@ -57,12 +60,22 @@ export function SpendingStream({
   anomalyDays,
   effectiveBudget = 0,
   formatCurrency,
+  month,
+  year,
   className,
 }: SpendingStreamProps) {
   const prefersReduced = useReducedMotion();
   const clamped = Math.min(Math.max(budgetUsedPercent, 0), 120);
   const [activeStone, setActiveStone] = useState<number | null>(null);
   const [isHovering, setIsHovering] = useState(false);
+
+  // Pause animations when the browser tab is hidden to save battery
+  const [isPageVisible, setIsPageVisible] = useState(true);
+  useEffect(() => {
+    const handleVisibility = () => setIsPageVisible(!document.hidden);
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () => document.removeEventListener("visibilitychange", handleVisibility);
+  }, []);
 
   const fmt = useCallback(
     (n: number) => (formatCurrency ? formatCurrency(n) : `₹${n.toLocaleString()}`),
@@ -81,8 +94,12 @@ export function SpendingStream({
   /* ── Budget horizon line Y position (100% mark) ── */
   const budgetHorizonY = VB_H - (14 + 90);
 
-  /* ── Today marker ── */
-  const today = new Date().getDate();
+  /* ── Today marker — only meaningful when viewing the actual current month ── */
+  const today = useMemo(() => {
+    const now = new Date();
+    const isCurrentMonth = month === now.getMonth() + 1 && year === now.getFullYear();
+    return isCurrentMonth ? now.getDate() : -1;
+  }, [month, year]);
 
   /* ── Daily budget baseline Y (mapped into same weight-space as stones) ── */
   const baselineY = useMemo(() => {
@@ -468,7 +485,7 @@ export function SpendingStream({
               fill="url(#ss-base)"
               opacity={w.opacity}
               animate={{ x: [w.shift[0], w.shift[1], w.shift[0]] }}
-              transition={{ duration: w.speed, ease: "linear", repeat: Infinity }}
+              transition={{ duration: w.speed, ease: "linear", repeat: isPageVisible ? Infinity : 0 }}
             />
           ))}
 
@@ -483,7 +500,7 @@ export function SpendingStream({
               transition={{
                 duration: wavePaths[0].speed,
                 ease: "linear",
-                repeat: Infinity,
+                repeat: isPageVisible ? Infinity : 0,
               }}
             />
           )}
@@ -497,7 +514,7 @@ export function SpendingStream({
               transition={{
                 duration: wavePaths[1].speed,
                 ease: "linear",
-                repeat: Infinity,
+                repeat: isPageVisible ? Infinity : 0,
               }}
             />
           )}
@@ -526,7 +543,7 @@ export function SpendingStream({
                 transition={{
                   duration: bobDuration,
                   ease: "easeInOut",
-                  repeat: Infinity,
+                  repeat: isPageVisible ? Infinity : 0,
                   delay: (stone.day % 7) * 0.3,
                 }}
               >
@@ -542,7 +559,7 @@ export function SpendingStream({
                     transition={{
                       duration: 2.5,
                       ease: "easeInOut",
-                      repeat: Infinity,
+                      repeat: isPageVisible ? Infinity : 0,
                     }}
                   />
                 )}
