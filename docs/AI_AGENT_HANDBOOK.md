@@ -85,18 +85,18 @@ If a workflow prompt (`prompts/STANDARD_HEADER.md`, `prompts/MASTER_AUDIT.md`) i
 
 The following actions require the prompting human to authorize them **in the same session**:
 
-| Forbidden by default                                          | Why                                                                    |
-| ------------------------------------------------------------- | ---------------------------------------------------------------------- |
-| Modify code under `src/` outside the current sprint's task list | Application changes belong to a task with acceptance criteria.         |
-| Introduce a new dependency (`package.json`)                    | Every dep is a supply-chain surface; requires review + `npm audit`.    |
-| Create a new database migration                                | Migrations are authoritative and irreversible in prod.                 |
-| Change an env var or secret name                               | Coupled to hosting + rotation runbooks.                                |
-| Log or transmit monetary values, emails, phone numbers, PII    | Fintech rule — see [`AI_CONTEXT.md §18`](AI_CONTEXT.md).               |
-| Weaken auth, RLS, rate limiting, or encryption                 | Security posture must monotonically improve.                           |
-| Hard-code colors, spacing, radii, motion durations             | Design tokens exist for a reason — see [`DESIGN_SYSTEM.md`](DESIGN_SYSTEM.md). |
-| Cross-feature imports (e.g., analytics reaching into ledger)   | Feature verticalization is a stated architecture goal ([M10](IMPLEMENTATION_QUEUE.md#sprint-101)). |
-| Create planning / notes / summary Markdown outside the current task's `Affected Files` | Doc sprawl is a known failure mode. Use in-session memory instead. |
-| Delete or rewrite `firestore.rules` while it exists            | Kept as a legacy artifact per [ADR-0001](adr/0001-postgres-over-firestore.md). |
+| Forbidden by default                                                                   | Why                                                                                                |
+| -------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| Modify code under `src/` outside the current sprint's task list                        | Application changes belong to a task with acceptance criteria.                                     |
+| Introduce a new dependency (`package.json`)                                            | Every dep is a supply-chain surface; requires review + `npm audit`.                                |
+| Create a new database migration                                                        | Migrations are authoritative and irreversible in prod.                                             |
+| Change an env var or secret name                                                       | Coupled to hosting + rotation runbooks.                                                            |
+| Log or transmit monetary values, emails, phone numbers, PII                            | Fintech rule — see [`AI_CONTEXT.md §18`](AI_CONTEXT.md).                                           |
+| Weaken auth, RLS, rate limiting, or encryption                                         | Security posture must monotonically improve.                                                       |
+| Hard-code colors, spacing, radii, motion durations                                     | Design tokens exist for a reason — see [`DESIGN_SYSTEM.md`](DESIGN_SYSTEM.md).                     |
+| Cross-feature imports (e.g., analytics reaching into ledger)                           | Feature verticalization is a stated architecture goal ([M10](IMPLEMENTATION_QUEUE.md#sprint-101)). |
+| Create planning / notes / summary Markdown outside the current task's `Affected Files` | Doc sprawl is a known failure mode. Use in-session memory instead.                                 |
+| Delete or rewrite `firestore.rules` while it exists                                    | Kept as a legacy artifact per [ADR-0001](adr/0001-postgres-over-firestore.md).                     |
 
 If in doubt: **ask one clarifying question, then pick the smallest reversible change**.
 
@@ -143,14 +143,14 @@ Full details in [`IMPLEMENTATION_RULES.md`](IMPLEMENTATION_RULES.md).
 
 Preferred tools, in order of preference for common tasks:
 
-| Task                                          | First choice                                    | Fallback                     |
-| --------------------------------------------- | ----------------------------------------------- | ---------------------------- |
-| Find a symbol or reference                    | `grep` / `glob`                                 | Shell (`Select-String`)      |
-| Read a specific file section                  | `view` with `view_range`                        | Shell (`Get-Content`)        |
-| Make a precise, small edit                    | `edit` (batched in one response when possible)  | Recreate the file            |
-| Recreate a small file after full rewrite      | `create` (delete + create is only for scaffolds) | —                            |
-| Run tests / build                             | `npm test`, `npm run build`, `npm run lint`     | —                            |
-| Explore a wide, independent research thread   | `task` (explore agent) with a complete prompt   | —                            |
+| Task                                        | First choice                                     | Fallback                |
+| ------------------------------------------- | ------------------------------------------------ | ----------------------- |
+| Find a symbol or reference                  | `grep` / `glob`                                  | Shell (`Select-String`) |
+| Read a specific file section                | `view` with `view_range`                         | Shell (`Get-Content`)   |
+| Make a precise, small edit                  | `edit` (batched in one response when possible)   | Recreate the file       |
+| Recreate a small file after full rewrite    | `create` (delete + create is only for scaffolds) | —                       |
+| Run tests / build                           | `npm test`, `npm run build`, `npm run lint`      | —                       |
+| Explore a wide, independent research thread | `task` (explore agent) with a complete prompt    | —                       |
 
 **Never** delegate a small, in-context lookup to an `explore` agent — it costs more than reading the file yourself.
 

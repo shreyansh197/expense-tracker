@@ -679,7 +679,6 @@ Quick jumps for reviewers:
 - Security headers + CSP: [next.config.ts](../next.config.ts)
 - Sentry configs: [sentry.client.config.ts](../sentry.client.config.ts), [sentry.server.config.ts](../sentry.server.config.ts), [sentry.edge.config.ts](../sentry.edge.config.ts)
 
-
 ---
 
 **Last reviewed:** 2026-07-23

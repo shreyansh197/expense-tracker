@@ -251,7 +251,6 @@ If everything else in this document is forgotten, remember this:
 
 > **ExpenStream exists to reduce financial anxiety and increase financial confidence — for every user, on every screen, in every interaction. If a feature does not do this, it does not ship.**
 
-
 ---
 
 **Last reviewed:** 2026-07-23

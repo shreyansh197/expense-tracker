@@ -139,17 +139,17 @@ The pre-flight smoke that gates every production deploy. All steps run against *
 
 ## Roles
 
-| Gate                        | Owner            | Blocking? |
-| --------------------------- | ---------------- | --------- |
-| Automated Jest suite        | Author of the PR | Yes       |
-| Lint / build / types        | Author of the PR | Yes       |
-| Accessibility manual        | A11y reviewer    | Yes       |
-| Performance smoke           | Perf reviewer    | Recommend |
-| Sync / offline manual       | Release captain  | Yes       |
-| Security manual             | Security review  | Yes       |
-| PWA / platform manual       | Release captain  | Recommend |
-| Business ledger manual      | Product          | Recommend |
-| Release smoke (T + 15 min)  | Release captain  | Yes       |
+| Gate                       | Owner            | Blocking? |
+| -------------------------- | ---------------- | --------- |
+| Automated Jest suite       | Author of the PR | Yes       |
+| Lint / build / types       | Author of the PR | Yes       |
+| Accessibility manual       | A11y reviewer    | Yes       |
+| Performance smoke          | Perf reviewer    | Recommend |
+| Sync / offline manual      | Release captain  | Yes       |
+| Security manual            | Security review  | Yes       |
+| PWA / platform manual      | Release captain  | Recommend |
+| Business ledger manual     | Product          | Recommend |
+| Release smoke (T + 15 min) | Release captain  | Yes       |
 
 ---
 
