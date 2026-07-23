@@ -58,8 +58,8 @@ Additional automatic-fail patterns:
 - **TypeScript strict** is non-negotiable: `noImplicitAny`, `strictNullChecks`, `noUncheckedIndexedAccess`.
 - Use `unknown` at boundaries and narrow with Zod — never `any`.
 - Zod parses **every** external input: API bodies, query strings, `localStorage`, `IndexedDB` reads, env vars.
-- Currency uses integer minor units or the decimal-safe helpers in [src/lib/calculations.ts](src/lib/calculations.ts). No `+`, `-`, `*`, `/` on floats for money.
-- Dates are ISO 8601 strings on the wire, `Date` objects in memory, and always locale-aware in the UI via helpers in [src/lib/utils.ts](src/lib/utils.ts).
+- Currency uses integer minor units or the decimal-safe helpers in [src/lib/calculations.ts](../src/lib/calculations.ts). No `+`, `-`, `*`, `/` on floats for money.
+- Dates are ISO 8601 strings on the wire, `Date` objects in memory, and always locale-aware in the UI via helpers in [src/lib/utils.ts](../src/lib/utils.ts).
 - No new npm dependency without: bundle-size check, license check, and a one-line note in the PR.
 - Feature flags gate anything user-visible that is not yet ready.
 
@@ -80,13 +80,13 @@ Additional automatic-fail patterns:
 - **Max 250 lines per component file**, including JSX. Larger means split.
 - **Max one default export per component file.** Named exports for helpers.
 - **Presentational vs. container split:** components in `src/components/ui/` are pure, tokenized, and stateless; feature components in `src/components/<domain>/` compose them with hooks.
-- **No fetching inside components.** Data comes from hooks in [src/hooks/](src/hooks/); mutations go through the sync engine.
+- **No fetching inside components.** Data comes from hooks in [src/hooks/](../src/hooks/); mutations go through the sync engine.
 - **No business logic in JSX.** Move it to a hook, a util, or a `src/lib/*` module.
 - Props are typed with an explicit `interface` or `type`, exported, and documented at the type level.
-- No prop drilling more than **two levels**. Use a context in [src/contexts/](src/contexts/) or a store in [src/stores/](src/stores/).
+- No prop drilling more than **two levels**. Use a context in [src/contexts/](../src/contexts/) or a store in [src/stores/](../src/stores/).
 - Every interactive component ships with the four canonical states: **empty, loading, error, offline** (see [AI_CONTEXT.md](AI_CONTEXT.md) §8).
 - Client components declare `"use client"` on the first line; server components must not import client-only libs.
-- Motion uses variants from [src/lib/motion/tokens.ts](src/lib/motion/tokens.ts). No inline `transition` objects in feature code.
+- Motion uses variants from [src/lib/motion/tokens.ts](../src/lib/motion/tokens.ts). No inline `transition` objects in feature code.
 
 **Best practices**
 
@@ -141,13 +141,13 @@ src/
 
 **Rules**
 
-- **Tailwind + design tokens only.** No inline `style={{ color: ... }}` for design values. Tokens are defined in [src/app/globals.css](src/app/globals.css) and mirrored in [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md).
+- **Tailwind + design tokens only.** No inline `style={{ color: ... }}` for design values. Tokens are defined in [src/app/globals.css](../src/app/globals.css) and mirrored in [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md).
 - **No hard-coded colors, radii, spacing, or z-indices.** Use CSS variables or Tailwind tokens.
 - **Accent color is user-owned.** Components inherit via `--accent-*` tokens; never hard-code brand hues.
 - **Themes are first-class.** Every screen must render correctly in light, dark, and sunset themes without special-casing.
 - **`prefers-reduced-motion` is respected** in every Framer variant — use the helpers in `src/lib/motion/`.
 - **Images** via `next/image`; **icons** via inline SVG or Lucide; **fonts** via `next/font` with `display: swap`.
-- **No layout shift** on first paint. Reserve space for async content with skeletons from [src/components/ui/](src/components/ui/).
+- **No layout shift** on first paint. Reserve space for async content with skeletons from [src/components/ui/](../src/components/ui/).
 - **Mobile-first.** Primary actions must be reachable in the bottom half of the viewport on mobile.
 - **Hit targets ≥ 44×44px.** Focus rings visible, using the accent token, never `outline: none`.
 - **No new global CSS classes.** Extend tokens or add a UI primitive instead.
@@ -168,11 +168,11 @@ src/
 
 - Route handlers live only in `src/app/api/**` and follow the shape: **parse → authenticate → authorize → execute → serialize → audit**.
 - **Zod validates** every request body, query, and header before use.
-- **`getSessionUser()`** (or the equivalent guard in [src/lib/server/](src/lib/server/)) authenticates every non-public route.
+- **`getSessionUser()`** (or the equivalent guard in [src/lib/server/](../src/lib/server/)) authenticates every non-public route.
 - **Workspace scoping is enforced server-side**, not trusted from the client. Every query includes `workspaceId` derived from the session.
 - **Mutations are idempotent.** Use client-provided `mutationId` for dedupe on the write path.
 - **Rate limits** apply to auth, sync, invite, and export endpoints. See migration `013_rate_limit_table.sql`.
-- **No raw SQL** in feature code. Prisma is the only path. Migrations live in [prisma/migrations/](prisma/migrations/).
+- **No raw SQL** in feature code. Prisma is the only path. Migrations live in [prisma/migrations/](../prisma/migrations/).
 - **No PII or monetary values** in logs, error messages, or third-party analytics.
 - **Audit privileged actions** (device link, invite, member removal, password change, 2FA toggle) to the audit log.
 - Long-running work happens off the request path (queue, cron, edge function) — never block a user request.
@@ -191,7 +191,7 @@ src/
 
 **Rules**
 
-- **Prisma is the only schema authority.** Edit [prisma/schema.prisma](prisma/schema.prisma), generate a migration, commit both.
+- **Prisma is the only schema authority.** Edit [prisma/schema.prisma](../prisma/schema.prisma), generate a migration, commit both.
 - **Every migration is additive and reversible where possible.** Never edit a shipped migration — write a new one.
 - **RLS is enabled on every table** (baseline: migration `012_enable_rls_all_tables.sql`). New tables must ship with an RLS policy in the same migration.
 - **Every user-owned row carries `workspaceId`** and is indexed on `(workspaceId, ...)`.
@@ -290,7 +290,7 @@ src/
 
 **Rules**
 
-- **All motion goes through Framer Motion** using variants from [src/lib/motion/tokens.ts](src/lib/motion/tokens.ts).
+- **All motion goes through Framer Motion** using variants from [src/lib/motion/tokens.ts](../src/lib/motion/tokens.ts).
 - **No inline `transition` objects** in feature components. Reference a token.
 - **Durations** live in tokens: `motion.duration.instant / fast / base / slow`. No raw numbers.
 - **Easings** are tokenized. No raw cubic-bezier values in feature code.
@@ -316,9 +316,9 @@ src/
 
 - **Local state (`useState`)** for anything scoped to one component.
 - **URL state (`searchParams`)** for anything shareable, bookmarkable, or refresh-survivable (filters, tabs, ranges).
-- **React Context** for cross-cutting concerns that rarely change (auth, workspace, theme). Contexts live in [src/contexts/](src/contexts/).
-- **Zustand stores** in [src/stores/](src/stores/) for cross-component ephemeral state that changes often (toasts, drawers, transient UI).
-- **Dexie (IndexedDB)** is the durable client cache. Reads go through hooks in [src/hooks/](src/hooks/); writes go through the mutation queue in [src/lib/syncEngine.ts](src/lib/syncEngine.ts).
+- **React Context** for cross-cutting concerns that rarely change (auth, workspace, theme). Contexts live in [src/contexts/](../src/contexts/).
+- **Zustand stores** in [src/stores/](../src/stores/) for cross-component ephemeral state that changes often (toasts, drawers, transient UI).
+- **Dexie (IndexedDB)** is the durable client cache. Reads go through hooks in [src/hooks/](../src/hooks/); writes go through the mutation queue in [src/lib/syncEngine.ts](../src/lib/syncEngine.ts).
 - **Never** put server data in Zustand. Never put ephemeral UI state in Dexie.
 - **Never** duplicate the same piece of state in two stores.
 - **Selectors** are memoized. Consumers subscribe to the smallest slice they need.
@@ -339,14 +339,14 @@ src/
 **Rules**
 
 - **Every `async` boundary** (route handler, hook, sync task) has a `try/catch` and reports to the structured logger.
-- **User-facing errors** use the toast / error-state components from [src/components/ui/](src/components/ui/) — never `alert()`.
-- **Error boundaries** wrap every top-level route via [src/app/error.tsx](src/app/error.tsx) and per-feature boundaries where appropriate.
+- **User-facing errors** use the toast / error-state components from [src/components/ui/](../src/components/ui/) — never `alert()`.
+- **Error boundaries** wrap every top-level route via [src/app/error.tsx](../src/app/error.tsx) and per-feature boundaries where appropriate.
 - **Never swallow errors.** A `catch` block that does nothing is a bug. At minimum, log and re-throw or surface a typed error.
 - **Never leak stack traces** or internal messages to the user. Map to a friendly copy string.
 - **Never log PII or monetary values.** See §13.
 - **Retryable errors** (network, 5xx) are retried by the sync engine with exponential backoff and jitter.
 - **Non-retryable errors** (4xx, validation) surface immediately with actionable copy.
-- **Sentry** captures unhandled errors via [sentry.client.config.ts](sentry.client.config.ts) and its server/edge siblings. Financial values are scrubbed in `beforeSend`.
+- **Sentry** captures unhandled errors via [sentry.client.config.ts](../sentry.client.config.ts) and its server/edge siblings. Financial values are scrubbed in `beforeSend`.
 
 **Best practices**
 
@@ -362,7 +362,7 @@ src/
 
 **Rules**
 
-- **Use the structured logger** in [src/lib/errorReporting.ts](src/lib/errorReporting.ts) (or its server equivalent). Do **not** use `console.log`, `console.debug`, or `console.info` in application code.
+- **Use the structured logger** in [src/lib/errorReporting.ts](../src/lib/errorReporting.ts) (or its server equivalent). Do **not** use `console.log`, `console.debug`, or `console.info` in application code.
 - **`console.warn` and `console.error`** are allowed only in the logger implementation itself and in `scripts/`.
 - **Log levels:** `debug` (dev only, stripped in prod), `info` (state transitions), `warn` (recoverable anomalies), `error` (unhandled or user-visible failure).
 - **Never log:** email, phone, name, address, IP, device fingerprints, monetary values, workspace names, category names, or any body of a user-authored expense/note.
@@ -384,7 +384,7 @@ src/
 
 **Rules**
 
-- **Jest** is the test runner. Specs live under [src/**tests**/](src/__tests__/) and mirror the module path.
+- **Jest** is the test runner. Specs live under [src/**tests**/](../src/__tests__/) and mirror the module path.
 - **Every new module in `src/lib/`** ships with a unit test.
 - **Every new component** ships with a contract test (props, states, a11y).
 - **Every new API route** ships with an integration test that covers: auth failure, validation failure, workspace-scope failure, happy path.
@@ -410,8 +410,8 @@ src/
 
 **Rules**
 
-- **Living docs** ([AI_CONTEXT.md](docs/AI_CONTEXT.md), [ARCHITECTURE.md](docs/ARCHITECTURE.md), [DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md), [PROJECT_MASTER_PLAN.md](docs/PROJECT_MASTER_PLAN.md), this file) are updated **in place**. Never fork.
-- **Do not create a new markdown file to describe your own PR.** Update the relevant living doc, [CHANGELOG.md](docs/CHANGELOG.md), or [RELEASE_NOTES.md](docs/RELEASE_NOTES.md).
+- **Living docs** ([AI_CONTEXT.md](AI_CONTEXT.md), [ARCHITECTURE.md](ARCHITECTURE.md), [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md), [PROJECT_MASTER_PLAN.md](PROJECT_MASTER_PLAN.md), this file) are updated **in place**. Never fork.
+- **Do not create a new markdown file to describe your own PR.** Update the relevant living doc, [CHANGELOG.md](CHANGELOG.md), or [RELEASE_NOTES.md](RELEASE_NOTES.md).
 - **`CHANGELOG.md`** gets an entry for every user-visible change, following the existing style.
 - **`RELEASE_NOTES.md`** is written for humans and updated at release time.
 - **`SPRINT_BOARD.md`** is the source of truth for in-flight work. Tasks move only there.
@@ -521,7 +521,7 @@ src/
 - **Jest** must pass. Coverage does not regress on `src/lib/`.
 - **CI runs**: lint, typecheck, test, build, bundle-size check, migration dry-run.
 - **Pre-commit hooks** (via Husky, if configured) run `lint-staged`. Do not bypass with `--no-verify`.
-- **Sprint reviews** ([SPRINT_BOARD.md](docs/SPRINT_BOARD.md)) verify: no TODOs added, no `console.log` added, no oversized components, no undocumented endpoints.
+- **Sprint reviews** ([SPRINT_BOARD.md](SPRINT_BOARD.md)) verify: no TODOs added, no `console.log` added, no oversized components, no undocumented endpoints.
 
 ---
 
@@ -534,3 +534,8 @@ src/
 ---
 
 **End of document.** When a rule here proves wrong in practice, open a PR that updates this file first — then change the code. Rules are only as strong as the discipline that keeps them honest.
+
+
+---
+
+**Last reviewed:** 2026-07-23

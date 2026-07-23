@@ -366,6 +366,8 @@ Migration `012_enable_rls_all_tables.sql` enables **RLS on every table**. Polici
 
 `001`→`013` covers: initial schema, auth, Google OAuth, phone OTP, device client id, new settings columns, expense currency, workspace encryption key, achievements/accent color, push + notification prefs, verification tokens, RLS-all-tables, rate-limit table.
 
+[`prisma/migrations/`](../prisma/migrations) is the **sole authoritative** history. [`prisma/legacy/`](../prisma/legacy) archives the pre-Prisma Supabase SQL files (`supabase-setup.sql`, `supabase-migration*.sql`) for provenance only — see [`prisma/legacy/README.md`](../prisma/legacy/README.md) and [ADR-0001](adr/0001-postgres-over-firestore.md). Nothing under `prisma/legacy/` is applied by `prisma migrate`.
+
 ### 8.4 Client-side (IndexedDB via Dexie)
 
 `src/lib/db.ts` defines four Dexie tables — `expenses`, `settings`, `ledgers`, `payments` — plus a `mutations` queue table. Records mirror server shape, with numeric timestamps and workspace scoping. Types `IDBExpense`, `IDBSettings`, `IDBLedger`, `IDBPayment`, `IDBMutation` are the client contract.
@@ -676,3 +678,8 @@ Quick jumps for reviewers:
 - Migrations: [prisma/migrations/](../prisma/migrations)
 - Security headers + CSP: [next.config.ts](../next.config.ts)
 - Sentry configs: [sentry.client.config.ts](../sentry.client.config.ts), [sentry.server.config.ts](../sentry.server.config.ts), [sentry.edge.config.ts](../sentry.edge.config.ts)
+
+
+---
+
+**Last reviewed:** 2026-07-23

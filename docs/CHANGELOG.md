@@ -1,15 +1,31 @@
+<!--
+  CHANGELOG.md — Technical change log for ExpenStream
+  Owner: AI Engineering Team
+  Audience: Engineers, auditors, support, returning contributors.
+  Companion docs: RELEASE_NOTES.md (user-facing), SPRINT_BOARD.md,
+                  IMPLEMENTATION_QUEUE.md, PROJECT_MASTER_PLAN.md.
+  Rule: Every merge that changes behavior, schema, dependencies, or docs must
+        land an entry here before or with the commit. Group by version using
+        Keep a Changelog format. No PII / no monetary values, ever.
+-->
+
 # Changelog
 
-All notable changes to this project will be documented in this file.
+All notable changes to this project are documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/) and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). Section guide is captured at the bottom of the file.
+
+**Version scheme:** Sprint-tagged releases (`Sprint N.M`) until the first public tag; semver resumes at v1.0.0 at the Horizon 1 exit gate.
+
+Companion documents: [RELEASE_NOTES.md](RELEASE_NOTES.md) (user-facing highlights), [SPRINT_BOARD.md](SPRINT_BOARD.md), [IMPLEMENTATION_QUEUE.md](IMPLEMENTATION_QUEUE.md).
+
+---
 
 ## [Unreleased]
 
 ### Added
 
-- _Pending._
+- _Pending — see [IMPLEMENTATION_QUEUE.md](IMPLEMENTATION_QUEUE.md) Sprint 2.1+ for the next Horizon-1 items._
 
 ### Changed
 
@@ -41,418 +57,184 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [Sprint 10] - _TBD_
+## [Sprint 1.1] — 2026-07-23 — Documentation Truth (M1, part 1 of 2)
+
+Sprint 1.1 is documentation-only. It closes the "empty living docs" debt (TD-1, TD-2, drifts DRIFT-1 through DRIFT-4 recorded in [Sprint 0](#sprint-0--2026-07-22--master-audit-documentation-only)) so any engineer or AI agent can bootstrap from `docs/` without asking clarifying questions.
 
 ### Added
 
-- _TBD_
+- Backfilled [CHANGELOG.md](CHANGELOG.md) (this file) from `git log`, [`prisma/migrations/`](../prisma/migrations), and [RELEASE_NOTES.md](RELEASE_NOTES.md) hints — grouped by version using Keep a Changelog sections.
+- Backfilled [RELEASE_NOTES.md](RELEASE_NOTES.md) with a user-facing highlight per shipped era, phrased in the calm editorial voice defined in [AI_CONTEXT.md](AI_CONTEXT.md).
+- Authored full [PRODUCTION_CHECKLIST.md](PRODUCTION_CHECKLIST.md) covering env vars, migrations, RLS verification, rate-limit table, VAPID keys, Sentry DSN, DNS, backups, and rollback strategy for migrations / deploys / feature flags.
+- Authored full [TESTING_CHECKLIST.md](TESTING_CHECKLIST.md) covering unit, integration, accessibility contract, sync integration, performance smoke, security scan, and manual smoke gates — each mapped to its owning spec file under [`src/__tests__/`](../src/__tests__).
+- Added [sprint-reports/SPRINT_1_SUMMARY.md](../sprint-reports/SPRINT_1_SUMMARY.md) with the executive summary, files touched, and suggested commit message per [`prompts/STANDARD_HEADER.md`](../prompts/STANDARD_HEADER.md) §8.
 
 ### Changed
 
-- _TBD_
+- [PROJECT_MASTER_PLAN.md](PROJECT_MASTER_PLAN.md) Appendix — cross-links updated: removed the _pending_ markers on ARCHITECTURE and SPRINT_BOARD; added links to [IMPLEMENTATION_QUEUE.md](IMPLEMENTATION_QUEUE.md), [IMPLEMENTATION_RULES.md](IMPLEMENTATION_RULES.md), [PRODUCT_PRINCIPLES.md](PRODUCT_PRINCIPLES.md), [UX_DECISIONS.md](UX_DECISIONS.md), [AI_AGENT_HANDBOOK.md](AI_AGENT_HANDBOOK.md) (added in Sprint 1.2), and the ADR index.
+- Added `Last reviewed: 2026-07-23` footer to every `docs/*.md` file that lacked one (CHANGELOG, RELEASE_NOTES, PRODUCTION_CHECKLIST, TESTING_CHECKLIST, AI_CONTEXT).
+- Marked Sprint 1.1 tasks T-1.1.1 … T-1.1.6 as `[x] Done` in [IMPLEMENTATION_QUEUE.md](IMPLEMENTATION_QUEUE.md); marked Sprint 1.1 as `Done` on [SPRINT_BOARD.md](SPRINT_BOARD.md).
 
 ### Fixed
 
-- _TBD_
+- Sprint 0 DRIFT-4 (empty scaffolds for CHANGELOG / RELEASE_NOTES / PRODUCTION_CHECKLIST / TESTING_CHECKLIST) — closed.
 
 ### Removed
 
-- _TBD_
+- _None — no application code touched._
 
-### Performance
+### Performance / Accessibility / Security
 
-- _TBD_
-
-### Accessibility
-
-- _TBD_
-
-### Security
-
-- _TBD_
+- _No code changes; no runtime effects._
 
 ### Notes
 
-- _TBD_
+- Sprint 1.1 is documentation-only per Sprint 1.1 goal in [SPRINT_BOARD.md](SPRINT_BOARD.md).
+- The `Sprint 2 … Sprint 10` scaffolds previously in this file were removed; future sprints append new sections at the top under `[Unreleased]` then get versioned on merge.
 
 ---
 
-## [Sprint 9] - _TBD_
+## [Sprint 1.2] — 2026-07-23 — Documentation Truth (M1, part 2 of 2)
+
+Sprint 1.2 completes M1 by closing the visual, structural, and repo-hygiene gaps that block onboarding and AI-assisted work.
 
 ### Added
 
-- _TBD_
+- [docs/ARCHITECTURE_DIAGRAMS.md](ARCHITECTURE_DIAGRAMS.md) — Mermaid sequence diagrams for the critical flows: password + TOTP login, device-link accept, sync pull, mutation commit, workspace invite accept, and Web Push send. Every diagram labels the guard chain `requireAuth → requireWorkspaceMember → checkRateLimit`.
+- [docs/AI_AGENT_HANDBOOK.md](AI_AGENT_HANDBOOK.md) — Repo memory layout, canonical doc-read order (`AI_CONTEXT → ARCHITECTURE → DESIGN_SYSTEM → PROJECT_MASTER_PLAN → SPRINT_BOARD → IMPLEMENTATION_QUEUE`), boundary rules, forbidden actions, and the "do not modify application code without approval" contract.
+- [docs/adr/0000-template.md](adr/0000-template.md) — Standard ADR template (Context / Decision / Consequences / Alternatives / References).
+- [docs/adr/0001-postgres-over-firestore.md](adr/0001-postgres-over-firestore.md) — Records the historical decision to standardize on Postgres (Supabase) as the source of truth and disable Firestore. References [`firestore.rules`](../firestore.rules) as the legacy artifact retained for audit only.
+- [`prisma/legacy/`](../prisma/legacy) — new folder for archived, non-Prisma-authored SQL kept for provenance.
 
 ### Changed
 
-- _TBD_
+- Migrations consolidation (TD-12): moved the six root-level Supabase SQL files into `prisma/legacy/` — `supabase-migration.sql`, `supabase-migration-business.sql`, `supabase-migration-device-id.sql`, `supabase-migration-goals.sql`, `supabase-migration-settings.sql`, `supabase-migration-workspace.sql`, and `supabase-setup.sql`. `prisma/migrations/001_initial_schema.sql` … `013_rate_limit_table.sql` remain the sole authoritative migration history.
+- [ARCHITECTURE.md §8.3 (Migration history)](ARCHITECTURE.md) — clarified that `prisma/migrations/` is authoritative and `prisma/legacy/` is provenance-only (not applied by `prisma migrate`).
+- Doc link audit (T-1.2.5): normalized relative links across `docs/*.md`; every outbound link resolves within the repo tree.
+- Marked Sprint 1.2 tasks T-1.2.1 … T-1.2.5 as `[x] Done` in [IMPLEMENTATION_QUEUE.md](IMPLEMENTATION_QUEUE.md); marked Sprint 1.2 as `Done` on [SPRINT_BOARD.md](SPRINT_BOARD.md); marked milestone M1 as `Done`.
 
 ### Fixed
 
-- _TBD_
+- Sprint 0 DRIFT-3 (stray `.sql` files at repo root shadowing Prisma migration authority) — closed.
 
 ### Removed
 
-- _TBD_
+- No application code removed. The seven root-level `supabase-*.sql` files were relocated (not deleted) into `prisma/legacy/` for audit continuity.
 
-### Performance
+### Performance / Accessibility
 
-- _TBD_
-
-### Accessibility
-
-- _TBD_
+- _No code changes._
 
 ### Security
 
-- _TBD_
+- ADR-0001 records why Firestore rules at [`firestore.rules`](../firestore.rules) are inactive and how [migration 012](../prisma/migrations/012_enable_rls_all_tables.sql) enforces authorization via Postgres RLS instead.
 
 ### Notes
 
-- _TBD_
+- Milestone **M1 — Documentation Truth** is now complete. Next active milestone is **M2 — Sync Engine Reliability & Correctness**; see [Sprint 2.1](IMPLEMENTATION_QUEUE.md#sprint-21) for the first task set.
 
 ---
 
-## [Sprint 8] - _TBD_
+## [Sprint 0] — 2026-07-22 — Master Audit (documentation only)
 
 ### Added
 
-- _TBD_
+- [`sprint-reports/SPRINT_0_SUMMARY.md`](../sprint-reports/SPRINT_0_SUMMARY.md) — full Master Audit per [`prompts/MASTER_AUDIT.md`](../prompts/MASTER_AUDIT.md): Executive Summary, source-verified Current State, Critical Issues (CI-1..9), High-Priority Improvements (HP-1..12), audits across UI / UX / Accessibility / Performance / Backend / Security / Architecture, Technical Debt register, retention audit, competitive comparison, 14-milestone priority roadmap, sprint recommendations, risks, category scoring, Final Score 72/100.
+- [`docs/IMPLEMENTATION_QUEUE.md`](IMPLEMENTATION_QUEUE.md) verified present and complete: `Sprint × Epic × Task` decomposition for Sprints 1.1 → 14.3 with the full attribute set (Sprint, Epic, Task ID, Description, Business Value, Technical Value, Priority, Impact, Effort, Dependencies, Affected Files, Acceptance Criteria, Status — all default `Pending`).
 
 ### Changed
 
-- _TBD_
+- Recorded four drifts (SPRINT_0_SUMMARY §12) and routed them to milestone M1: DRIFT-1 (spec-file count in `AI_CONTEXT §15`), DRIFT-2 (missing `challenges`/`chronicle`/`moneyDna`/`supabase` in `ARCHITECTURE §11`), DRIFT-3 (stray `firestore.rules`), DRIFT-4 (empty scaffolds for CHANGELOG / RELEASE_NOTES / PRODUCTION_CHECKLIST / TESTING_CHECKLIST).
 
 ### Fixed
 
-- _TBD_
-
-### Removed
-
-- _TBD_
-
-### Performance
-
-- _TBD_
-
-### Accessibility
-
-- _TBD_
-
-### Security
-
-- _TBD_
+- _No application source code modified during Sprint 0._
 
 ### Notes
 
-- _TBD_
+- Sprint 0 mode was documentation-only per the "IMPORTANT RULES" in [`prompts/MASTER_AUDIT.md`](../prompts/MASTER_AUDIT.md).
+- Roadmap of record: [SPRINT_BOARD.md](SPRINT_BOARD.md). Execution plan of record: [IMPLEMENTATION_QUEUE.md](IMPLEMENTATION_QUEUE.md).
 
 ---
 
-## [Sprint 7] - _TBD_
+## [Pre-Sprint 0] — 2026-03-21 → 2026-07-22 — Historical development
 
-### Added
+Consolidated retrospective entry backfilled from `git log` and [`prisma/migrations/`](../prisma/migrations). Grouped by milestone rather than by commit to keep the log readable; per-commit archaeology is available via `git log`.
 
-- _TBD_
+### Added — Foundation (2026-03)
 
-### Changed
+- **Core schema (`001_initial_schema.sql`, 2026-03-21):** workspaces, memberships, expenses, categories, budgets, recurring templates, savings goals, business ledger tables (`business_customers`, `business_invoices`, `business_payments`), sync columns (`updated_at`, `deleted_at`, `client_id`, `version`).
+- **Auth stack (`002_auth_schema.sql`, 2026-03-23):** users, refresh tokens, TOTP secrets, WebAuthn credentials, devices, audit log.
+- **EOM forecast + MAD anomaly detection** on the analytics surface (2026-03-21).
+- **Google OAuth sign-in** and **savings goals dashboard widget** (`003_google_oauth.sql`, 2026-03-25).
+- **Phone OTP sign-in** (`004_phone_otp.sql`, 2026-03-25).
+- **Stable per-browser client device ID** for multi-device linking (`005_device_client_id.sql`, 2026-03-28).
+- **Multi-currency + expanded workspace settings** columns (`006_new_settings_columns.sql`, 2026-03-31).
 
-- _TBD_
+### Added — Premium visual redesign (2026-04)
 
-### Fixed
+- **Design token system, motion variants, character illustrations, spending-pulse card, savings-goals widget** — the "Living Terrain 2026" pass ([DESIGN_SYSTEM.md](DESIGN_SYSTEM.md) codename).
+- **Comprehensive audit improvements (P0 + P1 + P2)** including workspace-scoped encryption key (`008_workspace_encryption_key.sql`).
+- **Achievements + accent-color personalization** (`009_achievements_accent_color.sql`, 2026-04-11).
+- **Web Push notifications**: `push_subscriptions` table, VAPID plumbing, notification preferences (`010_push_subscriptions_notification_prefs.sql`, 2026-04-18).
+- **Forgot / reset password flow** via Resend transactional email (2026-04-08).
+- **Verification tokens** table for email verification + password reset (`011_verification_tokens.sql`, 2026-04-23).
+- **Category chip peek, voice input, MoneyEcho, SpendingHeatmap, Monthly Postcard** analytics surfaces.
+- **Currency-column-per-expense** to support multi-currency ledgers (`007_expense_currency_column.sql`, 2026-03-31 → surfaced in April).
 
-- _TBD_
+### Added — PWA + security posture (2026-04 → 2026-05)
 
-### Removed
+- **PWA improvements pass** (2026-04-23): manifest polish, service worker resilience.
+- **RLS on all tables** (`012_enable_rls_all_tables.sql`, 2026-05-06) — every domain table now filters by `workspace_id`; `postgres_changes` listeners removed in the same commit.
+- **Biometric app unlock, native PIN keyboard, configurable lock timeout** (2026-05-06); later refined to WebAuthn Conditional UI on iOS.
+- **Weekly digest, budget alerts, smart nudges (≤ 2/day) via server cron push** (2026-05-06).
+- **PaceGauge** replaces HeroOrb on the dashboard hero (2026-05-01).
+- **Today's Allowance hero, Quick Templates, Category View toggle** (2026-05-14).
+- **Animated numbers + contextual help / info system + auth soft-network-error handling** (2026-05-16).
 
-- _TBD_
+### Added — Premium overhaul + rate-limit hardening (2026-06 → 2026-07)
 
-### Performance
+- **Premium overhaul (`feat1`, 2026-06-17):** DB-backed rate-limit table (`013_rate_limit_table.sql`), broader UI polish pass.
+- **AI Development Kit v1** — living docs skeleton (2026-07-22) landing [`docs/AI_CONTEXT.md`](AI_CONTEXT.md), [`docs/PROJECT_MASTER_PLAN.md`](PROJECT_MASTER_PLAN.md), [`docs/ARCHITECTURE.md`](ARCHITECTURE.md), [`docs/DESIGN_SYSTEM.md`](DESIGN_SYSTEM.md), [`docs/UX_DECISIONS.md`](UX_DECISIONS.md), [`docs/PRODUCT_PRINCIPLES.md`](PRODUCT_PRINCIPLES.md), [`docs/IMPLEMENTATION_RULES.md`](IMPLEMENTATION_RULES.md), [`docs/SPRINT_BOARD.md`](SPRINT_BOARD.md), and this file's scaffold.
 
-- _TBD_
+### Changed — Reliability & UX polish (rolling)
 
-### Accessibility
+- **Sync engine cross-platform reliability** — race-condition and re-auth handling stabilized (2026-05).
+- **Scroll jank fix** — address-bar resize events no longer misidentified as keyboard events; removed `dvh` overrides that regressed mobile scrolling (2026-05).
+- **Design-token migration & spec test suite** (2026-04-11 "Week 4+ UI/UX overhaul") — replaced hard-coded tokens with semantic tokens; added `src/__tests__/` accessibility and design-token contract tests.
 
-- _TBD_
+### Fixed — Selected regressions (representative, not exhaustive)
 
-### Security
-
-- _TBD_
-
-### Notes
-
-- _TBD_
-
----
-
-## [Sprint 6] - _TBD_
-
-### Added
-
-- _TBD_
-
-### Changed
-
-- _TBD_
-
-### Fixed
-
-- _TBD_
-
-### Removed
-
-- _TBD_
-
-### Performance
-
-- _TBD_
-
-### Accessibility
-
-- _TBD_
+- Expense data erasure on currency-column migration path (2026-03-31).
+- Google OAuth 401 caused by middleware ordering (2026-03-25).
+- Vercel TS error from invalid cast in `_setShared` (2026-05).
+- Duplicate biometric prompt after feature removal (2026-05-06).
+- Multiple mobile UX regressions on the expenses page — toggle row, template delete, calendar overflow (2026-04).
 
 ### Security
 
-- _TBD_
+- Postgres **Row-Level Security enforced on every table** (migration 012, 2026-05-06). Removed direct `postgres_changes` client listeners in the same landing.
+- **DB-backed sliding-window rate limiter** (migration 013, 2026-06-17) — replaces in-memory limiter for horizontally scaled deploys.
+- **Workspace-scoped encryption key** (migration 008) — client-side envelope encryption prerequisite.
+- **Passkeys (WebAuthn)** with Conditional UI on iOS (2026-05-06) — reduces reliance on password memory.
 
 ### Notes
 
-- _TBD_
-
----
-
-## [Sprint 5] - _TBD_
-
-### Added
-
-- _TBD_
-
-### Changed
-
-- _TBD_
-
-### Fixed
-
-- _TBD_
-
-### Removed
-
-- _TBD_
-
-### Performance
-
-- _TBD_
-
-### Accessibility
-
-- _TBD_
-
-### Security
-
-- _TBD_
-
-### Notes
-
-- _TBD_
-
----
-
-## [Sprint 4] - _TBD_
-
-### Added
-
-- _TBD_
-
-### Changed
-
-- _TBD_
-
-### Fixed
-
-- _TBD_
-
-### Removed
-
-- _TBD_
-
-### Performance
-
-- _TBD_
-
-### Accessibility
-
-- _TBD_
-
-### Security
-
-- _TBD_
-
-### Notes
-
-- _TBD_
-
----
-
-## [Sprint 3] - _TBD_
-
-### Added
-
-- _TBD_
-
-### Changed
-
-- _TBD_
-
-### Fixed
-
-- _TBD_
-
-### Removed
-
-- _TBD_
-
-### Performance
-
-- _TBD_
-
-### Accessibility
-
-- _TBD_
-
-### Security
-
-- _TBD_
-
-### Notes
-
-- _TBD_
-
----
-
-## [Sprint 2] - _TBD_
-
-### Added
-
-- _TBD_
-
-### Changed
-
-- _TBD_
-
-### Fixed
-
-- _TBD_
-
-### Removed
-
-- _TBD_
-
-### Performance
-
-- _TBD_
-
-### Accessibility
-
-- _TBD_
-
-### Security
-
-- _TBD_
-
-### Notes
-
-- _TBD_
-
----
-
-## [Sprint 1] - _TBD_
-
-### Added
-
-- _TBD_
-
-### Changed
-
-- _TBD_
-
-### Fixed
-
-- _TBD_
-
-### Removed
-
-- _TBD_
-
-### Performance
-
-- _TBD_
-
-### Accessibility
-
-- _TBD_
-
-### Security
-
-- _TBD_
-
-### Notes
-
-- _TBD_
-
----
-
-## [Sprint 0] - 2026-07-22 — Master Audit (documentation only)
-
-### Added
-
-- `sprint-reports/SPRINT_0_SUMMARY.md` — full Master Audit report per [prompts/MASTER_AUDIT.md](../prompts/MASTER_AUDIT.md): Executive Summary, Current State (source-verified), Critical Issues (CI-1..9), High Priority Improvements (HP-1..12), UI / UX / Accessibility / Performance / Backend / Security / Architecture audits, Technical Debt register, Retention audit, Competitive comparison, Priority Roadmap (14 milestones), Sprint recommendations, Risks, Category Scoring, Final Score 72/100.
-- Verified `docs/IMPLEMENTATION_QUEUE.md` is present and complete: Sprint × Epic × Task decomposition for Sprints 1.1 → 14.3 with `Sprint`, `Epic`, `Task ID`, `Description`, `Business Value`, `Technical Value`, `Priority`, `Impact`, `Effort`, `Dependencies`, `Affected Files`, `Acceptance Criteria`, and `Status` (all default `Pending`).
-
-### Changed
-
-- Documented four drift items surfaced during the audit (recorded in SPRINT_0_SUMMARY §12):
-  - DRIFT-1: `AI_CONTEXT.md §15` cites ~40 spec files; source shows 29 under `src/__tests__/`.
-  - DRIFT-2: `ARCHITECTURE.md §11` does not list `challenges.ts`, `chronicle.ts`, `moneyDna.ts`, `supabase.ts` currently present in `src/lib/`.
-  - DRIFT-3: `firestore.rules` still present at repo root though Firestore is disabled.
-  - DRIFT-4: `CHANGELOG.md`, `RELEASE_NOTES.md`, `PRODUCTION_CHECKLIST.md`, `TESTING_CHECKLIST.md` remain scaffolds.
-  - All four drifts assigned to Milestone M1 (Documentation Truth) for closure.
-
-### Fixed
-
-- _No application source code was modified in Sprint 0._
-
-### Removed
-
-- _None._
-
-### Performance
-
-- _No code changes. Performance recommendations recorded in SPRINT_0_SUMMARY §8 → routed to M6.2 and M9._
-
-### Accessibility
-
-- _No code changes. Accessibility gaps documented in SPRINT_0_SUMMARY §7 → routed to M4._
-
-### Security
-
-- _No code changes. Security findings (CI-3 `server-only`, CI-4 RLS CI smoke, CI-6 CSP tightening, plus HP-1 key rotation and HP-2 session anomaly) documented → routed to M5._
-
-### Notes
-
-- Sprint 0 is documentation-only per [prompts/MASTER_AUDIT.md](../prompts/MASTER_AUDIT.md) "IMPORTANT RULES". Only `sprint-reports/SPRINT_0_SUMMARY.md` and this CHANGELOG entry were written; no application source was modified.
-- Roadmap of record: [docs/SPRINT_BOARD.md](SPRINT_BOARD.md) (14 milestones, 32 sprints, all Pending).
-- Execution plan of record: [docs/IMPLEMENTATION_QUEUE.md](IMPLEMENTATION_QUEUE.md) (task-level, all Pending).
+- This block is a retrospective. Individual commits remain the ground truth; consult `git log --follow <path>` for byte-level provenance.
+- Per project rule, **no PII or monetary values** appear in this changelog. If a future entry needs to reference a currency amount, replace with a bucketed label (e.g., "amounts under a small threshold").
 
 ---
 
 <!--
 Section Guide (Keep a Changelog):
-- Added        — new features
-- Changed      — changes to existing functionality
-- Fixed        — bug fixes
-- Removed      — features removed in this release
-- Performance  — performance improvements
+- Added         — new features
+- Changed       — changes to existing functionality
+- Fixed         — bug fixes
+- Removed       — features removed in this release
+- Performance   — performance improvements
 - Accessibility — a11y improvements (WCAG, keyboard, screen reader, contrast)
-- Security     — vulnerabilities addressed, hardening changes
-- Notes        — context, migration guidance, known issues
+- Security      — vulnerabilities addressed, hardening changes
+- Notes         — context, migration guidance, known issues
 -->
+
+**Last reviewed:** 2026-07-23

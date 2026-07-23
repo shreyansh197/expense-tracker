@@ -117,7 +117,7 @@ TypeScript strict - ESLint/Prettier clean - Tests co-located under `src/__tests_
   - File is non-empty and cross-linked from [PROJECT_MASTER_PLAN Appendix](PROJECT_MASTER_PLAN.md).
   - Every milestone anchor in the TOC resolves.
   - Each sprint carries Goal, Tasks, Files, Dependencies, Acceptance Criteria, Effort, Priority.
-- **Status:** [ ] Pending
+- **Status:** [x] Done (2026-07-23)
 
 ### T-1.1.2 - Backfill CHANGELOG from git + migrations
 
@@ -137,7 +137,7 @@ TypeScript strict - ESLint/Prettier clean - Tests co-located under `src/__tests_
   - Each versioned block lists Added/Changed/Fixed/Security/Removed.
   - Every migration `NNN_*.sql` referenced under its version.
   - No PII/monetary values.
-- **Status:** [ ] Pending
+- **Status:** [x] Done (2026-07-23)
 
 ### T-1.1.3 - Backfill user-facing Release Notes
 
@@ -157,7 +157,7 @@ TypeScript strict - ESLint/Prettier clean - Tests co-located under `src/__tests_
   - Each version has >= 1 human-readable highlight per shipped feature.
   - No guilt-tripping / gamified copy.
   - Cross-linked from CHANGELOG.
-- **Status:** [ ] Pending
+- **Status:** [x] Done (2026-07-23)
 
 ### T-1.1.4 - Author Production Checklist
 
@@ -176,7 +176,7 @@ TypeScript strict - ESLint/Prettier clean - Tests co-located under `src/__tests_
 - **Acceptance Criteria:**
   - Every checklist item is objectively verifiable (pass / fail).
   - Rollback path documented for at least: migration, deploy, feature-flag.
-- **Status:** [ ] Pending
+- **Status:** [x] Done (2026-07-23)
 
 ### T-1.1.5 - Author Testing Checklist
 
@@ -195,7 +195,7 @@ TypeScript strict - ESLint/Prettier clean - Tests co-located under `src/__tests_
 - **Acceptance Criteria:**
   - Checklist enumerates automated + manual gates with owners.
   - References the specific spec files (`accessibilityContracts.test.ts`, `syncEngine.integration.test.ts`, etc.).
-- **Status:** [ ] Pending
+- **Status:** [x] Done (2026-07-23)
 
 ### T-1.1.6 - Cross-link docs from PRD Appendix
 
@@ -214,7 +214,7 @@ TypeScript strict - ESLint/Prettier clean - Tests co-located under `src/__tests_
 - **Acceptance Criteria:**
   - No broken link in `docs/`.
   - Each doc footer states `Last reviewed: YYYY-MM-DD`.
-- **Status:** [ ] Pending
+- **Status:** [x] Done (2026-07-23)
 
 ---
 
@@ -243,7 +243,7 @@ TypeScript strict - ESLint/Prettier clean - Tests co-located under `src/__tests_
 - **Acceptance Criteria:**
   - Diagrams render in GitHub Markdown preview (Mermaid).
   - Each flow labels the guard chain (`requireAuth -> requireWorkspaceMember -> checkRateLimit`).
-- **Status:** [ ] Pending
+- **Status:** [x] Done (2026-07-23)
 
 ### T-1.2.2 - Consolidate stray SQL migrations
 
@@ -262,7 +262,7 @@ TypeScript strict - ESLint/Prettier clean - Tests co-located under `src/__tests_
 - **Acceptance Criteria:**
   - Repo root contains no `.sql` files.
   - `prisma migrate status` remains clean on a fresh clone.
-- **Status:** [ ] Pending
+- **Status:** [x] Done (2026-07-23)
 
 ### T-1.2.3 - Author AI Agent Handbook
 
@@ -281,7 +281,7 @@ TypeScript strict - ESLint/Prettier clean - Tests co-located under `src/__tests_
 - **Acceptance Criteria:**
   - Handbook lists read order: `AI_CONTEXT -> ARCHITECTURE -> DESIGN_SYSTEM -> PROJECT_MASTER_PLAN -> SPRINT_BOARD -> IMPLEMENTATION_QUEUE`.
   - Lists forbidden actions (unapproved deps, secret leaks, cross-feature imports).
-- **Status:** [ ] Pending
+- **Status:** [x] Done (2026-07-23)
 
 ### T-1.2.4 - Introduce ADR framework & ADR-0001
 
@@ -300,7 +300,7 @@ TypeScript strict - ESLint/Prettier clean - Tests co-located under `src/__tests_
 - **Acceptance Criteria:**
   - Template follows standard ADR format.
   - ADR-0001 references [firestore.rules](../firestore.rules) as legacy artifact.
-- **Status:** [ ] Pending
+- **Status:** [x] Done (2026-07-23)
 
 ### T-1.2.5 - Doc link audit
 
@@ -318,7 +318,7 @@ TypeScript strict - ESLint/Prettier clean - Tests co-located under `src/__tests_
 - **Affected Files:** All `docs/*.md`
 - **Acceptance Criteria:**
   - Zero unresolved relative links across `docs/`.
-- **Status:** [ ] Pending
+- **Status:** [x] Done (2026-07-23)
 
 ---
 
@@ -1696,14 +1696,14 @@ TypeScript strict - ESLint/Prettier clean - Tests co-located under `src/__tests_
 - **Sprint:** Sprint 7.1
 - **Epic:** M7 - Business Ledger
 - **Feature:** Exports - Snapshot
-- **Description:** Snapshot totals + FX rates at export time in [src/lib/csvExport.ts](../src/lib/csvExport.ts) and PDF exporter; header row includes snapshot timestamp.
+- **Description:** Snapshot totals + FX rates at export time in `src/lib/csvExport.ts` (new) and PDF exporter; header row includes snapshot timestamp.
 - **Business Value:** Exports are legally consistent.
 - **Technical Value:** Removes drift between screen and file.
 - **Priority:** P1
 - **Impact:** High
 - **Effort:** S
 - **Dependencies:** None
-- **Affected Files:** [src/lib/csvExport.ts](../src/lib/csvExport.ts), PDF exporter
+- **Affected Files:** `src/lib/csvExport.ts` (new), PDF exporter
 - **Acceptance Criteria:**
   - Snapshot test asserts exact match with on-screen totals in fixture.
 - **Status:** [ ] Pending
@@ -2014,14 +2014,14 @@ TypeScript strict - ESLint/Prettier clean - Tests co-located under `src/__tests_
 - **Sprint:** Sprint 8.2
 - **Epic:** M8 - Envelopes
 - **Feature:** Anomalies - Envelope
-- **Description:** Add `envelope-over` anomaly type to [src/lib/anomalyDetection.ts](../src/lib/anomalyDetection.ts) firing when `pct > 100%` during the current period.
+- **Description:** Add `envelope-over` anomaly type to `src/lib/anomalyDetection.ts` (new) firing when `pct > 100%` during the current period.
 - **Business Value:** Users are alerted before month end.
 - **Technical Value:** Reuses anomaly pipeline (no new UI stack).
 - **Priority:** P1
 - **Impact:** High
 - **Effort:** S
 - **Dependencies:** T-8.1.3
-- **Affected Files:** [src/lib/anomalyDetection.ts](../src/lib/anomalyDetection.ts), `src/components/analytics/*`
+- **Affected Files:** `src/lib/anomalyDetection.ts` (new), `src/components/analytics/*`
 - **Acceptance Criteria:**
   - Anomaly card visible on dashboard.
 - **Status:** [ ] Pending
@@ -3160,14 +3160,14 @@ TypeScript strict - ESLint/Prettier clean - Tests co-located under `src/__tests_
 - **Sprint:** Sprint 14.2
 - **Epic:** M14 - AI-Native
 - **Feature:** AI - Presets
-- **Description:** Save NL query as a preset in [src/stores/filterStore.ts](../src/stores/filterStore.ts).
+- **Description:** Save NL query as a preset in `src/stores/filterStore.ts` (new).
 - **Business Value:** Repeat queries in one tap.
 - **Technical Value:** Standard preset extension.
 - **Priority:** P2
 - **Impact:** Low
 - **Effort:** XS
 - **Dependencies:** T-14.2.2
-- **Affected Files:** [src/stores/filterStore.ts](../src/stores/filterStore.ts)
+- **Affected Files:** `src/stores/filterStore.ts` (new)
 - **Acceptance Criteria:**
   - Preset roundtrip test passes.
 - **Status:** [ ] Pending
@@ -3224,14 +3224,14 @@ TypeScript strict - ESLint/Prettier clean - Tests co-located under `src/__tests_
 - **Sprint:** Sprint 14.3
 - **Epic:** M14 - AI-Native
 - **Feature:** AI - Anomaly
-- **Description:** Enumerate reasons: `envelope-over`, `merchant-outlier`, `category-outlier`, `weekly-spike`, `recurring-drift`, `new-merchant`; stored in [src/lib/anomalyDetection.ts](../src/lib/anomalyDetection.ts).
+- **Description:** Enumerate reasons: `envelope-over`, `merchant-outlier`, `category-outlier`, `weekly-spike`, `recurring-drift`, `new-merchant`; stored in `src/lib/anomalyDetection.ts` (new).
 - **Business Value:** Users understand every alert.
 - **Technical Value:** Structured taxonomy for future ML.
 - **Priority:** P2
 - **Impact:** High
 - **Effort:** S
 - **Dependencies:** T-8.2.3
-- **Affected Files:** [src/lib/anomalyDetection.ts](../src/lib/anomalyDetection.ts)
+- **Affected Files:** `src/lib/anomalyDetection.ts` (new)
 - **Acceptance Criteria:**
   - Taxonomy documented in [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md).
 - **Status:** [ ] Pending
@@ -3267,7 +3267,7 @@ TypeScript strict - ESLint/Prettier clean - Tests co-located under `src/__tests_
 - **Impact:** Medium
 - **Effort:** S
 - **Dependencies:** T-14.3.2
-- **Affected Files:** [src/lib/anomalyDetection.ts](../src/lib/anomalyDetection.ts), [src/stores/settingsStore.ts](../src/stores/settingsStore.ts)
+- **Affected Files:** `src/lib/anomalyDetection.ts` (new), `src/stores/settingsStore.ts` (new)
 - **Acceptance Criteria:**
   - Feedback persisted and honored on next run.
 - **Status:** [ ] Pending
@@ -3434,3 +3434,8 @@ TypeScript strict - ESLint/Prettier clean - Tests co-located under `src/__tests_
 - This queue is the source of truth: if [SPRINT_BOARD.md](SPRINT_BOARD.md), [PROJECT_MASTER_PLAN.md](PROJECT_MASTER_PLAN.md), or [ARCHITECTURE.md](ARCHITECTURE.md) disagree, this file wins for execution ordering.
 
 ---
+
+
+---
+
+**Last reviewed:** 2026-07-23

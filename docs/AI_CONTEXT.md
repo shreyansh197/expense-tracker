@@ -166,3 +166,8 @@ Voice examples: "You're on track." / "Rent is due Friday." / "This looks unusual
 - Every new mutation must be idempotent and enqueueable by the sync engine.
 - When in doubt, ask one clarifying question; otherwise pick the smallest reversible change and proceed.
 - Keep this file under two pages. If you must add, remove something staler first.
+
+
+---
+
+**Last reviewed:** 2026-07-23

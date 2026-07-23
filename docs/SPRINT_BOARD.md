@@ -47,13 +47,13 @@ This board decomposes the entire product roadmap defined in [PROJECT_MASTER_PLAN
 
 ## M1 — Documentation Truth
 
-**Horizon:** 1 · **PRD Milestone:** M1 · **Debt covered:** TD-1, TD-2, TD-12 · **Status:** Pending
+**Horizon:** 1 · **PRD Milestone:** M1 · **Debt covered:** TD-1, TD-2, TD-12 · **Status:** Done (2026-07-23)
 
 **Outcome:** Every doc in [docs/](.) is truthful, cross-linked, and freshly reviewed so a new engineer or AI agent can bootstrap without asking clarifying questions. The `docs/` folder becomes the trusted map of the codebase.
 
 ### Sprint 1.1 — Populate Sprint Board & Refresh Living Docs
 
-- **Status:** Pending · **Priority:** P1 · **Effort:** M · **Story points:** 8
+- **Status:** Done (2026-07-23) · **Priority:** P1 · **Effort:** M · **Story points:** 8
 - **Goal:** Replace all empty living docs with the current, verified state of the product. Publish this sprint board.
 - **Tasks:**
   1. Populate [SPRINT_BOARD.md](SPRINT_BOARD.md) with the full milestone/sprint decomposition (this document).
@@ -78,7 +78,7 @@ This board decomposes the entire product roadmap defined in [PROJECT_MASTER_PLAN
 
 ### Sprint 1.2 — Sequence Diagrams, Migration Consolidation, AI‑Agent Handbook
 
-- **Status:** Pending · **Priority:** P1 · **Effort:** M · **Story points:** 8
+- **Status:** Done (2026-07-23) · **Priority:** P1 · **Effort:** M · **Story points:** 8
 - **Goal:** Add the visual references and repo‑hygiene items that make onboarding and AI‑assisted work reliable. Closes TD‑12 and Architecture §18.25.
 - **Tasks:**
   1. Add `docs/ARCHITECTURE_DIAGRAMS.md` with Mermaid sequence diagrams: login → 2FA, device‑link accept, sync pull, mutation commit, invite accept, push send.
@@ -967,3 +967,8 @@ This board decomposes the entire product roadmap defined in [PROJECT_MASTER_PLAN
 ---
 
 _All items above are **Pending**. Update `Status:` in place when work begins or completes. This board mirrors [PROJECT_MASTER_PLAN.md](PROJECT_MASTER_PLAN.md) — if the two disagree, the PRD wins for scope and the code wins for behavior; then update this file._
+
+
+---
+
+**Last reviewed:** 2026-07-23

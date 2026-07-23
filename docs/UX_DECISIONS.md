@@ -957,3 +957,8 @@ Decisions are grouped by concern:
 - Tokens, components, contracts: [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md).
 - Architecture and boundaries: [ARCHITECTURE.md](ARCHITECTURE.md).
 - QA gates: [TESTING_CHECKLIST.md](TESTING_CHECKLIST.md).
+
+
+---
+
+**Last reviewed:** 2026-07-23

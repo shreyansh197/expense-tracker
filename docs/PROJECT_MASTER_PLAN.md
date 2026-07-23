@@ -654,9 +654,17 @@ Explicitly out of current scope, tracked to inform architecture but not prioriti
 ## Appendix — Cross-references
 
 - Product mission, principles, and standards: [AI_CONTEXT.md](AI_CONTEXT.md).
-- Architecture, layers, and boundaries: [ARCHITECTURE.md](ARCHITECTURE.md) _(pending — TD-1)_.
+- Product doctrine and non-negotiables: [PRODUCT_PRINCIPLES.md](PRODUCT_PRINCIPLES.md).
+- Architecture, layers, and boundaries: [ARCHITECTURE.md](ARCHITECTURE.md); sequence diagrams: [ARCHITECTURE_DIAGRAMS.md](ARCHITECTURE_DIAGRAMS.md).
 - Design tokens and components: [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md).
-- Live sprint state: [SPRINT_BOARD.md](SPRINT_BOARD.md) _(pending — TD-2)_.
+- UX precedent and decisions: [UX_DECISIONS.md](UX_DECISIONS.md).
+- Code contracts: [IMPLEMENTATION_RULES.md](IMPLEMENTATION_RULES.md).
+- Live sprint state: [SPRINT_BOARD.md](SPRINT_BOARD.md).
+- Task-level execution plan: [IMPLEMENTATION_QUEUE.md](IMPLEMENTATION_QUEUE.md).
 - Release readiness: [PRODUCTION_CHECKLIST.md](PRODUCTION_CHECKLIST.md).
 - QA gates: [TESTING_CHECKLIST.md](TESTING_CHECKLIST.md).
 - History: [CHANGELOG.md](CHANGELOG.md), [RELEASE_NOTES.md](RELEASE_NOTES.md).
+- AI operating manual: [AI_AGENT_HANDBOOK.md](AI_AGENT_HANDBOOK.md).
+- Architecture Decision Records: [adr/](adr/) — start with [ADR-0001](adr/0001-postgres-over-firestore.md).
+
+**Last reviewed:** 2026-07-23

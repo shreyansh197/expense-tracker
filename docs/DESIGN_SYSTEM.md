@@ -1091,3 +1091,8 @@ Motion earns its place by answering "what changed?" Anything else is decoration 
 - New tokens are proposed via PR that updates both `src/app/globals.css` **and** this doc in the same commit.
 - Component-level contracts (props, states, a11y) live in `src/__tests__/componentContracts.test.ts`, `accessibilityContracts.test.ts`, and `designTokens.test.ts` — those tests are the enforcement layer.
 - When a component drifts from a token, the fix is to align the component to the token, not the token to the component.
+
+
+---
+
+**Last reviewed:** 2026-07-23

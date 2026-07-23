@@ -212,7 +212,7 @@ If and when AI is introduced into ExpenStream (summaries, categorization hints, 
 2. **No monetary values leave the device without explicit, per-session consent.** AI features that require server inference are opt-in, disclosed in plain language, and remember the choice.
 3. **On-device inference is the preferred path.** When quality permits, we run models locally.
 4. **The AI never invents a number.** Categorization is deterministic and rule-first; AI ranks candidates but never fabricates a currency amount.
-5. **Prompt-injection is a security incident.** All AI inputs derived from user or third-party data are sanitized and treated as untrusted. See [expense-tracker-security-analysis.md](../../../memories/repo/expense-tracker-security-analysis.md) posture.
+5. **Prompt-injection is a security incident.** All AI inputs derived from user or third-party data are sanitized and treated as untrusted. See the security posture summarized in [ARCHITECTURE.md §6 and §14](ARCHITECTURE.md) and the audit findings in [`sprint-reports/SPRINT_0_SUMMARY.md`](../sprint-reports/SPRINT_0_SUMMARY.md).
 6. **Explainability by default.** Every AI-generated insight shows its inputs on tap: _"Based on 12 expenses in Groceries this month."_
 7. **No training on user data without opt-in.** Ever. Anonymized aggregates do not count as anonymization for training purposes.
 8. **Model provenance is transparent.** The user can see which model produced a given output, and when the model last changed.
@@ -250,3 +250,8 @@ If and when AI is introduced into ExpenStream (summaries, categorization hints, 
 If everything else in this document is forgotten, remember this:
 
 > **ExpenStream exists to reduce financial anxiety and increase financial confidence — for every user, on every screen, in every interaction. If a feature does not do this, it does not ship.**
+
+
+---
+
+**Last reviewed:** 2026-07-23
