@@ -41,6 +41,7 @@ This board decomposes the entire product roadmap defined in [PROJECT_MASTER_PLAN
 - [M12 — PWA & Platform Expansion](#m12--pwa--platform-expansion)
 - [M13 — Collaboration Expansion](#m13--collaboration-expansion)
 - [M14 — AI-Native Surfaces (Opt‑In)](#m14--ai-native-surfaces-optin)
+- [M15 — UI Foundation (Product Experience Documentation)](#m15--ui-foundation-product-experience-documentation)
 - [Roll‑up & Traceability](#rollup--traceability)
 
 ---
@@ -884,7 +885,53 @@ This board decomposes the entire product roadmap defined in [PROJECT_MASTER_PLAN
 
 ---
 
-## Roll‑up & Traceability
+## M15 — UI Foundation (Product Experience Documentation)
+
+**Horizon:** 1 · **PRD Milestone:** M1 (extension) · **Debt covered:** UI-Foundation audit gap · **Status:** Done (2026-07-24)
+
+**Outcome:** ExpenStream has a formal **Product Experience** documentation family — the missing middle between doctrine (`PRODUCT_PRINCIPLES.md`) and mechanics (`DESIGN_SYSTEM.md`). Future AI agents and human contributors can bootstrap a *premium finance experience* mindset without additional prompting. Documentation-only sprint — **no application source code touched**.
+
+Full audit that authorised this milestone: [`sprint-reports/UI_FOUNDATION_AUDIT.md`](../sprint-reports/UI_FOUNDATION_AUDIT.md).
+Execution report: [`sprint-reports/UI_FOUNDATION_IMPLEMENTATION.md`](../sprint-reports/UI_FOUNDATION_IMPLEMENTATION.md).
+
+### Sprint 15.1 — Author Product Experience Family & Extend Anchor Docs
+
+- **Status:** Done (2026-07-24) · **Priority:** P1 · **Effort:** M · **Story points:** 8
+- **Goal:** Land the three approved new documents, five approved in-place extensions, and prompt-layer updates from the UI Foundation Audit.
+- **Tasks:**
+  1. Create [`docs/EXPERIENCE_VISION.md`](EXPERIENCE_VISION.md) — the north-star narrative + Six Qualities + benchmark qualities (never designs).
+  2. Create [`docs/SCREEN_GUIDELINES.md`](SCREEN_GUIDELINES.md) — canonical composition and five states for Dashboard, Expenses, Analytics, Business, Category, Settings, Login, Landing.
+  3. Create [`docs/FINANCIAL_PSYCHOLOGY.md`](FINANCIAL_PSYCHOLOGY.md) — money-bias catalogue with a per-bias guardrail and refused anti-pattern.
+  4. Extend [`docs/PRODUCT_PRINCIPLES.md`](PRODUCT_PRINCIPLES.md) with §7.5 Emotional design commitments and §7.6 Financial-psychology guardrails.
+  5. Extend [`docs/PROJECT_MASTER_PLAN.md`](PROJECT_MASTER_PLAN.md) §7 with per-journey emotional arc sub-bullets.
+  6. Extend [`docs/DESIGN_SYSTEM.md`](DESIGN_SYSTEM.md) with §22 UI Evolution & Versioning.
+  7. Extend [`docs/AI_AGENT_HANDBOOK.md`](AI_AGENT_HANDBOOK.md) §1 memory layout, §2 canonical read order, §8 prompts of record.
+  8. Extend [`prompts/STANDARD_HEADER.md`](../prompts/STANDARD_HEADER.md) STEP 1 to list the three new docs.
+  9. Extend [`prompts/IMPLEMENT_SPRINT.md`](../prompts/IMPLEMENT_SPRINT.md) Phase 2 to consult Experience Vision + Screen Guidelines.
+  10. Generate [`sprint-reports/UI_FOUNDATION_IMPLEMENTATION.md`](../sprint-reports/UI_FOUNDATION_IMPLEMENTATION.md).
+- **Files:**
+  - `docs/EXPERIENCE_VISION.md` (new)
+  - `docs/SCREEN_GUIDELINES.md` (new)
+  - `docs/FINANCIAL_PSYCHOLOGY.md` (new)
+  - `docs/PRODUCT_PRINCIPLES.md` (updated: §7.5, §7.6)
+  - `docs/PROJECT_MASTER_PLAN.md` (updated: §7 emotional arcs)
+  - `docs/DESIGN_SYSTEM.md` (updated: §22)
+  - `docs/AI_AGENT_HANDBOOK.md` (updated: §1, §2, §8, §9)
+  - `prompts/STANDARD_HEADER.md` (updated: STEP 1 doc list)
+  - `prompts/IMPLEMENT_SPRINT.md` (updated: Phase 2 bullets)
+  - `sprint-reports/UI_FOUNDATION_IMPLEMENTATION.md` (new)
+- **Dependencies:** [`sprint-reports/UI_FOUNDATION_AUDIT.md`](../sprint-reports/UI_FOUNDATION_AUDIT.md) approval.
+- **Acceptance Criteria:**
+  - The three new docs each explain: why the feature exists, problem it solves, business + product value, user mindset, emotional goal, user journey, loading / empty / error / offline states, accessibility, motion expectations, information hierarchy, interaction philosophy, design rationale, future evolution, and common implementation mistakes.
+  - No existing high-quality section is rewritten; every extension is additive.
+  - No `src/` file is modified.
+  - Reading order in `AI_AGENT_HANDBOOK §2` includes the three new docs in the positions defined by the audit §6.
+  - `STANDARD_HEADER.md` STEP 1 lists the three new docs.
+  - Cross-references between the four Product Experience docs and their doctrine anchors resolve (no 404s).
+
+---
+
+
 
 ### Milestone Status Summary
 
@@ -904,8 +951,9 @@ This board decomposes the entire product roadmap defined in [PROJECT_MASTER_PLAN
 | M12 | PWA & Platform Expansion              | 3       | P3       | 2       | Pending |
 | M13 | Collaboration Expansion               | 3       | P3       | 2       | Pending |
 | M14 | AI‑Native Surfaces (Opt‑In)           | 4       | P3       | 3       | Pending |
+| M15 | UI Foundation (Product Experience Documentation) | 1 | P1 | 1 | Done (2026-07-24) |
 
-**Totals:** 14 milestones · 32 sprints · all Pending.
+**Totals:** 15 milestones · 33 sprints · 1 Done (M15), 14 Pending.
 
 ### Traceability to PRD
 

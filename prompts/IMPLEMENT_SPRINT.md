@@ -66,6 +66,8 @@ Understand:
 - Current implementation patterns
 - Reusable utilities
 - Existing design system
+- Experience Vision (`docs/EXPERIENCE_VISION.md`) — the target feeling the sprint must not violate.
+- Screen Guidelines (`docs/SCREEN_GUIDELINES.md`) — the canonical composition and five states for every screen the sprint touches.
 - Existing coding conventions
 
 Do not redesign existing architecture unless absolutely required.

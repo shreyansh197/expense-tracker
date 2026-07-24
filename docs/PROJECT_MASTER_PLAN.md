@@ -292,6 +292,8 @@ Journeys are described end-to-end. Each step names the surface, the state contra
 6. **Success signal** — Dashboard renders total, remaining budget, and a friendly "You're on track" microcopy.
 7. **Install prompt** — After 2 sessions, subtle "Install ExpenStream" banner appears once.
 
+- _Primary emotion arc:_ start = curiosity (tentative) → mid = trust (the app is calm and not asking for bank credentials) → end = quiet accomplishment (the number appeared, nothing celebrated at me). See [`EXPERIENCE_VISION.md §1 The Session Story`](EXPERIENCE_VISION.md).
+
 ### 7.2 Daily use
 
 1. Open PWA → dashboard first paint < 1 s.
@@ -299,12 +301,16 @@ Journeys are described end-to-end. Each step names the surface, the state contra
 3. Evening reminder push (if enabled) at user-local time.
 4. Weekly digest surfaces trends and any anomaly.
 
+- _Primary emotion arc:_ start = mild alertness ("where am I this month?") → mid = clarity (the answer arrived in one glance) → end = relief (nothing needs my attention right now). If the end-state is anxiety, the design failed.
+
 ### 7.3 Multi-device linking
 
 1. On device A: Settings > Security > "Link a device" → 10-min token URL.
 2. Share URL to device B (QR, message, or paste).
 3. Device B visits `/device-link/{token}` → auto-accepts if signed in, else login flow preserves the link.
 4. Device B appears in Devices list on device A. Sync begins immediately.
+
+- _Primary emotion arc:_ start = mild caution (a security-adjacent flow) → mid = confidence (the token is short-lived, the audit log is visible) → end = ownership (my data is on my other device, on my terms).
 
 ### 7.4 Business ledger flow
 
@@ -314,6 +320,8 @@ Journeys are described end-to-end. Each step names the surface, the state contra
 4. Record payments as they arrive → progress ring updates → optional reminder scheduled.
 5. Export collections as CSV/JSON at month end.
 
+- _Primary emotion arc:_ start = professional focus ("what am I owed?") → mid = control (each payment moves the ring, nothing is stuck in a spreadsheet) → end = closure (the month is exported and the number is trustworthy).
+
 ### 7.5 Collaborative household
 
 1. Owner creates invite (MEMBER role, 24 h expiry) in Settings > Members.
@@ -321,11 +329,17 @@ Journeys are described end-to-end. Each step names the surface, the state contra
 3. Invitee opens link → previews workspace name, role, inviter → accepts.
 4. Both dashboards now reflect a shared source of truth. Audit log records the join.
 
+- _Primary emotion arc:_ start = social vulnerability (sharing money with another person) → mid = safety (the invitee sees exactly what they are joining before accepting) → end = shared calm (the ledger is now a "we" surface, not a "you" surface).
+
 ### 7.6 Recovery / continuity
 
 1. New device: sign in → 2FA (if enabled) → optional device-link via token from an existing device.
 2. Data pulled via delta sync, cursor-based.
 3. Full backup restore from Settings > Data if needed (JSON v2 format).
+
+- _Primary emotion arc:_ start = high anxiety (a lost/replaced device is a stressful moment) → mid = reassurance (sync is working, the export exists, my key is recoverable) → end = restored trust (the app is exactly where I left it).
+
+> Emotional arcs above are the acceptance test for each journey's affective quality. Per-screen state contracts (empty / loading / error / offline / success) and the *feeling per screen* live in [`SCREEN_GUIDELINES.md`](SCREEN_GUIDELINES.md). The end-to-end narrative that these arcs compose into is [`EXPERIENCE_VISION.md`](EXPERIENCE_VISION.md).
 
 ---
 

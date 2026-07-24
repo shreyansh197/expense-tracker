@@ -50,6 +50,9 @@ At minimum, understand:
 - AI_CONTEXT.md
 - PROJECT_MASTER_PLAN.md
 - PRODUCT_PRINCIPLES.md
+- EXPERIENCE_VISION.md
+- SCREEN_GUIDELINES.md
+- FINANCIAL_PSYCHOLOGY.md
 - DESIGN_SYSTEM.md
 - UX_DECISIONS.md
 - ARCHITECTURE.md
@@ -65,6 +68,8 @@ At minimum, understand:
 - PRODUCTION_CHECKLIST.md
 - TESTING_CHECKLIST.md
 - RELEASE_NOTES.md
+
+> The three Product Experience documents (`EXPERIENCE_VISION.md`, `SCREEN_GUIDELINES.md`, `FINANCIAL_PSYCHOLOGY.md`) inform how the product should *feel* and how each screen should be composed. They sit inside "remaining documentation" in the conflict-resolution order below — they never override `IMPLEMENTATION_RULES`, `DESIGN_SYSTEM`, `UX_DECISIONS`, or `PROJECT_MASTER_PLAN`.
 
 If documentation conflicts:
 

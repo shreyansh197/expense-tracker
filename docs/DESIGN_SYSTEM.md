@@ -1095,4 +1095,72 @@ Motion earns its place by answering "what changed?" Anything else is decoration 
 
 ---
 
-**Last reviewed:** 2026-07-23
+## 22. UI Evolution & Versioning
+
+The design system is a living surface. This section is the **contract for how it changes** so a future engineer or AI agent can propose, deprecate, and version tokens and components without breaking downstream consumers. The intent is to make evolution cheap, drift expensive, and history readable.
+
+### 22.1 Versioning model
+
+- **The design system is versioned with the app.** There is no separate DS release train — a token or component that ships in app version `X.Y.Z` is authoritative for that version.
+- **Semver of *intent*, not just of *tokens*:**
+  - **Major** — a token is removed, renamed, or has its semantic meaning changed (e.g., `--color-danger` remapped to a different hue family, or `--space-4` re-quantised). Also: a component prop is removed, or default behaviour changes in a way an existing screen would notice.
+  - **Minor** — a new token, a new component, or a new variant is *added*. Existing consumers keep working.
+  - **Patch** — non-visual clarifications (docs, tests, JSDoc, contract-test coverage).
+- Every version-affecting change lists its DS impact in [`CHANGELOG.md`](CHANGELOG.md) under the app version it ships in. Major DS changes additionally require an [ADR](adr/) explaining the rationale.
+
+### 22.2 Proposing a new token, component, or variant
+
+1. **Check that no existing token or component already carries the semantic meaning.** Reuse beats invention. If a screen wants "a slightly warmer amber", it uses the existing amber token — it does not add a new one.
+2. **Write the definition in both places atomically:** `src/app/globals.css` (or the relevant token file such as `src/lib/motion/tokens.ts`) and the corresponding section of this document. A PR that updates one without the other is rejected.
+3. **Extend the contract tests** in `src/__tests__/designTokens.test.ts` (and `componentContracts.test.ts` / `accessibilityContracts.test.ts` if a component is involved). Contract tests are the enforcement layer — a token that no test references does not exist.
+4. **Cite the ownership.** In the doc entry, name the section it belongs to (§4 Colors, §10 Inputs, etc.). Cross-cutting additions go into §20 "Cross-cutting rules".
+5. **Prefer additive over destructive.** New variants ship alongside old ones; deprecation runs on its own schedule (§22.3).
+
+### 22.3 Deprecating a token, component, or variant
+
+Deprecation is a two-phase, minimum-one-release process — never a delete-in-place.
+
+- **Phase 1 — Announce.**
+  - Mark the token or component `@deprecated` in code (JSDoc / CSS comment) with the version it will be removed in and the replacement to migrate to.
+  - Add a "Deprecated in vX.Y.Z" row to the owning section of this document with the same information.
+  - The token or component continues to work; contract tests keep enforcing it.
+  - Add a lint or contract-test entry that surfaces new usages as a warning (so no new consumers appear during the deprecation window).
+- **Phase 2 — Remove.**
+  - Only after every consumer has migrated (grep confirmed, contract tests updated).
+  - The removal is a **Major DS change** (§22.1), gets an [ADR](adr/), and a [`CHANGELOG.md`](CHANGELOG.md) entry.
+  - The doc section moves the row from "Deprecated" to "Historical" with the version the removal shipped in, so future readers can trace it.
+
+**Never:**
+
+- Delete a token in the same PR that announces its deprecation.
+- Reassign an existing token to a new value without going through Phase 1 → Phase 2 first (silent remap is the highest-severity DS bug — it changes every screen without warning).
+- Rename a component prop without a Phase-1 deprecation window (breaks consumers).
+
+### 22.4 Evolving motion, elevation, and typography scales
+
+These three families are the most sensitive to drift because they are physical (feel, depth, rhythm) rather than semantic. Any change to §1 Typography, §7 Elevation, §8 Motion, or §19 Animation Principles additionally requires:
+
+- Screenshot / video diff attached to the PR (before / after) so reviewers can *see* the change.
+- A note on `prefers-reduced-motion` behaviour if motion is touched.
+- Confirmation that the change does not violate the WCAG AA contrast contract (§17) or the 44 × 44 px touch-target contract ([`IMPLEMENTATION_RULES.md`](IMPLEMENTATION_RULES.md)).
+
+### 22.5 Cross-references
+
+- **Precedent for interaction decisions the change affects:** [`UX_DECISIONS.md`](UX_DECISIONS.md).
+- **The engineering contracts that enforce the change:** [`IMPLEMENTATION_RULES.md`](IMPLEMENTATION_RULES.md).
+- **The narrative / feeling the change must not violate:** [`EXPERIENCE_VISION.md`](EXPERIENCE_VISION.md).
+- **The per-screen composition the change ripples into:** [`SCREEN_GUIDELINES.md`](SCREEN_GUIDELINES.md).
+- **The Product Experience family this doc sits inside:** see the family map in [`AI_AGENT_HANDBOOK.md §1`](AI_AGENT_HANDBOOK.md).
+
+### 22.6 What this section is not
+
+- Not a component library changelog — that lives in [`CHANGELOG.md`](CHANGELOG.md) under each app version.
+- Not a design-review protocol — reviews follow the ordinary sprint acceptance-criteria flow ([`SPRINT_BOARD.md`](SPRINT_BOARD.md)).
+- Not a place for new tokens themselves — those go into their semantic section above.
+
+The purpose of §22 is one thing: **make the process of changing the design system as legible as the design system itself.**
+
+
+---
+
+**Last reviewed:** 2026-07-24

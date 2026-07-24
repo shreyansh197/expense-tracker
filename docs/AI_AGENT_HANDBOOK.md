@@ -27,7 +27,10 @@ expense-tracker/
 │   ├── AI_CONTEXT.md           ← engineering principles + AI rules (kept short)
 │   ├── ARCHITECTURE.md         ← runtime shape today
 │   ├── ARCHITECTURE_DIAGRAMS.md← sequence diagrams for critical flows
-│   ├── DESIGN_SYSTEM.md        ← tokens, motion, components
+│   ├── DESIGN_SYSTEM.md        ← tokens, motion, components (§22 UI evolution)
+│   ├── EXPERIENCE_VISION.md    ← north-star product experience narrative (Product Experience family)
+│   ├── SCREEN_GUIDELINES.md    ← per-screen canonical composition + five states (Product Experience family)
+│   ├── FINANCIAL_PSYCHOLOGY.md ← money-bias catalogue + guardrails (Product Experience family)
 │   ├── UX_DECISIONS.md         ← precedent log for UX trade-offs
 │   ├── PROJECT_MASTER_PLAN.md  ← PRD, scope, milestones
 │   ├── SPRINT_BOARD.md         ← what's active + what's queued
@@ -58,17 +61,22 @@ expense-tracker/
 Read in this order. Skimming is allowed once the doc has been fully read in a previous session — but the boot must **touch** each file to confirm it hasn't changed.
 
 1. [`AI_CONTEXT.md`](AI_CONTEXT.md) — mission, rules, "under two pages" constraint.
-2. [`ARCHITECTURE.md`](ARCHITECTURE.md) (+ [`ARCHITECTURE_DIAGRAMS.md`](ARCHITECTURE_DIAGRAMS.md) if the task touches auth, sync, notifications, or workspace flows).
-3. [`DESIGN_SYSTEM.md`](DESIGN_SYSTEM.md) — tokens, motion, components. **Never invent new spacing/colors/typography.**
-4. [`PROJECT_MASTER_PLAN.md`](PROJECT_MASTER_PLAN.md) — scope + priorities + acceptance criteria.
-5. [`SPRINT_BOARD.md`](SPRINT_BOARD.md) — what's active this sprint.
-6. [`IMPLEMENTATION_QUEUE.md`](IMPLEMENTATION_QUEUE.md) — the atomic task(s) assigned.
-7. [`IMPLEMENTATION_RULES.md`](IMPLEMENTATION_RULES.md) — enforceable contracts.
-8. Task-specific: [`UX_DECISIONS.md`](UX_DECISIONS.md) for UX precedent; [`adr/`](adr/) for architecture precedent.
+2. [`PRODUCT_PRINCIPLES.md`](PRODUCT_PRINCIPLES.md) — product doctrine, now including §7.5 emotional-design commitments and §7.6 financial-psychology guardrails.
+3. [`EXPERIENCE_VISION.md`](EXPERIENCE_VISION.md) — the north-star feeling and premium-fintech qualities every screen must aim at. *(Product Experience family.)*
+4. [`FINANCIAL_PSYCHOLOGY.md`](FINANCIAL_PSYCHOLOGY.md) — the biases we design *against* and the anti-patterns we refuse to ship. *(Product Experience family.)*
+5. [`ARCHITECTURE.md`](ARCHITECTURE.md) (+ [`ARCHITECTURE_DIAGRAMS.md`](ARCHITECTURE_DIAGRAMS.md) if the task touches auth, sync, notifications, or workspace flows).
+6. [`DESIGN_SYSTEM.md`](DESIGN_SYSTEM.md) — tokens, motion, components (§22 UI evolution & versioning). **Never invent new spacing/colors/typography.**
+7. [`SCREEN_GUIDELINES.md`](SCREEN_GUIDELINES.md) — per-screen canonical composition and five states. Load whenever a screen is being created, edited, or reviewed. *(Product Experience family.)*
+8. [`UX_DECISIONS.md`](UX_DECISIONS.md) — precedent for the composition choices.
+9. [`PROJECT_MASTER_PLAN.md`](PROJECT_MASTER_PLAN.md) — scope, personas, journeys (§7 now carries per-journey emotional arcs), acceptance criteria.
+10. [`SPRINT_BOARD.md`](SPRINT_BOARD.md) — what's active this sprint.
+11. [`IMPLEMENTATION_QUEUE.md`](IMPLEMENTATION_QUEUE.md) — the atomic task(s) assigned.
+12. [`IMPLEMENTATION_RULES.md`](IMPLEMENTATION_RULES.md) — enforceable contracts.
+13. Task-specific: [`adr/`](adr/) for architecture precedent; [`PRODUCTION_CHECKLIST.md`](PRODUCTION_CHECKLIST.md) / [`TESTING_CHECKLIST.md`](TESTING_CHECKLIST.md) before release.
 
-If a workflow prompt (`prompts/STANDARD_HEADER.md`, `prompts/MASTER_AUDIT.md`) is provided, it wins over the default boot and specifies its own read order.
+If a workflow prompt (`prompts/STANDARD_HEADER.md`, `prompts/MASTER_AUDIT.md`, `prompts/UI_FOUNDATION_AUDIT.md`) is provided, it wins over the default boot and specifies its own read order.
 
-**Conflict resolution order:** `IMPLEMENTATION_RULES > DESIGN_SYSTEM > UX_DECISIONS > PROJECT_MASTER_PLAN > remaining docs`. This handbook loses every tie.
+**Conflict resolution order (unchanged):** `IMPLEMENTATION_RULES > DESIGN_SYSTEM > UX_DECISIONS > PROJECT_MASTER_PLAN > remaining docs`. The three Product Experience docs (`EXPERIENCE_VISION`, `SCREEN_GUIDELINES`, `FINANCIAL_PSYCHOLOGY`) sit **inside "remaining"** — they inform but do not override engineering or design contracts. This handbook loses every tie.
 
 ---
 
@@ -159,7 +167,9 @@ Preferred tools, in order of preference for common tasks:
 ## 8. Prompts of record
 
 - [`prompts/STANDARD_HEADER.md`](../prompts/STANDARD_HEADER.md) — the default sprint-execution prompt.
+- [`prompts/IMPLEMENT_SPRINT.md`](../prompts/IMPLEMENT_SPRINT.md) — the per-sprint execution workflow.
 - [`prompts/MASTER_AUDIT.md`](../prompts/MASTER_AUDIT.md) — the audit prompt used to generate [`sprint-reports/SPRINT_0_SUMMARY.md`](../sprint-reports/SPRINT_0_SUMMARY.md).
+- [`prompts/UI_FOUNDATION_AUDIT.md`](../prompts/UI_FOUNDATION_AUDIT.md) — the audit prompt that produced [`sprint-reports/UI_FOUNDATION_AUDIT.md`](../sprint-reports/UI_FOUNDATION_AUDIT.md) and, on approval, [`sprint-reports/UI_FOUNDATION_IMPLEMENTATION.md`](../sprint-reports/UI_FOUNDATION_IMPLEMENTATION.md).
 
 If a session opens with one of these prompts, follow it verbatim; this handbook is subordinate to the prompt during that session.
 
@@ -167,6 +177,7 @@ If a session opens with one of these prompts, follow it verbatim; this handbook 
 
 ## 9. Change history
 
+- **2026-07-24:** Extended §1 memory layout, §2 read order, and §8 prompts of record to include the Product Experience family (`EXPERIENCE_VISION.md`, `SCREEN_GUIDELINES.md`, `FINANCIAL_PSYCHOLOGY.md`) and the `UI_FOUNDATION_AUDIT` prompt of record. See [`sprint-reports/UI_FOUNDATION_IMPLEMENTATION.md`](../sprint-reports/UI_FOUNDATION_IMPLEMENTATION.md).
 - **2026-07-23:** Handbook created (Sprint 1.2, T-1.2.3).
 
-**Last reviewed:** 2026-07-23
+**Last reviewed:** 2026-07-24

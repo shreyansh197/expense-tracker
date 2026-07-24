@@ -133,6 +133,33 @@ Anchored in [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md) (_Living Terrain_). Restated he
 9. **Icons carry labels.** Every icon-only control has an accessible name and, above `sm`, a visible label on hover or long-press.
 10. **Empty is a design surface.** Empty states are designed with the same rigor as full states — they are the user's first impression of every feature.
 
+### 7.5 Emotional design commitments
+
+The [§5 Feelings taxonomy](#5-ux-philosophy) lists the feelings we want and the feelings we refuse. This subsection upgrades that list from a taxonomy to a set of **promises** the product keeps on every screen. It is anchored by [`EXPERIENCE_VISION.md`](EXPERIENCE_VISION.md), which describes the narrative these promises compose into.
+
+1. **Calm is the default, not the celebration.** The neutral state of every screen is quiet: no red, no confetti, no exclamation. Emphasis is earned by the number that matters, not by the color of the chrome. If the user finishes an action and *notices nothing changed*, the design succeeded.
+2. **Honesty precedes optimism.** We show the true number before we show any reassurance. A budget that is 12% overspent is displayed as 12% overspent — never as "close to on track". Reassurance, when we offer it, comes as context, not as spin.
+3. **Respect the money-shaped moment.** Opening a personal-finance app is rarely idle. The user came with a question, a worry, or a decision. The first screen answers that question in under a second. We do not stall, tease, or ask them to sit through a splash animation.
+4. **Never weaponise emotion.** No streak-shaming, no red push notifications engineered to drive re-open, no fake urgency, no manipulative loss framing. Any emotional signal we send has to survive the test "would a thoughtful accountant say this to a friend?".
+5. **Undo is an emotional feature, not a technical one.** Reversibility is the promise that lets the user tap without fear. Every destructive action carries a visible, immediate undo path. See [UX-9.x](UX_DECISIONS.md) for the pattern.
+
+Reviewers verifying a new feature must be able to point to which of the five promises it keeps. If none apply, the feature has no emotional purpose and should be redesigned before shipping.
+
+### 7.6 Financial-psychology guardrails
+
+Personal finance is a domain saturated with cognitive biases (anchoring, loss aversion, mental accounting, present bias, financial shame, notification-driven anxiety). Most competing products *exploit* these biases to drive engagement metrics. ExpenStream designs *against* them.
+
+The full bias catalogue and per-bias guardrails live in [`FINANCIAL_PSYCHOLOGY.md`](FINANCIAL_PSYCHOLOGY.md). This subsection records the doctrine-level posture that governs it:
+
+1. **Anchoring — we do not seed reference points that flatter or shame.** No "average user your age spends…" framing. The only anchors we display are ones the user set themselves (budget, envelope, goal).
+2. **Loss aversion — we do not dramatise loss.** Overspend is shown as a number and a small amber marker, not a red alert. Notifications never say "You've lost…".
+3. **Present bias — we do not use countdowns or scarcity.** No "24 hours left to hit your goal" ticking clocks. No "you'll miss your target if…" pre-emptive guilt.
+4. **Ambient anxiety — silence is a valid response.** If nothing changed, we don't notify. If nothing is wrong, we don't alert. Push, badges, red dots, and haptics are rationed.
+5. **Financial shame — we do not judge categories.** No frowny face for "eating out". No colour-coding a category as "bad". Category totals are presented in the same visual weight regardless of what the category represents.
+6. **Mental accounting — we let the user carve money into envelopes, but we never *enforce* the carving.** Envelopes are a tool, not a moral system.
+
+Any feature proposal that would knowingly exploit one of these biases is redesigned. Any feature proposal that would *design against* one earns a citation in [`FINANCIAL_PSYCHOLOGY.md`](FINANCIAL_PSYCHOLOGY.md).
+
 ---
 
 ## 8. Engineering Principles

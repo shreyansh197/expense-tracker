@@ -87,6 +87,7 @@ TypeScript strict - ESLint/Prettier clean - Tests co-located under `src/__tests_
 - [Sprint 14.1 - On-Device Categorization Suggestions (Epic M14)](#sprint-141)
 - [Sprint 14.2 - Natural-Language Filter Bar (Analytics) (Epic M14)](#sprint-142)
 - [Sprint 14.3 - Inline Anomaly Explanations (Epic M14)](#sprint-143)
+- [Sprint 15.1 - Author Product Experience Family & Extend Anchor Docs (Epic M15)](#sprint-151)
 - [Roll-Up & Traceability](#roll-up--traceability)
 
 ---
@@ -3289,6 +3290,212 @@ TypeScript strict - ESLint/Prettier clean - Tests co-located under `src/__tests_
 - **Acceptance Criteria:**
   - Report references every KPI with pass/fail.
 - **Status:** [ ] Pending
+
+---
+
+<a id="sprint-151"></a>
+
+## Sprint 15.1 - Author Product Experience Family & Extend Anchor Docs
+
+**Epic:** M15 - UI Foundation (Product Experience Documentation) - **Horizon:** 1 - **Priority:** P1 - **Effort:** M - **Story points:** 8
+
+**Sprint goal:** Land the three new Product Experience documents, the five approved in-place doc extensions, and the two prompt-layer updates from the [UI Foundation Audit](../sprint-reports/UI_FOUNDATION_AUDIT.md). Documentation-only sprint - **no `src/` file is modified**.
+
+### T-15.1.1 - Create EXPERIENCE_VISION.md
+
+- **Task ID:** T-15.1.1
+- **Sprint:** Sprint 15.1
+- **Epic:** M15 - UI Foundation (Product Experience Documentation)
+- **Feature:** Docs - Product Experience family
+- **Description:** Author [docs/EXPERIENCE_VISION.md](EXPERIENCE_VISION.md): the north-star product experience narrative, Six Qualities of a Premium Finance Surface, benchmark qualities (extracted, never copied), anti-patterns refused, and the mandatory Product-Experience 18-question set from the [UI Foundation Audit](../sprint-reports/UI_FOUNDATION_AUDIT.md) §11.
+- **Business Value:** Gives every future designer + AI agent a single narrative to write toward. Prevents drift from the "premium finance" positioning.
+- **Technical Value:** Closes the "Experience Vision" and "Premium Fintech UX" coverage gaps from the audit.
+- **Priority:** P1
+- **Impact:** High
+- **Effort:** S
+- **Dependencies:** UI Foundation Audit approval.
+- **Affected Files:** [docs/EXPERIENCE_VISION.md](EXPERIENCE_VISION.md)
+- **Acceptance Criteria:**
+  - Answers all 18 Product-Experience questions (why, problem, business value, product value, user mindset, emotional goal, user journey, loading, empty, error, offline, accessibility, motion, information hierarchy, interaction philosophy, design rationale, future evolution, common implementation mistakes).
+  - Cites [PRODUCT_PRINCIPLES §7.5](PRODUCT_PRINCIPLES.md) and [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md); does not restate their content.
+  - No visual designs, screenshots, or component code.
+- **Status:** [x] Done (2026-07-24)
+
+### T-15.1.2 - Create SCREEN_GUIDELINES.md
+
+- **Task ID:** T-15.1.2
+- **Sprint:** Sprint 15.1
+- **Epic:** M15 - UI Foundation (Product Experience Documentation)
+- **Feature:** Docs - Product Experience family
+- **Description:** Author [docs/SCREEN_GUIDELINES.md](SCREEN_GUIDELINES.md): one entry per top-level screen (Dashboard, Expenses, Analytics, Business, Category, Settings, Login, Landing) with Purpose, Canonical composition, Five states (empty / loading / error / offline / success), and Owning UX-N.N + DS references. Includes the mandatory Product-Experience 18-question set.
+- **Business Value:** Every screen decision is now traceable to a single specification instead of being reconstructed from three docs.
+- **Technical Value:** Closes "Screen Guidelines" audit gap.
+- **Priority:** P1
+- **Impact:** High
+- **Effort:** M
+- **Dependencies:** T-15.1.1 (Experience Vision anchor).
+- **Affected Files:** [docs/SCREEN_GUIDELINES.md](SCREEN_GUIDELINES.md)
+- **Acceptance Criteria:**
+  - Covers every screen listed above with all four sub-headings.
+  - Cites [UX_DECISIONS.md](UX_DECISIONS.md) and [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md) precedents rather than restating them.
+  - Each screen carries an implementation-status marker (Aspirational / Partially implemented / Implemented).
+- **Status:** [x] Done (2026-07-24)
+
+### T-15.1.3 - Create FINANCIAL_PSYCHOLOGY.md
+
+- **Task ID:** T-15.1.3
+- **Sprint:** Sprint 15.1
+- **Epic:** M15 - UI Foundation (Product Experience Documentation)
+- **Feature:** Docs - Product Experience family
+- **Description:** Author [docs/FINANCIAL_PSYCHOLOGY.md](FINANCIAL_PSYCHOLOGY.md): one entry per money-related cognitive bias with fields Bias / Where it appears in personal finance / How competitors typically exploit it / Our guardrail / Our anti-pattern. Includes the mandatory Product-Experience 18-question set and the explicit non-goal statement.
+- **Business Value:** Prevents ExpenStream from ever shipping a dark-pattern nudge. Preserves the "premium, calm, honest" positioning.
+- **Technical Value:** Closes "Financial Psychology" and "Behavioral Design" audit gaps.
+- **Priority:** P1
+- **Impact:** High
+- **Effort:** S
+- **Dependencies:** T-15.1.1.
+- **Affected Files:** [docs/FINANCIAL_PSYCHOLOGY.md](FINANCIAL_PSYCHOLOGY.md)
+- **Acceptance Criteria:**
+  - Opens with the explicit non-goal: "This document exists so we design *against* these biases, not with them."
+  - Covers anchoring, loss aversion, mental accounting, present bias, financial shame, notification anxiety, envelope bias at minimum.
+  - Every entry lists the anti-pattern we refuse.
+- **Status:** [x] Done (2026-07-24)
+
+### T-15.1.4 - Extend PRODUCT_PRINCIPLES with §7.5 and §7.6
+
+- **Task ID:** T-15.1.4
+- **Sprint:** Sprint 15.1
+- **Epic:** M15
+- **Feature:** Docs - Doctrine anchors
+- **Description:** Add §7.5 Emotional design commitments and §7.6 Financial-psychology guardrails to [docs/PRODUCT_PRINCIPLES.md](PRODUCT_PRINCIPLES.md). Both subsections cite the new Product Experience docs and do not duplicate them.
+- **Business Value:** Doctrine now names the emotional + psychological posture the app must keep.
+- **Technical Value:** Anchors the new docs so they never become the sole source of truth for principles.
+- **Priority:** P1
+- **Impact:** Medium
+- **Effort:** XS
+- **Dependencies:** None (in-place extension).
+- **Affected Files:** [docs/PRODUCT_PRINCIPLES.md](PRODUCT_PRINCIPLES.md)
+- **Acceptance Criteria:**
+  - §7.5 and §7.6 exist, are additive (no existing content removed), and reference `EXPERIENCE_VISION.md` and `FINANCIAL_PSYCHOLOGY.md` respectively.
+- **Status:** [x] Done (2026-07-24)
+
+### T-15.1.5 - Extend PROJECT_MASTER_PLAN §7 with emotional arcs
+
+- **Task ID:** T-15.1.5
+- **Sprint:** Sprint 15.1
+- **Epic:** M15
+- **Feature:** Docs - PRD journeys
+- **Description:** Add one *primary emotion arc* sub-bullet (start → mid → end) to each of §7.1 - §7.6 in [docs/PROJECT_MASTER_PLAN.md](PROJECT_MASTER_PLAN.md). No new journeys, no restructure.
+- **Business Value:** Journeys are now testable for feeling, not only for steps.
+- **Technical Value:** Provides the acceptance surface for `SCREEN_GUIDELINES.md` per-screen feeling promises.
+- **Priority:** P1
+- **Impact:** Medium
+- **Effort:** XS
+- **Dependencies:** None.
+- **Affected Files:** [docs/PROJECT_MASTER_PLAN.md](PROJECT_MASTER_PLAN.md)
+- **Acceptance Criteria:**
+  - Every subsection under §7 carries exactly one emotion-arc bullet.
+  - The arcs cross-link to `EXPERIENCE_VISION.md` and `SCREEN_GUIDELINES.md`.
+- **Status:** [x] Done (2026-07-24)
+
+### T-15.1.6 - Extend DESIGN_SYSTEM with §22 UI Evolution & Versioning
+
+- **Task ID:** T-15.1.6
+- **Sprint:** Sprint 15.1
+- **Epic:** M15
+- **Feature:** Docs - Design system
+- **Description:** Append §22 UI Evolution & Versioning to [docs/DESIGN_SYSTEM.md](DESIGN_SYSTEM.md) covering versioning model, propose / deprecate / remove flow, sensitivity rules for motion / elevation / typography, and cross-references. Absorbs the audit's "UI Evolution" gap without creating a separate doc.
+- **Business Value:** Design system can evolve safely; drift becomes expensive.
+- **Technical Value:** Anchors the deprecation contract that governs tokens and components.
+- **Priority:** P1
+- **Impact:** Medium
+- **Effort:** XS
+- **Dependencies:** None.
+- **Affected Files:** [docs/DESIGN_SYSTEM.md](DESIGN_SYSTEM.md)
+- **Acceptance Criteria:**
+  - §22 exists with the six subsections defined in the audit (versioning, proposing, deprecating, sensitive families, cross-references, scope).
+  - Existing §§0-21 unchanged apart from the `Last reviewed` footer.
+- **Status:** [x] Done (2026-07-24)
+
+### T-15.1.7 - Update AI_AGENT_HANDBOOK map + read order + prompts of record
+
+- **Task ID:** T-15.1.7
+- **Sprint:** Sprint 15.1
+- **Epic:** M15
+- **Feature:** Docs - Agent navigation
+- **Description:** Update §1 Repository memory layout, §2 Canonical read order, §8 Prompts of record, and §9 Change history in [docs/AI_AGENT_HANDBOOK.md](AI_AGENT_HANDBOOK.md) so future agents load the new docs at the positions the audit §6 specifies.
+- **Business Value:** Agent bootstraps land on the new docs by default.
+- **Technical Value:** Prevents the new docs from being invisible to agents that follow the handbook literally.
+- **Priority:** P1
+- **Impact:** High
+- **Effort:** XS
+- **Dependencies:** T-15.1.1 - T-15.1.3.
+- **Affected Files:** [docs/AI_AGENT_HANDBOOK.md](AI_AGENT_HANDBOOK.md)
+- **Acceptance Criteria:**
+  - Memory-layout tree lists the three new docs.
+  - Canonical read order includes them at the audit-specified positions.
+  - Conflict-resolution order is unchanged and restated.
+  - `UI_FOUNDATION_AUDIT` prompt is listed as a prompt of record.
+- **Status:** [x] Done (2026-07-24)
+
+### T-15.1.8 - Extend STANDARD_HEADER STEP 1 doc list
+
+- **Task ID:** T-15.1.8
+- **Sprint:** Sprint 15.1
+- **Epic:** M15
+- **Feature:** Prompts - Standard header
+- **Description:** Add `EXPERIENCE_VISION.md`, `SCREEN_GUIDELINES.md`, and `FINANCIAL_PSYCHOLOGY.md` to STEP 1 of [prompts/STANDARD_HEADER.md](../prompts/STANDARD_HEADER.md). Pre-existing bogus doc references (COMPONENT_LIBRARY.md, PERFORMANCE_GUIDELINES.md, SECURITY_GUIDELINES.md, API_SPECIFICATION.md, DATABASE_SCHEMA.md) are **out of scope** per audit §7.1 - they are tracked separately.
+- **Business Value:** Sprint-executing agents load the Product Experience family by default.
+- **Technical Value:** Prompt-layer consistency with `AI_AGENT_HANDBOOK.md §2`.
+- **Priority:** P1
+- **Impact:** Medium
+- **Effort:** XS
+- **Dependencies:** T-15.1.1 - T-15.1.3.
+- **Affected Files:** [prompts/STANDARD_HEADER.md](../prompts/STANDARD_HEADER.md)
+- **Acceptance Criteria:**
+  - STEP 1 lists the three new docs.
+  - A caveat clarifies they sit in "remaining documentation" for conflict resolution.
+  - Conflict-resolution priority order (§ IMPLEMENTATION_RULES → DESIGN_SYSTEM → UX_DECISIONS → PROJECT_MASTER_PLAN → remaining) is unchanged.
+- **Status:** [x] Done (2026-07-24)
+
+### T-15.1.9 - Extend IMPLEMENT_SPRINT Phase 2 bullets
+
+- **Task ID:** T-15.1.9
+- **Sprint:** Sprint 15.1
+- **Epic:** M15
+- **Feature:** Prompts - Sprint workflow
+- **Description:** Add "Experience Vision" and "Screen Guidelines" bullets to the Phase 2 "Understand" list in [prompts/IMPLEMENT_SPRINT.md](../prompts/IMPLEMENT_SPRINT.md) so per-sprint executions consult them alongside the design system.
+- **Business Value:** Ensures every sprint respects the target feeling and per-screen composition.
+- **Technical Value:** Closes the audit §7.3 gap.
+- **Priority:** P1
+- **Impact:** Medium
+- **Effort:** XS
+- **Dependencies:** T-15.1.1, T-15.1.2.
+- **Affected Files:** [prompts/IMPLEMENT_SPRINT.md](../prompts/IMPLEMENT_SPRINT.md)
+- **Acceptance Criteria:**
+  - Both bullets present in Phase 2 with correct paths.
+  - No other Phase 2 content removed.
+- **Status:** [x] Done (2026-07-24)
+
+### T-15.1.10 - Generate UI_FOUNDATION_IMPLEMENTATION.md report
+
+- **Task ID:** T-15.1.10
+- **Sprint:** Sprint 15.1
+- **Epic:** M15
+- **Feature:** Sprint reports
+- **Description:** Produce [sprint-reports/UI_FOUNDATION_IMPLEMENTATION.md](../sprint-reports/UI_FOUNDATION_IMPLEMENTATION.md) covering Files created, Files updated, Cross references, Prompt changes, Reading order, Integration summary.
+- **Business Value:** A closing artefact that reviewers and future agents can read to understand what shipped in the UI Foundation milestone.
+- **Technical Value:** Companion to the audit report; preserves execution history.
+- **Priority:** P1
+- **Impact:** Medium
+- **Effort:** XS
+- **Dependencies:** T-15.1.1 - T-15.1.9.
+- **Affected Files:** `sprint-reports/UI_FOUNDATION_IMPLEMENTATION.md` (new)
+- **Acceptance Criteria:**
+  - Sections listed above are all present.
+  - No `src/` file is listed.
+  - Cross-links to `UI_FOUNDATION_AUDIT.md`.
+- **Status:** [x] Done (2026-07-24)
 
 ---
 
