@@ -102,6 +102,12 @@ export interface IDBMutation {
   idempotencyKey: string;
   workspaceId: string;
   createdAt: number;
+  /** Number of push attempts made so far. 0 = never attempted. */
+  attempts: number;
+  /** Earliest epoch ms at which this mutation may be retried. 0 = eligible now. */
+  nextRetryAt: number;
+  /** Short, redacted description of the last failure (never contains request body / money). */
+  lastError?: string | null;
 }
 
 export interface IDBSyncMeta {
@@ -185,6 +191,32 @@ class ExpenseDB extends Dexie {
       watcherHistory: "++id, savedAt",
       timeMachineScenarios: "id, savedAt",
     });
+    // v4: persistent retry metadata on the mutation queue so it survives
+    // tab close, network loss, and re-auth (Sprint 2.2 / T-2.2.1).
+    // Adds nextRetryAt as an index so we can query the drain-eligible slice
+    // in constant time; attempts + lastError are stored inline.
+    this.version(4)
+      .stores({
+        expenses: "id, workspaceId, [workspaceId+month+year], category",
+        settings: "workspaceId",
+        ledgers: "id, workspaceId",
+        payments: "id, workspaceId, ledgerId",
+        mutations: "++localId, workspaceId, idempotencyKey, nextRetryAt, [workspaceId+nextRetryAt]",
+        syncMeta: "workspaceId",
+        exchangeRates: "base",
+        calcCache: "key",
+        watcherHistory: "++id, savedAt",
+        timeMachineScenarios: "id, savedAt",
+      })
+      .upgrade(async (tx) => {
+        // Populate defaults on pre-existing rows so the drain loop can rely
+        // on the fields being present (Dexie leaves them undefined otherwise).
+        await tx.table("mutations").toCollection().modify((m: Record<string, unknown>) => {
+          if (typeof m.attempts !== "number") m.attempts = 0;
+          if (typeof m.nextRetryAt !== "number") m.nextRetryAt = 0;
+          if (typeof m.lastError === "undefined") m.lastError = null;
+        });
+      });
   }
 }
 
@@ -207,6 +239,9 @@ export async function migrateFromLocalStorage(): Promise<void> {
           ...m,
           workspaceId: m.workspaceId || "",
           createdAt: Date.now(),
+          attempts: 0,
+          nextRetryAt: 0,
+          lastError: null,
         })
       );
       if (mutations.length > 0) {

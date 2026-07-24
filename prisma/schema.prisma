@@ -29,14 +29,14 @@ model User {
   updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz
   deletedAt       DateTime? @map("deleted_at") @db.Timestamptz
 
-  passkeys         Passkey[]
-  memberships      Membership[]
-  devices          Device[]
-  sessions         Session[]
-  invitesSent      Invite[]       @relation("InviteSender")
-  deviceLinksOwned DeviceLink[]
-  auditLogs        AuditLog[]
-  ownedWorkspaces  Workspace[]    @relation("WorkspaceOwner")
+  passkeys           Passkey[]
+  memberships        Membership[]
+  devices            Device[]
+  sessions           Session[]
+  invitesSent        Invite[]            @relation("InviteSender")
+  deviceLinksOwned   DeviceLink[]
+  auditLogs          AuditLog[]
+  ownedWorkspaces    Workspace[]         @relation("WorkspaceOwner")
   verificationTokens VerificationToken[]
 
   @@index([deletedAt])
@@ -65,26 +65,26 @@ model Passkey {
 // ═══════════════════════════  WORKSPACES  ═════════════════════
 
 model Workspace {
-  id             String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name           String  @default("My Expenses") @db.VarChar(120)
-  ownerId        String  @map("owner_id") @db.Uuid
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name           String   @default("My Expenses") @db.VarChar(120)
+  ownerId        String   @map("owner_id") @db.Uuid
   /// Legacy sync code for migration. NULL for new workspaces.
-  legacySyncCode String? @unique @map("legacy_sync_code") @db.VarChar(10)
+  legacySyncCode String?  @unique @map("legacy_sync_code") @db.VarChar(10)
   /// AES-256 key (base64) for client-side encryption at rest. Generated on first access.
-  encryptionKey  String? @map("encryption_key") @db.VarChar(64)
+  encryptionKey  String?  @map("encryption_key") @db.VarChar(64)
   createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
   updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz
 
-  owner              User                @relation("WorkspaceOwner", fields: [ownerId], references: [id], onDelete: Cascade)
-  memberships        Membership[]
-  devices            Device[]
-  invites            Invite[]
-  deviceLinks        DeviceLink[]
-  expenses           Expense[]
-  workspaceSettings  WorkspaceSettings?
-  businessLedgers    BusinessLedger[]
-  businessPayments   BusinessPayment[]
-  syncCursors        SyncCursor[]
+  owner             User               @relation("WorkspaceOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  memberships       Membership[]
+  devices           Device[]
+  invites           Invite[]
+  deviceLinks       DeviceLink[]
+  expenses          Expense[]
+  workspaceSettings WorkspaceSettings?
+  businessLedgers   BusinessLedger[]
+  businessPayments  BusinessPayment[]
+  syncCursors       SyncCursor[]
 
   @@index([ownerId])
   @@map("workspaces")
@@ -221,13 +221,13 @@ model AuditLog {
 // ═══════════════════════════  VERIFICATION TOKENS  ════════════
 
 model VerificationToken {
-  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId    String   @map("user_id") @db.Uuid
-  tokenHash String   @unique @map("token_hash") @db.VarChar(128)
-  type      String   @db.VarChar(30) // "email_verify" | "password_reset"
-  expiresAt DateTime @map("expires_at") @db.Timestamptz
+  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  tokenHash String    @unique @map("token_hash") @db.VarChar(128)
+  type      String    @db.VarChar(30) // "email_verify" | "password_reset"
+  expiresAt DateTime  @map("expires_at") @db.Timestamptz
   usedAt    DateTime? @map("used_at") @db.Timestamptz
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -265,31 +265,31 @@ model Expense {
 // ═══════════════════════════  DOMAIN: WORKSPACE SETTINGS  ═════
 
 model WorkspaceSettings {
-  workspaceId         String   @id @map("workspace_id") @db.Uuid
-  salary              Decimal  @default(0) @db.Decimal(14, 2)
-  currency            String   @default("INR") @db.VarChar(3)
-  categories          Json     @default("[]") @db.JsonB
-  customCategories    Json     @default("[]") @map("custom_categories") @db.JsonB
-  hiddenDefaults      Json     @default("[]") @map("hidden_defaults") @db.JsonB
-  categoryBudgets     Json     @default("{}") @map("category_budgets") @db.JsonB
-  recurringExpenses   Json     @default("[]") @map("recurring_expenses") @db.JsonB
-  savedFilters        Json     @default("[]") @map("saved_filters") @db.JsonB
-  goals               Json     @default("[]") @db.JsonB
-  rolloverEnabled     Boolean  @default(false) @map("rollover_enabled")
-  rolloverHistory     Json     @default("{}") @map("rollover_history") @db.JsonB
-  monthlyBudgets      Json     @default("{}") @map("monthly_budgets") @db.JsonB
-  businessMode        Boolean  @default(false) @map("business_mode")
-  revenueExpectations Json     @default("[]") @map("revenue_expectations") @db.JsonB
-  businessTags        Json     @default("[]") @map("business_tags") @db.JsonB
-  multiCurrencyEnabled Boolean @default(false) @map("multi_currency_enabled")
-  dashboardLayout     Json?    @map("dashboard_layout") @db.JsonB
-  dismissedRecurringSuggestions Json @default("[]") @map("dismissed_recurring_suggestions") @db.JsonB
-  autoRules           Json     @default("[]") @map("auto_rules") @db.JsonB
-  achievements        Json     @default("[]") @db.JsonB
-  accentColor         String?  @map("accent_color") @db.VarChar(20)
-  notificationPrefs   Json?    @map("notification_prefs") @db.JsonB
-  version             Int      @default(1)
-  updatedAt           DateTime @updatedAt @map("updated_at") @db.Timestamptz
+  workspaceId                   String   @id @map("workspace_id") @db.Uuid
+  salary                        Decimal  @default(0) @db.Decimal(14, 2)
+  currency                      String   @default("INR") @db.VarChar(3)
+  categories                    Json     @default("[]") @db.JsonB
+  customCategories              Json     @default("[]") @map("custom_categories") @db.JsonB
+  hiddenDefaults                Json     @default("[]") @map("hidden_defaults") @db.JsonB
+  categoryBudgets               Json     @default("{}") @map("category_budgets") @db.JsonB
+  recurringExpenses             Json     @default("[]") @map("recurring_expenses") @db.JsonB
+  savedFilters                  Json     @default("[]") @map("saved_filters") @db.JsonB
+  goals                         Json     @default("[]") @db.JsonB
+  rolloverEnabled               Boolean  @default(false) @map("rollover_enabled")
+  rolloverHistory               Json     @default("{}") @map("rollover_history") @db.JsonB
+  monthlyBudgets                Json     @default("{}") @map("monthly_budgets") @db.JsonB
+  businessMode                  Boolean  @default(false) @map("business_mode")
+  revenueExpectations           Json     @default("[]") @map("revenue_expectations") @db.JsonB
+  businessTags                  Json     @default("[]") @map("business_tags") @db.JsonB
+  multiCurrencyEnabled          Boolean  @default(false) @map("multi_currency_enabled")
+  dashboardLayout               Json?    @map("dashboard_layout") @db.JsonB
+  dismissedRecurringSuggestions Json     @default("[]") @map("dismissed_recurring_suggestions") @db.JsonB
+  autoRules                     Json     @default("[]") @map("auto_rules") @db.JsonB
+  achievements                  Json     @default("[]") @db.JsonB
+  accentColor                   String?  @map("accent_color") @db.VarChar(20)
+  notificationPrefs             Json?    @map("notification_prefs") @db.JsonB
+  version                       Int      @default(1)
+  updatedAt                     DateTime @updatedAt @map("updated_at") @db.Timestamptz
 
   workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
@@ -375,6 +375,24 @@ model SyncCursor {
 
   @@unique([workspaceId, deviceId, tableName])
   @@map("sync_cursors")
+}
+
+// ═══════════════════════════  MUTATION DEDUP LEDGER  ══════════
+// Sprint 2.2 / T-2.2.3 — guaranteed-once delivery. The API route uses
+// `$queryRawUnsafe` / `$executeRawUnsafe` against this table so Prisma
+// introspection can stay in sync with the shape managed by
+// prisma/migrations/014_mutation_idempotency.sql.
+
+model ProcessedIdempotencyKey {
+  workspaceId    String   @map("workspace_id") @db.Uuid
+  idempotencyKey String   @map("idempotency_key") @db.VarChar(64)
+  entityId       String?  @map("entity_id") @db.VarChar(64)
+  processedAt    DateTime @default(now()) @map("processed_at") @db.Timestamptz
+
+  @@id([workspaceId, idempotencyKey])
+  @@unique([workspaceId, idempotencyKey], map: "processed_idempotency_keys_workspace_key_uidx")
+  @@index([processedAt], map: "processed_idempotency_keys_processed_at_idx")
+  @@map("processed_idempotency_keys")
 }
 
 // ═══════════════════════════  (PHASE 2) E2EE KEY  ═════════════

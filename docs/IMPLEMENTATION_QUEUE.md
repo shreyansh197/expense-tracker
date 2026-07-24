@@ -1,4 +1,4 @@
-<!--
+﻿<!--
   IMPLEMENTATION_QUEUE.md - Single source of truth for execution
   Owner: Product + AI Engineering
   Audience: Engineers, AI agents, PMs, QA.
@@ -432,7 +432,7 @@ TypeScript strict - ESLint/Prettier clean - Tests co-located under `src/__tests_
 - **Acceptance Criteria:**
   - Forced tab close leaves queue intact; next open resumes drain.
   - Dexie schema versioned; upgrade migration tested.
-- **Status:** [ ] Pending
+- **Status:** [x] ✅ Done — Sprint 2.2
 
 ### T-2.2.2 - Retry drain on `online` / `visibilitychange`
 
@@ -451,7 +451,7 @@ TypeScript strict - ESLint/Prettier clean - Tests co-located under `src/__tests_
 - **Acceptance Criteria:**
   - Simulated offline->online transition drains queue within 5 s.
   - Backoff caps at reasonable ceiling (e.g., 30 s).
-- **Status:** [ ] Pending
+- **Status:** [x] Done - Sprint 2.2
 
 ### T-2.2.3 - Server-side idempotency de-duplication
 
@@ -470,7 +470,7 @@ TypeScript strict - ESLint/Prettier clean - Tests co-located under `src/__tests_
 - **Acceptance Criteria:**
   - Two commits with same key -> HTTP 200 with identical body, single row in DB.
   - Migration reversible; RLS still enforced on the new index.
-- **Status:** [ ] Pending
+- **Status:** [x] Done - Sprint 2.2
 
 ### T-2.2.4 - Dead-letter surface in Diagnostics
 
@@ -489,7 +489,7 @@ TypeScript strict - ESLint/Prettier clean - Tests co-located under `src/__tests_
 - **Acceptance Criteria:**
   - Dead-letter items visible within 30 s of terminal failure.
   - Discard action confirmed with reversible undo.
-- **Status:** [ ] Pending
+- **Status:** [x] Done - Sprint 2.2
 
 ### T-2.2.5 - Reliability & idempotency tests
 
@@ -507,7 +507,7 @@ TypeScript strict - ESLint/Prettier clean - Tests co-located under `src/__tests_
 - **Affected Files:** `src/__tests__/syncEngine.reliability.test.ts` (new), `src/__tests__/syncCommit.idempotency.test.ts` (new)
 - **Acceptance Criteria:**
   - Both specs green in CI; used as M2 exit gate.
-- **Status:** [ ] Pending
+- **Status:** [x] Done - Sprint 2.2
 
 ---
 

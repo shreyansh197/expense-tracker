@@ -22,7 +22,9 @@ type AuditAction =
   | "user.delete_account"
   | "user.change_password"
   | "user.reset_password"
-  | "migration.sync_code";
+  | "migration.sync_code"
+  | "sync.dead_letter_retry"
+  | "sync.dead_letter_discard";
 
 export async function audit(params: {
   userId?: string;

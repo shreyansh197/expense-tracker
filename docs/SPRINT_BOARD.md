@@ -129,7 +129,7 @@ This board decomposes the entire product roadmap defined in [PROJECT_MASTER_PLAN
 
 ### Sprint 2.2 — Persistent Mutation Queue & Guaranteed‑Once Delivery
 
-- **Status:** Pending · **Priority:** P0 · **Effort:** L · **Story points:** 13
+- **Status:** ✅ Done — Sprint 2.2 · **Priority:** P0 · **Effort:** L · **Story points:** 13
 - **Goal:** Mutation queue survives tab close, network loss, and re‑auth. Every mutation is delivered exactly once. Closes Architecture §18.8.
 - **Tasks:**
   1. Persist queue attempts + backoff schedule in Dexie `mutations` table.

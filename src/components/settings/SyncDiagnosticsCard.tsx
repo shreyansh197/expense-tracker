@@ -1,10 +1,19 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
-import { Activity, ArrowUpCircle, ArrowDownCircle, AlertTriangle, RotateCcw, WifiOff, ShieldAlert, Inbox } from "lucide-react";
+import { useCallback, useEffect, useState, useTransition } from "react";
+import { Activity, ArrowUpCircle, ArrowDownCircle, AlertTriangle, RotateCcw, WifiOff, ShieldAlert, Inbox, RefreshCw, Trash2 } from "lucide-react";
 import { useSyncCounters } from "@/hooks/useSyncStatus";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
-import { resetSyncCounters } from "@/lib/syncEngine";
+import {
+  resetSyncCounters,
+  getDeadLetterMutations,
+  retryDeadLetter,
+  discardDeadLetter,
+  restoreDiscardedMutation,
+  onDeadLetterChange,
+  MAX_MUTATION_ATTEMPTS,
+} from "@/lib/syncEngine";
+import type { IDBMutation } from "@/lib/db";
 import { useToast } from "@/components/ui/Toast";
 
 /**
@@ -80,6 +89,60 @@ export function SyncDiagnosticsCard() {
     const id = setInterval(() => setNow(Date.now()), 10_000);
     return () => clearInterval(id);
   }, []);
+
+  // ── Dead-letter queue (Sprint 2.2 / T-2.2.4) ─────────────────────────────
+  const [deadLetter, setDeadLetter] = useState<IDBMutation[]>([]);
+
+  const refreshDeadLetter = useCallback(() => {
+    getDeadLetterMutations()
+      .then(setDeadLetter)
+      .catch(() => setDeadLetter([]));
+  }, []);
+
+  useEffect(() => {
+    refreshDeadLetter();
+    // Poll periodically as a safety net (30s ≪ the 30s acceptance criterion)
+    // and subscribe to explicit change events so retry/discard update instantly.
+    const id = setInterval(refreshDeadLetter, 15_000);
+    const unsub = onDeadLetterChange(refreshDeadLetter);
+    return () => {
+      clearInterval(id);
+      unsub();
+    };
+  }, [refreshDeadLetter]);
+
+  const handleRetry = (localId: number) => {
+    retryDeadLetter(localId)
+      .then((ok) => {
+        toast(ok ? "Retrying stuck change" : "Change no longer in queue", ok ? "success" : "info");
+        refreshDeadLetter();
+      })
+      .catch(() => toast("Could not retry", "error"));
+  };
+
+  const handleDiscard = (localId: number) => {
+    discardDeadLetter(localId)
+      .then((discarded) => {
+        if (!discarded) {
+          toast("Change no longer in queue", "info");
+          refreshDeadLetter();
+          return;
+        }
+        toast("Discarded stuck change", "success", {
+          label: "Undo",
+          onClick: () => {
+            restoreDiscardedMutation(discarded)
+              .then(() => {
+                toast("Change restored", "success");
+                refreshDeadLetter();
+              })
+              .catch(() => toast("Undo failed", "error"));
+          },
+        });
+        refreshDeadLetter();
+      })
+      .catch(() => toast("Could not discard", "error"));
+  };
 
   const handleReset = () => {
     startTransition(() => {
@@ -224,6 +287,72 @@ export function SyncDiagnosticsCard() {
         >
           <p className="font-semibold uppercase tracking-wide text-[10px] mb-1">Last error</p>
           <p className="font-mono break-all">{counters.lastError}</p>
+        </div>
+      )}
+
+      {deadLetter.length > 0 && (
+        <div
+          className="rounded-lg px-3 py-2 space-y-2"
+          style={{ background: "var(--danger-soft)", color: "var(--danger-text)" }}
+          role="region"
+          aria-label={`${deadLetter.length} stuck changes needing attention`}
+          data-testid="sync-diag-dead-letter"
+        >
+          <div className="flex items-center justify-between gap-2">
+            <p className="font-semibold uppercase tracking-wide text-[10px] flex items-center gap-1.5">
+              <ShieldAlert size={12} aria-hidden="true" />
+              Stuck changes
+              <span
+                className="ml-1 rounded-full px-1.5 py-0.5 text-[10px] font-bold"
+                style={{ background: "var(--danger-text)", color: "var(--danger-soft)" }}
+              >
+                {deadLetter.length}
+              </span>
+            </p>
+            <p className="text-[10px] opacity-80">Exceeded {MAX_MUTATION_ATTEMPTS} retry attempts</p>
+          </div>
+          <ul className="space-y-1.5" role="list">
+            {deadLetter.map((m) => (
+              <li
+                key={m.localId}
+                className="flex items-center justify-between gap-2 rounded-md px-2 py-1.5"
+                style={{ background: "var(--surface)" }}
+              >
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-medium truncate" style={{ color: "var(--text-primary)" }}>
+                    {m.table}:{m.operation}
+                  </p>
+                  <p className="text-[10px] font-mono truncate" style={{ color: "var(--text-tertiary)" }}>
+                    {m.lastError ?? "unknown error"} · {m.attempts ?? 0} attempts
+                  </p>
+                </div>
+                <div className="flex items-center gap-1 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => m.localId && handleRetry(m.localId)}
+                    aria-label={`Retry ${m.table} ${m.operation}`}
+                    className="inline-flex items-center justify-center gap-1 rounded-md px-2 min-h-[44px] text-[11px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]"
+                    style={{ background: "var(--surface-secondary)", color: "var(--text-primary)" }}
+                    data-testid={`sync-diag-dl-retry-${m.localId}`}
+                  >
+                    <RefreshCw size={12} aria-hidden="true" />
+                    Retry
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => m.localId && handleDiscard(m.localId)}
+                    aria-label={`Discard ${m.table} ${m.operation}`}
+                    className="inline-flex items-center justify-center gap-1 rounded-md px-2 min-h-[44px] text-[11px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]"
+                    style={{ background: "var(--danger-text)", color: "var(--danger-soft)" }}
+                    data-testid={`sync-diag-dl-discard-${m.localId}`}
+                  >
+                    <Trash2 size={12} aria-hidden="true" />
+                    Discard
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
         </div>
       )}
 

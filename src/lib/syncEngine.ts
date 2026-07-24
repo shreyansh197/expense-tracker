@@ -175,8 +175,43 @@ export function generateUUID(): string {
 
 const MAX_MUTATION_QUEUE_SIZE = 500;
 
+/**
+ * After this many consecutive push failures a mutation is considered
+ * "dead-lettered" — it stays in the queue but is skipped by the drain
+ * until the user takes an explicit action (retry / discard).
+ */
+export const MAX_MUTATION_ATTEMPTS = 8;
+
+/** Exponential backoff base (ms) — first retry waits 1s. */
+const BACKOFF_BASE_MS = 1_000;
+/** Cap for exponential backoff — matches acceptance criteria (≤ 30s). */
+const BACKOFF_CAP_MS = 30_000;
+/** Additional pseudorandom jitter (ms) to avoid thundering-herd retries. */
+const BACKOFF_JITTER_MS = 500;
+
+/**
+ * Compute the next-retry delay for a mutation that has failed `attempts` times.
+ * Uses exponential backoff (2^n) capped at BACKOFF_CAP_MS plus uniform jitter.
+ * Exposed for reliability tests.
+ */
+export function computeBackoffDelay(attempts: number): number {
+  const capped = Math.min(BACKOFF_BASE_MS * 2 ** Math.max(0, attempts - 1), BACKOFF_CAP_MS);
+  const jitter = Math.floor(Math.random() * BACKOFF_JITTER_MS);
+  return capped + jitter;
+}
+
+/**
+ * Redact any monetary values / free-text from an error message before persisting
+ * it on the mutation row. Keeps only the shape (name + numeric status code).
+ */
+function _redactPushError(err: unknown, status?: number): string {
+  if (typeof status === "number") return `HTTP ${status}`;
+  if (err instanceof Error) return err.name || "Error";
+  return "unknown";
+}
+
 export async function enqueueMutation(
-  mutation: Omit<IDBMutation, "localId" | "createdAt" | "workspaceId">,
+  mutation: Omit<IDBMutation, "localId" | "createdAt" | "workspaceId" | "attempts" | "nextRetryAt" | "lastError">,
   workspaceId: string,
 ): Promise<void> {
   // Cap the mutation queue to prevent unbounded growth while offline
@@ -206,6 +241,9 @@ export async function enqueueMutation(
     data: storedData,
     workspaceId,
     createdAt: Date.now(),
+    attempts: 0,
+    nextRetryAt: 0,
+    lastError: null,
   });
 
   // Register Background Sync so the SW wakes us when connectivity returns
@@ -542,6 +580,14 @@ export async function pushMutations(workspaceId?: string): Promise<number> {
       .sortBy("localId");
     if (allMutations.length === 0) return 0;
 
+    // Backfill retry metadata on legacy rows that pre-date Dexie v4 (belt-and-
+    // braces — the v4 upgrade also does this).
+    for (const m of allMutations) {
+      if (typeof m.attempts !== "number") m.attempts = 0;
+      if (typeof m.nextRetryAt !== "number") m.nextRetryAt = 0;
+      if (typeof m.lastError === "undefined") m.lastError = null;
+    }
+
     // Purge mutations with non-UUID ids — they will always fail Zod validation
     const invalidMutations = allMutations.filter(m => m.id && !UUID_RE.test(m.id));
     if (invalidMutations.length > 0) {
@@ -549,8 +595,30 @@ export async function pushMutations(workspaceId?: string): Promise<number> {
       await db.mutations.bulkDelete(invalidMutations.map(m => m.localId!).filter(Boolean));
     }
 
-    const mutations = allMutations.filter(m => !m.id || UUID_RE.test(m.id));
-    if (mutations.length === 0) return 0;
+    const now = Date.now();
+    const eligible = allMutations.filter(m => {
+      if (m.id && !UUID_RE.test(m.id)) return false;
+      // Dead-lettered mutations — skip until user retries them explicitly.
+      if ((m.attempts ?? 0) >= MAX_MUTATION_ATTEMPTS) return false;
+      // Backoff — not yet time to retry.
+      if ((m.nextRetryAt ?? 0) > now) return false;
+      return true;
+    });
+    if (eligible.length === 0) {
+      // Nothing to drain right now — but if we deferred any items, schedule
+      // the next drain at the earliest nextRetryAt so we don't wait for the
+      // slow-poll tick.
+      const deferred = allMutations.filter(m =>
+        (m.attempts ?? 0) < MAX_MUTATION_ATTEMPTS && (m.nextRetryAt ?? 0) > now
+      );
+      if (deferred.length > 0) {
+        const earliest = Math.min(...deferred.map(m => m.nextRetryAt ?? 0));
+        _scheduleRetryDrain(earliest - now);
+      }
+      return 0;
+    }
+
+    const mutations = eligible;
 
     syncLog("push", `Pushing ${mutations.length} mutations for workspace=${wid.slice(0,8)}…`);
 
@@ -618,11 +686,13 @@ export async function pushMutations(workspaceId?: string): Promise<number> {
           // these mutations have valid UUIDs so the issue may be transient (schema mismatch etc.)
           // 401 = needs token refresh — authFetch already retried, so give up for this cycle
           // Other = server error, retry later
+          await _recordBatchFailure(batch, res.status);
           break;
         }
       } catch (err) {
         syncErr("push", "Network error during push:", err);
         _recordFailure("push", err instanceof Error ? err.name : "network");
+        await _recordBatchFailure(batch, undefined, err);
         break; // Network error — stop, retry later (mutations stay in queue)
       }
     }
@@ -655,6 +725,167 @@ export function trySyncPush(workspaceId?: string, showSpinner = false) {
 
 export async function getPendingMutationCount(): Promise<number> {
   return db.mutations.count();
+}
+
+// ── Dead-letter queue (Sprint 2.2 / T-2.2.4) ──
+
+const _deadLetterListeners = new Set<() => void>();
+
+function _notifyDeadLetterChange() {
+  _deadLetterListeners.forEach((fn) => {
+    try { fn(); } catch { /* listener errors are non-fatal */ }
+  });
+}
+
+/** Subscribe to dead-letter queue changes (promotion, retry, discard). */
+export function onDeadLetterChange(fn: () => void): () => void {
+  _deadLetterListeners.add(fn);
+  return () => { _deadLetterListeners.delete(fn); };
+}
+
+/**
+ * List mutations that have exhausted their retry budget and are awaiting
+ * user action. Filters by workspace so per-tenant UI stays clean.
+ */
+export async function getDeadLetterMutations(workspaceId?: string): Promise<IDBMutation[]> {
+  const wid = workspaceId ?? getActiveWorkspaceId();
+  if (!wid) return [];
+  const all = await db.mutations.where("workspaceId").equals(wid).toArray();
+  return all.filter(m => (m.attempts ?? 0) >= MAX_MUTATION_ATTEMPTS);
+}
+
+/**
+ * Reset a dead-lettered mutation so the next drain picks it up.
+ * Clears attempts, nextRetryAt, and lastError; returns true on success.
+ */
+export async function retryDeadLetter(localId: number): Promise<boolean> {
+  const mutation = await db.mutations.get(localId);
+  if (!mutation) return false;
+  await db.mutations.update(localId, {
+    attempts: 0,
+    nextRetryAt: 0,
+    lastError: null,
+  });
+  _notifyDeadLetterChange();
+  // Log to server audit trail (best-effort — never blocks the UI).
+  _auditDeadLetterAction(mutation.workspaceId, "retry", mutation).catch(() => {});
+  // Kick a drain now so the user sees immediate progress.
+  trySyncPush(mutation.workspaceId);
+  return true;
+}
+
+/**
+ * Remove a dead-lettered mutation from the queue. Returns the removed
+ * mutation so the caller can offer an "Undo" that re-enqueues it.
+ */
+export async function discardDeadLetter(localId: number): Promise<IDBMutation | null> {
+  const mutation = await db.mutations.get(localId);
+  if (!mutation) return null;
+  await db.mutations.delete(localId);
+  _notifyDeadLetterChange();
+  _auditDeadLetterAction(mutation.workspaceId, "discard", mutation).catch(() => {});
+  return mutation;
+}
+
+/**
+ * Restore a previously-discarded mutation. Used to implement the "Undo"
+ * affordance on the discard action. Preserves attempts=0 so the drain
+ * retries it immediately.
+ */
+export async function restoreDiscardedMutation(mutation: IDBMutation): Promise<void> {
+  // Strip localId so Dexie assigns a fresh auto-increment key.
+  const { localId: _drop, ...rest } = mutation;
+  void _drop;
+  await db.mutations.add({
+    ...rest,
+    attempts: 0,
+    nextRetryAt: 0,
+    lastError: null,
+  });
+  _notifyDeadLetterChange();
+  trySyncPush(mutation.workspaceId);
+}
+
+async function _auditDeadLetterAction(
+  workspaceId: string,
+  action: "retry" | "discard",
+  mutation: IDBMutation,
+): Promise<void> {
+  try {
+    // Redacted payload — never sends `data` (may contain amounts / notes).
+    await authFetch("/api/audit/sync-dead-letter", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        workspaceId,
+        action,
+        mutationSummary: {
+          table: mutation.table,
+          operation: mutation.operation,
+          idempotencyKey: mutation.idempotencyKey,
+          attempts: mutation.attempts ?? 0,
+          lastError: mutation.lastError ?? null,
+        },
+      }),
+      signal: AbortSignal.timeout(10_000),
+    });
+  } catch {
+    // Non-fatal — audit endpoint is best-effort.
+  }
+}
+
+// ── Retry-drain scheduling (Sprint 2.2 / T-2.2.2) ──
+
+let _retryDrainTimeout: ReturnType<typeof setTimeout> | null = null;
+
+/**
+ * Persist a batch failure: bump `attempts`, compute exponential backoff with
+ * jitter, and persist `lastError`. Mutations that cross the MAX_MUTATION_ATTEMPTS
+ * threshold surface via `onDeadLetterChange`.
+ */
+async function _recordBatchFailure(
+  batch: IDBMutation[],
+  status?: number,
+  err?: unknown,
+): Promise<void> {
+  const now = Date.now();
+  const lastError = _redactPushError(err, status);
+  let deadLetterPromoted = false;
+  await db.transaction("rw", db.mutations, async () => {
+    for (const m of batch) {
+      if (!m.localId) continue;
+      const attempts = (m.attempts ?? 0) + 1;
+      const wasDeadLettered = (m.attempts ?? 0) >= MAX_MUTATION_ATTEMPTS;
+      const isDeadLettered = attempts >= MAX_MUTATION_ATTEMPTS;
+      if (!wasDeadLettered && isDeadLettered) deadLetterPromoted = true;
+      await db.mutations.update(m.localId, {
+        attempts,
+        nextRetryAt: now + computeBackoffDelay(attempts),
+        lastError,
+      });
+    }
+  });
+  if (deadLetterPromoted) _notifyDeadLetterChange();
+
+  // Schedule a targeted retry so we don't wait for the slow-poll tick.
+  const earliestDelay = computeBackoffDelay(1); // conservative — actual per-row values persisted above
+  _scheduleRetryDrain(earliestDelay);
+}
+
+function _scheduleRetryDrain(delayMs: number): void {
+  if (_retryDrainTimeout) { clearTimeout(_retryDrainTimeout); _retryDrainTimeout = null; }
+  const wait = Math.max(0, Math.min(delayMs, BACKOFF_CAP_MS + BACKOFF_JITTER_MS));
+  _retryDrainTimeout = setTimeout(() => {
+    _retryDrainTimeout = null;
+    if (typeof document !== "undefined" && document.visibilityState !== "visible") return;
+    if (typeof navigator !== "undefined" && !navigator.onLine) return;
+    trySyncPush();
+  }, wait);
+  // In Node (Jest) allow the process to exit even while this timer is
+  // pending. Browsers have no `.unref()` on the timer handle, hence the
+  // defensive optional chain.
+  const handle = _retryDrainTimeout as unknown as { unref?: () => void };
+  handle?.unref?.();
 }
 
 // ── Sync engine lifecycle ──
@@ -808,6 +1039,9 @@ async function _migrateStuckData() {
         idempotencyKey: makeIdempotencyKey(),
         workspaceId: exp.workspaceId,
         createdAt: Date.now(),
+        attempts: 0,
+        nextRetryAt: 0,
+        lastError: null,
       });
     }
 
@@ -833,6 +1067,9 @@ async function _migrateStuckData() {
         idempotencyKey: makeIdempotencyKey(),
         workspaceId: led.workspaceId,
         createdAt: Date.now(),
+        attempts: 0,
+        nextRetryAt: 0,
+        lastError: null,
       });
     }
 
@@ -857,6 +1094,9 @@ async function _migrateStuckData() {
         idempotencyKey: makeIdempotencyKey(),
         workspaceId: pay.workspaceId,
         createdAt: Date.now(),
+        attempts: 0,
+        nextRetryAt: 0,
+        lastError: null,
       });
     }
 
@@ -961,6 +1201,7 @@ export function startSyncEngine() {
 
 export function stopSyncEngine() {
   if (_syncTimeout) { clearTimeout(_syncTimeout); _syncTimeout = null; }
+  if (_retryDrainTimeout) { clearTimeout(_retryDrainTimeout); _retryDrainTimeout = null; }
   if (_onlineHandler) { window.removeEventListener("online", _onlineHandler); _onlineHandler = null; }
   if (_visibilityHandler) { document.removeEventListener("visibilitychange", _visibilityHandler); _visibilityHandler = null; }
   if (_realtimeChannel) { supabase.removeChannel(_realtimeChannel); _realtimeChannel = null; }

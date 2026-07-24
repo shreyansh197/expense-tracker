@@ -69,7 +69,7 @@ function makeJsonResponse(body: unknown, status = 200): Response {
   });
 }
 
-function makeMutation(overrides: Partial<IDBMutation> = {}): Omit<IDBMutation, "localId" | "createdAt" | "workspaceId"> {
+function makeMutation(overrides: Partial<IDBMutation> = {}): Omit<IDBMutation, "localId" | "createdAt" | "workspaceId" | "attempts" | "nextRetryAt" | "lastError"> {
   return {
     table: "expenses",
     operation: "upsert",
@@ -225,6 +225,9 @@ describe("pushMutations", () => {
       idempotencyKey: makeIdempotencyKey(),
       workspaceId: "ws-test-001",
       createdAt: Date.now(),
+      attempts: 0,
+      nextRetryAt: 0,
+      lastError: null,
     });
     // Add a valid mutation
     await enqueueMutation(makeMutation(), "ws-test-001");
