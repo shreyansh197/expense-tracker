@@ -339,7 +339,7 @@ Journeys are described end-to-end. Each step names the surface, the state contra
 
 - _Primary emotion arc:_ start = high anxiety (a lost/replaced device is a stressful moment) → mid = reassurance (sync is working, the export exists, my key is recoverable) → end = restored trust (the app is exactly where I left it).
 
-> Emotional arcs above are the acceptance test for each journey's affective quality. Per-screen state contracts (empty / loading / error / offline / success) and the *feeling per screen* live in [`SCREEN_GUIDELINES.md`](SCREEN_GUIDELINES.md). The end-to-end narrative that these arcs compose into is [`EXPERIENCE_VISION.md`](EXPERIENCE_VISION.md).
+> Emotional arcs above are the acceptance test for each journey's affective quality. Per-screen state contracts (empty / loading / error / offline / success) and the _feeling per screen_ live in [`SCREEN_GUIDELINES.md`](SCREEN_GUIDELINES.md). The end-to-end narrative that these arcs compose into is [`EXPERIENCE_VISION.md`](EXPERIENCE_VISION.md).
 
 ---
 

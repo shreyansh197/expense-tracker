@@ -30,23 +30,23 @@ Every feature that ExpenStream ships passes through the same test: **does openin
 
 ### 0.1 Why the feature exists
 
-Because the ExpenStream ADK already has doctrine (`PRODUCT_PRINCIPLES.md`) and mechanics (`DESIGN_SYSTEM.md`), but it does not have a **narrative** for what a premium finance experience *feels* like end-to-end. Without a narrative, every designer and every AI agent reconstructs the target from scratch, and the target drifts.
+Because the ExpenStream ADK already has doctrine (`PRODUCT_PRINCIPLES.md`) and mechanics (`DESIGN_SYSTEM.md`), but it does not have a **narrative** for what a premium finance experience _feels_ like end-to-end. Without a narrative, every designer and every AI agent reconstructs the target from scratch, and the target drifts.
 
 ### 0.2 What problem it solves
 
-The gap between "we know the principles" and "we know what to ship". This document is the middle sentence: the target sensory experience each feature must aim at, described concretely enough that a reviewer can point at a screen and say *"that is (or is not) the feeling."*
+The gap between "we know the principles" and "we know what to ship". This document is the middle sentence: the target sensory experience each feature must aim at, described concretely enough that a reviewer can point at a screen and say _"that is (or is not) the feeling."_
 
 ### 0.3 Business value
 
 - **Positioning integrity.** ExpenStream is being built as a premium, privacy-first, calm alternative to attention-economy money apps. That positioning collapses the moment the app feels rushed, loud, or manipulative. This document is the daily reminder.
 - **Faster feature scoping.** With a shared narrative, feature debates end sooner — "would that ship on Apple Wallet? on a payday-loan app?" — and the answer is unambiguous.
-- **Reduced rework.** Emotional bugs (features that feel *off*) are the most expensive to catch late. Catching them at the scoping table is orders of magnitude cheaper.
+- **Reduced rework.** Emotional bugs (features that feel _off_) are the most expensive to catch late. Catching them at the scoping table is orders of magnitude cheaper.
 
 ### 0.4 Product value
 
 - Gives every screen a single **feeling target** that reviewers can grade against.
 - Turns the "premium fintech" phrase into an operational, non-vague spec.
-- Provides the vocabulary — *calm, honest, unhurried, private, precise, human* — that appears in every future PR description and design review.
+- Provides the vocabulary — _calm, honest, unhurried, private, precise, human_ — that appears in every future PR description and design review.
 
 ### 0.5 User mindset
 
@@ -56,11 +56,11 @@ Users open a personal-finance app in one of three mindsets:
 2. **Concerned** — "Something feels off. Can I check?"
 3. **Transactional** — "I just spent ₹340; log it before I forget."
 
-None of these mindsets is *leisure*. Every one of them is a small, purposeful, slightly-tense moment. The vision below is engineered for those three mindsets — never for the fourth, hypothetical "browsing for fun" mindset that does not exist for personal finance.
+None of these mindsets is _leisure_. Every one of them is a small, purposeful, slightly-tense moment. The vision below is engineered for those three mindsets — never for the fourth, hypothetical "browsing for fun" mindset that does not exist for personal finance.
 
 ### 0.6 Emotional goal
 
-**From money-as-worry to money-as-clarity.** By the time the user closes the app, the primary emotion should be *quiet relief* — the question is answered, the log is captured, nothing is nagging. If the user closes the app more anxious than they opened it, the design has failed regardless of every other metric.
+**From money-as-worry to money-as-clarity.** By the time the user closes the app, the primary emotion should be _quiet relief_ — the question is answered, the log is captured, nothing is nagging. If the user closes the app more anxious than they opened it, the design has failed regardless of every other metric.
 
 ---
 
@@ -70,7 +70,7 @@ Every ExpenStream session moves through four beats. They apply whether the sessi
 
 1. **Open.** The first paint is meaningful. No splash. No brand animation. The dashboard hero — "am I on track this month?" — is the first thing on screen and the answer is legible within one second (see [`DESIGN_SYSTEM.md §8 Motion`](DESIGN_SYSTEM.md) for the timing budget and [`IMPLEMENTATION_RULES.md`](IMPLEMENTATION_RULES.md) for the first-paint contract).
 2. **Glance.** The user's actual question is answered without scrolling and without a chart. The answer is a number and, at most, one word of context ("on track", "over by ₹410"). No confetti; no red alerts.
-3. **Act.** If the user came to *do* something (log an expense, record a payment, adjust a budget), the primary action is one tap away and completes in one gesture. Amount pad first, category grid second, save third — this order is [UX-4.1](UX_DECISIONS.md) precedent.
+3. **Act.** If the user came to _do_ something (log an expense, record a payment, adjust a budget), the primary action is one tap away and completes in one gesture. Amount pad first, category grid second, save third — this order is [UX-4.1](UX_DECISIONS.md) precedent.
 4. **Close.** The app makes it easy to leave. There is no "wait, one more thing" — no upsell modal, no rating request, no streak reminder. The absence of a hook is a feature.
 
 The story is deliberately anticlimactic. The most successful ExpenStream session is one the user does not remember having.
@@ -79,16 +79,16 @@ The story is deliberately anticlimactic. The most successful ExpenStream session
 
 ## 2. The Six Qualities of a Premium Finance Surface
 
-Six qualities compose the ExpenStream *feeling*. They are the reviewer's checklist and the copywriter's tuning fork.
+Six qualities compose the ExpenStream _feeling_. They are the reviewer's checklist and the copywriter's tuning fork.
 
-| # | Quality      | What it means concretely                                                                                                            | What it forbids                                                                    |
-| - | ------------ | ----------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| 1 | **Calm**     | Neutral defaults. Emphasis reserved for the number that matters. Motion is short, gentle, and always cued by a state change.        | Red badges by default; celebratory animations; punchy microcopy.                   |
-| 2 | **Honest**   | The true number appears before any reassurance. Estimates are labelled. Rounding is visible on tap.                                 | Vanity metrics; "close to on track" spin; hidden fees; fake progress bars.         |
-| 3 | **Unhurried**| Actions complete at human pace. Confirmations are quiet. Loading skeletons are calm rectangles, not shimmering rivers.              | Auto-advancing tutorials; countdown timers; forced onboarding flow.                |
-| 4 | **Private**  | Sensitive fields render lazily. Screenshots do not expose amounts. Push bodies never include monetary values (see `AI_CONTEXT §18`).| Amounts in notifications, analytics, or logs; tracking pixels; ad networks.        |
-| 5 | **Precise**  | Every amount carries a currency. Rounding is documented. Two-decimal display, four-decimal storage. Alignment is monospaced on numbers.| Locale-guessing without confirmation; ambiguous units; drifting decimal columns. |
-| 6 | **Human**    | Microcopy is written by a thoughtful accountant, not a growth hacker. Empty states teach. Errors apologise without grovelling.      | Emoji at a user's loss; gamified guilt ("you broke your streak!"); passive-aggressive nags. |
+| #   | Quality       | What it means concretely                                                                                                                | What it forbids                                                                             |
+| --- | ------------- | --------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| 1   | **Calm**      | Neutral defaults. Emphasis reserved for the number that matters. Motion is short, gentle, and always cued by a state change.            | Red badges by default; celebratory animations; punchy microcopy.                            |
+| 2   | **Honest**    | The true number appears before any reassurance. Estimates are labelled. Rounding is visible on tap.                                     | Vanity metrics; "close to on track" spin; hidden fees; fake progress bars.                  |
+| 3   | **Unhurried** | Actions complete at human pace. Confirmations are quiet. Loading skeletons are calm rectangles, not shimmering rivers.                  | Auto-advancing tutorials; countdown timers; forced onboarding flow.                         |
+| 4   | **Private**   | Sensitive fields render lazily. Screenshots do not expose amounts. Push bodies never include monetary values (see `AI_CONTEXT §18`).    | Amounts in notifications, analytics, or logs; tracking pixels; ad networks.                 |
+| 5   | **Precise**   | Every amount carries a currency. Rounding is documented. Two-decimal display, four-decimal storage. Alignment is monospaced on numbers. | Locale-guessing without confirmation; ambiguous units; drifting decimal columns.            |
+| 6   | **Human**     | Microcopy is written by a thoughtful accountant, not a growth hacker. Empty states teach. Errors apologise without grovelling.          | Emoji at a user's loss; gamified guilt ("you broke your streak!"); passive-aggressive nags. |
 
 If a proposed feature does not clearly advance at least one of these six qualities, it does not belong in ExpenStream regardless of how "engaging" it is.
 
@@ -104,23 +104,23 @@ Personal finance apps commonly reach for chimes, badges, red dots, and celebrato
 - **No push haptics for informational updates.** Haptics are reserved for the user's own primary action (save, delete, undo), and never for server-initiated notifications.
 - **No streak counters.** Streaks weaponise the fear of losing them. See [`FINANCIAL_PSYCHOLOGY.md`](FINANCIAL_PSYCHOLOGY.md).
 
-The user's evening should be quieter *because* they use ExpenStream, not louder.
+The user's evening should be quieter _because_ they use ExpenStream, not louder.
 
 ---
 
 ## 4. Benchmark Qualities — Extracted, Never Copied
 
-ExpenStream studies other products for the *qualities* they achieve, never for the designs they ship. Any resemblance to a specific screen or motion of another product in ExpenStream code is a bug. The following are the qualities we admire and extract:
+ExpenStream studies other products for the _qualities_ they achieve, never for the designs they ship. Any resemblance to a specific screen or motion of another product in ExpenStream code is a bug. The following are the qualities we admire and extract:
 
-| Product              | Quality worth extracting                                                            | What we refuse to import                                                    |
-| -------------------- | ----------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| **Apple Wallet**     | Extreme restraint; typography does the work; motion confirms rather than performs.  | Skeuomorphic depth; card metaphor for non-card entities.                    |
-| **Copilot Money**    | Warm neutrals; the "your money" narrative; charts that whisper.                     | Aggressive weekly digests; feature discovery via nudge.                     |
-| **Monarch**          | Category discipline; long-run views without doom-framing.                           | Household comparison social layer; premium-tier gating of exports.          |
-| **YNAB**             | Envelope-as-first-class-object; opinionated defaults that respect the user.         | Guilt-driven copy; onboarding that presumes a mental model.                 |
-| **Revolut**          | Speed; the ledger renders instantly; sub-second interactions feel weightless.       | Interstitial upsells; card gamification; loot-box "spend to spin" surfaces. |
-| **Material Design 3**| The five states discipline; motion tokens; a11y-first defaults.                     | Ripple-heavy tactility; brand-colour dependence.                            |
-| **Apple HIG**        | Restraint on sound + haptic budget; alerts that earn their interruption cost.       | System-native chrome that dictates layout choices.                          |
+| Product               | Quality worth extracting                                                           | What we refuse to import                                                    |
+| --------------------- | ---------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| **Apple Wallet**      | Extreme restraint; typography does the work; motion confirms rather than performs. | Skeuomorphic depth; card metaphor for non-card entities.                    |
+| **Copilot Money**     | Warm neutrals; the "your money" narrative; charts that whisper.                    | Aggressive weekly digests; feature discovery via nudge.                     |
+| **Monarch**           | Category discipline; long-run views without doom-framing.                          | Household comparison social layer; premium-tier gating of exports.          |
+| **YNAB**              | Envelope-as-first-class-object; opinionated defaults that respect the user.        | Guilt-driven copy; onboarding that presumes a mental model.                 |
+| **Revolut**           | Speed; the ledger renders instantly; sub-second interactions feel weightless.      | Interstitial upsells; card gamification; loot-box "spend to spin" surfaces. |
+| **Material Design 3** | The five states discipline; motion tokens; a11y-first defaults.                    | Ripple-heavy tactility; brand-colour dependence.                            |
+| **Apple HIG**         | Restraint on sound + haptic budget; alerts that earn their interruption cost.      | System-native chrome that dictates layout choices.                          |
 
 Reviewers who see a design that "looks like [product]" should reject it. Extract the quality, ship an ExpenStream original.
 
@@ -200,7 +200,7 @@ The a11y contract lives in [`DESIGN_SYSTEM.md §17`](DESIGN_SYSTEM.md), [`IMPLEM
 - **Nothing feels bolted-on.** Every interaction usable by mouse is equally usable by keyboard, voice, and screen reader.
 - **Motion is optional.** `prefers-reduced-motion` disables all decorative motion and replaces state transitions with instant cross-fades ≤ 100 ms.
 - **Text scales.** Every screen survives 200% user text scaling without truncation.
-- **Colour is never load-bearing alone.** Overspend is *both* amber-tinted *and* labelled "over by ₹X".
+- **Colour is never load-bearing alone.** Overspend is _both_ amber-tinted _and_ labelled "over by ₹X".
 - **Touch targets are ≥ 44 × 44 px.** Enforced by contract test.
 - **Screen reader order matches visual order.** No `tabindex` gymnastics.
 - **Focus is always visible.** A calm focus ring, never a system-default outline.
@@ -225,7 +225,7 @@ The goal: after using ExpenStream for a week, the user should struggle to name a
 
 ## 13. Information Hierarchy
 
-- **One hero answer per screen.** The dashboard hero answers *"where am I this month?"*; the analytics hero answers *"what did I actually spend on?"*; the business hero answers *"what am I owed?"*. If a screen has two heroes, it has none.
+- **One hero answer per screen.** The dashboard hero answers _"where am I this month?"_; the analytics hero answers _"what did I actually spend on?"_; the business hero answers _"what am I owed?"_. If a screen has two heroes, it has none.
 - **The hero is a number, not a chart.** Charts are supporting evidence.
 - **Cards group; whitespace separates.** No dividers where whitespace suffices. See [`DESIGN_SYSTEM.md §11 Cards`](DESIGN_SYSTEM.md).
 - **Density is user-choice.** Comfortable and compact modes are equal citizens; neither is the "power-user" mode.
@@ -250,11 +250,11 @@ Interaction precedent lives in [`UX_DECISIONS.md`](UX_DECISIONS.md); this sectio
 
 ## 15. Design Rationale
 
-Why *this* vision, and not something more energetic?
+Why _this_ vision, and not something more energetic?
 
 - **Because money is high-stakes context.** A colourful, animated finance app produces the same anxiety as a colourful, animated MRI report. The chrome must match the seriousness of the subject.
 - **Because the target user has ambient financial anxiety.** ExpenStream's target personas ([`PROJECT_MASTER_PLAN §6`](PROJECT_MASTER_PLAN.md)) include people for whom every rupee is decided. Loud interfaces make that anxiety worse, not better.
-- **Because engagement metrics are the wrong target for personal finance.** The successful ExpenStream user opens the app *less* over time, not more. The vision is engineered to earn that outcome.
+- **Because engagement metrics are the wrong target for personal finance.** The successful ExpenStream user opens the app _less_ over time, not more. The vision is engineered to earn that outcome.
 - **Because craft compounds.** Restrained, precise, unhurried products earn trust slowly and permanently. Loud products earn attention quickly and lose it just as fast.
 
 ---
@@ -291,7 +291,7 @@ Fifteen mistakes that reviewers and AI agents should flag on sight:
 14. **A "premium" export tier** — refuse; export parity is a principle.
 15. **A design that "looks like [competitor]"** — extract the quality, ship an original.
 
-If a PR triggers any of these, the correct response is *"redesign, then re-review"*, not *"amend and merge"*.
+If a PR triggers any of these, the correct response is _"redesign, then re-review"_, not _"amend and merge"_.
 
 ---
 
@@ -300,7 +300,7 @@ If a PR triggers any of these, the correct response is *"redesign, then re-revie
 - **Designers:** read before scoping any feature. Grade the design against §2, §5, and §17. Cite this doc in the design brief.
 - **Engineers:** read once at project onboarding. Refer back when a spec is ambiguous — the answer often lives in §6, §7, §8, or §12.
 - **Copywriters:** §6 (Human), §9 (Error tone), §14 (calm copy) are the tuning fork.
-- **AI agents:** load this doc immediately after `PRODUCT_PRINCIPLES.md`. When asked to design a screen or feature, cross-reference against `SCREEN_GUIDELINES.md` for composition and `FINANCIAL_PSYCHOLOGY.md` for what to design *against*.
+- **AI agents:** load this doc immediately after `PRODUCT_PRINCIPLES.md`. When asked to design a screen or feature, cross-reference against `SCREEN_GUIDELINES.md` for composition and `FINANCIAL_PSYCHOLOGY.md` for what to design _against_.
 - **Reviewers:** any PR that changes user-facing behaviour must name which §2 quality it advances. If it does not, ask.
 
 ---

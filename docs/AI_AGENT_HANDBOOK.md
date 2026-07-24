@@ -62,11 +62,11 @@ Read in this order. Skimming is allowed once the doc has been fully read in a pr
 
 1. [`AI_CONTEXT.md`](AI_CONTEXT.md) — mission, rules, "under two pages" constraint.
 2. [`PRODUCT_PRINCIPLES.md`](PRODUCT_PRINCIPLES.md) — product doctrine, now including §7.5 emotional-design commitments and §7.6 financial-psychology guardrails.
-3. [`EXPERIENCE_VISION.md`](EXPERIENCE_VISION.md) — the north-star feeling and premium-fintech qualities every screen must aim at. *(Product Experience family.)*
-4. [`FINANCIAL_PSYCHOLOGY.md`](FINANCIAL_PSYCHOLOGY.md) — the biases we design *against* and the anti-patterns we refuse to ship. *(Product Experience family.)*
+3. [`EXPERIENCE_VISION.md`](EXPERIENCE_VISION.md) — the north-star feeling and premium-fintech qualities every screen must aim at. _(Product Experience family.)_
+4. [`FINANCIAL_PSYCHOLOGY.md`](FINANCIAL_PSYCHOLOGY.md) — the biases we design _against_ and the anti-patterns we refuse to ship. _(Product Experience family.)_
 5. [`ARCHITECTURE.md`](ARCHITECTURE.md) (+ [`ARCHITECTURE_DIAGRAMS.md`](ARCHITECTURE_DIAGRAMS.md) if the task touches auth, sync, notifications, or workspace flows).
 6. [`DESIGN_SYSTEM.md`](DESIGN_SYSTEM.md) — tokens, motion, components (§22 UI evolution & versioning). **Never invent new spacing/colors/typography.**
-7. [`SCREEN_GUIDELINES.md`](SCREEN_GUIDELINES.md) — per-screen canonical composition and five states. Load whenever a screen is being created, edited, or reviewed. *(Product Experience family.)*
+7. [`SCREEN_GUIDELINES.md`](SCREEN_GUIDELINES.md) — per-screen canonical composition and five states. Load whenever a screen is being created, edited, or reviewed. _(Product Experience family.)_
 8. [`UX_DECISIONS.md`](UX_DECISIONS.md) — precedent for the composition choices.
 9. [`PROJECT_MASTER_PLAN.md`](PROJECT_MASTER_PLAN.md) — scope, personas, journeys (§7 now carries per-journey emotional arcs), acceptance criteria.
 10. [`SPRINT_BOARD.md`](SPRINT_BOARD.md) — what's active this sprint.

@@ -1092,7 +1092,6 @@ Motion earns its place by answering "what changed?" Anything else is decoration 
 - Component-level contracts (props, states, a11y) live in `src/__tests__/componentContracts.test.ts`, `accessibilityContracts.test.ts`, and `designTokens.test.ts` — those tests are the enforcement layer.
 - When a component drifts from a token, the fix is to align the component to the token, not the token to the component.
 
-
 ---
 
 ## 22. UI Evolution & Versioning
@@ -1102,9 +1101,9 @@ The design system is a living surface. This section is the **contract for how it
 ### 22.1 Versioning model
 
 - **The design system is versioned with the app.** There is no separate DS release train — a token or component that ships in app version `X.Y.Z` is authoritative for that version.
-- **Semver of *intent*, not just of *tokens*:**
+- **Semver of _intent_, not just of _tokens_:**
   - **Major** — a token is removed, renamed, or has its semantic meaning changed (e.g., `--color-danger` remapped to a different hue family, or `--space-4` re-quantised). Also: a component prop is removed, or default behaviour changes in a way an existing screen would notice.
-  - **Minor** — a new token, a new component, or a new variant is *added*. Existing consumers keep working.
+  - **Minor** — a new token, a new component, or a new variant is _added_. Existing consumers keep working.
   - **Patch** — non-visual clarifications (docs, tests, JSDoc, contract-test coverage).
 - Every version-affecting change lists its DS impact in [`CHANGELOG.md`](CHANGELOG.md) under the app version it ships in. Major DS changes additionally require an [ADR](adr/) explaining the rationale.
 
@@ -1140,7 +1139,7 @@ Deprecation is a two-phase, minimum-one-release process — never a delete-in-pl
 
 These three families are the most sensitive to drift because they are physical (feel, depth, rhythm) rather than semantic. Any change to §1 Typography, §7 Elevation, §8 Motion, or §19 Animation Principles additionally requires:
 
-- Screenshot / video diff attached to the PR (before / after) so reviewers can *see* the change.
+- Screenshot / video diff attached to the PR (before / after) so reviewers can _see_ the change.
 - A note on `prefers-reduced-motion` behaviour if motion is touched.
 - Confirmation that the change does not violate the WCAG AA contrast contract (§17) or the 44 × 44 px touch-target contract ([`IMPLEMENTATION_RULES.md`](IMPLEMENTATION_RULES.md)).
 
@@ -1159,7 +1158,6 @@ These three families are the most sensitive to drift because they are physical (
 - Not a place for new tokens themselves — those go into their semantic section above.
 
 The purpose of §22 is one thing: **make the process of changing the design system as legible as the design system itself.**
-
 
 ---
 

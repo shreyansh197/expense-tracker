@@ -3356,7 +3356,7 @@ TypeScript strict - ESLint/Prettier clean - Tests co-located under `src/__tests_
 - **Dependencies:** T-15.1.1.
 - **Affected Files:** [docs/FINANCIAL_PSYCHOLOGY.md](FINANCIAL_PSYCHOLOGY.md)
 - **Acceptance Criteria:**
-  - Opens with the explicit non-goal: "This document exists so we design *against* these biases, not with them."
+  - Opens with the explicit non-goal: "This document exists so we design _against_ these biases, not with them."
   - Covers anchoring, loss aversion, mental accounting, present bias, financial shame, notification anxiety, envelope bias at minimum.
   - Every entry lists the anti-pattern we refuse.
 - **Status:** [x] Done (2026-07-24)
@@ -3385,7 +3385,7 @@ TypeScript strict - ESLint/Prettier clean - Tests co-located under `src/__tests_
 - **Sprint:** Sprint 15.1
 - **Epic:** M15
 - **Feature:** Docs - PRD journeys
-- **Description:** Add one *primary emotion arc* sub-bullet (start → mid → end) to each of §7.1 - §7.6 in [docs/PROJECT_MASTER_PLAN.md](PROJECT_MASTER_PLAN.md). No new journeys, no restructure.
+- **Description:** Add one _primary emotion arc_ sub-bullet (start → mid → end) to each of §7.1 - §7.6 in [docs/PROJECT_MASTER_PLAN.md](PROJECT_MASTER_PLAN.md). No new journeys, no restructure.
 - **Business Value:** Journeys are now testable for feeling, not only for steps.
 - **Technical Value:** Provides the acceptance surface for `SCREEN_GUIDELINES.md` per-screen feeling promises.
 - **Priority:** P1
@@ -3641,7 +3641,6 @@ TypeScript strict - ESLint/Prettier clean - Tests co-located under `src/__tests_
 - This queue is the source of truth: if [SPRINT_BOARD.md](SPRINT_BOARD.md), [PROJECT_MASTER_PLAN.md](PROJECT_MASTER_PLAN.md), or [ARCHITECTURE.md](ARCHITECTURE.md) disagree, this file wins for execution ordering.
 
 ---
-
 
 ---
 

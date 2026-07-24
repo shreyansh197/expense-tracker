@@ -20,7 +20,7 @@
 
 ## 1. Executive Summary
 
-The UI Foundation Audit identified a missing middle layer between doctrine (`PRODUCT_PRINCIPLES.md`) and mechanics (`DESIGN_SYSTEM.md`) — a **Product Experience** family that would answer *"what should the user feel on each screen, and how do we design for the psychology of money?"*. That gap is now closed.
+The UI Foundation Audit identified a missing middle layer between doctrine (`PRODUCT_PRINCIPLES.md`) and mechanics (`DESIGN_SYSTEM.md`) — a **Product Experience** family that would answer _"what should the user feel on each screen, and how do we design for the psychology of money?"_. That gap is now closed.
 
 This sprint:
 
@@ -35,12 +35,12 @@ Everything below traces directly to a section of the audit report.
 
 ## 2. Files Created
 
-| Path                                                             | Family              | Responsibility                                                                                                                                     | Audit reference |
-| ---------------------------------------------------------------- | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
-| [`docs/EXPERIENCE_VISION.md`](../docs/EXPERIENCE_VISION.md)      | Product Experience  | North-star product experience narrative; the Six Qualities of a Premium Finance Surface; benchmark qualities (extracted, never copied); the Sound Absence; anti-patterns refused. | Audit §4.1      |
-| [`docs/SCREEN_GUIDELINES.md`](../docs/SCREEN_GUIDELINES.md)      | Product Experience  | Canonical composition and five states (empty / loading / error / offline / success) for every top-level screen — Landing, Login, Dashboard, Expenses, Analytics, Business, Category, Settings — plus screens-wide cross-cutting rules. | Audit §4.2      |
-| [`docs/FINANCIAL_PSYCHOLOGY.md`](../docs/FINANCIAL_PSYCHOLOGY.md)| Product Experience  | Money-related cognitive biases (anchoring, loss aversion, present bias, financial shame, notification anxiety, mental accounting, envelope bias, social comparison, sunk cost, endowment, scarcity, category framing, confirmation bias) each paired with an ExpenStream guardrail and the anti-pattern we refuse to ship. Opens with the explicit non-goal statement. | Audit §4.3      |
-| `sprint-reports/UI_FOUNDATION_IMPLEMENTATION.md`                 | Ops & History       | This report.                                                                                                                                       | Audit §11       |
+| Path                                                              | Family             | Responsibility                                                                                                                                                                                                                                                                                                                                                         | Audit reference |
+| ----------------------------------------------------------------- | ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
+| [`docs/EXPERIENCE_VISION.md`](../docs/EXPERIENCE_VISION.md)       | Product Experience | North-star product experience narrative; the Six Qualities of a Premium Finance Surface; benchmark qualities (extracted, never copied); the Sound Absence; anti-patterns refused.                                                                                                                                                                                      | Audit §4.1      |
+| [`docs/SCREEN_GUIDELINES.md`](../docs/SCREEN_GUIDELINES.md)       | Product Experience | Canonical composition and five states (empty / loading / error / offline / success) for every top-level screen — Landing, Login, Dashboard, Expenses, Analytics, Business, Category, Settings — plus screens-wide cross-cutting rules.                                                                                                                                 | Audit §4.2      |
+| [`docs/FINANCIAL_PSYCHOLOGY.md`](../docs/FINANCIAL_PSYCHOLOGY.md) | Product Experience | Money-related cognitive biases (anchoring, loss aversion, present bias, financial shame, notification anxiety, mental accounting, envelope bias, social comparison, sunk cost, endowment, scarcity, category framing, confirmation bias) each paired with an ExpenStream guardrail and the anti-pattern we refuse to ship. Opens with the explicit non-goal statement. | Audit §4.3      |
+| `sprint-reports/UI_FOUNDATION_IMPLEMENTATION.md`                  | Ops & History      | This report.                                                                                                                                                                                                                                                                                                                                                           | Audit §11       |
 
 Each Product Experience document answers the 18 mandatory Product Experience questions (why, problem, business value, product value, user mindset, emotional goal, user journey, loading, empty, error, offline, accessibility, motion, information hierarchy, interaction philosophy, design rationale, future evolution, common implementation mistakes).
 
@@ -52,16 +52,16 @@ Each Product Experience document answers the 18 mandatory Product Experience que
 
 All updates are additive. No existing section was removed, renamed, or restructured. The `Last reviewed` footer date was refreshed only on files that received content changes.
 
-| Path                                                                       | Change                                                                                                                                                                       | Audit reference |
-| -------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
-| [`docs/PRODUCT_PRINCIPLES.md`](../docs/PRODUCT_PRINCIPLES.md)              | Added §7.5 **Emotional design commitments** (five promises upgrading the §5 Feelings taxonomy) and §7.6 **Financial-psychology guardrails** (doctrine-level posture anchoring the new `FINANCIAL_PSYCHOLOGY.md`). | Audit §3        |
-| [`docs/PROJECT_MASTER_PLAN.md`](../docs/PROJECT_MASTER_PLAN.md)            | Added a *primary emotion arc* sub-bullet (start → mid → end) to every subsection of §7 User Journey (§7.1 – §7.6). No new journeys, no restructure. Cross-linked to `EXPERIENCE_VISION.md` and `SCREEN_GUIDELINES.md`. | Audit §3        |
-| [`docs/DESIGN_SYSTEM.md`](../docs/DESIGN_SYSTEM.md)                        | Appended §22 **UI Evolution & Versioning** covering versioning model, propose / deprecate / remove flow, sensitivity rules for motion / elevation / typography, cross-references, and scope. Sections §0–§21 unchanged. `Last reviewed` bumped to 2026-07-24. | Audit §3, §4.4  |
-| [`docs/AI_AGENT_HANDBOOK.md`](../docs/AI_AGENT_HANDBOOK.md)                | §1 Repository memory layout now lists the three new docs. §2 Canonical read order rewritten to match the audit §6 sequence. §8 Prompts of record adds `prompts/IMPLEMENT_SPRINT.md` and `prompts/UI_FOUNDATION_AUDIT.md`. §9 Change history entry added. Conflict-resolution order **unchanged**. | Audit §3, §6, §7 |
-| [`docs/SPRINT_BOARD.md`](../docs/SPRINT_BOARD.md)                          | Added **M15 — UI Foundation (Product Experience Documentation)** milestone with Sprint 15.1 decomposition. Table of contents, Milestone Status Summary, and totals updated to reflect 15 milestones / 33 sprints. | Audit §3        |
-| [`docs/IMPLEMENTATION_QUEUE.md`](../docs/IMPLEMENTATION_QUEUE.md)          | Added Sprint 15.1 with 10 atomic tasks (T-15.1.1 – T-15.1.10), one per file created + one per existing-doc update + one for this report. TOC updated. All tasks marked `[x] Done (2026-07-24)`. | Audit §3        |
-| [`prompts/STANDARD_HEADER.md`](../prompts/STANDARD_HEADER.md)              | STEP 1 doc list now includes `EXPERIENCE_VISION.md`, `SCREEN_GUIDELINES.md`, `FINANCIAL_PSYCHOLOGY.md` with a note that they sit in "remaining documentation" for conflict resolution. Pre-existing bogus doc references (COMPONENT_LIBRARY, PERFORMANCE_GUIDELINES, SECURITY_GUIDELINES, API_SPECIFICATION, DATABASE_SCHEMA) were **not** touched, per audit §7.1 (out of scope for this milestone). | Audit §7.2      |
-| [`prompts/IMPLEMENT_SPRINT.md`](../prompts/IMPLEMENT_SPRINT.md)            | Phase 2 "Understand" list now includes **Experience Vision** and **Screen Guidelines** alongside the existing "Existing design system" bullet, so per-sprint executions consult both. | Audit §7.3      |
+| Path                                                              | Change                                                                                                                                                                                                                                                                                                                                                                                                | Audit reference  |
+| ----------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------- |
+| [`docs/PRODUCT_PRINCIPLES.md`](../docs/PRODUCT_PRINCIPLES.md)     | Added §7.5 **Emotional design commitments** (five promises upgrading the §5 Feelings taxonomy) and §7.6 **Financial-psychology guardrails** (doctrine-level posture anchoring the new `FINANCIAL_PSYCHOLOGY.md`).                                                                                                                                                                                     | Audit §3         |
+| [`docs/PROJECT_MASTER_PLAN.md`](../docs/PROJECT_MASTER_PLAN.md)   | Added a _primary emotion arc_ sub-bullet (start → mid → end) to every subsection of §7 User Journey (§7.1 – §7.6). No new journeys, no restructure. Cross-linked to `EXPERIENCE_VISION.md` and `SCREEN_GUIDELINES.md`.                                                                                                                                                                                | Audit §3         |
+| [`docs/DESIGN_SYSTEM.md`](../docs/DESIGN_SYSTEM.md)               | Appended §22 **UI Evolution & Versioning** covering versioning model, propose / deprecate / remove flow, sensitivity rules for motion / elevation / typography, cross-references, and scope. Sections §0–§21 unchanged. `Last reviewed` bumped to 2026-07-24.                                                                                                                                         | Audit §3, §4.4   |
+| [`docs/AI_AGENT_HANDBOOK.md`](../docs/AI_AGENT_HANDBOOK.md)       | §1 Repository memory layout now lists the three new docs. §2 Canonical read order rewritten to match the audit §6 sequence. §8 Prompts of record adds `prompts/IMPLEMENT_SPRINT.md` and `prompts/UI_FOUNDATION_AUDIT.md`. §9 Change history entry added. Conflict-resolution order **unchanged**.                                                                                                     | Audit §3, §6, §7 |
+| [`docs/SPRINT_BOARD.md`](../docs/SPRINT_BOARD.md)                 | Added **M15 — UI Foundation (Product Experience Documentation)** milestone with Sprint 15.1 decomposition. Table of contents, Milestone Status Summary, and totals updated to reflect 15 milestones / 33 sprints.                                                                                                                                                                                     | Audit §3         |
+| [`docs/IMPLEMENTATION_QUEUE.md`](../docs/IMPLEMENTATION_QUEUE.md) | Added Sprint 15.1 with 10 atomic tasks (T-15.1.1 – T-15.1.10), one per file created + one per existing-doc update + one for this report. TOC updated. All tasks marked `[x] Done (2026-07-24)`.                                                                                                                                                                                                       | Audit §3         |
+| [`prompts/STANDARD_HEADER.md`](../prompts/STANDARD_HEADER.md)     | STEP 1 doc list now includes `EXPERIENCE_VISION.md`, `SCREEN_GUIDELINES.md`, `FINANCIAL_PSYCHOLOGY.md` with a note that they sit in "remaining documentation" for conflict resolution. Pre-existing bogus doc references (COMPONENT_LIBRARY, PERFORMANCE_GUIDELINES, SECURITY_GUIDELINES, API_SPECIFICATION, DATABASE_SCHEMA) were **not** touched, per audit §7.1 (out of scope for this milestone). | Audit §7.2       |
+| [`prompts/IMPLEMENT_SPRINT.md`](../prompts/IMPLEMENT_SPRINT.md)   | Phase 2 "Understand" list now includes **Experience Vision** and **Screen Guidelines** alongside the existing "Existing design system" bullet, so per-sprint executions consult both.                                                                                                                                                                                                                 | Audit §7.3       |
 
 **Files intentionally NOT updated** (audit §3, §7):
 
@@ -77,7 +77,7 @@ All updates are additive. No existing section was removed, renamed, or restructu
 
 ## 4. Cross-References Established
 
-The new docs are cross-linked into the existing memory graph. Direction of every arrow is *consumer → source of truth*.
+The new docs are cross-linked into the existing memory graph. Direction of every arrow is _consumer → source of truth_.
 
 ### 4.1 Outgoing from the new documents
 
@@ -103,12 +103,12 @@ No cycles introduced. Doctrine (`PRODUCT_PRINCIPLES.md`) is cited by the new doc
 
 ## 5. Prompt Changes
 
-| Prompt                                                                                | Change                                                                                                                                                                          | Rationale                                                                                                    |
-| ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| [`prompts/STANDARD_HEADER.md`](../prompts/STANDARD_HEADER.md)                         | STEP 1 lists the three new docs; a caveat clarifies they sit in "remaining documentation" for conflict resolution.                                                              | Audit §7.2. Ensures every sprint-executing agent loads the Product Experience family at session boot.        |
-| [`prompts/IMPLEMENT_SPRINT.md`](../prompts/IMPLEMENT_SPRINT.md)                       | Phase 2 "Understand" list adds `docs/EXPERIENCE_VISION.md` and `docs/SCREEN_GUIDELINES.md`.                                                                                     | Audit §7.3. Per-sprint executions now consult the target feeling and per-screen composition alongside DS.    |
-| [`prompts/MASTER_AUDIT.md`](../prompts/MASTER_AUDIT.md)                               | **Unchanged.**                                                                                                                                                                  | Audit §7.4. Sprint-0 historical prompt; complete as authored.                                                |
-| [`prompts/UI_FOUNDATION_AUDIT.md`](../prompts/UI_FOUNDATION_AUDIT.md)                 | **Unchanged.**                                                                                                                                                                  | Audit §7.5. Immutable; this is the prompt that governed the audit.                                           |
+| Prompt                                                                | Change                                                                                                             | Rationale                                                                                                 |
+| --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------- |
+| [`prompts/STANDARD_HEADER.md`](../prompts/STANDARD_HEADER.md)         | STEP 1 lists the three new docs; a caveat clarifies they sit in "remaining documentation" for conflict resolution. | Audit §7.2. Ensures every sprint-executing agent loads the Product Experience family at session boot.     |
+| [`prompts/IMPLEMENT_SPRINT.md`](../prompts/IMPLEMENT_SPRINT.md)       | Phase 2 "Understand" list adds `docs/EXPERIENCE_VISION.md` and `docs/SCREEN_GUIDELINES.md`.                        | Audit §7.3. Per-sprint executions now consult the target feeling and per-screen composition alongside DS. |
+| [`prompts/MASTER_AUDIT.md`](../prompts/MASTER_AUDIT.md)               | **Unchanged.**                                                                                                     | Audit §7.4. Sprint-0 historical prompt; complete as authored.                                             |
+| [`prompts/UI_FOUNDATION_AUDIT.md`](../prompts/UI_FOUNDATION_AUDIT.md) | **Unchanged.**                                                                                                     | Audit §7.5. Immutable; this is the prompt that governed the audit.                                        |
 
 **Deferred (audit §7.1, out of scope for this milestone):** cleanup of the five bogus doc references still listed in `prompts/STANDARD_HEADER.md` STEP 1 (`COMPONENT_LIBRARY.md`, `PERFORMANCE_GUIDELINES.md`, `SECURITY_GUIDELINES.md`, `API_SPECIFICATION.md`, `DATABASE_SCHEMA.md`). These are tracked as a Documentation-Truth task, not a UI-Foundation task.
 
@@ -120,11 +120,11 @@ The canonical read order in [`docs/AI_AGENT_HANDBOOK.md §2`](../docs/AI_AGENT_H
 
 1. [`AI_CONTEXT.md`](../docs/AI_CONTEXT.md) — boot memory, "under two pages" constraint.
 2. [`PRODUCT_PRINCIPLES.md`](../docs/PRODUCT_PRINCIPLES.md) — doctrine (now with §7.5 emotional / §7.6 fin-psych anchors).
-3. **[`EXPERIENCE_VISION.md`](../docs/EXPERIENCE_VISION.md)** *(new)* — target feeling; Six Qualities.
-4. **[`FINANCIAL_PSYCHOLOGY.md`](../docs/FINANCIAL_PSYCHOLOGY.md)** *(new)* — biases refused.
+3. **[`EXPERIENCE_VISION.md`](../docs/EXPERIENCE_VISION.md)** _(new)_ — target feeling; Six Qualities.
+4. **[`FINANCIAL_PSYCHOLOGY.md`](../docs/FINANCIAL_PSYCHOLOGY.md)** _(new)_ — biases refused.
 5. [`ARCHITECTURE.md`](../docs/ARCHITECTURE.md) (+ [`ARCHITECTURE_DIAGRAMS.md`](../docs/ARCHITECTURE_DIAGRAMS.md) if the task touches auth / sync / notifications / workspace flows).
 6. [`DESIGN_SYSTEM.md`](../docs/DESIGN_SYSTEM.md) — vocabulary (now with §22 UI Evolution).
-7. **[`SCREEN_GUIDELINES.md`](../docs/SCREEN_GUIDELINES.md)** *(new)* — per-screen composition + five states.
+7. **[`SCREEN_GUIDELINES.md`](../docs/SCREEN_GUIDELINES.md)** _(new)_ — per-screen composition + five states.
 8. [`UX_DECISIONS.md`](../docs/UX_DECISIONS.md) — precedent log.
 9. [`PROJECT_MASTER_PLAN.md`](../docs/PROJECT_MASTER_PLAN.md) — PRD, personas, journeys (§7 emotional arcs).
 10. [`SPRINT_BOARD.md`](../docs/SPRINT_BOARD.md) — what's active.
@@ -142,29 +142,29 @@ The canonical read order in [`docs/AI_AGENT_HANDBOOK.md §2`](../docs/AI_AGENT_H
 
 Per audit §8:
 
-| Family                       | Files                                                                                                                                                                              |
-| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Boot & Rules**             | `AI_CONTEXT.md`, `AI_AGENT_HANDBOOK.md`, `IMPLEMENTATION_RULES.md`.                                                                                                                |
-| **The Why (Doctrine)**       | `PRODUCT_PRINCIPLES.md` (now including §7.5 emotional / §7.6 fin-psych anchors).                                                                                                   |
-| **The What (Product Scope)** | `PROJECT_MASTER_PLAN.md` (now including per-journey emotional arcs in §7).                                                                                                         |
-| **The How (Design + Build)** | `DESIGN_SYSTEM.md` (now including §22 UI Evolution), `ARCHITECTURE.md`, `ARCHITECTURE_DIAGRAMS.md`, `adr/`.                                                                        |
-| **Product Experience (NEW)** | **`EXPERIENCE_VISION.md`**, **`SCREEN_GUIDELINES.md`**, **`FINANCIAL_PSYCHOLOGY.md`**, `UX_DECISIONS.md`.                                                                          |
-| **Ops & History**            | `SPRINT_BOARD.md`, `IMPLEMENTATION_QUEUE.md`, `PRODUCTION_CHECKLIST.md`, `TESTING_CHECKLIST.md`, `CHANGELOG.md`, `RELEASE_NOTES.md`, and this report under `sprint-reports/`.       |
+| Family                       | Files                                                                                                                                                                         |
+| ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Boot & Rules**             | `AI_CONTEXT.md`, `AI_AGENT_HANDBOOK.md`, `IMPLEMENTATION_RULES.md`.                                                                                                           |
+| **The Why (Doctrine)**       | `PRODUCT_PRINCIPLES.md` (now including §7.5 emotional / §7.6 fin-psych anchors).                                                                                              |
+| **The What (Product Scope)** | `PROJECT_MASTER_PLAN.md` (now including per-journey emotional arcs in §7).                                                                                                    |
+| **The How (Design + Build)** | `DESIGN_SYSTEM.md` (now including §22 UI Evolution), `ARCHITECTURE.md`, `ARCHITECTURE_DIAGRAMS.md`, `adr/`.                                                                   |
+| **Product Experience (NEW)** | **`EXPERIENCE_VISION.md`**, **`SCREEN_GUIDELINES.md`**, **`FINANCIAL_PSYCHOLOGY.md`**, `UX_DECISIONS.md`.                                                                     |
+| **Ops & History**            | `SPRINT_BOARD.md`, `IMPLEMENTATION_QUEUE.md`, `PRODUCTION_CHECKLIST.md`, `TESTING_CHECKLIST.md`, `CHANGELOG.md`, `RELEASE_NOTES.md`, and this report under `sprint-reports/`. |
 
 ### 7.2 What a future AI agent gets for free
 
 A new session that follows `AI_AGENT_HANDBOOK §2` now bootstraps into a complete Product Experience mindset without additional prompting:
 
-- **What the product *is*** → `AI_CONTEXT.md`.
-- **What the product *promises*** → `PRODUCT_PRINCIPLES.md` (with the new §7.5, §7.6 anchors).
-- **What the product should *feel* like** → `EXPERIENCE_VISION.md`.
-- **What the product *refuses* to do** → `FINANCIAL_PSYCHOLOGY.md`.
-- **What the vocabulary *is*** → `DESIGN_SYSTEM.md` (with the new §22 evolution contract).
-- **What sentences the vocabulary *composes into*** → `SCREEN_GUIDELINES.md`.
-- **What has been *decided* before** → `UX_DECISIONS.md`.
-- **What the *scope, personas, and journeys* are** → `PROJECT_MASTER_PLAN.md` (with the new emotional arcs).
-- **What the *contracts* are** → `IMPLEMENTATION_RULES.md`.
-- **What is *active* right now** → `SPRINT_BOARD.md` + `IMPLEMENTATION_QUEUE.md`.
+- **What the product _is_** → `AI_CONTEXT.md`.
+- **What the product _promises_** → `PRODUCT_PRINCIPLES.md` (with the new §7.5, §7.6 anchors).
+- **What the product should _feel_ like** → `EXPERIENCE_VISION.md`.
+- **What the product _refuses_ to do** → `FINANCIAL_PSYCHOLOGY.md`.
+- **What the vocabulary _is_** → `DESIGN_SYSTEM.md` (with the new §22 evolution contract).
+- **What sentences the vocabulary _composes into_** → `SCREEN_GUIDELINES.md`.
+- **What has been _decided_ before** → `UX_DECISIONS.md`.
+- **What the _scope, personas, and journeys_ are** → `PROJECT_MASTER_PLAN.md` (with the new emotional arcs).
+- **What the _contracts_ are** → `IMPLEMENTATION_RULES.md`.
+- **What is _active_ right now** → `SPRINT_BOARD.md` + `IMPLEMENTATION_QUEUE.md`.
 
 ### 7.3 Verification
 
@@ -180,20 +180,20 @@ A new session that follows `AI_AGENT_HANDBOOK §2` now bootstraps into a complet
 
 ### 7.4 Risks called out at audit time — status
 
-| Audit risk | Mitigation as shipped                                                                                                                                                                                                    |
-| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| R-1 Documentation sprawl | Reading order in §6 above is explicit; `AI_CONTEXT.md` is not extended so the 2-page constraint holds; new docs are inserted at semantically-useful positions in the order.                                              |
-| R-2 Duplication drift    | Every new doc opens with a header-comment reviewer checklist ("do not restate DS", "do not restate principles"). Cross-references cite rather than restate.                                                              |
-| R-3 Screen Guidelines fossilise UI | `SCREEN_GUIDELINES.md §2-§9` each carries an implementation-status marker (`Implemented` / `Partially implemented` / `Aspirational`). Drift is expected and traceable.                                             |
-| R-4 Fin-psych doc misread as nudging playbook | `FINANCIAL_PSYCHOLOGY.md` opens with the explicit non-goal statement; every entry lists an anti-pattern refused; §15 restates the "thoughtful accountant" test.                                          |
-| R-5 Benchmark copying    | `EXPERIENCE_VISION.md §4` restates the ban in-doc and only extracts *qualities*, never designs.                                                                                                                          |
-| R-6 STANDARD_HEADER prompt drift | Explicitly out of scope for this milestone; tracked separately.                                                                                                                                                    |
-| R-7 Agent conflict-resolution ambiguity | Conflict order restated in `AI_AGENT_HANDBOOK §2` and in each new doc's header comment.                                                                                                                        |
-| R-8 Scope creep (Component Library) | Explicitly deferred in audit §9 and not created here.                                                                                                                                                              |
+| Audit risk                                    | Mitigation as shipped                                                                                                                                                       |
+| --------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| R-1 Documentation sprawl                      | Reading order in §6 above is explicit; `AI_CONTEXT.md` is not extended so the 2-page constraint holds; new docs are inserted at semantically-useful positions in the order. |
+| R-2 Duplication drift                         | Every new doc opens with a header-comment reviewer checklist ("do not restate DS", "do not restate principles"). Cross-references cite rather than restate.                 |
+| R-3 Screen Guidelines fossilise UI            | `SCREEN_GUIDELINES.md §2-§9` each carries an implementation-status marker (`Implemented` / `Partially implemented` / `Aspirational`). Drift is expected and traceable.      |
+| R-4 Fin-psych doc misread as nudging playbook | `FINANCIAL_PSYCHOLOGY.md` opens with the explicit non-goal statement; every entry lists an anti-pattern refused; §15 restates the "thoughtful accountant" test.             |
+| R-5 Benchmark copying                         | `EXPERIENCE_VISION.md §4` restates the ban in-doc and only extracts _qualities_, never designs.                                                                             |
+| R-6 STANDARD_HEADER prompt drift              | Explicitly out of scope for this milestone; tracked separately.                                                                                                             |
+| R-7 Agent conflict-resolution ambiguity       | Conflict order restated in `AI_AGENT_HANDBOOK §2` and in each new doc's header comment.                                                                                     |
+| R-8 Scope creep (Component Library)           | Explicitly deferred in audit §9 and not created here.                                                                                                                       |
 
 ---
 
-## 8. What is *not* done in this milestone
+## 8. What is _not_ done in this milestone
 
 Per audit §9 (Reserved for Future Work):
 
