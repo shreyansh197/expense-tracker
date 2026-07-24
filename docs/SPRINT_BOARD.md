@@ -109,7 +109,7 @@ This board decomposes the entire product roadmap defined in [PROJECT_MASTER_PLAN
 
 ### Sprint 2.1 — Sync Instrumentation & Conflict Reproduction
 
-- **Status:** Pending · **Priority:** P1 · **Effort:** M · **Story points:** 5
+- **Status:** Done (2026-07-24) · **Priority:** P1 · **Effort:** M · **Story points:** 5
 - **Goal:** Make sync engine behavior observable and reproduce a real money‑field conflict end‑to‑end.
 - **Tasks:**
   1. Add pull/push/conflict counters to [src/lib/syncEngine.ts](../src/lib/syncEngine.ts) exposed via `useSyncStatus`.

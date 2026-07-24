@@ -347,7 +347,7 @@ TypeScript strict - ESLint/Prettier clean - Tests co-located under `src/__tests_
 - **Acceptance Criteria:**
   - Counters reset on demand; never persisted with PII/money.
   - Existing sync tests remain green.
-- **Status:** [ ] Pending
+- **Status:** [x] Done (2026-07-24)
 
 ### T-2.1.2 - Build Sync Diagnostics panel
 
@@ -366,7 +366,7 @@ TypeScript strict - ESLint/Prettier clean - Tests co-located under `src/__tests_
 - **Acceptance Criteria:**
   - Five states honored (empty/loading/error/offline/success).
   - Contract test asserts a11y (labels, focus ring, >= 44 px targets).
-- **Status:** [ ] Pending
+- **Status:** [x] Done (2026-07-24)
 
 ### T-2.1.3 - Author reproduction test for money-field conflict
 
@@ -385,7 +385,7 @@ TypeScript strict - ESLint/Prettier clean - Tests co-located under `src/__tests_
 - **Acceptance Criteria:**
   - Test runs deterministically in CI (no network dependence).
   - Captures the observed conflict count and final row state.
-- **Status:** [ ] Pending
+- **Status:** [x] Done (2026-07-24)
 
 ### T-2.1.4 - Document `NEXT_PUBLIC_SYNC_LOG` toggle
 
@@ -403,7 +403,7 @@ TypeScript strict - ESLint/Prettier clean - Tests co-located under `src/__tests_
 - **Affected Files:** [docs/AI_CONTEXT.md](AI_CONTEXT.md)
 - **Acceptance Criteria:**
   - Docs show enable/disable path and warn about not logging monetary values.
-- **Status:** [ ] Pending
+- **Status:** [x] Done (2026-07-24)
 
 ---
 

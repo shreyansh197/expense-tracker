@@ -25,7 +25,10 @@ Companion documents: [RELEASE_NOTES.md](RELEASE_NOTES.md) (user-facing highlight
 
 ### Added
 
-- _Pending — see [IMPLEMENTATION_QUEUE.md](IMPLEMENTATION_QUEUE.md) Sprint 2.1+ for the next Horizon-1 items._
+- **Sync counters (T-2.1.1):** Session-scoped `pullBatches`, `pushBatches`, `conflicts`, `failures`, `lastPullAt`, `lastPushAt`, and redacted `lastError` in [src/lib/syncEngine.ts](../src/lib/syncEngine.ts); exposed via new `useSyncCounters` hook in [src/hooks/useSyncStatus.ts](../src/hooks/useSyncStatus.ts). No PII/money in payload; counters clear on tab close or `resetSyncCounters()`.
+- **Sync Diagnostics panel (T-2.1.2):** New `src/components/settings/SyncDiagnosticsCard.tsx` under Settings › Data & Automation; shows queue depth, per-session pull/push counters, conflict count, last pull/push time, last error, and a Reset button. Five states honored (empty/loading/error/offline/success), ≥44 × 44 px target, keyboard + `aria-live` region.
+- **Conflict reproduction test (T-2.1.3):** New `src/__tests__/syncEngine.repro.test.ts` — two virtual clients mutating `expense.amount` concurrently; snapshots the current non-deterministic last-write-wins overwrite plus conflict-counter increment so Sprint 2.3 can measure the fix objectively.
+- **Docs (T-2.1.4):** [AI_CONTEXT.md §16.1](AI_CONTEXT.md) now documents the `NEXT_PUBLIC_SYNC_LOG` compile-time toggle with sample output and explicit "no monetary values in logs" caveats.
 
 ### Changed
 
@@ -45,15 +48,15 @@ Companion documents: [RELEASE_NOTES.md](RELEASE_NOTES.md) (user-facing highlight
 
 ### Accessibility
 
-- _Pending._
+- Sync Diagnostics panel meets a11y contract: `role="region"`, `aria-label="Sync diagnostics"`, `aria-live="polite"`, focus-visible ring, ≥44 × 44 px reset control.
 
 ### Security
 
-- _Pending._
+- Sync counters and diagnostics UI never surface monetary values, request bodies, or auth tokens; `lastError` stores only tag + status code / error name (max 200 chars).
 
 ### Notes
 
-- _Pending._
+- Sprint 2.1 (M2) is code-complete. Baseline captured; Sprint 2.2 (persistent queue) and Sprint 2.3 (deterministic conflict UX) will use the new counters to measure improvement.
 
 ---
 

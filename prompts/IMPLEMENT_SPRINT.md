@@ -1,10 +1,14 @@
-# ExpenStream ADK - Sprint Implementation Workflow
+# ExpenStream ADK — Sprint Implementation Workflow
 
 ## Purpose
 
 This document defines the standard implementation workflow for every development sprint.
 
-Always read and follow `prompts/STANDARD_HEADER.md` before executing this workflow.
+Always read and follow:
+
+- prompts/STANDARD_HEADER.md
+
+before executing this workflow.
 
 The documentation inside the `docs/` directory is the project's single source of truth.
 
@@ -16,9 +20,11 @@ Do not make assumptions.
 
 ## Phase 1 — Understand the Sprint
 
+Before making any code changes:
+
 1. Read `docs/IMPLEMENTATION_QUEUE.md`.
 2. Locate the requested Sprint.
-3. Read every task within the Sprint.
+3. Read every task belonging to that Sprint.
 4. Understand:
    - Sprint Goal
    - Business Value
@@ -26,47 +32,67 @@ Do not make assumptions.
    - Dependencies
    - Acceptance Criteria
    - Affected Files
-5. Verify that all prerequisite tasks have already been completed.
-6. If a dependency is missing, stop and explain why implementation cannot continue.
+5. Verify that every prerequisite task has already been completed.
+6. If a dependency is missing:
+   - Stop.
+   - Explain why implementation cannot continue.
+   - Do not attempt a workaround.
 
 ---
 
 ## Phase 2 — Repository Analysis
 
-Before modifying code, inspect all affected areas of the repository.
+Before modifying code, understand the existing implementation.
+
+Review all affected areas including:
+
+- Components
+- Hooks
+- Utilities
+- Services
+- State Management
+- Routing
+- API Layer
+- Database
+- Authentication
+- Sync Engine
+- Tests
+- Documentation
 
 Understand:
 
-- Current implementation
-- Architecture
-- Data flow
-- State management
-- APIs
-- Database interactions
-- Existing tests
-- Related components
-- Related hooks
-- Related utilities
+- Current architecture
+- Existing data flow
+- Current implementation patterns
+- Reusable utilities
+- Existing design system
+- Existing coding conventions
 
-Do not rewrite existing architecture without justification.
+Do not redesign existing architecture unless absolutely required.
 
 ---
 
 ## Phase 3 — Implementation Plan
 
-Before writing code, generate a concise implementation plan.
+Before writing any code, generate a concise implementation plan.
 
 Include:
 
-- Sprint objective
-- Task execution order
-- Files to create
-- Files to modify
-- Dependencies
-- Potential risks
-- Testing strategy
+### Sprint Objective
 
-Begin implementation only after the plan is complete.
+### Task Execution Order
+
+### Files To Create
+
+### Files To Modify
+
+### Dependencies
+
+### Potential Risks
+
+### Validation Strategy
+
+Only begin implementation after the plan is complete.
 
 ---
 
@@ -76,34 +102,88 @@ Implement **every task** belonging to the requested Sprint.
 
 Requirements:
 
-- Production-ready code
-- Preserve existing functionality
-- Maintain backward compatibility where applicable
-- Follow the Design System
-- Follow Architecture guidelines
-- Follow coding standards
-- Respect Accessibility requirements
+- Production-ready implementation
+- Maintain existing functionality
+- Respect existing architecture
+- Respect Design System
+- Respect Accessibility guidelines
 - Respect Performance guidelines
+- Respect Security requirements
+- Follow existing coding conventions
+- Follow best practices
+- Keep components modular and reusable
 
 Do NOT:
 
 - Implement another Sprint
 - Skip acceptance criteria
+- Leave TODOs
 - Leave placeholder implementations
-- Leave TODO comments
-- Introduce unnecessary refactoring
-- Modify unrelated files
+- Introduce unnecessary dependencies
+- Modify unrelated functionality
+- Rewrite working code without technical justification
+
+---
+
+## Continuous Quality Improvement
+
+While implementing the current Sprint, you may discover issues that are directly related to the work being performed.
+
+Examples include:
+
+- Outdated documentation
+- Missing architecture decisions
+- Inconsistent naming
+- Minor technical debt
+- Small code quality issues
+- Missing type safety
+- Missing tests
+- Minor accessibility issues
+- Small performance improvements
+
+You may improve these **only if they are necessary to complete the current Sprint safely and correctly.**
+
+### Decision Rule
+
+Before making improvements outside the Sprint tasks, ask:
+
+1. Is this required to complete the current Sprint?
+2. Does leaving it unchanged introduce bugs, regressions, architectural inconsistency, or poor developer experience?
+3. Can it be fixed with a localized change without expanding the Sprint scope?
+
+If the answer to all three is **YES**, implement the improvement.
+
+Otherwise:
+
+- Do NOT implement it.
+- Record it under **Future Recommendations** in the Sprint Summary.
+
+Rules:
+
+- Keep improvements localized.
+- Preserve backward compatibility.
+- Do not perform unrelated refactoring.
+- Do not redesign completed modules.
+- Do not expand the Sprint scope.
+- Document all improvements in:
+  - CHANGELOG.md
+  - Sprint Summary Report
+
+Always prioritize completing the Sprint over making optional improvements.
 
 ---
 
 ## Phase 5 — Code Quality
 
-Ensure the implementation is:
+Review the implementation for quality.
 
-- Clean
+Ensure the code is:
+
 - Modular
-- Maintainable
 - Reusable
+- Maintainable
+- Readable
+- Well documented
 - Type-safe
 - Accessible
 - Responsive
@@ -111,17 +191,20 @@ Ensure the implementation is:
 
 Avoid:
 
-- Duplicate code
 - Dead code
+- Duplicate code
 - Large components
-- Tight coupling
 - Magic numbers
-- Console logging
+- Tight coupling
+- Console logs
 - Unused imports
+- Inconsistent naming
+
+If better abstractions naturally emerge during implementation, use them only if they remain localized to the current Sprint.
 
 ---
 
-## Phase 6 — Testing
+## Phase 6 — Validation & Testing
 
 Run or update all affected tests.
 
@@ -131,19 +214,26 @@ Verify:
 - New tests pass
 - Build succeeds
 - Lint succeeds
-- No TypeScript errors
+- TypeScript passes
 - No runtime errors
 - No console errors
 
-If tests fail:
+Additionally verify:
 
-Fix them before considering the Sprint complete.
+- Existing functionality still works
+- No regressions introduced
+- Accessibility remains compliant
+- Performance is not degraded
+
+If any validation fails:
+
+Fix it before considering the Sprint complete.
 
 ---
 
 ## Phase 7 — Documentation
 
-Update every affected document.
+Update every document affected by the implementation.
 
 Examples include:
 
@@ -157,7 +247,9 @@ Examples include:
 - PRODUCTION_CHECKLIST.md
 - RELEASE_NOTES.md
 
-Only modify documents that are actually affected.
+Only modify documentation that is actually affected.
+
+Keep documentation synchronized with the codebase.
 
 ---
 
@@ -171,37 +263,77 @@ sprint-reports/SPRINT_<NUMBER>_SUMMARY.md
 
 Include:
 
-- Sprint Overview
-- Completed Tasks
-- Acceptance Criteria Status
-- Files Created
-- Files Modified
-- Architecture Changes
-- UI/UX Changes
-- Backend Changes
-- Database Changes
-- Performance Improvements
-- Accessibility Improvements
-- Tests Added
-- Documentation Updated
-- Risks
-- Known Issues
-- Remaining Work
-- Validation Results
+# Executive Summary
+
+# Sprint Goal
+
+# Completed Tasks
+
+# Acceptance Criteria Status
+
+# Files Created
+
+# Files Modified
+
+# Architecture Changes
+
+# UI / UX Changes
+
+# Backend Changes
+
+# Database Changes
+
+# API Changes
+
+# Performance Improvements
+
+# Accessibility Improvements
+
+# Security Improvements
+
+# Tests Added
+
+# Documentation Updated
+
+# Risks
+
+# Known Issues
+
+# Future Recommendations
+
+# Validation Results
+
+# Remaining Work
 
 ---
 
-## Phase 9 — Completion Checklist
+## Phase 9 — Sprint Completion Checklist
 
-Before finishing, verify:
+Before finishing verify:
 
-- Every Sprint task is complete.
-- Every acceptance criterion is satisfied.
-- Documentation is updated.
-- Tests pass.
-- Build passes.
-- Lint passes.
-- Existing functionality still works.
+✓ Every Sprint task is completed.
+
+✓ Every acceptance criterion is satisfied.
+
+✓ Build passes.
+
+✓ Lint passes.
+
+✓ Tests pass.
+
+✓ TypeScript passes.
+
+✓ Existing functionality still works.
+
+✓ Documentation updated.
+
+✓ Sprint report generated.
+
+✓ No TODOs introduced.
+
+✓ No placeholder implementations remain.
+
+✓ No unrelated refactoring performed.
 
 ---
 
@@ -211,26 +343,40 @@ Provide:
 
 ### Executive Summary
 
-A concise summary of the Sprint implementation.
+Summarize the Sprint implementation.
+
+---
 
 ### Files Changed
 
-List every file created or modified.
+List:
+
+- Files Created
+- Files Modified
+- Files Deleted (if any)
+
+---
 
 ### Validation
 
 Summarize:
 
-- Tests
 - Build
+- Tests
 - Lint
-- Type checking
+- Type Checking
+- Accessibility
+- Performance
+
+---
 
 ### Remaining Work
 
-State what remains for the next Sprint.
+Explain what remains for the next Sprint.
 
-### Suggested Commit Message
+---
+
+### Suggested Git Commit
 
 Provide a Conventional Commit message.
 
@@ -248,6 +394,13 @@ After completing the requested Sprint:
 
 STOP.
 
-Do not begin the next Sprint.
+Do NOT implement the next Sprint.
 
-Wait for review, testing, and approval before continuing.
+Wait for:
+
+- Review
+- Testing
+- Approval
+- Commit
+
+before continuing.

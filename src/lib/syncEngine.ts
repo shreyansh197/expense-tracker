@@ -55,6 +55,81 @@ export function onSyncPhaseChange(fn: (phase: SyncPhase) => void): () => void {
   return () => { _syncPhaseListeners.delete(fn); };
 }
 
+// ── Session-scoped sync counters (in-memory only, no PII / no money) ──
+
+export interface SyncCounters {
+  /** Successful pull page responses received (per HTTP call). */
+  pullBatches: number;
+  /** Push batches sent to /api/sync/commit (100-item chunks). */
+  pushBatches: number;
+  /** Rows where local IDB.updatedAt was newer than the incoming server row. */
+  conflicts: number;
+  /** Push or pull HTTP/network failures observed this session. */
+  failures: number;
+  /** Epoch ms of the last successful pull (0 = never this session). */
+  lastPullAt: number;
+  /** Epoch ms of the last successful push batch (0 = never this session). */
+  lastPushAt: number;
+  /**
+   * Short, redacted description of the most recent sync error (tag + status/message).
+   * Never contains monetary values, user data, request bodies, or auth tokens.
+   */
+  lastError: string | null;
+  /** Epoch ms the counters were last reset (session start or explicit reset). */
+  resetAt: number;
+}
+
+function _emptyCounters(): SyncCounters {
+  return {
+    pullBatches: 0,
+    pushBatches: 0,
+    conflicts: 0,
+    failures: 0,
+    lastPullAt: 0,
+    lastPushAt: 0,
+    lastError: null,
+    resetAt: Date.now(),
+  };
+}
+
+let _counters: SyncCounters = _emptyCounters();
+const _countersListeners = new Set<(c: SyncCounters) => void>();
+
+function _emitCounters() {
+  const snapshot = { ..._counters };
+  _countersListeners.forEach((fn) => fn(snapshot));
+}
+
+/** Return a snapshot of the current session's sync counters. */
+export function getSyncCounters(): SyncCounters {
+  return { ..._counters };
+}
+
+/** Subscribe to counter changes. Returns an unsubscribe fn. */
+export function onSyncCountersChange(fn: (c: SyncCounters) => void): () => void {
+  _countersListeners.add(fn);
+  return () => { _countersListeners.delete(fn); };
+}
+
+/** Reset all counters and last-error to their initial values. */
+export function resetSyncCounters(): void {
+  _counters = _emptyCounters();
+  _emitCounters();
+}
+
+/**
+ * Record a sync error for diagnostics. `tag` identifies the phase (pull/push/etc.).
+ * `detail` must be pre-redacted — never pass request bodies or amounts.
+ */
+function _recordFailure(tag: string, detail: string) {
+  _counters = {
+    ..._counters,
+    failures: _counters.failures + 1,
+    lastError: `[${tag}] ${detail}`.slice(0, 200),
+  };
+  _emitCounters();
+}
+
 // ── Workspace access denied observable ──
 
 type AccessDeniedListener = (workspaceId: string) => void;
@@ -185,15 +260,21 @@ export async function pullChanges(workspaceId?: string): Promise<boolean> {
       if (!res.ok) {
         if (res.status === 403) {
           _notifyAccessDenied(wid);
+          _recordFailure("pull", `HTTP 403`);
           return false;
         }
         syncErr("pull", `HTTP ${res.status} from /api/sync/changes`);
         try { syncErr("pull", await res.text()); } catch {}
+        _recordFailure("pull", `HTTP ${res.status}`);
         return false;
       }
 
       const data = await res.json();
       const { cursor, changes } = data;
+
+      // Every successful pull page counts, even no-op pages.
+      _counters = { ..._counters, pullBatches: _counters.pullBatches + 1, lastPullAt: Date.now() };
+      _emitCounters();
 
       const expCount = changes.expenses?.length ?? 0;
       const settCount = changes.settings ? 1 : 0;
@@ -269,8 +350,12 @@ export async function pullChanges(workspaceId?: string): Promise<boolean> {
               }
               didWrite = true;
             }
-            if (conflictCount > 0 && _broadcastChannel) {
-              _broadcastChannel.postMessage({ type: "sync-conflict", count: conflictCount });
+            if (conflictCount > 0) {
+              _counters = { ..._counters, conflicts: _counters.conflicts + conflictCount };
+              _emitCounters();
+              if (_broadcastChannel) {
+                _broadcastChannel.postMessage({ type: "sync-conflict", count: conflictCount });
+              }
             }
           }
 
@@ -424,6 +509,7 @@ export async function pullChanges(workspaceId?: string): Promise<boolean> {
       return true;
     } catch (err) {
       syncErr("pull", "Exception in pullChanges:", err);
+      _recordFailure("pull", err instanceof Error ? err.name : "exception");
       return false;
     }
   })();
@@ -518,9 +604,12 @@ export async function pushMutations(workspaceId?: string): Promise<number> {
           applied += body.results.filter(
             (r: { status: string }) => r.status === "applied"
           ).length;
+          _counters = { ..._counters, pushBatches: _counters.pushBatches + 1, lastPushAt: Date.now() };
+          _emitCounters();
         } else {
           const bodyText = await res.text().catch(() => "");
           syncErr("push", `HTTP ${res.status} from /api/sync/commit:`, bodyText);
+          _recordFailure("push", `HTTP ${res.status}`);
           if (res.status === 403) {
             _notifyAccessDenied(wid);
             break;
@@ -533,6 +622,7 @@ export async function pushMutations(workspaceId?: string): Promise<number> {
         }
       } catch (err) {
         syncErr("push", "Network error during push:", err);
+        _recordFailure("push", err instanceof Error ? err.name : "network");
         break; // Network error — stop, retry later (mutations stay in queue)
       }
     }
@@ -885,4 +975,6 @@ export function stopSyncEngine() {
   _firstPullPromise = new Promise((r) => { _firstPullResolve = r; });
   _initReady = Promise.resolve();
   _setSyncPhase("idle");
+  _counters = _emptyCounters();
+  _emitCounters();
 }

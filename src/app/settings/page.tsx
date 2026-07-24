@@ -11,7 +11,7 @@ import {
   Wallet, LinkIcon, Tag, Repeat, TrendingUp, Target, Palette,
   Download, Zap, Smartphone, Briefcase,
   Shield, Users, Database, Globe, ChevronLeft, ChevronRight,
-  Search, Bell, Sunrise, RotateCcw,
+  Search, Bell, Sunrise, RotateCcw, Activity,
 } from "lucide-react";
 import { InstallButton } from "@/components/pwa/InstallButton";
 import { AccentColorPicker, applyAccentColor } from "@/components/settings/AccentColorPicker";
@@ -30,6 +30,7 @@ const ExportImportWizard = lazy(() => import("@/components/settings/ExportImport
 const AutoRulesManager = lazy(() => import("@/components/settings/AutoRulesManager").then(m => ({ default: m.AutoRulesManager })));
 const DataAccountManagement = lazy(() => import("@/components/settings/DataAccountManagement").then(m => ({ default: m.DataAccountManagement })));
 import { SettingsFooterLogout } from "@/components/settings/SettingsFooterLogout";
+import { SyncDiagnosticsCard } from "@/components/settings/SyncDiagnosticsCard";
 import Link from "next/link";
 import { NotificationSettings } from "@/components/settings/NotificationSettings";
 import { subscribeToPush, unsubscribeFromPush } from "@/lib/pushSubscription";
@@ -139,7 +140,7 @@ export default function SettingsPage() {
       const sectionToZone: Record<string, string> = {
         account: "zone-account", security: "zone-account", members: "zone-account",
         budget: "zone-finances", categories: "zone-finances", recurring: "zone-finances", goals: "zone-finances", rollover: "zone-finances",
-        rules: "zone-automation", "export-import": "zone-automation", "data-management": "zone-automation",
+        rules: "zone-automation", "export-import": "zone-automation", "data-management": "zone-automation", "sync-diagnostics": "zone-automation",
         "app-mode": "zone-preferences", "multi-currency": "zone-preferences", theme: "zone-preferences",
       };
       const mapped = sectionToZone[hash];
@@ -168,6 +169,7 @@ export default function SettingsPage() {
     { id: "goals", zone: "zone-finances", keywords: "goals savings target fund" },
     { id: "rollover", zone: "zone-finances", keywords: "rollover carry forward surplus deficit budget" },
     { id: "rules", zone: "zone-automation", keywords: "rules smart auto categorize automation" },
+    { id: "sync-diagnostics", zone: "zone-automation", keywords: "sync diagnostics status queue conflicts pull push failures debug offline" },
     { id: "export-import", zone: "zone-automation", keywords: "export import csv json backup restore download" },
     { id: "data-management", zone: "zone-automation", keywords: "data delete remove workspace reset clear" },
     { id: "app-mode", zone: "zone-preferences", keywords: "mode personal business switch" },
@@ -625,6 +627,18 @@ export default function SettingsPage() {
             className={!isSectionVisible('rules') ? 'hidden' : ''}
           >
             <ErrorBoundary><Suspense fallback={<LazyFallback />}><AutoRulesManager /></Suspense></ErrorBoundary>
+          </AccordionSection>
+
+          {/* ─── Sync Diagnostics ─── */}
+          <AccordionSection
+            id="sync-diagnostics"
+            icon={<Activity size={18} />}
+            title="Sync Diagnostics"
+            description="Live sync counters, queue depth, last error"
+            iconColor="bg-[var(--info-soft)] text-[var(--info-text)]"
+            className={!isSectionVisible('sync-diagnostics') ? 'hidden' : ''}
+          >
+            <ErrorBoundary><SyncDiagnosticsCard /></ErrorBoundary>
           </AccordionSection>
 
           {/* ─── Export & Import ─── */}

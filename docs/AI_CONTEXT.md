@@ -143,6 +143,26 @@ Voice examples: "You're on track." / "Rent is due Friday." / "This looks unusual
 - Focus theme: hardening — accessibility contracts, sync reliability, notification UX.
 - Definition of done: typed, tested, a11y-checked, offline-verified, docs updated.
 
+### 16.1 Sync-engine debug toggle — `NEXT_PUBLIC_SYNC_LOG`
+
+- `src/lib/syncEngine.ts` gates verbose console output behind `SYNC_LOG = process.env.NODE_ENV !== "production" || process.env.NEXT_PUBLIC_SYNC_LOG === "true"`.
+- **Enable in a build:** add `NEXT_PUBLIC_SYNC_LOG=true` to `.env.local` (dev) or Vercel's production env vars, then rebuild. `NEXT_PUBLIC_*` values are baked in at build time.
+- **Disable:** unset or set to any other value and rebuild.
+- **Runtime overrides:** none — this flag is compile-time only. Do not read it from `localStorage`.
+- **Sample output (tags prefixed with `[sync:…]`):**
+  ```
+  [sync:init] Starting sync engine…
+  [sync:pull] Fetching changes for workspace=abcd1234… since=cursor-9f2
+  [sync:pull] Received: 3 expenses, 0 settings, 0 ledgers, 0 payments, cursor=cursor-a01, hasMore=false
+  [sync:push] Pushing 2 mutations for workspace=abcd1234…
+  [sync:push] Server response: applied,applied
+  ```
+- **Privacy caveats — read before enabling in production:**
+  - The helpers never log request/response bodies or `data` payloads, so monetary values, categories, and remarks stay out of the console. Do **not** add ad-hoc `console.log(mutation.data)` — it would leak PII/money.
+  - Workspace IDs are truncated to the first 8 chars.
+  - `syncErr` also captures to Sentry; leaving the flag on will not create duplicate Sentry events (only console verbosity changes).
+  - In-memory session counters exposed via `getSyncCounters()` and the Settings › Sync Diagnostics panel are safe to share (no PII/money) and reset on tab close.
+
 ## 17. Current Priorities
 
 1. Keep the dashboard and expense-entry flow fast, calm, and offline-perfect.

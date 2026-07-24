@@ -65,7 +65,7 @@ Owner spec files under [`src/__tests__/`](../src/__tests__):
 
 **Sprint 2.x will add:**
 
-- [ ] `syncEngine.repro.test.ts` — conflict reproduction ([Sprint 2.1](IMPLEMENTATION_QUEUE.md#sprint-21)).
+- [x] `syncEngine.repro.test.ts` — conflict reproduction ([Sprint 2.1](IMPLEMENTATION_QUEUE.md#sprint-21)).
 - [ ] `syncEngine.reliability.test.ts` + `syncCommit.idempotency.test.ts` ([Sprint 2.2](IMPLEMENTATION_QUEUE.md#sprint-22)).
 - [ ] `syncEngine.conflict.test.ts` + `money.helpers.test.ts` ([Sprint 2.3](IMPLEMENTATION_QUEUE.md#sprint-23)).
 
