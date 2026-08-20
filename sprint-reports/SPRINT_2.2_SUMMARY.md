@@ -31,17 +31,17 @@ Deliver the guaranteed-once contract for mutation sync (Architecture
 
 # Acceptance Criteria Status
 
-| Criterion                                                                                     | Status |
-| --------------------------------------------------------------------------------------------- | ------ |
-| Forced tab close leaves queue intact; next open resumes drain                                 | ✅     |
-| Dexie schema versioned; upgrade migration back-fills defaults                                 | ✅     |
-| Simulated offline→online transition drains queue within 5 s                                   | ✅     |
-| Backoff caps at 30 s (+ jitter)                                                               | ✅     |
-| Two commits with same idempotency key → HTTP 200 with identical body, single DB row          | ✅     |
-| Migration reversible; RLS still enforced                                                      | ✅     |
-| Dead-letter items visible within 30 s of terminal failure                                     | ✅     |
-| Discard action confirmed with reversible undo                                                 | ✅     |
-| `syncEngine.reliability.test.ts` + `syncCommit.idempotency.test.ts` green — M2 exit gate      | ✅     |
+| Criterion                                                                                | Status |
+| ---------------------------------------------------------------------------------------- | ------ |
+| Forced tab close leaves queue intact; next open resumes drain                            | ✅     |
+| Dexie schema versioned; upgrade migration back-fills defaults                            | ✅     |
+| Simulated offline→online transition drains queue within 5 s                              | ✅     |
+| Backoff caps at 30 s (+ jitter)                                                          | ✅     |
+| Two commits with same idempotency key → HTTP 200 with identical body, single DB row      | ✅     |
+| Migration reversible; RLS still enforced                                                 | ✅     |
+| Dead-letter items visible within 30 s of terminal failure                                | ✅     |
+| Discard action confirmed with reversible undo                                            | ✅     |
+| `syncEngine.reliability.test.ts` + `syncCommit.idempotency.test.ts` green — M2 exit gate | ✅     |
 
 # Files Created
 
@@ -137,7 +137,7 @@ Deliver the guaranteed-once contract for mutation sync (Architecture
   (zero policies = deny-all for anon/authenticated), matching the pattern
   set in migration 012.
 - Client audit call only sends `{ table, operation, idempotencyKey,
-  attempts, lastError }` — never the mutation body.
+attempts, lastError }` — never the mutation body.
 
 # Tests Added
 
@@ -186,13 +186,13 @@ Deliver the guaranteed-once contract for mutation sync (Architecture
 
 # Validation Results
 
-| Gate                             | Result |
-| -------------------------------- | ------ |
-| `npx jest syncEngine.reliability syncCommit.idempotency syncEngine.integration syncEngine.repro` | 28/28 pass |
-| Full `npx jest`                  | 1491 pass, 22 pre-existing failures (identical to Sprint 2.1 baseline; no regressions) |
-| `npx tsc --noEmit`               | 0 new errors (only pre-existing errors in unrelated test files) |
-| `npx eslint` (changed files)     | 0 errors, 0 warnings |
-| `npx prisma validate`            | schema valid |
+| Gate                                                                                             | Result                                                                                 |
+| ------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------- |
+| `npx jest syncEngine.reliability syncCommit.idempotency syncEngine.integration syncEngine.repro` | 28/28 pass                                                                             |
+| Full `npx jest`                                                                                  | 1491 pass, 22 pre-existing failures (identical to Sprint 2.1 baseline; no regressions) |
+| `npx tsc --noEmit`                                                                               | 0 new errors (only pre-existing errors in unrelated test files)                        |
+| `npx eslint` (changed files)                                                                     | 0 errors, 0 warnings                                                                   |
+| `npx prisma validate`                                                                            | schema valid                                                                           |
 
 # Remaining Work
 

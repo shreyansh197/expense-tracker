@@ -889,7 +889,7 @@ This board decomposes the entire product roadmap defined in [PROJECT_MASTER_PLAN
 
 **Horizon:** 1 · **PRD Milestone:** M1 (extension) · **Debt covered:** UI-Foundation audit gap · **Status:** Done (2026-07-24)
 
-**Outcome:** ExpenStream has a formal **Product Experience** documentation family — the missing middle between doctrine (`PRODUCT_PRINCIPLES.md`) and mechanics (`DESIGN_SYSTEM.md`). Future AI agents and human contributors can bootstrap a *premium finance experience* mindset without additional prompting. Documentation-only sprint — **no application source code touched**.
+**Outcome:** ExpenStream has a formal **Product Experience** documentation family — the missing middle between doctrine (`PRODUCT_PRINCIPLES.md`) and mechanics (`DESIGN_SYSTEM.md`). Future AI agents and human contributors can bootstrap a _premium finance experience_ mindset without additional prompting. Documentation-only sprint — **no application source code touched**.
 
 Full audit that authorised this milestone: [`sprint-reports/UI_FOUNDATION_AUDIT.md`](../sprint-reports/UI_FOUNDATION_AUDIT.md).
 Execution report: [`sprint-reports/UI_FOUNDATION_IMPLEMENTATION.md`](../sprint-reports/UI_FOUNDATION_IMPLEMENTATION.md).
@@ -931,27 +931,25 @@ Execution report: [`sprint-reports/UI_FOUNDATION_IMPLEMENTATION.md`](../sprint-r
 
 ---
 
-
-
 ### Milestone Status Summary
 
-| ID  | Milestone                             | Horizon | Priority | Sprints | Status  |
-| --- | ------------------------------------- | ------- | -------- | ------- | ------- |
-| M1  | Documentation Truth                   | 1       | P1       | 2       | Pending |
-| M2  | Sync Engine Reliability & Correctness | 1       | P0       | 3       | Pending |
-| M3  | Notification UX Hardening             | 1       | P1       | 2       | Pending |
-| M4  | Accessibility Contracts Coverage      | 1       | P0       | 2       | Pending |
-| M5  | Security & Compliance Hardening       | 1–2     | P0/P1    | 4       | Pending |
-| M6  | Observability & Ops Foundation        | 1–2     | P1       | 2       | Pending |
-| M7  | Business Ledger Polish & Reminders    | 2       | P1       | 2       | Pending |
-| M8  | Envelope Budgets                      | 2       | P2       | 2       | Pending |
-| M9  | Performance & Bundle Discipline       | 2       | P2       | 2       | Pending |
-| M10 | Architecture Modularity Refactor      | 2       | P2/P3    | 2       | Pending |
-| M11 | Data Lifecycle & Ownership            | 3       | P2/P3    | 2       | Pending |
-| M12 | PWA & Platform Expansion              | 3       | P3       | 2       | Pending |
-| M13 | Collaboration Expansion               | 3       | P3       | 2       | Pending |
-| M14 | AI‑Native Surfaces (Opt‑In)           | 4       | P3       | 3       | Pending |
-| M15 | UI Foundation (Product Experience Documentation) | 1 | P1 | 1 | Done (2026-07-24) |
+| ID  | Milestone                                        | Horizon | Priority | Sprints | Status            |
+| --- | ------------------------------------------------ | ------- | -------- | ------- | ----------------- |
+| M1  | Documentation Truth                              | 1       | P1       | 2       | Pending           |
+| M2  | Sync Engine Reliability & Correctness            | 1       | P0       | 3       | Pending           |
+| M3  | Notification UX Hardening                        | 1       | P1       | 2       | Pending           |
+| M4  | Accessibility Contracts Coverage                 | 1       | P0       | 2       | Pending           |
+| M5  | Security & Compliance Hardening                  | 1–2     | P0/P1    | 4       | Pending           |
+| M6  | Observability & Ops Foundation                   | 1–2     | P1       | 2       | Pending           |
+| M7  | Business Ledger Polish & Reminders               | 2       | P1       | 2       | Pending           |
+| M8  | Envelope Budgets                                 | 2       | P2       | 2       | Pending           |
+| M9  | Performance & Bundle Discipline                  | 2       | P2       | 2       | Pending           |
+| M10 | Architecture Modularity Refactor                 | 2       | P2/P3    | 2       | Pending           |
+| M11 | Data Lifecycle & Ownership                       | 3       | P2/P3    | 2       | Pending           |
+| M12 | PWA & Platform Expansion                         | 3       | P3       | 2       | Pending           |
+| M13 | Collaboration Expansion                          | 3       | P3       | 2       | Pending           |
+| M14 | AI‑Native Surfaces (Opt‑In)                      | 4       | P3       | 3       | Pending           |
+| M15 | UI Foundation (Product Experience Documentation) | 1       | P1       | 1       | Done (2026-07-24) |
 
 **Totals:** 15 milestones · 33 sprints · 1 Done (M15), 14 Pending.
 
@@ -1015,7 +1013,6 @@ Execution report: [`sprint-reports/UI_FOUNDATION_IMPLEMENTATION.md`](../sprint-r
 ---
 
 _All items above are **Pending**. Update `Status:` in place when work begins or completes. This board mirrors [PROJECT_MASTER_PLAN.md](PROJECT_MASTER_PLAN.md) — if the two disagree, the PRD wins for scope and the code wins for behavior; then update this file._
-
 
 ---
 
