@@ -1,5 +1,6 @@
 import { db, migrateFromLocalStorage } from "./db";
-import type { IDBMutation } from "./db";
+import type { IDBMutation, IDBExpense, IDBLedger, IDBPayment } from "./db";
+import type { Table } from "dexie";
 import { authFetch, getActiveWorkspaceId, isAuthenticated, subscribeAuth } from "./authClient";
 import { supabase } from "./supabase";
 import { encryptJSON, decryptJSON, hasEncryptionKey } from "./crypto";
@@ -143,6 +144,290 @@ export function onWorkspaceAccessDenied(fn: AccessDeniedListener): () => void {
 function _notifyAccessDenied(workspaceId: string) {
   syncWarn("pull", `Access denied (403) for workspace ${workspaceId.slice(0, 8)}…`);
   _accessDeniedListeners.forEach((fn) => fn(workspaceId));
+}
+
+// ── Per-field money-conflict registry (T-2.3.1) ──
+//
+// Money fields (`amount`, `expectedAmount`) are NEVER silently overwritten by a
+// pull. When the local copy has diverged from the incoming server row, the sync
+// engine keeps the local value and records a pending conflict here instead of
+// auto-merging. A contested value is only reconciled when the user makes an
+// explicit choice via `resolveMoneyConflict` (surfaced by the ConflictReviewSheet
+// in a later task). Non-money fields continue to use deterministic timestamp
+// last-writer-wins. See Architecture §18.1.
+
+export type ConflictEntity = "expense" | "ledger" | "payment";
+export type ConflictChoice = "mine" | "theirs";
+
+export interface MoneyConflict {
+  /** Stable identity: `${entity}:${id}:${field}`. */
+  key: string;
+  entity: ConflictEntity;
+  /** Record id (UUID). */
+  id: string;
+  workspaceId: string;
+  /** Contested money field (`amount` | `expectedAmount`). */
+  field: string;
+  /** Value currently held locally (kept until the user resolves). */
+  localValue: number;
+  /** Value the server proposed in the pull. */
+  serverValue: number;
+  /** Local record `updatedAt` at detection time (epoch ms). */
+  localUpdatedAt: number;
+  /** Server row `updatedAt` at detection time (epoch ms). */
+  serverUpdatedAt: number;
+  /** Epoch ms the conflict was first detected. */
+  detectedAt: number;
+}
+
+/** Money fields that must never be silently overwritten, keyed by entity. */
+const MONEY_FIELDS: Record<ConflictEntity, readonly string[]> = {
+  expense: ["amount"],
+  ledger: ["expectedAmount"],
+  payment: ["amount"],
+};
+
+/** Server mutation table for each conflict entity. */
+const CONFLICT_TABLE: Record<ConflictEntity, IDBMutation["table"]> = {
+  expense: "expenses",
+  ledger: "business_ledgers",
+  payment: "business_payments",
+};
+
+/** Registry keys for every money field of a record (used to clear on delete). */
+function _conflictKeysFor(entity: ConflictEntity, id: string): string[] {
+  return MONEY_FIELDS[entity].map((field) => `${entity}:${id}:${field}`);
+}
+
+const _pendingConflicts = new Map<string, MoneyConflict>();
+// Money value the user committed to for a key that has not yet converged on the
+// server (corrective push still in flight). Guards against a resolved conflict
+// spontaneously re-opening on the next pull before the server catches up.
+const _resolvedIntents = new Map<string, number>();
+const _conflictListeners = new Set<(conflicts: MoneyConflict[]) => void>();
+
+function _conflictSnapshot(workspaceId?: string): MoneyConflict[] {
+  const all = Array.from(_pendingConflicts.values());
+  return workspaceId ? all.filter((c) => c.workspaceId === workspaceId) : all;
+}
+
+function _emitConflicts() {
+  const snapshot = _conflictSnapshot();
+  _conflictListeners.forEach((fn) => fn(snapshot));
+}
+
+/** Snapshot of unresolved money conflicts (optionally scoped to a workspace). */
+export function getPendingMoneyConflicts(workspaceId?: string): MoneyConflict[] {
+  return _conflictSnapshot(workspaceId);
+}
+
+/** Subscribe to money-conflict changes. Returns an unsubscribe fn. */
+export function onMoneyConflictsChange(
+  fn: (conflicts: MoneyConflict[]) => void,
+): () => void {
+  _conflictListeners.add(fn);
+  return () => { _conflictListeners.delete(fn); };
+}
+
+/**
+ * Reconcile the conflict registry after a pull: register newly-detected
+ * conflicts (refreshing the server value on re-detection) and clear any whose
+ * values have since converged or been superseded. Emits once if anything changed.
+ */
+function _reconcileConflicts(detected: MoneyConflict[], resolvedKeys: string[]): void {
+  let changed = false;
+  for (const c of detected) {
+    _pendingConflicts.set(c.key, c);
+    changed = true;
+  }
+  for (const key of resolvedKeys) {
+    if (_pendingConflicts.delete(key)) changed = true;
+    _resolvedIntents.delete(key);
+  }
+  if (changed) _emitConflicts();
+}
+
+/** Clear all pending money conflicts (used on engine stop / workspace reset). */
+export function clearMoneyConflicts(): void {
+  _resolvedIntents.clear();
+  if (_pendingConflicts.size === 0) return;
+  _pendingConflicts.clear();
+  _emitConflicts();
+}
+
+/**
+ * Per-field last-writer-wins merge for a pulled record.
+ *
+ *  - Non-money fields follow deterministic timestamp LWW (newer `updatedAt` wins).
+ *  - Money fields are preserved locally on collision and returned as pending
+ *    conflicts; they are never silently overwritten by the server.
+ *
+ * A money field is contested when local and server disagree AND the local copy
+ * has diverged — either it is strictly newer than the incoming row, there is an
+ * un-pushed local edit queued, or a prior conflict on the same field is still
+ * awaiting the user. `existing` being undefined means the row is new, so the
+ * server record is taken verbatim.
+ */
+function _mergePulledRecord<T extends { updatedAt: number }>(
+  entity: ConflictEntity,
+  workspaceId: string,
+  id: string,
+  existing: T | undefined,
+  serverRecord: T,
+  serverUpdatedAt: number,
+  hasPendingLocalEdit: boolean,
+): { merged: T; conflicts: MoneyConflict[]; resolvedKeys: string[] } {
+  if (!existing) return { merged: serverRecord, conflicts: [], resolvedKeys: [] };
+
+  const serverNewer = serverUpdatedAt >= existing.updatedAt;
+  // Non-money fields resolve by whole-record timestamp LWW.
+  const merged = { ...(serverNewer ? serverRecord : existing) } as T;
+  const conflicts: MoneyConflict[] = [];
+  const resolvedKeys: string[] = [];
+
+  const ex = existing as Record<string, unknown>;
+  const sv = serverRecord as Record<string, unknown>;
+  const mg = merged as Record<string, unknown>;
+
+  for (const field of MONEY_FIELDS[entity]) {
+    const localValue = ex[field] as number;
+    const serverValue = sv[field] as number;
+    const key = `${entity}:${id}:${field}`;
+    const existingConflict = _pendingConflicts.get(key);
+    const intent = _resolvedIntents.get(key);
+
+    if (localValue === serverValue) {
+      // Values agree — nothing contested. Drop any open conflict / resolution
+      // intent that has since converged (LWW already placed the agreed value).
+      if (existingConflict || intent !== undefined) resolvedKeys.push(key);
+      continue;
+    }
+
+    if (intent !== undefined && localValue === intent) {
+      // The user already resolved this field to the current local value; the
+      // server just hasn't converged yet (corrective push still in flight).
+      // Keep local and stay silent — never re-open a resolved conflict.
+      mg[field] = localValue;
+      continue;
+    }
+
+    // Values differ: contested if the local copy has diverged (strictly newer
+    // or an un-pushed edit) or a prior conflict on this field is still open.
+    const contested =
+      existingConflict !== undefined ||
+      existing.updatedAt > serverUpdatedAt ||
+      hasPendingLocalEdit;
+
+    if (contested) {
+      // Keep the local value and defer to an explicit user choice.
+      mg[field] = localValue;
+      conflicts.push({
+        key,
+        entity,
+        id,
+        workspaceId,
+        field,
+        localValue,
+        serverValue,
+        localUpdatedAt: existing.updatedAt,
+        serverUpdatedAt,
+        detectedAt: existingConflict?.detectedAt ?? Date.now(),
+      });
+    }
+    // Otherwise the server row is the later write — timestamp LWW already put
+    // the server value in `merged`.
+  }
+
+  return { merged, conflicts, resolvedKeys };
+}
+
+/**
+ * Resolve a deferred money conflict with an explicit user choice. This is the
+ * ONLY path that reconciles a contested money field — a pull never resolves one
+ * on its own.
+ *
+ *  - `"mine"`   keeps the local value and re-queues it so the server converges.
+ *  - `"theirs"` adopts the server value into local IDB.
+ *
+ * Either way the chosen value is queued as the final upsert when an un-pushed
+ * local edit is still sitting in the mutation queue, so a stale queued write
+ * can never silently override the user's decision. Returns true if a matching
+ * conflict was found and resolved.
+ */
+export async function resolveMoneyConflict(
+  key: string,
+  choice: ConflictChoice,
+): Promise<boolean> {
+  const conflict = _pendingConflicts.get(key);
+  if (!conflict) return false;
+
+  const serverTable = CONFLICT_TABLE[conflict.entity];
+
+  // The applied value: for "theirs" it is the server's proposed value; for
+  // "mine" it is the record's *current* local value (which may have been edited
+  // again while the prompt was open) — never the value captured at detection.
+  const applyTo = async <T extends { updatedAt: number }>(
+    table: Table<T, string>,
+  ): Promise<number | null> => {
+    const record = await table.get(conflict.id);
+    if (!record) return null;
+    const rec = record as unknown as Record<string, unknown>;
+    const chosen =
+      choice === "mine" ? (rec[conflict.field] as number) : conflict.serverValue;
+    const updated: Record<string, unknown> = { ...rec };
+    updated[conflict.field] = chosen;
+    // Keep `updatedAt` monotonic so a resolution never moves the record's clock
+    // backwards (which could let an older server snapshot win the next pull).
+    // "mine" is a fresh local write that must out-rank both sides.
+    updated.updatedAt =
+      choice === "mine"
+        ? Math.max(Date.now(), record.updatedAt + 1, conflict.serverUpdatedAt + 1)
+        : Math.max(record.updatedAt, conflict.serverUpdatedAt);
+    await table.put(updated as unknown as T);
+    return chosen;
+  };
+
+  let chosen: number | null;
+  if (conflict.entity === "expense") chosen = await applyTo(db.expenses);
+  else if (conflict.entity === "ledger") chosen = await applyTo(db.ledgers);
+  else chosen = await applyTo(db.payments);
+
+  if (chosen === null) {
+    // Record no longer exists (e.g. deleted) — just drop the stale conflict.
+    _pendingConflicts.delete(key);
+    _resolvedIntents.delete(key);
+    _emitConflicts();
+    return true;
+  }
+
+  // A queued-but-un-pushed local upsert for this record still carries the old
+  // local money value and would otherwise override the resolution once it
+  // flushes. Re-queue the chosen value last so the final server write matches.
+  const hasStalePendingUpsert = await db.mutations
+    .where("workspaceId").equals(conflict.workspaceId)
+    .filter((m) => m.operation === "upsert" && m.id === conflict.id && m.table === serverTable)
+    .count() > 0;
+
+  if (choice === "mine" || hasStalePendingUpsert) {
+    await enqueueMutation(
+      {
+        table: serverTable,
+        operation: "upsert",
+        id: conflict.id,
+        data: { [conflict.field]: chosen },
+        idempotencyKey: makeIdempotencyKey(),
+      },
+      conflict.workspaceId,
+    );
+  }
+
+  // Remember the committed value so a pull that lands before the server
+  // converges keeps it without re-opening the just-resolved conflict.
+  _pendingConflicts.delete(key);
+  _resolvedIntents.set(key, chosen);
+  _emitConflicts();
+  _notifySyncPull();
+  return true;
 }
 
 // ── Idempotency key generation ──
@@ -335,9 +620,17 @@ export async function pullChanges(workspaceId?: string): Promise<boolean> {
       const pendingDeleteIds = new Set(
         pendingMutations.filter(m => m.operation === "delete" && m.id).map(m => m.id!)
       );
+      // Records with an un-pushed local upsert — a differing server money value
+      // for these is treated as a collision even if the server row looks newer.
+      const pendingUpsertIds = new Set(
+        pendingMutations.filter(m => m.operation === "upsert" && m.id).map(m => m.id!)
+      );
 
       // Track whether we actually wrote something (skip _notifySyncPull if no real changes)
       let didWrite = false;
+      // Money-field collisions detected this pull; reconciled after the tx commits.
+      const moneyConflicts: MoneyConflict[] = [];
+      const resolvedConflictKeys: string[] = [];
 
       // Pre-read existing settings to avoid redundant writes
       const existingSettings = changes.settings ? await db.settings.get(wid) : null;
@@ -363,13 +656,14 @@ export async function pullChanges(workspaceId?: string): Promise<boolean> {
               if (pendingDeleteIds.has(row.id)) continue;
               if (row.deletedAt) {
                 await db.expenses.delete(row.id);
+                resolvedConflictKeys.push(..._conflictKeysFor("expense", row.id));
               } else {
                 const serverUpdatedAt = new Date(row.updatedAt).getTime();
                 const existing = existingMap.get(row.id);
                 if (existing && existing.updatedAt > serverUpdatedAt) {
                   conflictCount++;
                 }
-                await db.expenses.put({
+                const serverRecord: IDBExpense = {
                   id: row.id,
                   workspaceId: wid,
                   category: row.category,
@@ -384,7 +678,14 @@ export async function pullChanges(workspaceId?: string): Promise<boolean> {
                   createdAt: new Date(row.createdAt).getTime(),
                   updatedAt: serverUpdatedAt,
                   deletedAt: null,
-                });
+                };
+                const { merged, conflicts, resolvedKeys } = _mergePulledRecord(
+                  "expense", wid, row.id, existing, serverRecord,
+                  serverUpdatedAt, pendingUpsertIds.has(row.id),
+                );
+                if (conflicts.length) moneyConflicts.push(...conflicts);
+                if (resolvedKeys.length) resolvedConflictKeys.push(...resolvedKeys);
+                await db.expenses.put(merged);
               }
               didWrite = true;
             }
@@ -472,12 +773,22 @@ export async function pullChanges(workspaceId?: string): Promise<boolean> {
 
           // ── Ledgers ──
           if (changes.businessLedgers?.length) {
+            const incomingIds = changes.businessLedgers
+              .filter((r: Record<string, unknown>) => !r.deletedAt && !pendingDeleteIds.has(r.id as string))
+              .map((r: Record<string, unknown>) => r.id as string);
+            const existingMap = new Map(
+              (await db.ledgers.bulkGet(incomingIds))
+                .filter(Boolean)
+                .map((l) => [l!.id, l!])
+            );
             for (const row of changes.businessLedgers) {
               if (pendingDeleteIds.has(row.id)) continue;
               if (row.deletedAt) {
                 await db.ledgers.delete(row.id);
+                resolvedConflictKeys.push(..._conflictKeysFor("ledger", row.id));
               } else {
-                await db.ledgers.put({
+                const serverUpdatedAt = new Date(row.updatedAt).getTime();
+                const serverRecord: IDBLedger = {
                   id: row.id,
                   workspaceId: wid,
                   name: row.name,
@@ -488,9 +799,16 @@ export async function pullChanges(workspaceId?: string): Promise<boolean> {
                   tags: row.tags || [],
                   notes: row.notes || "",
                   createdAt: new Date(row.createdAt).getTime(),
-                  updatedAt: new Date(row.updatedAt).getTime(),
+                  updatedAt: serverUpdatedAt,
                   deletedAt: null,
-                });
+                };
+                const { merged, conflicts, resolvedKeys } = _mergePulledRecord(
+                  "ledger", wid, row.id, existingMap.get(row.id), serverRecord,
+                  serverUpdatedAt, pendingUpsertIds.has(row.id),
+                );
+                if (conflicts.length) moneyConflicts.push(...conflicts);
+                if (resolvedKeys.length) resolvedConflictKeys.push(...resolvedKeys);
+                await db.ledgers.put(merged);
               }
               didWrite = true;
             }
@@ -498,12 +816,22 @@ export async function pullChanges(workspaceId?: string): Promise<boolean> {
 
           // ── Payments ──
           if (changes.businessPayments?.length) {
+            const incomingIds = changes.businessPayments
+              .filter((r: Record<string, unknown>) => !r.deletedAt && !pendingDeleteIds.has(r.id as string))
+              .map((r: Record<string, unknown>) => r.id as string);
+            const existingMap = new Map(
+              (await db.payments.bulkGet(incomingIds))
+                .filter(Boolean)
+                .map((p) => [p!.id, p!])
+            );
             for (const row of changes.businessPayments) {
               if (pendingDeleteIds.has(row.id)) continue;
               if (row.deletedAt) {
                 await db.payments.delete(row.id);
+                resolvedConflictKeys.push(..._conflictKeysFor("payment", row.id));
               } else {
-                await db.payments.put({
+                const serverUpdatedAt = new Date(row.updatedAt).getTime();
+                const serverRecord: IDBPayment = {
                   id: row.id,
                   workspaceId: wid,
                   ledgerId: row.ledgerId,
@@ -513,9 +841,16 @@ export async function pullChanges(workspaceId?: string): Promise<boolean> {
                   reference: row.reference || undefined,
                   notes: row.notes || undefined,
                   createdAt: new Date(row.createdAt).getTime(),
-                  updatedAt: new Date(row.updatedAt).getTime(),
+                  updatedAt: serverUpdatedAt,
                   deletedAt: null,
-                });
+                };
+                const { merged, conflicts, resolvedKeys } = _mergePulledRecord(
+                  "payment", wid, row.id, existingMap.get(row.id), serverRecord,
+                  serverUpdatedAt, pendingUpsertIds.has(row.id),
+                );
+                if (conflicts.length) moneyConflicts.push(...conflicts);
+                if (resolvedKeys.length) resolvedConflictKeys.push(...resolvedKeys);
+                await db.payments.put(merged);
               }
               didWrite = true;
             }
@@ -527,6 +862,14 @@ export async function pullChanges(workspaceId?: string): Promise<boolean> {
           }
         }
       );
+
+      // Reconcile money-field conflicts detected during the merge. Done after
+      // the tx commits so listeners observe a consistent IDB state. Contested
+      // local values are preserved above and stay until the user resolves them
+      // via `resolveMoneyConflict`; converged conflicts are cleared.
+      if (moneyConflicts.length || resolvedConflictKeys.length) {
+        _reconcileConflicts(moneyConflicts, resolvedConflictKeys);
+      }
 
       // Only notify subscribers if we actually wrote data — prevents
       // cascading re-renders and push-pull loops from no-op pulls.
@@ -1218,4 +1561,5 @@ export function stopSyncEngine() {
   _setSyncPhase("idle");
   _counters = _emptyCounters();
   _emitCounters();
+  clearMoneyConflicts();
 }

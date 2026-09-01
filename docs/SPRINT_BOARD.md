@@ -156,10 +156,10 @@ This board decomposes the entire product roadmap defined in [PROJECT_MASTER_PLAN
 
 ### Sprint 2.3 — Deterministic Conflict UX & Monetary Math Audit
 
-- **Status:** Pending · **Priority:** P0 · **Effort:** L · **Story points:** 13
+- **Status:** In progress (T-2.3.1 ✅ Done) · **Priority:** P0 · **Effort:** L · **Story points:** 13
 - **Goal:** Money fields never silently overwrite. Every path uses integer minor units or a decimal‑safe helper. Closes TD‑3, TD‑9 and Architecture §18.1–18.2.
 - **Tasks:**
-  1. Implement per‑field last‑writer‑wins in [src/lib/syncEngine.ts](../src/lib/syncEngine.ts) with a user prompt for `amount`, `expectedAmount`, `receivedAmount` collisions.
+  1. ✅ **Done** — per‑field last‑writer‑wins in [src/lib/syncEngine.ts](../src/lib/syncEngine.ts): non‑money fields use deterministic timestamp LWW; `amount`/`expectedAmount` collisions preserve the local value and register a `MoneyConflict` resolved only by an explicit user event (`resolveMoneyConflict`). (`receivedAmount` is not yet a persisted field — see note.)
   2. Build `ConflictReviewSheet` (extends `useSyncConflictToast`) rendering both versions side by side with "keep mine / keep theirs / merge" actions.
   3. Emit `audit_logs` entry on every user‑resolved money conflict.
   4. Introduce `Money` branded type (`type Money = number & { __brand: "minor-units" }`) and helpers `toMinor(major)`, `fromMinor(minor)`, `addMoney`, `subMoney`.

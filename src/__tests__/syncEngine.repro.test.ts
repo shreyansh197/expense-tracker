@@ -10,10 +10,10 @@
  * behavior of `pullChanges` when local IDB is newer than the incoming
  * server row.
  *
- * This test intentionally captures the *current* non-deterministic
- * overwrite behavior so Sprint 2.3 can measure the deterministic fix
- * against it. It does not assert "correct" behavior — it snapshots
- * observed behavior and the conflict counter increments.
+ * This test verifies the Sprint 2.3 (T-2.3.1) deterministic fix: a money-field
+ * collision (local IDB newer than the incoming server row, with divergent
+ * `amount`) is NEVER silently overwritten. The local value is preserved and a
+ * pending conflict is surfaced for explicit user resolution.
  *
  * No monetary values are printed in the snapshot output beyond the
  * literal test-fixture integers (100/150/200). No PII.
@@ -59,6 +59,9 @@ import {
   makeIdempotencyKey,
   getSyncCounters,
   resetSyncCounters,
+  getPendingMoneyConflicts,
+  resolveMoneyConflict,
+  clearMoneyConflicts,
 } from "@/lib/syncEngine";
 
 // ── Simulated server ────────────────────────────────────────────────────────
@@ -158,6 +161,7 @@ beforeEach(async () => {
   await db.expenses.clear();
   await db.syncMeta.clear();
   resetSyncCounters();
+  clearMoneyConflicts();
   server = new VirtualServer({
     id: EXPENSE_ID,
     workspaceId: mockWorkspaceId,
@@ -177,7 +181,7 @@ beforeEach(async () => {
 // ── The reproduction ────────────────────────────────────────────────────────
 
 describe("syncEngine repro — concurrent expense.amount conflict", () => {
-  test("two clients mutate the same amount; captures baseline behavior", async () => {
+  test("two clients mutate the same amount; local money is preserved and deferred", async () => {
     // ── Client A: pull the seed row (amount=100) ─────────────────────────
     await pullChanges(mockWorkspaceId);
 
@@ -210,8 +214,8 @@ describe("syncEngine repro — concurrent expense.amount conflict", () => {
     server.commit([{ id: EXPENSE_ID, operation: "upsert", data: { amount: 200 } }]);
 
     // ── Client A: pull → server sends row with amount=200 while local is 150 ─
-    // IDB.updatedAt (future) > server.updatedAt → conflict counter increments,
-    // BUT current behavior still overwrites local with server row.
+    // IDB.updatedAt (future) > server.updatedAt AND amount diverges → the money
+    // field is contested: local 150 is preserved and a pending conflict surfaces.
     const conflictsBefore = getSyncCounters().conflicts;
     await pullChanges(mockWorkspaceId);
     const conflictsAfter = getSyncCounters().conflicts;
@@ -219,9 +223,8 @@ describe("syncEngine repro — concurrent expense.amount conflict", () => {
     const finalLocal = await db.expenses.get(EXPENSE_ID);
     const counters = getSyncCounters();
 
-    // Snapshot the observed baseline behavior. Sprint 2.3 will change the
-    // final amount to something deterministic (either 150 kept or a merge
-    // UI surfaced) — when it does, this snapshot must be updated intentionally.
+    // Deterministic post-fix behavior: the local money value is never silently
+    // overwritten; it is kept until the user resolves the conflict.
     expect({
       conflictDelta: conflictsAfter - conflictsBefore,
       finalAmount: finalLocal?.amount,
@@ -233,12 +236,91 @@ describe("syncEngine repro — concurrent expense.amount conflict", () => {
 {
   "conflictDelta": 1,
   "failures": 0,
-  "finalAmount": 200,
-  "finalUpdatedAtIsServer": true,
+  "finalAmount": 150,
+  "finalUpdatedAtIsServer": false,
   "pullBatches": 2,
   "pushBatches": 0,
 }
 `);
+
+    // A pending money conflict is surfaced for explicit user resolution — the
+    // pull never resolves it on its own.
+    const pending = getPendingMoneyConflicts(mockWorkspaceId);
+    expect(pending).toHaveLength(1);
+    expect(pending[0]).toMatchObject({
+      entity: "expense",
+      id: EXPENSE_ID,
+      field: "amount",
+      localValue: 150,
+      serverValue: 200,
+    });
+  });
+
+  test("resolving a money conflict with 'theirs' adopts the server value", async () => {
+    await pullChanges(mockWorkspaceId);
+    const seeded = await db.expenses.get(EXPENSE_ID);
+    await db.expenses.put({ ...seeded!, amount: 150, updatedAt: Date.now() + 60_000 });
+    await enqueueMutation(
+      {
+        table: "expenses",
+        operation: "upsert",
+        id: EXPENSE_ID,
+        data: { amount: 150, category: seeded!.category, day: seeded!.day, month: seeded!.month, year: seeded!.year, isRecurring: false },
+        idempotencyKey: makeIdempotencyKey(),
+      },
+      mockWorkspaceId,
+    );
+    server.commit([{ id: EXPENSE_ID, operation: "upsert", data: { amount: 200 } }]);
+    await pullChanges(mockWorkspaceId);
+
+    const [conflict] = getPendingMoneyConflicts(mockWorkspaceId);
+    const resolved = await resolveMoneyConflict(conflict.key, "theirs");
+    expect(resolved).toBe(true);
+
+    const after = await db.expenses.get(EXPENSE_ID);
+    expect(after?.amount).toBe(200);
+    expect(getPendingMoneyConflicts(mockWorkspaceId)).toHaveLength(0);
+
+    // The stale queued upsert (amount=150) must not silently undo the choice:
+    // after the queue flushes and we re-pull, the value stays at the server's
+    // 200 and no new conflict re-opens.
+    await pushMutations(mockWorkspaceId);
+    expect(server.row.amount).toBe(200);
+    await pullChanges(mockWorkspaceId);
+    const converged = await db.expenses.get(EXPENSE_ID);
+    expect(converged?.amount).toBe(200);
+    expect(getPendingMoneyConflicts(mockWorkspaceId)).toHaveLength(0);
+  });
+
+  test("resolving a money conflict with 'mine' keeps local and re-queues a push", async () => {
+    await pullChanges(mockWorkspaceId);
+    const seeded = await db.expenses.get(EXPENSE_ID);
+    await db.expenses.put({ ...seeded!, amount: 150, updatedAt: Date.now() + 60_000 });
+    server.commit([{ id: EXPENSE_ID, operation: "upsert", data: { amount: 200 } }]);
+    await pullChanges(mockWorkspaceId);
+
+    // Drain the queue so we can assert the resolution enqueues a fresh push.
+    await db.mutations.clear();
+
+    const [conflict] = getPendingMoneyConflicts(mockWorkspaceId);
+    const resolved = await resolveMoneyConflict(conflict.key, "mine");
+    expect(resolved).toBe(true);
+
+    const after = await db.expenses.get(EXPENSE_ID);
+    expect(after?.amount).toBe(150);
+    expect(getPendingMoneyConflicts(mockWorkspaceId)).toHaveLength(0);
+
+    const queued = await db.mutations.where("workspaceId").equals(mockWorkspaceId).toArray();
+    expect(queued).toHaveLength(1);
+    expect(queued[0]).toMatchObject({ table: "expenses", operation: "upsert", id: EXPENSE_ID });
+    expect(queued[0].data).toMatchObject({ amount: 150 });
+
+    // A pull that lands before the corrective push flushes (server still 200)
+    // must NOT re-open the just-resolved conflict — the local value stays 150.
+    await pullChanges(mockWorkspaceId);
+    expect(getPendingMoneyConflicts(mockWorkspaceId)).toHaveLength(0);
+    const stillLocal = await db.expenses.get(EXPENSE_ID);
+    expect(stillLocal?.amount).toBe(150);
   });
 
   test("push after local edit does not clear the conflict counter", async () => {

@@ -65,8 +65,8 @@ Owner spec files under [`src/__tests__/`](../src/__tests__):
 
 **Sprint 2.x will add:**
 
-- [x] `syncEngine.repro.test.ts` — conflict reproduction ([Sprint 2.1](IMPLEMENTATION_QUEUE.md#sprint-21)).
-- [ ] `syncEngine.reliability.test.ts` + `syncCommit.idempotency.test.ts` ([Sprint 2.2](IMPLEMENTATION_QUEUE.md#sprint-22)).
+- [x] `syncEngine.repro.test.ts` — conflict reproduction ([Sprint 2.1](IMPLEMENTATION_QUEUE.md#sprint-21)); updated in [Sprint 2.3 T-2.3.1](IMPLEMENTATION_QUEUE.md#sprint-23) to assert deterministic per-field LWW: divergent money value preserved locally, pending conflict surfaced, and `mine`/`theirs` resolution paths (including no re-open on a pre-push pull).
+- [x] `syncEngine.reliability.test.ts` + `syncCommit.idempotency.test.ts` ([Sprint 2.2](IMPLEMENTATION_QUEUE.md#sprint-22)).
 - [ ] `syncEngine.conflict.test.ts` + `money.helpers.test.ts` ([Sprint 2.3](IMPLEMENTATION_QUEUE.md#sprint-23)).
 
 ## 4. Automated — Lint, format, types `[Auto][P0]`

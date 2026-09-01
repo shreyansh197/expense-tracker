@@ -537,7 +537,8 @@ TypeScript strict - ESLint/Prettier clean - Tests co-located under `src/__tests_
 - **Acceptance Criteria:**
   - Money-field collisions never resolve without a user event.
   - Non-money fields use timestamp-based LWW deterministically.
-- **Status:** [ ] Pending
+- **Status:** [x] Done - Sprint 2.3
+- **Implementation notes:** [src/lib/syncEngine.ts](../src/lib/syncEngine.ts) now merges pulled records per field via `_mergePulledRecord`: non-money fields follow deterministic whole-record timestamp LWW, while money fields (`amount` on expenses/payments, `expectedAmount` on ledgers) are preserved locally on collision and registered as a `MoneyConflict` instead of being overwritten. New public API: `getPendingMoneyConflicts`, `onMoneyConflictsChange`, `resolveMoneyConflict(key, choice)` (the sole reconciliation path — `"mine"`/`"theirs"`), and `clearMoneyConflicts`. An in-memory resolution-intent guard prevents a just-resolved conflict from re-opening on the next pull before the server converges; tombstone deletes clear any dangling conflict. Conflict registry is session-scoped in memory this task (durable cross-reload persistence recorded under Future Recommendations). Covered by `src/__tests__/syncEngine.repro.test.ts` (preserve-local snapshot + `mine`/`theirs` resolution paths).
 
 ### T-2.3.2 - Build ConflictReviewSheet
 

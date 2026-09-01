@@ -34,10 +34,11 @@ Companion documents: [RELEASE_NOTES.md](RELEASE_NOTES.md) (user-facing highlight
 - **Sync Diagnostics panel (T-2.1.2):** New `src/components/settings/SyncDiagnosticsCard.tsx` under Settings › Data & Automation; shows queue depth, per-session pull/push counters, conflict count, last pull/push time, last error, and a Reset button. Five states honored (empty/loading/error/offline/success), ≥44 × 44 px target, keyboard + `aria-live` region.
 - **Conflict reproduction test (T-2.1.3):** New `src/__tests__/syncEngine.repro.test.ts` — two virtual clients mutating `expense.amount` concurrently; snapshots the current non-deterministic last-write-wins overwrite plus conflict-counter increment so Sprint 2.3 can measure the fix objectively.
 - **Docs (T-2.1.4):** [AI_CONTEXT.md §16.1](AI_CONTEXT.md) now documents the `NEXT_PUBLIC_SYNC_LOG` compile-time toggle with sample output and explicit "no monetary values in logs" caveats.
+- **Per-field last-writer-wins conflict engine (T-2.3.1):** [src/lib/syncEngine.ts](../src/lib/syncEngine.ts) now merges each pulled record field-by-field via `_mergePulledRecord`. Non-money fields keep deterministic whole-record timestamp LWW; money fields (`amount` on expenses/payments, `expectedAmount` on ledgers) are never silently overwritten — on a divergent collision the local value is preserved and a `MoneyConflict` is registered for explicit user resolution. New public API: `getPendingMoneyConflicts`, `onMoneyConflictsChange`, `resolveMoneyConflict(key, "mine" | "theirs")` (the only reconciliation path), and `clearMoneyConflicts`. `"mine"` re-queues the record's current local value with a monotonic `updatedAt`; a resolution-intent guard stops a just-resolved conflict from re-opening on the next pull before the server converges; incoming tombstones clear any dangling conflict. Ledger/payment pulls now batch-fetch existing rows for the same collision detection already used for expenses. Registry is session-scoped in memory (durable persistence tracked below). No monetary values are logged.
 
 ### Changed
 
-- _Pending._
+- **Conflict reproduction test flipped to the fixed contract (T-2.3.1):** `src/__tests__/syncEngine.repro.test.ts` no longer snapshots the old silent-overwrite baseline. It now asserts the deterministic outcome (local money value preserved, `finalAmount: 150`, a pending conflict surfaced) and adds coverage for the `"mine"` and `"theirs"` resolution paths, including that a pre-push pull does not re-open a resolved conflict.
 
 ### Fixed
 
