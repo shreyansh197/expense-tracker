@@ -24,6 +24,7 @@ import { useConfirm } from "@/components/ui/ConfirmDialog";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/Skeleton";
 import type { PaymentInput, LedgerInput } from "@/types";
+import { subMoney } from "@/lib/money";
 
 export default function LedgerDetailPage() {
   const { formatCurrency } = useCurrency();
@@ -58,7 +59,7 @@ export default function LedgerDetailPage() {
     );
   }
 
-  const remaining = ledger.expectedAmount - totalReceived;
+  const remaining = subMoney(ledger.expectedAmount, totalReceived);
   const isOverdue =
     ledger.status === "active" &&
     ledger.dueDate &&

@@ -165,6 +165,13 @@ const paymentMutationData = z.object({
   deletedAt: z.string().nullable().optional(),
 });
 
+const mutationConflictMeta = z.object({
+  // Contested money field name (e.g. "amount", "expectedAmount"). No monetary
+  // values are ever included here — only which field and which side won (R-8).
+  field: z.string().max(40),
+  choice: z.enum(["mine", "theirs"]),
+});
+
 const expenseMutation = z.object({
   table: z.literal("expenses"),
   operation: z.enum(["upsert", "delete"]),
@@ -172,6 +179,7 @@ const expenseMutation = z.object({
   data: expenseMutationData,
   clientVersion: z.number().int().min(1).optional(),
   idempotencyKey: z.string().max(64),
+  conflict: mutationConflictMeta.optional(),
 });
 
 const settingsMutation = z.object({
@@ -181,6 +189,7 @@ const settingsMutation = z.object({
   data: settingsMutationData,
   clientVersion: z.number().int().min(1).optional(),
   idempotencyKey: z.string().max(64),
+  conflict: mutationConflictMeta.optional(),
 });
 
 const ledgerMutation = z.object({
@@ -190,6 +199,7 @@ const ledgerMutation = z.object({
   data: ledgerMutationData,
   clientVersion: z.number().int().min(1).optional(),
   idempotencyKey: z.string().max(64),
+  conflict: mutationConflictMeta.optional(),
 });
 
 const paymentMutation = z.object({
@@ -199,6 +209,7 @@ const paymentMutation = z.object({
   data: paymentMutationData,
   clientVersion: z.number().int().min(1).optional(),
   idempotencyKey: z.string().max(64),
+  conflict: mutationConflictMeta.optional(),
 });
 
 const mutationSchema = z.discriminatedUnion("table", [

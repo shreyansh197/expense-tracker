@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { m } from "framer-motion";
 import { CalendarDays } from "lucide-react";
+import { addMoney } from "@/lib/money";
 import { useUIStore } from "@/stores/uiStore";
 import { useExpenses } from "@/hooks/useExpenses";
 import { useSettings } from "@/hooks/useSettings";
@@ -45,13 +46,13 @@ export function SpendingForecastCalendar() {
     // Build daily actuals
     const dailyActuals: Record<number, number> = {};
     for (const e of active) {
-      dailyActuals[e.day] = (dailyActuals[e.day] || 0) + e.amount;
+      dailyActuals[e.day] = addMoney(dailyActuals[e.day] || 0, e.amount);
     }
 
     // Build recurring map (which days have recurring)
     const recurringByDay: Record<number, number> = {};
     for (const r of recurringExpenses) {
-      recurringByDay[r.day] = (recurringByDay[r.day] || 0) + r.amount;
+      recurringByDay[r.day] = addMoney(recurringByDay[r.day] || 0, r.amount);
     }
 
     const days: DayForecast[] = [];

@@ -108,6 +108,12 @@ export interface IDBMutation {
   nextRetryAt: number;
   /** Short, redacted description of the last failure (never contains request body / money). */
   lastError?: string | null;
+  /**
+   * Set only on the corrective upsert enqueued by `resolveMoneyConflict`. Signals
+   * to the server that this write resolves a money-field conflict so it can emit a
+   * `conflict.resolve.money` audit row. Carries no monetary values (R-8).
+   */
+  conflict?: { field: string; choice: "mine" | "theirs" };
 }
 
 export interface IDBSyncMeta {

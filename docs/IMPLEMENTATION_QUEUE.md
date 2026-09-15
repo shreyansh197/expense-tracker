@@ -557,7 +557,8 @@ TypeScript strict - ESLint/Prettier clean - Tests co-located under `src/__tests_
 - **Acceptance Criteria:**
   - Fully keyboard operable and reduced-motion respectful.
   - Snapshot test locks visual invariants.
-- **Status:** [ ] Pending
+- **Status:** [x] Done - Sprint 2.3
+- **Implementation notes:** New [src/components/sync/ConflictReviewSheet.tsx](../src/components/sync/ConflictReviewSheet.tsx) subscribes to the T-2.3.1 registry via `onMoneyConflictsChange`/`getPendingMoneyConflicts` and opens a focus-trapped, reduced-motion [BottomSheet](../src/components/ui/BottomSheet.tsx) whenever a money conflict is pending. It renders both contested values side by side ("This device" vs "Other device", formatted through `useCurrency`) and resolves via the two deterministic choices — Keep mine / Keep theirs — calling `resolveMoneyConflict`. Money is a scalar quantity with no meaningful automatic merge, so the deterministic keep-mine/keep-theirs contract from T-2.3.1 is honoured instead of a bogus merge action (recorded in the Sprint 2.3 report). Mounted globally in [src/app/providers.tsx](../src/app/providers.tsx) alongside the existing conflict toast. Visual invariants locked by `src/__tests__/conflictReviewSheet.contract.test.ts` (tokens-only, 48px targets, aria roles, mine/theirs-only).
 
 ### T-2.3.3 - Audit entry on user-resolved money conflict
 
@@ -575,7 +576,8 @@ TypeScript strict - ESLint/Prettier clean - Tests co-located under `src/__tests_
 - **Affected Files:** [src/lib/server/audit.ts](../src/lib/server/audit.ts), `src/app/api/sync/commit/route.ts`
 - **Acceptance Criteria:**
   - Row emitted per resolution; payload contains no `amount*` values.
-- **Status:** [ ] Pending
+- **Status:** [x] Done - Sprint 2.3
+- **Implementation notes:** `resolveMoneyConflict` now tags its corrective upsert with `conflict: { field, choice }` (no monetary value); this flows through `pushMutations` → `/api/sync/commit`, validated by an optional `conflict` object added to every mutation schema in [src/lib/validators.ts](../src/lib/validators.ts). On a successful money-entity upsert the route calls `auditConflictResolution`, which emits a `conflict.resolve.money` [audit_logs](../src/lib/server/audit.ts) row capturing `entityType` (expense/ledger/payment), `entityId`, and `meta: { field, choice }` only — never an amount (R-8). Audit writes are best-effort (a logging failure never fails the applied mutation) and are skipped on idempotent replays. New `IDBMutation.conflict` field added in [src/lib/db.ts](../src/lib/db.ts).
 
 ### T-2.3.4 - Introduce Money branded type + helpers
 
@@ -594,7 +596,8 @@ TypeScript strict - ESLint/Prettier clean - Tests co-located under `src/__tests_
 - **Acceptance Criteria:**
   - 100% branch coverage on helpers.
   - No `Number`-typed `amount` remains outside `money.ts` after migration (see T-2.3.5).
-- **Status:** [ ] Pending
+- **Status:** [x] Done - Sprint 2.3
+- **Implementation notes:** New [src/lib/money.ts](../src/lib/money.ts) defines `type Money = number & { __brand: 'minor-units' }` plus `toMinor`, `fromMinor`, `addMoney`, `subMoney`, `mulMoney`, `formatMoney`, and a `sumMoney` accumulator. Helpers perform every operation in integer minor units (paise/cents) and only re-materialise a major-unit number at the boundary, eliminating binary-float drift (`0.1 + 0.2 === 0.3`). `toMinor`/`mulMoney` throw `RangeError` on non-finite input so precision bugs surface loudly. All branches covered by `src/__tests__/money.helpers.test.ts`.
 
 ### T-2.3.5 - Migrate all money paths to `Money`
 
@@ -613,7 +616,8 @@ TypeScript strict - ESLint/Prettier clean - Tests co-located under `src/__tests_
 - **Acceptance Criteria:**
   - No `+`/`-`/`*` on `amount*` identifiers outside `money.ts` (enforced by T-2.3.6).
   - All calculation tests remain green after migration.
-- **Status:** [ ] Pending
+- **Status:** [x] Done - Sprint 2.3
+- **Implementation notes:** Every money arithmetic site flagged by the T-2.3.6 guard (108 sites across 40 files) was migrated to the `money.ts` helpers — `sum + e.amount` → `addMoney(...)`, sort comparators → `subMoney(...)`, `amount * ratio` and `convert()` → `mulMoney(...)`. Covers [src/lib/calculations.ts](../src/lib/calculations.ts), [src/lib/exchangeRates.ts](../src/lib/exchangeRates.ts), [src/lib/filters.ts](../src/lib/filters.ts), analytics/business/dashboard/expenses components, hooks, and pages. One false positive — a colour-blend factor misnamed `amount` in [AccentColorPicker](../src/components/settings/AccentColorPicker.tsx) — was renamed to `factor` (it is not money). Test files are exempt from the guard. All 1491 pre-existing tests plus the new Money-precision cases stay green.
 
 ### T-2.3.6 - ESLint rule: forbid raw arithmetic on money fields
 
@@ -632,7 +636,8 @@ TypeScript strict - ESLint/Prettier clean - Tests co-located under `src/__tests_
 - **Acceptance Criteria:**
   - Rule fires on a synthetic violation in a smoke test.
   - CI blocks merges violating the rule.
-- **Status:** [ ] Pending
+- **Status:** [x] Done - Sprint 2.3
+- **Implementation notes:** A `no-restricted-syntax` guard in [eslint.config.mjs](../eslint.config.mjs) (selectors shared via `eslint.money-rule.cjs`) forbids `+`/`-`/`*` and their compound `+=`/`-=`/`*=` forms on any identifier or member named `amount`/`expectedAmount`/`receivedAmount`, everywhere except `src/lib/money.ts` and test files. The rule is `error`-level so CI blocks violations. `src/__tests__/moneyLintRule.test.ts` loads the exact shipped selectors in-process and asserts the guard fires on synthetic violations, stays quiet with the helpers, and is disabled inside `money.ts`.
 
 ### T-2.3.7 - Conflict + money test suites
 
@@ -651,7 +656,8 @@ TypeScript strict - ESLint/Prettier clean - Tests co-located under `src/__tests_
 - **Acceptance Criteria:**
   - Two-client edit on `amount` always triggers `ConflictReviewSheet`.
   - M2 exit criteria in [PROJECT_MASTER_PLAN section 14](PROJECT_MASTER_PLAN.md) satisfied.
-- **Status:** [ ] Pending
+- **Status:** [x] Done - Sprint 2.3
+- **Implementation notes:** `src/__tests__/syncEngine.conflict.test.ts` drives a two-client `expense.amount` edit and asserts a pending conflict is registered (the exact condition that opens `ConflictReviewSheet`), that the local money value is never overwritten, and that both deterministic resolutions plus the `conflict.resolve.money` audit signal behave correctly. `src/__tests__/money.helpers.test.ts` locks the helper invariants; `calculations.test.ts` gains a "money precision" block proving drift-free totals. `conflictReviewSheet.contract.test.ts` and `moneyLintRule.test.ts` complete the suite.
 
 ---
 

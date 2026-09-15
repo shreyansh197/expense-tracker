@@ -8,6 +8,7 @@ import { getDaysInMonth } from "@/lib/utils";
 import { getDayOfWeekFactors } from "@/lib/calculations";
 import { toExpense } from "@/lib/mappers";
 import type { Expense } from "@/types";
+import { addMoney, subMoney } from "@/lib/money";
 
 const EMPTY: Expense[] = [];
 
@@ -107,10 +108,10 @@ export function useHistoricalData(currentMonth: number, currentYear: number, loo
 
       // Compute fresh
       const monthExpenses = allExpenses.filter(e => e.month === m && e.year === y);
-      const total = monthExpenses.reduce((s, e) => s + e.amount, 0);
+      const total = monthExpenses.reduce((s, e) => addMoney(s, e.amount), 0);
       const categoryBreakdown: Record<string, number> = {};
       for (const e of monthExpenses) {
-        categoryBreakdown[e.category] = (categoryBreakdown[e.category] || 0) + e.amount;
+        categoryBreakdown[e.category] = addMoney(categoryBreakdown[e.category] || 0, e.amount);
       }
       const md: MonthData = {
         month: m,
@@ -147,7 +148,7 @@ export function useHistoricalData(currentMonth: number, currentYear: number, loo
     // Top categories across all months
     const catTotals: Record<string, number> = {};
     for (const e of allExpenses) {
-      catTotals[e.category] = (catTotals[e.category] || 0) + e.amount;
+      catTotals[e.category] = addMoney(catTotals[e.category] || 0, e.amount);
     }
     const topCategoriesAllTime = Object.entries(catTotals)
       .map(([category, total]) => ({ category, total }))
@@ -158,12 +159,12 @@ export function useHistoricalData(currentMonth: number, currentYear: number, loo
     const dayOfWeekFactors = getDayOfWeekFactors(allExpenses);
 
     // Recurring vs one-time
-    const recurring = allExpenses.filter(e => e.isRecurring).reduce((s, e) => s + e.amount, 0);
-    const oneTime = allExpenses.filter(e => !e.isRecurring).reduce((s, e) => s + e.amount, 0);
+    const recurring = allExpenses.filter(e => e.isRecurring).reduce((s, e) => addMoney(s, e.amount), 0);
+    const oneTime = allExpenses.filter(e => !e.isRecurring).reduce((s, e) => addMoney(s, e.amount), 0);
 
     // Biggest expenses (current month)
     const biggestExpenses = current
-      ? [...current.expenses].sort((a, b) => b.amount - a.amount).slice(0, 5)
+      ? [...current.expenses].sort((a, b) => subMoney(b.amount, a.amount)).slice(0, 5)
       : [];
 
     // Weekly totals (current month)
@@ -175,7 +176,7 @@ export function useHistoricalData(currentMonth: number, currentYear: number, loo
         const endDay = Math.min(startDay + 6, daysInMonth);
         const total = current.expenses
           .filter(e => e.day >= startDay && e.day <= endDay)
-          .reduce((s, e) => s + e.amount, 0);
+          .reduce((s, e) => addMoney(s, e.amount), 0);
         spendingByWeek.push({ week: w + 1, total });
       }
     }

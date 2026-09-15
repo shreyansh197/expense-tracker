@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 import type { Expense } from "@/types";
+import { addMoney } from "@/lib/money";
 
 interface MerchantRow {
   name: string;
@@ -25,7 +26,7 @@ export function MerchantBreakdown({ expenses, formatCurrency }: MerchantBreakdow
       const key = e.remark?.trim() || "Other";
       const existing = map.get(key);
       if (existing) {
-        existing.total += e.amount;
+        existing.total = addMoney(existing.total, e.amount);
         existing.count += 1;
       } else {
         map.set(key, { total: e.amount, count: 1 });

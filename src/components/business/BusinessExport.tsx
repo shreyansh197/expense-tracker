@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Download } from "lucide-react";
 import type { Ledger, Payment } from "@/types";
+import { subMoney } from "@/lib/money";
 
 interface BusinessExportProps {
   ledgers: Ledger[];
@@ -31,7 +32,7 @@ export function BusinessExport({ ledgers, allPayments, receivedByLedger }: Busin
           `"${l.name.replace(/"/g, '""')}"`,
           l.expectedAmount,
           received,
-          l.expectedAmount - received,
+          subMoney(l.expectedAmount, received),
           l.status,
           l.dueDate ? new Date(l.dueDate).toISOString().split("T")[0] : "",
           `"${l.tags.join(", ")}"`,

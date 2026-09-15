@@ -6,6 +6,7 @@ import { useExpenses } from "@/hooks/useExpenses";
 import { useUIStore } from "@/stores/uiStore";
 import { getSpendingStreak } from "@/lib/calculations";
 import { detectCorrelations } from "@/lib/correlations";
+import { addMoney } from "@/lib/money";
 
 export type WatcherInsightType =
   | "anomaly"
@@ -115,10 +116,10 @@ export function useWatcher(): { insight: WatcherInsight | null; dismiss: () => v
     // 5. Top category dominance (>50% of monthly spend in one category)
     if (expenses.length >= 3) {
       const active = expenses.filter((e) => !e.deletedAt);
-      const total = active.reduce((s, e) => s + e.amount, 0);
+      const total = active.reduce((s, e) => addMoney(s, e.amount), 0);
       if (total > 0) {
         const byCat: Record<string, number> = {};
-        for (const e of active) byCat[e.category] = (byCat[e.category] ?? 0) + e.amount;
+        for (const e of active) byCat[e.category] = addMoney(byCat[e.category] ?? 0, e.amount);
         const top = Object.entries(byCat).sort((a, b) => b[1] - a[1])[0];
         if (top && top[1] / total > 0.5) {
           return {
@@ -148,9 +149,9 @@ export function useWatcher(): { insight: WatcherInsight | null; dismiss: () => v
 
     // 7. Daily spend summary (there IS spending today)
     if (todaySpend.length > 0) {
-      const todayTotal = todaySpend.reduce((s, e) => s + e.amount, 0);
+      const todayTotal = todaySpend.reduce((s, e) => addMoney(s, e.amount), 0);
       const active = expenses.filter((e) => !e.deletedAt);
-      const totalMonth = active.reduce((s, e) => s + e.amount, 0);
+      const totalMonth = active.reduce((s, e) => addMoney(s, e.amount), 0);
       if (totalMonth > 0) {
         const pct = Math.round((todayTotal / totalMonth) * 100);
         if (pct > 30) {
@@ -161,7 +162,7 @@ export function useWatcher(): { insight: WatcherInsight | null; dismiss: () => v
         }
       }
       const avgDaily = active.length > 0
-        ? active.reduce((s, e) => s + e.amount, 0) / new Date().getDate()
+        ? active.reduce((s, e) => addMoney(s, e.amount), 0) / new Date().getDate()
         : 0;
       if (avgDaily > 0 && todayTotal > avgDaily * 1.5) {
         return {

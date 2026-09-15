@@ -1,4 +1,5 @@
 import type { Expense } from "@/types";
+import { addMoney } from "@/lib/money";
 
 export interface CorrelationResult {
   category1: string;
@@ -25,7 +26,7 @@ export function detectCorrelations(
 
   for (const e of active) {
     if (!catDays[e.category]) catDays[e.category] = {};
-    catDays[e.category][e.day] = (catDays[e.category][e.day] || 0) + e.amount;
+    catDays[e.category][e.day] = addMoney(catDays[e.category][e.day] || 0, e.amount);
     allDays.add(e.day);
   }
 

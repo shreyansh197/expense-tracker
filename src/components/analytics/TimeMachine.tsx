@@ -6,7 +6,7 @@ import { Clock, ArrowRightLeft, RotateCcw, Bookmark, Trash2, Copy, Check } from 
 import { useExpenses } from "@/hooks/useExpenses";
 import { useSettings } from "@/hooks/useSettings";
 import { useUIStore } from "@/stores/uiStore";
-import { useCurrency } from "@/hooks/useCurrency";
+import { addMoney } from "@/lib/money";import { useCurrency } from "@/hooks/useCurrency";
 import { useCalculationsContext } from "@/contexts/CalculationsContext";
 import { getAllCategories, buildCategoryMap } from "@/lib/categories";
 import { db } from "@/lib/db";
@@ -112,7 +112,7 @@ export function TimeMachine() {
     const map: Record<string, { total: number; count: number }> = {};
     for (const e of active) {
       if (!map[e.category]) map[e.category] = { total: 0, count: 0 };
-      map[e.category].total += e.amount;
+      map[e.category].total = addMoney(map[e.category].total, e.amount);
       map[e.category].count++;
     }
     return map;
@@ -125,7 +125,7 @@ export function TimeMachine() {
     const sourceTxns = active.filter((e) => e.category === sourceCategory);
     if (sourceTxns.length === 0) return null;
 
-    const originalSourceTotal = sourceTxns.reduce((s, e) => s + e.amount, 0);
+    const originalSourceTotal = sourceTxns.reduce((s, e) => addMoney(s, e.amount), 0);
     const newSourceTotal = sourceTxns.length * replacementAmount;
     const savings = originalSourceTotal - newSourceTotal;
     const newMonthlyTotal = monthlyTotal - savings;

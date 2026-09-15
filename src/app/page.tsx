@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect, Suspense, useMemo, useSyncExternalStore, useRef, useCallback } from "react";
 import dynamic from "next/dynamic";
 import { m, AnimatePresence } from "framer-motion";
+import { addMoney, mulMoney } from "@/lib/money";
 import { AppShell } from "@/components/layout/AppShell";
 import { MonthSwitcher } from "@/components/layout/MonthSwitcher";
 import { SyncIndicator } from "@/components/sync/SyncIndicator";
@@ -281,15 +282,15 @@ function DashboardContent() {
     if (prevMonthExpenses.length > 0) {
       const catTotals = new Map<string, number>();
       const prevCatTotals = new Map<string, number>();
-      for (const e of active) catTotals.set(e.category, (catTotals.get(e.category) ?? 0) + e.amount);
+      for (const e of active) catTotals.set(e.category, addMoney(catTotals.get(e.category) ?? 0, e.amount));
       for (const e of prevMonthExpenses.filter((e) => !e.deletedAt))
-        prevCatTotals.set(e.category, (prevCatTotals.get(e.category) ?? 0) + e.amount);
+        prevCatTotals.set(e.category, addMoney(prevCatTotals.get(e.category) ?? 0, e.amount));
 
       const dayRatio = daysInMonth / Math.max(today, 1);
       for (const [cat, amount] of catTotals) {
         const prevAmt = prevCatTotals.get(cat);
         if (prevAmt && prevAmt > 0) {
-          const projectedPct = ((amount * dayRatio - prevAmt) / prevAmt) * 100;
+          const projectedPct = ((mulMoney(amount, dayRatio) - prevAmt) / prevAmt) * 100;
           if (projectedPct > 30) {
             const catMeta = allCategories.find((c) => c.id === cat);
             const name = catMeta?.label ?? cat;
@@ -299,7 +300,7 @@ function DashboardContent() {
               icon: AlertTriangle,
               sparkData: dailyTotals
                 .filter((dt) => dt.day <= today)
-                .map((dt) => active.filter((e) => e.day === dt.day && e.category === cat).reduce((s, e) => s + e.amount, 0)),
+                .map((dt) => active.filter((e) => e.day === dt.day && e.category === cat).reduce((s, e) => addMoney(s, e.amount), 0)),
             });
             break;
           }
@@ -329,8 +330,8 @@ function DashboardContent() {
 
     // Spending slowdown (from SmartInsights — merged)
     if (prevMonthExpenses.length > 0) {
-      const prevTotal = prevMonthExpenses.filter((e) => !e.deletedAt).reduce((s, e) => s + e.amount, 0);
-      const currentTotal = active.reduce((s, e) => s + e.amount, 0);
+      const prevTotal = prevMonthExpenses.filter((e) => !e.deletedAt).reduce((s, e) => addMoney(s, e.amount), 0);
+      const currentTotal = active.reduce((s, e) => addMoney(s, e.amount), 0);
       if (prevTotal > 0 && currentTotal < prevTotal * 0.7 && today > 15) {
         insights.push({
           text: `You've spent ${Math.round((1 - currentTotal / prevTotal) * 100)}% less than last month — lighter footprint.`,
@@ -353,7 +354,7 @@ function DashboardContent() {
     if (today >= daysInMonth - 2 && active.length > 0) {
       const topCat = [...new Map<string, number>()].length === 0 ? null : (() => {
         const cats = new Map<string, number>();
-        for (const e of active) cats.set(e.category, (cats.get(e.category) ?? 0) + e.amount);
+        for (const e of active) cats.set(e.category, addMoney(cats.get(e.category) ?? 0, e.amount));
         let maxCat = "";
         let maxAmt = 0;
         for (const [c, a] of cats) { if (a > maxAmt) { maxCat = c; maxAmt = a; } }
@@ -486,7 +487,7 @@ function DashboardContent() {
           topCategory={topCategory}
           streak={streak}
           recurringCount={(settings.recurringExpenses ?? []).length}
-          recurringTotal={(settings.recurringExpenses ?? []).reduce((s, r) => s + r.amount, 0)}
+          recurringTotal={(settings.recurringExpenses ?? []).reduce((s, r) => addMoney(s, r.amount), 0)}
           formatCurrency={formatCurrency}
           onCategoryClick={handleCategoryClick}
           userName={user?.name}
@@ -530,7 +531,7 @@ function DashboardContent() {
               topCategory={topCategory}
               streak={streak}
               recurringCount={(settings.recurringExpenses ?? []).length}
-              recurringTotal={(settings.recurringExpenses ?? []).reduce((s, r) => s + r.amount, 0)}
+              recurringTotal={(settings.recurringExpenses ?? []).reduce((s, r) => addMoney(s, r.amount), 0)}
               formatCurrency={formatCurrency}
               onCategoryClick={handleCategoryClick}
               userName={user?.name}

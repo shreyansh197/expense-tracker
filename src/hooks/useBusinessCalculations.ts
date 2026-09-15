@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 import type { Ledger, Payment } from "@/types";
+import { addMoney } from "@/lib/money";
 
 export interface BusinessStats {
   totalExpected: number;
@@ -30,14 +31,14 @@ export function useBusinessCalculations(
     // Received per ledger
     const receivedByLedger: Record<string, number> = {};
     for (const p of allPayments) {
-      receivedByLedger[p.ledgerId] = (receivedByLedger[p.ledgerId] || 0) + p.amount;
+      receivedByLedger[p.ledgerId] = addMoney(receivedByLedger[p.ledgerId] || 0, p.amount);
     }
 
-    const totalExpected = nonCancelled.reduce((s, l) => s + l.expectedAmount, 0);
+    const totalExpected = nonCancelled.reduce((s, l) => addMoney(s, l.expectedAmount), 0);
     const nonCancelledIds = new Set(nonCancelled.map((l) => l.id));
     const totalReceived = allPayments
       .filter((p) => nonCancelledIds.has(p.ledgerId))
-      .reduce((s, p) => s + p.amount, 0);
+      .reduce((s, p) => addMoney(s, p.amount), 0);
     const collectionPercent = totalExpected > 0 ? (totalReceived / totalExpected) * 100 : 0;
 
     // Overdue
@@ -56,7 +57,7 @@ export function useBusinessCalculations(
       const received = receivedByLedger[l.id] || 0;
       for (const tag of l.tags) {
         const existing = tagMap.get(tag) || { expected: 0, received: 0, count: 0 };
-        existing.expected += l.expectedAmount;
+        existing.expected = addMoney(existing.expected, l.expectedAmount);
         existing.received += received;
         existing.count += 1;
         tagMap.set(tag, existing);
@@ -79,7 +80,8 @@ export function useBusinessCalculations(
       const d = new Date(p.date);
       const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
       if (monthlyMap.has(key)) {
-        monthlyMap.get(key)!.received += p.amount;
+        const bucket = monthlyMap.get(key)!;
+        bucket.received = addMoney(bucket.received, p.amount);
       }
     }
     // Distribute expected across months based on ledger creation dates
@@ -87,7 +89,8 @@ export function useBusinessCalculations(
       const d = new Date(l.createdAt);
       const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
       if (monthlyMap.has(key)) {
-        monthlyMap.get(key)!.expected += l.expectedAmount;
+        const bucket = monthlyMap.get(key)!;
+        bucket.expected = addMoney(bucket.expected, l.expectedAmount);
       }
     }
     const monthlyCollections = Array.from(monthlyMap.entries()).map(([month, data]) => ({

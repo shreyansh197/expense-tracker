@@ -6,6 +6,7 @@ import { useSettings } from "@/hooks/useSettings";
 import { useUIStore } from "@/stores/uiStore";
 import { useCalculations } from "@/hooks/useCalculations";
 import type { CategoryTotal, DailyTotal, StackedDailyTotal, Forecast, AnomalyResult } from "@/types";
+import { addMoney, subMoney } from "@/lib/money";
 
 interface CalculationsContextValue {
   monthlyTotal: number;
@@ -104,9 +105,9 @@ export function CalculationsProvider({ children }: { children: React.ReactNode }
           // Skip months with zero expenses — can't distinguish "no tracking" from "spent nothing"
           // Adding full budget as rollover for untracked months inflates future budgets incorrectly
           if (activeRows.length === 0) continue;
-          const total = activeRows.reduce((sum, r) => sum + r.amount, 0);
+          const total = activeRows.reduce((sum, r) => addMoney(sum, r.amount), 0);
 
-          history[key] = budget - total;
+          history[key] = subMoney(budget, total);
           // Apply rollover cap if set
           const cap = settings.rolloverCap;
           if (cap && cap > 0 && history[key] > cap) {

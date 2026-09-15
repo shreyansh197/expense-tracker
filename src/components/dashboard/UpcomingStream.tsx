@@ -10,6 +10,7 @@ import type { LucideIcon } from "lucide-react";
 import { useSettings } from "@/hooks/useSettings";
 import { useCurrency } from "@/hooks/useCurrency";
 import { getAllCategories, buildCategoryMap } from "@/lib/categories";
+import { addMoney } from "@/lib/money";
 import type { RecurringExpense } from "@/types";
 
 const ICON_MAP: Record<string, LucideIcon> = {
@@ -71,7 +72,7 @@ export function UpcomingStream() {
 
   if (upcoming.length === 0) return null;
 
-  const totalUpcoming = upcoming.reduce((sum, item) => sum + item.recurring.amount, 0);
+  const totalUpcoming = upcoming.reduce((sum, item) => addMoney(sum, item.recurring.amount), 0);
 
   return (
     <div className="card p-4 sm:p-5">

@@ -1,4 +1,5 @@
 import type { Expense, CategoryId, DailyTotal, CategoryTotal, StackedDailyTotal, Forecast, AnomalyResult } from "@/types";
+import { addMoney, subMoney, sumMoney } from "@/lib/money";
 
 /** Round to 2 decimal places (currency precision) to avoid floating-point drift */
 export function roundCurrency(value: number): number {
@@ -21,9 +22,9 @@ export function getCategoryTotal(
   month: number,
   year: number
 ): number {
-  return roundCurrency(activeExpenses(expenses, month, year)
+  return sumMoney(activeExpenses(expenses, month, year)
     .filter((e) => e.category === category)
-    .reduce((sum, e) => sum + e.amount, 0));
+    .map((e) => e.amount));
 }
 
 /**
@@ -35,9 +36,9 @@ export function getDailyTotal(
   month: number,
   year: number
 ): number {
-  return roundCurrency(activeExpenses(expenses, month, year)
+  return sumMoney(activeExpenses(expenses, month, year)
     .filter((e) => e.day === day)
-    .reduce((sum, e) => sum + e.amount, 0));
+    .map((e) => e.amount));
 }
 
 /**
@@ -48,7 +49,7 @@ export function getMonthlyTotal(
   month: number,
   year: number
 ): number {
-  return roundCurrency(activeExpenses(expenses, month, year).reduce((sum, e) => sum + e.amount, 0));
+  return sumMoney(activeExpenses(expenses, month, year).map((e) => e.amount));
 }
 
 /**
@@ -106,7 +107,7 @@ export function getAllCategoryTotals(
   const orphanMap = new Map<string, number>();
   for (const e of active) {
     if (!knownSet.has(e.category)) {
-      orphanMap.set(e.category, (orphanMap.get(e.category) || 0) + e.amount);
+      orphanMap.set(e.category, addMoney(orphanMap.get(e.category) || 0, e.amount));
     }
   }
   for (const [category, total] of orphanMap) {
@@ -230,8 +231,8 @@ export function getStackedDailyTotals(
     const row: StackedDailyTotal = { day, total: 0 };
     const dayExpenses = active.filter((e) => e.day === day);
     for (const e of dayExpenses) {
-      row[e.category] = (row[e.category] as number || 0) + e.amount;
-      row.total += e.amount;
+      row[e.category] = addMoney((row[e.category] as number) || 0, e.amount);
+      row.total = addMoney(row.total, e.amount);
     }
     result.push(row);
   }
@@ -324,7 +325,7 @@ export function detectAnomalies(
 
     // Check each expense in this category
     for (const e of active.filter((x) => x.category === cat)) {
-      const z = (0.6745 * (e.amount - med)) / mad;
+      const z = (0.6745 * subMoney(e.amount, med)) / mad;
       if (z > threshold) {
         anomalies.push({
           expense: e,
@@ -375,7 +376,7 @@ export function getDayOfWeekFactors(expenses: Expense[]): Record<number, number>
     if (e.deletedAt) continue;
     const d = new Date(e.year, e.month - 1, e.day);
     const dow = d.getDay();
-    sums[dow] += e.amount;
+    sums[dow] = addMoney(sums[dow], e.amount);
     counts[dow]++;
   }
 

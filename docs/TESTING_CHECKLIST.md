@@ -67,7 +67,10 @@ Owner spec files under [`src/__tests__/`](../src/__tests__):
 
 - [x] `syncEngine.repro.test.ts` — conflict reproduction ([Sprint 2.1](IMPLEMENTATION_QUEUE.md#sprint-21)); updated in [Sprint 2.3 T-2.3.1](IMPLEMENTATION_QUEUE.md#sprint-23) to assert deterministic per-field LWW: divergent money value preserved locally, pending conflict surfaced, and `mine`/`theirs` resolution paths (including no re-open on a pre-push pull).
 - [x] `syncEngine.reliability.test.ts` + `syncCommit.idempotency.test.ts` ([Sprint 2.2](IMPLEMENTATION_QUEUE.md#sprint-22)).
-- [ ] `syncEngine.conflict.test.ts` + `money.helpers.test.ts` ([Sprint 2.3](IMPLEMENTATION_QUEUE.md#sprint-23)).
+- [x] `syncEngine.conflict.test.ts` + `money.helpers.test.ts` ([Sprint 2.3](IMPLEMENTATION_QUEUE.md#sprint-23)) — two-client `amount` edit surfaces a pending conflict (the ConflictReviewSheet trigger), deterministic `mine`/`theirs` resolution, and the `conflict.resolve.money` audit signal; full-branch coverage of the `Money` helpers.
+- [x] `conflictReviewSheet.contract.test.ts` ([Sprint 2.3 T-2.3.2](IMPLEMENTATION_QUEUE.md#sprint-23)) — locks visual invariants: tokens-only styling, 48 px touch targets, focus-trapped BottomSheet, mine/theirs-only actions.
+- [x] `moneyLintRule.test.ts` ([Sprint 2.3 T-2.3.6](IMPLEMENTATION_QUEUE.md#sprint-23)) — the money-arithmetic ESLint guard fires on synthetic `+`/`-`/`*`(+compound) violations, stays quiet with the helpers, and is disabled inside `money.ts`.
+- [x] `calculations.test.ts` — extended with a Money-precision block proving drift-free totals after the T-2.3.5 migration.
 
 ## 4. Automated — Lint, format, types `[Auto][P0]`
 

@@ -58,7 +58,7 @@ Additional automatic-fail patterns:
 - **TypeScript strict** is non-negotiable: `noImplicitAny`, `strictNullChecks`, `noUncheckedIndexedAccess`.
 - Use `unknown` at boundaries and narrow with Zod — never `any`.
 - Zod parses **every** external input: API bodies, query strings, `localStorage`, `IndexedDB` reads, env vars.
-- Currency uses integer minor units or the decimal-safe helpers in [src/lib/calculations.ts](../src/lib/calculations.ts). No `+`, `-`, `*`, `/` on floats for money.
+- Currency uses integer minor units or the decimal-safe helpers in [src/lib/money.ts](../src/lib/money.ts) (`addMoney`, `subMoney`, `mulMoney`, `sumMoney`; `toMinor`/`fromMinor`). No raw `+`, `-`, `*` on floats for money — enforced by the `no-restricted-syntax` guard in [eslint.config.mjs](../eslint.config.mjs).
 - Dates are ISO 8601 strings on the wire, `Date` objects in memory, and always locale-aware in the UI via helpers in [src/lib/utils.ts](../src/lib/utils.ts).
 - No new npm dependency without: bundle-size check, license check, and a one-line note in the PR.
 - Feature flags gate anything user-visible that is not yet ready.

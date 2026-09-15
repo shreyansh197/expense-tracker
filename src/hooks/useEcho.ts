@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { differenceInCalendarDays } from "date-fns";
 import type { Expense } from "@/types";
+import { subMoney } from "@/lib/money";
 
 export interface EchoData {
   daysAgo: number;
@@ -46,7 +47,7 @@ export function useEcho(expenses: Expense[], ttlMs = 4000) {
       setEcho({
         daysAgo,
         lastAmount: prior.amount,
-        diff: newExpense.amount - prior.amount,
+        diff: subMoney(newExpense.amount, prior.amount),
         category: newExpense.category,
         remark: prior.remark,
       });

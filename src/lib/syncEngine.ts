@@ -400,26 +400,26 @@ export async function resolveMoneyConflict(
     return true;
   }
 
-  // A queued-but-un-pushed local upsert for this record still carries the old
-  // local money value and would otherwise override the resolution once it
-  // flushes. Re-queue the chosen value last so the final server write matches.
-  const hasStalePendingUpsert = await db.mutations
-    .where("workspaceId").equals(conflict.workspaceId)
-    .filter((m) => m.operation === "upsert" && m.id === conflict.id && m.table === serverTable)
-    .count() > 0;
-
-  if (choice === "mine" || hasStalePendingUpsert) {
-    await enqueueMutation(
-      {
-        table: serverTable,
-        operation: "upsert",
-        id: conflict.id,
-        data: { [conflict.field]: chosen },
-        idempotencyKey: makeIdempotencyKey(),
-      },
-      conflict.workspaceId,
-    );
-  }
+  // Every resolution enqueues a conflict-tagged corrective upsert of the chosen
+  // value. This serves two purposes:
+  //   1. Reconciliation — the chosen value is written last, so any stale queued
+  //      upsert (which still carries the old local money value) cannot silently
+  //      override the user's decision once it flushes, and "theirs" reasserts
+  //      the agreed value on the server.
+  //   2. Audit — it carries `conflict: { field, choice }` so the commit route
+  //      emits exactly one `conflict.resolve.money` row per resolution (T-2.3.3),
+  //      including "theirs" resolutions that would otherwise need no data write.
+  await enqueueMutation(
+    {
+      table: serverTable,
+      operation: "upsert",
+      id: conflict.id,
+      data: { [conflict.field]: chosen },
+      idempotencyKey: makeIdempotencyKey(),
+      conflict: { field: conflict.field, choice },
+    },
+    conflict.workspaceId,
+  );
 
   // Remember the committed value so a pull that lands before the server
   // converges keeps it without re-opening the just-resolved conflict.
@@ -991,6 +991,7 @@ export async function pushMutations(workspaceId?: string): Promise<number> {
             id: m.id,
             data: m.data,
             idempotencyKey: m.idempotencyKey,
+            ...(m.conflict ? { conflict: m.conflict } : {}),
           })),
         };
         syncLog("push", `Sending batch ${i/100 + 1}: ${batch.length} mutations`, batch.map(m => `${m.table}:${m.operation}:${m.id?.slice(0,8)}`));

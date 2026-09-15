@@ -1,5 +1,6 @@
 import type { Expense, CategoryId } from "@/types";
 import { getDayOfWeekFactors } from "@/lib/calculations";
+import { addMoney } from "@/lib/money";
 
 /**
  * 8 normalized axes (0–1) representing a user's spending behavioral fingerprint.
@@ -38,7 +39,7 @@ export function computeFingerprint(
   const active = expenses.filter((e) => !e.deletedAt);
   if (active.length < 5) return null;
 
-  const total = active.reduce((s, e) => s + e.amount, 0);
+  const total = active.reduce((s, e) => addMoney(s, e.amount), 0);
   if (total === 0) return null;
 
   // 1. Automation (recurring ratio)
@@ -46,7 +47,7 @@ export function computeFingerprint(
 
   // 2. Focus (Herfindahl index — ranges ~0.05 to 1.0, normalize)
   const catTotals: Record<string, number> = {};
-  for (const e of active) catTotals[e.category] = (catTotals[e.category] || 0) + e.amount;
+  for (const e of active) catTotals[e.category] = addMoney(catTotals[e.category] || 0, e.amount);
   const shares = Object.values(catTotals).map((v) => v / total);
   const herfindahl = shares.reduce((s, sh) => s + sh * sh, 0);
   const focus = Math.min(herfindahl * 2, 1); // scale up — 0.5+ is very concentrated
@@ -58,7 +59,7 @@ export function computeFingerprint(
   const weekendEnergy = Math.min(Math.max((weekendFactor - 0.5) / 1.5, 0), 1);
 
   // 4. Front-loading (first-half ratio, already 0–1)
-  const firstHalf = active.filter((e) => e.day <= 15).reduce((s, e) => s + e.amount, 0);
+  const firstHalf = active.filter((e) => e.day <= 15).reduce((s, e) => addMoney(s, e.amount), 0);
   const frontLoading = firstHalf / total;
 
   // 5. Frequency (unique spending days / days in month)

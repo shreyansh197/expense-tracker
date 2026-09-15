@@ -16,6 +16,7 @@ import {
 import { InstallButton } from "@/components/pwa/InstallButton";
 import { AccentColorPicker, applyAccentColor } from "@/components/settings/AccentColorPicker";
 import { useToast } from "@/components/ui/Toast";
+import { addMoney } from "@/lib/money";
 
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { SettingsAccordion, AccordionSection } from "@/components/settings/SettingsAccordion";
@@ -122,7 +123,7 @@ export default function SettingsPage() {
   const recurringCount = settings.recurringExpenses?.length || 0;
   const recurringTotal = (settings.recurringExpenses || [])
     .filter((r) => r.active)
-    .reduce((sum, r) => sum + r.amount, 0);
+    .reduce((sum, r) => addMoney(sum, r.amount), 0);
   const goalsCount = settings.goals?.length || 0;
 
   const zones = [

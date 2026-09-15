@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import { TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { Sparkline } from "@/components/ui/charts/Sparkline";
 import type { Expense, CategoryId } from "@/types";
+import { addMoney } from "@/lib/money";
 
 interface CategoryVelocityProps {
   expenses: Expense[];
@@ -23,7 +24,7 @@ function getWeekTotals(expenses: Expense[], categoryId: CategoryId, weeksBack = 
     const weekIdx = Math.floor(diffDays / 7);
     if (weekIdx < weeksBack) {
       // weekIdx 0 = this week, we store oldest-first so reverse
-      totals[weeksBack - 1 - weekIdx] += e.amount;
+      totals[weeksBack - 1 - weekIdx] = addMoney(totals[weeksBack - 1 - weekIdx], e.amount);
     }
   }
   return totals;

@@ -1,4 +1,5 @@
 import type { Expense, Challenge } from "@/types";
+import { addMoney } from "@/lib/money";
 
 // ── Challenge templates ──
 
@@ -73,7 +74,7 @@ export const CHALLENGE_TEMPLATES: ChallengeTemplate[] = [
 
       const inRange = filterDateRange(expenses, startDate, endDate);
       const dailyTotals: Record<number, number> = {};
-      for (const e of inRange) dailyTotals[e.day] = (dailyTotals[e.day] || 0) + e.amount;
+      for (const e of inRange) dailyTotals[e.day] = addMoney(dailyTotals[e.day] || 0, e.amount);
 
       // Calculate average to set cap
       const allAmounts = Object.values(dailyTotals);

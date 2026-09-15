@@ -5,9 +5,45 @@ import { syncCommitSchema } from "@/lib/validators";
 import { ensureSyncColumns } from "@/lib/server/ensureSyncColumns";
 import { rateLimit } from "@/lib/server/rateLimit";
 import { hashIp } from "@/lib/server/tokens";
+import { audit } from "@/lib/server/audit";
 import type { Prisma } from "@prisma/client";
 
 type Json = Prisma.InputJsonValue;
+
+/** Map a sync mutation table to its audit-log entity type. */
+const CONFLICT_ENTITY_TYPE: Record<string, string> = {
+  expenses: "expense",
+  business_ledgers: "ledger",
+  business_payments: "payment",
+};
+
+/**
+ * Emit a `conflict.resolve.money` audit row when a mutation resolves a
+ * money-field conflict. Captures entity type, id, and the chosen side only —
+ * never any monetary value (R-8). Best-effort: an audit failure never fails the
+ * mutation that was already applied.
+ */
+async function auditConflictResolution(
+  conflict: { field: string; choice: "mine" | "theirs" } | undefined,
+  table: string,
+  entityId: string,
+  userId: string,
+  ipHash: string,
+): Promise<void> {
+  if (!conflict) return;
+  try {
+    await audit({
+      userId,
+      entityType: CONFLICT_ENTITY_TYPE[table] ?? table,
+      entityId,
+      action: "conflict.resolve.money",
+      meta: { field: conflict.field, choice: conflict.choice },
+      ipHash,
+    });
+  } catch (err) {
+    console.error("[sync/commit] Failed to write conflict.resolve.money audit:", err);
+  }
+}
 
 /**
  * POST /api/sync/commit
@@ -20,7 +56,8 @@ export async function POST(req: NextRequest) {
   if (!auth) return jsonError("Unauthorized", 401);
 
   const ip = getClientIp(req);
-  const rl = await rateLimit(`sync-commit:${hashIp(ip)}:${auth.userId}`, 60, 60_000);
+  const ipHash = hashIp(ip);
+  const rl = await rateLimit(`sync-commit:${ipHash}:${auth.userId}`, 60, 60_000);
   if (!rl.ok) {
     return NextResponse.json(
       { error: "Too many requests. Try again later." },
@@ -129,6 +166,7 @@ export async function POST(req: NextRequest) {
             },
           });
           results.push({ idempotencyKey: mutation.idempotencyKey, status: "applied", id: record.id });
+          await auditConflictResolution(mutation.conflict, mutation.table, record.id, auth.userId, ipHash);
         } else {
           // Soft delete — use updateMany to avoid P2025 if record doesn't exist
           await prisma.expense.updateMany({
@@ -249,6 +287,7 @@ export async function POST(req: NextRequest) {
             });
           }
           results.push({ idempotencyKey: mutation.idempotencyKey, status: "applied", id: record.id });
+          await auditConflictResolution(mutation.conflict, mutation.table, record.id, auth.userId, ipHash);
         } else {
           await prisma.businessLedger.updateMany({
             where: { id: mutation.id!, workspaceId },
@@ -325,6 +364,7 @@ export async function POST(req: NextRequest) {
             });
           }
           results.push({ idempotencyKey: mutation.idempotencyKey, status: "applied", id: record.id });
+          await auditConflictResolution(mutation.conflict, mutation.table, record.id, auth.userId, ipHash);
         } else {
           await prisma.businessPayment.updateMany({
             where: { id: mutation.id!, workspaceId },

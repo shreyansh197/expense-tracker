@@ -1,4 +1,5 @@
 import type { Expense, CategoryId, CategoryMeta } from "@/types";
+import { addMoney, subMoney } from "@/lib/money";
 
 interface FilterOptions {
   activeCategories: CategoryId[];
@@ -61,7 +62,7 @@ export function groupByDay(
 ): DayGroup[] {
   if (sortBy === "amount-desc" || sortBy === "amount-asc") {
     const sorted = [...filtered].sort((a, b) =>
-      sortBy === "amount-desc" ? b.amount - a.amount : a.amount - b.amount
+      sortBy === "amount-desc" ? subMoney(b.amount, a.amount) : subMoney(a.amount, b.amount)
     );
     const map = new Map<number, Expense[]>();
     for (const e of sorted) {
@@ -73,7 +74,7 @@ export function groupByDay(
     for (const [day, exps] of map) {
       groups.push({
         day,
-        total: exps.reduce((s, e) => s + e.amount, 0),
+        total: exps.reduce((s, e) => addMoney(s, e.amount), 0),
         expenses: exps,
       });
     }
@@ -93,8 +94,8 @@ export function groupByDay(
   for (const [day, exps] of map) {
     groups.push({
       day,
-      total: exps.reduce((s, e) => s + e.amount, 0),
-      expenses: exps.sort((a, b) => b.amount - a.amount),
+      total: exps.reduce((s, e) => addMoney(s, e.amount), 0),
+      expenses: exps.sort((a, b) => subMoney(b.amount, a.amount)),
     });
   }
 
@@ -124,15 +125,15 @@ export function groupByFullDate(
     const [year, month, day] = key.split("-").map(Number);
     const sorted =
       sortBy === "amount-desc"
-        ? [...exps].sort((a, b) => b.amount - a.amount)
+        ? [...exps].sort((a, b) => subMoney(b.amount, a.amount))
         : sortBy === "amount-asc"
-        ? [...exps].sort((a, b) => a.amount - b.amount)
-        : [...exps].sort((a, b) => b.amount - a.amount);
+        ? [...exps].sort((a, b) => subMoney(a.amount, b.amount))
+        : [...exps].sort((a, b) => subMoney(b.amount, a.amount));
     groups.push({
       day,
       month,
       year,
-      total: exps.reduce((s, e) => s + e.amount, 0),
+      total: exps.reduce((s, e) => addMoney(s, e.amount), 0),
       expenses: sorted,
     });
   }
@@ -183,18 +184,18 @@ export function groupByCategory(
     const meta = categoryMap.get(cat);
     const sortedExps =
       sortBy === "amount-desc"
-        ? [...exps].sort((a, b) => b.amount - a.amount)
+        ? [...exps].sort((a, b) => subMoney(b.amount, a.amount))
         : sortBy === "amount-asc"
-        ? [...exps].sort((a, b) => a.amount - b.amount)
+        ? [...exps].sort((a, b) => subMoney(a.amount, b.amount))
         : sortBy === "day-asc"
-        ? [...exps].sort((a, b) => a.day !== b.day ? a.day - b.day : b.amount - a.amount)
-        : [...exps].sort((a, b) => a.day !== b.day ? b.day - a.day : b.amount - a.amount);
+        ? [...exps].sort((a, b) => a.day !== b.day ? a.day - b.day : subMoney(b.amount, a.amount))
+        : [...exps].sort((a, b) => a.day !== b.day ? b.day - a.day : subMoney(b.amount, a.amount));
     groups.push({
       category: cat,
       label: meta?.label ?? cat,
       color: meta?.color ?? "var(--accent)",
       bgColor: meta?.bgColor ?? "var(--surface-secondary)",
-      total: exps.reduce((s, e) => s + e.amount, 0),
+      total: exps.reduce((s, e) => addMoney(s, e.amount), 0),
       expenses: sortedExps,
     });
   }

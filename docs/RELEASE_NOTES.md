@@ -28,6 +28,18 @@ _No user-visible changes shipped in this section yet._
 
 ---
 
+## Sprint 2.3 — Money conflicts, resolved by you (in progress)
+
+When you edit the same amount on two devices while offline, ExpenStream will no longer quietly pick a winner. Instead, the next time your devices sync, a calm review sheet shows both values side by side — the one on this device and the one from the other device — and lets you choose which to keep. Nothing changes until you decide.
+
+**What this means for you:**
+
+- **No silent overwrites of money.** A conflicting amount is always surfaced for you to resolve, never guessed.
+- **Clear, one-handed choices.** Keep this device's value or the other device's value — fully keyboard-accessible and respectful of reduced-motion settings.
+- **Rock-solid math everywhere.** Totals, charts, forecasts, and exports now compute amounts with exact currency precision, so figures always add up to the last paisa.
+
+---
+
 ## Sprint 1 — Documentation Truth (2026-07-23) · _internal-only_
 
 Sprint 1 is an internal quality release. Nothing changed in the app itself. We refreshed every document under [`docs/`](.) so contributors and AI assistants can onboard without asking clarifying questions.

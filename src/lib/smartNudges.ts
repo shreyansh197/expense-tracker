@@ -1,5 +1,6 @@
 import type { Expense } from "@/types";
 import { getDayOfWeekFactors } from "@/lib/calculations";
+import { addMoney } from "@/lib/money";
 
 // ── Smart Nudge Types ──
 
@@ -75,7 +76,7 @@ export function getWeekendForecastNudge(
   const active = allExpenses.filter((e) => !e.deletedAt);
   if (active.length < 10) return null;
 
-  const avgDaily = active.reduce((s, e) => s + e.amount, 0) / Math.max(new Set(active.map((e) => `${e.year}-${e.month}-${e.day}`)).size, 1);
+  const avgDaily = active.reduce((s, e) => addMoney(s, e.amount), 0) / Math.max(new Set(active.map((e) => `${e.year}-${e.month}-${e.day}`)).size, 1);
   const predictedWeekend = Math.round(avgDaily * weekendFactor * 2); // Sat + Sun
 
   return {

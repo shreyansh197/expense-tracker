@@ -1,4 +1,5 @@
 import type { Expense, CategoryId } from "@/types";
+import { addMoney, subMoney } from "@/lib/money";
 
 export interface RecurringSuggestion {
   /** Stable key for dedup: `${category}|${roundedAmount}` */
@@ -67,7 +68,7 @@ export function detectRecurringPatterns(
       const consecutive = findConsecutiveMonthlyEntries(cluster);
       if (consecutive.length < 2) continue;
 
-      const avgAmount = Math.round(consecutive.reduce((s, e) => s + e.amount, 0) / consecutive.length);
+      const avgAmount = Math.round(consecutive.reduce((s, e) => addMoney(s, e.amount), 0) / consecutive.length);
       const avgDay = Math.round(consecutive.reduce((s, e) => s + e.day, 0) / consecutive.length);
       const key = `${category}|${avgAmount}`;
 
@@ -107,7 +108,7 @@ function clusterByAmount(sorted: Expense[]): Expense[][] {
 
     for (let j = i + 1; j < sorted.length; j++) {
       if (used.has(j)) continue;
-      if (Math.abs(sorted[j].amount - anchor) / anchor <= AMOUNT_TOLERANCE) {
+      if (Math.abs(subMoney(sorted[j].amount, anchor)) / anchor <= AMOUNT_TOLERANCE) {
         cluster.push(sorted[j]);
         used.add(j);
       }
