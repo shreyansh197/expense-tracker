@@ -1,7 +1,18 @@
 "use client";
 
 import { useCallback, useEffect, useState, useTransition } from "react";
-import { Activity, ArrowUpCircle, ArrowDownCircle, AlertTriangle, RotateCcw, WifiOff, ShieldAlert, Inbox, RefreshCw, Trash2 } from "lucide-react";
+import {
+  Activity,
+  ArrowUpCircle,
+  ArrowDownCircle,
+  AlertTriangle,
+  RotateCcw,
+  WifiOff,
+  ShieldAlert,
+  Inbox,
+  RefreshCw,
+  Trash2,
+} from "lucide-react";
 import { useSyncCounters } from "@/hooks/useSyncStatus";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import {
@@ -41,23 +52,36 @@ interface StatRowProps {
   testid?: string;
 }
 
-function StatRow({ icon, label, value, emphasis = "default", testid }: StatRowProps) {
+function StatRow({
+  icon,
+  label,
+  value,
+  emphasis = "default",
+  testid,
+}: StatRowProps) {
   const valueColor =
     emphasis === "danger"
       ? "var(--danger-text)"
       : emphasis === "warn"
-      ? "var(--warning-text)"
-      : "var(--text-primary)";
+        ? "var(--warning-text)"
+        : "var(--text-primary)";
   return (
     <div
       className="flex items-center justify-between gap-3 py-2"
       data-testid={testid}
     >
       <div className="flex items-center gap-2 min-w-0">
-        <span className="shrink-0" style={{ color: "var(--text-tertiary)" }} aria-hidden="true">
+        <span
+          className="shrink-0"
+          style={{ color: "var(--text-tertiary)" }}
+          aria-hidden="true"
+        >
           {icon}
         </span>
-        <span className="text-xs font-medium truncate" style={{ color: "var(--text-secondary)" }}>
+        <span
+          className="text-xs font-medium truncate"
+          style={{ color: "var(--text-secondary)" }}
+        >
           {label}
         </span>
       </div>
@@ -114,7 +138,10 @@ export function SyncDiagnosticsCard() {
   const handleRetry = (localId: number) => {
     retryDeadLetter(localId)
       .then((ok) => {
-        toast(ok ? "Retrying stuck change" : "Change no longer in queue", ok ? "success" : "info");
+        toast(
+          ok ? "Retrying stuck change" : "Change no longer in queue",
+          ok ? "success" : "info",
+        );
         refreshDeadLetter();
       })
       .catch(() => toast("Could not retry", "error"));
@@ -158,16 +185,15 @@ export function SyncDiagnosticsCard() {
   // empty   → no pending mutations and no recorded activity (session just started)
   // success → active session with at least one pull or push
   const hasActivity = counters.pullBatches > 0 || counters.pushBatches > 0;
-  const state: "offline" | "error" | "loading" | "empty" | "success" =
-    !isOnline
-      ? "offline"
-      : counters.lastError && !hasActivity
+  const state: "offline" | "error" | "loading" | "empty" | "success" = !isOnline
+    ? "offline"
+    : counters.lastError && !hasActivity
       ? "error"
       : !hasActivity && pendingCount === 0
-      ? "empty"
-      : !hasActivity
-      ? "loading"
-      : "success";
+        ? "empty"
+        : !hasActivity
+          ? "loading"
+          : "success";
 
   return (
     <div
@@ -180,20 +206,32 @@ export function SyncDiagnosticsCard() {
       {state === "offline" && (
         <div
           className="flex items-start gap-2 rounded-lg px-3 py-2 text-xs"
-          style={{ background: "var(--warning-soft)", color: "var(--warning-text)" }}
+          style={{
+            background: "var(--warning-soft)",
+            color: "var(--warning-text)",
+          }}
           role="status"
         >
           <WifiOff size={14} aria-hidden="true" className="mt-0.5 shrink-0" />
-          <span>Offline. Sync will resume automatically once you reconnect.</span>
+          <span>
+            Offline. Sync will resume automatically once you reconnect.
+          </span>
         </div>
       )}
       {state === "error" && (
         <div
           className="flex items-start gap-2 rounded-lg px-3 py-2 text-xs"
-          style={{ background: "var(--danger-soft)", color: "var(--danger-text)" }}
+          style={{
+            background: "var(--danger-soft)",
+            color: "var(--danger-text)",
+          }}
           role="status"
         >
-          <ShieldAlert size={14} aria-hidden="true" className="mt-0.5 shrink-0" />
+          <ShieldAlert
+            size={14}
+            aria-hidden="true"
+            className="mt-0.5 shrink-0"
+          />
           <span>Sync reported an error. See last error below.</span>
         </div>
       )}
@@ -203,14 +241,21 @@ export function SyncDiagnosticsCard() {
           style={{ background: "var(--info-soft)", color: "var(--info-text)" }}
           role="status"
         >
-          <Activity size={14} aria-hidden="true" className="mt-0.5 shrink-0 animate-pulse" />
+          <Activity
+            size={14}
+            aria-hidden="true"
+            className="mt-0.5 shrink-0 animate-pulse"
+          />
           <span>Waiting for the first sync of this session…</span>
         </div>
       )}
       {state === "empty" && (
         <div
           className="flex items-start gap-2 rounded-lg px-3 py-2 text-xs"
-          style={{ background: "var(--surface-secondary)", color: "var(--text-secondary)" }}
+          style={{
+            background: "var(--surface-secondary)",
+            color: "var(--text-secondary)",
+          }}
           role="status"
         >
           <Inbox size={14} aria-hidden="true" className="mt-0.5 shrink-0" />
@@ -220,7 +265,10 @@ export function SyncDiagnosticsCard() {
       {state === "success" && (
         <div
           className="flex items-start gap-2 rounded-lg px-3 py-2 text-xs"
-          style={{ background: "var(--success-soft)", color: "var(--success-text)" }}
+          style={{
+            background: "var(--success-soft)",
+            color: "var(--success-text)",
+          }}
           role="status"
         >
           <Activity size={14} aria-hidden="true" className="mt-0.5 shrink-0" />
@@ -231,7 +279,10 @@ export function SyncDiagnosticsCard() {
       {/* Counter grid — no monetary values, no PII */}
       <div
         className="rounded-lg divide-y px-3"
-        style={{ background: "var(--surface-secondary)", borderColor: "var(--border)" }}
+        style={{
+          background: "var(--surface-secondary)",
+          borderColor: "var(--border)",
+        }}
       >
         <StatRow
           icon={<Inbox size={14} />}
@@ -283,9 +334,14 @@ export function SyncDiagnosticsCard() {
       {counters.lastError && (
         <div
           className="rounded-lg px-3 py-2 text-xs"
-          style={{ background: "var(--danger-soft)", color: "var(--danger-text)" }}
+          style={{
+            background: "var(--danger-soft)",
+            color: "var(--danger-text)",
+          }}
         >
-          <p className="font-semibold uppercase tracking-wide text-[10px] mb-1">Last error</p>
+          <p className="font-semibold uppercase tracking-wide text-[10px] mb-1">
+            Last error
+          </p>
           <p className="font-mono break-all">{counters.lastError}</p>
         </div>
       )}
@@ -293,7 +349,10 @@ export function SyncDiagnosticsCard() {
       {deadLetter.length > 0 && (
         <div
           className="rounded-lg px-3 py-2 space-y-2"
-          style={{ background: "var(--danger-soft)", color: "var(--danger-text)" }}
+          style={{
+            background: "var(--danger-soft)",
+            color: "var(--danger-text)",
+          }}
           role="region"
           aria-label={`${deadLetter.length} stuck changes needing attention`}
           data-testid="sync-diag-dead-letter"
@@ -304,12 +363,17 @@ export function SyncDiagnosticsCard() {
               Stuck changes
               <span
                 className="ml-1 rounded-full px-1.5 py-0.5 text-[10px] font-bold"
-                style={{ background: "var(--danger-text)", color: "var(--danger-soft)" }}
+                style={{
+                  background: "var(--danger-text)",
+                  color: "var(--danger-soft)",
+                }}
               >
                 {deadLetter.length}
               </span>
             </p>
-            <p className="text-[10px] opacity-80">Exceeded {MAX_MUTATION_ATTEMPTS} retry attempts</p>
+            <p className="text-[10px] opacity-80">
+              Exceeded {MAX_MUTATION_ATTEMPTS} retry attempts
+            </p>
           </div>
           <ul className="space-y-1.5" role="list">
             {deadLetter.map((m) => (
@@ -319,11 +383,18 @@ export function SyncDiagnosticsCard() {
                 style={{ background: "var(--surface)" }}
               >
                 <div className="min-w-0 flex-1">
-                  <p className="text-xs font-medium truncate" style={{ color: "var(--text-primary)" }}>
+                  <p
+                    className="text-xs font-medium truncate"
+                    style={{ color: "var(--text-primary)" }}
+                  >
                     {m.table}:{m.operation}
                   </p>
-                  <p className="text-[10px] font-mono truncate" style={{ color: "var(--text-tertiary)" }}>
-                    {m.lastError ?? "unknown error"} · {m.attempts ?? 0} attempts
+                  <p
+                    className="text-[10px] font-mono truncate"
+                    style={{ color: "var(--text-tertiary)" }}
+                  >
+                    {m.lastError ?? "unknown error"} · {m.attempts ?? 0}{" "}
+                    attempts
                   </p>
                 </div>
                 <div className="flex items-center gap-1 shrink-0">
@@ -332,7 +403,10 @@ export function SyncDiagnosticsCard() {
                     onClick={() => m.localId && handleRetry(m.localId)}
                     aria-label={`Retry ${m.table} ${m.operation}`}
                     className="inline-flex items-center justify-center gap-1 rounded-md px-2 min-h-[44px] text-[11px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]"
-                    style={{ background: "var(--surface-secondary)", color: "var(--text-primary)" }}
+                    style={{
+                      background: "var(--surface-secondary)",
+                      color: "var(--text-primary)",
+                    }}
                     data-testid={`sync-diag-dl-retry-${m.localId}`}
                   >
                     <RefreshCw size={12} aria-hidden="true" />
@@ -343,7 +417,10 @@ export function SyncDiagnosticsCard() {
                     onClick={() => m.localId && handleDiscard(m.localId)}
                     aria-label={`Discard ${m.table} ${m.operation}`}
                     className="inline-flex items-center justify-center gap-1 rounded-md px-2 min-h-[44px] text-[11px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]"
-                    style={{ background: "var(--danger-text)", color: "var(--danger-soft)" }}
+                    style={{
+                      background: "var(--danger-text)",
+                      color: "var(--danger-soft)",
+                    }}
                     data-testid={`sync-diag-dl-discard-${m.localId}`}
                   >
                     <Trash2 size={12} aria-hidden="true" />
@@ -366,9 +443,18 @@ export function SyncDiagnosticsCard() {
           disabled={isPending}
           aria-label="Reset sync diagnostics counters"
           className="inline-flex items-center justify-center gap-1.5 rounded-lg px-3 min-h-[44px] min-w-[44px] text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--surface)] disabled:opacity-60"
-          style={{ background: "var(--surface)", color: "var(--text-primary)", borderColor: "var(--border)", borderWidth: 1 }}
+          style={{
+            background: "var(--surface)",
+            color: "var(--text-primary)",
+            borderColor: "var(--border)",
+            borderWidth: 1,
+          }}
         >
-          <RotateCcw size={14} aria-hidden="true" className={isPending ? "animate-spin" : ""} />
+          <RotateCcw
+            size={14}
+            aria-hidden="true"
+            className={isPending ? "animate-spin" : ""}
+          />
           Reset counters
         </button>
       </div>

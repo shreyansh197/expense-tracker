@@ -22,7 +22,8 @@
 // ── Mocks (must load BEFORE importing the sync engine) ────────────────────
 
 const mockAuthFetch = jest.fn<Promise<Response>, [string, RequestInit?]>();
-let mockWorkspaceId: string | null = "ws-a-00000000-0000-0000-0000-000000000000";
+let mockWorkspaceId: string | null =
+  "ws-a-00000000-0000-0000-0000-000000000000";
 let mockIsAuthenticated = true;
 
 jest.mock("@/lib/authClient", () => ({
@@ -34,7 +35,10 @@ jest.mock("@/lib/authClient", () => ({
 
 jest.mock("@/lib/supabase", () => ({
   supabase: {
-    channel: () => ({ on: () => ({ subscribe: () => {} }), unsubscribe: () => {} }),
+    channel: () => ({
+      on: () => ({ subscribe: () => {} }),
+      unsubscribe: () => {},
+    }),
     removeChannel: () => {},
   },
 }));
@@ -87,7 +91,14 @@ function makeMutation() {
     table: "expenses" as const,
     operation: "upsert" as const,
     id: crypto.randomUUID(),
-    data: { amount: 42, category: "groceries", day: 1, month: 1, year: 2025, isRecurring: false },
+    data: {
+      amount: 42,
+      category: "groceries",
+      day: 1,
+      month: 1,
+      year: 2025,
+      isRecurring: false,
+    },
     idempotencyKey: makeIdempotencyKey(),
   };
 }
@@ -119,9 +130,14 @@ describe("persistent mutation queue", () => {
     // instance, mirroring how the browser retains the underlying store after
     // JS globals reset. Fetching via a fresh query proves the rows are
     // durable rather than held in an in-memory buffer.
-    const survivors = await db.mutations.where("workspaceId").equals(WORKSPACE_A).toArray();
+    const survivors = await db.mutations
+      .where("workspaceId")
+      .equals(WORKSPACE_A)
+      .toArray();
     expect(survivors).toHaveLength(2);
-    expect(survivors.every(m => m.attempts === 0 && m.nextRetryAt === 0)).toBe(true);
+    expect(
+      survivors.every((m) => m.attempts === 0 && m.nextRetryAt === 0),
+    ).toBe(true);
   });
 });
 
@@ -137,7 +153,10 @@ describe("failed push updates retry metadata", () => {
     await pushMutations(WORKSPACE_A);
     const after = Date.now();
 
-    const rows = await db.mutations.where("workspaceId").equals(WORKSPACE_A).toArray();
+    const rows = await db.mutations
+      .where("workspaceId")
+      .equals(WORKSPACE_A)
+      .toArray();
     expect(rows).toHaveLength(1);
     const row = rows[0];
     expect(row.attempts).toBe(1);
@@ -168,7 +187,9 @@ describe("failed push updates retry metadata", () => {
 
     await pushMutations(WORKSPACE_A);
 
-    const row = (await db.mutations.where("workspaceId").equals(WORKSPACE_A).toArray())[0];
+    const row = (
+      await db.mutations.where("workspaceId").equals(WORKSPACE_A).toArray()
+    )[0];
     expect(row.attempts).toBe(1);
     expect(row.nextRetryAt).toBeGreaterThan(Date.now());
     expect(row.lastError).toBe("TypeError");
@@ -210,8 +231,14 @@ describe("workspace isolation across re-auth", () => {
     mockWorkspaceId = WORKSPACE_B;
     await enqueueMutation(makeMutation(), WORKSPACE_B);
 
-    const a = await db.mutations.where("workspaceId").equals(WORKSPACE_A).toArray();
-    const b = await db.mutations.where("workspaceId").equals(WORKSPACE_B).toArray();
+    const a = await db.mutations
+      .where("workspaceId")
+      .equals(WORKSPACE_A)
+      .toArray();
+    const b = await db.mutations
+      .where("workspaceId")
+      .equals(WORKSPACE_B)
+      .toArray();
     expect(a).toHaveLength(2);
     expect(b).toHaveLength(1);
   });
@@ -220,7 +247,9 @@ describe("workspace isolation across re-auth", () => {
     await enqueueMutation(makeMutation(), WORKSPACE_A);
     await enqueueMutation(makeMutation(), WORKSPACE_B);
 
-    mockAuthFetch.mockResolvedValue(jsonResponse({ results: [{ status: "applied" }] }));
+    mockAuthFetch.mockResolvedValue(
+      jsonResponse({ results: [{ status: "applied" }] }),
+    );
 
     await pushMutations(WORKSPACE_A);
 
@@ -231,7 +260,10 @@ describe("workspace isolation across re-auth", () => {
     expect(body.mutations).toHaveLength(1);
 
     // Workspace B's mutation is untouched.
-    const b = await db.mutations.where("workspaceId").equals(WORKSPACE_B).toArray();
+    const b = await db.mutations
+      .where("workspaceId")
+      .equals(WORKSPACE_B)
+      .toArray();
     expect(b).toHaveLength(1);
   });
 });
@@ -280,7 +312,9 @@ describe("dead-letter queue lifecycle", () => {
     expect(mockAuthFetch).not.toHaveBeenCalled();
 
     // User clicks Retry — attempts reset, and drain (mocked) fires trySyncPush.
-    mockAuthFetch.mockResolvedValue(jsonResponse({ results: [{ status: "applied" }] }));
+    mockAuthFetch.mockResolvedValue(
+      jsonResponse({ results: [{ status: "applied" }] }),
+    );
     const ok = await retryDeadLetter(row.localId!);
     expect(ok).toBe(true);
 
@@ -299,7 +333,9 @@ describe("dead-letter queue lifecycle", () => {
     });
 
     // Silence the trySyncPush the restore path fires automatically.
-    mockAuthFetch.mockResolvedValue(jsonResponse({ results: [{ status: "applied" }] }));
+    mockAuthFetch.mockResolvedValue(
+      jsonResponse({ results: [{ status: "applied" }] }),
+    );
 
     const discarded = await discardDeadLetter(row.localId!);
     expect(discarded).not.toBeNull();
@@ -307,7 +343,10 @@ describe("dead-letter queue lifecycle", () => {
 
     await restoreDiscardedMutation(discarded!);
 
-    const restored = await db.mutations.where("workspaceId").equals(WORKSPACE_A).toArray();
+    const restored = await db.mutations
+      .where("workspaceId")
+      .equals(WORKSPACE_A)
+      .toArray();
     expect(restored).toHaveLength(1);
     expect(restored[0].attempts).toBe(0);
     expect(restored[0].idempotencyKey).toBe(discarded!.idempotencyKey);

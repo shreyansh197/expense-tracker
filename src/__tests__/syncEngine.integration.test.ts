@@ -69,7 +69,17 @@ function makeJsonResponse(body: unknown, status = 200): Response {
   });
 }
 
-function makeMutation(overrides: Partial<IDBMutation> = {}): Omit<IDBMutation, "localId" | "createdAt" | "workspaceId" | "attempts" | "nextRetryAt" | "lastError"> {
+function makeMutation(
+  overrides: Partial<IDBMutation> = {},
+): Omit<
+  IDBMutation,
+  | "localId"
+  | "createdAt"
+  | "workspaceId"
+  | "attempts"
+  | "nextRetryAt"
+  | "lastError"
+> {
   return {
     table: "expenses",
     operation: "upsert",
@@ -131,7 +141,7 @@ describe("pushMutations", () => {
     mockAuthFetch.mockResolvedValue(
       makeJsonResponse({
         results: Array(100).fill({ status: "applied" }),
-      })
+      }),
     );
 
     // First call: should send 2 batches (100 + 50)
@@ -142,11 +152,15 @@ describe("pushMutations", () => {
     expect(mockAuthFetch).toHaveBeenCalledTimes(2);
 
     // Verify first batch had 100 mutations
-    const firstCallBody = JSON.parse(mockAuthFetch.mock.calls[0][1]?.body as string);
+    const firstCallBody = JSON.parse(
+      mockAuthFetch.mock.calls[0][1]?.body as string,
+    );
     expect(firstCallBody.mutations).toHaveLength(100);
 
     // Verify second batch had 50 mutations
-    const secondCallBody = JSON.parse(mockAuthFetch.mock.calls[1][1]?.body as string);
+    const secondCallBody = JSON.parse(
+      mockAuthFetch.mock.calls[1][1]?.body as string,
+    );
     expect(secondCallBody.mutations).toHaveLength(50);
   });
 
@@ -157,7 +171,7 @@ describe("pushMutations", () => {
     mockAuthFetch.mockResolvedValue(
       makeJsonResponse({
         results: [{ status: "applied" }, { status: "applied" }],
-      })
+      }),
     );
 
     await pushMutations("ws-test-001");
@@ -170,7 +184,9 @@ describe("pushMutations", () => {
     await enqueueMutation(makeMutation(), "ws-test-001");
 
     let resolveFirst: (v: Response) => void;
-    const firstPromise = new Promise<Response>((r) => { resolveFirst = r; });
+    const firstPromise = new Promise<Response>((r) => {
+      resolveFirst = r;
+    });
     mockAuthFetch.mockReturnValueOnce(firstPromise);
 
     // Start first push (hangs on fetch)
@@ -193,7 +209,9 @@ describe("pushMutations", () => {
     const deniedHandler = jest.fn();
     const unsub = onWorkspaceAccessDenied(deniedHandler);
 
-    mockAuthFetch.mockResolvedValue(makeJsonResponse({ error: "Forbidden" }, 403));
+    mockAuthFetch.mockResolvedValue(
+      makeJsonResponse({ error: "Forbidden" }, 403),
+    );
 
     await pushMutations("ws-test-001");
 
@@ -233,7 +251,7 @@ describe("pushMutations", () => {
     await enqueueMutation(makeMutation(), "ws-test-001");
 
     mockAuthFetch.mockResolvedValue(
-      makeJsonResponse({ results: [{ status: "applied" }] })
+      makeJsonResponse({ results: [{ status: "applied" }] }),
     );
 
     await pushMutations("ws-test-001");
@@ -272,7 +290,7 @@ describe("pullChanges", () => {
         },
         cursor: "cursor-001",
         hasMore: false,
-      })
+      }),
     );
 
     const success = await pullChanges("ws-test-001");
@@ -288,7 +306,9 @@ describe("pullChanges", () => {
     const deniedHandler = jest.fn();
     const unsub = onWorkspaceAccessDenied(deniedHandler);
 
-    mockAuthFetch.mockResolvedValue(makeJsonResponse({ error: "Forbidden" }, 403));
+    mockAuthFetch.mockResolvedValue(
+      makeJsonResponse({ error: "Forbidden" }, 403),
+    );
 
     const success = await pullChanges("ws-test-001");
     expect(success).toBe(false);
@@ -311,7 +331,9 @@ describe("pullChanges", () => {
       workspaceId: "ws-test-001",
       category: "transport",
       amount: 50,
-      day: 1, month: 6, year: 2025,
+      day: 1,
+      month: 6,
+      year: 2025,
       isRecurring: false,
       createdAt: Date.now(),
       updatedAt: Date.now(),
@@ -322,7 +344,9 @@ describe("pullChanges", () => {
       workspaceId: "ws-test-001",
       category: "groceries",
       amount: 100,
-      day: 2, month: 6, year: 2025,
+      day: 2,
+      month: 6,
+      year: 2025,
       isRecurring: false,
       createdAt: Date.now(),
       updatedAt: Date.now(),
@@ -341,7 +365,7 @@ describe("pullChanges", () => {
           },
           cursor: "cursor-page1",
           hasMore: true,
-        })
+        }),
       )
       // Second page: hasMore=false
       .mockResolvedValueOnce(
@@ -354,7 +378,7 @@ describe("pullChanges", () => {
           },
           cursor: "cursor-page2",
           hasMore: false,
-        })
+        }),
       );
 
     const success = await pullChanges("ws-test-001");

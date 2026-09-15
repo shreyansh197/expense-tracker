@@ -124,22 +124,40 @@ beforeEach(() => {
 
   // Simulated ledger of already-processed idempotency keys, keyed by the
   // string the route substitutes into $queryRawUnsafe.
-  const processed: Array<{ idempotency_key: string; entity_id: string | null }> = [];
+  const processed: Array<{
+    idempotency_key: string;
+    entity_id: string | null;
+  }> = [];
 
-  mockPrisma.$queryRawUnsafe.mockImplementation(async (_sql: string, _wsId: string, keys: string[]) => {
-    return processed.filter((r) => keys.includes(r.idempotency_key));
-  });
+  mockPrisma.$queryRawUnsafe.mockImplementation(
+    async (_sql: string, _wsId: string, keys: string[]) => {
+      return processed.filter((r) => keys.includes(r.idempotency_key));
+    },
+  );
 
-  mockPrisma.$executeRawUnsafe.mockImplementation(async (sql: string, _wsId: string, keys: string[], entityIds: (string | null)[]) => {
-    if (typeof sql === "string" && sql.includes("INSERT INTO processed_idempotency_keys")) {
-      keys.forEach((k, i) => {
-        if (!processed.some((r) => r.idempotency_key === k)) {
-          processed.push({ idempotency_key: k, entity_id: entityIds[i] ?? null });
-        }
-      });
-    }
-    return 0;
-  });
+  mockPrisma.$executeRawUnsafe.mockImplementation(
+    async (
+      sql: string,
+      _wsId: string,
+      keys: string[],
+      entityIds: (string | null)[],
+    ) => {
+      if (
+        typeof sql === "string" &&
+        sql.includes("INSERT INTO processed_idempotency_keys")
+      ) {
+        keys.forEach((k, i) => {
+          if (!processed.some((r) => r.idempotency_key === k)) {
+            processed.push({
+              idempotency_key: k,
+              entity_id: entityIds[i] ?? null,
+            });
+          }
+        });
+      }
+      return 0;
+    },
+  );
 
   mockPrisma.expense.findUnique.mockResolvedValue(null);
   mockPrisma.expense.upsert.mockResolvedValue({ id: EXPENSE_ID });
@@ -187,22 +205,32 @@ describe("POST /api/sync/commit — idempotency dedup", () => {
     const newKey = "idem-key-2024-def";
     mockPrisma.expense.upsert.mockResolvedValueOnce({ id: newId });
 
-    const res = await POST(makeRequest({
-      workspaceId: WORKSPACE,
-      mutations: [
-        commitBody().mutations[0],
-        {
-          ...commitBody().mutations[0],
-          id: newId,
-          idempotencyKey: newKey,
-        },
-      ],
-    }));
+    const res = await POST(
+      makeRequest({
+        workspaceId: WORKSPACE,
+        mutations: [
+          commitBody().mutations[0],
+          {
+            ...commitBody().mutations[0],
+            id: newId,
+            idempotencyKey: newKey,
+          },
+        ],
+      }),
+    );
 
     const body = await res.json();
     expect(mockPrisma.expense.upsert).toHaveBeenCalledTimes(1);
     expect(body.results).toHaveLength(2);
-    expect(body.results[0]).toEqual({ idempotencyKey: KEY, status: "applied", id: EXPENSE_ID });
-    expect(body.results[1]).toEqual({ idempotencyKey: newKey, status: "applied", id: newId });
+    expect(body.results[0]).toEqual({
+      idempotencyKey: KEY,
+      status: "applied",
+      id: EXPENSE_ID,
+    });
+    expect(body.results[1]).toEqual({
+      idempotencyKey: newKey,
+      status: "applied",
+      id: newId,
+    });
   });
 });
