@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import webpush from "web-push";
 import { prisma } from "@/lib/server/prisma";
+import { rateLimit } from "@/lib/server/rateLimit";
+import { dispatchDueDeliveries, enqueueDeliveries, type EnqueueItem } from "@/lib/server/pushDispatcher";
 
 /**
  * POST /api/push/send
@@ -43,6 +45,17 @@ export async function POST(req: NextRequest) {
   const secret = bearer || req.headers.get("x-cron-secret") || req.nextUrl.searchParams.get("secret");
   if (!secret || secret !== process.env.CRON_SECRET) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  // ── Rate limit ────────────────────────────────────────────────
+  // The scheduler ticks once per minute; allow a small burst for manual
+  // re-runs / redeploys but block abusive floods of the secret-gated endpoint.
+  const limited = await rateLimit("cron:push-send", 10, 60_000);
+  if (!limited.ok) {
+    return NextResponse.json(
+      { error: "Rate limit exceeded" },
+      { status: 429, headers: { "Retry-After": String(limited.retryAfter) } },
+    );
   }
 
   // ── Timestamp replay-attack prevention ───────────────────────
@@ -162,9 +175,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "DB query failed" }, { status: 500 });
   }
 
-  if (workspaceRows.length === 0) {
-    return NextResponse.json({ sent: 0, time: utcTime });
-  }
+  // Note: we do not early-return on an empty workspace set — the scheduler must
+  // still dispatch any due retries persisted by earlier ticks (see dispatch step).
 
   // ── Decide which notifications to send per workspace ──────────
   // { workspaceId → payload[] }
@@ -318,65 +330,42 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  if (notifMap.size === 0) {
-    return NextResponse.json({ sent: 0, time: utcTime });
-  }
-
-  // ── Fetch push subscriptions for all involved workspaces ──────
+  // ── Enqueue newly-due notifications as delivery rows ──────────
+  // Each (subscription × payload) becomes a `push_deliveries` row so it gains
+  // an observable lifecycle and survives transient push-service outages.
   const involvedIds = [...notifMap.keys()];
-  const subscriptions = await prisma.pushSubscription.findMany({
-    where: { workspaceId: { in: involvedIds } },
-  });
+  let enqueued = 0;
 
-  if (subscriptions.length === 0) {
-    return NextResponse.json({ sent: 0, time: utcTime, workspaces: involvedIds.length });
-  }
+  if (involvedIds.length > 0) {
+    const subscriptions = await prisma.pushSubscription.findMany({
+      where: { workspaceId: { in: involvedIds } },
+    });
 
-  const subsByWorkspace = new Map<string, typeof subscriptions>();
-  for (const sub of subscriptions) {
-    if (!subsByWorkspace.has(sub.workspaceId)) subsByWorkspace.set(sub.workspaceId, []);
-    subsByWorkspace.get(sub.workspaceId)!.push(sub);
-  }
+    const subsByWorkspace = new Map<string, typeof subscriptions>();
+    for (const sub of subscriptions) {
+      if (!subsByWorkspace.has(sub.workspaceId)) subsByWorkspace.set(sub.workspaceId, []);
+      subsByWorkspace.get(sub.workspaceId)!.push(sub);
+    }
 
-  // ── Send notifications ────────────────────────────────────────
-  let sent = 0;
-  let failed = 0;
-  const staleEndpoints: string[] = [];
-
-  await Promise.allSettled(
-    [...notifMap.entries()].flatMap(([workspaceId, payloads]) => {
+    const items: EnqueueItem[] = [];
+    for (const [workspaceId, payloads] of notifMap.entries()) {
       const subs = subsByWorkspace.get(workspaceId) ?? [];
-      return subs.flatMap(sub =>
-        payloads.map(async (payload) => {
-          try {
-            await webpush.sendNotification(
-              { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
-              payload,
-              { TTL: 3600 },
-            );
-            sent++;
-          } catch (err: unknown) {
-            failed++;
-            const statusCode = (err as { statusCode?: number })?.statusCode;
-            if (statusCode === 404 || statusCode === 410) {
-              staleEndpoints.push(sub.endpoint);
-            } else {
-              console.error(`[push/send] Failed for endpoint ${sub.endpoint.slice(0, 50)}…:`, err);
-            }
-          }
-        }),
-      );
-    }),
+      for (const sub of subs) {
+        for (const payload of payloads) {
+          items.push({ subscriptionId: sub.id, payload, scheduledFor: now });
+        }
+      }
+    }
+
+    enqueued = await enqueueDeliveries(items);
+  }
+
+  // ── Dispatch all due deliveries (fresh + retries from earlier ticks) ──
+  const { sent, failed, dead } = await dispatchDueDeliveries({ now });
+
+  console.log(
+    `[push/send] utc=${utcTime} enqueued=${enqueued} sent=${sent} failed=${failed} dead=${dead}`,
   );
 
-  // ── Clean up stale subscriptions ──────────────────────────────
-  if (staleEndpoints.length > 0) {
-    await prisma.pushSubscription.deleteMany({
-      where: { endpoint: { in: staleEndpoints } },
-    });
-  }
-
-  console.log(`[push/send] utc=${utcTime} sent=${sent} failed=${failed} stale=${staleEndpoints.length}`);
-
-  return NextResponse.json({ sent, failed, staleRemoved: staleEndpoints.length, time: utcTime });
+  return NextResponse.json({ sent, failed, dead, enqueued, time: utcTime });
 }

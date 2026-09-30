@@ -7,6 +7,7 @@
  */
 
 import { db, type IDBExchangeRate } from "@/lib/db";
+import { mulMoney } from "@/lib/money";
 
 interface RateCache {
   base: string;
@@ -156,7 +157,9 @@ export function convert(
   const fromRate = rates[from];
   const toRate = rates[to];
   if (!fromRate || !toRate) return amount; // unknown currency — return as-is
-  return Math.round((amount * toRate / fromRate) * 100) / 100;
+  // Decimal-safe: scale by the unitless ratio in integer minor units, rounding
+  // once to the nearest minor unit (identical to the previous float rounding).
+  return mulMoney(amount, toRate / fromRate);
 }
 
 /** Get info about the currently cached rates (for debugging / settings display) */

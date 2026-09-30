@@ -1,11 +1,14 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Bell, BellOff, Clock, TrendingUp, Target, Sparkles } from "lucide-react";
+import { Bell, BellOff, Clock, TrendingUp, Target, Sparkles, MoonStar } from "lucide-react";
 import { useSettings } from "@/hooks/useSettings";
 import { useToast } from "@/components/ui/Toast";
 import { subscribeToPush, unsubscribeFromPush } from "@/lib/pushSubscription";
 import type { NotificationPrefs } from "@/types";
+
+const DEFAULT_QUIET_HOURS_START = "22:00";
+const DEFAULT_QUIET_HOURS_END = "07:00";
 
 const DEFAULT_PREFS: NotificationPrefs = {
   enabled: false,
@@ -13,6 +16,7 @@ const DEFAULT_PREFS: NotificationPrefs = {
   eveningReminderTime: "21:00",
   weeklyDigest: false,
   budgetAlerts: true,
+  quietHoursEnabled: false,
 };
 
 function getPrefs(settingsNotifications?: Partial<NotificationPrefs>): NotificationPrefs {
@@ -68,6 +72,20 @@ export function NotificationSettings() {
       toast("Notifications disabled", "success");
     }
   }, [prefs.enabled, requestPermission, updatePrefs, toast]);
+
+  const handleToggleQuietHours = useCallback(() => {
+    const turningOn = !(prefs.quietHoursEnabled ?? false);
+    updatePrefs({
+      quietHoursEnabled: turningOn,
+      // Seed sensible defaults the first time the window is turned on so the
+      // toggle is immediately meaningful without extra taps.
+      ...(turningOn && !prefs.quietHoursStart ? { quietHoursStart: DEFAULT_QUIET_HOURS_START } : {}),
+      ...(turningOn && !prefs.quietHoursEnd ? { quietHoursEnd: DEFAULT_QUIET_HOURS_END } : {}),
+      ...(turningOn && !prefs.quietHoursTimezone
+        ? { quietHoursTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone }
+        : {}),
+    });
+  }, [prefs.quietHoursEnabled, prefs.quietHoursStart, prefs.quietHoursEnd, prefs.quietHoursTimezone, updatePrefs]);
 
   const notSupported = typeof Notification === "undefined";
   const blocked = permission === "denied";
@@ -211,6 +229,67 @@ export function NotificationSettings() {
               <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
                 Context-aware tips based on your spending patterns (max 3/week)
               </p>
+            </div>
+          </div>
+
+          {/* Quiet Hours */}
+          <div className="flex items-start gap-3 rounded-lg p-3" style={{ background: "var(--surface-secondary)" }}>
+            <MoonStar size={16} className="mt-0.5 shrink-0" style={{ color: "var(--text-muted)" }} />
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>Quiet hours</p>
+                <button
+                  role="switch"
+                  aria-checked={prefs.enabled && (prefs.quietHoursEnabled ?? false)}
+                  aria-label="Quiet hours"
+                  disabled={!prefs.enabled}
+                  onClick={handleToggleQuietHours}
+                  className={`relative h-5 w-9 rounded-full transition-colors ${
+                    prefs.enabled && prefs.quietHoursEnabled ? "bg-brand" : "bg-[var(--border-strong)]"
+                  } ${!prefs.enabled ? "opacity-40" : ""}`}
+                >
+                  <span
+                    className={`absolute top-0.5 left-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${
+                      prefs.enabled && prefs.quietHoursEnabled ? "translate-x-4" : ""
+                    }`}
+                  />
+                </button>
+              </div>
+              <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
+                Never woken by push during this window, in your local time
+              </p>
+              {prefs.enabled && prefs.quietHoursEnabled && (
+                <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-2">
+                  <div className="flex items-center gap-2">
+                    <label htmlFor="quiet-hours-start" className="text-xs" style={{ color: "var(--text-muted)" }}>
+                      From
+                    </label>
+                    <input
+                      id="quiet-hours-start"
+                      type="time"
+                      aria-label="Quiet hours start time"
+                      value={prefs.quietHoursStart ?? DEFAULT_QUIET_HOURS_START}
+                      onChange={(e) => updatePrefs({ quietHoursStart: e.target.value })}
+                      className="rounded-md border px-2 py-1 text-xs"
+                      style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--text-primary)" }}
+                    />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <label htmlFor="quiet-hours-end" className="text-xs" style={{ color: "var(--text-muted)" }}>
+                      Until
+                    </label>
+                    <input
+                      id="quiet-hours-end"
+                      type="time"
+                      aria-label="Quiet hours end time"
+                      value={prefs.quietHoursEnd ?? DEFAULT_QUIET_HOURS_END}
+                      onChange={(e) => updatePrefs({ quietHoursEnd: e.target.value })}
+                      className="rounded-md border px-2 py-1 text-xs"
+                      style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--text-primary)" }}
+                    />
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>

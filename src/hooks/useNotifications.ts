@@ -40,10 +40,18 @@ export function useNotifications(month: number, year: number, expenses?: Expense
         subscribedRef.current = ok;
         if (ok) {
           console.log("[notifications] Push subscription active");
-          // Auto-detect timezone on first subscription if not already saved
+          // Auto-detect timezone on first subscription if not already saved.
+          // Quiet hours (Sprint 3.2) default to the same timezone so the
+          // window is ready to go the moment the user turns it on.
           const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-          if (tz && !(prefs as Record<string, unknown> | undefined)?.timezone) {
-            updateSettings({ notificationPrefs: { ...(prefs ?? {}), timezone: tz } as NotificationPrefs }).catch(() => {});
+          if (tz && (!prefs?.timezone || !prefs?.quietHoursTimezone)) {
+            updateSettings({
+              notificationPrefs: {
+                ...(prefs ?? {}),
+                timezone: prefs?.timezone ?? tz,
+                quietHoursTimezone: prefs?.quietHoursTimezone ?? tz,
+              } as NotificationPrefs,
+            }).catch(() => {});
           }
         }
       });

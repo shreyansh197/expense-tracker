@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 import { getMonthName } from "@/lib/utils";
+import { addMoney } from "@/lib/money";
 import { useExpenses } from "@/hooks/useExpenses";
 import { useUIStore } from "@/stores/uiStore";
 
@@ -111,7 +112,7 @@ export function YearOverYearChart({ formatCurrency }: YearOverYearChartProps) {
 function useMonthTotal(month: number, year: number) {
   const { expenses } = useExpenses(month, year);
   return useMemo(
-    () => expenses.filter((e) => !e.deletedAt).reduce((s, e) => s + e.amount, 0),
+    () => expenses.filter((e) => !e.deletedAt).reduce((s, e) => addMoney(s, e.amount), 0),
     [expenses]
   );
 }

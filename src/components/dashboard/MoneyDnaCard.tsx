@@ -10,6 +10,7 @@ import { useExpenses } from "@/hooks/useExpenses";
 import { useSettings } from "@/hooks/useSettings";
 import { useUIStore } from "@/stores/uiStore";
 import { useToast } from "@/components/ui/Toast";
+import { addMoney } from "@/lib/money";
 
 export function MoneyDnaCard() {
   const { currentMonth, currentYear } = useUIStore();
@@ -19,7 +20,7 @@ export function MoneyDnaCard() {
   const [expanded, setExpanded] = useState(false);
 
   const recurringTotal = useMemo(
-    () => (settings.recurringExpenses ?? []).filter((r) => r.active).reduce((s, r) => s + r.amount, 0),
+    () => (settings.recurringExpenses ?? []).filter((r) => r.active).reduce((s, r) => addMoney(s, r.amount), 0),
     [settings.recurringExpenses],
   );
 

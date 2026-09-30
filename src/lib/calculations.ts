@@ -1,4 +1,5 @@
 import type { Expense, CategoryId, DailyTotal, CategoryTotal, StackedDailyTotal, Forecast, AnomalyResult } from "@/types";
+import { addMoney, subMoney, sumMoney } from "@/lib/money";
 
 /** Round to 2 decimal places (currency precision) to avoid floating-point drift */
 export function roundCurrency(value: number): number {
@@ -21,9 +22,9 @@ export function getCategoryTotal(
   month: number,
   year: number
 ): number {
-  return roundCurrency(activeExpenses(expenses, month, year)
+  return sumMoney(activeExpenses(expenses, month, year)
     .filter((e) => e.category === category)
-    .reduce((sum, e) => sum + e.amount, 0));
+    .map((e) => e.amount));
 }
 
 /**
@@ -35,9 +36,9 @@ export function getDailyTotal(
   month: number,
   year: number
 ): number {
-  return roundCurrency(activeExpenses(expenses, month, year)
+  return sumMoney(activeExpenses(expenses, month, year)
     .filter((e) => e.day === day)
-    .reduce((sum, e) => sum + e.amount, 0));
+    .map((e) => e.amount));
 }
 
 /**
@@ -48,7 +49,7 @@ export function getMonthlyTotal(
   month: number,
   year: number
 ): number {
-  return roundCurrency(activeExpenses(expenses, month, year).reduce((sum, e) => sum + e.amount, 0));
+  return sumMoney(activeExpenses(expenses, month, year).map((e) => e.amount));
 }
 
 /**
@@ -106,7 +107,7 @@ export function getAllCategoryTotals(
   const orphanMap = new Map<string, number>();
   for (const e of active) {
     if (!knownSet.has(e.category)) {
-      orphanMap.set(e.category, (orphanMap.get(e.category) || 0) + e.amount);
+      orphanMap.set(e.category, addMoney(orphanMap.get(e.category) || 0, e.amount));
     }
   }
   for (const [category, total] of orphanMap) {
@@ -230,8 +231,8 @@ export function getStackedDailyTotals(
     const row: StackedDailyTotal = { day, total: 0 };
     const dayExpenses = active.filter((e) => e.day === day);
     for (const e of dayExpenses) {
-      row[e.category] = (row[e.category] as number || 0) + e.amount;
-      row.total += e.amount;
+      row[e.category] = addMoney((row[e.category] as number) || 0, e.amount);
+      row.total = addMoney(row.total, e.amount);
     }
     result.push(row);
   }
@@ -324,7 +325,7 @@ export function detectAnomalies(
 
     // Check each expense in this category
     for (const e of active.filter((x) => x.category === cat)) {
-      const z = (0.6745 * (e.amount - med)) / mad;
+      const z = (0.6745 * subMoney(e.amount, med)) / mad;
       if (z > threshold) {
         anomalies.push({
           expense: e,
@@ -375,7 +376,7 @@ export function getDayOfWeekFactors(expenses: Expense[]): Record<number, number>
     if (e.deletedAt) continue;
     const d = new Date(e.year, e.month - 1, e.day);
     const dow = d.getDay();
-    sums[dow] += e.amount;
+    sums[dow] = addMoney(sums[dow], e.amount);
     counts[dow]++;
   }
 
@@ -449,4 +450,89 @@ export function getWeightedForecast(
     method: "weighted",
     historicalMonths: historicalTotals.length,
   };
+}
+
+// ═══════════════════════════════════════════════════════════════
+// WEEK BOUNDS — timezone- and locale-correct digest boundaries (T-3.2.4)
+// ═══════════════════════════════════════════════════════════════
+
+/** A calendar date (no time component — matches the Expense day/month/year grain). */
+export interface CalendarDate {
+  year: number;
+  month: number; // 1-based
+  day: number;
+}
+
+export interface WeekBounds {
+  start: CalendarDate;
+  end: CalendarDate;
+}
+
+/**
+ * The calendar date `instant` falls on inside IANA timezone `timezone`.
+ * A server tick is always a UTC instant; the *date* it corresponds to for a
+ * given user depends entirely on their timezone, not the server's.
+ */
+function getCalendarDateInTimezone(instant: Date, timezone: string): CalendarDate {
+  try {
+    const parts = new Intl.DateTimeFormat("en-CA", {
+      timeZone: timezone,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).formatToParts(instant);
+    const get = (type: string) => Number(parts.find((p) => p.type === type)!.value);
+    return { year: get("year"), month: get("month"), day: get("day") };
+  } catch {
+    // Unknown/invalid IANA name — fail safe to UTC rather than throw.
+    return { year: instant.getUTCFullYear(), month: instant.getUTCMonth() + 1, day: instant.getUTCDate() };
+  }
+}
+
+/**
+ * Compute the calendar week (inclusive Sat/Sun-to-Sun/Sat style bounds)
+ * containing `now`, evaluated in the user's own timezone and week-start
+ * convention — never the server's UTC clock.
+ *
+ * `weekStartsOn`: `0` = Sunday-first (US/India and many other locales),
+ * `1` = Monday-first (ISO-8601 / most of Europe). Two users on either side
+ * of a UTC day boundary must see their own local week, and a Monday-first
+ * locale must resolve to a different week start than a Sunday-first one for
+ * the same instant — that is the whole point of computing this locally
+ * instead of trusting the server's UTC "today".
+ */
+export function getWeekBounds(now: Date, timezone: string, weekStartsOn: 0 | 1 = 0): WeekBounds {
+  const local = getCalendarDateInTimezone(now, timezone);
+  // A UTC-midnight Date for the local calendar date lets us use plain
+  // UTC-based day arithmetic (setUTCDate) without any further tz conversion —
+  // the timezone's influence is fully captured by `local` above.
+  const anchor = new Date(Date.UTC(local.year, local.month - 1, local.day));
+  const dayOfWeek = anchor.getUTCDay(); // 0=Sun..6=Sat, matches `local`'s calendar date
+  const daysSinceWeekStart = (dayOfWeek - weekStartsOn + 7) % 7;
+
+  const start = new Date(anchor);
+  start.setUTCDate(start.getUTCDate() - daysSinceWeekStart);
+  const end = new Date(start);
+  end.setUTCDate(end.getUTCDate() + 6);
+
+  return {
+    start: { year: start.getUTCFullYear(), month: start.getUTCMonth() + 1, day: start.getUTCDate() },
+    end: { year: end.getUTCFullYear(), month: end.getUTCMonth() + 1, day: end.getUTCDate() },
+  };
+}
+
+/** Whether `date` falls within `bounds` (inclusive), by calendar-day comparison. */
+export function isDateWithinWeekBounds(date: CalendarDate, bounds: WeekBounds): boolean {
+  const key = (d: CalendarDate) => d.year * 10000 + d.month * 100 + d.day;
+  const k = key(date);
+  return k >= key(bounds.start) && k <= key(bounds.end);
+}
+
+/** Sum of all active expenses whose date falls inside the given week bounds. */
+export function getWeeklyTotal(expenses: Expense[], bounds: WeekBounds): number {
+  return sumMoney(
+    expenses
+      .filter((e) => !e.deletedAt && isDateWithinWeekBounds({ year: e.year, month: e.month, day: e.day }, bounds))
+      .map((e) => e.amount),
+  );
 }

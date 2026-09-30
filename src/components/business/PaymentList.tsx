@@ -6,6 +6,7 @@ import { useCurrency } from "@/hooks/useCurrency";
 import { useConfirm } from "@/components/ui/ConfirmDialog";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 import type { Payment, PaymentMethod } from "@/types";
+import { addMoney } from "@/lib/money";
 
 const methodIcons: Record<PaymentMethod, typeof Banknote> = {
   bank_transfer: CreditCard,
@@ -220,7 +221,7 @@ export function PaymentList({ payments, onDelete }: PaymentListProps) {
     return [...payments]
       .reverse()
       .map((p) => {
-        total += p.amount;
+        total = addMoney(total, p.amount);
         return { ...p, runningTotal: total };
       })
       .reverse();

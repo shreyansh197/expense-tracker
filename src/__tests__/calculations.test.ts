@@ -782,3 +782,44 @@ describe("multi-currency in monthly totals", () => {
     expect(total).toBe(3000);
   });
 });
+
+// =========== MONEY PRECISION (T-2.3.5) ===========
+
+describe("money precision in calculations", () => {
+  test("monthly total of fractional amounts is drift-free", () => {
+    // 0.1 + 0.1 + 0.1 must equal 0.3 exactly (naive float sum yields 0.30000000000000004)
+    const expenses = [
+      makeExpense({ amount: 0.1, day: 1 }),
+      makeExpense({ amount: 0.1, day: 2 }),
+      makeExpense({ amount: 0.1, day: 3 }),
+    ];
+    expect(getMonthlyTotal(expenses, 3, 2026)).toBe(0.3);
+  });
+
+  test("category total of many cents stays exact", () => {
+    const expenses = Array.from({ length: 10 }, (_, i) =>
+      makeExpense({ amount: 0.1, category: "groceries", day: i + 1 }),
+    );
+    expect(getCategoryTotal(expenses, "groceries", 3, 2026)).toBe(1);
+  });
+
+  test("daily total sums fractional amounts without drift", () => {
+    const expenses = [
+      makeExpense({ amount: 10.01, day: 5 }),
+      makeExpense({ amount: 20.02, day: 5 }),
+      makeExpense({ amount: 0.07, day: 5 }),
+    ];
+    expect(getDailyTotal(expenses, 5, 3, 2026)).toBe(30.1);
+  });
+
+  test("stacked daily totals equal the sum of their category rows", () => {
+    const expenses = [
+      makeExpense({ amount: 0.1, category: "groceries", day: 1 }),
+      makeExpense({ amount: 0.2, category: "transport", day: 1 }),
+    ];
+    const stacked = getStackedDailyTotals(expenses, ["groceries", "transport"], 3, 2026, 31);
+    const day1 = stacked.find((d) => d.day === 1)!;
+    expect(day1.total).toBe(0.3);
+  });
+});
+

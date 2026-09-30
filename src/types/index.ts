@@ -25,6 +25,11 @@ export interface NotificationPrefs {
   weeklyDigest: boolean;
   budgetAlerts: boolean;
   smartNudges?: boolean; // context-aware tips based on spending patterns
+  // Quiet hours (Sprint 3.2): suppress push delivery during this local window.
+  quietHoursEnabled?: boolean;
+  quietHoursStart?: string; // "HH:MM" local start of the quiet window
+  quietHoursEnd?: string; // "HH:MM" local end; may be < start (overnight wrap, e.g. 22:00–07:00)
+  quietHoursTimezone?: string; // IANA timezone the window is evaluated in; defaults to `timezone`
 }
 
 export interface UserSettings {

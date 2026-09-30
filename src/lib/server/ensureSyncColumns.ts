@@ -52,6 +52,13 @@ export async function ensureSyncColumns(): Promise<void> {
         PRIMARY KEY (workspace_id, idempotency_key)
       );
 
+      -- Migration 014: Replay support — remember the entity id so a repeated
+      -- commit returns the ORIGINAL entity id (identical response body).
+      ALTER TABLE processed_idempotency_keys
+        ADD COLUMN IF NOT EXISTS entity_id VARCHAR(64);
+      CREATE UNIQUE INDEX IF NOT EXISTS processed_idempotency_keys_workspace_key_uidx
+        ON processed_idempotency_keys (workspace_id, idempotency_key);
+
       -- Migration 010: Widen recovery_codes column for SHA-256 hashes
       ALTER TABLE users ALTER COLUMN recovery_codes TYPE VARCHAR(64)[];
     `);

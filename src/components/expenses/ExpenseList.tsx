@@ -11,7 +11,7 @@ import { useUIStore } from "@/stores/uiStore";
 import { useToast } from "@/components/ui/Toast";
 import { useConfirm } from "@/components/ui/ConfirmDialog";
 import { EmptyState } from "@/components/ui/EmptyState";
-
+import { addMoney } from "@/lib/money";
 import { ReceiptIllustration } from "@/components/ui/illustrations";
 import { StillWater } from "@/components/ui/illustrations/terrain";
 import { filterExpenses, groupByDay, groupByFullDate, groupByCategory } from "@/lib/filters";
@@ -288,7 +288,7 @@ export function ExpenseList({
         result.push({
           day: g.day,
           expenses: g.expenses.slice(0, remaining),
-          total: g.expenses.slice(0, remaining).reduce((s, e) => s + e.amount, 0),
+          total: g.expenses.slice(0, remaining).reduce((s, e) => addMoney(s, e.amount), 0),
         });
         count += remaining;
       }

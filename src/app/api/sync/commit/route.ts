@@ -5,9 +5,45 @@ import { syncCommitSchema } from "@/lib/validators";
 import { ensureSyncColumns } from "@/lib/server/ensureSyncColumns";
 import { rateLimit } from "@/lib/server/rateLimit";
 import { hashIp } from "@/lib/server/tokens";
+import { audit } from "@/lib/server/audit";
 import type { Prisma } from "@prisma/client";
 
 type Json = Prisma.InputJsonValue;
+
+/** Map a sync mutation table to its audit-log entity type. */
+const CONFLICT_ENTITY_TYPE: Record<string, string> = {
+  expenses: "expense",
+  business_ledgers: "ledger",
+  business_payments: "payment",
+};
+
+/**
+ * Emit a `conflict.resolve.money` audit row when a mutation resolves a
+ * money-field conflict. Captures entity type, id, and the chosen side only —
+ * never any monetary value (R-8). Best-effort: an audit failure never fails the
+ * mutation that was already applied.
+ */
+async function auditConflictResolution(
+  conflict: { field: string; choice: "mine" | "theirs" } | undefined,
+  table: string,
+  entityId: string,
+  userId: string,
+  ipHash: string,
+): Promise<void> {
+  if (!conflict) return;
+  try {
+    await audit({
+      userId,
+      entityType: CONFLICT_ENTITY_TYPE[table] ?? table,
+      entityId,
+      action: "conflict.resolve.money",
+      meta: { field: conflict.field, choice: conflict.choice },
+      ipHash,
+    });
+  } catch (err) {
+    console.error("[sync/commit] Failed to write conflict.resolve.money audit:", err);
+  }
+}
 
 /**
  * POST /api/sync/commit
@@ -20,7 +56,8 @@ export async function POST(req: NextRequest) {
   if (!auth) return jsonError("Unauthorized", 401);
 
   const ip = getClientIp(req);
-  const rl = await rateLimit(`sync-commit:${hashIp(ip)}:${auth.userId}`, 60, 60_000);
+  const ipHash = hashIp(ip);
+  const rl = await rateLimit(`sync-commit:${ipHash}:${auth.userId}`, 60, 60_000);
   if (!rl.ok) {
     return NextResponse.json(
       { error: "Too many requests. Try again later." },
@@ -54,17 +91,19 @@ export async function POST(req: NextRequest) {
   // Ensure all required columns exist (idempotent, runs once per cold start)
   await ensureSyncColumns();
 
-  // Check which idempotency keys have already been processed
+  // Check which idempotency keys have already been processed. If a key is
+  // already present we return its original entity_id so the caller sees the
+  // same response body on every replay (guaranteed-once contract, Sprint 2.2).
   const allKeys = mutations.map((m) => m.idempotencyKey);
-  let processedKeys = new Set<string>();
+  const processedKeys = new Map<string, string | null>();
   try {
-    const rows = await prisma.$queryRawUnsafe<{ idempotency_key: string }[]>(
-      `SELECT idempotency_key FROM processed_idempotency_keys
+    const rows = await prisma.$queryRawUnsafe<{ idempotency_key: string; entity_id: string | null }[]>(
+      `SELECT idempotency_key, entity_id FROM processed_idempotency_keys
        WHERE workspace_id = $1::uuid AND idempotency_key = ANY($2::varchar[])`,
       workspaceId,
       allKeys,
     );
-    processedKeys = new Set(rows.map((r) => r.idempotency_key));
+    for (const r of rows) processedKeys.set(r.idempotency_key, r.entity_id);
   } catch {
     // Table may not exist yet on first deploy — proceed without dedup
   }
@@ -72,9 +111,12 @@ export async function POST(req: NextRequest) {
   const results: { idempotencyKey: string; status: "applied" | "skipped" | "error"; id?: string; error?: string }[] = [];
 
   for (const mutation of mutations) {
-    // Skip already-processed mutations
+    // Replay of a previously-applied mutation — return the ORIGINAL entity id
+    // so the response body is byte-for-byte identical to the first response.
+    // Guaranteed-once semantics (Sprint 2.2 / T-2.2.3).
     if (processedKeys.has(mutation.idempotencyKey)) {
-      results.push({ idempotencyKey: mutation.idempotencyKey, status: "skipped" });
+      const originalId = processedKeys.get(mutation.idempotencyKey) ?? undefined;
+      results.push({ idempotencyKey: mutation.idempotencyKey, status: "applied", id: originalId });
       continue;
     }
 
@@ -124,6 +166,7 @@ export async function POST(req: NextRequest) {
             },
           });
           results.push({ idempotencyKey: mutation.idempotencyKey, status: "applied", id: record.id });
+          await auditConflictResolution(mutation.conflict, mutation.table, record.id, auth.userId, ipHash);
         } else {
           // Soft delete — use updateMany to avoid P2025 if record doesn't exist
           await prisma.expense.updateMany({
@@ -244,6 +287,7 @@ export async function POST(req: NextRequest) {
             });
           }
           results.push({ idempotencyKey: mutation.idempotencyKey, status: "applied", id: record.id });
+          await auditConflictResolution(mutation.conflict, mutation.table, record.id, auth.userId, ipHash);
         } else {
           await prisma.businessLedger.updateMany({
             where: { id: mutation.id!, workspaceId },
@@ -320,6 +364,7 @@ export async function POST(req: NextRequest) {
             });
           }
           results.push({ idempotencyKey: mutation.idempotencyKey, status: "applied", id: record.id });
+          await auditConflictResolution(mutation.conflict, mutation.table, record.id, auth.userId, ipHash);
         } else {
           await prisma.businessPayment.updateMany({
             where: { id: mutation.id!, workspaceId },
@@ -338,18 +383,24 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  // Record successfully processed idempotency keys
-  const appliedKeys = results
-    .filter((r) => r.status === "applied")
-    .map((r) => r.idempotencyKey);
-  if (appliedKeys.length > 0) {
+  // Record successfully processed idempotency keys along with the entity id
+  // they produced. On replay we return the same entity id → identical body.
+  // We only insert keys applied on THIS request — replayed keys already
+  // exist in the ledger (ON CONFLICT DO NOTHING would be a no-op but the
+  // extra round trip is wasteful and pollutes observability).
+  const appliedRecords = results
+    .filter((r) => r.status === "applied" && !processedKeys.has(r.idempotencyKey))
+    .map((r) => ({ key: r.idempotencyKey, entityId: r.id ?? null }));
+  if (appliedRecords.length > 0) {
     try {
       await prisma.$executeRawUnsafe(
-        `INSERT INTO processed_idempotency_keys (workspace_id, idempotency_key)
-         SELECT $1::uuid, unnest($2::varchar[])
+        `INSERT INTO processed_idempotency_keys (workspace_id, idempotency_key, entity_id)
+         SELECT $1::uuid, key, entity_id
+         FROM unnest($2::varchar[], $3::varchar[]) AS t(key, entity_id)
          ON CONFLICT DO NOTHING`,
         workspaceId,
-        appliedKeys,
+        appliedRecords.map((r) => r.key),
+        appliedRecords.map((r) => r.entityId),
       );
     } catch {
       // Non-fatal — dedup is best-effort

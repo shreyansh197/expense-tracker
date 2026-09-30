@@ -12,6 +12,7 @@ import { buildCategoryMap } from "@/lib/categories";
 import { getMonthName } from "@/lib/utils";
 import { useCurrency } from "@/hooks/useCurrency";
 import { getCategoryTotal } from "@/lib/calculations";
+import { addMoney } from "@/lib/money";
 import { authFetch, getActiveWorkspaceId } from "@/lib/authClient";
 import { SkeletonCategoryDetail } from "@/components/ui/Skeleton";
 import { TargetIllustration } from "@/components/ui/illustrations";
@@ -138,7 +139,7 @@ export default function CategoryPage({ params }: { params: Promise<{ slug: strin
     const countByDay: number[] = Array(7).fill(0);
     for (const e of categoryExpenses) {
       const d = new Date(year, month - 1, e.day).getDay();
-      byday[d] += e.amount;
+      byday[d] = addMoney(byday[d], e.amount);
       countByDay[d]++;
     }
     const maxDay = byday.indexOf(Math.max(...byday));

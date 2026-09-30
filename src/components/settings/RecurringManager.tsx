@@ -10,6 +10,7 @@ import { useConfirm } from "@/components/ui/ConfirmDialog";
 import { Plus, Trash2, ToggleLeft, ToggleRight, Pencil, X, ArrowUpDown } from "lucide-react";
 import { FormError } from "@/components/ui/FormError";
 import { CategorySelector } from "@/components/expenses/CategorySelector";
+import { addMoney, subMoney } from "@/lib/money";
 
 import type { RecurringExpense, CategoryId, RecurringFrequency } from "@/types";
 
@@ -122,13 +123,13 @@ export function RecurringManager() {
   // Sort
   const sorted = [...recurring].sort((a, b) => {
     if (sortKey === "day") return a.day - b.day;
-    if (sortKey === "amount") return b.amount - a.amount;
+    if (sortKey === "amount") return subMoney(b.amount, a.amount);
     return a.remark.localeCompare(b.remark);
   });
 
   // Totals
-  const activeTotal = recurring.filter((r) => r.active).reduce((sum, r) => sum + r.amount, 0);
-  const totalAll = recurring.reduce((sum, r) => sum + r.amount, 0);
+  const activeTotal = recurring.filter((r) => r.active).reduce((sum, r) => addMoney(sum, r.amount), 0);
+  const totalAll = recurring.reduce((sum, r) => addMoney(sum, r.amount), 0);
 
   return (
     <div className="space-y-3">

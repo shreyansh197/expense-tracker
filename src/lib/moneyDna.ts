@@ -1,5 +1,6 @@
 import type { Expense, CategoryId } from "@/types";
 import { getDayOfWeekFactors } from "@/lib/calculations";
+import { addMoney } from "@/lib/money";
 
 // ── Archetype definitions ──
 
@@ -96,14 +97,14 @@ function computeScores(input: DnaInput): DnaScore[] {
   const weekendFactor = ((dowFactors[0] ?? 1) + (dowFactors[5] ?? 1) + (dowFactors[6] ?? 1)) / 3;
 
   // First half vs second half spending
-  const firstHalf = active.filter((e) => e.day <= 15).reduce((s, e) => s + e.amount, 0);
-  const secondHalf = active.filter((e) => e.day > 15).reduce((s, e) => s + e.amount, 0);
+  const firstHalf = active.filter((e) => e.day <= 15).reduce((s, e) => addMoney(s, e.amount), 0);
+  const secondHalf = active.filter((e) => e.day > 15).reduce((s, e) => addMoney(s, e.amount), 0);
   const total = firstHalf + secondHalf;
   const firstHalfRatio = total > 0 ? firstHalf / total : 0.5;
 
   // Category concentration (Herfindahl index)
   const catTotals: Record<string, number> = {};
-  for (const e of active) catTotals[e.category] = (catTotals[e.category] || 0) + e.amount;
+  for (const e of active) catTotals[e.category] = addMoney(catTotals[e.category] || 0, e.amount);
   const shares = Object.values(catTotals).map((v) => (total > 0 ? v / total : 0));
   const herfindahl = shares.reduce((s, sh) => s + sh * sh, 0);
 
@@ -167,7 +168,7 @@ export function computeMoneyDna(
   const active = expenses.filter((e) => !e.deletedAt);
   if (active.length < 5) return null;
 
-  const total = active.reduce((s, e) => s + e.amount, 0);
+  const total = active.reduce((s, e) => addMoney(s, e.amount), 0);
   const amounts = active.map((e) => e.amount);
   amounts.sort((a, b) => a - b);
   const median = amounts.length % 2 === 0

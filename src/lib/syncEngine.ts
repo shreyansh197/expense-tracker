@@ -1,5 +1,6 @@
 import { db, migrateFromLocalStorage } from "./db";
-import type { IDBMutation } from "./db";
+import type { IDBMutation, IDBExpense, IDBLedger, IDBPayment } from "./db";
+import type { Table } from "dexie";
 import { authFetch, getActiveWorkspaceId, isAuthenticated, subscribeAuth } from "./authClient";
 import { supabase } from "./supabase";
 import { encryptJSON, decryptJSON, hasEncryptionKey } from "./crypto";
@@ -55,6 +56,81 @@ export function onSyncPhaseChange(fn: (phase: SyncPhase) => void): () => void {
   return () => { _syncPhaseListeners.delete(fn); };
 }
 
+// ── Session-scoped sync counters (in-memory only, no PII / no money) ──
+
+export interface SyncCounters {
+  /** Successful pull page responses received (per HTTP call). */
+  pullBatches: number;
+  /** Push batches sent to /api/sync/commit (100-item chunks). */
+  pushBatches: number;
+  /** Rows where local IDB.updatedAt was newer than the incoming server row. */
+  conflicts: number;
+  /** Push or pull HTTP/network failures observed this session. */
+  failures: number;
+  /** Epoch ms of the last successful pull (0 = never this session). */
+  lastPullAt: number;
+  /** Epoch ms of the last successful push batch (0 = never this session). */
+  lastPushAt: number;
+  /**
+   * Short, redacted description of the most recent sync error (tag + status/message).
+   * Never contains monetary values, user data, request bodies, or auth tokens.
+   */
+  lastError: string | null;
+  /** Epoch ms the counters were last reset (session start or explicit reset). */
+  resetAt: number;
+}
+
+function _emptyCounters(): SyncCounters {
+  return {
+    pullBatches: 0,
+    pushBatches: 0,
+    conflicts: 0,
+    failures: 0,
+    lastPullAt: 0,
+    lastPushAt: 0,
+    lastError: null,
+    resetAt: Date.now(),
+  };
+}
+
+let _counters: SyncCounters = _emptyCounters();
+const _countersListeners = new Set<(c: SyncCounters) => void>();
+
+function _emitCounters() {
+  const snapshot = { ..._counters };
+  _countersListeners.forEach((fn) => fn(snapshot));
+}
+
+/** Return a snapshot of the current session's sync counters. */
+export function getSyncCounters(): SyncCounters {
+  return { ..._counters };
+}
+
+/** Subscribe to counter changes. Returns an unsubscribe fn. */
+export function onSyncCountersChange(fn: (c: SyncCounters) => void): () => void {
+  _countersListeners.add(fn);
+  return () => { _countersListeners.delete(fn); };
+}
+
+/** Reset all counters and last-error to their initial values. */
+export function resetSyncCounters(): void {
+  _counters = _emptyCounters();
+  _emitCounters();
+}
+
+/**
+ * Record a sync error for diagnostics. `tag` identifies the phase (pull/push/etc.).
+ * `detail` must be pre-redacted — never pass request bodies or amounts.
+ */
+function _recordFailure(tag: string, detail: string) {
+  _counters = {
+    ..._counters,
+    failures: _counters.failures + 1,
+    lastError: `[${tag}] ${detail}`.slice(0, 200),
+  };
+  _emitCounters();
+}
+
 // ── Workspace access denied observable ──
 
 type AccessDeniedListener = (workspaceId: string) => void;
@@ -68,6 +144,290 @@ export function onWorkspaceAccessDenied(fn: AccessDeniedListener): () => void {
 function _notifyAccessDenied(workspaceId: string) {
   syncWarn("pull", `Access denied (403) for workspace ${workspaceId.slice(0, 8)}…`);
   _accessDeniedListeners.forEach((fn) => fn(workspaceId));
+}
+
+// ── Per-field money-conflict registry (T-2.3.1) ──
+//
+// Money fields (`amount`, `expectedAmount`) are NEVER silently overwritten by a
+// pull. When the local copy has diverged from the incoming server row, the sync
+// engine keeps the local value and records a pending conflict here instead of
+// auto-merging. A contested value is only reconciled when the user makes an
+// explicit choice via `resolveMoneyConflict` (surfaced by the ConflictReviewSheet
+// in a later task). Non-money fields continue to use deterministic timestamp
+// last-writer-wins. See Architecture §18.1.
+
+export type ConflictEntity = "expense" | "ledger" | "payment";
+export type ConflictChoice = "mine" | "theirs";
+
+export interface MoneyConflict {
+  /** Stable identity: `${entity}:${id}:${field}`. */
+  key: string;
+  entity: ConflictEntity;
+  /** Record id (UUID). */
+  id: string;
+  workspaceId: string;
+  /** Contested money field (`amount` | `expectedAmount`). */
+  field: string;
+  /** Value currently held locally (kept until the user resolves). */
+  localValue: number;
+  /** Value the server proposed in the pull. */
+  serverValue: number;
+  /** Local record `updatedAt` at detection time (epoch ms). */
+  localUpdatedAt: number;
+  /** Server row `updatedAt` at detection time (epoch ms). */
+  serverUpdatedAt: number;
+  /** Epoch ms the conflict was first detected. */
+  detectedAt: number;
+}
+
+/** Money fields that must never be silently overwritten, keyed by entity. */
+const MONEY_FIELDS: Record<ConflictEntity, readonly string[]> = {
+  expense: ["amount"],
+  ledger: ["expectedAmount"],
+  payment: ["amount"],
+};
+
+/** Server mutation table for each conflict entity. */
+const CONFLICT_TABLE: Record<ConflictEntity, IDBMutation["table"]> = {
+  expense: "expenses",
+  ledger: "business_ledgers",
+  payment: "business_payments",
+};
+
+/** Registry keys for every money field of a record (used to clear on delete). */
+function _conflictKeysFor(entity: ConflictEntity, id: string): string[] {
+  return MONEY_FIELDS[entity].map((field) => `${entity}:${id}:${field}`);
+}
+
+const _pendingConflicts = new Map<string, MoneyConflict>();
+// Money value the user committed to for a key that has not yet converged on the
+// server (corrective push still in flight). Guards against a resolved conflict
+// spontaneously re-opening on the next pull before the server catches up.
+const _resolvedIntents = new Map<string, number>();
+const _conflictListeners = new Set<(conflicts: MoneyConflict[]) => void>();
+
+function _conflictSnapshot(workspaceId?: string): MoneyConflict[] {
+  const all = Array.from(_pendingConflicts.values());
+  return workspaceId ? all.filter((c) => c.workspaceId === workspaceId) : all;
+}
+
+function _emitConflicts() {
+  const snapshot = _conflictSnapshot();
+  _conflictListeners.forEach((fn) => fn(snapshot));
+}
+
+/** Snapshot of unresolved money conflicts (optionally scoped to a workspace). */
+export function getPendingMoneyConflicts(workspaceId?: string): MoneyConflict[] {
+  return _conflictSnapshot(workspaceId);
+}
+
+/** Subscribe to money-conflict changes. Returns an unsubscribe fn. */
+export function onMoneyConflictsChange(
+  fn: (conflicts: MoneyConflict[]) => void,
+): () => void {
+  _conflictListeners.add(fn);
+  return () => { _conflictListeners.delete(fn); };
+}
+
+/**
+ * Reconcile the conflict registry after a pull: register newly-detected
+ * conflicts (refreshing the server value on re-detection) and clear any whose
+ * values have since converged or been superseded. Emits once if anything changed.
+ */
+function _reconcileConflicts(detected: MoneyConflict[], resolvedKeys: string[]): void {
+  let changed = false;
+  for (const c of detected) {
+    _pendingConflicts.set(c.key, c);
+    changed = true;
+  }
+  for (const key of resolvedKeys) {
+    if (_pendingConflicts.delete(key)) changed = true;
+    _resolvedIntents.delete(key);
+  }
+  if (changed) _emitConflicts();
+}
+
+/** Clear all pending money conflicts (used on engine stop / workspace reset). */
+export function clearMoneyConflicts(): void {
+  _resolvedIntents.clear();
+  if (_pendingConflicts.size === 0) return;
+  _pendingConflicts.clear();
+  _emitConflicts();
+}
+
+/**
+ * Per-field last-writer-wins merge for a pulled record.
+ *
+ *  - Non-money fields follow deterministic timestamp LWW (newer `updatedAt` wins).
+ *  - Money fields are preserved locally on collision and returned as pending
+ *    conflicts; they are never silently overwritten by the server.
+ *
+ * A money field is contested when local and server disagree AND the local copy
+ * has diverged — either it is strictly newer than the incoming row, there is an
+ * un-pushed local edit queued, or a prior conflict on the same field is still
+ * awaiting the user. `existing` being undefined means the row is new, so the
+ * server record is taken verbatim.
+ */
+function _mergePulledRecord<T extends { updatedAt: number }>(
+  entity: ConflictEntity,
+  workspaceId: string,
+  id: string,
+  existing: T | undefined,
+  serverRecord: T,
+  serverUpdatedAt: number,
+  hasPendingLocalEdit: boolean,
+): { merged: T; conflicts: MoneyConflict[]; resolvedKeys: string[] } {
+  if (!existing) return { merged: serverRecord, conflicts: [], resolvedKeys: [] };
+
+  const serverNewer = serverUpdatedAt >= existing.updatedAt;
+  // Non-money fields resolve by whole-record timestamp LWW.
+  const merged = { ...(serverNewer ? serverRecord : existing) } as T;
+  const conflicts: MoneyConflict[] = [];
+  const resolvedKeys: string[] = [];
+
+  const ex = existing as Record<string, unknown>;
+  const sv = serverRecord as Record<string, unknown>;
+  const mg = merged as Record<string, unknown>;
+
+  for (const field of MONEY_FIELDS[entity]) {
+    const localValue = ex[field] as number;
+    const serverValue = sv[field] as number;
+    const key = `${entity}:${id}:${field}`;
+    const existingConflict = _pendingConflicts.get(key);
+    const intent = _resolvedIntents.get(key);
+
+    if (localValue === serverValue) {
+      // Values agree — nothing contested. Drop any open conflict / resolution
+      // intent that has since converged (LWW already placed the agreed value).
+      if (existingConflict || intent !== undefined) resolvedKeys.push(key);
+      continue;
+    }
+
+    if (intent !== undefined && localValue === intent) {
+      // The user already resolved this field to the current local value; the
+      // server just hasn't converged yet (corrective push still in flight).
+      // Keep local and stay silent — never re-open a resolved conflict.
+      mg[field] = localValue;
+      continue;
+    }
+
+    // Values differ: contested if the local copy has diverged (strictly newer
+    // or an un-pushed edit) or a prior conflict on this field is still open.
+    const contested =
+      existingConflict !== undefined ||
+      existing.updatedAt > serverUpdatedAt ||
+      hasPendingLocalEdit;
+
+    if (contested) {
+      // Keep the local value and defer to an explicit user choice.
+      mg[field] = localValue;
+      conflicts.push({
+        key,
+        entity,
+        id,
+        workspaceId,
+        field,
+        localValue,
+        serverValue,
+        localUpdatedAt: existing.updatedAt,
+        serverUpdatedAt,
+        detectedAt: existingConflict?.detectedAt ?? Date.now(),
+      });
+    }
+    // Otherwise the server row is the later write — timestamp LWW already put
+    // the server value in `merged`.
+  }
+
+  return { merged, conflicts, resolvedKeys };
+}
+
+/**
+ * Resolve a deferred money conflict with an explicit user choice. This is the
+ * ONLY path that reconciles a contested money field — a pull never resolves one
+ * on its own.
+ *
+ *  - `"mine"`   keeps the local value and re-queues it so the server converges.
+ *  - `"theirs"` adopts the server value into local IDB.
+ *
+ * Either way the chosen value is queued as the final upsert when an un-pushed
+ * local edit is still sitting in the mutation queue, so a stale queued write
+ * can never silently override the user's decision. Returns true if a matching
+ * conflict was found and resolved.
+ */
+export async function resolveMoneyConflict(
+  key: string,
+  choice: ConflictChoice,
+): Promise<boolean> {
+  const conflict = _pendingConflicts.get(key);
+  if (!conflict) return false;
+
+  const serverTable = CONFLICT_TABLE[conflict.entity];
+
+  // The applied value: for "theirs" it is the server's proposed value; for
+  // "mine" it is the record's *current* local value (which may have been edited
+  // again while the prompt was open) — never the value captured at detection.
+  const applyTo = async <T extends { updatedAt: number }>(
+    table: Table<T, string>,
+  ): Promise<number | null> => {
+    const record = await table.get(conflict.id);
+    if (!record) return null;
+    const rec = record as unknown as Record<string, unknown>;
+    const chosen =
+      choice === "mine" ? (rec[conflict.field] as number) : conflict.serverValue;
+    const updated: Record<string, unknown> = { ...rec };
+    updated[conflict.field] = chosen;
+    // Keep `updatedAt` monotonic so a resolution never moves the record's clock
+    // backwards (which could let an older server snapshot win the next pull).
+    // "mine" is a fresh local write that must out-rank both sides.
+    updated.updatedAt =
+      choice === "mine"
+        ? Math.max(Date.now(), record.updatedAt + 1, conflict.serverUpdatedAt + 1)
+        : Math.max(record.updatedAt, conflict.serverUpdatedAt);
+    await table.put(updated as unknown as T);
+    return chosen;
+  };
+
+  let chosen: number | null;
+  if (conflict.entity === "expense") chosen = await applyTo(db.expenses);
+  else if (conflict.entity === "ledger") chosen = await applyTo(db.ledgers);
+  else chosen = await applyTo(db.payments);
+
+  if (chosen === null) {
+    // Record no longer exists (e.g. deleted) — just drop the stale conflict.
+    _pendingConflicts.delete(key);
+    _resolvedIntents.delete(key);
+    _emitConflicts();
+    return true;
+  }
+
+  // Every resolution enqueues a conflict-tagged corrective upsert of the chosen
+  // value. This serves two purposes:
+  //   1. Reconciliation — the chosen value is written last, so any stale queued
+  //      upsert (which still carries the old local money value) cannot silently
+  //      override the user's decision once it flushes, and "theirs" reasserts
+  //      the agreed value on the server.
+  //   2. Audit — it carries `conflict: { field, choice }` so the commit route
+  //      emits exactly one `conflict.resolve.money` row per resolution (T-2.3.3),
+  //      including "theirs" resolutions that would otherwise need no data write.
+  await enqueueMutation(
+    {
+      table: serverTable,
+      operation: "upsert",
+      id: conflict.id,
+      data: { [conflict.field]: chosen },
+      idempotencyKey: makeIdempotencyKey(),
+      conflict: { field: conflict.field, choice },
+    },
+    conflict.workspaceId,
+  );
+
+  // Remember the committed value so a pull that lands before the server
+  // converges keeps it without re-opening the just-resolved conflict.
+  _pendingConflicts.delete(key);
+  _resolvedIntents.set(key, chosen);
+  _emitConflicts();
+  _notifySyncPull();
+  return true;
 }
 
 // ── Idempotency key generation ──
@@ -100,8 +460,43 @@ export function generateUUID(): string {
 
 const MAX_MUTATION_QUEUE_SIZE = 500;
 
+/**
+ * After this many consecutive push failures a mutation is considered
+ * "dead-lettered" — it stays in the queue but is skipped by the drain
+ * until the user takes an explicit action (retry / discard).
+ */
+export const MAX_MUTATION_ATTEMPTS = 8;
+
+/** Exponential backoff base (ms) — first retry waits 1s. */
+const BACKOFF_BASE_MS = 1_000;
+/** Cap for exponential backoff — matches acceptance criteria (≤ 30s). */
+const BACKOFF_CAP_MS = 30_000;
+/** Additional pseudorandom jitter (ms) to avoid thundering-herd retries. */
+const BACKOFF_JITTER_MS = 500;
+
+/**
+ * Compute the next-retry delay for a mutation that has failed `attempts` times.
+ * Uses exponential backoff (2^n) capped at BACKOFF_CAP_MS plus uniform jitter.
+ * Exposed for reliability tests.
+ */
+export function computeBackoffDelay(attempts: number): number {
+  const capped = Math.min(BACKOFF_BASE_MS * 2 ** Math.max(0, attempts - 1), BACKOFF_CAP_MS);
+  const jitter = Math.floor(Math.random() * BACKOFF_JITTER_MS);
+  return capped + jitter;
+}
+
+/**
+ * Redact any monetary values / free-text from an error message before persisting
+ * it on the mutation row. Keeps only the shape (name + numeric status code).
+ */
+function _redactPushError(err: unknown, status?: number): string {
+  if (typeof status === "number") return `HTTP ${status}`;
+  if (err instanceof Error) return err.name || "Error";
+  return "unknown";
+}
+
 export async function enqueueMutation(
-  mutation: Omit<IDBMutation, "localId" | "createdAt" | "workspaceId">,
+  mutation: Omit<IDBMutation, "localId" | "createdAt" | "workspaceId" | "attempts" | "nextRetryAt" | "lastError">,
   workspaceId: string,
 ): Promise<void> {
   // Cap the mutation queue to prevent unbounded growth while offline
@@ -131,6 +526,9 @@ export async function enqueueMutation(
     data: storedData,
     workspaceId,
     createdAt: Date.now(),
+    attempts: 0,
+    nextRetryAt: 0,
+    lastError: null,
   });
 
   // Register Background Sync so the SW wakes us when connectivity returns
@@ -185,15 +583,21 @@ export async function pullChanges(workspaceId?: string): Promise<boolean> {
       if (!res.ok) {
         if (res.status === 403) {
           _notifyAccessDenied(wid);
+          _recordFailure("pull", `HTTP 403`);
           return false;
         }
         syncErr("pull", `HTTP ${res.status} from /api/sync/changes`);
         try { syncErr("pull", await res.text()); } catch {}
+        _recordFailure("pull", `HTTP ${res.status}`);
         return false;
       }
 
       const data = await res.json();
       const { cursor, changes } = data;
+
+      // Every successful pull page counts, even no-op pages.
+      _counters = { ..._counters, pullBatches: _counters.pullBatches + 1, lastPullAt: Date.now() };
+      _emitCounters();
 
       const expCount = changes.expenses?.length ?? 0;
       const settCount = changes.settings ? 1 : 0;
@@ -216,9 +620,17 @@ export async function pullChanges(workspaceId?: string): Promise<boolean> {
       const pendingDeleteIds = new Set(
         pendingMutations.filter(m => m.operation === "delete" && m.id).map(m => m.id!)
       );
+      // Records with an un-pushed local upsert — a differing server money value
+      // for these is treated as a collision even if the server row looks newer.
+      const pendingUpsertIds = new Set(
+        pendingMutations.filter(m => m.operation === "upsert" && m.id).map(m => m.id!)
+      );
 
       // Track whether we actually wrote something (skip _notifySyncPull if no real changes)
       let didWrite = false;
+      // Money-field collisions detected this pull; reconciled after the tx commits.
+      const moneyConflicts: MoneyConflict[] = [];
+      const resolvedConflictKeys: string[] = [];
 
       // Pre-read existing settings to avoid redundant writes
       const existingSettings = changes.settings ? await db.settings.get(wid) : null;
@@ -244,13 +656,14 @@ export async function pullChanges(workspaceId?: string): Promise<boolean> {
               if (pendingDeleteIds.has(row.id)) continue;
               if (row.deletedAt) {
                 await db.expenses.delete(row.id);
+                resolvedConflictKeys.push(..._conflictKeysFor("expense", row.id));
               } else {
                 const serverUpdatedAt = new Date(row.updatedAt).getTime();
                 const existing = existingMap.get(row.id);
                 if (existing && existing.updatedAt > serverUpdatedAt) {
                   conflictCount++;
                 }
-                await db.expenses.put({
+                const serverRecord: IDBExpense = {
                   id: row.id,
                   workspaceId: wid,
                   category: row.category,
@@ -265,12 +678,23 @@ export async function pullChanges(workspaceId?: string): Promise<boolean> {
                   createdAt: new Date(row.createdAt).getTime(),
                   updatedAt: serverUpdatedAt,
                   deletedAt: null,
-                });
+                };
+                const { merged, conflicts, resolvedKeys } = _mergePulledRecord(
+                  "expense", wid, row.id, existing, serverRecord,
+                  serverUpdatedAt, pendingUpsertIds.has(row.id),
+                );
+                if (conflicts.length) moneyConflicts.push(...conflicts);
+                if (resolvedKeys.length) resolvedConflictKeys.push(...resolvedKeys);
+                await db.expenses.put(merged);
               }
               didWrite = true;
             }
-            if (conflictCount > 0 && _broadcastChannel) {
-              _broadcastChannel.postMessage({ type: "sync-conflict", count: conflictCount });
+            if (conflictCount > 0) {
+              _counters = { ..._counters, conflicts: _counters.conflicts + conflictCount };
+              _emitCounters();
+              if (_broadcastChannel) {
+                _broadcastChannel.postMessage({ type: "sync-conflict", count: conflictCount });
+              }
             }
           }
 
@@ -349,12 +773,22 @@ export async function pullChanges(workspaceId?: string): Promise<boolean> {
 
           // ── Ledgers ──
           if (changes.businessLedgers?.length) {
+            const incomingIds = changes.businessLedgers
+              .filter((r: Record<string, unknown>) => !r.deletedAt && !pendingDeleteIds.has(r.id as string))
+              .map((r: Record<string, unknown>) => r.id as string);
+            const existingMap = new Map(
+              (await db.ledgers.bulkGet(incomingIds))
+                .filter(Boolean)
+                .map((l) => [l!.id, l!])
+            );
             for (const row of changes.businessLedgers) {
               if (pendingDeleteIds.has(row.id)) continue;
               if (row.deletedAt) {
                 await db.ledgers.delete(row.id);
+                resolvedConflictKeys.push(..._conflictKeysFor("ledger", row.id));
               } else {
-                await db.ledgers.put({
+                const serverUpdatedAt = new Date(row.updatedAt).getTime();
+                const serverRecord: IDBLedger = {
                   id: row.id,
                   workspaceId: wid,
                   name: row.name,
@@ -365,9 +799,16 @@ export async function pullChanges(workspaceId?: string): Promise<boolean> {
                   tags: row.tags || [],
                   notes: row.notes || "",
                   createdAt: new Date(row.createdAt).getTime(),
-                  updatedAt: new Date(row.updatedAt).getTime(),
+                  updatedAt: serverUpdatedAt,
                   deletedAt: null,
-                });
+                };
+                const { merged, conflicts, resolvedKeys } = _mergePulledRecord(
+                  "ledger", wid, row.id, existingMap.get(row.id), serverRecord,
+                  serverUpdatedAt, pendingUpsertIds.has(row.id),
+                );
+                if (conflicts.length) moneyConflicts.push(...conflicts);
+                if (resolvedKeys.length) resolvedConflictKeys.push(...resolvedKeys);
+                await db.ledgers.put(merged);
               }
               didWrite = true;
             }
@@ -375,12 +816,22 @@ export async function pullChanges(workspaceId?: string): Promise<boolean> {
 
           // ── Payments ──
           if (changes.businessPayments?.length) {
+            const incomingIds = changes.businessPayments
+              .filter((r: Record<string, unknown>) => !r.deletedAt && !pendingDeleteIds.has(r.id as string))
+              .map((r: Record<string, unknown>) => r.id as string);
+            const existingMap = new Map(
+              (await db.payments.bulkGet(incomingIds))
+                .filter(Boolean)
+                .map((p) => [p!.id, p!])
+            );
             for (const row of changes.businessPayments) {
               if (pendingDeleteIds.has(row.id)) continue;
               if (row.deletedAt) {
                 await db.payments.delete(row.id);
+                resolvedConflictKeys.push(..._conflictKeysFor("payment", row.id));
               } else {
-                await db.payments.put({
+                const serverUpdatedAt = new Date(row.updatedAt).getTime();
+                const serverRecord: IDBPayment = {
                   id: row.id,
                   workspaceId: wid,
                   ledgerId: row.ledgerId,
@@ -390,9 +841,16 @@ export async function pullChanges(workspaceId?: string): Promise<boolean> {
                   reference: row.reference || undefined,
                   notes: row.notes || undefined,
                   createdAt: new Date(row.createdAt).getTime(),
-                  updatedAt: new Date(row.updatedAt).getTime(),
+                  updatedAt: serverUpdatedAt,
                   deletedAt: null,
-                });
+                };
+                const { merged, conflicts, resolvedKeys } = _mergePulledRecord(
+                  "payment", wid, row.id, existingMap.get(row.id), serverRecord,
+                  serverUpdatedAt, pendingUpsertIds.has(row.id),
+                );
+                if (conflicts.length) moneyConflicts.push(...conflicts);
+                if (resolvedKeys.length) resolvedConflictKeys.push(...resolvedKeys);
+                await db.payments.put(merged);
               }
               didWrite = true;
             }
@@ -404,6 +862,14 @@ export async function pullChanges(workspaceId?: string): Promise<boolean> {
           }
         }
       );
+
+      // Reconcile money-field conflicts detected during the merge. Done after
+      // the tx commits so listeners observe a consistent IDB state. Contested
+      // local values are preserved above and stay until the user resolves them
+      // via `resolveMoneyConflict`; converged conflicts are cleared.
+      if (moneyConflicts.length || resolvedConflictKeys.length) {
+        _reconcileConflicts(moneyConflicts, resolvedConflictKeys);
+      }
 
       // Only notify subscribers if we actually wrote data — prevents
       // cascading re-renders and push-pull loops from no-op pulls.
@@ -424,6 +890,7 @@ export async function pullChanges(workspaceId?: string): Promise<boolean> {
       return true;
     } catch (err) {
       syncErr("pull", "Exception in pullChanges:", err);
+      _recordFailure("pull", err instanceof Error ? err.name : "exception");
       return false;
     }
   })();
@@ -456,6 +923,14 @@ export async function pushMutations(workspaceId?: string): Promise<number> {
       .sortBy("localId");
     if (allMutations.length === 0) return 0;
 
+    // Backfill retry metadata on legacy rows that pre-date Dexie v4 (belt-and-
+    // braces — the v4 upgrade also does this).
+    for (const m of allMutations) {
+      if (typeof m.attempts !== "number") m.attempts = 0;
+      if (typeof m.nextRetryAt !== "number") m.nextRetryAt = 0;
+      if (typeof m.lastError === "undefined") m.lastError = null;
+    }
+
     // Purge mutations with non-UUID ids — they will always fail Zod validation
     const invalidMutations = allMutations.filter(m => m.id && !UUID_RE.test(m.id));
     if (invalidMutations.length > 0) {
@@ -463,8 +938,30 @@ export async function pushMutations(workspaceId?: string): Promise<number> {
       await db.mutations.bulkDelete(invalidMutations.map(m => m.localId!).filter(Boolean));
     }
 
-    const mutations = allMutations.filter(m => !m.id || UUID_RE.test(m.id));
-    if (mutations.length === 0) return 0;
+    const now = Date.now();
+    const eligible = allMutations.filter(m => {
+      if (m.id && !UUID_RE.test(m.id)) return false;
+      // Dead-lettered mutations — skip until user retries them explicitly.
+      if ((m.attempts ?? 0) >= MAX_MUTATION_ATTEMPTS) return false;
+      // Backoff — not yet time to retry.
+      if ((m.nextRetryAt ?? 0) > now) return false;
+      return true;
+    });
+    if (eligible.length === 0) {
+      // Nothing to drain right now — but if we deferred any items, schedule
+      // the next drain at the earliest nextRetryAt so we don't wait for the
+      // slow-poll tick.
+      const deferred = allMutations.filter(m =>
+        (m.attempts ?? 0) < MAX_MUTATION_ATTEMPTS && (m.nextRetryAt ?? 0) > now
+      );
+      if (deferred.length > 0) {
+        const earliest = Math.min(...deferred.map(m => m.nextRetryAt ?? 0));
+        _scheduleRetryDrain(earliest - now);
+      }
+      return 0;
+    }
+
+    const mutations = eligible;
 
     syncLog("push", `Pushing ${mutations.length} mutations for workspace=${wid.slice(0,8)}…`);
 
@@ -494,6 +991,7 @@ export async function pushMutations(workspaceId?: string): Promise<number> {
             id: m.id,
             data: m.data,
             idempotencyKey: m.idempotencyKey,
+            ...(m.conflict ? { conflict: m.conflict } : {}),
           })),
         };
         syncLog("push", `Sending batch ${i/100 + 1}: ${batch.length} mutations`, batch.map(m => `${m.table}:${m.operation}:${m.id?.slice(0,8)}`));
@@ -518,9 +1016,12 @@ export async function pushMutations(workspaceId?: string): Promise<number> {
           applied += body.results.filter(
             (r: { status: string }) => r.status === "applied"
           ).length;
+          _counters = { ..._counters, pushBatches: _counters.pushBatches + 1, lastPushAt: Date.now() };
+          _emitCounters();
         } else {
           const bodyText = await res.text().catch(() => "");
           syncErr("push", `HTTP ${res.status} from /api/sync/commit:`, bodyText);
+          _recordFailure("push", `HTTP ${res.status}`);
           if (res.status === 403) {
             _notifyAccessDenied(wid);
             break;
@@ -529,10 +1030,13 @@ export async function pushMutations(workspaceId?: string): Promise<number> {
           // these mutations have valid UUIDs so the issue may be transient (schema mismatch etc.)
           // 401 = needs token refresh — authFetch already retried, so give up for this cycle
           // Other = server error, retry later
+          await _recordBatchFailure(batch, res.status);
           break;
         }
       } catch (err) {
         syncErr("push", "Network error during push:", err);
+        _recordFailure("push", err instanceof Error ? err.name : "network");
+        await _recordBatchFailure(batch, undefined, err);
         break; // Network error — stop, retry later (mutations stay in queue)
       }
     }
@@ -565,6 +1069,167 @@ export function trySyncPush(workspaceId?: string, showSpinner = false) {
 
 export async function getPendingMutationCount(): Promise<number> {
   return db.mutations.count();
+}
+
+// ── Dead-letter queue (Sprint 2.2 / T-2.2.4) ──
+
+const _deadLetterListeners = new Set<() => void>();
+
+function _notifyDeadLetterChange() {
+  _deadLetterListeners.forEach((fn) => {
+    try { fn(); } catch { /* listener errors are non-fatal */ }
+  });
+}
+
+/** Subscribe to dead-letter queue changes (promotion, retry, discard). */
+export function onDeadLetterChange(fn: () => void): () => void {
+  _deadLetterListeners.add(fn);
+  return () => { _deadLetterListeners.delete(fn); };
+}
+
+/**
+ * List mutations that have exhausted their retry budget and are awaiting
+ * user action. Filters by workspace so per-tenant UI stays clean.
+ */
+export async function getDeadLetterMutations(workspaceId?: string): Promise<IDBMutation[]> {
+  const wid = workspaceId ?? getActiveWorkspaceId();
+  if (!wid) return [];
+  const all = await db.mutations.where("workspaceId").equals(wid).toArray();
+  return all.filter(m => (m.attempts ?? 0) >= MAX_MUTATION_ATTEMPTS);
+}
+
+/**
+ * Reset a dead-lettered mutation so the next drain picks it up.
+ * Clears attempts, nextRetryAt, and lastError; returns true on success.
+ */
+export async function retryDeadLetter(localId: number): Promise<boolean> {
+  const mutation = await db.mutations.get(localId);
+  if (!mutation) return false;
+  await db.mutations.update(localId, {
+    attempts: 0,
+    nextRetryAt: 0,
+    lastError: null,
+  });
+  _notifyDeadLetterChange();
+  // Log to server audit trail (best-effort — never blocks the UI).
+  _auditDeadLetterAction(mutation.workspaceId, "retry", mutation).catch(() => {});
+  // Kick a drain now so the user sees immediate progress.
+  trySyncPush(mutation.workspaceId);
+  return true;
+}
+
+/**
+ * Remove a dead-lettered mutation from the queue. Returns the removed
+ * mutation so the caller can offer an "Undo" that re-enqueues it.
+ */
+export async function discardDeadLetter(localId: number): Promise<IDBMutation | null> {
+  const mutation = await db.mutations.get(localId);
+  if (!mutation) return null;
+  await db.mutations.delete(localId);
+  _notifyDeadLetterChange();
+  _auditDeadLetterAction(mutation.workspaceId, "discard", mutation).catch(() => {});
+  return mutation;
+}
+
+/**
+ * Restore a previously-discarded mutation. Used to implement the "Undo"
+ * affordance on the discard action. Preserves attempts=0 so the drain
+ * retries it immediately.
+ */
+export async function restoreDiscardedMutation(mutation: IDBMutation): Promise<void> {
+  // Strip localId so Dexie assigns a fresh auto-increment key.
+  const { localId: _drop, ...rest } = mutation;
+  void _drop;
+  await db.mutations.add({
+    ...rest,
+    attempts: 0,
+    nextRetryAt: 0,
+    lastError: null,
+  });
+  _notifyDeadLetterChange();
+  trySyncPush(mutation.workspaceId);
+}
+
+async function _auditDeadLetterAction(
+  workspaceId: string,
+  action: "retry" | "discard",
+  mutation: IDBMutation,
+): Promise<void> {
+  try {
+    // Redacted payload — never sends `data` (may contain amounts / notes).
+    await authFetch("/api/audit/sync-dead-letter", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        workspaceId,
+        action,
+        mutationSummary: {
+          table: mutation.table,
+          operation: mutation.operation,
+          idempotencyKey: mutation.idempotencyKey,
+          attempts: mutation.attempts ?? 0,
+          lastError: mutation.lastError ?? null,
+        },
+      }),
+      signal: AbortSignal.timeout(10_000),
+    });
+  } catch {
+    // Non-fatal — audit endpoint is best-effort.
+  }
+}
+
+// ── Retry-drain scheduling (Sprint 2.2 / T-2.2.2) ──
+
+let _retryDrainTimeout: ReturnType<typeof setTimeout> | null = null;
+
+/**
+ * Persist a batch failure: bump `attempts`, compute exponential backoff with
+ * jitter, and persist `lastError`. Mutations that cross the MAX_MUTATION_ATTEMPTS
+ * threshold surface via `onDeadLetterChange`.
+ */
+async function _recordBatchFailure(
+  batch: IDBMutation[],
+  status?: number,
+  err?: unknown,
+): Promise<void> {
+  const now = Date.now();
+  const lastError = _redactPushError(err, status);
+  let deadLetterPromoted = false;
+  await db.transaction("rw", db.mutations, async () => {
+    for (const m of batch) {
+      if (!m.localId) continue;
+      const attempts = (m.attempts ?? 0) + 1;
+      const wasDeadLettered = (m.attempts ?? 0) >= MAX_MUTATION_ATTEMPTS;
+      const isDeadLettered = attempts >= MAX_MUTATION_ATTEMPTS;
+      if (!wasDeadLettered && isDeadLettered) deadLetterPromoted = true;
+      await db.mutations.update(m.localId, {
+        attempts,
+        nextRetryAt: now + computeBackoffDelay(attempts),
+        lastError,
+      });
+    }
+  });
+  if (deadLetterPromoted) _notifyDeadLetterChange();
+
+  // Schedule a targeted retry so we don't wait for the slow-poll tick.
+  const earliestDelay = computeBackoffDelay(1); // conservative — actual per-row values persisted above
+  _scheduleRetryDrain(earliestDelay);
+}
+
+function _scheduleRetryDrain(delayMs: number): void {
+  if (_retryDrainTimeout) { clearTimeout(_retryDrainTimeout); _retryDrainTimeout = null; }
+  const wait = Math.max(0, Math.min(delayMs, BACKOFF_CAP_MS + BACKOFF_JITTER_MS));
+  _retryDrainTimeout = setTimeout(() => {
+    _retryDrainTimeout = null;
+    if (typeof document !== "undefined" && document.visibilityState !== "visible") return;
+    if (typeof navigator !== "undefined" && !navigator.onLine) return;
+    trySyncPush();
+  }, wait);
+  // In Node (Jest) allow the process to exit even while this timer is
+  // pending. Browsers have no `.unref()` on the timer handle, hence the
+  // defensive optional chain.
+  const handle = _retryDrainTimeout as unknown as { unref?: () => void };
+  handle?.unref?.();
 }
 
 // ── Sync engine lifecycle ──
@@ -718,6 +1383,9 @@ async function _migrateStuckData() {
         idempotencyKey: makeIdempotencyKey(),
         workspaceId: exp.workspaceId,
         createdAt: Date.now(),
+        attempts: 0,
+        nextRetryAt: 0,
+        lastError: null,
       });
     }
 
@@ -743,6 +1411,9 @@ async function _migrateStuckData() {
         idempotencyKey: makeIdempotencyKey(),
         workspaceId: led.workspaceId,
         createdAt: Date.now(),
+        attempts: 0,
+        nextRetryAt: 0,
+        lastError: null,
       });
     }
 
@@ -767,6 +1438,9 @@ async function _migrateStuckData() {
         idempotencyKey: makeIdempotencyKey(),
         workspaceId: pay.workspaceId,
         createdAt: Date.now(),
+        attempts: 0,
+        nextRetryAt: 0,
+        lastError: null,
       });
     }
 
@@ -871,6 +1545,7 @@ export function startSyncEngine() {
 
 export function stopSyncEngine() {
   if (_syncTimeout) { clearTimeout(_syncTimeout); _syncTimeout = null; }
+  if (_retryDrainTimeout) { clearTimeout(_retryDrainTimeout); _retryDrainTimeout = null; }
   if (_onlineHandler) { window.removeEventListener("online", _onlineHandler); _onlineHandler = null; }
   if (_visibilityHandler) { document.removeEventListener("visibilitychange", _visibilityHandler); _visibilityHandler = null; }
   if (_realtimeChannel) { supabase.removeChannel(_realtimeChannel); _realtimeChannel = null; }
@@ -885,4 +1560,7 @@ export function stopSyncEngine() {
   _firstPullPromise = new Promise((r) => { _firstPullResolve = r; });
   _initReady = Promise.resolve();
   _setSyncPhase("idle");
+  _counters = _emptyCounters();
+  _emitCounters();
+  clearMoneyConflicts();
 }

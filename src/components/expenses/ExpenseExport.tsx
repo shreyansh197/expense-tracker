@@ -6,6 +6,7 @@ import { Download, FileDown, Image, FileSpreadsheet, FileText, Upload } from "lu
 import type { Expense } from "@/types";
 import { CATEGORIES } from "@/lib/categories";
 import { useSettings } from "@/hooks/useSettings";
+import { addMoney } from "@/lib/money";
 
 interface ExpenseExportProps {
   expenses: Expense[];
@@ -98,7 +99,7 @@ export function ExpenseExport({ expenses, month, year, onImport }: ExpenseExport
 
   const exportPDF = () => {
     const monthName = new Date(year, month - 1).toLocaleString("default", { month: "long" });
-    const total = activeExpenses.reduce((s, e) => s + e.amount, 0);
+    const total = activeExpenses.reduce((s, e) => addMoney(s, e.amount), 0);
     const currency = settings.currency || "INR";
     const symbol = currency === "INR" ? "₹" : currency === "USD" ? "$" : currency;
 
@@ -146,14 +147,14 @@ export function ExpenseExport({ expenses, month, year, onImport }: ExpenseExport
 
   const exportImage = async () => {
     const monthName = new Date(year, month - 1).toLocaleString("default", { month: "long" });
-    const total = activeExpenses.reduce((s, e) => s + e.amount, 0);
+    const total = activeExpenses.reduce((s, e) => addMoney(s, e.amount), 0);
     const currency = settings.currency || "INR";
     const symbol = currency === "INR" ? "₹" : currency === "USD" ? "$" : currency;
 
     // Category breakdown
     const catTotals: Record<string, number> = {};
     for (const e of activeExpenses) {
-      catTotals[e.category] = (catTotals[e.category] || 0) + e.amount;
+      catTotals[e.category] = addMoney(catTotals[e.category] || 0, e.amount);
     }
     const topCats = Object.entries(catTotals)
       .sort(([, a], [, b]) => b - a)

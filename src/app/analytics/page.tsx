@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { AppShell } from "@/components/layout/AppShell";
 import { MonthSwitcher } from "@/components/layout/MonthSwitcher";
 import { SyncIndicator } from "@/components/sync/SyncIndicator";
+import { addMoney } from "@/lib/money";
 import { useUIStore } from "@/stores/uiStore";
 import { useMonthUrlSync } from "@/hooks/useMonthUrlSync";
 import { usePageTitle } from "@/hooks/usePageTitle";
@@ -135,7 +136,7 @@ function AnalyticsContent() {
 
     const monthLabel = getMonthName(currentMonth);
     const currentMd = history.currentMonth;
-    const total = currentMd ? currentMd.expenses.reduce((s, e) => s + e.amount, 0) : 0;
+    const total = currentMd ? currentMd.expenses.reduce((s, e) => addMoney(s, e.amount), 0) : 0;
 
     // ── Title ──
     ctx.fillStyle = "#1A1B2E";

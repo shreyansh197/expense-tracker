@@ -18,6 +18,7 @@ import {
   detectAnomalies,
 } from "@/lib/calculations";
 import { getDaysInMonth } from "@/lib/utils";
+import { addMoney } from "@/lib/money";
 import { fetchRates, convert, getFallbackRates } from "@/lib/exchangeRates";
 import { db } from "@/lib/db";
 import { getActiveWorkspaceId } from "@/lib/authClient";
@@ -165,7 +166,7 @@ export function useCalculations(
             ? await db.expenses.where("[workspaceId+month+year]").equals([wid, m, y]).toArray()
             : await db.expenses.where({ month: m, year: y }).toArray();
           const active = exps.filter((e) => !e.deletedAt);
-          const total = active.reduce((s, e) => s + e.amount, 0);
+          const total = active.reduce((s, e) => addMoney(s, e.amount), 0);
           totals.push(total);
           for (const e of active) {
             allHist.push({

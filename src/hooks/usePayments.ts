@@ -10,6 +10,7 @@ import {
   generateUUID,
 } from "@/lib/syncEngine";
 import { useDexieQuery } from "@/hooks/useDexieQuery";
+import { addMoney } from "@/lib/money";
 import type { Payment, PaymentInput, PaymentMethod, SyncStatus } from "@/types";
 
 // Global event kept for backward compatibility (RecurringManager imports it)
@@ -134,7 +135,7 @@ export function usePayments(ledgerId: string | null) {
     notifyPaymentChange();
   }, []);
 
-  const totalReceived = payments.reduce((sum, p) => sum + p.amount, 0);
+  const totalReceived = payments.reduce((sum, p) => addMoney(sum, p.amount), 0);
 
   return {
     payments,

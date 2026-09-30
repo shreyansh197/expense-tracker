@@ -18,6 +18,7 @@ import { rehydrateAppMode } from "@/stores/uiStore";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useToast } from "@/components/ui/Toast";
 import { useSyncConflictToast } from "@/hooks/useSyncConflictToast";
+import { ConflictReviewSheet } from "@/components/sync/ConflictReviewSheet";
 
 function SyncProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
@@ -112,6 +113,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
               <AccentColorEffect />
               <KeyboardScrollEffect />
               <SyncConflictWatcher />
+              <ConflictReviewSheet />
               <RecoveryCodeBanner />
               <AppReviewPrompt />
               <ConfirmProvider>{children}</ConfirmProvider>

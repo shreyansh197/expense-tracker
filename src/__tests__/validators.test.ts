@@ -12,6 +12,7 @@ import {
   syncChangesSchema,
   syncCommitSchema,
   updateSettingsSchema,
+  notificationPrefsSchema,
 } from "../lib/validators";
 
 // =========== registerSchema ===========
@@ -443,6 +444,128 @@ describe("syncCommitSchema", () => {
       mutations: [{ ...validMutation, idempotencyKey: "a".repeat(65) }],
     });
     expect(result.success).toBe(false);
+  });
+
+  test("accepts a workspace_settings mutation with a valid quiet-hours window", () => {
+    const result = syncCommitSchema.safeParse({
+      workspaceId: validUuid,
+      mutations: [
+        {
+          table: "workspace_settings",
+          operation: "upsert",
+          idempotencyKey: "key-settings-1",
+          data: {
+            notificationPrefs: {
+              enabled: true,
+              quietHoursEnabled: true,
+              quietHoursStart: "22:00",
+              quietHoursEnd: "07:00",
+              quietHoursTimezone: "Asia/Kolkata",
+            },
+          },
+        },
+      ],
+    });
+    expect(result.success).toBe(true);
+  });
+
+  test("rejects a workspace_settings mutation with an identical quiet-hours start/end", () => {
+    const result = syncCommitSchema.safeParse({
+      workspaceId: validUuid,
+      mutations: [
+        {
+          table: "workspace_settings",
+          operation: "upsert",
+          idempotencyKey: "key-settings-2",
+          data: {
+            notificationPrefs: {
+              quietHoursEnabled: true,
+              quietHoursStart: "09:00",
+              quietHoursEnd: "09:00",
+            },
+          },
+        },
+      ],
+    });
+    expect(result.success).toBe(false);
+  });
+});
+
+// =========== notificationPrefsSchema (T-3.2.1) ===========
+
+describe("notificationPrefsSchema", () => {
+  test("accepts an empty object (all fields optional)", () => {
+    expect(notificationPrefsSchema.safeParse({}).success).toBe(true);
+  });
+
+  test("accepts a same-day quiet-hours window (start < end)", () => {
+    const result = notificationPrefsSchema.safeParse({
+      quietHoursEnabled: true,
+      quietHoursStart: "09:00",
+      quietHoursEnd: "17:00",
+    });
+    expect(result.success).toBe(true);
+  });
+
+  test("accepts an overnight quiet-hours window (start > end)", () => {
+    const result = notificationPrefsSchema.safeParse({
+      quietHoursEnabled: true,
+      quietHoursStart: "22:00",
+      quietHoursEnd: "07:00",
+    });
+    expect(result.success).toBe(true);
+  });
+
+  test("rejects an identical start and end (ambiguous window)", () => {
+    const result = notificationPrefsSchema.safeParse({
+      quietHoursEnabled: true,
+      quietHoursStart: "12:00",
+      quietHoursEnd: "12:00",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  test("rejects a malformed HH:MM string", () => {
+    expect(
+      notificationPrefsSchema.safeParse({ quietHoursStart: "9:00" }).success,
+    ).toBe(false);
+    expect(
+      notificationPrefsSchema.safeParse({ quietHoursEnd: "24:00" }).success,
+    ).toBe(false);
+    expect(
+      notificationPrefsSchema.safeParse({ quietHoursEnd: "12:60" }).success,
+    ).toBe(false);
+  });
+
+  test("accepts eveningReminderTime in HH:MM format", () => {
+    expect(
+      notificationPrefsSchema.safeParse({ eveningReminderTime: "21:00" }).success,
+    ).toBe(true);
+  });
+
+  test("rejects malformed eveningReminderTime", () => {
+    expect(
+      notificationPrefsSchema.safeParse({ eveningReminderTime: "9pm" }).success,
+    ).toBe(false);
+  });
+
+  test("passes through unrecognized fields for forward/backward compatibility", () => {
+    const result = notificationPrefsSchema.safeParse({ enabled: true, futureField: "x" });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect((result.data as Record<string, unknown>).futureField).toBe("x");
+    }
+  });
+
+  test("older prefs without any quiet-hours fields remain valid (sync migration compatibility)", () => {
+    const legacy = {
+      enabled: true,
+      eveningReminder: true,
+      eveningReminderTime: "21:00",
+      weeklyDigest: false,
+      budgetAlerts: true,
+    };
+    expect(notificationPrefsSchema.safeParse(legacy).success).toBe(true);
   });
 });
 

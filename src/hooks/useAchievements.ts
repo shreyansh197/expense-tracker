@@ -2,6 +2,7 @@
 
 import { useMemo, useRef, useCallback, useEffect } from "react";
 import type { Achievement, Expense, UserSettings } from "@/types";
+import { addMoney } from "@/lib/money";
 
 // ── Achievement definitions ──
 
@@ -48,7 +49,7 @@ function getConsecutiveMonthsUnderBudget(
   for (const e of allExpenses) {
     if (e.deletedAt) continue;
     const key = `${e.year}-${String(e.month).padStart(2, "0")}`;
-    monthMap[key] = (monthMap[key] || 0) + e.amount;
+    monthMap[key] = addMoney(monthMap[key] || 0, e.amount);
   }
 
   const now = new Date();
