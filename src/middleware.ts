@@ -20,6 +20,7 @@ const PUBLIC_PATHS = new Set([
   "/api/migrate/sync-code", // POST – legacy migration
   "/api/push/vapid-key",    // GET — public VAPID key for push subscribe
   "/api/push/send",         // POST — cron-triggered, secured by CRON_SECRET
+  "/api/admin/push/health", // GET — cron/monitor OR admin session, secured in-route
 ]);
 
 // Path prefixes that don't require auth

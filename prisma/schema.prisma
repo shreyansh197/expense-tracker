@@ -361,6 +361,26 @@ model PushSubscription {
   @@map("push_subscriptions")
 }
 
+// ═══════════════════════════  PUSH DELIVERIES (lifecycle)  ════
+// Durable per-notification delivery record powering server-scheduled
+// reminders with retry + dead-letter (Sprint 3.1). Status transitions:
+// pending → sent, or pending → failed (retry with backoff) → dead.
+model PushDelivery {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  subscriptionId String   @map("subscription_id") @db.Uuid
+  scheduledFor   DateTime @default(now()) @map("scheduled_for") @db.Timestamptz
+  attempts       Int      @default(0)
+  lastError      String?  @map("last_error") @db.Text
+  status         String   @default("pending") @db.VarChar(16)
+  payload        String   @db.Text
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@index([status, scheduledFor])
+  @@index([subscriptionId])
+  @@map("push_deliveries")
+}
+
 // ═══════════════════════════  SYNC CURSORS (per device)  ══════
 
 model SyncCursor {

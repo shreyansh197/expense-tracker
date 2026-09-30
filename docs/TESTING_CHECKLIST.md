@@ -58,7 +58,7 @@ Owner spec files under [`src/__tests__/`](../src/__tests__):
 
 - [ ] `syncEngine.integration.test.ts` — delta pull, mutation-queue drain, workspace-scope enforcement, `onWorkspaceAccessDenied` propagation.
 - [ ] `settingsSync.test.ts` — settings-store hydration, offline write → online reconciliation.
-- [ ] `notifications.test.ts` / `notificationSettings.test.ts` — Web Push subscribe/unsubscribe contract, notification-preference storage, quiet-hours math.
+- [x] `notifications.test.ts` / `notificationSettings.test.ts` / `pushQuietHours.test.ts` — Web Push subscribe/unsubscribe contract, notification-preference storage, quiet-hours math ([Sprint 3.2 T-3.2.6](IMPLEMENTATION_QUEUE.md#sprint-32)).
 - [ ] `dashboardComponents.test.ts` — dashboard tiles render deterministically from fixture ledgers.
 - [ ] `bugFixes.test.ts` / `recentFeatures.test.ts` / `cleanupVerification.test.ts` — regression barriers for specific incidents.
 - [ ] `quickTemplatesAndViewMode.test.ts` — expenses-page interaction regressions.
@@ -71,6 +71,15 @@ Owner spec files under [`src/__tests__/`](../src/__tests__):
 - [x] `conflictReviewSheet.contract.test.ts` ([Sprint 2.3 T-2.3.2](IMPLEMENTATION_QUEUE.md#sprint-23)) — locks visual invariants: tokens-only styling, 48 px touch targets, focus-trapped BottomSheet, mine/theirs-only actions.
 - [x] `moneyLintRule.test.ts` ([Sprint 2.3 T-2.3.6](IMPLEMENTATION_QUEUE.md#sprint-23)) — the money-arithmetic ESLint guard fires on synthetic `+`/`-`/`*`(+compound) violations, stays quiet with the helpers, and is disabled inside `money.ts`.
 - [x] `calculations.test.ts` — extended with a Money-precision block proving drift-free totals after the T-2.3.5 migration.
+
+**Sprint 3.x adds:**
+
+- [x] `pushSend.retry.test.ts` ([Sprint 3.1 T-3.1.3 / T-3.1.6](IMPLEMENTATION_QUEUE.md#sprint-31)) — backoff schedule `30s → 5min → 30min → dead` with ±20% jitter bounds; a persistently-failing endpoint is dead-lettered after exactly 4 attempts; a successful send marks the delivery `sent` on the first attempt.
+- [x] `pushSubscription.stale.test.ts` ([Sprint 3.1 T-3.1.5 / T-3.1.6](IMPLEMENTATION_QUEUE.md#sprint-31)) — a `410`/`404` from the push service prunes the `push_subscriptions` row within one dispatch cycle, dead-letters the delivery, and emits exactly one privacy-safe `push.subscription_pruned` audit entry (deduplicated per endpoint); healthy subscriptions are never pruned.
+- [x] `notificationSettings.test.ts` — push-route contract updated for Sprint 3.1: asserts `/api/push/send` delegates to `dispatchDueDeliveries`/`enqueueDeliveries` and that stale-endpoint cleanup + `webpush.sendNotification` live in `pushDispatcher.ts`.
+- [x] `pushQuietHours.test.ts` ([Sprint 3.2 T-3.2.3 / T-3.2.6](IMPLEMENTATION_QUEUE.md#sprint-32)) — `parseHHMMToMinutes`/`resolveQuietHoursWindow`/`isQuietHoursActive`/`nextLocalClockTimeUtc` unit coverage including overnight (midnight-crossing) windows and multiple IANA timezones evaluated independently of the server's UTC clock; `dispatchDueDeliveries` integration proves a delivery inside quiet hours is held (rescheduled to the window's end, zero attempts spent), sends normally once the window ends, is workspace-isolated, and is backward-compatible when no quiet-hours lookup is configured; a 40-subscription mixed fixture clears the ≥ 95% M3 delivery-rate bar.
+- [x] `weeklyDigest.timezone.test.ts` ([Sprint 3.2 T-3.2.4 / T-3.2.6](IMPLEMENTATION_QUEUE.md#sprint-32)) — `getWeekBounds` resolves a different week for a Sunday-first vs. Monday-first locale on the same instant; a UTC instant near midnight lands in a different calendar week depending on the evaluating timezone (east vs. west of UTC); month/year boundary crossings; `getWeeklyTotal` sums only in-range, non-deleted expenses.
+- [x] `validators.test.ts` — extended with `notificationPrefsSchema` ([Sprint 3.2 T-3.2.1](IMPLEMENTATION_QUEUE.md#sprint-32)): accepts same-day and overnight quiet-hours windows, rejects an identical start/end, rejects malformed `HH:MM`, and `syncCommitSchema` accepts/rejects the corresponding `workspace_settings` mutation shapes.
 
 ## 4. Automated — Lint, format, types `[Auto][P0]`
 

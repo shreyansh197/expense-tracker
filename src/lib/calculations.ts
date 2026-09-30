@@ -451,3 +451,88 @@ export function getWeightedForecast(
     historicalMonths: historicalTotals.length,
   };
 }
+
+// ═══════════════════════════════════════════════════════════════
+// WEEK BOUNDS — timezone- and locale-correct digest boundaries (T-3.2.4)
+// ═══════════════════════════════════════════════════════════════
+
+/** A calendar date (no time component — matches the Expense day/month/year grain). */
+export interface CalendarDate {
+  year: number;
+  month: number; // 1-based
+  day: number;
+}
+
+export interface WeekBounds {
+  start: CalendarDate;
+  end: CalendarDate;
+}
+
+/**
+ * The calendar date `instant` falls on inside IANA timezone `timezone`.
+ * A server tick is always a UTC instant; the *date* it corresponds to for a
+ * given user depends entirely on their timezone, not the server's.
+ */
+function getCalendarDateInTimezone(instant: Date, timezone: string): CalendarDate {
+  try {
+    const parts = new Intl.DateTimeFormat("en-CA", {
+      timeZone: timezone,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).formatToParts(instant);
+    const get = (type: string) => Number(parts.find((p) => p.type === type)!.value);
+    return { year: get("year"), month: get("month"), day: get("day") };
+  } catch {
+    // Unknown/invalid IANA name — fail safe to UTC rather than throw.
+    return { year: instant.getUTCFullYear(), month: instant.getUTCMonth() + 1, day: instant.getUTCDate() };
+  }
+}
+
+/**
+ * Compute the calendar week (inclusive Sat/Sun-to-Sun/Sat style bounds)
+ * containing `now`, evaluated in the user's own timezone and week-start
+ * convention — never the server's UTC clock.
+ *
+ * `weekStartsOn`: `0` = Sunday-first (US/India and many other locales),
+ * `1` = Monday-first (ISO-8601 / most of Europe). Two users on either side
+ * of a UTC day boundary must see their own local week, and a Monday-first
+ * locale must resolve to a different week start than a Sunday-first one for
+ * the same instant — that is the whole point of computing this locally
+ * instead of trusting the server's UTC "today".
+ */
+export function getWeekBounds(now: Date, timezone: string, weekStartsOn: 0 | 1 = 0): WeekBounds {
+  const local = getCalendarDateInTimezone(now, timezone);
+  // A UTC-midnight Date for the local calendar date lets us use plain
+  // UTC-based day arithmetic (setUTCDate) without any further tz conversion —
+  // the timezone's influence is fully captured by `local` above.
+  const anchor = new Date(Date.UTC(local.year, local.month - 1, local.day));
+  const dayOfWeek = anchor.getUTCDay(); // 0=Sun..6=Sat, matches `local`'s calendar date
+  const daysSinceWeekStart = (dayOfWeek - weekStartsOn + 7) % 7;
+
+  const start = new Date(anchor);
+  start.setUTCDate(start.getUTCDate() - daysSinceWeekStart);
+  const end = new Date(start);
+  end.setUTCDate(end.getUTCDate() + 6);
+
+  return {
+    start: { year: start.getUTCFullYear(), month: start.getUTCMonth() + 1, day: start.getUTCDate() },
+    end: { year: end.getUTCFullYear(), month: end.getUTCMonth() + 1, day: end.getUTCDate() },
+  };
+}
+
+/** Whether `date` falls within `bounds` (inclusive), by calendar-day comparison. */
+export function isDateWithinWeekBounds(date: CalendarDate, bounds: WeekBounds): boolean {
+  const key = (d: CalendarDate) => d.year * 10000 + d.month * 100 + d.day;
+  const k = key(date);
+  return k >= key(bounds.start) && k <= key(bounds.end);
+}
+
+/** Sum of all active expenses whose date falls inside the given week bounds. */
+export function getWeeklyTotal(expenses: Expense[], bounds: WeekBounds): number {
+  return sumMoney(
+    expenses
+      .filter((e) => !e.deletedAt && isDateWithinWeekBounds({ year: e.year, month: e.month, day: e.day }, bounds))
+      .map((e) => e.amount),
+  );
+}

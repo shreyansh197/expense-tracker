@@ -916,8 +916,9 @@ Decisions are grouped by concern:
 
 **Future Considerations.**
 
-- Server-scheduled reminders with retries (M3 in [PROJECT_MASTER_PLAN.md §14](PROJECT_MASTER_PLAN.md)).
 - Smart quiet-hours inferred from user routine (opt-in).
+
+**Update (Sprint 3.2).** Quiet-hours are no longer just a stated principle — they are now a concrete, user-configurable window (start/end + timezone, overnight wrap supported, e.g. `22:00`–`07:00`) under Settings → Notifications, enforced server-side in `pushDispatcher.ts` per the recipient's own IANA timezone. A delivery due inside the window is held and resent right after it ends rather than dropped. See [IMPLEMENTATION_QUEUE.md Sprint 3.2](IMPLEMENTATION_QUEUE.md#sprint-32).
 
 ---
 

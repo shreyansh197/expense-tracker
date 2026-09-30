@@ -73,6 +73,58 @@ describe("NotificationSettings component contract", () => {
 });
 
 // =========================================================================
+// TC-SETTINGS-009: Quiet hours contract (T-3.2.2)
+// Priority: HIGH | US-SETTINGS-005 — Quiet-hours toggle + paired time pickers
+// =========================================================================
+
+describe("NotificationSettings quiet hours contract", () => {
+  const src = readComponent("components/settings/NotificationSettings.tsx");
+
+  test("TC-SETTINGS-009-01: has a Quiet hours toggle", () => {
+    expect(src).toContain("quietHoursEnabled");
+    expect(src).toMatch(/Quiet hours/i);
+  });
+
+  test("TC-SETTINGS-009-02: toggle is a labelled, keyboard-operable switch", () => {
+    // Same role="switch" + aria-checked pattern as every other toggle in this
+    // component, plus an explicit accessible name for this one.
+    expect(src).toMatch(/role="switch"[\s\S]{0,200}quietHoursEnabled/);
+    expect(src).toContain('aria-label="Quiet hours"');
+  });
+
+  test("TC-SETTINGS-009-03: renders paired start/end time pickers", () => {
+    expect(src).toContain("quietHoursStart");
+    expect(src).toContain("quietHoursEnd");
+    // Both pickers must be native <input type="time"> — same as the evening
+    // reminder — for full keyboard + screen-reader support out of the box.
+    const timeInputs = src.match(/type="time"/g) ?? [];
+    expect(timeInputs.length).toBeGreaterThanOrEqual(3); // evening reminder + start + end
+  });
+
+  test("TC-SETTINGS-009-04: time pickers have accessible labels", () => {
+    expect(src).toContain('aria-label="Quiet hours start time"');
+    expect(src).toContain('aria-label="Quiet hours end time"');
+    expect(src).toContain('htmlFor="quiet-hours-start"');
+    expect(src).toContain('htmlFor="quiet-hours-end"');
+  });
+
+  test("TC-SETTINGS-009-05: pickers are disabled until quiet hours is enabled", () => {
+    // Rendered conditionally on prefs.quietHoursEnabled so a disabled window
+    // never confuses the user with editable-but-inert inputs.
+    expect(src).toMatch(/prefs\.enabled && prefs\.quietHoursEnabled[\s\S]{0,250}quiet-hours-start/);
+  });
+
+  test("TC-SETTINGS-009-06: defaults quiet hours timezone from the browser on enable", () => {
+    expect(src).toMatch(/Intl\.DateTimeFormat\(\)\.resolvedOptions\(\)\.timeZone/);
+  });
+
+  test("TC-SETTINGS-009-07: master toggle disables the quiet-hours switch", () => {
+    // Matches the existing convention: every sub-toggle is `disabled={!prefs.enabled}`.
+    expect(src).toMatch(/disabled=\{!prefs\.enabled\}[\s\S]{0,80}onClick=\{handleToggleQuietHours\}/);
+  });
+});
+
+// =========================================================================
 // TC-SETTINGS-002: Settings page integration contract
 // Priority: HIGH | US-SETTINGS-001
 // =========================================================================
@@ -208,6 +260,7 @@ describe("Push API route contracts", () => {
   const subscribeRoute = readComponent("app/api/push/subscribe/route.ts");
   const sendRoute = readComponent("app/api/push/send/route.ts");
   const vapidRoute = readComponent("app/api/push/vapid-key/route.ts");
+  const pushDispatcher = readComponent("lib/server/pushDispatcher.ts");
 
   test("TC-SETTINGS-005-01: subscribe route exports POST handler", () => {
     expect(subscribeRoute).toMatch(/export\s+(async\s+)?function\s+POST/);
@@ -233,12 +286,18 @@ describe("Push API route contracts", () => {
     expect(sendRoute).toContain("x-cron-secret");
   });
 
-  test("TC-SETTINGS-005-07: send route uses webpush.sendNotification", () => {
-    expect(sendRoute).toContain("sendNotification");
+  test("TC-SETTINGS-005-07: dispatcher uses webpush.sendNotification; route delegates", () => {
+    // Sprint 3.1: the actual send moved into pushDispatcher; the route enqueues
+    // deliveries and delegates dispatch to it.
+    expect(pushDispatcher).toContain("sendNotification");
+    expect(sendRoute).toContain("dispatchDueDeliveries");
+    expect(sendRoute).toContain("enqueueDeliveries");
   });
 
-  test("TC-SETTINGS-005-08: send route cleans stale 404/410 subscriptions", () => {
-    expect(sendRoute).toMatch(/404|410/);
+  test("TC-SETTINGS-005-08: dispatcher cleans stale 404/410 subscriptions", () => {
+    // Sprint 3.1: stale-endpoint pruning lives in the dispatcher's retry loop.
+    expect(pushDispatcher).toMatch(/404|410/);
+    expect(pushDispatcher).toContain("pruneStaleSubscription");
   });
 
   test("TC-SETTINGS-005-09: send route filters by notification time", () => {
@@ -251,6 +310,56 @@ describe("Push API route contracts", () => {
 
   test("TC-SETTINGS-005-11: vapid-key route returns VAPID_PUBLIC_KEY", () => {
     expect(vapidRoute).toContain("VAPID_PUBLIC_KEY");
+  });
+});
+
+// =========================================================================
+// TC-SETTINGS-010: /api/admin/push/health contract (T-3.2.5)
+// Priority: HIGH | Ops dashboard auth + privacy surface
+// =========================================================================
+
+describe("Admin push health route contract", () => {
+  const healthRoute = readComponent("app/api/admin/push/health/route.ts");
+  const middleware = readComponent("middleware.ts");
+
+  test("TC-SETTINGS-010-01: exports a GET handler", () => {
+    expect(healthRoute).toMatch(/export\s+(async\s+)?function\s+GET/);
+  });
+
+  test("TC-SETTINGS-010-02: accepts CRON_SECRET as one auth path", () => {
+    expect(healthRoute).toContain("CRON_SECRET");
+    expect(healthRoute).toContain("x-cron-secret");
+  });
+
+  test("TC-SETTINGS-010-03: accepts an authenticated workspace admin as the other auth path", () => {
+    expect(healthRoute).toContain("requireAuth");
+    expect(healthRoute).toContain("requireWorkspaceAdmin");
+  });
+
+  test("TC-SETTINGS-010-04: rejects when neither auth path succeeds", () => {
+    expect(healthRoute).toMatch(/!isCronAuthed && !isAdminAuthed/);
+    expect(healthRoute).toContain("401");
+  });
+
+  test("TC-SETTINGS-010-05: is rate-limited", () => {
+    expect(healthRoute).toContain("rateLimit(");
+    expect(healthRoute).toContain("429");
+  });
+
+  test("TC-SETTINGS-010-06: never queries push_subscriptions (endpoint/keys stay out of scope)", () => {
+    // The health surface only reads push_deliveries — it must never touch the
+    // table holding raw endpoints / p256dh / auth keys.
+    expect(healthRoute).not.toContain("push_subscriptions");
+    expect(healthRoute).not.toContain("p256dh");
+  });
+
+  test("TC-SETTINGS-010-07: returns aggregate status counters and a delivered ratio", () => {
+    expect(healthRoute).toContain("counts");
+    expect(healthRoute).toContain("deliveredRatio");
+  });
+
+  test("TC-SETTINGS-010-08: whitelisted in middleware so the CRON_SECRET-only path isn't blocked", () => {
+    expect(middleware).toContain("/api/admin/push/health");
   });
 });
 

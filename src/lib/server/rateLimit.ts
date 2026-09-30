@@ -53,11 +53,41 @@ function inMemoryRateLimit(
 
 // ── DB backend ─────────────────────────────────────────────────────────────────
 
+// The `rate_limits` table only exists as a raw-SQL migration (013_rate_limit_table.sql)
+// which is never applied by `prisma db push` (no matching schema.prisma model) or by any
+// migration runner. Without this, every request paid for a failing DB round-trip before
+// falling back to in-memory — ensure the table exists here instead, once per process
+// lifetime, mirroring the pattern in ensureSyncColumns.ts.
+let _tableEnsured = false;
+
+async function ensureRateLimitTable(): Promise<void> {
+  if (_tableEnsured) return;
+  _tableEnsured = true;
+  try {
+    await prisma.$executeRawUnsafe(`
+      CREATE TABLE IF NOT EXISTS rate_limits (
+        "key"      VARCHAR(255) NOT NULL,
+        "count"    INTEGER      NOT NULL DEFAULT 1,
+        "reset_at" TIMESTAMPTZ  NOT NULL,
+        PRIMARY KEY ("key")
+      );
+      CREATE INDEX IF NOT EXISTS rate_limits_reset_at_idx ON rate_limits ("reset_at");
+      ALTER TABLE rate_limits ENABLE ROW LEVEL SECURITY;
+    `);
+  } catch (err) {
+    // Table creation failed (e.g. transient DB issue) — retry on next call.
+    _tableEnsured = false;
+    throw err;
+  }
+}
+
 async function dbRateLimit(
   key: string,
   max: number,
   windowMs: number,
 ): Promise<{ ok: true } | { ok: false; retryAfter: number }> {
+  await ensureRateLimitTable();
+
   const now = new Date();
   const resetAt = new Date(Date.now() + windowMs);
 

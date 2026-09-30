@@ -28,6 +28,35 @@ _No user-visible changes shipped in this section yet._
 
 ---
 
+## Sprint 3.2 — Quiet hours and a clearer night's sleep (in progress)
+
+You can now tell ExpenStream when *not* to reach you. Set a quiet-hours window in Settings → Notifications and every scheduled reminder — evening nudges, weekly digests, budget alerts — waits until the window closes before it ever reaches your device.
+
+**What this means for you:**
+
+- **A real "do not disturb."** Pick a start and end time (even one that crosses midnight, like 10 PM–7 AM) and reminders simply pause for that stretch.
+- **Always evaluated in your own time.** Whether you're an early riser in Mumbai or a night owl in New York, the window is honored in your local time — not the server's.
+- **Nothing lost, just delayed.** A reminder due during quiet hours isn't skipped — it arrives right after the window ends.
+- **Weekly digests match your week.** Your weekly summary now lines up with the week you actually lived, whether your calendar starts on Sunday or Monday.
+
+_Notifications still never contain amounts or personal details._
+
+---
+
+## Sprint 3.1 — Reminders you can rely on (in progress)
+
+Evening reminders, weekly digests, budget alerts, and nudges now run on a dependable server schedule. If a notification can't be delivered right away — say the push service has a brief hiccup — ExpenStream automatically tries again a few times before giving up, so a momentary outage no longer means a missed reminder.
+
+**What this means for you:**
+
+- **Timely reminders.** Scheduled notifications arrive close to your chosen time, every day.
+- **Resilient delivery.** Temporary delivery failures are retried automatically on a gentle backoff instead of being dropped.
+- **Cleaner and quieter.** When a device's notification permission goes away for good, its subscription is retired automatically — no wasted or duplicate sends.
+
+_All timing is computed in your local timezone. Notifications never contain amounts or personal details._
+
+---
+
 ## Sprint 2.3 — Money conflicts, resolved by you (in progress)
 
 When you edit the same amount on two devices while offline, ExpenStream will no longer quietly pick a winner. Instead, the next time your devices sync, a calm review sheet shows both values side by side — the one on this device and the one from the other device — and lets you choose which to keep. Nothing changes until you decide.

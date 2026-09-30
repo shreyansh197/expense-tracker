@@ -686,7 +686,7 @@ TypeScript strict - ESLint/Prettier clean - Tests co-located under `src/__tests_
 - **Acceptance Criteria:**
   - Endpoint returns `{ sent, failed, dead }` counts.
   - Rate-limited and `CRON_SECRET`-gated.
-- **Status:** [ ] Pending
+- **Status:** [x] Done
 
 ### T-3.1.2 - `push_deliveries` table migration
 
@@ -705,7 +705,7 @@ TypeScript strict - ESLint/Prettier clean - Tests co-located under `src/__tests_
 - **Acceptance Criteria:**
   - RLS policies verified by smoke test.
   - Indexed on `(status, scheduledFor)` for scheduler efficiency.
-- **Status:** [ ] Pending
+- **Status:** [x] Done
 
 ### T-3.1.3 - Exponential backoff with jitter
 
@@ -723,7 +723,7 @@ TypeScript strict - ESLint/Prettier clean - Tests co-located under `src/__tests_
 - **Affected Files:** `src/lib/server/pushDispatcher.ts`
 - **Acceptance Criteria:**
   - Unit test asserts schedule and jitter bounds.
-- **Status:** [ ] Pending
+- **Status:** [x] Done
 
 ### T-3.1.4 - Cron entry ticking every minute
 
@@ -742,7 +742,7 @@ TypeScript strict - ESLint/Prettier clean - Tests co-located under `src/__tests_
 - **Acceptance Criteria:**
   - Cron entry documented in `docs/ops/push.md`.
   - Middleware allows the secret-bearing request through.
-- **Status:** [ ] Pending
+- **Status:** [x] Done
 
 ### T-3.1.5 - Auto-prune stale push subscriptions
 
@@ -760,7 +760,7 @@ TypeScript strict - ESLint/Prettier clean - Tests co-located under `src/__tests_
 - **Affected Files:** `src/app/api/push/subscribe/route.ts`, `src/lib/server/pushDispatcher.ts`
 - **Acceptance Criteria:**
   - Stale endpoint unsubscribed within one dispatch cycle.
-- **Status:** [ ] Pending
+- **Status:** [x] Done
 
 ### T-3.1.6 - Retry + stale tests
 
@@ -779,7 +779,7 @@ TypeScript strict - ESLint/Prettier clean - Tests co-located under `src/__tests_
 - **Acceptance Criteria:**
   - Failing endpoint hits dead-letter after 4 attempts.
   - Stale subscription pruned on 410 in test fixture.
-- **Status:** [ ] Pending
+- **Status:** [x] Done
 
 ---
 
@@ -808,7 +808,7 @@ TypeScript strict - ESLint/Prettier clean - Tests co-located under `src/__tests_
 - **Acceptance Criteria:**
   - Zod validation guards start < end (or overnight wrap-around).
   - Sync migration handles missing fields gracefully.
-- **Status:** [ ] Pending
+- **Status:** [x] Done
 
 ### T-3.2.2 - Settings UI: quiet-hours pickers
 
@@ -827,7 +827,7 @@ TypeScript strict - ESLint/Prettier clean - Tests co-located under `src/__tests_
 - **Acceptance Criteria:**
   - Keyboard operable; reduced-motion respected.
   - Contract test covers labels + focus ring.
-- **Status:** [ ] Pending
+- **Status:** [x] Done
 
 ### T-3.2.3 - Dispatcher honors quiet hours per timezone
 
@@ -845,7 +845,7 @@ TypeScript strict - ESLint/Prettier clean - Tests co-located under `src/__tests_
 - **Affected Files:** `src/lib/server/pushDispatcher.ts`
 - **Acceptance Criteria:**
   - Deliveries during quiet-hours are re-scheduled to the next allowed slot.
-- **Status:** [ ] Pending
+- **Status:** [x] Done
 
 ### T-3.2.4 - Weekly digest timezone correctness
 
@@ -863,7 +863,7 @@ TypeScript strict - ESLint/Prettier clean - Tests co-located under `src/__tests_
 - **Affected Files:** [src/lib/calculations.ts](../src/lib/calculations.ts)
 - **Acceptance Criteria:**
   - Digest for a Sunday-first-week locale differs correctly from a Monday-first-week locale.
-- **Status:** [ ] Pending
+- **Status:** [x] Done
 
 ### T-3.2.5 - `/api/admin/push/health` endpoint + runbook
 
@@ -882,7 +882,7 @@ TypeScript strict - ESLint/Prettier clean - Tests co-located under `src/__tests_
 - **Acceptance Criteria:**
   - Endpoint rate-limited and authed; response contains no PII.
   - Runbook documents alert thresholds.
-- **Status:** [ ] Pending
+- **Status:** [x] Done
 
 ### T-3.2.6 - Quiet-hours, timezone, notification-settings tests
 
@@ -900,7 +900,7 @@ TypeScript strict - ESLint/Prettier clean - Tests co-located under `src/__tests_
 - **Affected Files:** [src/**tests**/notificationSettings.test.ts](../src/__tests__/notificationSettings.test.ts), `src/__tests__/pushQuietHours.test.ts` (new), `src/__tests__/weeklyDigest.timezone.test.ts` (new)
 - **Acceptance Criteria:**
   - All three specs green; delivery >= 95% asserted in a fixture.
-- **Status:** [ ] Pending
+- **Status:** [x] Done
 
 ---
 

@@ -32,6 +32,7 @@ Verified against [ARCHITECTURE.md — Appendix A](ARCHITECTURE.md) and [`.env.ex
 - [ ] `[P0]` `IP_HASH_SALT` set to a unique per-environment value (never reused across staging/prod).
 - [ ] `[P0]` `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` set (anon key only; service-role never exposed to client).
 - [ ] `[P0]` `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` (`mailto:` URL) set — required for Web Push send.
+- [ ] `[P0]` `CRON_SECRET` set — gates `POST /api/push/send` and `GET /api/admin/push/health`. Vercel Cron ([`vercel.json`](../vercel.json), every minute) attaches it as `Authorization: Bearer`; external schedulers/monitors must send it. See [docs/ops/push.md](ops/push.md).
 - [ ] `[P0]` `RESEND_API_KEY` set — required for password reset / verification email.
 - [ ] `[P1]` `NEXT_PUBLIC_SENTRY_DSN` set; `SENTRY_AUTH_TOKEN` set for source-map upload.
 - [ ] `[P1]` `NEXT_PUBLIC_SYNC_LOG` **unset** (or `false`) in production.
@@ -41,7 +42,7 @@ Verified against [ARCHITECTURE.md — Appendix A](ARCHITECTURE.md) and [`.env.ex
 ## 2. Database & migrations
 
 - [ ] `[P0]` `prisma migrate status` clean against production DB — no drift, no unapplied migrations.
-- [ ] `[P0]` Latest migration in [`prisma/migrations/`](../prisma/migrations) applied (through `013_rate_limit_table.sql` at time of writing; check for higher-numbered files).
+- [ ] `[P0]` Latest migration in [`prisma/migrations/`](../prisma/migrations) applied (through `015_push_deliveries.sql` at time of writing; check for higher-numbered files).
 - [ ] `[P0]` Row-Level Security (RLS) enabled on every table — verify with the SQL smoke query documented in [ARCHITECTURE.md §8.2](ARCHITECTURE.md) (`SELECT tablename FROM pg_tables WHERE schemaname='public' AND rowsecurity = false;` returns zero rows).
 - [ ] `[P0]` Rate-limit table `rate_limit_hits` exists (migration `013_rate_limit_table.sql`) and is indexed on `(key, window_start)`.
 - [ ] `[P1]` `prisma/legacy/*.sql` present but **not** in the migration path — see [ADR-0001](adr/0001-postgres-over-firestore.md) for context.
@@ -138,6 +139,7 @@ Every release must have a **written** rollback plan before deploy. At minimum:
 - [ ] `[P0]` Add-expense mutation round-trips: create → appears on dashboard → survives page reload (proves DB write + sync pull).
 - [ ] `[P0]` Sentry error rate does not spike above baseline within the first 30 minutes.
 - [ ] `[P1]` Web Push send from an admin console reaches at least one test device.
+- [ ] `[P1]` `GET /api/admin/push/health` (with `CRON_SECRET` or an admin session) returns `200` with a sane `deliveredRatio`; wire it into an uptime monitor per the thresholds in [docs/ops/push.md](ops/push.md).
 
 ---
 

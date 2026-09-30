@@ -188,21 +188,21 @@ This board decomposes the entire product roadmap defined in [PROJECT_MASTER_PLAN
 
 ## M3 — Notification UX Hardening
 
-**Horizon:** 1 · **PRD Milestone:** M3 · **Debt covered:** TD-4 · **Risks addressed:** R-6, R-13 · **Status:** Pending
+**Horizon:** 1 · **PRD Milestone:** M3 · **Debt covered:** TD-4 · **Risks addressed:** R-6, R-13 · **Status:** Sprints complete — pending 7‑day live delivery‑rate validation
 
 **Outcome:** ≥ 95% push delivery over 7 days, timezone/quiet‑hours honored, weekly digests correct, failed pushes observable.
 
 ### Sprint 3.1 — Server Scheduler, Retries & Dead‑Letter
 
-- **Status:** Pending · **Priority:** P1 · **Effort:** L · **Story points:** 13
+- **Status:** ✅ Done (2026-09-17) · **Priority:** P1 · **Effort:** L · **Story points:** 13
 - **Goal:** Server‑scheduled evening reminders and digests with reliable retry and dead‑letter surface.
 - **Tasks:**
-  1. Rework `/api/push/send` to accept a batched schedule with per‑subscription retry state.
-  2. Add `push_deliveries` table (migration `015_push_deliveries.sql`) tracking `subscriptionId`, `scheduledFor`, `attempts`, `lastError`, `status` (`pending|sent|failed|dead`).
-  3. Exponential backoff (30s → 5min → 30min → dead) with jitter.
-  4. Cron entry (Vercel/Node scheduler) that ticks `/api/push/send` every minute, guarded by `CRON_SECRET`.
-  5. Auto‑prune stale `push_subscriptions` on `410 Gone` / `404 Not Found` from the push service.
-  6. Tests: `pushSend.retry.test.ts`, `pushSubscription.stale.test.ts`.
+  1. ✅ **Done** — Reworked `/api/push/send` to enqueue batched `push_deliveries` and delegate sending to `pushDispatcher`, rate‑limited + `CRON_SECRET`‑gated, returning `{ sent, failed, dead }`.
+  2. ✅ **Done** — Added `push_deliveries` table (migration `015_push_deliveries.sql` + Prisma `PushDelivery` model) tracking `subscriptionId`, `scheduledFor`, `attempts`, `lastError`, `status` (`pending|sent|failed|dead`), RLS‑enabled, indexed on `(status, scheduledFor)`.
+  3. ✅ **Done** — Exponential backoff `30s → 5min → 30min → dead` with ±20% jitter in `pushDispatcher.ts`.
+  4. ✅ **Done** — Cron entry (`vercel.json`, every minute) hitting `/api/push/send`, whitelisted in `middleware.ts`, documented in `docs/ops/push.md`.
+  5. ✅ **Done** — Auto‑prune stale `push_subscriptions` on `410 Gone` / `404 Not Found` with a `push.subscription_pruned` audit entry.
+  6. ✅ **Done** — Tests: `pushSend.retry.test.ts`, `pushSubscription.stale.test.ts`; `notificationSettings.test.ts` contract updated for the new architecture.
 - **Files:**
   - `src/app/api/push/send/route.ts`
   - `src/app/api/push/subscribe/route.ts`
@@ -219,23 +219,27 @@ This board decomposes the entire product roadmap defined in [PROJECT_MASTER_PLAN
 
 ### Sprint 3.2 — Quiet Hours, Timezone Correctness & Ops Dashboard
 
-- **Status:** Pending · **Priority:** P1 · **Effort:** M · **Story points:** 8
+- **Status:** ✅ Done (2026-09-28) · **Priority:** P1 · **Effort:** M · **Story points:** 8
 - **Goal:** Respect user quiet‑hours across timezones; give operators visibility into push health.
 - **Tasks:**
-  1. Extend `NotificationPrefs` with `quietHoursStart`, `quietHoursEnd`, `quietHoursTimezone` (defaults to `timezone`).
-  2. Update [src/components/settings/NotificationSettings.tsx](../src/components/settings/NotificationSettings.tsx) with paired time pickers and a "Quiet hours" toggle.
-  3. Server dispatcher skips deliveries falling inside a user's quiet‑hours window.
-  4. Weekly digest correctness: compute week bounds in user timezone (Luxon/`date-fns-tz`), not UTC; extend [src/lib/calculations.ts](../src/lib/calculations.ts) tests.
-  5. Build `/api/admin/push/health` (auth: `CRON_SECRET` or admin session) returning last 24 h counts and top failing endpoints; render in a lightweight `docs/ops/push.md` runbook.
-  6. Tests: `notificationSettings.test.ts` (extend), `pushQuietHours.test.ts`, `weeklyDigest.timezone.test.ts`.
+  1. ✅ **Done** — Extended `NotificationPrefs` with `quietHoursEnabled`, `quietHoursStart`, `quietHoursEnd`, `quietHoursTimezone` (defaults to `timezone`); new `notificationPrefsSchema` in `validators.ts` guards `HH:MM` formatting and rejects only an identical start/end (same‑day and overnight windows both valid).
+  2. ✅ **Done** — Updated [src/components/settings/NotificationSettings.tsx](../src/components/settings/NotificationSettings.tsx) with paired time pickers and a "Quiet hours" toggle, matching the existing switch pattern; labelled for keyboard + screen‑reader use.
+  3. ✅ **Done** — `pushDispatcher.ts` resolves each recipient's quiet‑hours window (own IANA timezone, overnight‑wrap aware) and holds/reschedules any due delivery inside it to the window's exact end — without spending a retry attempt.
+  4. ✅ **Done** — Weekly digest correctness: new `getWeekBounds(now, timezone, weekStartsOn)` in [src/lib/calculations.ts](../src/lib/calculations.ts) resolves week bounds from the *local* calendar date (via `Intl.DateTimeFormat` — no new date-library dependency, consistent with the existing tz-math pattern in `push/send/route.ts`), honoring Sunday‑first vs. Monday‑first conventions; not UTC.
+  5. ✅ **Done** — Built `/api/admin/push/health` (auth: `CRON_SECRET` or an authenticated `OWNER`/`ADMIN` session) returning last‑24h counts, `deliveredRatio`, and top dead‑lettered subscriptions (opaque IDs only); documented in `docs/ops/push.md`.
+  6. ✅ **Done** — Tests: `notificationSettings.test.ts` (extended with quiet‑hours UI + admin health route contracts), `pushQuietHours.test.ts` (new), `weeklyDigest.timezone.test.ts` (new), `validators.test.ts` (extended).
 - **Files:**
   - [src/components/settings/NotificationSettings.tsx](../src/components/settings/NotificationSettings.tsx)
   - [src/hooks/useNotifications.ts](../src/hooks/useNotifications.ts)
+  - [src/lib/validators.ts](../src/lib/validators.ts)
+  - [src/types/index.ts](../src/types/index.ts)
   - `src/lib/server/pushDispatcher.ts`
   - [src/lib/calculations.ts](../src/lib/calculations.ts)
+  - [src/middleware.ts](../src/middleware.ts)
   - `src/app/api/admin/push/health/route.ts` (new)
-  - `docs/ops/push.md` (new)
+  - `docs/ops/push.md`
   - [src/**tests**/notificationSettings.test.ts](../src/__tests__/notificationSettings.test.ts)
+  - [src/**tests**/validators.test.ts](../src/__tests__/validators.test.ts)
   - `src/__tests__/pushQuietHours.test.ts` (new)
   - `src/__tests__/weeklyDigest.timezone.test.ts` (new)
 - **Dependencies:** Sprint 3.1.

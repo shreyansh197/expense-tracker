@@ -116,6 +116,41 @@ const expenseMutationData = z.object({
   return true;
 }, { message: "Invalid date — day exceeds the number of days in this month", path: ["day"] });
 
+// "HH:MM", 00:00–23:59 — matches the native <input type="time"> value format.
+const HHMM_REGEX = /^([01]\d|2[0-3]):[0-5]\d$/;
+
+// NotificationPrefs (T-3.2.1): quiet-hours guard allows a same-day window
+// (start < end, e.g. "09:00"–"17:00") or an overnight wrap-around window
+// (start > end, e.g. "22:00"–"07:00"). Only an identical start/end is
+// rejected — it is ambiguous (either a zero-length or a full-24h window).
+// `.passthrough()` keeps older/newer clients forward- and backward-compatible
+// with fields this schema doesn't yet know about.
+export const notificationPrefsSchema = z
+  .object({
+    enabled: z.boolean().optional(),
+    eveningReminder: z.boolean().optional(),
+    eveningReminderTime: z.string().regex(HHMM_REGEX, "Must be HH:MM").optional(),
+    timezone: z.string().max(100).optional(),
+    weeklyDigest: z.boolean().optional(),
+    budgetAlerts: z.boolean().optional(),
+    smartNudges: z.boolean().optional(),
+    quietHoursEnabled: z.boolean().optional(),
+    quietHoursStart: z.string().regex(HHMM_REGEX, "Quiet hours start must be HH:MM").optional(),
+    quietHoursEnd: z.string().regex(HHMM_REGEX, "Quiet hours end must be HH:MM").optional(),
+    quietHoursTimezone: z.string().max(100).optional(),
+  })
+  .passthrough()
+  .refine(
+    (data) =>
+      data.quietHoursStart === undefined ||
+      data.quietHoursEnd === undefined ||
+      data.quietHoursStart !== data.quietHoursEnd,
+    {
+      message: "Quiet hours start and end cannot be identical",
+      path: ["quietHoursEnd"],
+    },
+  );
+
 const settingsMutationData = z.object({
   salary: z.number().min(0).optional(),
   currency: z.string().max(3).optional(),
@@ -139,7 +174,7 @@ const settingsMutationData = z.object({
   achievements: z.array(z.unknown()).optional(),
   accentColor: z.string().max(20).optional(),
   sunsetTheme: z.boolean().optional(),
-  notificationPrefs: z.unknown().optional(),
+  notificationPrefs: notificationPrefsSchema.optional(),
 });
 
 const ledgerMutationData = z.object({

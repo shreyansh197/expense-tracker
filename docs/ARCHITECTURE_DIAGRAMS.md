@@ -203,40 +203,51 @@ sequenceDiagram
 
 ---
 
-## 6. Web Push send (server-scheduled)
+## 6. Web Push send (server-scheduled, retry + quiet hours)
 
 ```mermaid
 sequenceDiagram
     autonumber
-    participant Cron as Vercel cron
+    participant Cron as Scheduler (every minute)
     participant Route as /api/push/send
-    participant Guards as (cron key) → checkRateLimit
+    participant Disp as pushDispatcher.ts
     participant DB as Postgres
     participant WP as web-push (VAPID)
     participant Dev as User device (SW)
 
-    Cron->>Route: POST /api/push/send (X-Cron-Key)
-    Route->>Guards: verifyCronKey + checkRateLimit(cron)
-    Guards-->>Route: authorised as cron
-    Route->>DB: SELECT push_subscriptions JOIN notification_prefs WHERE quiet_hours=false AND due
-    DB-->>Route: subscriptions batch
-    loop for each subscription
-        Route->>WP: sendNotification(sub, payload)
-        alt 201 Created
-            WP-->>Route: ok
-        else 410 Gone / 404 Not Found
-            Route->>DB: DELETE push_subscriptions WHERE endpoint=?
-        else other error
-            Route->>Route: syncErr → Sentry (no PII)
+    Cron->>Route: POST /api/push/send (Authorization: Bearer CRON_SECRET)
+    Route->>Route: verify CRON_SECRET + checkRateLimit(cron:push-send)
+    Route->>DB: SELECT workspace_settings WHERE notification_prefs.enabled
+    DB-->>Route: workspaces + prefs (local-time due check per tz)
+    Route->>DB: enqueueDeliveries() → push_deliveries rows (status=pending)
+    Route->>Disp: dispatchDueDeliveries()
+    Disp->>DB: SELECT push_deliveries WHERE status IN (pending, failed) AND scheduled_for <= now
+    Disp->>DB: SELECT workspace_settings (quiet-hours window per subscription's workspace)
+    loop for each due delivery
+        alt inside recipient's quiet hours (own IANA tz, overnight-aware)
+            Disp->>DB: UPDATE scheduled_for = window end (no attempt spent)
+        else
+            Disp->>WP: sendNotification(sub, payload)
+            alt 2xx
+                WP-->>Disp: ok
+                Disp->>DB: UPDATE status=sent
+            else 410 Gone / 404 Not Found
+                Disp->>DB: DELETE push_subscriptions (cascades deliveries) + audit push.subscription_pruned
+            else other error
+                Disp->>DB: UPDATE status=failed, scheduled_for += backoff(30s→5min→30min), or status=dead after 4 attempts
+            end
         end
     end
-    Route-->>Cron: 200 { sent, pruned }
+    Disp-->>Route: { sent, failed, dead }
+    Route-->>Cron: 200 { sent, failed, dead, enqueued, time }
 
     WP-->>Dev: push event
     Dev->>Dev: SW showNotification (title only; no monetary values in body)
     Dev->>Dev: on click → open app / relevant route
-    Note over Dev: quiet-hours enforced client-side too (Sprint 3.2 hardens tz correctness).
+
+    Note over Route,Disp: GET /api/admin/push/health (CRON_SECRET or admin session) exposes 24h counts + deliveredRatio for ops monitoring.
 ```
+
 
 ---
 

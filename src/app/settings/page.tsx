@@ -175,7 +175,7 @@ export default function SettingsPage() {
     { id: "data-management", zone: "zone-automation", keywords: "data delete remove workspace reset clear" },
     { id: "app-mode", zone: "zone-preferences", keywords: "mode personal business switch" },
     { id: "multi-currency", zone: "zone-preferences", keywords: "currency multi exchange rate convert" },
-    { id: "notifications", zone: "zone-preferences", keywords: "notifications reminder push alert budget evening weekly digest" },
+    { id: "notifications", zone: "zone-preferences", keywords: "notifications reminder push alert budget evening weekly digest quiet hours" },
     { id: "theme", zone: "zone-preferences", keywords: "theme appearance dark light system color" },
   ], []);
 

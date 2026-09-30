@@ -227,7 +227,7 @@ export async function POST(req: NextRequest) {
 
 - **Prisma client** is a lazily-initialized singleton in `src/lib/server/prisma.ts` using `@prisma/adapter-pg` on top of `pg`.
 - **Server-only modules** live under `src/lib/server/**` and use `"server-only"` imports where needed.
-- **Cron / scheduled jobs** call `/api/push/send` guarded by a `CRON_SECRET` (whitelisted in middleware).
+- **Cron / scheduled jobs** call `/api/push/send` every minute (see [vercel.json](../vercel.json)), guarded by a `CRON_SECRET` (whitelisted in middleware) and rate-limited. The route enqueues `push_deliveries` rows and delegates to the push dispatcher (`src/lib/server/pushDispatcher.ts`), which sends due deliveries, retries transient failures on a `30s → 5min → 30min → dead` backoff (±20% jitter, dead-lettered after 4 attempts), holds any delivery inside its recipient's quiet-hours window (rescheduled to the exact window-end instant, no attempt spent — Sprint 3.2), and prunes stale subscriptions on `404`/`410`. `GET /api/admin/push/health` (Sprint 3.2, `CRON_SECRET` or admin session) surfaces 24h delivery counters for ops. See [docs/ops/push.md](ops/push.md).
 - **Bundle analyzer** available via `ANALYZE=true npm run build` (`@next/bundle-analyzer`).
 
 ---
@@ -257,7 +257,8 @@ All server capabilities are exposed as HTTP JSON endpoints under `/api/**`. Grou
 | **Workspaces** | `GET/PATCH /api/workspaces/settings`, `GET/POST/DELETE /api/workspaces/members`                           | Settings blob + member management                     |
 | **Sync**       | `GET /api/sync/changes?since=…`                                                                           | Delta pull for expenses/settings/ledgers/payments     |
 |                | `POST /api/sync/commit`                                                                                   | Server-side idempotent write of queued mutations      |
-| **Push**       | `GET /api/push/vapid-key`, `POST/DELETE /api/push/subscribe`, `POST /api/push/send`                       | VAPID key, subscription CRUD, cron-triggered dispatch |
+| **Push**       | `GET /api/push/vapid-key`, `POST/DELETE /api/push/subscribe`, `POST /api/push/send`                       | VAPID key, subscription CRUD, per-minute cron dispatch with retry/dead-letter (`{ sent, failed, dead }`) and quiet-hours gating |
+| **Admin**      | `GET /api/admin/push/health`                                                                               | Push delivery health (24h counts, `deliveredRatio`, top dead-letters); `CRON_SECRET` or admin session, rate-limited |
 
 Conventions enforced across every route:
 
@@ -354,7 +355,7 @@ Workspace + collaboration: `workspaces`, `memberships`, `devices`, `device_links
 
 Domain: `expenses`, `workspace_settings` (JSONB blob), `business_ledgers`, `business_payments`.
 
-Infrastructure: `push_subscriptions`, `rate_limits`, `sync_cursors`.
+Infrastructure: `push_subscriptions`, `push_deliveries` (scheduled-push lifecycle: retry/dead-letter), `rate_limits`, `sync_cursors`.
 
 Every domain table carries `workspaceId`, `createdAt`, `updatedAt`, `deletedAt` (soft-delete) and is indexed on `(workspaceId, updatedAt)` for cursor-based delta sync.
 
@@ -364,7 +365,7 @@ Migration `012_enable_rls_all_tables.sql` enables **RLS on every table**. Polici
 
 ### 8.3 Migration history
 
-`001`→`013` covers: initial schema, auth, Google OAuth, phone OTP, device client id, new settings columns, expense currency, workspace encryption key, achievements/accent color, push + notification prefs, verification tokens, RLS-all-tables, rate-limit table.
+`001`→`015` covers: initial schema, auth, Google OAuth, phone OTP, device client id, new settings columns, expense currency, workspace encryption key, achievements/accent color, push + notification prefs, verification tokens, RLS-all-tables, rate-limit table, mutation idempotency, push deliveries (scheduler retry/dead-letter).
 
 [`prisma/migrations/`](../prisma/migrations) is the **sole authoritative** history. [`prisma/legacy/`](../prisma/legacy) archives the pre-Prisma Supabase SQL files (`supabase-setup.sql`, `supabase-migration*.sql`) for provenance only — see [`prisma/legacy/README.md`](../prisma/legacy/README.md) and [ADR-0001](adr/0001-postgres-over-firestore.md). Nothing under `prisma/legacy/` is applied by `prisma migrate`.
 
