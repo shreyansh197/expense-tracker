@@ -32,7 +32,7 @@ Verified against [ARCHITECTURE.md — Appendix A](ARCHITECTURE.md) and [`.env.ex
 - [ ] `[P0]` `IP_HASH_SALT` set to a unique per-environment value (never reused across staging/prod).
 - [ ] `[P0]` `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` set (anon key only; service-role never exposed to client).
 - [ ] `[P0]` `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` (`mailto:` URL) set — required for Web Push send.
-- [ ] `[P0]` `CRON_SECRET` set — gates `POST /api/push/send` and `GET /api/admin/push/health`. Vercel Cron ([`vercel.json`](../vercel.json), every minute) attaches it as `Authorization: Bearer`; external schedulers/monitors must send it. See [docs/ops/push.md](ops/push.md).
+- [ ] `[P0]` `CRON_SECRET` set — gates `POST /api/push/send` and `GET /api/admin/push/health`. An external scheduler must send it as `Authorization: Bearer` every minute; Vercel Hobby does not support the required cron frequency. See [docs/ops/push.md](ops/push.md).
 - [ ] `[P0]` `RESEND_API_KEY` set — required for password reset / verification email.
 - [ ] `[P1]` `NEXT_PUBLIC_SENTRY_DSN` set; `SENTRY_AUTH_TOKEN` set for source-map upload.
 - [ ] `[P1]` `NEXT_PUBLIC_SYNC_LOG` **unset** (or `false`) in production.

@@ -32,24 +32,25 @@ each push has an observable lifecycle. The endpoint returns per-batch counters:
 
 Delivery is driven by a scheduler that hits `/api/push/send` **every minute**.
 
-- **Vercel:** configured in [`vercel.json`](../../vercel.json):
-
-  ```json
-  { "crons": [{ "path": "/api/push/send", "schedule": "* * * * *" }] }
-  ```
-
-  Vercel Cron automatically attaches `Authorization: Bearer <CRON_SECRET>` when
-  the `CRON_SECRET` environment variable is set.
-
-- **External scheduler (cron-job.org / Node):** issue a `POST` every minute with
-  one of the accepted secret carriers:
-  - `Authorization: Bearer <CRON_SECRET>` (preferred), or
+- **Vercel Hobby:** Vercel Cron permits only daily jobs, which cannot meet the
+  minute-exact local notification times or retry schedule. No Vercel Cron is
+  registered; deploys do not start a push scheduler automatically.
+- **External scheduler (cron-job.org / Node):** create a job for
+  `https://<production-host>/api/push/send` with method `POST`, schedule
+  `* * * * *` (every minute), and the header
+  `Authorization: Bearer <CRON_SECRET>`. Set `CRON_SECRET` in the Vercel
+  Production environment to the same secret. Alternative accepted carriers:
   - `X-Cron-Secret: <CRON_SECRET>`, or
   - `?secret=<CRON_SECRET>` query parameter.
 
   Optional replay hardening: send `X-Cron-Timestamp` (Unix seconds; rejected if
   older than 5 minutes) and, when `CRON_SECRET_HMAC` is set, an
   `X-Cron-Signature` HMAC-SHA256 of the timestamp.
+
+  After deployment, trigger the job manually and check for a `200` response
+  with delivery counters. A preview deployment needs a separate job and its
+  own secret only when testing push delivery there; do not point the production
+  job at a preview URL.
 
 The route is whitelisted in [`src/middleware.ts`](../../src/middleware.ts) so the
 secret-bearing request bypasses the `Authorization: Bearer <JWT>` gate that
@@ -60,8 +61,8 @@ protects other API routes.
 | Variable            | Purpose                                            |
 | ------------------- | -------------------------------------------------- |
 | `CRON_SECRET`       | Shared secret gating `/api/push/send`.             |
-| `VAPID_PUBLIC_KEY`  | Web Push VAPID public key.                          |
-| `VAPID_PRIVATE_KEY` | Web Push VAPID private key.                          |
+| `VAPID_PUBLIC_KEY`  | Web Push VAPID public key.                         |
+| `VAPID_PRIVATE_KEY` | Web Push VAPID private key.                        |
 | `VAPID_EMAIL`       | `mailto:` contact for the push service (optional). |
 | `CRON_SECRET_HMAC`  | Optional HMAC key for signed cron requests.        |
 
@@ -116,11 +117,10 @@ the last 24 hours without needing direct database access.
 
 **Auth** — either of:
 
-- The shared `CRON_SECRET`, via `Authorization: ****** `X-Cron-Secret`
-  header, or `?secret=` query param (same carriers as `/api/push/send`) — lets
+- The shared `CRON_SECRET`, via `Authorization: ****** `X-Cron-Secret`header, or`?secret=`query param (same carriers as`/api/push/send`) — lets
   an external uptime monitor poll it.
 - A logged-in session (`Authorization: ****** whose user is an
-  `OWNER`/`ADMIN` of their workspace.
+`OWNER`/`ADMIN` of their workspace.
 
 Both paths are rate-limited (20 requests/minute per caller IP).
 
@@ -132,7 +132,12 @@ Both paths are rate-limited (20 requests/minute per caller IP).
   "counts": { "pending": 3, "sent": 412, "failed": 5, "dead": 2 },
   "deliveredRatio": 0.983,
   "topFailingSubscriptions": [
-    { "subscriptionId": "…", "attempts": 4, "lastError": "stale:410", "lastSeenAt": "…" }
+    {
+      "subscriptionId": "…",
+      "attempts": 4,
+      "lastError": "stale:410",
+      "lastSeenAt": "…"
+    }
   ],
   "generatedAt": "2026-09-28T12:00:00.000Z"
 }
