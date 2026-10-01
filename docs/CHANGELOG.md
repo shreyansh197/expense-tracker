@@ -23,6 +23,10 @@ Companion documents: [RELEASE_NOTES.md](RELEASE_NOTES.md) (user-facing highlight
 
 ## [Unreleased]
 
+### Changed — Sync dead-letter recovery UI
+
+- **`SyncDeadLetterBanner` replaces the diagnostics panel's recovery UI:** Dead-lettered mutations (changes that failed to sync after `MAX_MUTATION_ATTEMPTS` retries, see [syncEngine.ts](../src/lib/syncEngine.ts)) were only recoverable from the `SyncDiagnosticsCard` accordion buried in Settings › Data & Automation. The accordion is removed and replaced with [src/components/sync/SyncDeadLetterBanner.tsx](../src/components/sync/SyncDeadLetterBanner.tsx), a small global "Sync needs attention" alert (mounted in `AppShell`, visible on every page) that appears only when the queue is non-empty and exposes the same Retry / Discard / Undo actions. Session-only observability counters (queue depth, pull/push counts, last error) were dropped along with the panel — the sync engine itself does not depend on them. Underlying dead-letter handling in `syncEngine.ts` is unchanged.
+
 ### Added — M4 Accessibility Contracts (Sprints 4.1–4.2)
 
 - **Contract-test guide (T-4.1.1):** New [CONTRACT_TESTS.md](CONTRACT_TESTS.md) — anatomy, baseline contract, matchers, reduced-motion / focus-ring / touch-target checks, chart rule, CI gate; cross-linked from [DESIGN_SYSTEM.md §17.4a](DESIGN_SYSTEM.md) and [AI_CONTEXT.md §12](AI_CONTEXT.md). Shared assertions in `src/__tests__/helpers/contractAssertions.ts`.

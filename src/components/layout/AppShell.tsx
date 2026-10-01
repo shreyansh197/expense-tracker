@@ -22,6 +22,7 @@ import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { PullToRefreshIndicator } from "@/components/ui/PullToRefreshIndicator";
 import { pullChanges } from "@/lib/syncEngine";
 import { OfflineBanner } from "@/components/sync/SyncIndicator";
+import { SyncDeadLetterBanner } from "@/components/sync/SyncDeadLetterBanner";
 import { useBudgetHealthBg } from "@/hooks/useBudgetHealthBg";
 import { useSunsetTheme } from "@/hooks/useSunsetTheme";
 import { WatcherConstellation } from "@/components/ui/WatcherConstellation";
@@ -96,6 +97,7 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
       <ErrorBoundary>
         <CalculationsProvider>
           <OfflineBanner />
+          <SyncDeadLetterBanner />
           {accessDenied && (
             <div className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium" style={{ background: 'var(--danger-soft)', color: 'var(--danger-text)' }} role="alert">
               <span className="flex-1">You no longer have access to this workspace. Sync has been paused.</span>
