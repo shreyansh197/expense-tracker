@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 import { usePinLock } from "@/hooks/usePinLock";
 import { useToast } from "@/components/ui/Toast";
 
@@ -11,6 +11,7 @@ export function PinLockSettings() {
   const [confirmPin, setConfirmPin] = useState("");
   const [step, setStep] = useState<"idle" | "setup" | "confirm">("idle");
   const { toast } = useToast();
+  const timeoutId = useId();
 
   const handleSetup = () => {
     if (step === "idle") {
@@ -69,10 +70,11 @@ export function PinLockSettings() {
       {isEnabled ? (
         <div className="space-y-3">
           <div className="flex items-center gap-2">
-            <label className="text-xs font-medium" style={{ color: "var(--text-secondary)" }}>
+            <label htmlFor={timeoutId} className="text-xs font-medium" style={{ color: "var(--text-secondary)" }}>
               Lock after
             </label>
             <select
+              id={timeoutId}
               value={timeout}
               onChange={(e) => updateTimeout(Number(e.target.value) as 30 | 60 | 300 | 600)}
               className="rounded-lg border px-2 py-1 text-xs font-medium"
@@ -100,6 +102,7 @@ export function PinLockSettings() {
                 inputMode="numeric"
                 pattern="[0-9]*"
                 maxLength={4}
+                aria-label={step === "setup" ? "New 4-digit PIN" : "Confirm PIN"}
                 placeholder={step === "setup" ? "Enter 4-digit PIN" : "Confirm PIN"}
                 value={step === "setup" ? newPin : confirmPin}
                 onChange={(e) => {

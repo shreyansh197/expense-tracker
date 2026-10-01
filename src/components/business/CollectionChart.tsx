@@ -6,7 +6,16 @@ import { Group } from "@visx/group";
 import { Bar } from "@visx/shape";
 import { ParentSize } from "@visx/responsive";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { DataTableView, type DataTableColumn } from "@/components/ui/DataTableView";
+import { useCurrency } from "@/hooks/useCurrency";
 import { BarChart3 } from "lucide-react";
+
+type CollectionRow = CollectionChartProps["data"][number];
+
+function monthLabel(month: string, style: "short" | "long"): string {
+  const [year, monthIndex] = month.split("-").map(Number);
+  return new Date(year, monthIndex - 1, 1).toLocaleDateString(undefined, { month: style, year: style === "long" ? "numeric" : undefined });
+}
 
 interface CollectionChartProps {
   data: { month: string; received: number; expected: number }[];
@@ -18,7 +27,7 @@ function Chart({ data, width, height }: { data: CollectionChartProps["data"]; wi
   const formatted = useMemo(
     () => data.map((d) => ({
       ...d,
-      label: new Date(d.month + "-01").toLocaleDateString(undefined, { month: "short" }),
+      label: monthLabel(d.month, "short"),
     })),
     [data],
   );
@@ -40,7 +49,7 @@ function Chart({ data, width, height }: { data: CollectionChartProps["data"]; wi
   const barWidth = (xScale.bandwidth() - 2) / 2;
 
   return (
-    <svg width={width} height={height}>
+    <svg width={width} height={height} aria-hidden="true">
       <Group left={MARGIN.left} top={MARGIN.top}>
         {formatted.map((d) => {
           const x = xScale(d.label) ?? 0;
@@ -82,6 +91,7 @@ function Chart({ data, width, height }: { data: CollectionChartProps["data"]; wi
 }
 
 export function CollectionChart({ data }: CollectionChartProps) {
+  const { formatCurrency } = useCurrency();
   if (data.length === 0) return (
     <div className="card-stone p-5">
       <h3 className="text-sm font-semibold uppercase tracking-wider mb-3" style={{ color: "var(--text-muted)" }}>Monthly Collections</h3>
@@ -108,9 +118,24 @@ export function CollectionChart({ data }: CollectionChartProps) {
           <span className="text-[10px]" style={{ color: "var(--text-muted)" }}>Received</span>
         </div>
       </div>
-      <div style={{ height: 200 }}>
-        <ParentSize>{({ width, height }) => <Chart data={data} width={width} height={height} />}</ParentSize>
-      </div>
+      <DataTableView
+        title="Monthly collections"
+        columns={collectionColumns(formatCurrency)}
+        rows={data}
+        getRowKey={(d) => d.month}
+      >
+        <div style={{ height: 200 }}>
+          <ParentSize>{({ width, height }) => <Chart data={data} width={width} height={height} />}</ParentSize>
+        </div>
+      </DataTableView>
     </div>
   );
+}
+
+function collectionColumns(formatCurrency: (n: number) => string): DataTableColumn<CollectionRow>[] {
+  return [
+    { header: "Month", rowHeader: true, cell: (d) => monthLabel(d.month, "long") },
+    { header: "Expected", align: "end", cell: (d) => formatCurrency(d.expected) },
+    { header: "Received", align: "end", cell: (d) => formatCurrency(d.received) },
+  ];
 }

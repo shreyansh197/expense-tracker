@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useReducedMotion } from "@/lib/motion/useReducedMotion";
 
 interface AnimatedNumberProps {
   value: number;
@@ -14,6 +15,7 @@ export function AnimatedNumber({ value, format, duration = 400, className, style
   const [display, setDisplay] = useState(value);
   const prev = useRef(value);
   const raf = useRef<number>(0);
+  const reducedMotion = useReducedMotion();
 
   useEffect(() => {
     const from = prev.current;
@@ -24,12 +26,14 @@ export function AnimatedNumber({ value, format, duration = 400, className, style
       return;
     }
 
+    // Reduced motion: no counting animation — settle on the final value in one frame.
     const start = performance.now();
     const diff = to - from;
+    const total = reducedMotion ? 0 : duration;
 
     function tick(now: number) {
       const elapsed = now - start;
-      const t = Math.min(elapsed / duration, 1);
+      const t = total === 0 ? 1 : Math.min(elapsed / total, 1);
       // ease-out cubic
       const eased = 1 - Math.pow(1 - t, 3);
       setDisplay(from + diff * eased);
@@ -42,7 +46,7 @@ export function AnimatedNumber({ value, format, duration = 400, className, style
 
     raf.current = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf.current);
-  }, [value, duration]);
+  }, [value, duration, reducedMotion]);
 
   return <span className={className} style={style}>{format(display)}</span>;
 }

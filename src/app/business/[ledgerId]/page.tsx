@@ -135,8 +135,8 @@ export default function LedgerDetailPage() {
 
         {/* Header Card */}
         <div className="card p-5">
-          <div className="flex items-start gap-4">
-            <LedgerProgressRing received={totalReceived} expected={ledger.expectedAmount} size={64} strokeWidth={5} />
+          <div className="flex flex-wrap items-start gap-4">
+            <LedgerProgressRing received={totalReceived} expected={ledger.expectedAmount} size={64} strokeWidth={5} withDataTable />
             <div className="min-w-0 flex-1">
               <h1 className="text-lg font-bold" style={{ color: 'var(--text-primary)' }}>{ledger.name}</h1>
               <div className="mt-1 flex flex-wrap items-center gap-2">

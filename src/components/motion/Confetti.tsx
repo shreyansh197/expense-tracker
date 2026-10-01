@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useCallback } from "react";
+import { useReducedMotion } from "@/lib/motion/useReducedMotion";
 
 interface ConfettiProps {
   /** Whether to fire confetti */
@@ -56,6 +57,7 @@ export function Confetti({ active, duration = 2500, particleCount = 60 }: Confet
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const particlesRef = useRef<Particle[]>([]);
   const rafRef = useRef<number>(0);
+  const reducedMotion = useReducedMotion();
 
   const createParticles = useCallback(() => {
     const colors = getConfettiColors();
@@ -77,7 +79,8 @@ export function Confetti({ active, duration = 2500, particleCount = 60 }: Confet
   }, [particleCount]);
 
   useEffect(() => {
-    if (!active) return;
+    // Falling particles are pure decoration — skip them entirely for reduced motion.
+    if (!active || reducedMotion) return;
 
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -121,9 +124,9 @@ export function Confetti({ active, duration = 2500, particleCount = 60 }: Confet
 
     rafRef.current = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(rafRef.current);
-  }, [active, duration, createParticles]);
+  }, [active, duration, createParticles, reducedMotion]);
 
-  if (!active) return null;
+  if (!active || reducedMotion) return null;
 
   return (
     <canvas

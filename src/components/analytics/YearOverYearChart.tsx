@@ -1,226 +1,90 @@
 "use client";
 
 import { useMemo } from "react";
-import { getMonthName } from "@/lib/utils";
-import { addMoney } from "@/lib/money";
-import { useExpenses } from "@/hooks/useExpenses";
 import { useUIStore } from "@/stores/uiStore";
-
-interface MonthBarData {
-  monthIdx: number; // 1-12
-  curTotal: number;
-  prevTotal: number;
-}
-
-function MonthPairBar({
-  data,
-  maxVal,
-  formatCurrency,
-}: {
-  data: MonthBarData;
-  maxVal: number;
-  formatCurrency: (n: number) => string;
-}) {
-  const curPct = maxVal > 0 ? (data.curTotal / maxVal) * 100 : 0;
-  const prevPct = maxVal > 0 ? (data.prevTotal / maxVal) * 100 : 0;
-  const label = getMonthName(data.monthIdx).slice(0, 3);
-
-  return (
-    <div className="flex flex-col items-center gap-0.5" style={{ flex: "1 1 0", minWidth: 0 }}>
-      {/* Stacked bar */}
-      <div className="relative flex w-full items-end justify-center gap-px" style={{ height: 72 }}>
-        {/* Previous year bar */}
-        <div
-          className="rounded-t-sm transition-all duration-500"
-          style={{
-            width: "40%",
-            height: `${Math.max(prevPct, data.prevTotal > 0 ? 3 : 0)}%`,
-            background: "var(--text-muted)",
-            opacity: 0.3,
-          }}
-          title={`Last year: ${formatCurrency(Math.round(data.prevTotal))}`}
-        />
-        {/* Current year bar */}
-        <div
-          className="rounded-t-sm transition-all duration-500"
-          style={{
-            width: "40%",
-            height: `${Math.max(curPct, data.curTotal > 0 ? 3 : 0)}%`,
-            background: "var(--accent)",
-            opacity: 0.8,
-          }}
-          title={`This year: ${formatCurrency(Math.round(data.curTotal))}`}
-        />
-      </div>
-      {/* Month label */}
-      <span
-        className="text-[0.55rem] font-medium"
-        style={{ color: "var(--text-muted)" }}
-      >
-        {label}
-      </span>
-    </div>
-  );
-}
+import { useExpenseRange } from "@/hooks/useExpenseRange";
+import { DataTableView, type DataTableColumn } from "@/components/ui/DataTableView";
+import { buildYearOverYear, formatSignedPercent, type YearOverYearRow } from "@/lib/analyticsCharts";
+import { addMoney } from "@/lib/money";
+import { getShortMonthName } from "@/lib/utils";
 
 interface YearOverYearChartProps {
   formatCurrency: (n: number) => string;
+  formatCurrencyCompact: (n: number) => string;
 }
+
+const MONTHS = Array.from({ length: 12 }, (_, i) => i + 1);
 
 /**
- * Renders a 12-bar grouped chart comparing monthly totals for the current year
- * vs the same months in the previous year. Data is read from the parent analytics
- * page via `history` — this component uses useDexieQuery internally to avoid prop drilling.
+ * Grouped bars comparing each month (Jan → selected month) of the selected
+ * year with the same month a year earlier. One range query feeds both years.
  */
-export function YearOverYearChart({ formatCurrency }: YearOverYearChartProps) {
+export function YearOverYearChart({ formatCurrency, formatCurrencyCompact }: YearOverYearChartProps) {
   const { currentMonth, currentYear } = useUIStore();
   const prevYear = currentYear - 1;
-
-  // Load all 12 months for both years
-  const monthPairs = useMemo(() => {
-    const months: { m: number; y: number; isPrev: boolean }[] = [];
-    for (let m = 1; m <= 12; m++) {
-      months.push({ m, y: currentYear, isPrev: false });
-      months.push({ m, y: prevYear, isPrev: true });
-    }
-    return months;
-  }, [currentYear, prevYear]);
-
-  // Use individual month expense hooks — one per month shown
-  // (Only show months up to current month for this year)
-  const monthData = useMemo(() => {
-    const result: MonthBarData[] = [];
-    for (let m = 1; m <= 12; m++) {
-      result.push({ monthIdx: m, curTotal: 0, prevTotal: 0 });
-    }
-    return result;
-  }, []);
-
-  void monthPairs; // used via component-level hooks below
-
-  return (
-    <YoYChartInner
-      currentYear={currentYear}
-      prevYear={prevYear}
-      currentMonth={currentMonth}
-      formatCurrency={formatCurrency}
-      monthData={monthData}
-    />
+  const months = useMemo(
+    () => [prevYear, currentYear].flatMap((year) => MONTHS.map((month) => ({ month, year }))),
+    [prevYear, currentYear],
   );
-}
+  const expenses = useExpenseRange(months);
 
-function useMonthTotal(month: number, year: number) {
-  const { expenses } = useExpenses(month, year);
-  return useMemo(
-    () => expenses.filter((e) => !e.deletedAt).reduce((s, e) => addMoney(s, e.amount), 0),
-    [expenses]
-  );
-}
+  const model = useMemo(() => {
+    const cur = Array<number>(12).fill(0);
+    const prev = Array<number>(12).fill(0);
+    for (const e of expenses) {
+      const bucket = e.year === currentYear ? cur : e.year === prevYear ? prev : null;
+      if (bucket) bucket[e.month - 1] = addMoney(bucket[e.month - 1], e.amount);
+    }
+    return buildYearOverYear(cur, prev, currentMonth);
+  }, [expenses, currentYear, prevYear, currentMonth]);
 
-// We load all 12 * 2 = 24 months. Rather than 24 hooks, we load one per row
-// using a compound component pattern.
-function YoYMonthRow({
-  month,
-  currentYear,
-  prevYear,
-  onData,
-}: {
-  month: number;
-  currentYear: number;
-  prevYear: number;
-  onData?: never; // unused — data flows through the hook
-}) {
-  void onData;
-  const cur = useMonthTotal(month, currentYear);
-  const prev = useMonthTotal(month, prevYear);
-  return { cur, prev };
-}
-
-void YoYMonthRow;
-
-function YoYChartInner({
-  currentYear,
-  prevYear,
-  currentMonth,
-  formatCurrency,
-}: {
-  currentYear: number;
-  prevYear: number;
-  currentMonth: number;
-  formatCurrency: (n: number) => string;
-  monthData: MonthBarData[];
-}) {
-  // Load all 24 months inline using hooks
-  const m1c  = useMonthTotal(1,  currentYear);  const m1p  = useMonthTotal(1,  prevYear);
-  const m2c  = useMonthTotal(2,  currentYear);  const m2p  = useMonthTotal(2,  prevYear);
-  const m3c  = useMonthTotal(3,  currentYear);  const m3p  = useMonthTotal(3,  prevYear);
-  const m4c  = useMonthTotal(4,  currentYear);  const m4p  = useMonthTotal(4,  prevYear);
-  const m5c  = useMonthTotal(5,  currentYear);  const m5p  = useMonthTotal(5,  prevYear);
-  const m6c  = useMonthTotal(6,  currentYear);  const m6p  = useMonthTotal(6,  prevYear);
-  const m7c  = useMonthTotal(7,  currentYear);  const m7p  = useMonthTotal(7,  prevYear);
-  const m8c  = useMonthTotal(8,  currentYear);  const m8p  = useMonthTotal(8,  prevYear);
-  const m9c  = useMonthTotal(9,  currentYear);  const m9p  = useMonthTotal(9,  prevYear);
-  const m10c = useMonthTotal(10, currentYear);  const m10p = useMonthTotal(10, prevYear);
-  const m11c = useMonthTotal(11, currentYear);  const m11p = useMonthTotal(11, prevYear);
-  const m12c = useMonthTotal(12, currentYear);  const m12p = useMonthTotal(12, prevYear);
-
-  const bars: MonthBarData[] = [
-    { monthIdx: 1,  curTotal: m1c,  prevTotal: m1p  },
-    { monthIdx: 2,  curTotal: m2c,  prevTotal: m2p  },
-    { monthIdx: 3,  curTotal: m3c,  prevTotal: m3p  },
-    { monthIdx: 4,  curTotal: m4c,  prevTotal: m4p  },
-    { monthIdx: 5,  curTotal: m5c,  prevTotal: m5p  },
-    { monthIdx: 6,  curTotal: m6c,  prevTotal: m6p  },
-    { monthIdx: 7,  curTotal: m7c,  prevTotal: m7p  },
-    { monthIdx: 8,  curTotal: m8c,  prevTotal: m8p  },
-    { monthIdx: 9,  curTotal: m9c,  prevTotal: m9p  },
-    { monthIdx: 10, curTotal: m10c, prevTotal: m10p },
-    { monthIdx: 11, curTotal: m11c, prevTotal: m11p },
-    { monthIdx: 12, curTotal: m12c, prevTotal: m12p },
+  const columns: DataTableColumn<YearOverYearRow>[] = [
+    { header: "Month", rowHeader: true, cell: (r) => getShortMonthName(r.month) },
+    { header: String(currentYear), align: "end", cell: (r) => formatCurrency(r.current) },
+    { header: String(prevYear), align: "end", cell: (r) => formatCurrency(r.previous) },
+    { header: "Change", align: "end", cell: (r) => (r.changePct === null ? "—" : formatSignedPercent(r.changePct)) },
   ];
 
-  // Only show months up to current for current year (futures are 0 anyway)
-  const visible = bars.slice(0, currentMonth);
-  const maxVal = Math.max(...visible.flatMap((b) => [b.curTotal, b.prevTotal]), 1);
-
-  const curYearTotal = visible.reduce((s, b) => s + b.curTotal, 0);
-  const prevYearTotal = visible.reduce((s, b) => s + b.prevTotal, 0);
-  const yoyChange = prevYearTotal > 0
-    ? Math.round(((curYearTotal - prevYearTotal) / prevYearTotal) * 100)
-    : null;
+  const summary = `${currentYear} to date ${formatCurrency(model.currentTotal)}, ${prevYear} same period ${formatCurrency(model.previousTotal)}${
+    model.changePct === null ? "" : ` (${formatSignedPercent(model.changePct)})`
+  }.`;
 
   return (
-    <div>
-      {/* Summary */}
-      <div className="mb-3 flex gap-4">
-        <div className="flex items-center gap-1.5">
-          <div className="h-2.5 w-2.5 rounded-sm" style={{ background: "var(--accent)", opacity: 0.8 }} />
-          <span className="text-xs font-medium" style={{ color: "var(--text-secondary)" }}>
-            {currentYear}: <span className="font-bold">{formatCurrency(Math.round(curYearTotal))}</span>
-          </span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <div className="h-2.5 w-2.5 rounded-sm" style={{ background: "var(--text-muted)", opacity: 0.3 }} />
-          <span className="text-xs font-medium" style={{ color: "var(--text-secondary)" }}>
-            {prevYear}: <span className="font-bold">{formatCurrency(Math.round(prevYearTotal))}</span>
-          </span>
-        </div>
-        {yoyChange !== null && (
-          <span
-            className="text-xs font-semibold"
-            style={{ color: yoyChange > 0 ? "var(--danger)" : "var(--accent)" }}
-          >
-            {yoyChange > 0 ? "+" : ""}{yoyChange}% YoY
+    <DataTableView title={`Year over year, ${currentYear} vs ${prevYear}`} summary={summary} columns={columns} rows={model.rows} getRowKey={(r) => String(r.month)}>
+      <div className="mb-3 flex flex-wrap gap-x-4 gap-y-1">
+        <span className="flex items-center gap-1.5 text-xs font-medium" style={{ color: "var(--text-secondary)" }}>
+          <span aria-hidden="true" className="h-2.5 w-2.5 rounded-sm" style={{ background: "var(--accent)", opacity: 0.8 }} />
+          {currentYear}: <span className="font-bold">{formatCurrencyCompact(model.currentTotal)}</span>
+        </span>
+        <span className="flex items-center gap-1.5 text-xs font-medium" style={{ color: "var(--text-secondary)" }}>
+          <span aria-hidden="true" className="h-2.5 w-2.5 rounded-sm" style={{ background: "var(--text-muted)", opacity: 0.3 }} />
+          {prevYear}: <span className="font-bold">{formatCurrencyCompact(model.previousTotal)}</span>
+        </span>
+        {model.changePct !== null && (
+          <span className="text-xs font-semibold" style={{ color: model.changePct > 0 ? "var(--danger-text)" : "var(--success-text)" }}>
+            {formatSignedPercent(model.changePct)} YoY
           </span>
         )}
       </div>
-
-      {/* Bars */}
-      <div className="flex items-end gap-1">
-        {visible.map((b) => (
-          <MonthPairBar key={b.monthIdx} data={b} maxVal={maxVal} formatCurrency={formatCurrency} />
+      <div className="flex items-end gap-1" aria-hidden="true">
+        {model.rows.map((r) => (
+          <div key={r.month} className="flex min-w-0 flex-1 flex-col items-center gap-0.5">
+            <div className="flex w-full items-end justify-center gap-px" style={{ height: 72 }}>
+              <div
+                className="w-2/5 rounded-t-sm transition-[height] duration-500"
+                style={{ height: `${Math.max((r.previous / model.maxValue) * 100, r.previous > 0 ? 3 : 0)}%`, background: "var(--text-muted)", opacity: 0.3 }}
+              />
+              <div
+                className="w-2/5 rounded-t-sm transition-[height] duration-500"
+                style={{ height: `${Math.max((r.current / model.maxValue) * 100, r.current > 0 ? 3 : 0)}%`, background: "var(--accent)", opacity: 0.8 }}
+              />
+            </div>
+            <span className="text-caption font-medium" style={{ color: "var(--text-muted)" }}>
+              {getShortMonthName(r.month).charAt(0)}
+            </span>
+          </div>
         ))}
       </div>
-    </div>
+    </DataTableView>
   );
 }

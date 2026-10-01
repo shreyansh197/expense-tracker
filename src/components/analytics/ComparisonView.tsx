@@ -88,14 +88,14 @@ export function ComparisonView({ current, previous, categoryLabels, formatCurren
             className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold"
             style={{
               background: increased
-                ? "var(--danger-soft, rgba(239,68,68,0.1))"
+                ? "var(--danger-soft)"
                 : decreased
                 ? "color-mix(in srgb, var(--accent) 12%, transparent)"
                 : "var(--surface-secondary)",
               color: increased
-                ? "var(--danger)"
+                ? "var(--danger-text)"
                 : decreased
-                ? "var(--accent)"
+                ? "var(--success-text)"
                 : "var(--text-muted)",
             }}
           >
@@ -119,10 +119,13 @@ export function ComparisonView({ current, previous, categoryLabels, formatCurren
                   {row.label}
                 </span>
                 <span className="text-xs tabular-nums" style={{ color: "var(--text-muted)" }}>
-                  {formatCurrency(Math.round(row.cur))}
+                  {formatCurrency(row.cur)}
+                  <span className="sr-only">
+                    {` in ${curLabel}, ${formatCurrency(row.prev)} in ${prevLabel}`}
+                  </span>
                 </span>
               </div>
-              <div className="relative h-4 rounded-full overflow-hidden" style={{ background: "var(--surface-secondary)" }}>
+              <div className="relative h-4 rounded-full overflow-hidden" style={{ background: "var(--surface-secondary)" }} aria-hidden="true">
                 {/* Previous month (muted) */}
                 <div
                   className="absolute left-0 top-0 h-full rounded-full"

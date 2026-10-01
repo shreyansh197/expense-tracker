@@ -1,4 +1,4 @@
-﻿<!--
+<!--
   IMPLEMENTATION_QUEUE.md - Single source of truth for execution
   Owner: Product + AI Engineering
   Audience: Engineers, AI agents, PMs, QA.
@@ -929,7 +929,7 @@ TypeScript strict - ESLint/Prettier clean - Tests co-located under `src/__tests_
 - **Acceptance Criteria:**
   - Doc explains how to add a contract test in <= 5 minutes.
   - Cross-linked from [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md) and [AI_CONTEXT.md](AI_CONTEXT.md).
-- **Status:** [ ] Pending
+- **Status:** [x] Done
 
 ### T-4.1.2 - Codegen script for contract-test scaffolding
 
@@ -947,7 +947,7 @@ TypeScript strict - ESLint/Prettier clean - Tests co-located under `src/__tests_
 - **Affected Files:** `scripts/gen-contract-test.js` (new)
 - **Acceptance Criteria:**
   - Script generates a passing skeleton spec for a sample component.
-- **Status:** [ ] Pending
+- **Status:** [x] Done
 
 ### T-4.1.3 - CI enforcement of contract-test presence
 
@@ -965,7 +965,7 @@ TypeScript strict - ESLint/Prettier clean - Tests co-located under `src/__tests_
 - **Affected Files:** `.github/workflows/ci.yml`, `contract-tests.allowlist.json` (new)
 - **Acceptance Criteria:**
   - Synthetic PR that adds a component without a spec fails CI.
-- **Status:** [ ] Pending
+- **Status:** [x] Done
 
 ### T-4.1.4 - Backfill top 20 uncovered components
 
@@ -984,7 +984,7 @@ TypeScript strict - ESLint/Prettier clean - Tests co-located under `src/__tests_
 - **Acceptance Criteria:**
   - All 20 backfilled specs green.
   - Component coverage report shows >= 90% of components covered.
-- **Status:** [ ] Pending
+- **Status:** [x] Done
 
 ---
 
@@ -1013,7 +1013,7 @@ TypeScript strict - ESLint/Prettier clean - Tests co-located under `src/__tests_
 - **Acceptance Criteria:**
   - Toggle reachable via keyboard; state announced via `aria-live`.
   - Data table matches chart values exactly.
-- **Status:** [ ] Pending
+- **Status:** [x] Done
 
 ### T-4.2.2 - A11y audit of top pages
 
@@ -1031,7 +1031,7 @@ TypeScript strict - ESLint/Prettier clean - Tests co-located under `src/__tests_
 - **Affected Files:** `docs/a11y/2026-audit.md` (new)
 - **Acceptance Criteria:**
   - Every top page audited; findings triaged P0/P1/P2.
-- **Status:** [ ] Pending
+- **Status:** [x] Done
 
 ### T-4.2.3 - Fix all P0 audit findings
 
@@ -1049,7 +1049,7 @@ TypeScript strict - ESLint/Prettier clean - Tests co-located under `src/__tests_
 - **Affected Files:** Varies - components identified by audit
 - **Acceptance Criteria:**
   - Zero open P0 items in `docs/a11y/2026-audit.md`.
-- **Status:** [ ] Pending
+- **Status:** [x] Done
 
 ### T-4.2.4 - Chart-with-SVG contract test extension
 
@@ -1067,7 +1067,7 @@ TypeScript strict - ESLint/Prettier clean - Tests co-located under `src/__tests_
 - **Affected Files:** [src/**tests**/phaseFContracts.test.ts](../src/__tests__/phaseFContracts.test.ts)
 - **Acceptance Criteria:**
   - Extended spec green on `main`.
-- **Status:** [ ] Pending
+- **Status:** [x] Done
 
 ### T-4.2.5 - M4 exit verification
 
@@ -1085,7 +1085,7 @@ TypeScript strict - ESLint/Prettier clean - Tests co-located under `src/__tests_
 - **Affected Files:** [docs/SPRINT_BOARD.md](SPRINT_BOARD.md) (status update), this file (status updates)
 - **Acceptance Criteria:**
   - M4 status flipped to Done in board + queue.
-- **Status:** [ ] Pending
+- **Status:** [x] Done
 
 ---
 

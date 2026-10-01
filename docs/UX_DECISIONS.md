@@ -805,6 +805,50 @@ Decisions are grouped by concern:
 
 ---
 
+### UX-9.5 · Every chart ships with a "Table" toggle built from the chart's own rows (M4)
+
+**Decision.** Every non-decorative chart (Month Ridge, Spending Velocity, Rolling Average, Category Velocity, Top Merchants, Category Seasons, Year over Year, Collections, Ledger ring, Category trend ridge, Spending fingerprint) is wrapped in [`DataTableView`](../src/components/ui/DataTableView.tsx). A 44 px "Table" toggle (`aria-pressed`, stable name "Data table for …") swaps the visual for a semantic `role="table"` with caption, column and row headers; the change is announced politely. The visual SVG is `aria-hidden` and an `sr-only` summary sits in its place. Table cells use the exact currency formatter, while the chart may use compact labels — both come from the same model in [`src/lib/analyticsCharts.ts`](../src/lib/analyticsCharts.ts).
+
+**Reason.** Closes TD-6 / R-9. A screen-reader user gets the same story as a sighted user; a sighted user who wants the exact number (not "₹12.3K") gets it in one tap.
+
+**Alternatives Considered.**
+
+- _Always-present visually hidden table._ Rejected as the only mechanism: sighted keyboard and low-vision users benefit from exact values too.
+- _Arrow-key traversal of data points._ Desirable (DESIGN_SYSTEM §15.4) and tracked as an audit P1; the table already makes every value reachable by keyboard.
+
+**Trade-offs.**
+
+- Tables never scroll horizontally (DESIGN_SYSTEM §18.1): wide data (Category Seasons) collapses categories into one "Top categories" cell.
+- Long series (90-day rolling average) scroll vertically inside a focusable region.
+
+**Future Considerations.**
+
+- Keyboard data-point traversal with an on-focus tooltip; CSV export of any table.
+
+---
+
+### UX-9.6 · Analytics leads with the month's number; exploration moves behind Deep Dive (M4)
+
+**Decision.** The Analytics page is ordered by actionability: (1) header — month switcher, 3M/6M/12M, share, help; (2) **This month** hero — total spent, budget context, a plain-language read, the labelled projection, and anomalies ("Worth a look"); (3) Month vs Month by category; (4) the {period}-Month Ridge with average and top category; (5) Spending Velocity and Biggest This Month; (6) a collapsed **Deep Dive** with Rolling Average, Category Velocity, Top Merchants, Category Seasons, Year over Year and Time Machine. The three-card "insights" row (Avg Monthly / Top Category / Biggest Spend) is removed — each repeated information shown elsewhere (the ridge, the comparison, the biggest-expenses list), and "Top Category … all-time" was mislabelled (it covered only the selected period). Its useful parts now live in the ridge footer (average, top category with a link to its expenses).
+
+**Reason.** SCREEN_GUIDELINES §6/§10 — one hero answer, hero is a number, no chart in the hero position; FINANCIAL_PSYCHOLOGY §14 — projections are labelled estimates; EXPERIENCE_VISION §13 — the user's own numbers lead. Before, a first-time visitor faced eleven competing cards with two different "biggest expense" readouts and three charts above the first number.
+
+**Alternatives Considered.**
+
+- _Keep every card upfront with smaller sizing._ Rejected — density, not size, created the cognitive load.
+- _Remove the exploratory charts._ Rejected — they serve the Optimistic Planner; progressive disclosure keeps them one tap away and keeps their cost (a 5-month range query, six lazy chunks) off first paint.
+
+**Trade-offs.**
+
+- Deep Dive content is one tap further away; its button lists what is inside so it stays discoverable.
+- The 3M/6M/12M choice now lives in the URL (`?period=`), so refresh and shared links keep it.
+
+**Future Considerations.**
+
+- Remember the Deep Dive open state per user; per-section "Show more" for long ranked lists.
+
+---
+
 ## 10. Offline, Sync & Continuity
 
 ### UX-10.1 · Every action works offline; sync is invisible when it succeeds

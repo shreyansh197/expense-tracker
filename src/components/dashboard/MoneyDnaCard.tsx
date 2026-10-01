@@ -59,7 +59,9 @@ export function MoneyDnaCard() {
     >
       {/* Header */}
       <button
+        type="button"
         onClick={() => setExpanded((o) => !o)}
+        aria-expanded={expanded}
         className="flex w-full items-center gap-3 p-4 text-left"
       >
         <span className="text-2xl">{dna.primary.emoji}</span>

@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  accessibility-contracts:
+    name: Accessibility contracts (M4)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      # `postinstall` runs `prisma generate`, which only needs a syntactically valid URL.
+      DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Fails when any component under src/components/ lacks a contract test
+      # (docs/CONTRACT_TESTS.md §8), when an allowlist entry is stale, or when
+      # coverage drops below the 90% threshold.
+      - name: Contract-test presence gate
+        run: npm run contracts:check
+
+      - name: Contract and accessibility specs
+        run: npm run test:contracts -- --ci

@@ -23,6 +23,42 @@ Companion documents: [RELEASE_NOTES.md](RELEASE_NOTES.md) (user-facing highlight
 
 ## [Unreleased]
 
+### Added — M4 Accessibility Contracts (Sprints 4.1–4.2)
+
+- **Contract-test guide (T-4.1.1):** New [CONTRACT_TESTS.md](CONTRACT_TESTS.md) — anatomy, baseline contract, matchers, reduced-motion / focus-ring / touch-target checks, chart rule, CI gate; cross-linked from [DESIGN_SYSTEM.md §17.4a](DESIGN_SYSTEM.md) and [AI_CONTEXT.md §12](AI_CONTEXT.md). Shared assertions in `src/__tests__/helpers/contractAssertions.ts`.
+- **Contract scaffolder (T-4.1.2):** `scripts/gen-contract-test.js` (`npm run contracts:new -- <component>`) writes `src/__tests__/<camelName>.contract.test.ts` with the baseline contract plus the ARIA names/roles/states detected in the component; the skeleton passes on first run.
+- **CI contract gate (T-4.1.3):** `scripts/check-contract-tests.js` (`npm run contracts:check` / `contracts:report`) fails when a component lacks a contract, an allowlist entry is stale/unjustified, or coverage < 90 %. Allowlist in `contract-tests.allowlist.json` (decorative illustrations, icon barrel, non-rendering providers). New `.github/workflows/ci.yml` runs the gate and `npm run test:contracts`.
+- **Contract backfill (T-4.1.4):** 20 dedicated `*.contract.test.ts` specs (ExpenseForm, SpendingStream, SyncDiagnosticsCard, MonthlyPostcard, CSVImportWizard, WatcherConstellation, TimeMachine, CategorySelector, SpendingForecastCalendar, LedgerForm, CategoryChart, AppShell, QuickHelpButton, SpendingChallenges, QuickAddSheet, ConfirmDialog, Sidebar, GoalFundingSheet, InstallBanner, MonthSwitcher) plus an inventory block in `accessibilityContracts.test.ts`. Coverage 39 % → 100 % of non-allowlisted components.
+- **`DataTableView` (T-4.2.1):** New [src/components/ui/DataTableView.tsx](../src/components/ui/DataTableView.tsx) — keyboard toggle (`aria-pressed`, polite live announcement) that swaps a chart for a semantic `role="table"` built from the chart's own rows. Applied to RollingAverageChart, YearOverYearChart, RidgeLine, CollectionChart, LedgerProgressRing, MerchantBreakdown, CategoryVelocity, CategorySeasons, plus the new MonthRidge, SpendingVelocity and FingerprintBlob.
+- **Chart models:** New [src/lib/analyticsCharts.ts](../src/lib/analyticsCharts.ts) (ridge, weekly velocity, rolling series, category velocity, merchants, year-over-year, period parsing) and [src/lib/analyticsSummary.ts](../src/lib/analyticsSummary.ts); unit-tested in `analyticsCharts.test.ts`.
+- **Analytics components:** `AnalyticsHeader`, `AnalyticsPeriodSelector`, `AnalyticsSection`, `ThisMonthOverview`, `MonthRidge`, `SpendingVelocity`, `BiggestExpenses`, `AnalyticsDeepDive`; hooks `useAnalyticsPeriod` (`?period=` URL state, Zod-validated), `useExpenseRange` (raw expenses for a month range), `useAnalyticsShare`; `src/lib/analyticsShareImage.ts`.
+- **`StickyReveal` + `stickyReveal` variant:** zero-height sticky rail with a tokenised fade/slide reveal (reduced-motion cross-fade).
+- **A11y audit (T-4.2.2):** [docs/a11y/2026-audit.md](a11y/2026-audit.md) — `/`, `/analytics`, `/business`, `/settings`, `/expenses`, findings triaged P0/P1/P2.
+- **SVG chart rule (T-4.2.4):** `phaseFContracts.test.ts` now fails any component rendering a non-decorative `<svg>` without a `role="table"` alternative.
+
+### Changed — M4
+
+- **Analytics information hierarchy (UX-9.6):** the page leads with a "Spent in {month}" hero (budget context, plain-language read, labelled projection, anomalies), then Month vs Month, the {period}-Month Ridge, Spending Velocity + Biggest This Month, and a collapsed Deep Dive. `src/app/analytics/page.tsx` shrank from 832 to 216 lines.
+- **Reduced motion app-wide:** `<MotionConfig reducedMotion="user">` wraps the app; `AnimatedNumber` and `Confetti` honour the preference.
+- **Accessible names/labels (T-4.2.3):** label associations in LedgerForm, TimeMachine, PinLockSettings and ConfirmDialog (type-to-confirm); named QuickHelp close and ledger tag-remove buttons; QuickHelp `aria-expanded`/Escape/44 px; ConfirmDialog Escape-to-cancel; MoneyDnaCard `aria-expanded`; visible focus on CategorySelector inputs/swatches; analytics `h1` and section headings.
+
+### Fixed — M4
+
+- **Home:** the compact money-spent bar no longer appears abruptly or shifts the page when scrolling — it reveals smoothly through `StickyReveal`.
+- **Analytics mobile header:** the 3M/6M/12M selector no longer squeezes or hides the month name and arrows; the header stacks on `< md`.
+- **Month Ridge:** the title, bars, share image and table follow 3M/6M/12M (was stuck at "6-Month Ridge"); a 3M period now shows exactly 3 months (previously period + 1).
+- **Spending Velocity:** bars live in a clipped plot whose scale includes the budget pace, so a month far over budget no longer draws over the heading or labels.
+- **Rolling Average:** 30/60/90 now sets the visible range (it only re-windowed a single month of data, so the graph never changed); fed by raw expenses across the full range with a 7-day trailing mean (matching its explanation).
+- **Category Velocity:** anchored on the selected month instead of today, and fed raw expenses (cached months previously contributed no line items).
+- **PredictiveBurnBar:** invalid `var(--x)18` colour strings replaced with `color-mix`; projection labelled "estimate".
+- **Analytics empty state** now appears when the whole period has no expenses (the previous `months.length === 0` check could never be true).
+- **phaseFContracts:** two stale assertions (accent reset strategy, achievement IDs) aligned with current behaviour so the suite is green.
+
+### Removed — M4
+
+- Analytics insight-card row (Avg Monthly / Top Category / Biggest Spend) — redundant with the ridge, comparison and biggest-expenses list; average and top category moved to the ridge footer (UX-9.6). `InsightCard.tsx` deleted (no remaining consumers).
+- Orphaned, unimported components `BudgetRing.tsx`, `PaceGauge.tsx`, `SpendingDonut.tsx` (dead code carrying unlabelled SVG charts).
+
 ### Added
 
 - **Persistent mutation-queue retry metadata (T-2.2.1):** Dexie schema bumped to v4 in [src/lib/db.ts](../src/lib/db.ts). `IDBMutation` now carries `attempts`, `nextRetryAt`, and `lastError`; the v4 upgrade back-fills defaults so rows written before the migration remain drainable. Indexes updated so the drain loop can query eligible mutations in constant time.

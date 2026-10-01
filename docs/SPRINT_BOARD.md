@@ -253,19 +253,19 @@ This board decomposes the entire product roadmap defined in [PROJECT_MASTER_PLAN
 
 ## M4 — Accessibility Contracts Coverage
 
-**Horizon:** 1 · **PRD Milestone:** M4 · **Debt covered:** TD-6 · **Risks addressed:** R-9 · **Status:** Pending
+**Horizon:** 1 · **PRD Milestone:** M4 · **Debt covered:** TD-6 · **Risks addressed:** R-9 · **Status:** ✅ Done (2026-10-01)
 
 **Outcome:** Every component ships with a contract test; CI enforces presence for new components; every chart has a text alternative.
 
 ### Sprint 4.1 — Contract Template & CI Enforcement
 
-- **Status:** Pending · **Priority:** P0 · **Effort:** M · **Story points:** 8
+- **Status:** ✅ Done (2026-10-01) · **Priority:** P0 · **Effort:** M · **Story points:** 8
 - **Goal:** Formalize the contract‑test pattern and make it non‑optional in CI.
 - **Tasks:**
-  1. Author `docs/CONTRACT_TESTS.md` describing shape, matchers, and reduced‑motion / focus‑ring assertions.
-  2. Add a codegen script `scripts/gen-contract-test.js` that scaffolds a spec for a given component.
-  3. Add CI step: fail if a file under `src/components/` lacks a matching `src/__tests__/*.contract.test.ts` (allowlist for pure‑presentation primitives).
-  4. Backfill contract tests for the top 20 uncovered components identified by the script.
+  1. ✅ **Done** — Authored [`docs/CONTRACT_TESTS.md`](CONTRACT_TESTS.md) (5-minute quickstart, anatomy, baseline contract, matchers, reduced-motion / focus-ring / touch-target checks); shared helpers in `src/__tests__/helpers/contractAssertions.ts`; cross-linked from DESIGN_SYSTEM §17.4a and AI_CONTEXT §12.
+  2. ✅ **Done** — `scripts/gen-contract-test.js` (`npm run contracts:new`) scaffolds a passing spec (baseline + detected ARIA names/roles/states).
+  3. ✅ **Done** — `scripts/check-contract-tests.js` (`npm run contracts:check`) + `contract-tests.allowlist.json` + `.github/workflows/ci.yml`; a synthetic component without a spec fails (`contractTooling.test.ts`).
+  4. ✅ **Done** — 20 dedicated `*.contract.test.ts` specs + inventory in `accessibilityContracts.test.ts`; coverage 39 % → 100 % (threshold 90 %). Three orphaned, unimported dashboard charts were removed instead of backfilled.
 - **Files:**
   - `docs/CONTRACT_TESTS.md` (new)
   - `scripts/gen-contract-test.js` (new)
@@ -280,14 +280,14 @@ This board decomposes the entire product roadmap defined in [PROJECT_MASTER_PLAN
 
 ### Sprint 4.2 — Chart Text Alternatives & A11y Audit Pass
 
-- **Status:** Pending · **Priority:** P0 · **Effort:** M · **Story points:** 8
+- **Status:** ✅ Done (2026-10-01) · **Priority:** P0 · **Effort:** M · **Story points:** 8
 - **Goal:** Every chart has a text/data‑table alternative; complete accessibility audit of top pages.
 - **Tasks:**
-  1. Add `DataTableView` toggle to `RollingAverageChart`, `YearOverYearChart`, `RidgeLine`, `CollectionChart`, `LedgerProgressRing`, `MerchantBreakdown`, `CategoryVelocity`, `CategorySeasons`.
-  2. Ensure toggle state is announced to screen readers; keyboard operable.
-  3. Manual axe/AXE‑DevTools pass on `/`, `/analytics`, `/business`, `/settings`, `/expenses`; log findings in `docs/a11y/2026‑audit.md`.
-  4. Fix all P0 audit findings; open P1/P2 as new tickets.
-  5. Extend `phaseFContracts.test.ts` to require `role="table"` alternative for any component with a `<svg>` chart.
+  1. ✅ **Done** — `DataTableView` toggle on all eight listed charts plus the new Month Ridge, Spending Velocity and Spending fingerprint; rows come from shared models in `src/lib/analyticsCharts.ts`.
+  2. ✅ **Done** — Toggle is a 44 px `aria-pressed` button; changes announced via a polite live region; tables have caption, column and row headers.
+  3. ✅ **Done** — Audit of `/`, `/analytics`, `/business`, `/settings`, `/expenses` in [`docs/a11y/2026-audit.md`](a11y/2026-audit.md) (axe-core 0 violations on the rendered analytics components; contract suite; manual keyboard/SR/reduced-motion/responsive review).
+  4. ✅ **Done** — 22 P0 findings closed (incl. Analytics hierarchy UX-9.6, mobile header, ridge period, velocity overlap, rolling-average period, Home sticky bar reveal); 5 P1 / 4 P2 logged as follow-ups.
+  5. ✅ **Done** — `phaseFContracts.test.ts` fails any component with a non-decorative `<svg>` lacking a `role="table"` alternative; suite green.
 - **Files:**
   - `src/components/analytics/*.tsx`
   - `src/components/business/*.tsx`
@@ -942,7 +942,7 @@ Execution report: [`sprint-reports/UI_FOUNDATION_IMPLEMENTATION.md`](../sprint-r
 | M1  | Documentation Truth                              | 1       | P1       | 2       | Pending           |
 | M2  | Sync Engine Reliability & Correctness            | 1       | P0       | 3       | Pending           |
 | M3  | Notification UX Hardening                        | 1       | P1       | 2       | Pending           |
-| M4  | Accessibility Contracts Coverage                 | 1       | P0       | 2       | Pending           |
+| M4  | Accessibility Contracts Coverage                 | 1       | P0       | 2       | Done (2026-10-01) |
 | M5  | Security & Compliance Hardening                  | 1–2     | P0/P1    | 4       | Pending           |
 | M6  | Observability & Ops Foundation                   | 1–2     | P1       | 2       | Pending           |
 | M7  | Business Ledger Polish & Reminders               | 2       | P1       | 2       | Pending           |
@@ -955,7 +955,7 @@ Execution report: [`sprint-reports/UI_FOUNDATION_IMPLEMENTATION.md`](../sprint-r
 | M14 | AI‑Native Surfaces (Opt‑In)                      | 4       | P3       | 3       | Pending           |
 | M15 | UI Foundation (Product Experience Documentation) | 1       | P1       | 1       | Done (2026-07-24) |
 
-**Totals:** 15 milestones · 33 sprints · 1 Done (M15), 14 Pending.
+**Totals:** 15 milestones · 33 sprints · 2 Done (M4, M15), 13 Pending.
 
 ### Traceability to PRD
 

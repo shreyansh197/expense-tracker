@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useId } from "react";
 import { createPortal } from "react-dom";
 import { HelpCircle, X } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -68,8 +68,8 @@ function HelpPanelContent({
         <h3 className="text-xs font-bold uppercase tracking-wider" style={{ color: "var(--text-primary)" }}>
           Quick Tips
         </h3>
-        <button onClick={onClose} style={{ color: "var(--text-muted)" }} className="transition-colors hover:opacity-80">
-          <X size={14} />
+        <button type="button" onClick={onClose} style={{ color: "var(--text-muted)" }} className="flex h-11 w-11 -mr-3 -my-3 items-center justify-center transition-colors hover:opacity-80" aria-label="Close quick tips">
+          <X size={14} aria-hidden="true" />
         </button>
       </div>
 
@@ -162,6 +162,21 @@ export function QuickHelpButton({ variant = "icon", pageTips, pageLabel, showGen
   }, [open]);
 
   const handlerRef = useRef<((e: MouseEvent | TouchEvent) => void) | null>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const panelId = useId();
+
+  // Move focus into the panel so keyboard users land on the tips they opened.
+  useEffect(() => {
+    if (open) panelRef.current?.focus();
+  }, [open]);
+
+  const handlePanelKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key !== "Escape" || !open) return;
+    e.stopPropagation();
+    setOpen(false);
+    triggerRef.current?.focus();
+  };
 
   const isMac = typeof navigator !== "undefined" && navigator.platform.includes("Mac");
   const isTouch = getIsTouch();
@@ -176,21 +191,25 @@ export function QuickHelpButton({ variant = "icon", pageTips, pageLabel, showGen
   };
 
   return (
-    <div className="relative" ref={ref}>
+    <div className="relative" ref={ref} onKeyDown={handlePanelKeyDown}>
       <button
+        ref={triggerRef}
         onClick={() => setOpen((v) => !v)}
         className={cn(
           "flex items-center transition-colors",
           variant === "sidebar"
-            ? "gap-2 rounded-lg px-2 py-1.5 text-xs w-full"
-            : "h-8 w-8 justify-center rounded-lg"
+            ? "gap-2 rounded-lg px-2 py-1.5 text-xs w-full min-h-[44px]"
+            : "h-11 w-11 justify-center rounded-lg"
         )}
         style={{ color: "var(--text-primary)", background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}
         onMouseEnter={variant === "sidebar" ? (e) => { e.currentTarget.style.background = "var(--surface-secondary)"; } : undefined}
         onMouseLeave={variant === "sidebar" ? (e) => { e.currentTarget.style.background = ""; } : undefined}
         aria-label="Quick help"
+        aria-expanded={open}
+        aria-controls={open ? panelId : undefined}
+        type="button"
       >
-        <HelpCircle size={variant === "sidebar" ? 14 : 18} />
+        <HelpCircle size={variant === "sidebar" ? 14 : 18} aria-hidden="true" />
         {variant === "sidebar" && "Help & Tips"}
       </button>
 
@@ -199,8 +218,14 @@ export function QuickHelpButton({ variant = "icon", pageTips, pageLabel, showGen
           <div
             className="fixed inset-0 z-[450] bg-black/20 backdrop-blur-[1px] sm:hidden"
             onClick={close}
+            aria-hidden="true"
           />
           <div
+            id={panelId}
+            ref={panelRef}
+            tabIndex={-1}
+            role="dialog"
+            aria-label="Quick tips"
             className="fixed inset-x-3 top-20 z-[500] w-auto sm:inset-x-auto sm:w-72 sm:right-6 sm:top-16 rounded-xl border p-4 shadow-xl max-h-[70vh] overflow-y-auto"
             style={panelStyle}
           >
@@ -212,6 +237,11 @@ export function QuickHelpButton({ variant = "icon", pageTips, pageLabel, showGen
 
       {open && variant === "sidebar" && (
         <div
+          id={panelId}
+          ref={panelRef}
+          tabIndex={-1}
+          role="dialog"
+          aria-label="Quick tips"
           className="absolute z-[500] bottom-full left-0 mb-2 w-72 rounded-xl border p-4 shadow-xl max-h-[70vh] overflow-y-auto"
           style={panelStyle}
         >

@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useMemo, useCallback, useEffect } from "react";
+import { useState, useMemo, useCallback, useEffect, useId } from "react";
 import { m, AnimatePresence } from "framer-motion";
 import { Clock, ArrowRightLeft, RotateCcw, Bookmark, Trash2, Copy, Check } from "lucide-react";
 import { useExpenses } from "@/hooks/useExpenses";
 import { useSettings } from "@/hooks/useSettings";
 import { useUIStore } from "@/stores/uiStore";
-import { addMoney } from "@/lib/money";import { useCurrency } from "@/hooks/useCurrency";
+import { addMoney } from "@/lib/money";
+import { useCurrency } from "@/hooks/useCurrency";
 import { useCalculationsContext } from "@/contexts/CalculationsContext";
 import { getAllCategories, buildCategoryMap } from "@/lib/categories";
 import { db } from "@/lib/db";
@@ -33,6 +34,7 @@ export function TimeMachine() {
   const [showWhatIf, setShowWhatIf] = useState(false);
   const [copied, setCopied] = useState(false);
   const [savedScenarios, setSavedScenarios] = useState<SavedScenario[]>([]);
+  const fieldId = useId();
 
   // Load saved scenarios from Dexie on mount
   useEffect(() => {
@@ -176,10 +178,11 @@ export function TimeMachine() {
         {/* Category picker */}
         <div className="space-y-3">
           <div>
-            <label className="text-xs font-medium" style={{ color: "var(--text-secondary)" }}>
+            <label htmlFor={`${fieldId}-category`} className="text-xs font-medium" style={{ color: "var(--text-secondary)" }}>
               If every time I spent on...
             </label>
             <select
+              id={`${fieldId}-category`}
               value={scenario?.sourceCategory ?? ""}
               onChange={(e) => {
                 const cat = e.target.value;
@@ -206,11 +209,12 @@ export function TimeMachine() {
 
           {scenario && (
             <div>
-              <label className="text-xs font-medium" style={{ color: "var(--text-secondary)" }}>
+              <label htmlFor={`${fieldId}-amount`} className="text-xs font-medium" style={{ color: "var(--text-secondary)" }}>
                 ...I had spent this instead per transaction:
               </label>
               <div className="mt-1 flex items-center gap-2">
                 <input
+                  id={`${fieldId}-amount`}
                   type="number"
                   min={0}
                   value={scenario.replacementAmount === 0 ? "" : scenario.replacementAmount}
@@ -284,7 +288,7 @@ export function TimeMachine() {
               <div className="mt-3 flex items-center gap-3">
                 <button
                   onClick={handleReset}
-                  className="flex items-center gap-1.5 text-xs font-medium"
+                  className="flex min-h-[44px] items-center gap-1.5 text-xs font-medium"
                   style={{ color: "var(--text-muted)" }}
                 >
                   <RotateCcw size={12} />
@@ -292,7 +296,7 @@ export function TimeMachine() {
                 </button>
                 <button
                   onClick={saveScenario}
-                  className="flex items-center gap-1.5 text-xs font-medium"
+                  className="flex min-h-[44px] items-center gap-1.5 text-xs font-medium"
                   style={{ color: "var(--accent)" }}
                 >
                   <Bookmark size={12} />
@@ -315,7 +319,7 @@ export function TimeMachine() {
                         setTimeout(() => setCopied(false), 2000);
                       });
                     }}
-                    className="flex items-center gap-1.5 text-xs font-medium"
+                    className="flex min-h-[44px] items-center gap-1.5 text-xs font-medium"
                     style={{ color: "var(--text-muted)" }}
                     aria-label="Copy scenario as text"
                   >
@@ -336,15 +340,16 @@ export function TimeMachine() {
               {savedScenarios.map((s) => (
                 <div key={s.id} className="flex items-center justify-between rounded-lg px-2.5 py-1.5" style={{ background: "var(--surface-secondary)" }}>
                   <button
+                    type="button"
                     onClick={() => loadSavedScenario(s)}
-                    className="text-xs text-left flex-1 min-w-0 truncate"
+                    className="min-h-[44px] text-xs text-left flex-1 min-w-0 truncate"
                     style={{ color: "var(--text-secondary)" }}
                   >
                     {s.name}
                   </button>
                   <button
                     onClick={() => deleteSavedScenario(s.id)}
-                    className="shrink-0 p-1 rounded transition-colors hover:bg-[var(--danger-soft)]"
+                    className="shrink-0 flex h-11 w-11 items-center justify-center rounded transition-colors hover:bg-[var(--danger-soft)]"
                     style={{ color: "var(--text-muted)" }}
                     aria-label={`Delete saved scenario: ${s.name}`}
                   >

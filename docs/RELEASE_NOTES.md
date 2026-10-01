@@ -28,6 +28,23 @@ _No user-visible changes shipped in this section yet._
 
 ---
 
+## M4 — Accessible charts and a calmer Analytics (Sprints 4.1–4.2)
+
+Analytics now answers "how is this month going?" first, and every chart can be read as a simple table.
+
+**What this means for you:**
+
+- **The month's number comes first.** Analytics opens with what you've spent, how that compares to your budget, a short plain-language read of the month, and where the month is heading. Detailed charts are one tap away in **Deep Dive**.
+- **Every chart has a "Table" button.** Tap it to see the exact numbers behind the chart — great with a screen reader, and handy whenever a rounded label isn't enough.
+- **3M / 6M / 12M really changes the view.** The Month Ridge title, bars and shared image now follow your choice, and the setting is kept when you refresh.
+- **Rolling Average responds to 30 / 60 / 90 days.** The chart now shows exactly the range you pick.
+- **Easier on small phones.** The month name and arrows on Analytics never get squeezed off-screen, and the weekly spending bars no longer run over their labels in a big month.
+- **Smoother Home scrolling.** The compact "spent so far" bar now glides in as you scroll instead of popping in and nudging the page.
+- **Respects Reduce Motion everywhere.** If your device asks for less motion, ExpenStream keeps only gentle fades — no sliding, counting or confetti.
+- **Better with keyboards and screen readers.** Clearer labels on forms in Business, Settings and Expenses, a properly announced help panel, and Escape now closes confirmation dialogs.
+
+---
+
 ## Sprint 3.2 — Quiet hours and a clearer night's sleep (in progress)
 
 You can now tell ExpenStream when *not* to reach you. Set a quiet-hours window in Settings → Notifications and every scheduled reminder — evening nudges, weekly digests, budget alerts — waits until the window closes before it ever reaches your device.

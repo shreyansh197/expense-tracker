@@ -2,6 +2,7 @@
 
 import { m } from "framer-motion";
 import { AlertTriangle } from "lucide-react";
+import { fadeUpSmall, staggerTight } from "@/lib/motion/variants";
 import type { AnomalyResult } from "@/types";
 
 interface AnomalyCalloutProps {
@@ -11,82 +12,69 @@ interface AnomalyCalloutProps {
   categoryLabels: Record<string, string>;
 }
 
+const MAX_SHOWN = 5;
+
+/**
+ * Quiet, amber (never red) cards naming each unusual expense with a reason
+ * string — icon + text, not colour alone (SCREEN_GUIDELINES §6, §10.6).
+ */
 export function AnomalyCallout({ anomalies, formatCurrency, categoryLabels }: AnomalyCalloutProps) {
   if (anomalies.length === 0) return null;
 
   return (
-    <div className="space-y-2">
-      <div className="flex items-center gap-2 mb-3">
-        <AlertTriangle size={14} style={{ color: "var(--warning)" }} />
-        <h4 className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
-          Spending Anomalies
-        </h4>
-        <span
-          className="rounded-full px-2 py-0.5 text-xs font-bold"
-          style={{ background: "rgba(245,158,11,0.15)", color: "var(--accent)" }}
-        >
+    <div>
+      <div className="mb-3 flex items-center gap-2">
+        <AlertTriangle size={14} aria-hidden="true" style={{ color: "var(--warning-text)" }} />
+        <h3 className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
+          Worth a look
+        </h3>
+        <span className="rounded-full px-2 py-0.5 text-xs font-bold" style={{ background: "var(--warning-soft)", color: "var(--warning-text)" }}>
           {anomalies.length}
+          <span className="sr-only"> unusual {anomalies.length === 1 ? "expense" : "expenses"}</span>
         </span>
       </div>
 
-      {anomalies.slice(0, 5).map((a, i) => {
-        const catLabel = categoryLabels[a.expense.category] ?? a.expense.category;
-        const multiplier = a.categoryMedian > 0 ? (a.expense.amount / a.categoryMedian).toFixed(1) : null;
-        const anomalyDesc =
-          a.zScore >= 3.5
-            ? "unusually high — well above your normal"
-            : a.zScore >= 2.5
-            ? `about ${multiplier ?? "2"}× your typical ${catLabel} spend`
-            : "notably higher than your usual spending";
+      <m.ul className="space-y-2" variants={staggerTight} initial="initial" animate="animate">
+        {anomalies.slice(0, MAX_SHOWN).map((a) => {
+          const catLabel = categoryLabels[a.expense.category] ?? a.expense.category;
+          const multiplier = a.categoryMedian > 0 ? (a.expense.amount / a.categoryMedian).toFixed(1) : null;
+          const reason =
+            a.zScore >= 3.5
+              ? "well above your normal"
+              : a.zScore >= 2.5
+                ? `about ${multiplier ?? "2"}× your typical ${catLabel} spend`
+                : "notably higher than your usual spending";
 
-        return (
-          <m.div
-            key={a.expense.id}
-            initial={{ opacity: 0, x: -8 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: i * 0.06, duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-            className="rounded-xl p-3 flex items-start gap-3"
-            style={{
-              background: "rgba(245,158,11,0.06)",
-              border: "1px solid rgba(245,158,11,0.2)",
-              boxShadow: "0 0 12px rgba(245,158,11,0.08)",
-            }}
-          >
-            {/* Amber pulse dot */}
-            <div className="relative mt-0.5 shrink-0">
-              <span
-                className="block h-2.5 w-2.5 rounded-full"
-                style={{ background: "var(--accent)" }}
-              />
-              <span
-                className="absolute inset-0 animate-ping rounded-full opacity-40"
-                style={{ background: "var(--accent)", animationDuration: "2s" }}
-              />
-            </div>
-
-            <div className="flex-1 min-w-0">
-              <div className="flex items-start justify-between gap-2">
+          return (
+            <m.li
+              key={a.expense.id}
+              variants={fadeUpSmall}
+              className="flex items-start gap-3 rounded-xl p-3"
+              style={{ background: "var(--warning-soft)", border: "1px solid var(--warning-border)" }}
+            >
+              <span aria-hidden="true" className="mt-1.5 block h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: "var(--warning-text)" }} />
+              <div className="flex min-w-0 flex-1 items-start justify-between gap-2">
                 <div className="min-w-0">
-                  <p className="text-sm font-semibold truncate" style={{ color: "var(--text-primary)" }}>
+                  <p className="truncate text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
                     {a.expense.remark || catLabel}
                   </p>
-                  <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
-                    {catLabel} · {anomalyDesc}
+                  <p className="mt-0.5 text-xs" style={{ color: "var(--text-secondary)" }}>
+                    {catLabel} · {reason}
                   </p>
                 </div>
                 <div className="shrink-0 text-right">
-                  <p className="text-sm font-bold font-numeric" style={{ color: "var(--accent)" }}>
+                  <p className="text-sm font-bold font-numeric" style={{ color: "var(--text-primary)" }}>
                     {formatCurrency(a.expense.amount)}
                   </p>
                   <p className="text-xs font-numeric" style={{ color: "var(--text-muted)" }}>
-                    avg {formatCurrency(a.categoryMedian)}
+                    typical {formatCurrency(a.categoryMedian)}
                   </p>
                 </div>
               </div>
-            </div>
-          </m.div>
-        );
-      })}
+            </m.li>
+          );
+        })}
+      </m.ul>
     </div>
   );
 }

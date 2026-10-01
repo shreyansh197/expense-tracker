@@ -222,7 +222,7 @@ The five-states contract itself is defined in [`IMPLEMENTATION_RULES.md`](IMPLEM
 
 ## 6. Analytics
 
-`Status: [Partially implemented]`
+`Status: [Implemented — M4 hierarchy (UX-9.6); export footer and per-anomaly "See the transactions" link pending]`
 
 ### Purpose
 
@@ -232,11 +232,14 @@ The five-states contract itself is defined in [`IMPLEMENTATION_RULES.md`](IMPLEM
 
 ### Canonical composition
 
-- **Hero.** A single "Total for [period]" number with the period switcher (chip: This month · Last month · 3 months · Custom) directly below. No chart in the hero position.
-- **Below hero.**
-  1. **Category breakdown** — horizontal-bar chart, honest zero-anchored axis, category order = descending by amount.
-  2. **Trend** — line chart of monthly totals over the last 6 months, y-axis zero-anchored, no truncation. Forecast values labelled _estimate_ with a visible confidence range.
-  3. **Anomaly panel** — a single card per anomaly with a reason string and a "See the transactions" affordance. Reasons come from `src/lib/anomaly/reason.ts`.
+- **Header.** Month switcher (own row on mobile), 3M / 6M / 12M history selector (`?period=` in the URL), share, sync, help. On `< md` the selector and actions take a full-width second row so nothing is squeezed.
+- **Hero.** A single "Spent in [month]" number with budget context, a plain-language read of the month (≤ 3 sentences), the end-of-month projection labelled as an _estimate_ with its confidence, and any anomalies ("Worth a look"). No chart in the hero position.
+- **Below hero, in order.**
+  1. **Category breakdown** — Month vs Month horizontal bars, zero-anchored, ordered by amount.
+  2. **Trend** — the {period}-Month Ridge of monthly totals on one scale with the budget marker; footer shows the earlier-months average and the period's top category (links to its expenses).
+  3. **Weekly pace and biggest expenses** — Spending Velocity against the budget pace; the month's five largest expenses.
+  4. **Deep Dive** (collapsed disclosure) — Rolling Average (30/60/90 days, 7-day smoothing), Category Velocity, Top Merchants, Category Seasons, Year over Year, Time Machine.
+- Every chart carries a "Table" toggle (`DataTableView`, UX-9.5).
 - **Footer.** Export button (CSV/JSON), lossless per [`PRODUCT_PRINCIPLES §6.8`](PRODUCT_PRINCIPLES.md).
 
 ### Five states

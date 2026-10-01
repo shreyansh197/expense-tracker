@@ -9,6 +9,10 @@
     "start": "next start",
     "lint": "eslint",
     "test": "jest",
+    "test:contracts": "jest --testPathPattern \"(\\.contract\\.test|Contracts\\.test|touchTargets\\.test|motionTokens\\.test|motionVariants\\.test|contractTooling\\.test)\"",
+    "contracts:check": "node scripts/check-contract-tests.js",
+    "contracts:report": "node scripts/check-contract-tests.js --report",
+    "contracts:new": "node scripts/gen-contract-test.js",
     "postinstall": "prisma generate"
   },
   "dependencies": {

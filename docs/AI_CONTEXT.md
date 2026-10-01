@@ -103,9 +103,10 @@ Voice examples: "You're on track." / "Rent is due Friday." / "This looks unusual
 - WCAG 2.2 AA minimum; AAA for text on primary surfaces.
 - Every interactive element ≥ 44×44px hit target.
 - Focus rings are visible and use the accent token, not `outline: none`.
-- All charts have text alternatives / data tables for screen readers.
+- All charts have text alternatives / data tables for screen readers (`DataTableView`).
 - Color is never the sole channel — pair with icon, label, or shape.
-- Respect `prefers-reduced-motion` in every Framer variant.
+- Respect `prefers-reduced-motion` in every Framer variant (global `MotionConfig reducedMotion="user"`).
+- Every component ships a contract test — see `docs/CONTRACT_TESTS.md`; `npm run contracts:check` gates CI.
 
 ## 13. Security Standards
 
@@ -142,6 +143,7 @@ Voice examples: "You're on track." / "Rent is due Friday." / "This looks unusual
 - Sprint board: `docs/SPRINT_BOARD.md` (source of truth once populated).
 - Focus theme: hardening — accessibility contracts, sync reliability, notification UX.
 - Definition of done: typed, tested, a11y-checked, offline-verified, docs updated.
+- M4 (Accessibility Contracts) is complete: contract-test template in `docs/CONTRACT_TESTS.md`, CI gate in `.github/workflows/ci.yml`, chart text alternatives via `DataTableView`, audit in `docs/a11y/2026-audit.md`.
 
 ### 16.1 Sync-engine debug toggle — `NEXT_PUBLIC_SYNC_LOG`
 

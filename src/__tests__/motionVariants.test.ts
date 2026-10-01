@@ -16,6 +16,7 @@ import {
   tapFab,
   slideFromRight,
   expandCollapse,
+  stickyReveal,
 } from "../lib/motion/variants";
 import { duration, ease, stagger, spring, distance, scale } from "../lib/motion/tokens";
 
@@ -230,5 +231,24 @@ describe("expandCollapse", () => {
   test("animate state has auto height", () => {
     const animate = expandCollapse.animate as Record<string, unknown>;
     expect(animate.height).toBe("auto");
+  });
+});
+
+// =========== stickyReveal (M4 — Home compact bar) ===========
+
+describe("stickyReveal variant", () => {
+  test("enters from just above with opacity, using tokens", () => {
+    expect(stickyReveal.initial).toEqual({ opacity: 0, y: -distance.md });
+    const animate = stickyReveal.animate as { opacity: number; y: number; transition: { duration: number; ease: unknown } };
+    expect(animate.opacity).toBe(1);
+    expect(animate.y).toBe(0);
+    expect(animate.transition.duration).toBe(duration.normal);
+    expect(animate.transition.ease).toBe(ease.out);
+  });
+
+  test("exits quickly with the exit duration", () => {
+    const exit = stickyReveal.exit as { opacity: number; transition: { duration: number } };
+    expect(exit.opacity).toBe(0);
+    expect(exit.transition.duration).toBe(duration.exit);
   });
 });

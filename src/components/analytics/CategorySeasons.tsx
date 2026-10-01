@@ -8,13 +8,14 @@ import { useSettings } from "@/hooks/useSettings";
 import { useHistoricalData } from "@/hooks/useHistoricalData";
 import { useCurrency } from "@/hooks/useCurrency";
 import { buildCategoryMap } from "@/lib/categories";
+import { DataTableView, type DataTableColumn } from "@/components/ui/DataTableView";
 
 const MONTH_LABELS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 export function CategorySeasons() {
   const { currentMonth, currentYear } = useUIStore();
   const { settings } = useSettings();
-  const { formatCurrencyCompact } = useCurrency();
+  const { formatCurrency, formatCurrencyCompact } = useCurrency();
   // 11 months lookback = 12 total months
   const history = useHistoricalData(currentMonth, currentYear, 11);
 
@@ -126,6 +127,19 @@ export function CategorySeasons() {
   // Y-axis ticks (0, 25%, 50%, 75%, 100%)
   const yTicks = [0, 0.25, 0.5, 0.75, 1];
 
+  const seasonColumns: DataTableColumn<Record<string, string | number>>[] = [
+    { header: "Month", rowHeader: true, cell: (row) => String(row.label) },
+    { header: "Total", align: "end", cell: (row) => formatCurrency(row.total as number) },
+    {
+      header: "Top categories",
+      cell: (row) =>
+        topCats
+          .filter((cat) => ((row[cat] as number) || 0) > 0)
+          .map((cat) => `${catMap[cat]?.label ?? cat} ${formatCurrency(row[cat] as number)}`)
+          .join(", ") || "—",
+    },
+  ];
+
   return (
     <m.div
       className="card-terrain p-5"
@@ -140,7 +154,14 @@ export function CategorySeasons() {
         </h3>
       </div>
 
-      {/* Stacked area chart */}
+      {/* Stacked area chart — the data table is its text alternative */}
+      <DataTableView
+        title="Category seasons"
+        summary={`Top ${topCats.length} categories over the last ${stackedData.length} months.`}
+        columns={seasonColumns}
+        rows={stackedData}
+        getRowKey={(row) => String(row.label)}
+      >
       <ChartWithTooltip
         W={W} H={H}
         PADDING_LEFT={PADDING_LEFT} PADDING_RIGHT={PADDING_RIGHT}
@@ -156,6 +177,7 @@ export function CategorySeasons() {
         catMap={catMap}
         formatCurrencyCompact={formatCurrencyCompact}
       />
+      </DataTableView>
 
       {/* Legend */}
       <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5">
@@ -210,7 +232,7 @@ function ChartWithTooltip({
 
   return (
     <div className="relative">
-      <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto" preserveAspectRatio="xMidYMid meet">
+      <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
         {/* Grid lines + Y-axis labels */}
         {yTicks.map((frac) => (
           <g key={frac}>

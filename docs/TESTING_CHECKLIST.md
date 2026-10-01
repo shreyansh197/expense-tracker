@@ -50,9 +50,19 @@ Owner spec files under [`src/__tests__/`](../src/__tests__):
 - [ ] `tokenMigration.test.ts` — legacy tokens replaced everywhere.
 - [ ] `zIndexScale.test.ts` — z-index values live in the token scale.
 - [ ] `emptyStates.test.ts` / `loadingStates.test.ts` — every listed screen ships five-state coverage (empty / loading / error / offline / success).
-- [ ] `phaseFContracts.test.ts` — regression barrier for the April 2026 UX overhaul.
+- [x] `phaseFContracts.test.ts` — regression barrier for the April 2026 UX overhaul; since [Sprint 4.2 T-4.2.4](IMPLEMENTATION_QUEUE.md#sprint-42) it also fails any component that renders a non-decorative `<svg>` without a `role="table"` alternative.
 
 **Gate:** all of the above green; a new component **cannot** merge without an entry in the appropriate contract test.
+
+**M4 adds ([Sprint 4.1](IMPLEMENTATION_QUEUE.md#sprint-41) / [Sprint 4.2](IMPLEMENTATION_QUEUE.md#sprint-42)) — see [CONTRACT_TESTS.md](CONTRACT_TESTS.md):**
+
+- [x] `npm run contracts:check` — CI gate: every component under `src/components/` has a contract (dedicated `*.contract.test.ts` or aggregate reference), allowlist entries exist and are justified, coverage ≥ 90 % (currently 100 %).
+- [x] `contractTooling.test.ts` — a synthetic component without a spec fails the gate; stale/unjustified allowlist entries fail; the scaffolder's skeleton holds for its sample component.
+- [x] 20 backfilled `*.contract.test.ts` specs + the inventory block in `accessibilityContracts.test.ts` (baseline contract: no debug logging, no raw HTML, no positive tabindex, img alt, focus indicator, reduced-motion-aware JS loops).
+- [x] `dataTableView.contract.test.ts` / `chartTextAlternatives.contract.test.ts` — every listed chart exposes a `DataTableView` built from its own rows; SVGs are `aria-hidden`; toggles announce via `aria-live`.
+- [x] `analyticsCharts.test.ts` — chart models (ridge scale incl. budget, velocity pace line ≤ 100 %, rolling series length = selected period, anchor-based category velocity, merchants, year-over-year) and the hero summary.
+- [x] `analyticsLayout.contract.test.ts` — responsive header, period in the URL, ridge follows the period, section order (UX-9.6), Deep Dive disclosure semantics.
+- [x] `stickyReveal.contract.test.ts` + `motionVariants.test.ts` — Home compact bar uses the zero-height sticky rail and the tokenised `stickyReveal` variant with a reduced-motion cross-fade.
 
 ## 3. Automated — Integration `[Auto][P0]`
 
@@ -95,6 +105,9 @@ Owner spec files under [`src/__tests__/`](../src/__tests__):
 - [ ] Reduced-motion smoke: OS-level "Reduce Motion" toggled — no non-essential animation runs.
 - [ ] Contrast smoke: dark mode passes WCAG AA on the primary text against every surface used on the dashboard and analytics.
 - [ ] Zoom smoke: 200 % browser zoom — no horizontal scroll on primary flows.
+- [ ] Chart tables (M4): on `/analytics`, Tab to each "Table" button, press Enter — the screen reader announces "showing data table", the table has a caption and headers, and values match the chart; press again to return to the chart.
+- [ ] Analytics at 360 px (M4): the month name and both arrows stay fully visible; 3M/6M/12M fills the second row; switching period updates the ridge title, bars and table; Rolling Average 30/60/90 changes the date range.
+- [ ] Home scroll (M4): scroll past the hero — the compact money-spent bar slides/fades in without the page jumping; with Reduce Motion on it only cross-fades.
 
 ## 6. Manual — Performance smoke `[Manual][P1]`
 

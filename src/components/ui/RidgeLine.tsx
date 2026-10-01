@@ -2,6 +2,7 @@
 
 import { useId } from "react";
 import { m, useReducedMotion } from "framer-motion";
+import { DataTableView, type DataTableColumn } from "@/components/ui/DataTableView";
 import type { DailyTotal } from "@/types";
 
 interface RidgeLineProps {
@@ -18,6 +19,17 @@ interface RidgeLineProps {
   className?: string;
   /** "personal" uses moss/sage; "business" uses biz-accent green. */
   variant?: "personal" | "business";
+  /**
+   * Text alternative (T-4.2.1). When provided, the ridge renders with a
+   * keyboard-operable "Table" toggle listing each point's label and value.
+   */
+  table?: {
+    title: string;
+    /** One label per `dailyTotals` entry, in the same order. */
+    labels: string[];
+    valueHeader: string;
+    formatValue: (n: number) => string;
+  };
 }
 
 /**
@@ -71,6 +83,7 @@ export function RidgeLine({
   height = 40,
   className,
   variant = "personal",
+  table,
 }: RidgeLineProps) {
   const prefersReduced = useReducedMotion();
   const uid = useId().replace(/:/g, "");
@@ -83,7 +96,7 @@ export function RidgeLine({
   const ridgePath = buildRidgePath(dailyTotals, maxDays, width, height);
   const clippedWidth = Math.max(0, Math.min(progress, 1)) * width;
 
-  return (
+  const svg = (
     <svg
       viewBox={`0 0 ${width} ${height}`}
       width="100%"
@@ -130,5 +143,19 @@ export function RidgeLine({
         />
       )}
     </svg>
+  );
+
+  if (!table) return svg;
+
+  const rows = dailyTotals.map((d, i) => ({ label: table.labels[i] ?? String(d.day), total: d.total }));
+  const columns: DataTableColumn<(typeof rows)[number]>[] = [
+    { header: "Period", rowHeader: true, cell: (r) => r.label },
+    { header: table.valueHeader, align: "end", cell: (r) => table.formatValue(r.total) },
+  ];
+
+  return (
+    <DataTableView title={table.title} columns={columns} rows={rows} getRowKey={(r) => r.label}>
+      {svg}
+    </DataTableView>
   );
 }

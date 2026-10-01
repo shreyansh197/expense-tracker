@@ -274,6 +274,12 @@ export default function CategoryPage({ params }: { params: Promise<{ slug: strin
               maxDays={6}
               progress={1}
               height={56}
+              table={{
+                title: `${categoryLabel}, 6-month trend`,
+                labels: trendData.map((d) => d.label),
+                valueHeader: "Spent",
+                formatValue: formatCurrency,
+              }}
             />
             <div className="mt-2 flex justify-between">
               {trendData.map((d) => (

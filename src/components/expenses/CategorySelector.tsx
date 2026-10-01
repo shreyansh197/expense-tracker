@@ -193,7 +193,7 @@ export function CategorySelector({ categories, selected, onSelect, showError, ca
                   onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleSaveNewCategory(); } if (e.key === "Escape") { setShowCreate(false); setNewName(""); } }}
                   placeholder="Category name"
                   maxLength={32}
-                  className="flex-1 rounded-lg bg-transparent px-2 py-1 text-xs outline-none"
+                  className="flex-1 rounded-lg bg-transparent px-2 py-1 text-xs outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
                   style={{ border: "1px solid var(--border)", color: "var(--text-primary)" }}
                   aria-label="New category name"
                 />
@@ -224,7 +224,7 @@ export function CategorySelector({ categories, selected, onSelect, showError, ca
                     key={c}
                     type="button"
                     onClick={() => setNewColor(c)}
-                    className="h-5 w-5 rounded-full transition-transform"
+                    className="h-5 w-5 rounded-full transition-transform focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2"
                     style={{
                       background: c,
                       transform: newColor === c ? "scale(1.25)" : "scale(1)",

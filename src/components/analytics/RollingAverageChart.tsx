@@ -1,147 +1,160 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { scaleLinear, scaleTime } from "@visx/scale";
+import { useId, useMemo, useState } from "react";
+import { scaleLinear } from "@visx/scale";
 import { AreaClosed, LinePath } from "@visx/shape";
 import { curveMonotoneX } from "@visx/curve";
-import { LinearGradient } from "@visx/gradient";
 import { Group } from "@visx/group";
-import { m } from "framer-motion";
-
-interface DayPoint {
-  date: Date;
-  value: number;
-}
+import { ParentSize } from "@visx/responsive";
+import { DataTableView, type DataTableColumn } from "@/components/ui/DataTableView";
+import {
+  buildRollingSeries,
+  DEFAULT_ROLLING_PERIOD,
+  ROLLING_PERIODS,
+  ROLLING_WINDOW_DAYS,
+  type RollingPeriod,
+  type RollingPoint,
+} from "@/lib/analyticsCharts";
+import type { Expense } from "@/types";
 
 interface RollingAverageChartProps {
-  /** Daily totals keyed by ISO date string (YYYY-MM-DD) */
-  dailyTotals: Record<string, number>;
+  /** Raw expenses covering at least the longest period plus the smoothing window. */
+  expenses: readonly Expense[];
+  /** Last day of the series (today for the current month, else the month's last day). */
+  anchor: Date;
   formatCurrency: (n: number) => string;
-  width?: number;
+  formatCurrencyCompact: (n: number) => string;
   height?: number;
 }
 
-type WindowDays = 30 | 60 | 90;
+const MARGIN = { top: 8, right: 8, bottom: 22, left: 44 };
 
-/** Compute rolling mean and ±1σ band for the given window */
-function computeRolling(points: DayPoint[], window: number): Array<{ date: Date; mean: number; upper: number; lower: number }> {
-  return points.map((_, i) => {
-    const slice = points.slice(Math.max(0, i - window + 1), i + 1).map((p) => p.value);
-    const mean = slice.reduce((s, v) => s + v, 0) / slice.length;
-    const variance = slice.reduce((s, v) => s + (v - mean) ** 2, 0) / slice.length;
-    const sigma = Math.sqrt(variance);
-    return { date: points[i].date, mean, upper: mean + sigma, lower: Math.max(0, mean - sigma) };
-  });
+function formatDay(iso: string): string {
+  const [y, m, d] = iso.split("-").map(Number);
+  return new Date(y, m - 1, d).toLocaleDateString(undefined, { day: "numeric", month: "short" });
 }
 
-export function RollingAverageChart({ dailyTotals, formatCurrency, width = 320, height = 120 }: RollingAverageChartProps) {
-  const [window, setWindow] = useState<WindowDays>(30);
+/** Round a mean to minor units for display. */
+function toCents(n: number): number {
+  return Math.round(n * 100) / 100;
+}
 
-  const points = useMemo<DayPoint[]>(() => {
-    return Object.entries(dailyTotals)
-      .map(([date, value]) => ({ date: new Date(date), value }))
-      .sort((a, b) => a.date.getTime() - b.date.getTime());
-  }, [dailyTotals]);
+function Plot({ points, width, height, formatCurrencyCompact }: { points: RollingPoint[]; width: number; height: number; formatCurrencyCompact: (n: number) => string }) {
+  const gradientId = `rolling-band-${useId().replace(/:/g, "")}`;
+  const innerW = Math.max(width - MARGIN.left - MARGIN.right, 0);
+  const innerH = height - MARGIN.top - MARGIN.bottom;
+  const yMax = Math.max(...points.map((p) => p.upper), 1);
+  const xScale = scaleLinear({ domain: [0, Math.max(points.length - 1, 1)], range: [0, innerW] });
+  const yScale = scaleLinear({ domain: [0, yMax * 1.1], range: [innerH, 0], nice: true });
+  const first = points[0];
+  const last = points[points.length - 1];
 
-  const rolling = useMemo(() => computeRolling(points, window), [points, window]);
-
-  const margin = { top: 8, right: 8, bottom: 24, left: 40 };
-  const innerW = width - margin.left - margin.right;
-  const innerH = height - margin.top - margin.bottom;
-
-  const xScale = useMemo(() => {
-    if (rolling.length < 2) return null;
-    return scaleTime({
-      domain: [rolling[0].date, rolling[rolling.length - 1].date],
-      range: [0, innerW],
-    });
-  }, [rolling, innerW]);
-
-  const yMax = useMemo(() => Math.max(...rolling.map((d) => d.upper), 1), [rolling]);
-
-  const yScale = useMemo(() =>
-    scaleLinear({ domain: [0, yMax * 1.1], range: [innerH, 0], nice: true }),
-    [yMax, innerH],
+  return (
+    <svg width={width} height={height} aria-hidden="true">
+      <defs>
+        <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="var(--accent)" stopOpacity={0.14} />
+          <stop offset="100%" stopColor="var(--accent)" stopOpacity={0.04} />
+        </linearGradient>
+      </defs>
+      <Group left={MARGIN.left} top={MARGIN.top}>
+        <AreaClosed
+          data={points}
+          x={(_, i) => xScale(i)}
+          y0={(d) => yScale(d.lower)}
+          y1={(d) => yScale(d.upper)}
+          yScale={yScale}
+          fill={`url(#${gradientId})`}
+          curve={curveMonotoneX}
+        />
+        <LinePath
+          data={points}
+          x={(_, i) => xScale(i)}
+          y={(d) => yScale(d.mean)}
+          stroke="var(--accent)"
+          strokeWidth={2}
+          curve={curveMonotoneX}
+          strokeLinecap="round"
+        />
+        {[0, 0.5, 1].map((pct) => (
+          <text key={pct} x={-6} y={yScale(yMax * pct)} textAnchor="end" dominantBaseline="middle" fontSize={10} fill="var(--text-muted)">
+            {formatCurrencyCompact(yMax * pct)}
+          </text>
+        ))}
+        {first && last && (
+          <>
+            <text x={0} y={innerH + 16} fontSize={10} fill="var(--text-muted)">{formatDay(first.date)}</text>
+            <text x={innerW} y={innerH + 16} fontSize={10} textAnchor="end" fill="var(--text-muted)">{formatDay(last.date)}</text>
+          </>
+        )}
+      </Group>
+    </svg>
   );
+}
 
-  if (!xScale || rolling.length < 2 || width < 80) return null;
+/**
+ * Daily spend over the last 30 / 60 / 90 days, smoothed by a trailing 7-day
+ * mean with a ±1σ band. The selected period sets the visible date range, so
+ * switching it always redraws the chart and its data table.
+ */
+export function RollingAverageChart({ expenses, anchor, formatCurrency, formatCurrencyCompact, height = 140 }: RollingAverageChartProps) {
+  const [period, setPeriod] = useState<RollingPeriod>(DEFAULT_ROLLING_PERIOD);
+  const anchorKey = anchor.getTime();
+  const points = useMemo(() => buildRollingSeries(expenses, new Date(anchorKey), period), [expenses, anchorKey, period]);
+  const latest = points[points.length - 1];
+  const title = `${ROLLING_WINDOW_DAYS}-day rolling average, last ${period} days`;
+
+  const columns: DataTableColumn<RollingPoint>[] = [
+    { header: "Date", rowHeader: true, cell: (p) => formatDay(p.date) },
+    { header: "Spent", align: "end", cell: (p) => formatCurrency(p.dayTotal) },
+    { header: `${ROLLING_WINDOW_DAYS}-day avg`, align: "end", cell: (p) => formatCurrency(toCents(p.mean)) },
+  ];
 
   return (
     <div>
-      {/* Segmented control — connected pill style */}
-      <div className="mb-2 inline-flex rounded-lg overflow-hidden" style={{ border: "1px solid var(--border)" }}>
-        {([30, 60, 90] as WindowDays[]).map((w, i) => (
+      <div role="group" aria-label="Rolling average period" className="mb-2 inline-flex overflow-hidden rounded-lg" style={{ border: "1px solid var(--border)" }}>
+        {ROLLING_PERIODS.map((p, i) => (
           <button
-            key={w}
-            onClick={() => setWindow(w)}
-            className="px-2.5 py-1 text-xs font-semibold transition-colors"
+            key={p}
+            type="button"
+            onClick={() => setPeriod(p)}
+            aria-pressed={period === p}
+            aria-label={`Last ${p} days`}
+            className="min-h-[44px] min-w-[44px] px-3 text-xs font-semibold transition-colors"
             style={{
-              background: window === w ? "var(--accent)" : "var(--surface-secondary)",
-              color: window === w ? "#fff" : "var(--text-muted)",
-              borderRight: i < 2 ? "1px solid var(--border)" : "none",
+              background: period === p ? "var(--accent)" : "var(--surface-secondary)",
+              color: period === p ? "var(--text-inverse)" : "var(--text-muted)",
+              borderRight: i < ROLLING_PERIODS.length - 1 ? "1px solid var(--border)" : "none",
             }}
-            aria-pressed={window === w}
           >
-            {w}d
+            {p}d
           </button>
         ))}
       </div>
 
-      <svg
-        width={width}
-        height={height}
-        role="img"
-        aria-label={`${window}-day rolling average spending chart`}
+      <DataTableView
+        title={title}
+        summary={latest ? `Latest ${ROLLING_WINDOW_DAYS}-day average ${formatCurrency(toCents(latest.mean))} per day.` : undefined}
+        columns={columns}
+        rows={points}
+        getRowKey={(p) => p.date}
       >
-        <defs>
-          <LinearGradient id="rolling-band" from="var(--accent)" to="var(--accent)" fromOpacity={0.12} toOpacity={0.04} vertical />
-          <LinearGradient id="rolling-line" from="var(--accent)" to="var(--accent)" fromOpacity={1} toOpacity={0.6} />
-        </defs>
-        <Group left={margin.left} top={margin.top}>
-          {/* ±σ confidence band */}
-          <AreaClosed
-            data={rolling}
-            x={(d) => xScale(d.date) ?? 0}
-            y0={(d) => yScale(d.lower)}
-            y1={(d) => yScale(d.upper)}
-            yScale={yScale}
-            fill="url(#rolling-band)"
-            curve={curveMonotoneX}
-          />
-          {/* Rolling mean line */}
-          <LinePath
-            data={rolling}
-            x={(d) => xScale(d.date) ?? 0}
-            y={(d) => yScale(d.mean)}
-            stroke="var(--accent)"
-            strokeWidth={2}
-            curve={curveMonotoneX}
-            strokeLinecap="round"
-          />
-          {/* Axis labels */}
-          {[0, 0.5, 1].map((pct) => {
-            const val = yMax * pct;
-            const y = yScale(val);
-            return (
-              <text key={pct} x={-6} y={y} textAnchor="end" dominantBaseline="middle" fontSize={9} fill="var(--text-muted)">
-                {formatCurrency(val)}
-              </text>
-            );
-          })}
-        </Group>
-      </svg>
-
-      {/* Legend */}
-      <div className="mt-1 flex items-center gap-3 text-xs" style={{ color: "var(--text-muted)" }}>
-        <span className="flex items-center gap-1">
-          <span className="inline-block h-0.5 w-4 rounded" style={{ background: "var(--accent)" }} />
-          {window}d avg
-        </span>
-        <span className="flex items-center gap-1">
-          <span className="inline-block h-3 w-4 rounded opacity-20" style={{ background: "var(--accent)" }} />
-          ±1σ band
-        </span>
-      </div>
+        <div style={{ height }}>
+          <ParentSize>
+            {({ width }) => (width < 80 ? null : <Plot points={points} width={width} height={height} formatCurrencyCompact={formatCurrencyCompact} />)}
+          </ParentSize>
+        </div>
+        <div className="mt-1 flex items-center gap-3 text-xs" style={{ color: "var(--text-muted)" }}>
+          <span className="flex items-center gap-1">
+            <span aria-hidden="true" className="inline-block h-0.5 w-4 rounded" style={{ background: "var(--accent)" }} />
+            {ROLLING_WINDOW_DAYS}-day avg
+          </span>
+          <span className="flex items-center gap-1">
+            <span aria-hidden="true" className="inline-block h-3 w-4 rounded opacity-20" style={{ background: "var(--accent)" }} />
+            ±1σ band
+          </span>
+        </div>
+      </DataTableView>
     </div>
   );
 }

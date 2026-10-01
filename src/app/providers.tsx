@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { LazyMotion, domAnimation } from "framer-motion";
+import { LazyMotion, MotionConfig, domAnimation } from "framer-motion";
 import { ThemeProvider, useTheme } from "@/components/providers/ThemeProvider";
 import { AuthProvider } from "@/components/providers/AuthProvider";
 import { ToastProvider } from "@/components/ui/Toast";
@@ -104,6 +104,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
   useEffect(() => { rehydrateAppMode(); }, []);
   return (
     <LazyMotion features={domAnimation} strict>
+      {/* Honour prefers-reduced-motion app-wide: transform/layout animation is
+          disabled, opacity cross-fades remain as the state-change signal. */}
+      <MotionConfig reducedMotion="user">
       <ThemeProvider>
         <AuthProvider>
           <SyncProvider>
@@ -123,6 +126,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
         <SplashScreen />
         <OfflineScreen />
       </ThemeProvider>
+      </MotionConfig>
     </LazyMotion>
   );
 }

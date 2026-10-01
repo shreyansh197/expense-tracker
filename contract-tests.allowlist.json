@@ -1,0 +1,30 @@
+{
+  "$comment": "M4 contract-test gate allowlist (docs/CONTRACT_TESTS.md §8). Only pure-presentation primitives and non-rendering components belong here. Directory entries end with '/'. Every entry needs a reason; stale entries fail the gate.",
+  "threshold": 0.9,
+  "entries": [
+    {
+      "path": "src/components/ui/illustrations/",
+      "reason": "Decorative SVG illustrations (aria-hidden, no interaction, no data). Consumers own the accessible text."
+    },
+    {
+      "path": "src/components/ui/icons/index.tsx",
+      "reason": "Icon barrel of decorative inline SVGs; accessible names are supplied by the consuming control."
+    },
+    {
+      "path": "src/components/pwa/ServiceWorkerRegistration.tsx",
+      "reason": "Non-rendering effect component (returns null)."
+    },
+    {
+      "path": "src/components/pwa/SWUpdateListener.tsx",
+      "reason": "Non-rendering event bridge (returns null)."
+    },
+    {
+      "path": "src/components/providers/ThemeProvider.tsx",
+      "reason": "Context provider with no UI of its own; theme contrast is covered by designTokens.test.ts."
+    },
+    {
+      "path": "src/components/providers/AuthProvider.tsx",
+      "reason": "Context provider with no UI of its own; auth surfaces are covered by AuthModal contracts."
+    }
+  ]
+}

@@ -4,6 +4,19 @@ import { useMemo } from "react";
 import { m } from "framer-motion";
 import type { FingerprintAxes } from "@/lib/fingerprint";
 import { AXIS_LABELS } from "@/lib/fingerprint";
+import { DataTableView, type DataTableColumn } from "@/components/ui/DataTableView";
+
+interface AxisRow {
+  key: keyof FingerprintAxes;
+  label: string;
+  /** Normalised 0–1 axis value, shown as a 0–100 score. */
+  value: number;
+}
+
+const AXIS_COLUMNS: DataTableColumn<AxisRow>[] = [
+  { header: "Dimension", rowHeader: true, cell: (r) => r.label },
+  { header: "Score (0–100)", align: "end", cell: (r) => String(Math.round(r.value * 100)) },
+];
 
 interface FingerprintBlobProps {
   axes: FingerprintAxes;
@@ -81,14 +94,22 @@ export function FingerprintBlob({ axes, color = "var(--accent)", size = 180 }: F
     };
   });
 
+  const rows: AxisRow[] = AXIS_KEYS.map((key) => ({ key, label: AXIS_LABELS[key], value: axes[key] }));
+
   return (
+    <DataTableView
+      title="Spending fingerprint"
+      summary="A radial view of your spending behaviour across 8 dimensions."
+      columns={AXIS_COLUMNS}
+      rows={rows}
+      getRowKey={(r) => r.key}
+    >
     <svg
       viewBox={`0 0 ${size} ${size}`}
       width="100%"
       height="100%"
       className="mx-auto max-w-[200px] overflow-visible"
-      role="img"
-      aria-label="Financial fingerprint — a radial visualization of your spending behavior across 8 dimensions"
+      aria-hidden="true"
     >
       {/* Grid circles */}
       {gridRadii.map((r, i) => (
@@ -164,5 +185,6 @@ export function FingerprintBlob({ axes, color = "var(--accent)", size = 180 }: F
         </text>
       ))}
     </svg>
+    </DataTableView>
   );
 }

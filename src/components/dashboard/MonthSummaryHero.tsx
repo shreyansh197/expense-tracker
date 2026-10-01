@@ -88,11 +88,11 @@ export function MonthSummaryHero({
     setEditingBudget(false);
   };
 
-  // ─── Compact sticky bar ───────────────────────────────────
+  // ─── Compact sticky bar (pinned + revealed by StickyReveal) ───
   if (compact) {
     return (
       <div
-        className="sticky top-0 z-[var(--z-sticky)] backdrop-blur-md border-b"
+        className="backdrop-blur-md border-b"
         style={{
           background: "color-mix(in srgb, var(--surface) 85%, transparent)",
           borderColor: "var(--border)",

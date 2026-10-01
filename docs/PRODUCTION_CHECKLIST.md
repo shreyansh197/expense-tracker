@@ -93,6 +93,10 @@ Verified against [ARCHITECTURE.md — Appendix A](ARCHITECTURE.md) and [`.env.ex
 ## 8. Accessibility
 
 - [ ] `[P0]` `src/__tests__/accessibilityContracts.test.ts` green.
+- [x] `[P0]` `npm run contracts:check` green — every component has a contract test; CI (`.github/workflows/ci.yml`) enforces it on every PR (M4, [CONTRACT_TESTS.md](CONTRACT_TESTS.md)).
+- [x] `[P0]` Every chart exposes a keyboard-reachable data-table alternative (`DataTableView`, M4 T-4.2.1).
+- [x] `[P0]` [Accessibility audit](a11y/2026-audit.md) of `/`, `/analytics`, `/business`, `/settings`, `/expenses` — zero open P0 findings.
+- [x] `[P0]` App-wide `MotionConfig reducedMotion="user"`; JS-driven animations (`AnimatedNumber`, `Confetti`) honour `prefers-reduced-motion`.
 - [ ] `[P0]` `src/__tests__/touchTargets.test.ts` green — every interactive element ≥ 44×44 px.
 - [ ] `[P0]` `src/__tests__/motionTokens.test.ts` and `motionVariants.test.ts` green — `prefers-reduced-motion` respected everywhere.
 - [ ] `[P1]` Full keyboard tab-through of primary flows: login → dashboard → add expense → analytics → settings.

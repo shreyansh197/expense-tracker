@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 import { m } from "framer-motion";
 import { X, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -30,6 +30,7 @@ export function LedgerForm({ initial, onSubmit, onCancel, submitLabel = "Create 
   const [tagInput, setTagInput] = useState("");
   const [tags, setTags] = useState<string[]>(initial?.tags ?? []);
   const [submitting, setSubmitting] = useState(false);
+  const fieldId = useId();
   const [amountTouched, setAmountTouched] = useState(false);
   const amountInvalid = amountTouched && (expectedAmount === "" || isNaN(parseFloat(expectedAmount)) || parseFloat(expectedAmount) <= 0);
 
@@ -67,8 +68,9 @@ export function LedgerForm({ initial, onSubmit, onCancel, submitLabel = "Create 
     <form onSubmit={handleSubmit} className="space-y-4">
       {/* Name */}
       <div>
-        <label className="form-label">Name / Client</label>
+        <label className="form-label" htmlFor={`${fieldId}-name`}>Name / Client</label>
         <input
+          id={`${fieldId}-name`}
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
@@ -81,10 +83,11 @@ export function LedgerForm({ initial, onSubmit, onCancel, submitLabel = "Create 
 
       {/* Expected Amount */}
       <div>
-        <label className="form-label">Expected Amount</label>
+        <label className="form-label" htmlFor={`${fieldId}-amount`}>Expected Amount</label>
         <div className="relative">
           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm" style={{ color: 'var(--text-tertiary)' }}>{symbol}</span>
           <input
+            id={`${fieldId}-amount`}
             type="number"
             min="1"
             step="any"
@@ -148,8 +151,9 @@ export function LedgerForm({ initial, onSubmit, onCancel, submitLabel = "Create 
       {/* Status (only for edit) */}
       {initial && (
         <div>
-          <label className="form-label">Status</label>
+          <label className="form-label" htmlFor={`${fieldId}-status`}>Status</label>
           <select
+            id={`${fieldId}-status`}
             value={status}
             onChange={(e) => setStatus(e.target.value as LedgerStatus)}
             className="form-select w-full"
@@ -163,9 +167,10 @@ export function LedgerForm({ initial, onSubmit, onCancel, submitLabel = "Create 
 
       {/* Tags */}
       <div>
-        <label className="form-label">Tags</label>
+        <label className="form-label" htmlFor={`${fieldId}-tag`}>Tags</label>
         <div className="flex gap-2">
           <input
+            id={`${fieldId}-tag`}
             type="text"
             value={tagInput}
             onChange={(e) => setTagInput(e.target.value)}
@@ -192,7 +197,7 @@ export function LedgerForm({ initial, onSubmit, onCancel, submitLabel = "Create 
                 className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs" style={{ background: 'var(--biz-accent-soft)', color: 'var(--biz-accent-text)' }}
               >
                 {tag}
-                <button type="button" onClick={() => setTags(tags.filter((t) => t !== tag))} className="-mr-1 flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full transition-colors" style={{ color: 'var(--danger-text)' }}>
+                <button type="button" onClick={() => setTags(tags.filter((t) => t !== tag))} className="-mr-1 flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full transition-colors" style={{ color: 'var(--danger-text)' }} aria-label={`Remove tag ${tag}`}>
                   <X size={12} />
                 </button>
               </span>
@@ -203,8 +208,9 @@ export function LedgerForm({ initial, onSubmit, onCancel, submitLabel = "Create 
 
       {/* Notes */}
       <div>
-        <label className="form-label">Notes</label>
+        <label className="form-label" htmlFor={`${fieldId}-notes`}>Notes</label>
         <textarea
+          id={`${fieldId}-notes`}
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           rows={3}

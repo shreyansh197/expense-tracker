@@ -461,6 +461,8 @@ Every Framer variant must honor `prefers-reduced-motion`:
 
 - Replace movement with a **cross-fade** at `duration.fast`.
 - Never remove the animation entirely — leave the state-change signal.
+- **App-wide guard (M4):** the root wraps all motion in `<MotionConfig reducedMotion="user">` ([providers.tsx](../src/app/providers.tsx)), so transform/layout animation is dropped automatically and opacity cross-fades remain. JS-driven loops (`requestAnimationFrame` counters, canvas confetti) must check `useReducedMotion()` themselves — enforced by `expectReducedMotionAware` ([CONTRACT_TESTS.md §5](CONTRACT_TESTS.md)).
+- **Sticky reveals:** compact bars that appear once their full version scrolls away use [`StickyReveal`](../src/components/motion/StickyReveal.tsx) — a zero-height sticky rail (no layout shift) with the `stickyReveal` variant (fade + 12 px slide, `duration.normal`, `ease.out`; exit `duration.exit`), falling back to `fadeUpReduced`.
 
 ### 8.7 Rules
 
@@ -848,6 +850,8 @@ Charts are Visx. They are quiet, currency-aware, and always have a text alternat
 ### 15.4 Accessibility
 
 - Every chart has a **text alternative**: either a `<table>` sibling or `aria-describedby` summary ("30-day rolling average, currently ₹1,240, up 4% from last month").
+- **Implementation (M4):** wrap the chart in [`DataTableView`](../src/components/ui/DataTableView.tsx). It renders a 44 px "Table" toggle (`aria-pressed`, announced via a polite live region) that swaps the chart for a semantic `role="table"` built from the **same rows** as the chart, plus an `sr-only` summary while the chart is shown. Mark the visual `<svg>` `aria-hidden="true"`. Enforced by `chartTextAlternatives.contract.test.ts` and the SVG rule in `phaseFContracts.test.ts`; see [CONTRACT_TESTS.md §7](CONTRACT_TESTS.md).
+- Chart models (bars, budget markers, pace lines) share **one scale** that includes the reference value, so no bar or marker can overflow its track or overlap labels; labels always sit outside the plot area in normal flow.
 - Every chart is keyboard focusable; arrow keys move through data points; Enter opens the tooltip.
 - Chart colors are paired with **shape or label** — never encoded by color alone.
 
@@ -951,9 +955,13 @@ WCAG 2.2 AA is the floor. AAA is the target on hero text.
 
 ### 17.4 Charts & data viz
 
-- Data table sibling or `aria-describedby` summary is mandatory.
+- Data table sibling or `aria-describedby` summary is mandatory — use `DataTableView` (§15.4).
 - Keyboard traversal of data points with arrow keys.
 - Never encode meaning in color alone.
+
+### 17.4a Contract tests
+
+Every component under `src/components/` ships with an accessibility contract test; CI fails otherwise. How to write one in under five minutes: [CONTRACT_TESTS.md](CONTRACT_TESTS.md).
 
 ### 17.5 Reduced motion
 

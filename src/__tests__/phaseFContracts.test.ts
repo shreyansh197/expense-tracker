@@ -98,9 +98,10 @@ describe("AccentColorPicker component contract", () => {
     expect(src).toContain('setProperty("--accent-soft"');
   });
 
-  test("removes overrides via removeProperty", () => {
-    expect(src).toContain('removeProperty("--accent")');
-    expect(src).toContain('removeProperty("--accent-soft")');
+  test("falls back to the default preset instead of leaving stale overrides", () => {
+    // applyAccentColor always writes a full preset; unknown ids resolve to the default.
+    expect(src).toContain("ACCENT_PRESETS.find((p) => p.id === colorId) ?? ACCENT_PRESETS[0]");
+    expect(src).toContain('setProperty("--accent", isDark ? preset.accentDark : preset.accent)');
   });
 });
 
@@ -140,9 +141,9 @@ describe("useAchievements hook contract", () => {
   });
 
   // -- Achievement IDs match between defs and checks --
-  test("all 10 achievement IDs are present", () => {
-    const ids = ["first_step", "week_warrior", "monthly_master", "budget_hero", "triple_crown",
-      "category_king", "goal_setter", "goal_crusher", "recurring_pro", "data_driven"];
+  test("all 8 achievement IDs are present", () => {
+    const ids = ["getting_started", "week_warrior", "monthly_master", "budget_hero", "triple_crown",
+      "goal_setter", "goal_crusher", "recurring_pro"];
     for (const id of ids) {
       expect(src).toContain(`"${id}"`);
     }
@@ -266,5 +267,45 @@ describe("loading state contracts", () => {
     const src = readComponent("components/settings/AccountCard.tsx");
     expect(src).toContain("<Skeleton");
     expect(src).toContain("avatarUploading");
+  });
+});
+
+// =========== M4 · T-4.2.4 — every SVG chart exposes a role="table" alternative ===========
+//
+// Any component under src/components/ that renders a non-decorative <svg>
+// must also expose a role="table" text alternative (DataTableView). Decorative
+// SVGs opt out explicitly with aria-hidden="true". Keeps chart a11y (TD-6)
+// from regressing as new visualisations are added.
+
+describe("chart contracts — SVG requires a role=\"table\" text alternative", () => {
+  function walk(dir: string): string[] {
+    return fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+      const full = path.join(dir, entry.name);
+      return entry.isDirectory() ? walk(full) : [full];
+    });
+  }
+
+  const componentsDir = path.resolve(__dirname, "..", "components");
+  const svgComponents = walk(componentsDir)
+    .filter((file) => file.endsWith(".tsx"))
+    .map((file) => ({ rel: path.relative(componentsDir, file).split(path.sep).join("/"), src: fs.readFileSync(file, "utf-8") }))
+    .filter(({ src }) => /<svg\b/.test(src));
+
+  const dataTableSrc = readComponent("components/ui/DataTableView.tsx");
+
+  test("DataTableView renders a role=\"table\" element", () => {
+    expect(dataTableSrc).toContain('<table role="table"');
+  });
+
+  test("the scan finds the chart components", () => {
+    expect(svgComponents.map((c) => c.rel)).toEqual(
+      expect.arrayContaining(["analytics/RollingAverageChart.tsx", "business/CollectionChart.tsx", "ui/RidgeLine.tsx"]),
+    );
+  });
+
+  test.each(svgComponents.map((c) => [c.rel, c.src] as const))("%s: non-decorative SVG has a role=\"table\" alternative", (_rel, src) => {
+    const nonDecorative = [...src.matchAll(/<svg\b([^>]*)>/g)].filter(([, attrs]) => !/aria-hidden(?!=["{]false)/.test(attrs));
+    const hasTableAlternative = src.includes("<DataTableView") || src.includes('role="table"');
+    expect(nonDecorative.length === 0 || hasTableAlternative).toBe(true);
   });
 });

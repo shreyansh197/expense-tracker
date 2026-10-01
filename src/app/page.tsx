@@ -9,6 +9,7 @@ import { AppShell } from "@/components/layout/AppShell";
 import { MonthSwitcher } from "@/components/layout/MonthSwitcher";
 import { SyncIndicator } from "@/components/sync/SyncIndicator";
 import { RevealOnScroll } from "@/components/motion/RevealOnScroll";
+import { StickyReveal } from "@/components/motion/StickyReveal";
 import { MonthSummaryHero } from "@/components/dashboard/MonthSummaryHero";
 import { SkeletonKpiCards, SkeletonChart } from "@/components/ui/Skeleton";
 import { InstallBanner } from "@/components/pwa/InstallBanner";
@@ -471,8 +472,8 @@ function DashboardContent() {
       {/* Sentinel: when this leaves viewport, compact sticky hero appears. h-px required for iOS Safari IntersectionObserver */}
       <div ref={heroSentinelRef} aria-hidden="true" className="h-px" />
 
-      {/* Sticky compact hero bar */}
-      {heroScrolledOut && !heroLoading && expenses.length > 0 && (
+      {/* Sticky compact hero bar — zero-height rail + animated reveal, so the page never jumps */}
+      <StickyReveal show={heroScrolledOut && !heroLoading && expenses.length > 0}>
         <MonthSummaryHero
           compact
           monthlyTotal={monthlyTotal}
@@ -501,7 +502,7 @@ function DashboardContent() {
           month={currentMonth}
           year={currentYear}
         />
-      )}
+      </StickyReveal>
 
       {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
           2. HERO ZONE â€” total spent + spending stream

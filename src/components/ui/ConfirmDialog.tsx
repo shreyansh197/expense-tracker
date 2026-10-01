@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, createContext, useContext, useRef, useEffect } from "react";
+import { useState, useCallback, createContext, useContext, useRef, useEffect, useId } from "react";
 import { m, AnimatePresence } from "framer-motion";
 import { AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -129,11 +129,13 @@ function ConfirmDialogInner({
   variantColors: Record<string, { icon: string; button: string; border: string }>;
 }) {
   const trapRef = useFocusTrap<HTMLDivElement>(true);
+  const confirmInputId = useId();
 
   return (
         <m.div
           className="fixed inset-0 z-[300] flex items-center justify-center p-4"
           onClick={(e) => { if (e.target === e.currentTarget) handleCancel(); }}
+          onKeyDown={(e) => { if (e.key === "Escape") { e.stopPropagation(); handleCancel(); } }}
           role="dialog"
           aria-modal="true"
           aria-label={pending.options.title}
@@ -165,10 +167,11 @@ function ConfirmDialogInner({
                 </p>
                 {pending.options.requireInput && (
                   <div className="mt-3">
-                    <label className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+                    <label htmlFor={confirmInputId} className="text-xs" style={{ color: 'var(--text-secondary)' }}>
                       {pending.options.requireInputLabel || `Type "${pending.options.requireInput}" to confirm`}
                     </label>
                     <input
+                      id={confirmInputId}
                       ref={inputRef}
                       type="text"
                       value={inputValue}

@@ -74,7 +74,7 @@ expense-tracker/
 │   ├── manifest.json               # PWA manifest
 │   ├── sw.js                       # Service worker (cache + push + background sync)
 │   └── icons/                      # App icons + version.json
-├── scripts/                        # Build / DB helpers (db-push.js, gen-icons.js)
+├── scripts/                        # Build / DB helpers (db-push.js, gen-icons.js) + contract-test tooling (gen-contract-test.js, check-contract-tests.js)
 ├── sprint-reports/                 # Sprint retros
 ├── src/
 │   ├── middleware.ts               # Edge middleware — Bearer gate for /api/*
@@ -172,11 +172,13 @@ Next.js App Router with **React Server Components** for shell/layout and **Clien
 
 - **Visx** (Airbnb) — `@visx/curve`, `@visx/gradient`, `@visx/group`, `@visx/responsive`, `@visx/scale`, `@visx/shape`.
 - Custom SVG components (`RollingAverageChart`, `YearOverYearChart`, `RidgeLine`, `LedgerProgressRing`, `CollectionChart`) render server-safe SVG with currency-aware axes.
+- **Chart models (M4):** analytics charts render from pure models in `src/lib/analyticsCharts.ts` (ridge, weekly velocity, rolling series, category velocity, merchants, year-over-year). Each chart and its `DataTableView` text alternative consume the same model, so table values always match the chart. Day-level charts read raw expenses through `useExpenseRange` (not the cached month summaries from `useHistoricalData`, which omit line items) and anchor on the selected month (`periodAnchor`). The Analytics history period lives in the URL (`?period=3|6|12`, `useAnalyticsPeriod`).
 
 ### 3.6 Accessibility contracts
 
 - Every interactive element ≥ 44×44 px, visible focus ring using the accent token.
 - Screen-reader labels asserted by `accessibilityContracts.test.ts`, `touchTargets.test.ts`, `componentContracts.test.ts`, `phaseFContracts.test.ts`.
+- **M4:** every component under `src/components/` has a contract test, enforced in CI by `scripts/check-contract-tests.js` (`.github/workflows/ci.yml`); see [CONTRACT_TESTS.md](CONTRACT_TESTS.md). App-wide `MotionConfig reducedMotion="user"` in `src/app/providers.tsx`.
 
 ---
 

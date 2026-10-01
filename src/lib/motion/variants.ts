@@ -325,6 +325,24 @@ export const bottomSheet: Variants = {
   },
 };
 
+// ── Sticky reveal (compact bars that appear once their full version scrolls away) ──
+// Slides a short distance down from the top edge while fading in; exits upward
+// quickly. Movement is dropped under reduced motion (see StickyReveal).
+
+export const stickyReveal: Variants = {
+  initial: { opacity: 0, y: -distance.md },
+  animate: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: duration.normal, ease: ease.out },
+  },
+  exit: {
+    opacity: 0,
+    y: -distance.sm,
+    transition: { duration: duration.exit, ease: ease.in },
+  },
+};
+
 // ── Reduced-motion variant factory ──
 // Returns opacity-only transitions for users who prefer reduced motion.
 
