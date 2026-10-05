@@ -132,7 +132,7 @@ describe("AnalyticsDeepDive contract (progressive disclosure)", () => {
   });
 
   test("keeps every secondary analysis available", () => {
-    for (const name of ["<RollingAverageChart", "<CategoryVelocity", "<MerchantBreakdown", "<CategorySeasons", "<YearOverYearChart", "<TimeMachine"]) {
+    for (const name of ["<RollingAverageChart", "<CategoryVelocity", "<MerchantBreakdown", "<CategorySeasons"]) {
       expect(src).toContain(name);
     }
   });

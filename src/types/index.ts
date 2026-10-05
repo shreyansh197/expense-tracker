@@ -102,6 +102,14 @@ export interface RecurringExpense {
   createdAt: number;
 }
 
+/** A single funding/withdrawal event against a goal, dated to the month it happened in. */
+export interface GoalContribution {
+  amount: number; // signed: positive = funds added, negative = funds withdrawn
+  month: number;
+  year: number;
+  createdAt: number;
+}
+
 export interface Goal {
   id: string;
   name: string;
@@ -111,6 +119,8 @@ export interface Goal {
   monthlyContribution?: number;
   color: string;
   createdAt: number;
+  /** History of funding/withdrawal events, used to deduct/restore the month's budget. */
+  contributions?: GoalContribution[];
 }
 
 export interface SavedFilter {

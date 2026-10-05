@@ -142,7 +142,7 @@ export default function LandingPage() {
           <FeatureCard
             emoji="📊"
             title="Smart Analytics"
-            body="Month-over-month comparisons, year-over-year charts, category velocity, and spending forecasts."
+            body="Month-over-month comparisons, category velocity, and spending forecasts."
           />
           <FeatureCard
             emoji="🔔"

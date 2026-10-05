@@ -171,7 +171,7 @@ Next.js App Router with **React Server Components** for shell/layout and **Clien
 ### 3.5 Charts
 
 - **Visx** (Airbnb) — `@visx/curve`, `@visx/gradient`, `@visx/group`, `@visx/responsive`, `@visx/scale`, `@visx/shape`.
-- Custom SVG components (`RollingAverageChart`, `YearOverYearChart`, `RidgeLine`, `LedgerProgressRing`, `CollectionChart`) render server-safe SVG with currency-aware axes.
+- Custom SVG components (`RollingAverageChart`, `RidgeLine`, `LedgerProgressRing`, `CollectionChart`) render server-safe SVG with currency-aware axes.
 - **Chart models (M4):** analytics charts render from pure models in `src/lib/analyticsCharts.ts` (ridge, weekly velocity, rolling series, category velocity, merchants, year-over-year). Each chart and its `DataTableView` text alternative consume the same model, so table values always match the chart. Day-level charts read raw expenses through `useExpenseRange` (not the cached month summaries from `useHistoricalData`, which omit line items) and anchor on the selected month (`periodAnchor`). The Analytics history period lives in the URL (`?period=3|6|12`, `useAnalyticsPeriod`).
 
 ### 3.6 Accessibility contracts

@@ -61,6 +61,10 @@ export async function ensureSyncColumns(): Promise<void> {
 
       -- Migration 010: Widen recovery_codes column for SHA-256 hashes
       ALTER TABLE users ALTER COLUMN recovery_codes TYPE VARCHAR(64)[];
+
+      -- Migration 016: Spending challenges — persist across sync pulls
+      ALTER TABLE workspace_settings
+        ADD COLUMN IF NOT EXISTS active_challenges JSONB NOT NULL DEFAULT '[]'::jsonb;
     `);
     console.log("[ensureSyncColumns] Schema migration check complete");
   } catch (err) {

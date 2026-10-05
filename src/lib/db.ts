@@ -10,6 +10,7 @@ import type {
   PaymentMethod,
   DashboardLayout,
   ExpenseTemplate,
+  Challenge,
 } from "@/types";
 
 // ── IDB record types ──
@@ -56,6 +57,7 @@ export interface IDBSettings {
   autoRules?: any[];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   achievements?: any[];
+  activeChallenges?: Challenge[];
   accentColor?: string;
   sunsetTheme?: boolean;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

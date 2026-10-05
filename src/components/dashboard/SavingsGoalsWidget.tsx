@@ -7,6 +7,8 @@ import { useSettings } from "@/hooks/useSettings";
 import { useToast } from "@/components/ui/Toast";
 import { useCurrency } from "@/hooks/useCurrency";
 import { GoalFundingSheet } from "@/components/goals/GoalFundingSheet";
+import { applyGoalFunding } from "@/lib/goals";
+import { subMoney } from "@/lib/money";
 import type { Goal } from "@/types";
 
 const GOAL_COLORS = ["#F59E0B", "#10B981", "#6366F1", "#EC4899", "#3B82F6", "#EF4444"];
@@ -31,12 +33,12 @@ export function SavingsGoalsWidget() {
 
   const handleFundSave = (goalId: string, newSaved: number) => {
     const goal = goals.find((g) => g.id === goalId);
-    const prev = goal?.savedAmount ?? 0;
-    const updated = goals.map((g) =>
-      g.id === goalId ? { ...g, savedAmount: newSaved } : g
-    );
+    if (!goal) return;
+    const prev = goal.savedAmount;
+    const updated = goals.map((g) => (g.id === goalId ? applyGoalFunding(g, newSaved) : g));
     updateSettings({ goals: updated });
-    toast(newSaved > prev ? `+${formatCurrency(newSaved - prev)} added` : `${formatCurrency(prev - newSaved)} removed`);
+    const diff = subMoney(newSaved, prev);
+    toast(diff > 0 ? `+${formatCurrency(diff)} added` : `${formatCurrency(-diff)} removed`);
   };
 
   const handleCreateGoal = useCallback(() => {

@@ -238,7 +238,7 @@ The five-states contract itself is defined in [`IMPLEMENTATION_RULES.md`](IMPLEM
   1. **Category breakdown** — Month vs Month horizontal bars, zero-anchored, ordered by amount.
   2. **Trend** — the {period}-Month Ridge of monthly totals on one scale with the budget marker; footer shows the earlier-months average and the period's top category (links to its expenses).
   3. **Weekly pace and biggest expenses** — Spending Velocity against the budget pace; the month's five largest expenses.
-  4. **Deep Dive** (collapsed disclosure) — Rolling Average (30/60/90 days, 7-day smoothing), Category Velocity, Top Merchants, Category Seasons, Year over Year, Time Machine.
+  4. **Deep Dive** (collapsed disclosure) — Rolling Average (30/60/90 days, 7-day smoothing), Category Velocity, Top Merchants, Category Seasons.
 - Every chart carries a "Table" toggle (`DataTableView`, UX-9.5).
 - **Footer.** Export button (CSV/JSON), lossless per [`PRODUCT_PRINCIPLES §6.8`](PRODUCT_PRINCIPLES.md).
 

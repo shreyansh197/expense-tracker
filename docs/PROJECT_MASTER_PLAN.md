@@ -662,6 +662,10 @@ Explicitly out of current scope, tracked to inform architecture but not prioriti
 11. **Multi-account within a workspace.** Separate cash/card/UPI ledgers under one workspace.
 12. **Investment ledger (view-only).** Manual entry of holdings, no bank scraping.
 13. **Team-of-1 accountant handoff.** One-tap encrypted package for an accountant, with revocation.
+14. **Transaction-email auto-logging (opt-in).** Auto-create expenses from bank/UPI transaction emails. Two paths evaluated:
+    - **Path A — Gmail/Outlook OAuth (`gmail.readonly` or equivalent).** Fully automatic, but Google classifies inbox-reading as a "restricted scope": it requires a paid third-party CASA Tier-2 security assessment and annual re-verification before the consent screen can go live for real users, on top of a parser robust to dozens of bank/UPI formats and the ongoing privacy burden of processing a user's full inbox.
+    - **Path B — Dedicated forwarding address (preferred starting point).** Each user gets a unique app-generated address; they forward (or auto-forward via their bank's own rule) transaction alert emails to it. Parsed server-side via an inbound-email webhook (e.g. SendGrid Inbound Parse / Mailgun routes / SES receipt rules). No OAuth consent-screen review needed, fully opt-in per message, and is how several early expense-tracking apps shipped this feature. Still needs a per-bank/UPI parser and clear data-retention limits (discard raw email body after parsing).
+    - Decision: start with Path B if/when prioritized; Path A only if Path B proves insufficient and the CASA review cost is justified.
 
 ---
 

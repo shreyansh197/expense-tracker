@@ -7,6 +7,7 @@ import { useUIStore } from "@/stores/uiStore";
 import { useCalculations } from "@/hooks/useCalculations";
 import type { CategoryTotal, DailyTotal, StackedDailyTotal, Forecast, AnomalyResult } from "@/types";
 import { addMoney, subMoney } from "@/lib/money";
+import { getGoalContributionsTotal } from "@/lib/goals";
 
 interface CalculationsContextValue {
   monthlyTotal: number;
@@ -62,6 +63,7 @@ export function CalculationsProvider({ children }: { children: React.ReactNode }
     settings.currency,
     settings.multiCurrencyEnabled,
     settings.monthlyBudgets,
+    settings.goals,
   );
 
   // Auto-compute rollover for past months when rollover is enabled
@@ -106,8 +108,11 @@ export function CalculationsProvider({ children }: { children: React.ReactNode }
           // Adding full budget as rollover for untracked months inflates future budgets incorrectly
           if (activeRows.length === 0) continue;
           const total = activeRows.reduce((sum, r) => addMoney(sum, r.amount), 0);
+          // Funds committed to savings goals that month are no longer available
+          // to roll over either, same as spent money.
+          const goalContributions = getGoalContributionsTotal(settings.goals, pm, py);
 
-          history[key] = subMoney(budget, total);
+          history[key] = subMoney(subMoney(budget, total), goalContributions);
           // Apply rollover cap if set
           const cap = settings.rolloverCap;
           if (cap && cap > 0 && history[key] > cap) {
@@ -123,7 +128,7 @@ export function CalculationsProvider({ children }: { children: React.ReactNode }
         computingRef.current = false;
       }
     })();
-  }, [settings.rolloverEnabled, settings.salary, settings.rolloverHistory, settings.monthlyBudgets, settings.rolloverCap, updateSettings]);
+  }, [settings.rolloverEnabled, settings.salary, settings.rolloverHistory, settings.monthlyBudgets, settings.rolloverCap, settings.goals, updateSettings]);
 
   return (
     <CalculationsContext.Provider value={calcs}>

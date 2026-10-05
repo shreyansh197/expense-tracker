@@ -8,6 +8,8 @@ import { useToast } from "@/components/ui/Toast";
 import { useConfirm } from "@/components/ui/ConfirmDialog";
 import { useCurrency } from "@/hooks/useCurrency";
 import { PRESET_COLORS } from "@/lib/categories";
+import { applyGoalFunding } from "@/lib/goals";
+import { subMoney } from "@/lib/money";
 import type { Goal } from "@/types";
 
 export function GoalsManager() {
@@ -96,12 +98,12 @@ export function GoalsManager() {
 
   const handleFundSave = (goalId: string, newSaved: number) => {
     const goal = goals.find((g) => g.id === goalId);
-    const prev = goal?.savedAmount ?? 0;
-    const updated = goals.map((g) =>
-      g.id === goalId ? { ...g, savedAmount: newSaved } : g
-    );
+    if (!goal) return;
+    const prev = goal.savedAmount;
+    const updated = goals.map((g) => (g.id === goalId ? applyGoalFunding(g, newSaved) : g));
     updateSettings({ goals: updated });
-    toast(newSaved > prev ? `+${formatCurrency(newSaved - prev)} added` : `${formatCurrency(prev - newSaved)} removed`);
+    const diff = subMoney(newSaved, prev);
+    toast(diff > 0 ? `+${formatCurrency(diff)} added` : `${formatCurrency(-diff)} removed`);
   };
 
   // Summary stats

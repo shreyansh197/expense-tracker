@@ -298,46 +298,6 @@ export function buildMerchantRows(expenses: readonly Expense[], limit = 10): Mer
   return sorted.map((r) => ({ ...r, pct: (r.total / max) * 100 }));
 }
 
-// ── Year over year ───────────────────────────────────────────────────
-
-export interface YearOverYearRow {
-  month: number;
-  current: number;
-  previous: number;
-  changePct: number | null;
-}
-
-export interface YearOverYearModel {
-  rows: YearOverYearRow[];
-  currentTotal: number;
-  previousTotal: number;
-  changePct: number | null;
-  /** Largest single bar value, used to scale the chart. */
-  maxValue: number;
-}
-
-/** Compare monthly totals Jan…`throughMonth` for two consecutive years. */
-export function buildYearOverYear(
-  currentYearTotals: readonly number[],
-  previousYearTotals: readonly number[],
-  throughMonth: number,
-): YearOverYearModel {
-  const rows = Array.from({ length: throughMonth }, (_, i) => {
-    const current = currentYearTotals[i] ?? 0;
-    const previous = previousYearTotals[i] ?? 0;
-    return { month: i + 1, current, previous, changePct: previous > 0 ? (subMoney(current, previous) / previous) * 100 : null };
-  });
-  const currentTotal = sumMoney(rows.map((r) => r.current));
-  const previousTotal = sumMoney(rows.map((r) => r.previous));
-  return {
-    rows,
-    currentTotal,
-    previousTotal,
-    changePct: previousTotal > 0 ? (subMoney(currentTotal, previousTotal) / previousTotal) * 100 : null,
-    maxValue: Math.max(...rows.flatMap((r) => [r.current, r.previous]), 1),
-  };
-}
-
 /** `+12%` / `−8%` / `0%` — signed, rounded percentage for tables and labels. */
 export function formatSignedPercent(pct: number): string {
   const rounded = Math.round(pct);

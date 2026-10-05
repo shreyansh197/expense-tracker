@@ -15,8 +15,6 @@ const RollingAverageChart = dynamic(() => import("@/components/analytics/Rolling
 const CategoryVelocity = dynamic(() => import("@/components/analytics/CategoryVelocity").then((mod) => ({ default: mod.CategoryVelocity })), { ssr: false });
 const MerchantBreakdown = dynamic(() => import("@/components/analytics/MerchantBreakdown").then((mod) => ({ default: mod.MerchantBreakdown })), { ssr: false });
 const CategorySeasons = dynamic(() => import("@/components/analytics/CategorySeasons").then((mod) => ({ default: mod.CategorySeasons })), { ssr: false });
-const YearOverYearChart = dynamic(() => import("@/components/analytics/YearOverYearChart").then((mod) => ({ default: mod.YearOverYearChart })), { ssr: false });
-const TimeMachine = dynamic(() => import("@/components/analytics/TimeMachine").then((mod) => ({ default: mod.TimeMachine })), { ssr: false });
 
 /** Days of history the rolling average and velocity views need (longest period + smoothing window). */
 const RANGE_DAYS = Math.max(...ROLLING_PERIODS) + ROLLING_WINDOW_DAYS;
@@ -64,10 +62,6 @@ function DeepDiveContent({ month, year, monthExpenses, categories }: AnalyticsDe
         <MerchantBreakdown expenses={monthExpenses} formatCurrency={formatCurrency} />
       </DeepDiveBlock>
       <CategorySeasons />
-      <DeepDiveBlock title="Year over Year" info={<p className="text-xs leading-relaxed">Each month this year (solid) against the same month last year (faded), January to the selected month.</p>}>
-        <YearOverYearChart formatCurrency={formatCurrency} formatCurrencyCompact={formatCurrencyCompact} />
-      </DeepDiveBlock>
-      <TimeMachine />
     </div>
   );
 }
@@ -93,7 +87,7 @@ export function AnalyticsDeepDive(props: AnalyticsDeepDiveProps) {
           <span>
             <span className="block text-sm font-semibold uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Deep Dive</span>
             <span className="mt-0.5 block text-xs font-normal normal-case" style={{ color: "var(--text-tertiary)" }}>
-              Rolling average, category velocity, merchants, seasons, year over year and what-if scenarios
+              Rolling average, category velocity, merchants and seasons
             </span>
           </span>
           <ChevronDown

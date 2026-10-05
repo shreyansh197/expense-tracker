@@ -286,6 +286,7 @@ model WorkspaceSettings {
   dismissedRecurringSuggestions Json     @default("[]") @map("dismissed_recurring_suggestions") @db.JsonB
   autoRules                     Json     @default("[]") @map("auto_rules") @db.JsonB
   achievements                  Json     @default("[]") @db.JsonB
+  activeChallenges              Json     @default("[]") @map("active_challenges") @db.JsonB
   accentColor                   String?  @map("accent_color") @db.VarChar(20)
   notificationPrefs             Json?    @map("notification_prefs") @db.JsonB
   version                       Int      @default(1)

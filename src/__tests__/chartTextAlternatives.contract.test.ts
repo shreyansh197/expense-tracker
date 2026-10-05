@@ -14,7 +14,6 @@ interface ChartContract {
 
 const CHARTS: ChartContract[] = [
   { path: "components/analytics/RollingAverageChart.tsx", sharedModel: "rows={points}" },
-  { path: "components/analytics/YearOverYearChart.tsx", sharedModel: "rows={model.rows}" },
   { path: "components/ui/RidgeLine.tsx", sharedModel: "rows={rows}" },
   { path: "components/business/CollectionChart.tsx", sharedModel: "rows={data}" },
   { path: "components/business/LedgerProgressRing.tsx", sharedModel: "rows={[{ received, expected, percent }]}" },
@@ -74,8 +73,7 @@ describe("chart-specific accessibility", () => {
     expect(src).toContain("labels: trendData.map((d) => d.label)");
   });
 
-  test("CategoryVelocity and YearOverYear signal direction with sign/icon, not colour alone", () => {
+  test("CategoryVelocity signals direction with sign/icon, not colour alone", () => {
     expect(readSource("components/analytics/CategoryVelocity.tsx")).toContain("formatSignedPercent(r.deltaPct)");
-    expect(readSource("components/analytics/YearOverYearChart.tsx")).toContain("formatSignedPercent(model.changePct)");
   });
 });

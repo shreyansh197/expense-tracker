@@ -724,6 +724,7 @@ export async function pullChanges(workspaceId?: string): Promise<boolean> {
               dismissedRecurringSuggestions: s.dismissedRecurringSuggestions ?? [],
               autoRules: s.autoRules ?? [],
               achievements: s.achievements ?? [],
+              activeChallenges: s.activeChallenges ?? [],
               accentColor: s.accentColor ?? undefined,
               sunsetTheme: s.sunsetTheme ?? false,
               notificationPrefs: s.notificationPrefs ?? undefined,
@@ -743,6 +744,7 @@ export async function pullChanges(workspaceId?: string): Promise<boolean> {
               || JSON.stringify(existingSettings.recurringExpenses) !== JSON.stringify(incoming.recurringExpenses)
               || JSON.stringify(existingSettings.autoRules) !== JSON.stringify(incoming.autoRules)
               || JSON.stringify(existingSettings.achievements) !== JSON.stringify(incoming.achievements)
+              || JSON.stringify(existingSettings.activeChallenges) !== JSON.stringify(incoming.activeChallenges)
               || JSON.stringify(existingSettings.monthlyBudgets) !== JSON.stringify(incoming.monthlyBudgets)
               || existingSettings.accentColor !== incoming.accentColor
               || existingSettings.rolloverEnabled !== incoming.rolloverEnabled

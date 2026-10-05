@@ -11,7 +11,6 @@ import {
   buildMonthRidge,
   buildRollingSeries,
   buildWeeklyVelocity,
-  buildYearOverYear,
   dailyTotalsByDate,
   formatSignedPercent,
   monthsCovering,
@@ -207,19 +206,6 @@ describe("buildMerchantRows", () => {
       { name: "Other", total: 80, count: 1, pct: 100 },
       { name: "Cafe", total: 40, count: 2, pct: 50 },
     ]);
-  });
-});
-
-describe("buildYearOverYear", () => {
-  test("compares January through the selected month", () => {
-    const cur = [100, 200, 300, 400, ...Array(8).fill(0)];
-    const prev = [50, 0, 300, 100, ...Array(8).fill(999)];
-    const model = buildYearOverYear(cur, prev, 3);
-    expect(model.rows.map((r) => r.month)).toEqual([1, 2, 3]);
-    expect(model.rows.map((r) => r.changePct)).toEqual([100, null, 0]);
-    expect(model.currentTotal).toBe(600);
-    expect(model.previousTotal).toBe(350);
-    expect(model.maxValue).toBe(300);
   });
 });
 
