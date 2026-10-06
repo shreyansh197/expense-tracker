@@ -543,3 +543,39 @@ describe("BUG-008: Settings budget month is initialised from the dashboard month
     expect(key).toBe("2026-01");
   });
 });
+
+// ═══════════════════════════════════════════════════════════════════════════
+// BUG-009: activeChallenges dropped by any full-object settings rehydration
+// (loadSettings() merge, onSyncPull's local/remote reconciliation, etc.)
+// because DEFAULT_SETTINGS didn't declare the key. `{ ...DEFAULT_SETTINGS,
+// ...legacyObjectMissingKey }` silently produced `activeChallenges: undefined`,
+// and the next updateSettings()/pushToApi() call coalesced that to `[]`,
+// wiping out a challenge moments after it was started.
+// ═══════════════════════════════════════════════════════════════════════════
+
+describe("BUG-009: activeChallenges survives full-object settings rehydration", () => {
+  test("BUG-009-01: DEFAULT_SETTINGS declares activeChallenges as an empty array", () => {
+    expect(DEFAULT_SETTINGS.activeChallenges).toEqual([]);
+  });
+
+  test("BUG-009-02: merging a legacy object missing the key still yields an array, not undefined", () => {
+    // Simulates a localStorage/IDB snapshot saved before this field existed.
+    const legacy = { ...DEFAULT_SETTINGS } as Partial<UserSettings>;
+    delete legacy.activeChallenges;
+
+    const merged = { ...DEFAULT_SETTINGS, ...legacy };
+    expect(merged.activeChallenges).toEqual([]);
+    expect(merged.activeChallenges).not.toBeUndefined();
+  });
+
+  test("BUG-009-03: OLD (broken) DEFAULT_SETTINGS shape would have left it undefined", () => {
+    const brokenDefaults = { ...DEFAULT_SETTINGS } as Partial<UserSettings>;
+    delete brokenDefaults.activeChallenges;
+
+    const legacy = { ...brokenDefaults } as Partial<UserSettings>;
+    delete legacy.activeChallenges;
+
+    const merged = { ...brokenDefaults, ...legacy };
+    expect(merged.activeChallenges).toBeUndefined(); // reproduces the bug pre-fix
+  });
+});

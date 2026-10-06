@@ -35,6 +35,7 @@ export const DEFAULT_SETTINGS: UserSettings = {
   multiCurrencyEnabled: false,
   dismissedRecurringSuggestions: [],
   autoRules: [],
+  activeChallenges: [],
   sunsetTheme: false,
   quickTemplates: [],
   createdAt: 0,
