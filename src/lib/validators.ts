@@ -172,6 +172,7 @@ const settingsMutationData = z.object({
   dismissedRecurringSuggestions: z.array(z.unknown()).optional(),
   autoRules: z.array(z.unknown()).optional(),
   achievements: z.array(z.unknown()).optional(),
+  activeChallenges: z.array(z.unknown()).optional(),
   accentColor: z.string().max(20).optional(),
   sunsetTheme: z.boolean().optional(),
   notificationPrefs: notificationPrefsSchema.optional(),

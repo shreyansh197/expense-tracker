@@ -18,7 +18,7 @@ import {
   detectAnomalies,
 } from "@/lib/calculations";
 import { getDaysInMonth } from "@/lib/utils";
-import { addMoney, subMoney } from "@/lib/money";
+import { addMoney } from "@/lib/money";
 import { fetchRates, convert, getFallbackRates } from "@/lib/exchangeRates";
 import { getGoalContributionsTotal } from "@/lib/goals";
 import { db } from "@/lib/db";
@@ -78,7 +78,9 @@ export function useCalculations(
     });
   }, [expenses, multiCurrencyEnabled, rates, baseCurrency]);
 
-  // Calculate effective budget with per-month override and rollover
+  // Calculate effective budget with per-month override and rollover.
+  // Savings goal contributions do NOT change the budget itself — they're
+  // reflected in monthlyTotal ("money spent") instead, see below.
   const effectiveBudget = useMemo(() => {
     // Per-month budget override takes priority over global salary
     // Only use the override if it's a positive number (0 or missing = use salary)
@@ -86,27 +88,22 @@ export function useCalculations(
     const override = monthlyBudgets?.[monthKey];
     const baseBudget = (override !== undefined && override > 0) ? override : salary;
 
-    const withRollover = (() => {
-      if (!rolloverEnabled || !rolloverHistory) return baseBudget;
-      let pm = month - 1;
-      let py = year;
-      if (pm <= 0) { pm = 12; py -= 1; }
-      const key = `${py}-${String(pm).padStart(2, "0")}`;
-      const rollover = rolloverHistory[key] ?? 0;
-      return addMoney(baseBudget, Math.max(0, rollover));
-    })();
+    if (!rolloverEnabled || !rolloverHistory) return baseBudget;
+    let pm = month - 1;
+    let py = year;
+    if (pm <= 0) { pm = 12; py -= 1; }
+    const key = `${py}-${String(pm).padStart(2, "0")}`;
+    const rollover = rolloverHistory[key] ?? 0;
+    return addMoney(baseBudget, Math.max(0, rollover));
+  }, [salary, rolloverEnabled, rolloverHistory, month, year, monthlyBudgets]);
 
-    // Funds added to savings goals this month reduce the usable budget;
-    // withdrawing funds this month restores it — reflected app-wide via
-    // this single source of truth (T-review: savings goal budget linkage).
+  // Funds added to savings goals this month count as money spent, app-wide;
+  // withdrawing funds this month gives that money back (reduces money spent).
+  const monthlyTotal = useMemo(() => {
+    const expensesTotal = getMonthlyTotal(normalizedExpenses, month, year);
     const goalContributions = getGoalContributionsTotal(goals, month, year);
-    return subMoney(withRollover, goalContributions);
-  }, [salary, rolloverEnabled, rolloverHistory, month, year, monthlyBudgets, goals]);
-
-  const monthlyTotal = useMemo(
-    () => getMonthlyTotal(normalizedExpenses, month, year),
-    [normalizedExpenses, month, year]
-  );
+    return addMoney(expensesTotal, goalContributions);
+  }, [normalizedExpenses, month, year, goals]);
 
   const remaining = useMemo(
     () => getMonthlySaving(effectiveBudget, monthlyTotal),

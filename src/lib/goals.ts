@@ -3,9 +3,10 @@ import { addMoney, subMoney } from "@/lib/money";
 
 /**
  * Applies a funding/withdrawal change to a goal and records a dated
- * contribution so the change can later be deducted from (or restored to)
- * the budget of whichever month it happened in. `newSaved` is the already
- * clamped target `savedAmount` chosen by the caller (e.g. GoalFundingSheet).
+ * contribution so the change can later be added to (or removed from) the
+ * "money spent" total of whichever month it happened in. `newSaved` is the
+ * already clamped target `savedAmount` chosen by the caller (e.g.
+ * GoalFundingSheet).
  */
 export function applyGoalFunding(goal: Goal, newSaved: number, now: Date = new Date()): Goal {
   const delta = subMoney(newSaved, goal.savedAmount);
@@ -27,8 +28,8 @@ export function applyGoalFunding(goal: Goal, newSaved: number, now: Date = new D
 
 /**
  * Net amount funded into (or withdrawn from, if negative) all goals during a
- * given month. Used to deduct that month's goal contributions from the
- * month's effective budget, app-wide.
+ * given month. Added to (or subtracted from) the month's "money spent"
+ * total, app-wide — the budget itself is never adjusted by goal activity.
  */
 export function getGoalContributionsTotal(goals: readonly Goal[] | undefined, month: number, year: number): number {
   if (!goals || goals.length === 0) return 0;

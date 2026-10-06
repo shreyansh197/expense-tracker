@@ -469,6 +469,34 @@ describe("syncCommitSchema", () => {
     expect(result.success).toBe(true);
   });
 
+  test("preserves activeChallenges on a workspace_settings mutation (regression: was silently stripped, resetting challenges to [] on every sync)", () => {
+    const result = syncCommitSchema.safeParse({
+      workspaceId: validUuid,
+      mutations: [
+        {
+          table: "workspace_settings",
+          operation: "upsert",
+          idempotencyKey: "key-settings-3",
+          data: {
+            activeChallenges: [
+              { id: "c1", templateId: "no_eat_out_7", startDate: "2026-10-01", endDate: "2026-10-07", status: "active", progress: 0 },
+            ],
+          },
+        },
+      ],
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      const settingsMutation = result.data.mutations[0];
+      expect(settingsMutation.table).toBe("workspace_settings");
+      if (settingsMutation.table === "workspace_settings") {
+        expect(settingsMutation.data.activeChallenges).toEqual([
+          { id: "c1", templateId: "no_eat_out_7", startDate: "2026-10-01", endDate: "2026-10-07", status: "active", progress: 0 },
+        ]);
+      }
+    }
+  });
+
   test("rejects a workspace_settings mutation with an identical quiet-hours start/end", () => {
     const result = syncCommitSchema.safeParse({
       workspaceId: validUuid,
